@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import { forbidden } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import {
-  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
-  NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
@@ -62,12 +55,6 @@ const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('investigation') }).strict(),
 ]);
 
-const CONSUME_GROUP_PRIVILEGES = {
-  detection: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
-  ki_extraction: NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
-  investigation: NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,
-} as const;
-
 const readRunQuotaSnapshot = async ({
   internalRepository,
   settings,
@@ -112,7 +99,7 @@ const getRunQuotasRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES] }],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -138,7 +125,7 @@ const putRunQuotasRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -169,8 +156,7 @@ const consumeRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES] }],
-      extendedPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -179,10 +165,6 @@ const consumeRoute = createServerRoute({
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    const requiredPrivilege = CONSUME_GROUP_PRIVILEGES[params.body.group];
-    if (request.authzResult && request.authzResult[requiredPrivilege] !== true) {
-      throw forbidden(`Consuming ${params.body.group} run quota requires ${requiredPrivilege}`);
-    }
     return consumeRunQuota({
       internalRepository: createRunQuotaInternalRepository(server),
       group: params.body.group,

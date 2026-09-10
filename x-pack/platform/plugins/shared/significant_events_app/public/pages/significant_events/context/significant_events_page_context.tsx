@@ -63,7 +63,7 @@ export function SignificantEventsPageProvider({
       notifications: { toasts },
     },
   } = useKibana();
-  const { canShowDetection } = getNightshiftCapabilities(nightshift);
+  const { canShow } = getNightshiftCapabilities(nightshift);
 
   const queryClient = useQueryClient();
 
@@ -78,7 +78,7 @@ export function SignificantEventsPageProvider({
   const { data } = useQuery({
     queryKey: ['significant_events_discovery_status'],
     queryFn: getSignificantEventsDiscoveryStatus,
-    enabled: canShowDetection,
+    enabled: canShow,
     refetchInterval: (result) =>
       result?.status === SignificantEventsWorkflowStatus.InProgress
         ? RUNNING_POLL_INTERVAL_MS

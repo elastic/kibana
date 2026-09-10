@@ -83,7 +83,7 @@ const setElementInert = (element: HTMLDivElement | null): void => {
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
-  const { canManageDetection } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const history = useHistory();
   const { search } = useLocation();
   const needsActionSectionRef = useRef<HTMLElement>(null);
@@ -303,7 +303,7 @@ export function NightshiftApp(): React.ReactElement {
     closingEventUuid,
     investigationStatuses,
     onChatClick,
-    onCloseClick: canManageDetection ? handleCloseSignificantEvent : undefined,
+    onCloseClick: canManage ? handleCloseSignificantEvent : undefined,
     onEventClick: handleEventClick,
     selectedEventUuid: selectedEvent?.event_uuid,
   };

@@ -58,7 +58,7 @@ export function KnowledgeIndicatorsTable() {
       },
     },
   } = useKibana();
-  const canManageContext = getNightshiftCapabilities(nightshift).canManageContext;
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
@@ -190,7 +190,7 @@ export function KnowledgeIndicatorsTable() {
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,
     setKnowledgeIndicatorsToDelete,
-    canManageContext,
+    canManage,
   });
 
   const generationRow = (
@@ -263,14 +263,14 @@ export function KnowledgeIndicatorsTable() {
         icon={<AssetImage type="knowledgeIndicatorsEmptyState" size={140} />}
         title={<h2>{EMPTY_STATE_TITLE}</h2>}
         body={<p>{EMPTY_STATE_DESCRIPTION}</p>}
-        actions={canManageContext ? generationRow : undefined}
+        actions={canManage ? generationRow : undefined}
       />
     );
   }
 
   return (
     <EuiPanel hasBorder hasShadow={false}>
-      {canManageContext && generationRow}
+      {canManage && generationRow}
       {generationProgressCallout}
       <EuiSpacer size="m" />
       <KnowledgeIndicatorsToolbar
@@ -304,7 +304,7 @@ export function KnowledgeIndicatorsTable() {
         onBulkRestore={handleBulkRestore}
         onBulkPromote={handleBulkPromote}
         onDeleteSelected={() => setKnowledgeIndicatorsToDelete(selectedKnowledgeIndicators)}
-        canManageContext={canManageContext}
+        canManage={canManage}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule
@@ -356,7 +356,7 @@ export function KnowledgeIndicatorsTable() {
             isSelected: selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki),
           })}
           selection={
-            canManageContext
+            canManage
               ? {
                   selected: selectedKnowledgeIndicators,
                   onSelectionChange: setSelectedKnowledgeIndicators,

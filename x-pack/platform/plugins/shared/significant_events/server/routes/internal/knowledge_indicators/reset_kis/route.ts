@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -32,7 +32,7 @@ const resetKIsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   handler: async ({

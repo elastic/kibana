@@ -7,7 +7,7 @@
 import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
@@ -61,7 +61,7 @@ const readQueryOccurrencesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES] }],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   handler: async ({

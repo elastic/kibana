@@ -74,7 +74,7 @@ interface KnowledgeIndicatorsToolbarProps {
   onBulkRestore: () => void;
   onBulkPromote: () => void;
   onDeleteSelected: () => void;
-  canManageContext: boolean;
+  canManage: boolean;
 }
 
 export function KnowledgeIndicatorsToolbar({
@@ -108,7 +108,7 @@ export function KnowledgeIndicatorsToolbar({
   onBulkRestore,
   onBulkPromote,
   onDeleteSelected,
-  canManageContext,
+  canManage,
 }: KnowledgeIndicatorsToolbarProps) {
   return (
     <>
@@ -186,7 +186,7 @@ export function KnowledgeIndicatorsToolbar({
             label={TABLE_LABEL}
           />
         </EuiFlexItem>
-        {canManageContext && (
+        {canManage && (
           <>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty

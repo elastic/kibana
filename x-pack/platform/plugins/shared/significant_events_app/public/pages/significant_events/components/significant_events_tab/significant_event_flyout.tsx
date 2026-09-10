@@ -173,7 +173,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       },
     },
   } = useKibana();
-  const { canManageDetection } = getNightshiftCapabilities(nightshift);
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
@@ -242,7 +242,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       hideCloseButton
     >
       <FlyoutToolbarHeader>
-        {!isClosed && canManageDetection && (
+        {!isClosed && canManage && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}

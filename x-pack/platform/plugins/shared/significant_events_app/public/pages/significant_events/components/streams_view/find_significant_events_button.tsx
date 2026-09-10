@@ -48,7 +48,7 @@ export const FindSignificantEventsButton = ({
       },
     },
   } = useKibana();
-  const { canManageDetection } = getNightshiftCapabilities(nightshift);
+  const { canManage } = getNightshiftCapabilities(nightshift);
 
   const buildPanels = useCallback(
     ({ closeMenu }: MenuHelpers) => [
@@ -72,7 +72,7 @@ export const FindSignificantEventsButton = ({
 
   const isPrimaryDisabled = isDisabled || isRunning;
 
-  if (!canManageDetection) {
+  if (!canManage) {
     return null;
   }
 

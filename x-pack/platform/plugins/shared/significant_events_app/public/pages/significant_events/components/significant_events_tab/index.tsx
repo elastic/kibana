@@ -117,10 +117,10 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
       },
     },
   } = useKibana();
-  const { canManageDetection } = getNightshiftCapabilities(nightshift);
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
 
-  if (!canManageDetection || event.status === 'closed') {
+  if (!canManage || event.status === 'closed') {
     return null;
   }
 

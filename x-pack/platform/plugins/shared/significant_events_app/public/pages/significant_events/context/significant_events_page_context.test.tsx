@@ -73,7 +73,7 @@ describe('SignificantEventsPageProvider', () => {
     mockUseKibana.mockReturnValue({
       core: {
         application: {
-          capabilities: { nightshift: { detection_engine_show: true } },
+          capabilities: { nightshift: { show: true } },
         },
         notifications: { toasts: { addSuccess, addDanger, addError } },
       },

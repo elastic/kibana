@@ -49,7 +49,7 @@ interface UseKnowledgeIndicatorsColumnsParams {
   selectedKnowledgeIndicatorId: string | undefined;
   toggleSelectedKnowledgeIndicator: (ki: KnowledgeIndicator) => void;
   setKnowledgeIndicatorsToDelete: (items: KnowledgeIndicator[]) => void;
-  canManageContext: boolean;
+  canManage: boolean;
 }
 
 export const useKnowledgeIndicatorsColumns = ({
@@ -57,7 +57,7 @@ export const useKnowledgeIndicatorsColumns = ({
   selectedKnowledgeIndicatorId,
   toggleSelectedKnowledgeIndicator,
   setKnowledgeIndicatorsToDelete,
-  canManageContext,
+  canManage,
 }: UseKnowledgeIndicatorsColumnsParams) => {
   return useMemo(() => {
     const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
@@ -163,13 +163,13 @@ export const useKnowledgeIndicatorsColumns = ({
       },
     ];
 
-    if (!canManageContext) {
+    if (!canManage) {
       return columns.filter((column) => column.name !== ACTIONS_COLUMN_LABEL);
     }
 
     return columns;
   }, [
-    canManageContext,
+    canManage,
     occurrencesByQueryId,
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,

@@ -39,7 +39,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       application: {
         capabilities: {
           nightshift: {
-            detection_engine_manage: true,
+            manage: true,
           },
         },
       },

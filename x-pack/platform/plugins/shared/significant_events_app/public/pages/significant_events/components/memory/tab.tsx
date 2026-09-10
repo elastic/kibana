@@ -62,7 +62,7 @@ export function MemoryTab() {
       },
     },
   } = useKibana();
-  const canManage = getNightshiftCapabilities(nightshift).canManageContext;
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);

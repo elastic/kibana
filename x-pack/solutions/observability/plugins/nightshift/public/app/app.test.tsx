@@ -154,9 +154,8 @@ describe('NightshiftApp', () => {
         application: {
           capabilities: {
             nightshift: {
-              detection_engine_show: true,
-              detection_engine_manage: true,
-              context_engine_show: true,
+              show: true,
+              manage: true,
             },
           },
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: string }) => {

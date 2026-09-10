@@ -7,88 +7,28 @@
 
 export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
 
-/**
- * HTTP `security.authz.requiredPrivileges` tags. These are the `api:` entries on
- * each engine sub-feature, not the role-picker ids and not `capabilities.nightshift`.
- */
-export const NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES = {
-  read: 'read_nightshift_context_engine',
-  manage: 'manage_nightshift_context_engine',
+/** HTTP `security.authz.requiredPrivileges` tags registered on the Nightshift feature. */
+export const NIGHTSHIFT_API_PRIVILEGES = {
+  read: 'read_nightshift',
+  manage: 'manage_nightshift',
 } as const;
 
-export const NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES = {
-  read: 'read_nightshift_detection_engine',
-  manage: 'manage_nightshift_detection_engine',
+/** `capabilities.nightshift.*` keys granted by the feature's `ui:` list. */
+export const NIGHTSHIFT_UI_PRIVILEGES = {
+  show: 'show',
+  manage: 'manage',
 } as const;
-
-export const NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES = {
-  read: 'read_nightshift_investigation_engine',
-  manage: 'manage_nightshift_investigation_engine',
-} as const;
-
-/**
- * `capabilities.nightshift.*` keys granted by each engine's `ui:` list.
- */
-export const NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES = {
-  show: 'context_engine_show',
-  manage: 'context_engine_manage',
-} as const;
-
-export const NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES = {
-  show: 'detection_engine_show',
-  manage: 'detection_engine_manage',
-} as const;
-
-export const NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES = {
-  show: 'investigation_engine_show',
-  manage: 'investigation_engine_manage',
-} as const;
-
-/**
- * Role `feature.nightshift` sub-feature privilege ids (`context_engine_all`, …).
- * Use these in Scout roles and Spaces, not the API or UI strings above.
- */
-export const NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES = {
-  all: 'context_engine_all',
-  read: 'context_engine_read',
-} as const;
-
-export const NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES = {
-  all: 'detection_engine_all',
-  read: 'detection_engine_read',
-} as const;
-
-export const NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES = {
-  all: 'investigation_engine_all',
-  read: 'investigation_engine_read',
-} as const;
-
-/** Context or Detection read. Availability and other shared read-only routes. */
-export const NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES = [
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.read,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read,
-] as const;
-
-/** Context or Detection manage. Route-level door; handlers still branch on `authzResult`. */
-export const NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES = [
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
-] as const;
 
 export interface INightshiftCapabilities {
-  canShowContext: boolean;
-  canShowDetection: boolean;
-  canManageContext: boolean;
-  canManageDetection: boolean;
+  canShow: boolean;
+  canManage: boolean;
 }
 
 export function getNightshiftCapabilities(
   nightshift: Record<string, unknown> | undefined
 ): INightshiftCapabilities {
   return {
-    canShowContext: nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.show] === true,
-    canShowDetection: nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.show] === true,
-    canManageContext: nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true,
-    canManageDetection: nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true,
+    canShow: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.show] === true,
+    canManage: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true,
   };
 }

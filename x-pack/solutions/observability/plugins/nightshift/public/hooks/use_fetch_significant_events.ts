@@ -143,11 +143,11 @@ export const useFetchSignificantEvents = (): UseQueryResult<
     application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
-  const { canShowDetection } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   return useQuery<NightshiftSignificantEventsQueryData, Error>({
     queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-    enabled: canShowDetection,
+    enabled: canShow,
     queryFn: async ({ signal }) => {
       const from = moment().subtract(NIGHTSHIFT_LOOKBACK_DAYS, 'days').toISOString();
       const to = moment().toISOString();

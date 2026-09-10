@@ -6,11 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
-  NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -29,7 +25,7 @@ const bootstrapCleanupRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -68,11 +64,7 @@ const pauseRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [
-        {
-          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
-        },
-      ],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -96,16 +88,11 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled. ' +
-      'Deployment-wide (same privilege model as Pause): space-scoped Context Engine or Detection Engine manage gates the call.',
+      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled.',
   },
   security: {
     authz: {
-      requiredPrivileges: [
-        {
-          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
-        },
-      ],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -133,11 +120,7 @@ const statusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [
-        {
-          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES],
-        },
-      ],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),

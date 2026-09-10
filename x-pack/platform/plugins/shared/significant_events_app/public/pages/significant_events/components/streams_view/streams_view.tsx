@@ -32,7 +32,7 @@ export function StreamsView() {
       },
     },
   } = useKibana();
-  const { canManageContext } = getNightshiftCapabilities(nightshift);
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
@@ -132,7 +132,7 @@ export function StreamsView() {
               isClearable
             />
           </EuiFlexItem>
-          {canManageContext && (
+          {canManage && (
             <EuiFlexItem grow={false}>
               <GenerateSplitButton
                 size="s"
@@ -189,9 +189,9 @@ export function StreamsView() {
           searchQuery={searchQuery}
           blocksActivity={blocksActivity}
           activityBlockTooltip={activityBlockTooltip}
-          canManage={canManageContext}
+          canManage={canManage}
           selection={
-            canManageContext
+            canManage
               ? {
                   selected: selectedStreams,
                   onSelectionChange: setSelectedStreams,

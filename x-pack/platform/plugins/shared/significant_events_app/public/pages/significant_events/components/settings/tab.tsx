@@ -86,12 +86,10 @@ export function SettingsTab() {
   const nightshiftCapabilities = getNightshiftCapabilities(
     core.application.capabilities.nightshift
   );
-  const { canManageContext, canManageDetection } = nightshiftCapabilities;
-  const canPauseActivity = canManageContext || canManageDetection;
+  const { canManage } = nightshiftCapabilities;
+  const canPauseActivity = canManage;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditContextSettings = canManageContext && canSaveAdvancedSettings;
-  const canEditDetectionSettings = canManageDetection && canSaveAdvancedSettings;
-  const canEditSettings = canEditContextSettings || canEditDetectionSettings;
+  const canEditSettings = canManage && canSaveAdvancedSettings;
   const canManageSlack = core.application.capabilities.streams?.manage === true;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
@@ -103,12 +101,9 @@ export function SettingsTab() {
     status: maintenanceStatus,
     activityBlockTooltip,
   } = useBlocksNewActivity();
-  const isContextActivityToggleDisabled = !canEditContextSettings || blocksActivity;
-  const isDetectionActivityToggleDisabled = !canEditDetectionSettings || blocksActivity;
-  const isContextActivityConfigDisabled = (draftEnabled: boolean) =>
-    !canEditContextSettings || !draftEnabled || blocksActivity;
-  const isDetectionActivityConfigDisabled = (draftEnabled: boolean) =>
-    !canEditDetectionSettings || !draftEnabled || blocksActivity;
+  const isActivityToggleDisabled = !canEditSettings || blocksActivity;
+  const isActivityConfigDisabled = (draftEnabled: boolean) =>
+    !canEditSettings || !draftEnabled || blocksActivity;
 
   // getBooleanValue$ builds a new observable on every call, so memoize it —
   // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
@@ -156,8 +151,7 @@ export function SettingsTab() {
 
   // Dirty continuous/scheduled changes are blocked while paused (server 409).
   const activitySettingsDirty =
-    (canEditDetectionSettings && scheduledDiscovery.hasChanged) ||
-    (canEditContextSettings && continuousExtraction.hasChanged);
+    canEditSettings && (scheduledDiscovery.hasChanged || continuousExtraction.hasChanged);
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
@@ -188,11 +182,11 @@ export function SettingsTab() {
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
-    (canEditContextSettings &&
-      (indexPatterns !== savedIndexPatterns ||
-        continuousExtraction.hasChanged ||
-        hasTuningConfigChanges)) ||
-    (canEditDetectionSettings && scheduledDiscovery.hasChanged);
+    canEditSettings &&
+    (indexPatterns !== savedIndexPatterns ||
+      continuousExtraction.hasChanged ||
+      hasTuningConfigChanges ||
+      scheduledDiscovery.hasChanged);
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
@@ -207,7 +201,7 @@ export function SettingsTab() {
     try {
       const normalizedIndexPatterns = parseIndexPatterns(indexPatterns).join(', ');
       setIndexPatterns(normalizedIndexPatterns);
-      if (canEditContextSettings && normalizedIndexPatterns !== savedIndexPatterns) {
+      if (canEditSettings && normalizedIndexPatterns !== savedIndexPatterns) {
         await core.settings.client.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
           normalizedIndexPatterns
@@ -215,15 +209,15 @@ export function SettingsTab() {
         setSavedIndexPatterns(normalizedIndexPatterns);
       }
 
-      if (canEditContextSettings && continuousExtraction.hasChanged) {
+      if (canEditSettings && continuousExtraction.hasChanged) {
         await continuousExtraction.save();
       }
 
-      if (canEditDetectionSettings && scheduledDiscovery.hasChanged) {
+      if (canEditSettings && scheduledDiscovery.hasChanged) {
         await scheduledDiscovery.save();
       }
 
-      if (canEditContextSettings && hasTuningConfigChanges && parsedTuningConfig) {
+      if (canEditSettings && hasTuningConfigChanges && parsedTuningConfig) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -254,8 +248,7 @@ export function SettingsTab() {
     scheduledDiscovery,
     hasTuningConfigChanges,
     parsedTuningConfig,
-    canEditContextSettings,
-    canEditDetectionSettings,
+    canEditSettings,
   ]);
 
   const handleSave = useCallback(() => {
@@ -315,7 +308,7 @@ export function SettingsTab() {
 
       <EuiSpacer />
 
-      <StaleEventCleanupSection canManage={canManageDetection} />
+      <StaleEventCleanupSection canManage={canManage} />
 
       <EuiSpacer />
 
@@ -419,7 +412,7 @@ export function SettingsTab() {
                           enabled: e.target.checked,
                         }))
                       }
-                      disabled={isDetectionActivityToggleDisabled}
+                      disabled={isActivityToggleDisabled}
                     />
                   </EuiToolTip>
                 </EuiFormRow>
@@ -449,7 +442,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isDetectionActivityConfigDisabled(
+                        disabled={isActivityConfigDisabled(
                           scheduledDiscovery.draft.enabled
                         )}
                       />
@@ -481,7 +474,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isDetectionActivityConfigDisabled(
+                        disabled={isActivityConfigDisabled(
                           scheduledDiscovery.draft.enabled
                         )}
                       />
@@ -510,7 +503,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isDetectionActivityConfigDisabled(
+                        disabled={isActivityConfigDisabled(
                           scheduledDiscovery.draft.enabled
                         )}
                       />
@@ -543,7 +536,7 @@ export function SettingsTab() {
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                         max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={isDetectionActivityConfigDisabled(
+                        disabled={isActivityConfigDisabled(
                           scheduledDiscovery.draft.enabled
                         )}
                       />
@@ -575,7 +568,7 @@ export function SettingsTab() {
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
                         max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                        disabled={isDetectionActivityConfigDisabled(
+                        disabled={isActivityConfigDisabled(
                           scheduledDiscovery.draft.enabled
                         )}
                       />
@@ -636,7 +629,7 @@ export function SettingsTab() {
                     onChange={(e) => setIndexPatterns(e.target.value)}
                     placeholder={DEFAULT_INDEX_PATTERNS}
                     rows={2}
-                    disabled={!canEditContextSettings}
+                    disabled={!canEditSettings}
                   />
                 </EuiFormRow>
                 {indexPatternsMatch && (
@@ -742,7 +735,7 @@ export function SettingsTab() {
                           enabled: e.target.checked,
                         }))
                       }
-                      disabled={isContextActivityToggleDisabled}
+                      disabled={isActivityToggleDisabled}
                     />
                   </EuiToolTip>
                 </EuiFormRow>
@@ -801,7 +794,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_EXTRACTION_INTERVAL_HOURS}
-                        disabled={isContextActivityConfigDisabled(
+                        disabled={isActivityConfigDisabled(
                           continuousExtraction.draft.enabled
                         )}
                       />
@@ -832,7 +825,7 @@ export function SettingsTab() {
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
-                isDisabled={!canEditContextSettings}
+                isDisabled={!canEditSettings}
                 onClick={() => {
                   const defaultYaml = configToAnnotatedYaml(
                     DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
@@ -861,7 +854,7 @@ export function SettingsTab() {
           <EuiSpacer size="m" />
           <SignificantEventsTuningConfigEditor
             value={draftConfigYaml}
-            isReadOnly={!canEditContextSettings}
+            isReadOnly={!canEditSettings}
             onChange={(yaml, parsed) => {
               setDraftConfigYaml(yaml);
               setParsedTuningConfig(parsed);

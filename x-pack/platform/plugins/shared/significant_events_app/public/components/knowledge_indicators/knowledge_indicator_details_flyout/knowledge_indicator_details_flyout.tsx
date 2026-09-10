@@ -91,7 +91,7 @@ export function KnowledgeIndicatorDetailsFlyout({
       start: { share },
     },
   } = useKibana();
-  const canManageContext = getNightshiftCapabilities(nightshift).canManageContext;
+  const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -163,7 +163,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [openFeatureInDiscover]);
 
   const featureActionItems = useMemo(() => {
-    if (!canManageContext || knowledgeIndicator.kind !== 'feature') {
+    if (!canManage || knowledgeIndicator.kind !== 'feature') {
       return [];
     }
 
@@ -230,7 +230,7 @@ export function KnowledgeIndicatorDetailsFlyout({
 
     return items;
   }, [
-    canManageContext,
+    canManage,
     excludeFeature,
     isMutating,
     knowledgeIndicator,
@@ -239,7 +239,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   ]);
 
   const queryActionItems = useMemo(() => {
-    if (!canManageContext || knowledgeIndicator.kind !== 'query') {
+    if (!canManage || knowledgeIndicator.kind !== 'query') {
       return [];
     }
 
@@ -288,7 +288,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [
     activityBlockTooltip,
     blocksActivity,
-    canManageContext,
+    canManage,
     isMutating,
     knowledgeIndicator,
     promoteQuery,

@@ -88,15 +88,12 @@ export const useFetchDetectionOccurrences = (
     application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
-  const { canShowContext, canShowDetection } = getNightshiftCapabilities(
-    application.capabilities.nightshift
-  );
-  const canReadQueries = canShowContext || canShowDetection;
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
   const request = useMemo(() => buildDetectionOccurrencesRequest(detections), [detections]);
 
   return useQuery<DetectionOccurrencesByRuleUuid, Error>({
     queryKey: ['nightshift.detectionOccurrences', request],
-    enabled: request != null && canReadQueries,
+    enabled: request != null && canShow,
     queryFn: async ({ signal }) => {
       if (!request) {
         return new Map();

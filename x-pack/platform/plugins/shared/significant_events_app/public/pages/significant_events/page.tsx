@@ -72,10 +72,8 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const { canShowContext, canShowDetection, canManageContext, canManageDetection } =
-    getNightshiftCapabilities(nightshift);
-  const canShowManagement = canShowContext || canShowDetection;
-  const canPauseActivity = canManageContext || canManageDetection;
+  const { canShow, canManage } = getNightshiftCapabilities(nightshift);
+  const canPauseActivity = canManage;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -130,7 +128,7 @@ export function SignificantEventsPage() {
       },
     ];
 
-    if (agentBuilder && canManageContext) {
+    if (agentBuilder && canManage) {
       items.push({
         id: 'significantEventsSystemOnboarding',
         order: 2,
@@ -144,7 +142,7 @@ export function SignificantEventsPage() {
     return { items };
   }, [
     agentBuilder,
-    canManageContext,
+    canManage,
     getUrlForApp,
     handleOpenSystemOnboarding,
     nightshiftLabel,
@@ -223,15 +221,7 @@ export function SignificantEventsPage() {
     ],
     [tab, router]
   );
-  const tabs = allTabs.filter((item) => {
-    if (item.id === 'detections' || item.id === 'significant_events') {
-      return canShowDetection;
-    }
-    if (item.id === 'settings') {
-      return canShowManagement;
-    }
-    return canShowContext;
-  });
+  const tabs = canShow ? allTabs : [];
 
   if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
@@ -361,7 +351,7 @@ export function SignificantEventsPage() {
             </>
           )}
           {showMaintenanceBanners && <RunLimitsBanner />}
-          {canShowContext && (
+          {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'streams' && <StreamsView />}
               {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}

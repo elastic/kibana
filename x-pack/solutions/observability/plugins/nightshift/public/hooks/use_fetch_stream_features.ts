@@ -88,7 +88,7 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
     application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
-  const { canShowContext } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
   const uniqueStreamNames = [...new Set(streamNames)].sort();
 
   const { data, isInitialLoading, isFetching, isError, refetch } = useQuery<
@@ -96,7 +96,7 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
     Error
   >({
     queryKey: ['nightshift.streamFeatures', uniqueStreamNames],
-    enabled: canShowContext && uniqueStreamNames.length > 0,
+    enabled: canShow && uniqueStreamNames.length > 0,
     queryFn: async ({ signal }) =>
       collectStreamFeatures(
         uniqueStreamNames,

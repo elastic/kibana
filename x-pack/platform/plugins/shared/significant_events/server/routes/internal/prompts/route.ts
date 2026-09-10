@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { PromptsConfigAttributes } from '@kbn/streams-plugin/server';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
-import { NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { StatusError } from '../../../lib/errors/status_error';
 import { createServerRoute } from '../../create_server_route';
 
@@ -21,7 +21,7 @@ export const setStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -60,7 +60,7 @@ export const resetStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -86,7 +86,7 @@ export const getStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),

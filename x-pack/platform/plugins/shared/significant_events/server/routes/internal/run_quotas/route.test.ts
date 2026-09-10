@@ -9,13 +9,7 @@ import {
   DEFAULT_RUN_QUOTA_SETTINGS,
   type RunQuotaConsumeRequest,
 } from '../../../../common/run_quotas';
-import {
-  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
-  NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../../types';
 import type {
   RunQuotaSavedObjectsRepository,
@@ -54,12 +48,7 @@ const consumeRoute =
 
 const repository = {} as RunQuotaSavedObjectsRepository;
 const server = {} as SignificantEventsServer;
-const allEngineManageAuthz = {
-  [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage]: true,
-  [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage]: true,
-  [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage]: true,
-};
-const request = { authzResult: allEngineManageAuthz };
+const request = {};
 
 const defaultSettings: RunQuotaSettingsAttributes = {
   enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
@@ -114,14 +103,13 @@ describe('Significant Events run quota routes', () => {
       ].sort()
     );
     expect(getRoute.security.authz).toEqual({
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES] }],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     });
     expect(putRoute.security.authz).toEqual({
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     });
     expect(consumeRoute.security.authz).toEqual({
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES] }],
-      extendedPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     });
   });
 
@@ -269,30 +257,5 @@ describe('Significant Events run quota routes', () => {
       internalRepository: repository,
       group: body.group,
     });
-  });
-
-  it('allows consume when authzResult is absent (security disabled)', async () => {
-    await expect(
-      consumeRoute.handler({
-        ...handlerParams,
-        request: { authzResult: undefined },
-        params: { body: { group: 'detection' } },
-      } as never)
-    ).resolves.toEqual({ allowed: true });
-  });
-
-  it('rejects consume when the caller lacks the engine that owns that group', async () => {
-    await expect(
-      consumeRoute.handler({
-        ...handlerParams,
-        request: {
-          authzResult: {
-            [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage]: true,
-          },
-        },
-        params: { body: { group: 'ki_extraction' } },
-      } as never)
-    ).rejects.toMatchObject({ output: { statusCode: 403 } });
-    expect(consumeRunQuota).not.toHaveBeenCalled();
   });
 });
