@@ -17,6 +17,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
@@ -275,7 +276,9 @@ export const getEntityExpandItems = (
     items.push({
       type: 'item',
       iconType: 'maximize',
-      testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+      testSubject: isGrouped
+        ? GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID
+        : GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
       label: isGrouped
         ? i18n.translate(
             'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showGroupedEntities',
