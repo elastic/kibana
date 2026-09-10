@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 const formatDividerDate = (date: string): string => {
-  const m = moment(date);
+  const m = moment(date).locale(i18n.getLocale());
   const now = moment();
 
   if (m.isSame(now, 'day')) {
@@ -48,6 +48,7 @@ export const ConversationDateDivider: React.FC<{ date: string }> = ({ date }) =>
     >
       <EuiHorizontalRule
         margin="none"
+        aria-hidden={true}
         css={css`
           flex: 1;
         `}
@@ -65,6 +66,7 @@ export const ConversationDateDivider: React.FC<{ date: string }> = ({ date }) =>
       </EuiText>
       <EuiHorizontalRule
         margin="none"
+        aria-hidden={true}
         css={css`
           flex: 1;
         `}
