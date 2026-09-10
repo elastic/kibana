@@ -172,15 +172,16 @@ const buildHighlightSpans = (
   return spans;
 };
 
-const HighlightedText: React.FC<{ spans: Array<{ text: string; highlighted: boolean }> }> = ({
-  spans,
-}) => (
+const HighlightedText: React.FC<{
+  spans: Array<{ text: string; highlighted: boolean }>;
+  highlightColor?: string;
+}> = ({ spans, highlightColor = 'rgba(0, 200, 210, 0.25)' }) => (
   <>
     {spans.map((span, i) =>
       span.highlighted ? (
         <mark
           key={i}
-          style={{ backgroundColor: 'rgba(0, 200, 210, 0.25)', borderRadius: 2, padding: '0 1px' }}
+          style={{ backgroundColor: highlightColor, borderRadius: 2, padding: '0 1px' }}
         >
           {span.text}
         </mark>
@@ -242,6 +243,15 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
     if (!previewResult) return [];
     return buildHighlightSpans(activePreviewText, previewResult.tokenMap);
   }, [previewResult, activePreviewText]);
+
+  // Highlight token strings in the tokenized text by treating each token as its own "value"
+  const tokenSpans = useMemo(() => {
+    if (!previewResult) return [];
+    const selfMap = Object.fromEntries(
+      Object.keys(previewResult.tokenMap).map((t) => [t, t])
+    );
+    return buildHighlightSpans(previewResult.tokenized, selfMap);
+  }, [previewResult]);
 
   const matchRows = useMemo(() => {
     if (!previewResult) return [];
@@ -678,7 +688,12 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
                   }}
                   data-test-subj="anonymization-preview-model-pane"
                 >
-                  {previewResult ? previewResult.tokenized : null}
+                  {previewResult ? (
+                    <HighlightedText
+                      spans={tokenSpans}
+                      highlightColor="rgba(255, 165, 0, 0.25)"
+                    />
+                  ) : null}
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -747,6 +762,7 @@ export const PatternsFlyout: React.FC<PatternsFlyoutProps> = ({
     <EuiFlyout
       onClose={onClose}
       size="m"
+      resizable
       aria-labelledby="anonymization-patterns-flyout-title"
       data-test-subj="anonymizationPatternsFlyout"
     >
