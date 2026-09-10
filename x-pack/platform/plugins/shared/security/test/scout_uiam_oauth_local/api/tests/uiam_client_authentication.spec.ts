@@ -10,9 +10,8 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
-import { apiTest, COMMON_HEADERS, TEST_USERNAME } from '../fixtures';
+import { apiTest, COMMON_HEADERS, COMMON_UNSAFE_HEADERS, TEST_USERNAME } from '../fixtures';
 
-// The isolated server config deliberately gives Kibana a secret that UIAM does not accept.
 apiTest.describe(
   '[NON-MKI] Inbound UIAM ephemeral token client authentication',
   { tag: tags.serverless.security.complete },
@@ -42,7 +41,7 @@ apiTest.describe(
       async ({ apiClient, ephemeralToken }) => {
         const response = await apiClient.post('test_endpoints/uiam/secondary_auth', {
           headers: {
-            ...COMMON_HEADERS,
+            ...COMMON_UNSAFE_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
             [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
           },
@@ -77,7 +76,7 @@ apiTest.describe(
       async ({ apiClient, esClient, ephemeralToken }) => {
         const grantResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
           headers: {
-            ...COMMON_HEADERS,
+            ...COMMON_UNSAFE_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
             [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
           },
@@ -108,7 +107,7 @@ apiTest.describe(
       },
     ]) {
       apiTest(
-        `rejects an ephemeral token with ${description} gateway client authentication`,
+        `does not replace ${description} client authentication with the Kibana secret`,
         async ({ apiClient, ephemeralToken }) => {
           const response = await apiClient.get('internal/security/me', {
             headers: {

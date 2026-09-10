@@ -11,9 +11,7 @@ import { createUiamOAuthAccessToken, MOCK_IDP_UIAM_SERVICE_URL } from '@kbn/mock
 import { apiTest as baseApiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { TEST_USERNAME } from './constants';
-
-export { COMMON_HEADERS, TEST_USERNAME } from './constants';
+export const TEST_USERNAME = '1234567891';
 
 export const apiTest = baseApiTest.extend<{ ephemeralToken: string }, { oauthAccessToken: string }>(
   {

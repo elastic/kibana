@@ -272,13 +272,15 @@ export class ClusterClient implements ICustomClusterClient {
 
     // Preserve inbound bearer client authentication, including its absence. API keys keep their
     // existing internal/external client-authentication rules.
-    const isBearerToken = authorizationHeader.scheme.toLowerCase() === 'bearer';
+    const isBearerScheme = authorizationHeader.scheme.toLowerCase() === 'bearer';
     const requestHeaders =
-      isBearerToken && isRealRequest(request) ? ensureRawRequest(request).headers ?? {} : undefined;
+      isBearerScheme && isRealRequest(request)
+        ? ensureRawRequest(request).headers ?? {}
+        : undefined;
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
     const clientAuthentication =
-      (isBearerToken ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER] : undefined) ??
+      (isBearerScheme ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER] : undefined) ??
       this.security?.uiam?.getElasticsearchClientAuthentication(
         requestHeaders
           ? { credentialSource: 'inbound', credential: authorizationHeader, requestHeaders }

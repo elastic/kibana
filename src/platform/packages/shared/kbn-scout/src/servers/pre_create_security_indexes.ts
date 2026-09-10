@@ -23,11 +23,6 @@ export async function preCreateSecurityIndexesViaSamlAuth(
   config: Config,
   log: ToolingLog
 ): Promise<void> {
-  if (!config.get('preCreateSecurityIndexes')) {
-    log.debug('SAML Security index warmup is disabled for this server configuration');
-    return;
-  }
-
   const session = createSamlSessionManager(
     config.getScoutTestConfig(),
     new ScoutLogger('pre-create-security-indexes', 'info')
