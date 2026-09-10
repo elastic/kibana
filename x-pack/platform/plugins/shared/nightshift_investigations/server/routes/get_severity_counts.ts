@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import {
   INVESTIGATION_STATUSES,
   INVESTIGATION_SUBJECT_TYPES,
@@ -14,12 +13,23 @@ import {
 } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
-export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute({
-  endpoint: 'GET /internal/nightshift/investigations',
+/**
+ * Severity facet counts, split out from the list route.
+ *
+ * The counts are independent of pagination and sort, so serving them alongside the list would
+ * recompute an identical aggregation on every page change. Keeping them separate also lets the
+ * list render before the counts arrive.
+ *
+ * Deliberately accepts no `severities` param: the counts say how many investigations sit in each
+ * tier under the *other* filters, so narrowing by tier would make them self-referential.
+ */
+export const getSeverityCountsRoute = createNightshiftInvestigationsServerRoute({
+  endpoint: 'GET /internal/nightshift/investigations/_severity_counts',
   options: {
     access: 'internal',
-    summary: 'List investigations',
-    description: 'Returns a paginated list of investigations in the current space.',
+    summary: 'Investigation counts by severity',
+    description:
+      'Returns the number of investigations at each severity tier, zero-filled for all four tiers.',
   },
   security: {
     // agentBuilder:read as a proxy for AI feature access. See start_investigation.ts.
@@ -29,10 +39,6 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
     query: z.object({
       statuses: z
         .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
-        .transform((v) => (Array.isArray(v) ? v : [v]))
-        .optional(),
-      severities: z
-        .union([z.enum(SEVERITY_OPTIONS), z.array(z.enum(SEVERITY_OPTIONS)).max(4)])
         .transform((v) => (Array.isArray(v) ? v : [v]))
         .optional(),
       subject_types: z
@@ -50,12 +56,8 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
       started_before: z.string().max(100).datetime({ offset: true }).optional(),
       completed_after: z.string().max(100).datetime({ offset: true }).optional(),
       completed_before: z.string().max(100).datetime({ offset: true }).optional(),
-      sort_field: z.enum(['created_at', 'completed_at', 'severity']).optional(),
-      sort_order: z.enum(['asc', 'desc']).optional(),
-      page: z.coerce.number().int().min(1).max(100).optional(),
-      size: z.coerce.number().int().min(1).max(100).optional(),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) =>
-    getInvestigationsClient(request).list(params.query),
+    getInvestigationsClient(request).getSeverityCounts(params.query),
 });
