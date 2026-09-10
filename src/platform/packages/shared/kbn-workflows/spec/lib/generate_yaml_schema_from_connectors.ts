@@ -8,7 +8,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { CONNECTOR_ID_MAX_LENGTH, TEMPLATE_EXPRESSION_MAX_LENGTH } from '../../common/constants';
+import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
+import {
+  TEMPLATE_EXPRESSION_MAX_LENGTH,
+  WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX,
+} from '../../common/template_expressions';
 import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
@@ -167,11 +171,26 @@ function hasNoRequiredFields(schema: z.ZodType): boolean {
 }
 
 /**
- * Widens top-level array fields of a connector params schema to also accept a string, so that
- * Liquid template expressions like `"${{ event.messages }}"` are not flagged as errors in the
- * YAML editor when used in place of an array value. Only the editor-facing JSON schema is
- * affected — runtime step handlers always receive already-resolved values validated by the
- * original strict Zod schemas.
+ * Only whole-value `${{ … }}` expressions are accepted — not arbitrary strings, and not the
+ * bare `{{ … }}` form, which the templating engine always renders to a string and so can never
+ * satisfy an array param. See WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX for the full rationale.
+ */
+const LIQUID_TEMPLATE_SCHEMA = z
+  .string()
+  .regex(WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX)
+  .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
+
+/**
+ * Widens top-level array fields of a connector params schema to also accept a whole-value
+ * Liquid template expression like `"${{ event.messages }}"`, so that passing a templated value
+ * where an array is declared is not reported as a type error.
+ *
+ * This is not editor-only: the same generated schema is the server-side gate for workflow
+ * create/update (`workflow_crud_service` / `workflow_validation_service` in
+ * workflows_management), so it decides what can be *persisted*, not just what Monaco
+ * underlines. Connector params are not re-validated against `paramsSchema` at execution time,
+ * which is why the accepted form is restricted to the one the templating engine is guaranteed
+ * to resolve back to a native array.
  *
  * Only the direct children of the params schema (not nested objects) are widened, to avoid
  * disturbing deeply nested schemas such as the ES API's MappingTypeMapping.
@@ -182,26 +201,29 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
   }
   const modifications: Record<string, z.ZodType> = {};
   for (const [key, rawValue] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
-    let value = rawValue;
+    let value: z.ZodType = rawValue;
     let isOptional = false;
+    let hasDefault = false;
+    let defaultValue: unknown;
 
-    if (value instanceof z.ZodOptional) {
-      isOptional = true;
-      value = value.unwrap() as z.ZodType;
-    }
-    if (value instanceof z.ZodDefault) {
+    // `.optional()` and `.default()` can be applied in either order and stacked, so unwrap
+    // until the underlying type is reached, remembering what has to be re-applied afterwards.
+    while (value instanceof z.ZodOptional || value instanceof z.ZodDefault) {
+      if (value instanceof z.ZodOptional) {
+        isOptional = true;
+      } else {
+        hasDefault = true;
+        defaultValue = value.def.defaultValue;
+      }
       value = value.unwrap() as z.ZodType;
     }
 
     if (value instanceof z.ZodArray) {
-      // Only accept whole-value Liquid template expressions (e.g. `${{ expr }}` or `{{ expr }}`),
-      // not arbitrary strings, so the editor still catches plain mistyped values.
-      const liquidTemplate = z
-        .string()
-        .regex(/^\s*\$?\{\{[\s\S]*\}\}\s*$/)
-        .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
-      const widened: z.ZodType = z.union([liquidTemplate, value]);
-      modifications[key] = isOptional ? widened.optional() : widened;
+      const widened: z.ZodType = z.union([LIQUID_TEMPLATE_SCHEMA, value]);
+      // Re-apply the wrappers that were stripped above. Dropping `.default()` here would turn a
+      // defaulted param into a required one and break workflows that legitimately omit it.
+      const withOptionality = isOptional ? widened.optional() : widened;
+      modifications[key] = hasDefault ? withOptionality.default(defaultValue) : withOptionality;
     }
   }
   if (Object.keys(modifications).length === 0) {
@@ -209,7 +231,9 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
   }
   // safeExtend preserves object-level refinements and the unknownKeys policy (strict/passthrough),
   // unlike extend() which throws when the schema contains refinements.
-  return paramsSchema.safeExtend(modifications as Parameters<typeof paramsSchema.safeExtend>[0]);
+  // `modifications` is built as a mutable record; ZodRawShape is the readonly shape safeExtend
+  // expects, so the cast only relaxes mutability.
+  return paramsSchema.safeExtend(modifications as z.ZodRawShape);
 }
 
 function generateStepSchemaForConnector(
