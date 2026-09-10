@@ -14,34 +14,14 @@ export const importDashboardJsonStrings = {
     i18n.translate('dashboard.importJson.flyout.title', {
       defaultMessage: 'Import dashboard',
     }),
-  getFilePickerLabel: () =>
-    i18n.translate('dashboard.importJson.flyout.filePickerLabel', {
-      defaultMessage: 'Select a JSON file',
-    }),
-  getInfoCalloutTitle: () =>
-    i18n.translate('dashboard.importJson.flyout.infoCalloutTitle', {
-      defaultMessage: 'Only JSON files that are exported from Dashboard application are supported.',
-    }),
-  getImportButtonLabel: () =>
-    i18n.translate('dashboard.importJson.flyout.importButton', {
-      defaultMessage: 'Import',
-    }),
-  getCancelButtonLabel: () =>
-    i18n.translate('dashboard.importJson.flyout.cancelButton', {
-      defaultMessage: 'Cancel',
-    }),
-  getInvalidJsonError: () =>
-    i18n.translate('dashboard.importJson.flyout.invalidJsonError', {
-      defaultMessage: 'The selected file does not contain valid JSON.',
+  getExportApplication: () =>
+    i18n.translate('dashboard.importJson.flyout.exportApplication', {
+      defaultMessage: 'Dashboard application',
     }),
   getServerValidationError: () =>
     i18n.translate('dashboard.importJson.flyout.serverValidationError', {
       defaultMessage:
         'The file could not be imported. Make sure it was exported from the Dashboard export feature.',
-    }),
-  getWarningsTitle: () =>
-    i18n.translate('dashboard.importJson.flyout.warningsTitle', {
-      defaultMessage: 'Unsupported properties were removed',
     }),
   getWarningsBody: (count: number) =>
     i18n.translate('dashboard.importJson.flyout.warningsSummary', {
@@ -49,21 +29,9 @@ export const importDashboardJsonStrings = {
         '{count} item{count, plural, one {} other {s}} removed from the imported dashboard.',
       values: { count },
     }),
-  getWarningsAccordionShow: () =>
-    i18n.translate('dashboard.importJson.flyout.warningsAccordionShow', {
-      defaultMessage: 'Show details',
-    }),
-  getWarningsAccordionHide: () =>
-    i18n.translate('dashboard.importJson.flyout.warningsAccordionHide', {
-      defaultMessage: 'Hide details',
-    }),
   getSuccessToast: (title: string) =>
     i18n.translate('dashboard.importJson.successToast', {
       defaultMessage: 'Dashboard "{title}" imported successfully.',
       values: { title },
-    }),
-  getImportingLabel: () =>
-    i18n.translate('dashboard.importJson.flyout.importing', {
-      defaultMessage: 'Importing…',
     }),
 };

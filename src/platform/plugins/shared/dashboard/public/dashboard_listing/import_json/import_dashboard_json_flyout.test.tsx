@@ -69,6 +69,7 @@ describe('ImportDashboardJsonFlyout', () => {
   it('renders the file picker and NDJSON note', () => {
     renderFlyout();
     expect(screen.getByTestId('importDashboardJsonFilePicker')).toBeInTheDocument();
+    expect(screen.getByTestId('importDashboardJsonTechnicalPreviewBadge')).toBeInTheDocument();
     expect(screen.getByText(/exported from Dashboard application/)).toBeInTheDocument();
   });
 
@@ -121,9 +122,8 @@ describe('ImportDashboardJsonFlyout', () => {
 
     const warnings = screen.getByTestId('importDashboardJsonWarnings');
     const filePicker = screen.getByTestId('importDashboardJsonFilePicker');
-    expect(
-      warnings.compareDocumentPosition(filePicker) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    const position = warnings.compareDocumentPosition(filePicker);
+    expect(Math.floor(position / Node.DOCUMENT_POSITION_FOLLOWING) % 2).toBe(1);
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 

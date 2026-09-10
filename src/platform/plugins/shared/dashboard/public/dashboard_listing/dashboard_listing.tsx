@@ -26,6 +26,7 @@ import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_co
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps, DashboardListingTab } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
+import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export const DashboardListing = ({
@@ -118,10 +119,7 @@ export const DashboardListing = ({
   const onImportSuccess = useCallback((id: string, title: string) => {
     setRefreshListBouncer((b) => !b);
     coreServices.notifications.toasts.addSuccess(
-      i18n.translate('dashboard.importJson.successToast', {
-        defaultMessage: 'Dashboard "{title}" imported successfully.',
-        values: { title },
-      })
+      importDashboardJsonStrings.getSuccessToast(title)
     );
   }, []);
 
