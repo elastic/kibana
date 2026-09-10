@@ -62,7 +62,7 @@ const mockAppliedVersion = (esClient: ElasticsearchClientMock, version?: number)
 
 describe('smlIndexName', () => {
   it('is the dot-prefixed AI index the Elasticsearch template pattern matches', () => {
-    expect(smlIndexName).toBe('.ai-index-idx-sml-data');
+    expect(smlIndexName).toBe('.ai-index-idx-elastic-index');
   });
 });
 

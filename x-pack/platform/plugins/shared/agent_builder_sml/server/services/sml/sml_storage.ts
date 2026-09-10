@@ -9,8 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
 
-/** SML data index. Kibana owns its creation; Elasticsearch owns its mappings. */
-export const smlIndexName = '.ai-index-idx-sml-data';
+/** The Elastic AI index. Kibana owns its creation; Elasticsearch owns its mappings. */
+export const smlIndexName = '.ai-index-idx-elastic-index';
 
 /**
  * Elasticsearch-managed index template that owns the SML data index mappings (`ai-index@mappings`
