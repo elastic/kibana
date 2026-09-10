@@ -8,7 +8,12 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
+import {
+  conversationMetadataUpdatedTriggerCommonDefinition,
+  conversationAttachmentAddedTriggerCommonDefinition,
+  conversationAttachmentUpdatedTriggerCommonDefinition,
+  conversationAttachmentDeletedTriggerCommonDefinition,
+} from '../../common/workflows/triggers';
 
 export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
@@ -44,4 +49,13 @@ export function registerWorkflowSteps(
   );
 
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(
+    conversationAttachmentAddedTriggerCommonDefinition
+  );
+  workflowsExtensions.registerTriggerDefinition(
+    conversationAttachmentUpdatedTriggerCommonDefinition
+  );
+  workflowsExtensions.registerTriggerDefinition(
+    conversationAttachmentDeletedTriggerCommonDefinition
+  );
 }

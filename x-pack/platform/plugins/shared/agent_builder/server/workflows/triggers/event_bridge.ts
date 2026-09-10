@@ -7,8 +7,20 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  ConversationMetadataUpdatedTriggerId,
+  ConversationAttachmentAddedTriggerId,
+  ConversationAttachmentUpdatedTriggerId,
+  ConversationAttachmentDeletedTriggerId,
+} from '../../../common/workflows/triggers';
 import type { ConversationEventBus } from './conversation_event_bus';
+import type { ConversationAttachmentChangeKind } from '../../services/conversation/client/attachment_diff';
+
+const triggerIdByKind: Record<ConversationAttachmentChangeKind, string> = {
+  added: ConversationAttachmentAddedTriggerId,
+  updated: ConversationAttachmentUpdatedTriggerId,
+  deleted: ConversationAttachmentDeletedTriggerId,
+};
 
 /**
  * Registers bridge listeners that forward conversation domain events to workflows_extensions.
@@ -37,5 +49,15 @@ export function registerConversationWorkflowEventBridge(
 
   conversationEventBus.onMetadataPatched((request, payload) => {
     void forward(ConversationMetadataUpdatedTriggerId, payload, request);
+  });
+
+  conversationEventBus.onAttachmentsChanged((request, { conversationId, changes }) => {
+    for (const { kind, attachmentId, attachmentType } of changes) {
+      void forward(
+        triggerIdByKind[kind],
+        { conversationId, attachmentId, attachmentType },
+        request
+      );
+    }
   });
 }

@@ -21,3 +21,18 @@ export interface ConversationMetadataUpdatedEvent {
   /** Names of the metadata fields that changed in this write. */
   changedFields: string[];
 }
+
+/** Trigger IDs for conversation attachment lifecycle events. */
+export const ConversationAttachmentAddedTriggerId = 'ai.attachmentAdded' as const;
+export const ConversationAttachmentUpdatedTriggerId = 'ai.attachmentUpdated' as const;
+export const ConversationAttachmentDeletedTriggerId = 'ai.attachmentDeleted' as const;
+
+/** Payload shared by all three attachment trigger events. */
+export interface ConversationAttachmentEvent {
+  /** The ID of the conversation. */
+  conversationId: string;
+  /** The ID of the attachment that was added, updated, or deleted. */
+  attachmentId: string;
+  /** The type of the attachment (e.g. 'text', 'esql', 'visualization'). */
+  attachmentType: string;
+}
