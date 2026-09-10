@@ -126,10 +126,28 @@ describe('classifyChartSectionError', () => {
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
     });
 
+    it('classifies a 429 circuit-breaker status as an application error', () => {
+      const error = new EsqlResponseError(
+        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { status: 429 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
+    });
+
     it('classifies a search-interceptor error carrying a 5xx body status as an application error', () => {
       const error = createEsErrorLike(
-        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { type: 'search_phase_execution_exception', reason: 'all shards failed' },
         { status: 503 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
+    });
+
+    it('classifies a search-interceptor error carrying a 429 circuit-breaker status as an application error', () => {
+      const error = createEsErrorLike(
+        { type: 'circuit_breaking_exception', reason: 'data too large' },
+        { status: 429 }
       );
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);

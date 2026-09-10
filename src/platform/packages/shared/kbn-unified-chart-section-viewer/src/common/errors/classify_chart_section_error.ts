@@ -40,9 +40,16 @@ export interface ChartSectionErrorMeta {
  */
 const USER_INPUT_ERROR_TYPES: readonly string[] = ['parsing_exception', 'verification_exception'];
 
-const isClientErrorStatus = (status: number): boolean => status >= 400 && status < 500;
+/**
+ * Elasticsearch maps `circuit_breaking_exception` to 429.
+ */
+const HTTP_TOO_MANY_REQUESTS = 429;
 
-const isServerErrorStatus = (status: number): boolean => status >= 500;
+const isClientErrorStatus = (status: number): boolean =>
+  status >= 400 && status < 500 && status !== HTTP_TOO_MANY_REQUESTS;
+
+const isServerErrorStatus = (status: number): boolean =>
+  status >= 500 || status === HTTP_TOO_MANY_REQUESTS;
 
 const toRecord = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;

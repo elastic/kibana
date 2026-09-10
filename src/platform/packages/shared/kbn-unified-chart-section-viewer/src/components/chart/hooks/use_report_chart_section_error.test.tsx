@@ -445,12 +445,17 @@ describe('useReportChartSectionError', () => {
       // `KQL("""...""")` literal makes Elasticsearch reject the query, which
       // must not be counted as an application failure.
       const reportError = renderReporter();
-      const kqlParseError = new EsqlResponseError(
+      const kqlParseError = Object.assign(
+        new Error("line 1:42: extraneous input '|' expecting <EOF>"),
         {
-          type: 'parsing_exception',
-          reason: "line 1:42: extraneous input '|' expecting <EOF>",
-        },
-        { status: 400 }
+          attributes: {
+            error: {
+              type: 'parsing_exception',
+              reason: "line 1:42: extraneous input '|' expecting <EOF>",
+            },
+            rawResponse: { status: 400 },
+          },
+        }
       );
 
       reportError({
@@ -473,10 +478,15 @@ describe('useReportChartSectionError', () => {
 
     it('classifies a server-side ES failure as an application error', () => {
       const reportError = renderReporter();
-      const serverError = new EsqlResponseError(
-        { type: 'search_phase_execution_exception', reason: 'all shards failed' },
-        { status: 500 }
-      );
+      const serverError = Object.assign(new Error('all shards failed'), {
+        attributes: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+          },
+          rawResponse: { status: 500 },
+        },
+      });
 
       reportError({
         error: serverError,
