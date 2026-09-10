@@ -15,7 +15,12 @@ export const CANCEL_ERROR = i18n.translate('xpack.evals.runProgress.cancelError'
   defaultMessage: 'Failed to cancel run',
 });
 
-export const datasetCounts = (values: {
+export const datasetCounts = ({
+  done,
+  total,
+  failed,
+  scores,
+}: {
   done: number;
   total: number | string;
   failed: number;
@@ -23,7 +28,7 @@ export const datasetCounts = (values: {
 }) =>
   i18n.translate('xpack.evals.runProgress.datasetCounts', {
     defaultMessage: '{done} / {total} examples · {failed} failed · {scores} scores ingested',
-    values,
+    values: { done, total, failed, scores },
   });
 
 export const viewFailures = (count: number) =>

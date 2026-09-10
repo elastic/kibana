@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -134,7 +135,7 @@ describe('RulesClient', () => {
         maxScheduledPerMinute: 400,
         run: {
           alerts: { max: 10000 },
-          query: { maxResponseSize: 50 * 1024 * 1024 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
           maxGroupsPerExecution: 10000,
         },
         ...rulesConfigOverrides,
@@ -209,7 +210,9 @@ describe('RulesClient', () => {
       await client.createRule({
         data: {
           ...baseCreateData,
-          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboardId: 'so-dashboard-1' } }],
+          artifacts: [
+            { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'so-dashboard-1' } },
+          ],
         },
         options: { id: 'rule-id-dash' },
       });
@@ -218,7 +221,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           references: [
             {
-              name: 'artifact:dashboardId:dash-1',
+              name: 'artifact:dashboard_id:dash-1',
               type: 'dashboard',
               id: 'so-dashboard-1',
             },
@@ -245,11 +248,11 @@ describe('RulesClient', () => {
         id: 'rule-id-1',
         attributes: {
           ...baseSoAttrs,
-          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboardId: 'old-id' } }],
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'old-id' } }],
         },
         references: [
           {
-            name: 'artifact:dashboardId:dash-1',
+            name: 'artifact:dashboard_id:dash-1',
             type: 'dashboard',
             id: 'remapped-id',
           },
@@ -258,7 +261,7 @@ describe('RulesClient', () => {
 
       const res = await client.getRule({ id: 'rule-id-1' });
       expect(res.artifacts).toEqual([
-        { id: 'dash-1', type: 'dashboard', data: { dashboardId: 'remapped-id' } },
+        { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'remapped-id' } },
       ]);
     });
 
@@ -835,10 +838,12 @@ describe('RulesClient', () => {
         id: 'rule-id-imported',
         attributes: {
           ...baseSoAttrs,
-          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboardId: 'pre-import-id' } }],
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'pre-import-id' } }],
         },
         version: 'WzEsMV0=',
-        references: [{ name: 'artifact:dashboardId:dash-1', type: 'dashboard', id: 'remapped-id' }],
+        references: [
+          { name: 'artifact:dashboard_id:dash-1', type: 'dashboard', id: 'remapped-id' },
+        ],
       });
       rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-imported' });
 
@@ -850,12 +855,12 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
         expect.objectContaining({
           references: [
-            { name: 'artifact:dashboardId:dash-1', type: 'dashboard', id: 'remapped-id' },
+            { name: 'artifact:dashboard_id:dash-1', type: 'dashboard', id: 'remapped-id' },
           ],
         })
       );
       expect(res.artifacts).toEqual([
-        { id: 'dash-1', type: 'dashboard', data: { dashboardId: 'remapped-id' } },
+        { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'remapped-id' } },
       ]);
     });
 

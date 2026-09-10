@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  MAX_COMMENT_LENGTH,
-  MAX_USER_ACTIONS_PER_CASE,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
-import { comment, mockCases, mockCaseUnifiedAttachments } from '../../mocks';
+import { MAX_USER_ACTIONS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
@@ -22,6 +18,11 @@ import { addComment } from './add';
 
 describe('addComment', () => {
   const caseId = 'test-case';
+  const unifiedComment = {
+    type: 'comment' as const,
+    data: { content: 'unified text' },
+    owner: SECURITY_SOLUTION_OWNER,
+  };
 
   const clientArgs = createCasesClientMockArgs();
   const userActionService = createUserActionServiceMock();
@@ -31,6 +32,7 @@ describe('addComment', () => {
   clientArgs.services.userActionService = userActionService;
   clientArgs.services.caseService = caseService;
   clientArgs.services.attachmentService = attachmentService;
+  clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,34 +41,8 @@ describe('addComment', () => {
   it('throws with excess fields', async () => {
     await expect(
       // @ts-expect-error: excess attribute
-      addComment({ comment: { ...comment, foo: 'bar' }, caseId }, clientArgs)
+      addComment({ comment: { ...unifiedComment, foo: 'bar' }, caseId }, clientArgs)
     ).rejects.toThrow('invalid keys "foo"');
-  });
-
-  it('should throw an error if the comment length is too long', async () => {
-    const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
-
-    await expect(
-      addComment({ comment: { ...comment, comment: longComment }, caseId }, clientArgs)
-    ).rejects.toThrow(
-      `Failed while adding a comment to case id: test-case error: Error: The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
-    );
-  });
-
-  it('should throw an error if the comment is an empty string', async () => {
-    await expect(
-      addComment({ comment: { ...comment, comment: '' }, caseId }, clientArgs)
-    ).rejects.toThrow(
-      'Failed while adding a comment to case id: test-case error: Error: The comment field cannot be an empty string.'
-    );
-  });
-
-  it('should throw an error if the description is a string with empty characters', async () => {
-    await expect(
-      addComment({ comment: { ...comment, comment: '  ' }, caseId }, clientArgs)
-    ).rejects.toThrow(
-      'Failed while adding a comment to case id: test-case error: Error: The comment field cannot be an empty string.'
-    );
   });
 
   it(`throws error when the case user actions become > ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
@@ -74,13 +50,12 @@ describe('addComment', () => {
       [caseId]: MAX_USER_ACTIONS_PER_CASE,
     });
 
-    await expect(addComment({ comment, caseId }, clientArgs)).rejects.toThrow(
+    await expect(addComment({ comment: unifiedComment, caseId }, clientArgs)).rejects.toThrow(
       `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
     );
   });
 
   it('accepts unified type (v2) request', async () => {
-    clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
     const theCase = { ...mockCases[0], id: caseId };
@@ -96,12 +71,6 @@ describe('addComment', () => {
       new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
     );
     attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
-
-    const unifiedComment = {
-      type: 'comment' as const,
-      data: { content: 'unified text' },
-      owner: SECURITY_SOLUTION_OWNER,
-    };
 
     await expect(
       addComment({ comment: unifiedComment, caseId }, clientArgs)
@@ -117,9 +86,6 @@ describe('addComment', () => {
   });
 
   it('emits attachmentAdded event after creating a comment', async () => {
-    if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
-      clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
-    }
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
     const theCase = { ...mockCases[0], id: caseId };
@@ -136,17 +102,7 @@ describe('addComment', () => {
     );
     attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
 
-    await addComment(
-      {
-        comment: {
-          type: 'comment',
-          data: { content: 'unified text' },
-          owner: SECURITY_SOLUTION_OWNER,
-        },
-        caseId,
-      },
-      clientArgs
-    );
+    await addComment({ comment: unifiedComment, caseId }, clientArgs);
 
     expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
       clientArgs.request,

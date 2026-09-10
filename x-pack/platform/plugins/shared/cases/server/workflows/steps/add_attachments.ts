@@ -12,6 +12,7 @@ import {
   type AddAttachmentsStepInput,
 } from '../../../common/workflows/steps/add_attachments';
 import type { BulkCreateAttachmentsRequestV2 } from '../../../common/types/api';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
@@ -53,7 +54,12 @@ export const addAttachmentsStepDefinition = (
             caseId: input.case_id,
             attachments,
           });
-          return safeParseCaseForWorkflowOutput(definition.outputSchema.shape.case, updatedCase);
+          // The client returns unified comments; the output schema mirrors the
+          // public (legacy) wire shape, so convert back before validating.
+          return safeParseCaseForWorkflowOutput(
+            definition.outputSchema.shape.case,
+            toLegacyCaseResponse(updatedCase)
+          );
         });
       }
     ),
