@@ -380,33 +380,35 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                activityBlockTooltip ??
-                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
-              }
-            >
-              <EuiButton
-                iconType="inspect"
-                onClick={() => {
-                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
-                }}
-                isDisabled={isTriggering || blocksActivity}
-                hasAriaDisabled={blocksActivity}
-                isLoading={isTriggering}
-                fill
-                size="s"
-                data-test-subj="sigEventRunInvestigationButton"
+      {canManage && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  activityBlockTooltip ??
+                  (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
+                }
               >
-                {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+                <EuiButton
+                  iconType="inspect"
+                  onClick={() => {
+                    if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
+                  }}
+                  isDisabled={isTriggering || blocksActivity}
+                  hasAriaDisabled={blocksActivity}
+                  isLoading={isTriggering}
+                  fill
+                  size="s"
+                  data-test-subj="sigEventRunInvestigationButton"
+                >
+                  {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

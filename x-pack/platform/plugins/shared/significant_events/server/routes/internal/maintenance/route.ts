@@ -58,7 +58,7 @@ const pauseRoute = createServerRoute({
     summary: 'Pause Significant Events activity',
     description:
       'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Context Engine or Detection Engine manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
   },
   security: {
     authz: {

@@ -87,9 +87,9 @@ export function SettingsTab() {
     core.application.capabilities.nightshift
   );
   const { canManage } = nightshiftCapabilities;
-  const canPauseActivity = canManage;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManage && canSaveAdvancedSettings;
+  // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
@@ -296,7 +296,7 @@ export function SettingsTab() {
                 'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
-                    'Editing these settings requires a Nightshift Context Engine or Detection Engine "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                    'Editing these settings requires the Nightshift "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
                 }
               )}
             </p>
@@ -304,7 +304,7 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canPauseActivity} />
+      <MaintenanceSection canManage={canManage} />
 
       <EuiSpacer />
 

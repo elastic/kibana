@@ -185,7 +185,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               <p>
                 {i18n.translate('xpack.significantEventsApp.settings.maintenance.noManageBody', {
                   defaultMessage:
-                    'You can view pause status, but pausing or resuming requires Context Engine or Detection Engine manage.',
+                    'You can view pause status, but pausing or resuming requires Nightshift manage.',
                 })}
               </p>
             </EuiCallOut>

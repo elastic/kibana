@@ -73,7 +73,6 @@ export function SignificantEventsPage() {
   } = useKibana();
 
   const { canShow, canManage } = getNightshiftCapabilities(nightshift);
-  const canPauseActivity = canManage;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -221,7 +220,7 @@ export function SignificantEventsPage() {
     ],
     [tab, router]
   );
-  const tabs = canShow ? allTabs : [];
+  const tabs = allTabs;
 
   if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
@@ -288,7 +287,7 @@ export function SignificantEventsPage() {
                       'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                   })}
                 </p>
-                {canPauseActivity && (
+                {canManage && (
                   <EuiButton
                     href={router.link('/{tab}', { path: { tab: 'settings' } })}
                     color="danger"
@@ -316,14 +315,14 @@ export function SignificantEventsPage() {
                 })}
               >
                 <p>
-                  {canPauseActivity
+                  {canManage
                     ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
                           'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                       })
                     : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
                         defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with Context Engine or Detection Engine manage must resume activity from Settings.',
+                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with Nightshift manage must resume activity from Settings.',
                       })}
                 </p>
                 {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
@@ -334,7 +333,7 @@ export function SignificantEventsPage() {
                     })}
                   </p>
                 )}
-                {canPauseActivity && (
+                {canManage && (
                   <EuiButton
                     href={router.link('/{tab}', { path: { tab: 'settings' } })}
                     color="warning"

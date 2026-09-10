@@ -46,7 +46,7 @@ describe('cleanup workflow bootstrap route', () => {
     };
   };
 
-  it('requires Detection manage and enables cleanup in the current space', async () => {
+  it('requires Nightshift manage and enables cleanup in the current space', async () => {
     const params = createHandlerParams();
 
     await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });

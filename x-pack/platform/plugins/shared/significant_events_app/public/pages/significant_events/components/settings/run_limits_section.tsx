@@ -342,7 +342,7 @@ export const RunLimitsSection = () => {
                         'xpack.significantEventsApp.settings.runLimits.readOnlyDescription',
                         {
                           defaultMessage:
-                            'Changing enforcement or daily limits requires Context Engine manage in every space.',
+                            'Changing enforcement or daily limits requires Nightshift manage in every space.',
                         }
                       )}
                     </p>
