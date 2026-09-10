@@ -147,8 +147,25 @@ def main():
     # only on execute_tool spans, keyed by trace_id. Join: within a trace,
     # match each tool_call step to the span with the same tool name in
     # timestamp order. Unmatched -> explicit None (renderer marks it).
-    out = {}
+    #
+    # A model may have MULTIPLE executions in the window (retries). The
+    # reference board renders one run per model; pick the execution with
+    # the most docs per (model, prompt) — deterministic, never a blend.
+    best = {}  # (model, prompt) -> (n_docs, exec_id, docs)
     for exec_id, prompts in cells.items():
+        model = model_of.get(exec_id, "")
+        short = model.removeprefix("eis-")
+        for prompt, docs in prompts.items():
+            k = (short, prompt)
+            if k not in best or len(docs) > best[k][0]:
+                best[k] = (len(docs), exec_id, docs)
+
+    by_exec_prompt = collections.defaultdict(dict)  # exec_id -> prompt -> docs
+    for (short, prompt), (n, exec_id, docs) in best.items():
+        by_exec_prompt[exec_id][prompt] = docs
+
+    out = {}
+    for exec_id, prompts in by_exec_prompt.items():
         model = model_of.get(exec_id, "")
         short = model.removeprefix("eis-")
         for prompt, docs in prompts.items():
