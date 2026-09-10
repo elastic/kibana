@@ -16,8 +16,9 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
-import type { AwsServiceMatrixEntry, ServiceVarDef } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
@@ -41,30 +42,39 @@ function makeEntry(
     id,
     name: id,
     category: 'compute',
-    signalType: 'logs',
+    signalTypes: ['logs'],
+    dataStreams: [],
     deploymentMethods: [],
     showInUI: true,
     defaultEnabled: true,
+    defaultEnabledInputs: [],
     packageName: 'aws',
     ...overrides,
   } as AwsServiceMatrixEntry;
 }
 
-function makeTextVarDef(name: string): ServiceVarDef {
-  return {
-    def: { name, type: 'text', required: true, show_user: true } as any,
-    inputs: ['aws-s3'],
-  };
+function makeTextVarDef(name: string): RegistryVarsEntry {
+  return { name, type: 'text', required: true, show_user: true } as RegistryVarsEntry;
 }
 
 // --- incompleteInstances ---
 
 describe('useServiceSettings — incompleteInstances', () => {
   const svcWithRequired = makeEntry('svc_a', {
-    signalType: 'logs',
+    signalTypes: ['logs'],
+    dataStreams: ['svc_a'],
     inputs: ['aws-s3'],
+    defaultEnabledInputs: ['aws-s3'],
     requiredConfig: ['bucket_arn'],
-    varDefs: { bucket_arn: makeTextVarDef('bucket_arn') },
+    varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+    varDefsByDataStream: {
+      svc_a: {
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+        requiredConfig: ['bucket_arn'],
+      },
+    },
   });
 
   beforeEach(() => {
@@ -91,10 +101,15 @@ describe('useServiceSettings — incompleteInstances', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
     act(() =>
-      result.current.setServiceFieldsAndTransport(
+      result.current.setServiceFieldsAndInputs(
         'svc_a',
-        { bucket_arn: 'arn:aws:s3:::my-bucket' },
-        'aws-s3'
+        {
+          svc_a: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+          },
+        },
+        ['svc_a']
       )
     );
     expect(result.current.incompleteInstances).toHaveLength(0);
@@ -103,7 +118,7 @@ describe('useServiceSettings — incompleteInstances', () => {
 
   it('duplicate instance also appears in incompleteInstances when its required var is empty', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, null));
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
     expect(result.current.incompleteInstances.length).toBeGreaterThanOrEqual(2);
     expect(result.current.incompleteInstanceIds.has('svc_a__dup-1')).toBe(true);
   });
@@ -112,8 +127,8 @@ describe('useServiceSettings — incompleteInstances', () => {
 // --- signal filter ---
 
 describe('useServiceSettings — signal filter', () => {
-  const svcLogs = makeEntry('svc_logs', { signalType: 'logs', inputs: [] });
-  const svcMetrics = makeEntry('svc_metrics', { signalType: 'metrics', inputs: [] });
+  const svcLogs = makeEntry('svc_logs', { signalTypes: ['logs'], dataStreams: [] });
+  const svcMetrics = makeEntry('svc_metrics', { signalTypes: ['metrics'], dataStreams: [] });
 
   beforeEach(() => {
     mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
@@ -154,7 +169,7 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
@@ -165,10 +180,10 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, []);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
@@ -184,16 +199,16 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
     });
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, []);
     });
     act(() => {
       result.current.removeInstance('guardduty__dup-1');
     });
     act(() => {
-      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 3]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 3]', {}, []);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);

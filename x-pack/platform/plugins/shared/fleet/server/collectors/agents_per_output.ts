@@ -82,7 +82,7 @@ export async function getAgentsPerOutput(
     });
 
   outputs.forEach((output) => {
-    if (!outputTypeSupportPresets(output.type)) {
+    if (!outputTypeSupportPresets(output)) {
       return;
     }
     if (!outputTypes[output.type]) {

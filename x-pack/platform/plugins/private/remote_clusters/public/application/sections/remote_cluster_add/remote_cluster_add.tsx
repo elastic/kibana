@@ -68,7 +68,7 @@ export const RemoteClusterAdd: React.FC<Props> = ({
             defaultMessage:
               'Add a remote cluster that connects to seed nodes or to a single proxy address.',
           })}
-          back={`/app${CRUD_APP_BASE_PATH}/list`}
+          backHref={`/app${CRUD_APP_BASE_PATH}/list`}
         />
 
         <RemoteClusterWizard

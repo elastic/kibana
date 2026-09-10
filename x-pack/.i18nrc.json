@@ -28,6 +28,7 @@
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.contextEngine": "platform/plugins/shared/context_engine",
+    "xpack.agenticInvestigations": "platform/plugins/shared/agentic_investigations",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
@@ -47,6 +48,7 @@
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
+    "xpack.evals": "platform/plugins/shared/evals",
     "xpack.failureStoreModal": "platform/packages/shared/kbn-failure-store-modal",
     "xpack.features": "platform/plugins/shared/features",
     "xpack.dataFederation": "platform/plugins/private/data_federation",
@@ -70,7 +72,10 @@
     "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
-    "xpack.lens": "platform/plugins/shared/lens",
+    "xpack.lens": [
+      "platform/plugins/shared/lens",
+      "../src/platform/packages/shared/kbn-lens-common"
+    ],
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "platform/plugins/shared/licensing",
@@ -93,7 +98,9 @@
     ],
     "xpack.monitoring": ["platform/plugins/private/monitoring"],
     "xpack.observability": "solutions/observability/plugins/observability",
+    "xpack.observabilityAlerting": "solutions/observability/plugins/observability_alerting",
     "xpack.nightshift": "solutions/observability/plugins/nightshift",
+    "xpack.nightshiftInvestigations": ["platform/plugins/shared/nightshift_investigations"],
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
@@ -113,7 +120,7 @@
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
-    "xpack.pnd": ["solutions/security/plugins/pnd", "solutions/security/packages/kbn-pnd-common"],
+    "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common"],
     "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",
@@ -172,7 +179,10 @@
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
     "xpack.notificationCenter": "platform/plugins/shared/notification_center",
-    "xpack.customContent": "platform/plugins/shared/custom_content"
+    "xpack.customContent": [
+      "platform/packages/shared/custom-content/custom-content-renderer",
+      "platform/plugins/shared/custom_content"
+    ]
   },
   "exclude": ["examples"],
   "translations": [

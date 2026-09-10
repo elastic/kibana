@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -35,22 +36,33 @@ import {
   getAnyCloudConnectorIacTemplateUrl,
 } from '@kbn/fleet-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   showIdentityFederation: boolean;
+  onDeploy: () => void;
+  isDeploying: boolean;
+  isDone: boolean;
+  hasFailed: boolean;
 }
 
 export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
+  onDeploy,
+  isDeploying,
+  isDone,
+  hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { setConnectorId, authenticateAndDeployStep } = useOnboardingFlow();
+  const { connectorId: initialConnectorId } = authenticateAndDeployStep;
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(!isDone);
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
     showIdentityFederation ? 'identity_federation' : 'access_keys'
   );
@@ -60,6 +72,11 @@ export function ManagedIntegrationsSection({
       setPreferredMethod('access_keys');
     }
   }, [showIdentityFederation, preferredMethod]);
+
+  useEffect(() => {
+    if (isDone) setIsOpen(false);
+  }, [isDone]);
+
   const [isDeployReady, setIsDeployReady] = useState(false);
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
@@ -121,7 +138,7 @@ export function ManagedIntegrationsSection({
           <EuiFlexItem grow={false}>
             <EuiIcon type="package" size="m" color="subdued" aria-hidden />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
                 <FormattedMessage
@@ -131,14 +148,24 @@ export function ManagedIntegrationsSection({
               </strong>
             </EuiText>
           </EuiFlexItem>
+          {isDone && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="success" iconType="check">
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.doneBadge"
+                  defaultMessage="Done"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
+            <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.servicesLink"
+                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.serviceCount"
                 defaultMessage="{count, plural, one {# service} other {# services}}"
                 values={{ count: serviceCount }}
               />
-            </EuiBadge>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </button>
@@ -183,6 +210,9 @@ export function ManagedIntegrationsSection({
                     onChange={(id) => {
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
+                      if (id === 'access_keys') {
+                        setConnectorId(undefined);
+                      }
                     }}
                     data-test-subj="managedIntegrationsSection-preferredMethodRadio"
                   />
@@ -198,6 +228,8 @@ export function ManagedIntegrationsSection({
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   onReadyChange={setIsDeployReady}
+                  onConnectorIdChange={setConnectorId}
+                  initialConnectorId={initialConnectorId}
                 />
               ) : (
                 <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
@@ -206,15 +238,69 @@ export function ManagedIntegrationsSection({
 
             <EuiSpacer size="m" />
 
-            <EuiButton
-              isDisabled={!isDeployReady}
-              data-test-subj="managedIntegrationsSection-deployButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
-                defaultMessage="Deploy integrations"
-              />
-            </EuiButton>
+            {hasFailed && !isDeploying && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.title"
+                    defaultMessage="Deployment failed"
+                  />
+                }
+                color="danger"
+                iconType="error"
+                announceOnMount
+                data-test-subj="managedIntegrationsSection-errorCallout"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.body"
+                  defaultMessage="One or more integrations could not be deployed. Check your credentials and try again."
+                />
+                <EuiSpacer size="s" />
+                <EuiButton
+                  size="s"
+                  color="danger"
+                  onClick={onDeploy}
+                  data-test-subj="managedIntegrationsSection-retryButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.retryButton"
+                    defaultMessage="Retry"
+                  />
+                </EuiButton>
+              </EuiCallOut>
+            )}
+
+            {isDone && (
+              <EuiText size="s" data-test-subj="managedIntegrationsSection-successMessage">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.successMessage"
+                    defaultMessage="Managed integrations deployed. Data detection is running in the background — check Detect & Review for arrival status."
+                  />
+                </p>
+              </EuiText>
+            )}
+
+            {!hasFailed && !isDone && (
+              <EuiButton
+                isDisabled={!isDeployReady}
+                isLoading={isDeploying}
+                onClick={onDeploy}
+                data-test-subj="managedIntegrationsSection-deployButton"
+              >
+                {isDeploying ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
+                    defaultMessage="Deploying integrations..."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
+                    defaultMessage="Deploy integrations"
+                  />
+                )}
+              </EuiButton>
+            )}
           </EuiPanel>
         </div>
       )}

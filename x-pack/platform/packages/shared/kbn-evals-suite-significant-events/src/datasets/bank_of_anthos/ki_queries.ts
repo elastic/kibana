@@ -104,6 +104,7 @@ export const kiQueryGeneration: DatasetConfig['kiQueryGeneration'] = [
       ],
       expected_categories: ['error', 'operational'],
       expect_stats: true,
+      expect_queries: true,
       expected_ground_truth:
         'queries=[error detection for JDBC/SQL error, cache error, timeout, connection refused or connection attempt, upstream impact in frontend/ledgerwriter/balancereader/transactionhistory; STATS queries for aggregate error rate detection during ledger-db disconnect (JDBC error frequency, cache error rate per service)]',
     },

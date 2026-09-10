@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -34,7 +35,6 @@ import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
 import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
-import { DEFAULT_ACTIVITY_TIME_RANGE } from '../time_range';
 import { useResolvedActivityWindow } from '../use_resolved_activity_window';
 
 export const AlertTimelineSection: React.FC = () => {
@@ -50,7 +50,7 @@ export const AlertTimelineSection: React.FC = () => {
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
-  const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
+  const [timeRange, setTimeRange] = useAlertTimelineUrlState();
   const { windowStartMs, windowEndMs, applyRefresh } = useResolvedActivityWindow(
     timeRange.from,
     timeRange.to
@@ -196,7 +196,9 @@ export const AlertTimelineSection: React.FC = () => {
         {!isLoading && isError && (
           <EuiEmptyPrompt
             color="danger"
-            iconType="warning"
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="alertTimelineSectionError"
             title={
               <h4>
@@ -218,7 +220,9 @@ export const AlertTimelineSection: React.FC = () => {
 
         {!isLoading && !isError && timelineData.rows.length === 0 && (
           <EuiEmptyPrompt
-            iconType="bell"
+            icon={<EuiIcon type="bell" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="alertTimelineSectionEmpty"
             title={
               <h4>
