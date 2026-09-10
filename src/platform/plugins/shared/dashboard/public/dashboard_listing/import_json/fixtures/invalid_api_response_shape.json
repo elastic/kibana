@@ -1,0 +1,18 @@
+{
+  "id": "some-existing-dashboard-id",
+  "data": {
+    "title": "Looks like a Dashboard API response",
+    "panels": [],
+    "options": {
+      "hide_panel_titles": false,
+      "use_margins": true,
+      "sync_colors": false,
+      "sync_cursor": true,
+      "sync_tooltips": false,
+      "auto_apply_filters": true
+    }
+  },
+  "meta": {
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+}

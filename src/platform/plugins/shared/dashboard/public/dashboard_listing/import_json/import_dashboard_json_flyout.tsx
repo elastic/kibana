@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFilePicker,
@@ -20,9 +21,14 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiLink,
+  euiYScrollWithShadows,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
@@ -35,24 +41,45 @@ import { importDashboardJsonStrings } from './_import_dashboard_json_strings';
 interface ImportDashboardJsonFlyoutProps {
   closeFlyout: () => void;
   onImportSuccess: (id: string, title: string) => void;
+  titleId: string;
 }
 
 export const ImportDashboardJsonFlyout = ({
   closeFlyout,
   onImportSuccess,
+  titleId,
 }: ImportDashboardJsonFlyoutProps) => {
+  const euiThemeContext = useEuiTheme();
+  const warningsAccordionId = useGeneratedHtmlId({
+    prefix: 'importDashboardJsonWarnings',
+  });
+
   const [jsonParseError, setJsonParseError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [sanitizedState, setSanitizedState] = useState<DashboardState | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
+  const [showWarningsCallout, setShowWarningsCallout] = useState(true);
+
+  const warningsListStyles = useMemo(
+    () => css`
+      ${euiYScrollWithShadows(euiThemeContext, { height: 'auto' })}
+      max-height: 240px;
+      padding-top: ${euiThemeContext.euiTheme.size.s};
+      padding-bottom: ${euiThemeContext.euiTheme.size.s};
+    `,
+    [euiThemeContext]
+  );
 
   const resetState = useCallback(() => {
     setJsonParseError(null);
     setServerError(null);
     setWarnings([]);
     setSanitizedState(null);
+    setIsWarningsExpanded(false);
+    setShowWarningsCallout(true);
   }, []);
 
   const onFileChange = useCallback(
@@ -113,7 +140,7 @@ export const ImportDashboardJsonFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{importDashboardJsonStrings.getFlyoutTitle()}</h2>
+          <h2 id={titleId}>{importDashboardJsonStrings.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
@@ -155,6 +182,49 @@ export const ImportDashboardJsonFlyout = ({
           </>
         )}
 
+        {showWarningsCallout && warnings.length > 0 && (
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              size="s"
+              title={importDashboardJsonStrings.getWarningsTitle()}
+              text={importDashboardJsonStrings.getWarningsBody(warnings.length)}
+              data-test-subj="importDashboardJsonWarnings"
+              onDismiss={() => {
+                setShowWarningsCallout(false);
+                setIsWarningsExpanded(false);
+              }}
+            >
+              <EuiAccordion
+                id={warningsAccordionId}
+                initialIsOpen={false}
+                onToggle={setIsWarningsExpanded}
+                paddingSize="s"
+                buttonContent={
+                  isWarningsExpanded
+                    ? importDashboardJsonStrings.getWarningsAccordionHide()
+                    : importDashboardJsonStrings.getWarningsAccordionShow()
+                }
+              >
+                {isWarningsExpanded ? (
+                  <EuiText
+                    size="s"
+                    data-test-subj="importDashboardJsonWarningsList"
+                    css={warningsListStyles}
+                  >
+                    <ul>
+                      {warnings.map((w, i) => (
+                        <li key={`${i}-${w}`}>{w}</li>
+                      ))}
+                    </ul>
+                  </EuiText>
+                ) : null}
+              </EuiAccordion>
+            </KbnWarningCallout>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         <EuiForm fullWidth>
           <EuiFormRow
             fullWidth
@@ -172,24 +242,6 @@ export const ImportDashboardJsonFlyout = ({
             />
           </EuiFormRow>
         </EuiForm>
-
-        {warnings.length > 0 && (
-          <>
-            <EuiSpacer size="m" />
-            <KbnWarningCallout
-              announceOnMount
-              title={importDashboardJsonStrings.getWarningsTitle()}
-              text={importDashboardJsonStrings.getWarningsBody()}
-              data-test-subj="importDashboardJsonWarnings"
-            >
-              <ul>
-                {warnings.map((w, i) => (
-                  <li key={i}>{w}</li>
-                ))}
-              </ul>
-            </KbnWarningCallout>
-          </>
-        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

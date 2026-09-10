@@ -11,7 +11,6 @@ import React from 'react';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { coreServices } from '../../services/kibana_services';
-import { importDashboardJsonStrings } from './_import_dashboard_json_strings';
 
 export const openImportDashboardJsonFlyout = ({
   onImportSuccess,
@@ -23,15 +22,19 @@ export const openImportDashboardJsonFlyout = ({
   openLazyFlyout({
     core: coreServices,
     returnFocus,
-    loadContent: async ({ closeFlyout }) => {
+    loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
       const { ImportDashboardJsonFlyout } = await import('./import_dashboard_json_flyout');
       return (
-        <ImportDashboardJsonFlyout closeFlyout={closeFlyout} onImportSuccess={onImportSuccess} />
+        <ImportDashboardJsonFlyout
+          closeFlyout={closeFlyout}
+          onImportSuccess={onImportSuccess}
+          titleId={ariaLabelledBy}
+        />
       );
     },
     flyoutProps: {
       'data-test-subj': 'importDashboardJsonFlyout',
-      'aria-labelledby': importDashboardJsonStrings.getFlyoutTitle(),
+      type: 'overlay',
     },
   });
 };

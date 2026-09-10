@@ -44,7 +44,11 @@ const VALID_FILE = new File([JSON.stringify(VALID_STATE)], 'dashboard.json', {
 const renderFlyout = (onImportSuccess = jest.fn(), closeFlyout = jest.fn()) =>
   render(
     <I18nProvider>
-      <ImportDashboardJsonFlyout closeFlyout={closeFlyout} onImportSuccess={onImportSuccess} />
+      <ImportDashboardJsonFlyout
+        closeFlyout={closeFlyout}
+        onImportSuccess={onImportSuccess}
+        titleId="import-dashboard-json-title"
+      />
     </I18nProvider>
   );
 
@@ -96,7 +100,8 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
-  it('displays sanitize warnings but still allows import', async () => {
+  it('displays sanitize warnings above the file picker but still allows import', async () => {
+    const user = userEvent.setup();
     mockSanitizeDashboard.mockResolvedValue({
       data: VALID_STATE,
       warnings: ['Panel "chart-1" could not be loaded'],
@@ -106,7 +111,19 @@ describe('ImportDashboardJsonFlyout', () => {
     await waitFor(() =>
       expect(screen.getByTestId('importDashboardJsonWarnings')).toBeInTheDocument()
     );
+    expect(screen.getByText(/Unsupported properties were removed/)).toBeInTheDocument();
+    expect(screen.getByText(/1 item removed from the imported dashboard/)).toBeInTheDocument();
+    expect(screen.queryByTestId('importDashboardJsonWarningsList')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('Show details'));
+    expect(screen.getByTestId('importDashboardJsonWarningsList')).toBeInTheDocument();
     expect(screen.getByText(/Panel "chart-1" could not be loaded/)).toBeInTheDocument();
+
+    const warnings = screen.getByTestId('importDashboardJsonWarnings');
+    const filePicker = screen.getByTestId('importDashboardJsonFilePicker');
+    expect(
+      warnings.compareDocumentPosition(filePicker) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 

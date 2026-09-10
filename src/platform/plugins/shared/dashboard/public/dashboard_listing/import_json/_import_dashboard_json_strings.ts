@@ -41,12 +41,21 @@ export const importDashboardJsonStrings = {
     }),
   getWarningsTitle: () =>
     i18n.translate('dashboard.importJson.flyout.warningsTitle', {
-      defaultMessage: 'Import warnings',
+      defaultMessage: 'Unsupported properties were removed',
     }),
-  getWarningsBody: () =>
-    i18n.translate('dashboard.importJson.flyout.warningsBody', {
+  getWarningsBody: (count: number) =>
+    i18n.translate('dashboard.importJson.flyout.warningsSummary', {
       defaultMessage:
-        'Some panels could not be imported as configured. They will be imported in a degraded state.',
+        '{count} item{count, plural, one {} other {s}} removed from the imported dashboard.',
+      values: { count },
+    }),
+  getWarningsAccordionShow: () =>
+    i18n.translate('dashboard.importJson.flyout.warningsAccordionShow', {
+      defaultMessage: 'Show details',
+    }),
+  getWarningsAccordionHide: () =>
+    i18n.translate('dashboard.importJson.flyout.warningsAccordionHide', {
+      defaultMessage: 'Hide details',
     }),
   getSuccessToast: (title: string) =>
     i18n.translate('dashboard.importJson.successToast', {

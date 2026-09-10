@@ -185,13 +185,13 @@ export const DashboardListing = ({
               }
             : undefined,
       },
-      items: getDashboardCapabilities().showWriteControls
+      items: getDashboardCapabilities().createNew
         ? [
             {
               id: 'importDashboardJson',
               order: 0,
-              label: i18n.translate('dashboard.listing.importJsonButtonLabel', {
-                defaultMessage: 'Import JSON',
+              label: i18n.translate('dashboard.listing.importDashboardButtonLabel', {
+                defaultMessage: 'Import dashboard',
               }),
               iconType: 'upload',
               testId: 'dashboardListingImportButton',
