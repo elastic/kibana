@@ -20,6 +20,7 @@ import { ChatsPage } from './pages/chats';
 import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
 import { InvestigationDetailPage } from './pages/investigations/investigation_detail';
+import { OnboardingPage } from './pages/onboarding';
 
 /**
  * Top-level route table. A section with more than one page owns its own sub-routes — see
@@ -36,6 +37,7 @@ export const AlertZeroRoutes: React.FC = () => (
     <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
     <Route path="/watches" component={WatchesRoutes} />
     <Route path="/settings" component={SettingsPage} />
+    <Route path="/onboarding" component={OnboardingPage} />
     <Route path="/investigations/:id/proposals/:proposalId" component={InvestigationDetailPage} />
     <Route path="/investigations/:id" component={InvestigationDetailPage} />
   </Routes>

@@ -17,6 +17,10 @@ import { registerUpdateWorkerRoute } from './workers/update_worker';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
 import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
+import {
+  registerEnableOnboardingRoute,
+  registerDisableOnboardingRoute,
+} from './onboarding/enable_onboarding';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -25,6 +29,7 @@ export interface RouteDependencies {
   getSpaceId: AlertZeroSpaceIdResolver;
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
+  getOnboardingService: () => import('../services/onboarding/onboarding_service').OnboardingService;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -35,4 +40,6 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListInvestigationsRoute(deps);
   registerGetInvestigationRoute(deps);
   registerListInvestigationProposalsRoute(deps);
+  registerEnableOnboardingRoute(deps);
+  registerDisableOnboardingRoute(deps);
 };
