@@ -55,8 +55,6 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
-  /** @deprecated Use `getAttachments` (read) and `manageAttachments` (write) instead. */
-  attachments: casesTool('attachments'),
   getAttachments: casesTool('get_attachments'),
   manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
@@ -79,7 +77,6 @@ export const platformSignificantEventsTools = {
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
-
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;

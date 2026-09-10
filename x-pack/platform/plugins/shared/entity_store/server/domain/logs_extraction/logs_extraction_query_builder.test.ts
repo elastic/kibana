@@ -79,6 +79,42 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  describe('extractionMode guard: query output must not change across flag states until priority logic is added', () => {
+    it.each(Object.values(EntityType.enum))(
+      '%s: extractionMode=single output is byte-identical to default',
+      (type) => {
+        const baseParams = {
+          indexPatterns: ['test-index-*'],
+          latestIndex: 'latest-index',
+          entityDefinition: getEntityDefinition(type, 'default'),
+          docsLimit: 10000,
+          fromDateISO: '2022-01-01T00:00:00.000Z',
+          toDateISO: '2022-01-01T23:59:59.999Z',
+        };
+        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })).toBe(
+          buildLogsExtractionEsqlQuery(baseParams)
+        );
+      }
+    );
+
+    it.each(Object.values(EntityType.enum))(
+      '%s: extractionMode=priority output is byte-identical to single (no priority query logic yet)',
+      (type) => {
+        const baseParams = {
+          indexPatterns: ['test-index-*'],
+          latestIndex: 'latest-index',
+          entityDefinition: getEntityDefinition(type, 'default'),
+          docsLimit: 10000,
+          fromDateISO: '2022-01-01T00:00:00.000Z',
+          toDateISO: '2022-01-01T23:59:59.999Z',
+        };
+        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'priority' })).toBe(
+          buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })
+        );
+      }
+    );
+  });
+
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
     const base = getEntityDefinition('host', 'default');
     const query = buildLogsExtractionEsqlQuery({
