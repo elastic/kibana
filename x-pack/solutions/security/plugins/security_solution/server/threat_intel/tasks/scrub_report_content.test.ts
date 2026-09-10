@@ -34,7 +34,7 @@ interface UpdateByQueryArg {
   script: { source: string; params: { now: string } };
 }
 
-const setupRunner = (updateByQueryResult: unknown) => {
+const setupRunner = (updateByQueryResult: unknown, previousState: Record<string, unknown> = {}) => {
   const coreStart = coreMock.createStart();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   (esClient.updateByQuery as jest.Mock).mockImplementation(async () => {
@@ -54,7 +54,7 @@ const setupRunner = (updateByQueryResult: unknown) => {
   registerScrubReportContentTask({ taskManager, coreSetup, logger });
 
   const runner = definitions[SCRUB_REPORT_CONTENT_TASK_TYPE].createTaskRunner({
-    taskInstance: { state: {}, params: {} },
+    taskInstance: { state: previousState, params: {} },
     signal: new AbortController().signal,
     executionUuid: 'test',
     setCustomTaskRunEventFields: jest.fn(),
@@ -130,6 +130,72 @@ describe('scrub_report_content task', () => {
     expect(result.state).toEqual(
       expect.objectContaining({ totalReportsScrubbed: 7, lastRunAt: expect.any(String) })
     );
+  });
+
+  /**
+   * `update_by_query` answers 200 with per-document problems in `failures[]`,
+   * so a run that failed on every document returns `updated: 0` and used to be
+   * indistinguishable from a clean "nothing to scrub". What is left behind is
+   * fetched third-party body text living past its retention window, which is
+   * the one thing this task exists to prevent.
+   */
+  describe('per-document failures are not silent', () => {
+    const withFailures = () =>
+      setupRunner({
+        updated: 0,
+        failures: [{ id: 'report-1', status: 429, cause: { type: 'es_rejected_execution' } }],
+      });
+
+    it('counts them in state rather than reporting a clean run', async () => {
+      const { runner } = withFailures();
+
+      const result = await runner.run();
+
+      expect(result.state).toEqual(expect.objectContaining({ totalReportsFailed: 1 }));
+    });
+
+    it('logs at error level, because content is retained past its window', async () => {
+      const { runner, logger } = withFailures();
+
+      await runner.run();
+
+      expect(loggingSystemMock.collect(logger).error).toEqual([
+        [expect.stringContaining('Failed to scrub report content on 1 report(s)')],
+      ]);
+    });
+
+    it('accumulates the count across runs', async () => {
+      const { runner } = setupRunner(
+        { updated: 0, failures: [{ id: 'r' }, { id: 'r2' }] },
+        {
+          totalReportsFailed: 5,
+        }
+      );
+
+      const result = await runner.run();
+
+      expect(result.state).toEqual(expect.objectContaining({ totalReportsFailed: 7 }));
+    });
+
+    // `conflicts: 'proceed'` skips these, and the query keys on the absence of
+    // `lineage.content_scrubbed_at`, so the next run re-selects them. Counting
+    // them as failures would make a routine write race look like data retention
+    // breaking.
+    it('does not count a version conflict as a failure', async () => {
+      const { runner } = setupRunner({ updated: 2, version_conflicts: 4 });
+
+      const result = await runner.run();
+
+      expect(result.state).toEqual(expect.objectContaining({ totalReportsFailed: 0 }));
+    });
+
+    it('does not log a version conflict as an error', async () => {
+      const { runner, logger } = setupRunner({ updated: 2, version_conflicts: 4 });
+
+      await runner.run();
+
+      expect(loggingSystemMock.collect(logger).error).toEqual([]);
+    });
   });
 
   it('treats a missing reports index as a no-op', async () => {

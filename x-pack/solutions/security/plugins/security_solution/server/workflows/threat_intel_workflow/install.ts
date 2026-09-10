@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
@@ -22,23 +23,36 @@ const GLOBAL_THREAT_INTEL_WORKFLOW_IDS = [
  * Hybrid install: ingest + enrich once in the global workflow space (source
  * catalog and enrichment are content-global), attribute_alerts_to_reports once
  * per real Kibana space (alerts and hit counts are space-scoped).
+ *
+ * Every install is isolated so one failure cannot cancel the rest. A bare
+ * `await` in a loop meant a single failing space (or a failing global install)
+ * stopped every install after it, on every pass, and the error was swallowed by
+ * a `warn` in the caller — so a partly-installed deployment looked fully
+ * covered.
  */
 export const installThreatIntelManagedWorkflows = async ({
   managedWorkflowsClient,
   spaceIds,
+  logger,
 }: {
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
   spaceIds: readonly string[];
+  logger: Logger;
 }): Promise<void> => {
   for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
-    await managedWorkflowsClient.install(workflowId, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
+    try {
+      await managedWorkflowsClient.install(workflowId, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    } catch (error) {
+      logger.warn(`Failed to install the global threat intel workflow ${workflowId}`, { error });
+    }
   }
 
   await reconcileThreatIntelAttributeWorkflows({
     managedWorkflowsClient,
     spaceIds,
+    logger,
   });
 };
 
@@ -49,28 +63,58 @@ export const installThreatIntelManagedWorkflows = async ({
 export const reconcileThreatIntelAttributeWorkflows = async ({
   managedWorkflowsClient,
   spaceIds,
+  logger,
 }: {
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
   spaceIds: readonly string[];
+  logger: Logger;
 }): Promise<void> => {
+  const failedSpaceIds: string[] = [];
+
   for (const spaceId of spaceIds) {
-    await managedWorkflowsClient.install(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-      spaceId,
-      workflowIdSuffix: spaceId,
-    });
+    try {
+      await managedWorkflowsClient.install(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
+    } catch (error) {
+      failedSpaceIds.push(spaceId);
+      logger.warn(
+        `Failed to install ${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID} in space '${spaceId}'`,
+        { error }
+      );
+    }
+  }
+
+  if (failedSpaceIds.length > 0) {
+    logger.warn(
+      `${failedSpaceIds.length} of ${spaceIds.length} space(s) have no ` +
+        `${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID} workflow, so their alerts are not attributed ` +
+        `to threat reports: ${failedSpaceIds.join(', ')}. The promote task retries on its next run.`
+    );
   }
 };
 
-/** Uninstalls one workflow, tolerating not-found so a partial prior install still cleans up. */
+/**
+ * Uninstalls one workflow, tolerating not-found so a partial prior install still
+ * cleans up. Already-gone is the expected case on a deployment that never had
+ * the flag on, but a bare `catch {}` made a genuine failure (403, 5xx) just as
+ * invisible, leaving workflows running against alerts nobody is looking at any
+ * more. Debug is the level that keeps a flag-off boot quiet without dropping it.
+ */
 const uninstallTolerant = async (
   managedWorkflowsClient: SecurityManagedWorkflowsClient,
-  workflowId: string,
-  options: { spaceId: string; workflowIdSuffix?: string }
+  workflowId: Parameters<SecurityManagedWorkflowsClient['uninstall']>[0],
+  options: Parameters<SecurityManagedWorkflowsClient['uninstall']>[1],
+  logger: Logger
 ): Promise<void> => {
   try {
     await managedWorkflowsClient.uninstall(workflowId, options);
-  } catch {
-    // tolerate not-found / already-gone
+  } catch (error) {
+    logger.debug(
+      `Failed to uninstall the threat intel workflow ${workflowId} in space '${options.spaceId}'`,
+      { error }
+    );
   }
 };
 
@@ -81,20 +125,27 @@ const uninstallTolerant = async (
 export const uninstallThreatIntelManagedWorkflows = async ({
   managedWorkflowsClient,
   spaceIds,
+  logger,
 }: {
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
   spaceIds: readonly string[];
+  logger: Logger;
 }): Promise<void> => {
   for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
-    await uninstallTolerant(managedWorkflowsClient, workflowId, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
+    await uninstallTolerant(
+      managedWorkflowsClient,
+      workflowId,
+      { spaceId: GLOBAL_WORKFLOW_SPACE_ID },
+      logger
+    );
   }
 
   for (const spaceId of spaceIds) {
-    await uninstallTolerant(managedWorkflowsClient, THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-      spaceId,
-      workflowIdSuffix: spaceId,
-    });
+    await uninstallTolerant(
+      managedWorkflowsClient,
+      THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+      { spaceId, workflowIdSuffix: spaceId },
+      logger
+    );
   }
 };

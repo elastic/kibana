@@ -318,15 +318,66 @@ describe('seedDefaultSources', () => {
     );
   });
 
-  it('counts updateByQuery version conflicts as failed legacy-source disables', async () => {
-    const { result } = await run({
-      documents: currentDocuments(),
-      updateByQueryImpl: () => ({ updated: 0, version_conflicts: 3 }),
+  /**
+   * A non-zero `failed` makes bootstrap retry and eventually reject, which
+   * gates every threat intel route behind a 503 and leaves both tasks
+   * unscheduled. Only a real per-document failure is worth that.
+   */
+  describe('legacy-source disable outcomes', () => {
+    // Under `conflicts: 'proceed'` a conflict means an operator wrote to the
+    // source between the scan and the update. The row is skipped, still matches
+    // the same query, and is disabled on the next boot, so counting it as
+    // `failed` let a benign write race fail bootstrap.
+    it('does not count a version conflict as failed', async () => {
+      const { result } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({ updated: 0, version_conflicts: 3 }),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 0 })
+      );
     });
 
-    expect(result).toEqual(
-      expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 3 })
-    );
+    it('logs a version conflict at debug, not warn', async () => {
+      const { logger } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({ updated: 0, version_conflicts: 3 }),
+      });
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // The other half of the same bug: `failures[]` was read by nothing at all,
+    // so a source that could not be disabled stayed eligible for fetch and the
+    // run reported clean.
+    it('counts a per-document failure as failed', async () => {
+      const { result } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({
+          updated: 0,
+          version_conflicts: 0,
+          failures: [{ id: 'rss:legacy', status: 403 }],
+        }),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 1 })
+      );
+    });
+
+    it('warns that a failed source is still eligible for fetch', async () => {
+      const { logger } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({
+          updated: 0,
+          version_conflicts: 0,
+          failures: [{ id: 'rss:legacy', status: 403 }],
+        }),
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('still eligible for fetch'));
+    });
   });
 
   it('counts an updateByQuery failure as a failed legacy-source disable', async () => {

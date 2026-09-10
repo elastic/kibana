@@ -73,10 +73,28 @@ const stateSchemaV1 = schema.object({
   totalReportsScrubbed: schema.maybe(schema.number()),
 });
 
+/**
+ * v2 adds `totalReportsFailed`. `update_by_query` reports per-document failures
+ * in `failures[]` while still returning a 200 and an `updated` count, so a run
+ * that failed on every document used to return `updated: 0` and look exactly
+ * like a clean "nothing to scrub" no-op. These are untrusted third-party bodies
+ * outliving their retention window, so the failure needs a standing signal
+ * rather than one log line.
+ *
+ * Never edit a published version in place; add the next one. See
+ * https://github.com/elastic/kibana/issues/155764.
+ */
+const stateSchemaV2 = schema.object({
+  lastRunAt: schema.maybe(schema.string()),
+  totalReportsScrubbed: schema.maybe(schema.number()),
+  totalReportsFailed: schema.maybe(schema.number()),
+});
+
 interface ScrubReportContentState {
   [key: string]: unknown;
   lastRunAt?: string;
   totalReportsScrubbed?: number;
+  totalReportsFailed?: number;
 }
 
 /**
@@ -104,6 +122,10 @@ export const registerScrubReportContentTask = ({
       cost: TaskCost.Normal,
       stateSchemaByVersion: {
         1: { schema: stateSchemaV1, up: (s) => s },
+        2: {
+          schema: stateSchemaV2,
+          up: (s) => ({ ...s, totalReportsFailed: s.totalReportsFailed ?? 0 }),
+        },
       },
       createTaskRunner: ({ taskInstance, signal }: RunContext) => ({
         run: async () => {
@@ -145,10 +167,32 @@ export const registerScrubReportContentTask = ({
             );
 
             const scrubbed = response.updated ?? 0;
+            // `update_by_query` returns 200 with per-document problems in these
+            // two fields, so reading `updated` alone cannot tell a clean no-op
+            // from a run where every document failed.
+            const failures = response.failures ?? [];
+            const versionConflicts = response.version_conflicts ?? 0;
+
             if (scrubbed > 0) {
               logger.info(
                 `Scrubbed report content on ${scrubbed} report(s) older than ` +
                   `${CONTENT_RETENTION_DAYS} days`
+              );
+            }
+            if (failures.length > 0) {
+              logger.error(
+                `Failed to scrub report content on ${failures.length} report(s) older than ` +
+                  `${CONTENT_RETENTION_DAYS} days. Their fetched third-party bodies are still ` +
+                  `stored past the retention window (first failure: ${JSON.stringify(failures[0])})`
+              );
+            }
+            if (versionConflicts > 0) {
+              // `conflicts: 'proceed'` skips these rather than aborting. They are
+              // re-selected on the next run because the query keys on the absence
+              // of `lineage.content_scrubbed_at`, so this is a delay, not a loss.
+              logger.debug(
+                `Skipped ${versionConflicts} report(s) during the content scrub due to version ` +
+                  `conflicts; the next run picks them up.`
               );
             }
             if (scrubbed === MAX_DOCS_PER_RUN) {
@@ -162,6 +206,7 @@ export const registerScrubReportContentTask = ({
               state: {
                 lastRunAt: now,
                 totalReportsScrubbed: (previousState.totalReportsScrubbed ?? 0) + scrubbed,
+                totalReportsFailed: (previousState.totalReportsFailed ?? 0) + failures.length,
               } satisfies ScrubReportContentState,
             };
           } catch (err) {

@@ -16,7 +16,6 @@ import {
   type TaskManagerStartContract,
   type RunContext,
   throwRetryableError,
-  throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import {
   GLOBAL_SPACE_ID,
@@ -156,6 +155,7 @@ interface IocIndicatorOp {
     now: string;
     max_sources: number;
     severity: string | null;
+    ioc_tier: string;
   };
 }
 
@@ -166,6 +166,35 @@ interface IocIndicatorOp {
  * to stall the sync checkpoint. 1000 leaves an order of magnitude of headroom.
  */
 const MAX_SOURCE_CITATIONS = 1000;
+
+/**
+ * Tiers that reach the Indicator Match index. The index holds every
+ * *candidate* indicator labelled by tier, and consumers filter on `ioc_tier`
+ * for the precision they need (a hunt query wants recall, a blocking rule
+ * wants precision) — so `uncertain` is stored rather than dropped.
+ *
+ * `reference` and `denied` stay out: those are values `extract_iocs` already
+ * judged not to be indicators (citation URLs, private/reserved addresses,
+ * vendor domains, the benign denylist), not low-confidence candidates.
+ * Untiered IOCs are excluded too, since nothing can filter on a missing
+ * `ioc_tier`. The per-space, tier-filtered alias is the read-side
+ * enforcement — consumers must use it, not the raw backing index.
+ *
+ * Ordered ascending by precision: the membership gate and the Painless rank
+ * map in `SOURCES_UPSERT_SCRIPT` are both derived from this one list, so a
+ * tier cannot be admitted by one and left unranked by the other.
+ */
+const PROMOTABLE_TIERS_BY_PRECISION = ['uncertain', 'contextual', 'discriminating'] as const;
+
+const PROMOTABLE_TIERS: ReadonlySet<string> = new Set(PROMOTABLE_TIERS_BY_PRECISION);
+
+const isPromotableTier = (tier: unknown): tier is string =>
+  typeof tier === 'string' && PROMOTABLE_TIERS.has(tier);
+
+/** Painless map literal, e.g. `'uncertain': 1, 'contextual': 2, ...`. */
+const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
+  (tier, index) => `'${tier}': ${index + 1}`
+).join(', ');
 
 /**
  * Painless script that appends a sources[] entry for a citing report, deduped by
@@ -180,6 +209,13 @@ const MAX_SOURCE_CITATIONS = 1000;
  *   now        — wall-clock ISO string at the time of the bulk call
  *   max_sources — MAX_SOURCE_CITATIONS, the point at which provenance stops growing
  *   severity   — severity.level of the citing report, or null
+ *   ioc_tier   — the extract_iocs tier this citation assigned the value
+ *
+ * `severity` and `ioc_tier` are both refreshed best-wins, and both have to be,
+ * because the `upsert` document is ignored on an update. `ioc_tier` in particular
+ * is the read-side filter on the per-space alias, so leaving it frozen at its
+ * first-seen value kept a value first cited as `uncertain` out of the precision
+ * alias no matter how many later reports called it `discriminating`.
  *
  * `source_report_id`, `source_report_url`, and `threat.indicator.reference` are
  * deliberately left at their first-seen values. They pair with `first_seen`, and
@@ -227,32 +263,20 @@ if (params.severity != null) {
     ctx._source.threat.indicator.confidence = params.severity;
   }
 }
+if (params.ioc_tier != null) {
+  Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
+  int incomingTier = tierRank.containsKey(params.ioc_tier) ? tierRank[params.ioc_tier] : 0;
+  int currentTier = ctx._source.ioc_tier != null && tierRank.containsKey(ctx._source.ioc_tier)
+    ? tierRank[ctx._source.ioc_tier]
+    : 0;
+  if (incomingTier > currentTier) {
+    ctx._source.ioc_tier = params.ioc_tier;
+  }
+}
 `.trim();
 
 const isIocType = (value: unknown): value is IocType =>
   typeof value === 'string' && (IOC_TYPES as readonly string[]).includes(value);
-
-/**
- * Tiers that reach the Indicator Match index. The index holds every
- * *candidate* indicator labelled by tier, and consumers filter on `ioc_tier`
- * for the precision they need (a hunt query wants recall, a blocking rule
- * wants precision) — so `uncertain` is stored rather than dropped.
- *
- * `reference` and `denied` stay out: those are values `extract_iocs` already
- * judged not to be indicators (citation URLs, private/reserved addresses,
- * vendor domains, the benign denylist), not low-confidence candidates.
- * Untiered IOCs are excluded too, since nothing can filter on a missing
- * `ioc_tier`. The per-space, tier-filtered alias is the read-side
- * enforcement — consumers must use it, not the raw backing index.
- */
-const PROMOTABLE_TIERS: ReadonlySet<string> = new Set([
-  'discriminating',
-  'contextual',
-  'uncertain',
-]);
-
-const isPromotableTier = (tier: unknown): boolean =>
-  typeof tier === 'string' && PROMOTABLE_TIERS.has(tier);
 
 /** Elasticsearch rejects a document id longer than this. */
 const MAX_DOC_ID_BYTES = 512;
@@ -369,7 +393,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     // vetting gate: only IOCs the extractor did not already classify as noise
     // become live Indicator Match rows.
     const usableIocs = iocs.filter(
-      (ioc): ioc is typeof ioc & { type: IocType; value: string } =>
+      (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
         typeof ioc.value === 'string' &&
         ioc.value.length > 0 &&
         isIocType(ioc.type) &&
@@ -424,6 +448,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
           now,
           max_sources: MAX_SOURCE_CITATIONS,
           severity: severity ?? null,
+          ioc_tier: ioc.tier,
         },
       });
     }
@@ -467,6 +492,37 @@ const isRetryableBulkFailure = (item: estypes.BulkResponseItem | undefined): boo
   if (isTransientEsStatus(item.status)) return true;
   const type = item.error?.type;
   return typeof type === 'string' && RETRYABLE_BULK_ERROR_TYPES.has(type);
+};
+
+/**
+ * Fails a run in the only way that is safe for a *recurring* task.
+ *
+ * Deliberately never `throwUnrecoverableError`. Task Manager's
+ * `rescheduleFailedRun` checks `isUnrecoverableError` before it looks at the
+ * schedule, so `processResultForRecurringTask` then *deletes the task saved
+ * object* rather than rescheduling it (see its own test, "doesn't reschedule
+ * recurring tasks that throw an unrecoverable error"). This task is only ever
+ * scheduled from `startThreatIntel`, so deleting it stops promotion for every
+ * space until Kibana restarts. Every other caller of that helper in the repo is
+ * a one-shot task where deletion is the intent.
+ *
+ * A transient status earns a retry sooner than the next scheduled run.
+ * Everything else falls through to a plain throw, which Task Manager logs and
+ * then reschedules on the normal interval. That branch is also where every
+ * transport-level failure lands, because `ConnectionError`, `TimeoutError`, and
+ * `RequestAbortedError` carry no `statusCode` at all — only `ResponseError`
+ * does.
+ *
+ * Typed on the binding rather than the arrow so that control flow analysis
+ * treats a call as unreachable-after; on the arrow alone the callers below
+ * still look like they can fall through with `pitId` unassigned.
+ */
+const throwForNextRun: (context: string, err: unknown) => never = (context, err) => {
+  const message = (err as Error).message ?? String(err);
+  if (isTransientEsStatus((err as { statusCode?: number }).statusCode)) {
+    throwRetryableError(new Error(`${context}: ${message}`), new Date(Date.now() + 60_000));
+  }
+  throw new Error(`${context}: ${message}`);
 };
 
 interface BulkUpdateAction {
@@ -557,6 +613,9 @@ export const registerPromoteThreatIndicatorsTask = ({
           // anything. See `isRetryableBulkFailure`.
           let hadRetryableWriteFailures = false;
           let indicatorsRejected = 0;
+          // Set when the task timeout aborts an in-flight bulk, so the break can
+          // carry out through the chunk loop as well as the page loop.
+          let abortedMidRun = false;
 
           // A point-in-time freezes the view for the whole scan, which is what
           // makes `search_after` stable while enrichment writes concurrently,
@@ -571,25 +630,13 @@ export const registerPromoteThreatIndicatorsTask = ({
             });
             pitId = pit.id;
           } catch (err) {
-            const message = (err as Error).message ?? String(err);
             const status = (err as { statusCode?: number }).statusCode;
             if (status === 404) {
               // Reports index not created yet (first plugin start race).
               // Treat as no-op and let the next scheduled run pick up.
               return { state: previousState satisfies PromoteThreatIndicatorsState };
             }
-            if (isTransientEsStatus(status)) {
-              throwRetryableError(
-                new Error(
-                  `Elasticsearch transient failure opening the report scan PIT: ${message}`
-                ),
-                new Date(Date.now() + 60_000)
-              );
-            }
-            throwUnrecoverableError(
-              new Error(`Failed to open a point-in-time for the report scan: ${message}`)
-            );
-            return { state: previousState };
+            throwForNextRun('Failed to open a point-in-time for the report scan', err);
           }
 
           try {
@@ -631,21 +678,15 @@ export const registerPromoteThreatIndicatorsTask = ({
                 // ES can hand back a refreshed PIT id; carry it to the next page.
                 if (searchResponse.pit_id) pitId = searchResponse.pit_id;
               } catch (err) {
-                const message = (err as Error).message ?? String(err);
-                // ES temporarily unavailable — retry the whole run in a minute.
-                // Anything else (mapping conflict, RBAC) is permanent for this
-                // run and surfaces in the next attempt.
-                const status = (err as { statusCode?: number }).statusCode;
-                if (isTransientEsStatus(status)) {
-                  throwRetryableError(
-                    new Error(`Elasticsearch transient failure during report scan: ${message}`),
-                    new Date(Date.now() + 60_000)
-                  );
-                }
-                throwUnrecoverableError(
-                  new Error(`Failed to scan .kibana-threat-reports for IOC sync: ${message}`)
-                );
-                return { state: previousState };
+                // The task timeout aborts the in-flight request, which is a
+                // normal stop rather than a failure: `scanCompleted` stays false
+                // so the cursor holds and the next run re-scans from the same
+                // checkpoint. Checking `signal.aborted` before classifying the
+                // error is what keeps a timeout out of the failure paths — the
+                // abort rejection carries no `statusCode` and would otherwise be
+                // indistinguishable from a real one.
+                if (signal.aborted) break;
+                throwForNextRun('Failed to scan .kibana-threat-reports for IOC sync', err);
               }
 
               const hits = (searchResponse?.hits?.hits ?? []) as ReportHit[];
@@ -717,23 +758,19 @@ export const registerPromoteThreatIndicatorsTask = ({
                       indicatorsWritten += chunk.length;
                     }
                   } catch (err) {
-                    const message = (err as Error).message ?? String(err);
-                    const status = (err as { statusCode?: number }).statusCode;
-                    if (isTransientEsStatus(status)) {
-                      throwRetryableError(
-                        new Error(
-                          `Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`
-                        ),
-                        new Date(Date.now() + 60_000)
-                      );
+                    // Same reasoning as the scan above: a timeout mid-bulk is a
+                    // stop, not a failure. The flag carries the break out through
+                    // the chunk loop as well as the page loop.
+                    if (signal.aborted) {
+                      abortedMidRun = true;
+                      break;
                     }
-                    throwUnrecoverableError(
-                      new Error(`Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`)
-                    );
-                    return { state: previousState };
+                    throwForNextRun(`Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed`, err);
                   }
                 }
               }
+
+              if (abortedMidRun) break;
 
               reportsProcessed += hits.length;
               const lastHit = hits[hits.length - 1];
@@ -742,10 +779,8 @@ export const registerPromoteThreatIndicatorsTask = ({
               // search_after over [extracted_at, _shard_doc] so reports sharing an
               // extracted_at tick with the page boundary are not skipped.
               if (!lastHit?.sort) {
-                throwUnrecoverableError(
-                  new Error(
-                    'Threat report scan returned hits without sort values — cannot paginate safely'
-                  )
+                throw new Error(
+                  'Threat report scan returned hits without sort values — cannot paginate safely'
                 );
               }
               searchAfter = lastHit.sort;

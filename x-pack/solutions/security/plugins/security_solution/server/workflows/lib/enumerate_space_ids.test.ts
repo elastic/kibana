@@ -20,7 +20,7 @@ describe('enumerateSpaceIds', () => {
       'space-a',
       'space-b',
     ]);
-    expect(spaceRepository.find).toHaveBeenCalledWith({ type: 'space', perPage: 1000 });
+    expect(spaceRepository.find).toHaveBeenCalledWith({ type: 'space', perPage: 1000, page: 1 });
   });
 
   it('always includes default even when no space documents exist', async () => {
@@ -39,5 +39,22 @@ describe('enumerateSpaceIds', () => {
     };
 
     await expect(enumerateSpaceIds(spaceRepository)).resolves.toEqual(['default', 'space-a']);
+  });
+
+  it('paginates when a page comes back full, stopping once a short page is seen', async () => {
+    const fullPage = Array.from({ length: 1000 }, (_, i) => ({ id: `space-${i}` }));
+    const find = jest
+      .fn()
+      .mockResolvedValueOnce({ saved_objects: fullPage })
+      .mockResolvedValueOnce({ saved_objects: [{ id: 'space-last' }] });
+    const spaceRepository = { find };
+
+    const result = await enumerateSpaceIds(spaceRepository);
+
+    expect(find).toHaveBeenCalledTimes(2);
+    expect(find).toHaveBeenNthCalledWith(1, { type: 'space', perPage: 1000, page: 1 });
+    expect(find).toHaveBeenNthCalledWith(2, { type: 'space', perPage: 1000, page: 2 });
+    expect(result).toContain('space-last');
+    expect(result).toHaveLength(1002); // default + 1000 + 1
   });
 });

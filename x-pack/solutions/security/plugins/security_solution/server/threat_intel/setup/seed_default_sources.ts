@@ -360,18 +360,36 @@ const disableLegacySources = async ({
     });
 
     const disabled = response.updated ?? 0;
-    const failed = response.version_conflicts ?? 0;
+    // Only real per-document failures count as `failed`. The caller escalates a
+    // non-zero `failed` into a bootstrap retry and eventually a bootstrap
+    // rejection, which gates every route behind a 503 and leaves both tasks
+    // unscheduled, so it has to mean "something is actually wrong".
+    //
+    // `version_conflicts` is not that. Under `conflicts: 'proceed'` a conflict
+    // means an operator wrote to the source document between the scan and the
+    // update; the row is skipped, still matches the same query, and is picked up
+    // on the next boot. Reporting it as `failed` made a benign race able to fail
+    // bootstrap, while the failures that do mean something were dropped entirely.
+    const failures = response.failures ?? [];
+    const versionConflicts = response.version_conflicts ?? 0;
 
     if (disabled > 0) {
       log.info(`Disabled ${disabled} legacy source(s) outside the fixed catalog`);
     }
-    if (failed > 0) {
+    if (failures.length > 0) {
       log.warn(
-        `${failed} legacy source(s) outside the fixed catalog could not be disabled due to version conflicts`
+        `${failures.length} legacy source(s) outside the fixed catalog could not be disabled and ` +
+          `are still eligible for fetch (first failure: ${JSON.stringify(failures[0])})`
+      );
+    }
+    if (versionConflicts > 0) {
+      log.debug(
+        `${versionConflicts} legacy source(s) were skipped due to version conflicts; the next ` +
+          `boot's scan re-selects them.`
       );
     }
 
-    return { disabled, failed };
+    return { disabled, failed: failures.length };
   } catch (err) {
     log.warn(`Failed to disable legacy sources: ${(err as Error).message}`);
     return { disabled: 0, failed: 1 };

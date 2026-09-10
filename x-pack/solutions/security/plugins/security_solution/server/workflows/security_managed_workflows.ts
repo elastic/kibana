@@ -63,12 +63,14 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
       await installThreatIntelManagedWorkflows({
         managedWorkflowsClient,
         spaceIds,
+        logger,
       });
     } else {
       const spaceIds = await enumerateSpaceIds(createSpaceRepository(core));
       await uninstallThreatIntelManagedWorkflows({
         managedWorkflowsClient,
         spaceIds,
+        logger,
       });
     }
   } catch (error) {
@@ -104,6 +106,7 @@ export const reconcileThreatIntelAttributeWorkflowsForSpaces = async ({
     await reconcileThreatIntelAttributeWorkflows({
       managedWorkflowsClient,
       spaceIds,
+      logger,
     });
   } catch (error) {
     logger.warn('Failed to reconcile per-space threat intel attribute workflows', { error });

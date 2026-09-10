@@ -23,19 +23,27 @@
 // We import the module and reach into its internals via a test-only export
 // pattern: the function is already exported from the file as `buildBulkOps`
 // after the refactor.
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 // The task-manager server entry pulls in the whole plugin graph, which this
 // package's jest config cannot resolve (`TaskCost` comes back undefined). Only
-// the three symbols the task actually uses are needed here.
+// the symbols the task actually uses are needed here.
+//
+// The two throw helpers are tagged rather than aliased to a plain `throw`.
+// Mocking both as an identical `throw err` is what let the recurring-task
+// self-deletion bug ship: Task Manager DELETES a recurring task's saved object
+// when a run throws an unrecoverable error, so which helper a branch reaches is
+// the whole guarantee, and a test that cannot tell them apart proves nothing.
 jest.mock('@kbn/task-manager-plugin/server', () => ({
   TaskCost: { Normal: 2 },
-  throwRetryableError: (err: Error) => {
-    throw err;
+  throwRetryableError: (err: Error, runAt: Date) => {
+    throw Object.assign(err, { __taskOutcome: 'retryable', __runAt: runAt });
   },
   throwUnrecoverableError: (err: Error) => {
-    throw err;
+    throw Object.assign(err, { __taskOutcome: 'unrecoverable' });
   },
 }));
 
@@ -678,6 +686,118 @@ describe('promote task runner', () => {
       expect(esClient.search).not.toHaveBeenCalled();
     });
   });
+
+  /**
+   * This task is recurring, and Task Manager DELETES a recurring task's saved
+   * object when a run throws an unrecoverable error: `rescheduleFailedRun`
+   * checks `isUnrecoverableError` before it looks at the schedule, and
+   * `processResultForRecurringTask` then calls `removeTask()` (see Task
+   * Manager's own test, "doesn't reschedule recurring tasks that throw an
+   * unrecoverable error"). Nothing re-creates the task except
+   * `startThreatIntel`, so any run that fails that way stops promotion for
+   * every space until Kibana restarts.
+   */
+  describe('failing a run never unschedules the task', () => {
+    const searchFailureOutcome = async (err: unknown) => {
+      const { definition, esClient } = setupRunner([]);
+      (esClient.search as jest.Mock).mockRejectedValue(err);
+
+      return definition
+        .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
+        .run()
+        .then(
+          () => undefined,
+          (thrown: unknown) => thrown as { __taskOutcome?: string }
+        );
+    };
+
+    // The mechanism, not just today's outcomes: any future branch that reaches
+    // for the helper re-introduces the deletion.
+    it('does not import throwUnrecoverableError', () => {
+      const src = readFileSync(join(__dirname, 'promote_threat_indicators.ts'), 'utf8');
+      const taskManagerImport = src.slice(
+        0,
+        src.indexOf("} from '@kbn/task-manager-plugin/server';")
+      );
+
+      expect(taskManagerImport).not.toContain('throwUnrecoverableError');
+    });
+
+    // These are exactly the errors the old `else` branch swallowed into
+    // `throwUnrecoverableError`. A transport failure carries no `statusCode` at
+    // all — only `ResponseError` has one — so it used to be indistinguishable
+    // from a permanent one.
+    it.each([
+      ['a transport failure carrying no statusCode', new Error('socket hang up')],
+      ['a 400', Object.assign(new Error('bad mapping'), { statusCode: 400 })],
+      ['a 403', Object.assign(new Error('forbidden'), { statusCode: 403 })],
+    ])('leaves the run rescheduled after %s', async (_label, err) => {
+      await expect(searchFailureOutcome(err)).resolves.not.toHaveProperty(
+        '__taskOutcome',
+        'unrecoverable'
+      );
+    });
+
+    // One retryable-status set for every request the task makes. 502 and 504
+    // were retryable at the item level but permanent on the scan, which is the
+    // drift that having three separate lists produced.
+    it.each([[408], [429], [500], [502], [503], [504]])(
+      'retries sooner after a transient %i from the report scan',
+      async (statusCode) => {
+        await expect(
+          searchFailureOutcome(Object.assign(new Error('transient'), { statusCode }))
+        ).resolves.toHaveProperty('__taskOutcome', 'retryable');
+      }
+    );
+  });
+
+  /**
+   * The 2m task timeout aborts whatever request is in flight, and that rejection
+   * also carries no `statusCode`. The `while (!signal.aborted)` check only
+   * catches aborts that land between pages, so the request paths have to
+   * recognise the abort themselves or a routine timeout becomes a run failure.
+   */
+  describe('task timeout mid-request', () => {
+    const abortingRun = async (failing: 'search' | 'bulk') => {
+      const controller = new AbortController();
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+      // What the abort actually looks like to the task: a rejection with no
+      // status code, indistinguishable from a transport failure on its own.
+      (esClient[failing] as jest.Mock).mockImplementation(async () => {
+        controller.abort();
+        throw new Error('Request aborted');
+      });
+
+      const result = await definition
+        .createTaskRunner(
+          runContext({
+            taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+            signal: controller.signal,
+          })
+        )
+        .run();
+
+      return { result, esClient };
+    };
+
+    it.each([['search'], ['bulk']] as const)(
+      'holds the cursor and returns state when the %s is aborted',
+      async (failing) => {
+        const { result } = await abortingRun(failing);
+
+        expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
+      }
+    );
+
+    it.each([['search'], ['bulk']] as const)(
+      'still closes the PIT when the %s is aborted',
+      async (failing) => {
+        const { esClient } = await abortingRun(failing);
+
+        expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+      }
+    );
+  });
 });
 
 /**
@@ -756,6 +876,48 @@ describe('vetting gate', () => {
     );
 
     expect(ops[0].upsert).toEqual(expect.objectContaining({ ioc_tier: 'discriminating' }));
+  });
+
+  /**
+   * The `upsert` document is ignored on an update, so a field that lives only
+   * there is frozen at whatever the first citing report happened to say.
+   * `ioc_tier` cannot afford that: it is the read-side filter on the per-space
+   * alias, so a value first cited as `uncertain` stayed out of the precision
+   * alias no matter how many later reports called it `discriminating`.
+   */
+  describe('tier refresh on re-citation', () => {
+    it('passes the citing report tier to the script, not just to the upsert', () => {
+      const ops = buildBulkOpsForTest(
+        [makeReport({ id: 'r-vet', iocs: [iocAtTier('8.8.8.8', 'contextual')] })],
+        NOW
+      );
+
+      expect(ops[0].scriptParams.ioc_tier).toBe('contextual');
+    });
+
+    it('assigns ioc_tier in the script', () => {
+      expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('ctx._source.ioc_tier = params.ioc_tier');
+    });
+
+    it('only raises the label, so a later uncertain citation cannot demote it', () => {
+      expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (incomingTier > currentTier)');
+    });
+
+    // The rank map is generated from the same ordered list the membership gate
+    // is built from, so a tier cannot be admitted by one and left unranked by
+    // the other. Assert it through the gate rather than the list to prove they
+    // agree.
+    it.each([['uncertain'], ['contextual'], ['discriminating']])(
+      'ranks the promotable tier %s in the script',
+      (tier) => {
+        const ops = buildBulkOpsForTest(
+          [makeReport({ id: 'r-vet', iocs: [iocAtTier('4.3.2.1', tier)] })],
+          NOW
+        );
+
+        expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(`'${ops[0].scriptParams.ioc_tier}': `);
+      }
+    );
   });
 });
 
