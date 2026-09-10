@@ -11,6 +11,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig } from '@playwright/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
+import type { GroundTruthSource } from '../ground_truth/ground_truth';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connectorParam: AvailableConnectorWithId;
@@ -29,6 +30,7 @@ export function createPlaywrightEvalsConfig({
   timeout,
   runGlobalSetup,
   workers,
+  groundTruth,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
@@ -36,6 +38,12 @@ export function createPlaywrightEvalsConfig({
   timeout?: number;
   runGlobalSetup?: boolean;
   workers?: 1 | 2 | 3;
+  /**
+   * Remote ground-truth source. When set, the global setup downloads every `*.json` under the
+   * prefix (or honours `KBN_EVALS_GROUND_TRUTH_DIR` if already set) before any worker starts.
+   * Read it in the suite with `readGroundTruthTreeSync()`.
+   */
+  groundTruth?: GroundTruthSource;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
@@ -115,6 +123,7 @@ export function createPlaywrightEvalsConfig({
       serversConfigDir: (use as ScoutTestOptions).serversConfigDir,
     },
     projects: [...hookProjects, ...nextProjects],
+    metadata: { ...config.metadata, ...(groundTruth ? { groundTruth } : {}) },
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,

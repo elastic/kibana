@@ -458,6 +458,31 @@ const result = await replaySnapshot({
 
 Set `GCS_CREDENTIALS` (full JSON service account string) before starting Scout so Elasticsearch can access GCS repositories.
 
+### Remote ground truth (GCS)
+
+Suites can keep expected answers (criteria, expected features, …) out of the public repo by storing
+them as JSON in GCS and declaring the source in the Playwright config:
+
+```ts
+export default createPlaywrightEvalsConfig({
+  testDir: __dirname,
+  groundTruth: { bucket: 'my-datasets', prefix: '2026-03-27/' },
+});
+```
+
+The global setup downloads every `*.json` under the prefix into
+`target/evals/ground-truth/<bucket>/<prefix>` once per run and exports that path as
+`KBN_EVALS_GROUND_TRUTH_DIR` before any worker starts. Read it synchronously at collection time with
+`readGroundTruthTreeSync()` (`{ relativePath, json }` per file, sorted) and validate/assemble it in
+the suite. Auth reuses `GCS_CREDENTIALS`.
+
+- Local edits / offline: set `KBN_EVALS_GROUND_TRUTH_DIR` to a directory with the same layout (the
+  download directory above works after one run). Setup then skips GCS and logs that it is using
+  local files. A missing directory fails fast; there is no silent fallback.
+- `playwright test --list` and IDE runners skip global setup and fail with a message naming the env
+  var; run through `node scripts/evals run` instead.
+- Standalone scripts can call `ensureGroundTruthDir({ source })` directly.
+
 ### Dataplex (optional)
 
 Register snapshot datasets in Dataplex for discoverability. Aspects YAML files live in `snapshots/dataplex/<team>/`.
