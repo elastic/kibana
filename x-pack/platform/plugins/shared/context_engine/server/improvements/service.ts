@@ -10,20 +10,21 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { BulkOperationError } from '@kbn/storage-adapter';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  DEFAULT_IMPROVEMENTS_PAGE_SIZE,
-  MAX_IMPROVEMENTS_HISTORY_SIZE,
-  MAX_IMPROVEMENTS_PAGE_SIZE,
-} from '../../common/constants';
+import { DEFAULT_IMPROVEMENTS_PAGE_SIZE, MAX_IMPROVEMENTS_PAGE_SIZE } from '../../common/constants';
 import type {
   Improvement,
+  ImprovementHistorySummary,
   ImprovementResolution,
   ImprovementRevisionInput,
   ImprovementStatus,
   ImprovementTransition,
   ListImprovementsResponse,
 } from '../../common/http_api/improvements';
-import { IMPROVEMENTS_INDEX } from '../../common/http_api/improvements';
+import {
+  IMPROVEMENT_STATUSES,
+  IMPROVEMENTS_INDEX,
+  isImprovementStatus,
+} from '../../common/http_api/improvements';
 import { ImprovementConflictError, ImprovementNotFoundError } from './errors';
 import type { ImprovementsClient } from './storage';
 import { createImprovementsClient } from './storage';
@@ -76,11 +77,13 @@ export interface ImprovementsServiceApi {
   get(improvementId: string): Promise<Improvement | undefined>;
 
   /**
-   * Every improvement for an AI index with its current status, for the run briefing — the runner
-   * has to see what was already rejected, and why (`resolution.reason`), so it does not re-propose
-   * a fix a reviewer has already turned down.
+   * How many improvements an AI index carries and where they stand, for the run briefing. Counts
+   * rather than documents: the briefing tells a run whether there is any history worth consulting,
+   * and the run then queries this index itself for the lineage of the target it settles on. Which
+   * targets those will be is not knowable in advance, so shipping a fixed page of documents either
+   * misses the relevant ones or spends the run's context on ones it never looks at.
    */
-  historyFor(aiIndexId: string, options?: { size?: number }): Promise<Improvement[]>;
+  historySummaryFor(aiIndexId: string): Promise<ImprovementHistorySummary>;
 
   /** Writes a new revision. Throws {@link ImprovementConflictError} on a concurrent transition. */
   transition(
@@ -199,18 +202,32 @@ export class ImprovementsService implements ImprovementsServiceApi {
     return toDocuments(response.hits.hits)[0];
   }
 
-  async historyFor(
-    aiIndexId: string,
-    { size = MAX_IMPROVEMENTS_HISTORY_SIZE }: { size?: number } = {}
-  ): Promise<Improvement[]> {
-    // Not `list`: the briefing wants the whole history in one pass, and its cap is the run's
-    // context budget rather than a UI page size.
-    const response = await this.searchHeads({
-      filter: buildHeadFilter({ aiIndexId }),
-      from: 0,
-      size: Math.min(size, MAX_IMPROVEMENTS_HISTORY_SIZE),
+  async historySummaryFor(aiIndexId: string): Promise<ImprovementHistorySummary> {
+    const response = await this.client.search({
+      size: 0,
+      track_total_hits: true,
+      query: { bool: { filter: buildHeadFilter({ aiIndexId }) } },
+      aggs: { status: { terms: { field: 'status', size: IMPROVEMENT_STATUSES.length } } },
     });
-    return toDocuments(response.hits.hits);
+
+    const buckets =
+      (response.aggregations?.status as { buckets?: Array<{ key: string; doc_count: number }> })
+        ?.buckets ?? [];
+
+    const byStatus: Partial<Record<ImprovementStatus, number>> = {};
+    for (const { key, doc_count: count } of buckets) {
+      if (isImprovementStatus(key)) {
+        byStatus[key] = count;
+      }
+    }
+
+    return {
+      total:
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 0,
+      by_status: byStatus,
+    };
   }
 
   async transition(

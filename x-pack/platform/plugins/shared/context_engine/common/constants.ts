@@ -42,13 +42,6 @@ export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
 
 /**
- * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see
- * what was already rejected so it does not re-propose it, but the briefing shares the run's
- * context window.
- */
-export const MAX_IMPROVEMENTS_HISTORY_SIZE = 200;
-
-/**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.
  */
@@ -87,16 +80,25 @@ export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
 export const MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH = 4096;
 
-/**
- * Floor on the feedback-analysis schedule interval. Every run is an LLM
- * analysis over a window of signals, so the interval is a cost control rather
- * than only a scheduling detail.
- */
+/** Floor on the feedback-analysis schedule interval. */
 export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
 
 /** Applied when a feedback-analysis block omits the corresponding field. */
 export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
 export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
+
+/** Cap on the ranked pattern groups handed to a run. */
+export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
+
+/** Cap on the signal ids recorded per group. */
+export const MAX_GROUP_SIGNAL_IDS = 20;
+
+/** Cap on the proposals one run may record. */
+export const MAX_IMPROVEMENTS_PER_RUN = 25;
+
+/** Bounds on the free text a run may attach to a proposal. */
+export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
+export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
@@ -106,8 +108,8 @@ export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
 export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
 export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
-/** Agent id whose tool calls are left untagged. */
-export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+/** Skill id of the feedback loop's own analysis skill; rounds that load it are excluded from signal generation. */
+export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept

@@ -280,15 +280,23 @@ signals from a different space, a look at a specific workflow.
 
 ### Do not re-propose what was already rejected
 
-When the run gives you the improvement history for this index, read it before proposing anything.
-Do not repeat a rejected proposal unless new evidence addresses the reason it was rejected, and say
-what changed. Read that reason rather than assuming the change was wrong: a proposal can be turned
-down as a duplicate, as poorly evidenced, or as badly timed, and each of those points somewhere
-different.
+Every proposal ever made for an AI index is kept, with what a reviewer decided about it. Read the
+history of what you are about to propose before you propose it. Do not repeat a rejected proposal
+unless new evidence addresses the reason it was rejected, and say what changed. Read that reason
+rather than assuming the change was wrong: a proposal can be turned down as a duplicate, as poorly
+evidenced, or as badly timed, and each of those points somewhere different.
 
-History reaches you from the run or not at all. There is no store to search and no tool that
-returns it, so do not go looking for one. When no history came with the run, say that you had none
-rather than reporting that none exists.
+Look it up when you know what you want to change, not before — the history that matters is the
+history of *that* target, and which target it will be is not knowable until the signals are read.
+The run's briefing carries the query and the AI index id to run it against. It reads
+`context-engine-improvements`, filtering `ai_index_id` and `latest == true`, then the field that
+identifies your target: `target.ki_id`, `target.workflow_id`, or `target.subject` for an `add_*`
+action, which names what the addition would cover rather than an object that exists yet. The
+reviewer's words are in `resolution.reason`.
+
+An `Unknown index` error from that query means nothing has ever been proposed for any AI index, not
+that the lookup failed. Treat it as no history. If the run gave you no query to run, say you could
+not check rather than reporting that there was nothing to find.
 
 ## Reporting a finding
 

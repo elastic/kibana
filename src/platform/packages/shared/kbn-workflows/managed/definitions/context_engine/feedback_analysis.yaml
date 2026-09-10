@@ -1,0 +1,66 @@
+version: '1'
+name: 'Context Engine Feedback Analysis'
+description: 'Analyzes the signals for one Context Engine AI index and records the improvements it proposes.'
+enabled: true
+tags:
+  - context-engine
+  - feedback-loop
+  - scheduled
+settings:
+  timeout: '45m'
+  concurrency:
+    key: 'context-engine-feedback-analysis-__AI_INDEX_ID__'
+    strategy: drop
+    max: 1
+consts:
+  AI_INDEX_ID: '__AI_INDEX_ID__'
+  # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
+  NO_IMPROVEMENTS: []
+outputs:
+  - name: analyzed
+    type: boolean
+  - name: recorded
+    type: number
+  - name: skipped
+    type: number
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+steps:
+  - name: fetch_context
+    type: context-engine.getFeedbackContext
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+
+  - name: analyze_and_record
+    type: if
+    condition: '${{ steps.fetch_context.output.has_signals == true }}'
+    steps:
+      - name: run_analysis_agent
+        type: ai.agent
+        agent-id: '{{ steps.fetch_context.output.agent_id }}'
+        plugin-id: 'context_engine_feedback_analysis'
+        aggregate-by: 'context_engine'
+        create-conversation: true
+        timeout: '30m'
+        with:
+          message: '{{ steps.fetch_context.output.briefing }}'
+          schema: '${{ steps.fetch_context.output.output_schema }}'
+
+      - name: record_improvements
+        type: context-engine.recordImprovements
+        with:
+          ai_index_id: '{{ consts.AI_INDEX_ID }}'
+          agent_run_id: '{{ execution.id }}'
+          signal_window: '${{ steps.fetch_context.output.signal_window }}'
+          signal_spaces: '${{ steps.fetch_context.output.signal_spaces }}'
+          improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      analyzed: '${{ steps.fetch_context.output.has_signals | default: false }}'
+      recorded: '${{ steps.record_improvements.output.recorded | size | default: 0 }}'
+      skipped: '${{ steps.record_improvements.output.skipped | size | default: 0 }}'
