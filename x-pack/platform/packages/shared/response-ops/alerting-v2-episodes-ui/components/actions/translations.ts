@@ -260,87 +260,86 @@ export const BULK_TAGS_MODAL_SAVE = i18n.translate(
   }
 );
 
-/** --- Edit episode assignee flyout --- */
-export const ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
-  i18n.translate('xpack.alertingV2.episodes.assignees.flyout.emptyListTitle', {
+/** --- Edit episode assignee panel --- */
+export const ASSIGNEE_PANEL_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.panel.emptyListTitle', {
     defaultMessage:
       'The selected {totalEpisodes, plural, =1 {episode does} other {episodes do}} not have any assigned users',
     values: { totalEpisodes },
   });
 
-export const ASSIGNEE_FLYOUT_EMPTY_LIST_HELP = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.emptyListHelp',
+export const ASSIGNEE_PANEL_EMPTY_LIST_HELP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.emptyListHelp',
   {
     defaultMessage: 'Search to assign users.',
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noMatchesUserTitle',
+export const ASSIGNEE_PANEL_NO_MATCHES_USER_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesUserTitle',
   {
     defaultMessage: "User doesn't exist or is unavailable",
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noMatchesModifySearch',
+export const ASSIGNEE_PANEL_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesModifySearch',
   {
     defaultMessage: "Modify your search or check the user's privileges.",
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noMatchesLearnPrivileges',
+export const ASSIGNEE_PANEL_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noMatchesLearnPrivileges',
   {
     defaultMessage: 'Learn what privileges grant access to cases.',
   }
 );
 
-export const ASSIGNEE_FLYOUT_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.currentProfileErrorTitle',
+export const ASSIGNEE_PANEL_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.currentProfileErrorTitle',
   {
     defaultMessage: 'Could not load current assignee',
   }
 );
 
-export const ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.suggestErrorTitle',
+export const ASSIGNEE_PANEL_SUGGEST_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.suggestErrorTitle',
   {
     defaultMessage: 'Could not search users',
   }
 );
 
-export const ASSIGNEE_FLYOUT_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.title',
+export const ASSIGNEE_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.title',
   {
     defaultMessage: 'Edit assignee',
   }
 );
 
-export const ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.searchPlaceholder',
+export const ASSIGNEE_PANEL_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.searchPlaceholder',
   {
     defaultMessage: 'Search users',
   }
 );
 
-export const ASSIGNEE_FLYOUT_NO_ASSIGNEE_OPTION = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.noAssigneeOption',
+export const ASSIGNEE_PANEL_NO_ASSIGNEE_OPTION = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.noAssigneeOption',
   {
     defaultMessage: 'No assignee',
   }
 );
 
-export const ASSIGNEE_FLYOUT_CANCEL = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.cancel',
+export const ASSIGNEE_PANEL_APPLY = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.panel.apply',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Apply',
   }
 );
 
-export const ASSIGNEE_FLYOUT_SAVE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.save',
-  {
-    defaultMessage: 'Save',
-  }
-);
+export const ASSIGNEE_PANEL_MODAL_ARIA_LABEL = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.panel.modalAriaLabel', {
+    defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# episode} other {# episodes}}',
+    values: { totalEpisodes },
+  });

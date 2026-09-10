@@ -16,6 +16,11 @@ import { registerSignificantEventsSkills } from './register_skills';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
+import {
+  FEATURE_IDENTIFICATION_SKILL_ID,
+  FINALIZE_FEATURES_TOOL_ID,
+} from './feature_identification';
+import { platformStreamsMemoryTools } from '../../memory_and_investigation/tools/memory/tool_ids';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
@@ -26,6 +31,7 @@ const CORE_SKILL_IDS = [
   knowledgeIndicatorsManagementSkill.id,
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
+  FEATURE_IDENTIFICATION_SKILL_ID,
   'significant-events-onboarding',
   'streams-gap-detection',
   INVESTIGATION_SKILL_ID,
@@ -77,22 +83,29 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
   });
 
-  it('hides the inline tools of a registered skill once the feature becomes unavailable', async () => {
+  it('keeps feature-identification tools private and gates them by availability', async () => {
     const isAvailable = jest.fn().mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({
-      streamsKIsOnboardingClient,
-      maintenanceService,
-      isAvailable,
-    });
+    const { agentBuilder, options } = createOptions({ isAvailable });
 
     await registerSignificantEventsSkills(options);
-    const { getInlineTools } = agentBuilder.skills.register.mock.calls.find(
-      ([skill]) => skill.id === KI_IDENTIFICATION_SKILL_ID
+    const featureIdentificationSkill = agentBuilder.skills.register.mock.calls.find(
+      ([skill]) => skill.id === FEATURE_IDENTIFICATION_SKILL_ID
     )![0];
-    await expect(getInlineTools!()).resolves.not.toHaveLength(0);
+    expect(featureIdentificationSkill.experimental).toBe(true);
+    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: platformStreamsMemoryTools.memorySearch.replaceAll('.', '_'),
+        }),
+        expect.objectContaining({ id: platformStreamsMemoryTools.memoryRead.replaceAll('.', '_') }),
+        expect.objectContaining({ id: platformStreamsMemoryTools.memoryList.replaceAll('.', '_') }),
+        expect.objectContaining({ id: FINALIZE_FEATURES_TOOL_ID }),
+      ])
+    );
+    expect(featureIdentificationSkill.getRegistryTools).toBeUndefined();
 
     isAvailable.mockResolvedValue(false);
-    await expect(getInlineTools!()).resolves.toEqual([]);
+    await expect(featureIdentificationSkill.getInlineTools!()).resolves.toEqual([]);
   });
 
   it('registers the investigation skill as part of core skills when available', async () => {

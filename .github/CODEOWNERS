@@ -436,6 +436,7 @@ src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/respo
 src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
 src/platform/packages/private/kbn-reporting/public @elastic/response-ops
 src/platform/packages/private/kbn-reporting/server @elastic/response-ops
+src/platform/packages/private/kbn-rxjs-history @elastic/kibana-presentation
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
@@ -566,6 +567,7 @@ src/platform/packages/shared/kbn-dag-layout @elastic/workflows-eng
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service-server @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-data-source @elastic/kibana-discover
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-validation @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
@@ -1356,6 +1358,7 @@ x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-an
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/observability_alerting @elastic/rna-project-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/streams-ui
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
@@ -1394,6 +1397,7 @@ x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
 x-pack/solutions/security/packages/features @elastic/security-pds-deployment
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-alertzero-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
@@ -1415,7 +1419,6 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
@@ -1442,6 +1445,7 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
@@ -1451,7 +1455,6 @@ x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/securi
 x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/mitre_attack @elastic/security-detection-engineering
-x-pack/solutions/security/plugins/pnd @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
@@ -3143,19 +3146,19 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 # Nightshift investigations managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 
-# PND managed workflows (shared files: index, constants, template values, rule workflows)
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
+# AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution
 # Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_officer.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_officer.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_dark.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_dark.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_deep.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_deep.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_detection.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_detection.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_floor.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_floor.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_officer.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_officer.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_dark.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_dark.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_deep.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_deep.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_detection.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_detection.yaml @elastic/security-solution
 
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
@@ -3715,6 +3718,7 @@ docs/redirects.yml                            @elastic/ski-docs
 docs-dev/docset.yml                           @elastic/kibana-tech-leads
 docs-dev/index.md                             @elastic/kibana-tech-leads
 docs-dev/kbn-ui/                              @elastic/appex-sharedux
+docs-dev/chrome/                              @elastic/appex-sharedux
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/ski-docs
