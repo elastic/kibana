@@ -13,9 +13,5 @@ export default defineCypressConfig(
     env: {
       grepTags: '@ess',
     },
-    e2e: {
-      specPattern:
-        'public/management/cypress/e2e/response_actions/response_console_mocked/kill_process.cy.ts',
-    },
   })
 );

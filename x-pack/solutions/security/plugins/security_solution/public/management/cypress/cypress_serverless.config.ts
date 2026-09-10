@@ -14,11 +14,7 @@ export default defineCypressConfig(
     env: {
       IS_SERVERLESS: true,
 
-      grepTags: '@serverless --@skipInServerless',
-    },
-    e2e: {
-      specPattern:
-        'public/management/cypress/e2e/response_actions/response_console_mocked/kill_process.cy.ts',
+      grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     },
   })
 );
