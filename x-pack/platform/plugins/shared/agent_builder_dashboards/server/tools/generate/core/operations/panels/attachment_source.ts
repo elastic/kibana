@@ -9,19 +9,8 @@ import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 
 /**
- * The third panel input `source`, alongside `config` (by value) and `request`
- * (resolved from a query): add a panel from a visualization attachment the
- * conversation already holds.
- *
- * Unlike the other two this is orthogonal to panel `type` — the attachment's own
- * renderer decides which embeddable the panel becomes, so the caller supplies
- * only an id and a grid. The store read happens in the injected
- * `resolveAttachmentPanel` seam, keeping the generate core store-free.
- *
- * It exists because the by-value path forces the model to copy a whole payload
- * from a tool result into a tool call. That is merely wasteful for a Lens config
- * and actively bad for a custom content template, which can run to several KB of
- * HTML the model would have to reproduce verbatim.
+ * Adds a panel from a visualization attachment the conversation already holds. Carries no panel
+ * `type`: the attachment's own renderer decides which embeddable it becomes.
  */
 export const attachmentPanelInputSchema = z.object({
   source: z.literal('attachment'),
