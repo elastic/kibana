@@ -314,22 +314,32 @@ export class DatasetClient {
 
     const datasetId = await this.indexNewDataset({ name, targetSpaceIds, document });
 
-    // A dataset is deleted document-first, so one whose delete died in between
-    // could have left examples behind under an id this name derives again.
-    await this.deleteExamplesByDatasetId(datasetId);
+    try {
+      // A dataset is deleted document-first, so one whose delete died in between
+      // could have left examples behind under an id this name derives again.
+      await this.deleteExamplesByDatasetId(datasetId);
 
-    if (examples.length > 0) {
-      await this.addExamples(datasetId, examples, { touchDataset: false });
-      // Persist the count without advancing updated_at past the creation timestamp.
-      await this.touchDataset(datasetId, { bumpUpdatedAt: false });
+      if (examples.length > 0) {
+        await this.addExamples(datasetId, examples, { touchDataset: false });
+        // Persist the count without advancing updated_at past the creation timestamp.
+        await this.touchDataset(datasetId, { bumpUpdatedAt: false });
+      }
+
+      const created = await this.get(datasetId);
+      if (!created) {
+        throw new Error(`Failed to create dataset "${datasetId}"`);
+      }
+
+      return created;
+    } catch (error) {
+      try {
+        await this.datasetsStorage.delete({ id: datasetId });
+        await this.deleteExamplesByDatasetId(datasetId);
+      } catch {
+        // Best-effort; the caller must see the original create failure.
+      }
+      throw error;
     }
-
-    const created = await this.get(datasetId);
-    if (!created) {
-      throw new Error(`Failed to create dataset "${datasetId}"`);
-    }
-
-    return created;
   }
 
   /**
@@ -394,6 +404,30 @@ export class DatasetClient {
       ...dataset,
       examples,
     };
+  }
+
+  async copy(
+    sourceDatasetId: string,
+    { name, description }: { name: string; description?: string }
+  ): Promise<DatasetWithExamples | undefined> {
+    const sourceDataset = await this.get(sourceDatasetId);
+    if (!sourceDataset) {
+      return undefined;
+    }
+
+    const examples = sourceDataset.examples.map(({ input, output, metadata }) => ({
+      input,
+      output,
+      metadata,
+    }));
+
+    return this.create({
+      name,
+      description: description ?? sourceDataset.description,
+      tags: sourceDataset.tags,
+      maturity: sourceDataset.maturity,
+      examples,
+    });
   }
 
   /**

@@ -56,6 +56,7 @@ export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/t
 export type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
+  DiscoverSessionApiMetricsTab,
   DiscoverSessionApiResponse,
   DiscoverSessionApiTab,
   DiscoverSessionApiData,

@@ -11,6 +11,7 @@ import {
   isAssignment,
   isBooleanLiteral,
   isColumn,
+  isList,
   isMap,
   isStringLiteral,
   LeafPrinter,
@@ -18,7 +19,12 @@ import {
   Walker,
 } from '@elastic/esql';
 
-import type { ESQLAstQueryExpression, ESQLFunction, ESQLMap } from '@elastic/esql/types';
+import type {
+  ESQLAstHighlightCommand,
+  ESQLAstQueryExpression,
+  ESQLFunction,
+  ESQLMap,
+} from '@elastic/esql/types';
 import { replaceColumnNamesIfRenamed } from './query_parsing_helpers';
 
 export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
@@ -27,12 +33,20 @@ export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
 const HIGHLIGHT_OPTION_NAME = 'highlight';
 const PRE_TAG_OPTION_NAME = 'pre_tag';
 const POST_TAG_OPTION_NAME = 'post_tag';
+const PRE_TAGS_OPTION_NAME = 'pre_tags';
+const POST_TAGS_OPTION_NAME = 'post_tags';
 
 /**
  * ES|QL functions that can produce highlight markup in output columns when
  * called with `{ "highlight": true }`.
  */
 const FUNCTIONS_WITH_HIGHLIGHT_SUPPORT = ['top_snippets'];
+
+/**
+ * Prefix applied to HIGHLIGHT output columns when `prefix = "..."` is omitted.
+ * Mirrors `Highlight.DEFAULT_PREFIX` in Elasticsearch.
+ */
+const HIGHLIGHT_COMMAND_DEFAULT_PREFIX = 'highlight_';
 
 export interface ESQLHighlightTags {
   preTag: string;
@@ -50,6 +64,7 @@ export type ESQLColumnsWithHighlights = Record<string, ESQLHighlightTags>;
  * FROM books
  *  | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "highlight": true })
  *  | EVAL titles = TOP_SNIPPETS(title, "Tolkien", { "highlight": true, "pre_tag": "<mark>", "post_tag": "</mark>" })
+ *  | HIGHLIGHT "Tolkien" ON author
  * ```
  * Will return the following map:
  * ```
@@ -61,6 +76,10 @@ export type ESQLColumnsWithHighlights = Record<string, ESQLHighlightTags>;
  *   titles: {
  *     preTag: '<mark>',
  *     postTag: '</mark>',
+ *   },
+ *   highlight_author: {
+ *     preTag: '<em>',
+ *     postTag: '</em>',
  *   },
  * }
  */
@@ -99,6 +118,34 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
     };
   }
 
+  const highlightCommands = Walker.findAll(
+    root,
+    (node) => node.type === 'command' && node.name === 'highlight'
+  ) as ESQLAstHighlightCommand[];
+
+  for (const command of highlightCommands) {
+    const optionsMap = isMap(command.namedParameters) ? command.namedParameters : undefined;
+
+    const preTag = optionsMap
+      ? getHighlightTagName(optionsMap, PRE_TAGS_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_PRE_TAG
+      : DEFAULT_HIGHLIGHT_PRE_TAG;
+    const postTag = optionsMap
+      ? getHighlightTagName(optionsMap, POST_TAGS_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_POST_TAG
+      : DEFAULT_HIGHLIGHT_POST_TAG;
+
+    const prefix = command.prefix?.valueUnquoted ?? HIGHLIGHT_COMMAND_DEFAULT_PREFIX;
+
+    for (const field of command.highlightFields ?? []) {
+      const columnName = `${prefix}${field.name}`;
+      const [resolvedColumnName] = replaceColumnNamesIfRenamed(root, [columnName]);
+
+      columnsWithHighlights[resolvedColumnName] = {
+        preTag,
+        postTag,
+      };
+    }
+  }
+
   return columnsWithHighlights;
 }
 
@@ -120,6 +167,7 @@ const isHighlightEnabled = (optionsMap: ESQLMap): boolean => {
 
 /**
  * Returns the tag name defined in the map options if it exists.
+ * Accepts either a string literal or the first string in a list.
  */
 const getHighlightTagName = (optionsMap: ESQLMap, optionName: string): string | undefined => {
   const tagEntry = optionsMap.entries.find(
@@ -129,10 +177,14 @@ const getHighlightTagName = (optionsMap: ESQLMap, optionName: string): string | 
   if (!tagEntry?.value) {
     return undefined;
   }
-  if (!isStringLiteral(tagEntry.value)) {
-    return undefined;
+  if (isStringLiteral(tagEntry.value)) {
+    return tagEntry.value.valueUnquoted;
   }
-  return tagEntry.value.valueUnquoted;
+  if (isList(tagEntry.value)) {
+    const firstTag = tagEntry.value.values.find(isStringLiteral);
+    return firstTag?.valueUnquoted;
+  }
+  return undefined;
 };
 
 /**
