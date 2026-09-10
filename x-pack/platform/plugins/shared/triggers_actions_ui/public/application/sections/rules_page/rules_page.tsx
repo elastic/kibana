@@ -48,6 +48,7 @@ const RulesPage = () => {
     cps,
     docLinks,
     setBreadcrumbs,
+    hideListBackButton,
   } = useKibana().services;
 
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
@@ -169,10 +170,11 @@ const RulesPage = () => {
         showCreateRuleButtonInPrompt={true}
         navigateToEditRuleForm={navigateToEditRuleForm}
         navigateToCreateRuleForm={navigateToCreateRuleForm}
+        navigateToCreateRuleFromTemplateForm={navigateToCreateRuleFromTemplateForm}
         ruleDetailsRoute={rulesAppDetailsRoute}
       />
     );
-  }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
+  }, [navigateToEditRuleForm, navigateToCreateRuleForm, navigateToCreateRuleFromTemplateForm]);
 
   const renderLogsList = useCallback(() => {
     return (
@@ -210,12 +212,14 @@ const RulesPage = () => {
         menu={appMenu}
         docLink={docLinks.links.alerting.guide}
         spacing="bleed"
-        back={{
-          href: backButtonHref,
-          label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
-            defaultMessage: 'Alerts',
-          }),
-        }}
+        {...(!hideListBackButton && {
+          back: {
+            href: backButtonHref,
+            label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
+              defaultMessage: 'Alerts',
+            }),
+          },
+        })}
       />
       <Routes>
         <Route exact path="/logs" component={renderLogsList} />

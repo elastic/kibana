@@ -8,8 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useCallback } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import type { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
+import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
@@ -45,7 +47,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     setBreadcrumbs,
   } = useKibana().services;
 
-  const { basePath } = http;
+  const history = useHistory();
 
   // sets a baseline breadcrumb regardless of the outcome of loading the rule
   useEffect(() => {
@@ -96,7 +98,9 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       const outcome = (rule as ResolvedRule).outcome;
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${rule.id}`);
+        const path = history.createHref({
+          pathname: getRulesAppDetailsRoute(rule.id),
+        });
         spacesApi.ui.redirectLegacyUrl({
           path,
           aliasPurpose: (rule as ResolvedRule).alias_purpose,
@@ -107,7 +111,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
         });
       }
     }
-  }, [rule, spacesApi, basePath]);
+  }, [rule, spacesApi, history]);
 
   const getLegacyUrlConflictCallout = () => {
     const outcome = (rule as ResolvedRule).outcome;
@@ -115,9 +119,9 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       const aliasTargetId = (rule as ResolvedRule).alias_target_id!; // This is always defined if outcome === 'conflict'
       // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
-      const otherRulePath = basePath.prepend(
-        `insightsAndAlerting/triggersActions/rule/${aliasTargetId}`
-      );
+      const otherRulePath = history.createHref({
+        pathname: getRulesAppDetailsRoute(aliasTargetId),
+      });
       return (
         <>
           <EuiSpacer />

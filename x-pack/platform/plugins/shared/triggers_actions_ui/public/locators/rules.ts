@@ -7,7 +7,11 @@
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
+import {
+  RULES_MANAGEMENT_HOST,
+  rulesLocatorID,
+  type RulesLocatorParams,
+} from '@kbn/rule-data-utils';
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;
@@ -18,9 +22,11 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
     search = '',
     status = [],
     type = [],
+    host,
   }: RulesLocatorParams) => {
+    const { app, basePath } = host ?? RULES_MANAGEMENT_HOST;
     return {
-      app: 'rules',
+      app,
       path: setStateToKbnUrl(
         '_a',
         {
@@ -31,7 +37,7 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
           type,
         },
         { useHash: false, storeInHashQuery: false },
-        '/'
+        basePath
       ),
       state: {},
     };

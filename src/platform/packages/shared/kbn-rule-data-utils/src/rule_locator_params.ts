@@ -18,6 +18,21 @@ export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
 export const RULE_DETAILS_ALERTS_TAB: RuleDetailsTabId = 'alerts';
 export const RULE_DETAILS_HISTORY_TAB: RuleDetailsTabId = 'history';
 
+/**
+ * Identifies the host app and base path for v1 rule locators so the same
+ * locator resolves to different URL trees depending on which app mounts the
+ * classic rules page (Stack Management, Observability, etc.).
+ */
+export interface RulesLocatorHost extends SerializableRecord {
+  app: string;
+  basePath: string;
+}
+
+export const RULES_MANAGEMENT_HOST: RulesLocatorHost = {
+  app: 'management',
+  basePath: '/insightsAndAlerting/triggersActions',
+};
+
 export interface RuleDetailsLocatorParams extends SerializableRecord {
   ruleId: string;
   tabId?: RuleDetailsTabId;
@@ -25,6 +40,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
   rangeTo?: string;
   kuery?: string;
   controlConfigs?: SerializableRecord[];
+  host?: RulesLocatorHost;
 }
 
 export interface RulesLocatorParams extends SerializableRecord {
@@ -33,4 +49,5 @@ export interface RulesLocatorParams extends SerializableRecord {
   search?: string;
   status?: RuleStatus[];
   type?: string[];
+  host?: RulesLocatorHost;
 }

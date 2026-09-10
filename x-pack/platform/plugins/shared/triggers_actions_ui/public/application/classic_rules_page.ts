@@ -18,6 +18,8 @@ export interface ClassicRulesPageProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   /** Host app history. Falls back to an isolated memory history when omitted. */
   history?: ScopedHistory;
+  /** When true the rules-list page header omits its back-navigation link. */
+  hideListBackButton?: boolean;
 }
 
 export type ClassicRulesPagePluginsStart = Pick<

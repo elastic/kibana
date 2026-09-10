@@ -20,6 +20,7 @@ export const ComposableClassicRulesPage = ({
   coreStart,
   setBreadcrumbs,
   history,
+  hideListBackButton,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const { pluginsStart } = internalDeps;
@@ -82,8 +83,9 @@ export const ComposableClassicRulesPage = ({
       uiActions: pluginsStart.uiActions,
       cps: pluginsStart.cps,
       inspector: pluginsStart.inspector,
+      hideListBackButton,
     }),
-    [coreStart, internalDeps, kibanaFeatures, pluginsStart, resolvedHistory, setBreadcrumbs]
+    [coreStart, internalDeps, kibanaFeatures, pluginsStart, resolvedHistory, setBreadcrumbs, hideListBackButton]
   );
 
   return <RulesPageApp deps={deps} />;

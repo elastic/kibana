@@ -99,6 +99,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   uiActions?: UiActionsStart;
   cps?: CPSPluginStart;
   inspector?: InspectorStart;
+  hideListBackButton?: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

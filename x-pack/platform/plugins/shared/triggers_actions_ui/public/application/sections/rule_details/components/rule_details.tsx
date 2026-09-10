@@ -120,7 +120,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     notifications: { toasts },
     setBreadcrumbs,
   } = useKibana().services;
-  const { capabilities, getUrlForApp } = application;
+  const { capabilities } = application;
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -319,9 +319,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const backTarget = {
     ...getRulesBreadcrumbWithHref(),
-    href: getUrlForApp('management', {
-      path: 'insightsAndAlerting/triggersActions/',
-    }),
+    href: history.createHref({ pathname: routeToHome }),
   };
 
   const statusColor = getHealthColor(rule.executionStatus.status);

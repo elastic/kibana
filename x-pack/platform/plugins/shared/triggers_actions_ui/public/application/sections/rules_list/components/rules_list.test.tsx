@@ -105,6 +105,7 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
   }),
   useLocation: () => ({
     pathname: '/triggersActions/rules/',

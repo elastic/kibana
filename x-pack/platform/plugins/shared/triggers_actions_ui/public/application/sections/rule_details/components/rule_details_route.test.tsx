@@ -32,6 +32,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
   }),
   useLocation: () => ({
     pathname: '/triggersActions/rules/',
@@ -94,7 +95,7 @@ describe('rule_details_route', () => {
     });
 
     expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
-      path: 'insightsAndAlerting/triggersActions/rule/new_id',
+      path: '/rule/new_id',
       aliasPurpose: 'savedObjectConversion',
       objectNoun: 'rule',
     });
@@ -134,7 +135,7 @@ describe('rule_details_route', () => {
       currentObjectId: 'new_id',
       objectNoun: 'rule',
       otherObjectId: rule.id,
-      otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
+      otherObjectPath: `/rule/${rule.id}`,
     });
   });
 

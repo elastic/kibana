@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule, openRulesListAndSearch } from '../fixtures';
 
 const RULES_APP = 'rules';
+const SM_BASE = 'management/insightsAndAlerting/triggersActions';
 const APP_TITLE_SUBJ = 'appHeaderTitle';
 const RULES_LIST_SUBJ = 'rulesList';
 
@@ -52,6 +53,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
 
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    expect(page.url()).toContain(`/app/${SM_BASE}`);
   });
 
   test('shows the no-permission prompt when the user has actions but no alerting privilege', async ({
@@ -69,6 +71,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
 
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    expect(page.url()).toContain(`/app/${SM_BASE}`);
   });
 
   test('renders a newly-created rule and opens its details', async ({
@@ -95,10 +98,17 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
       await expect(ruleRow).toBeVisible();
     });
 
+    await test.step('rule-name link href stays within the host mount', async () => {
+      const anchor = ruleRow.locator('a').first();
+      const href = await anchor.getAttribute('href');
+      expect(href).toContain('/triggersActions/rule/');
+      expect(href).not.toMatch(/\/app\/rules\//);
+    });
+
     await test.step('navigates to the rule details page when clicking the rule', async () => {
       await ruleRow.click();
       await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
-      expect(page.url()).toContain(`/rule/${ruleId}`);
+      expect(page.url()).toContain(`/app/${SM_BASE}/rule/${ruleId}`);
     });
   });
 });

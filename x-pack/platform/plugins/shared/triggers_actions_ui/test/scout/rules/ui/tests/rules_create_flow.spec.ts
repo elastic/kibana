@@ -16,6 +16,8 @@ import {
   openRulesListAndSearch,
 } from '../fixtures';
 
+const SM_BASE = 'management/insightsAndAlerting/triggersActions';
+
 test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
   const createdRuleNames: string[] = [];
 
@@ -68,10 +70,10 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
       await expect(page.testSubj.locator('ruleTypeModal')).toBeVisible();
     });
 
-    await test.step('selecting a rule type navigates to the create form', async () => {
-      // `.es-query` is built-in in Scout's stateful/classic config.
+    await test.step('selecting a rule type navigates to the create form within management', async () => {
       await page.testSubj.click('.es-query-SelectOption');
       await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+      expect(page.url()).toContain(`/app/${SM_BASE}/create/`);
     });
   });
 
@@ -98,15 +100,16 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
       );
     });
 
-    await test.step('redirects to the rule details page', async () => {
+    await test.step('redirects to the rule details page within management', async () => {
       await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible({ timeout: 15000 });
       const ruleId = await findRuleIdByName(kbnClient, ruleName);
       expect(ruleId).toBeDefined();
-      expect(page.url()).toContain(`/rule/${ruleId}`);
+      expect(page.url()).toContain(`/app/${SM_BASE}/rule/${ruleId}`);
     });
 
-    await test.step('displays the rule in the rules list', async () => {
+    await test.step('displays the rule in the rules list within management', async () => {
       await openRulesListAndSearch(page, ruleName);
+      expect(page.url()).toContain(`/app/${SM_BASE}`);
       await expect(
         page.testSubj
           .locator('rulesList')

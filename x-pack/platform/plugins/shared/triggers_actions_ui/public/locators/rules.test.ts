@@ -5,56 +5,66 @@
  * 2.0.
  */
 
+import { RULES_MANAGEMENT_HOST } from '@kbn/rule-data-utils';
 import { RulesLocatorDefinition } from './rules';
+
+const MGMT_BASE = RULES_MANAGEMENT_HOST.basePath;
 
 describe('RulesLocator', () => {
   const locator = new RulesLocatorDefinition();
 
   it('should return correct app and url when empty params are provided', async () => {
     const location = await locator.getLocation({});
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `/?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!())`
+      `${MGMT_BASE}?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!())`
     );
   });
 
   it('should return correct url when lastResponse is provided', async () => {
     const location = await locator.getLocation({ lastResponse: ['foo'] });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `/?_a=(lastResponse:!(foo),params:(),search:'',status:!(),type:!())`
+      `${MGMT_BASE}?_a=(lastResponse:!(foo),params:(),search:'',status:!(),type:!())`
     );
   });
 
   it('should return correct url when params is provided', async () => {
     const location = await locator.getLocation({ params: { sloId: 'foo' } });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `/?_a=(lastResponse:!(),params:(sloId:foo),search:'',status:!(),type:!())`
+      `${MGMT_BASE}?_a=(lastResponse:!(),params:(sloId:foo),search:'',status:!(),type:!())`
     );
   });
 
   it('should return correct url when search is provided', async () => {
     const location = await locator.getLocation({ search: 'foo' });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `/?_a=(lastResponse:!(),params:(),search:foo,status:!(),type:!())`
+      `${MGMT_BASE}?_a=(lastResponse:!(),params:(),search:foo,status:!(),type:!())`
     );
   });
 
   it('should return correct url when status is provided', async () => {
     const location = await locator.getLocation({ status: ['enabled'] });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `/?_a=(lastResponse:!(),params:(),search:'',status:!(enabled),type:!())`
+      `${MGMT_BASE}?_a=(lastResponse:!(),params:(),search:'',status:!(enabled),type:!())`
     );
   });
 
   it('should return correct url when type is provided', async () => {
     const location = await locator.getLocation({ type: ['foo'] });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `/?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!(foo))`
+      `${MGMT_BASE}?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!(foo))`
     );
+  });
+
+  it('should resolve to a custom host when host is provided', async () => {
+    const host = { app: 'observability', basePath: '/alerting/rules/v1' };
+    const location = await locator.getLocation({ host });
+    expect(location.app).toEqual('observability');
+    expect(location.path).toContain('/alerting/rules/v1');
   });
 });
