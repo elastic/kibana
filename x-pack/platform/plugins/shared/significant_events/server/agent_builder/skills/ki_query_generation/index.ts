@@ -7,7 +7,12 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import type { MemoryToolsOptions } from '../../../memory_and_investigation/tools/memory';
+import {
+  createMemoryListTool,
+  createMemoryReadTool,
+  createMemorySearchTool,
+  type MemoryToolsOptions,
+} from '../../../memory_and_investigation/tools/memory';
 import { createGetStreamFeaturesTool } from './get_stream_features/tool';
 import { createValidateQueriesTool } from './validate_queries/tool';
 import description from './description.text';
@@ -15,12 +20,10 @@ import content from './skill.md.text';
 
 export const KI_QUERY_GENERATION_SKILL_ID = 'ki-query-generation' as const;
 
-export const createKIQueryGenerationSkill = ({
-  getScopedClients,
-  server,
-  logger,
-}: MemoryToolsOptions) =>
-  defineSkillType({
+export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
+  const { getScopedClients, server, logger } = options;
+
+  return defineSkillType({
     id: KI_QUERY_GENERATION_SKILL_ID,
     name: 'ki-query-generation',
     basePath: 'skills/platform/streams',
@@ -30,6 +33,9 @@ export const createKIQueryGenerationSkill = ({
     content,
     getInlineTools: () => {
       const tools: BuiltinSkillBoundedTool[] = [
+        createMemorySearchTool(options),
+        createMemoryReadTool(options),
+        createMemoryListTool(options),
         createGetStreamFeaturesTool({
           getScopedClients,
           server,
@@ -45,3 +51,4 @@ export const createKIQueryGenerationSkill = ({
       return tools.map(({ id, ...rest }) => ({ ...rest, id: id.replaceAll('.', '_') }));
     },
   });
+};
