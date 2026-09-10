@@ -214,8 +214,9 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 The point of the exercise is the identity behaviour: a rule created by an approved action should be attributed to the **approving analyst**, not to whoever started the Worker. When a workflow parked on `waitForApproval` is resumed through the in-Kibana resume path, the engine schedules a fresh task with an API key granted on the resumer's behalf, and that identity propagates into child workflows.
 
-**Prerequisites** — all three are load-bearing, and the identity behaviour degrades silently without them:
+**Prerequisites** — all four are load-bearing, and the identity behaviour degrades silently without them:
 
+- **This plugin enabled** (`xpack.agenticInvestigations.enabled: true`). It is **off by default**, so without this the routes 404 and AlertZero's proposals panel renders its load error rather than a queue.
 - **Security enabled.** With security off no API key is stored, the resume task gets no fake request, and the resume fails outright.
 - **Encrypted Saved Objects configured** (`xpack.encryptedSavedObjects.encryptionKey`). Scheduling a task with an API key throws without it.
 - **API keys enabled** in Elasticsearch.
