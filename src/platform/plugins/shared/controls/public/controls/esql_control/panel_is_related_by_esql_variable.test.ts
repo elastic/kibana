@@ -30,7 +30,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
     const sibling = esqlSibling('FROM logs | WHERE level == ?myVar');
 
     expect(
-      isRelated(sibling, [esqlVariable('myVar')], [{ esql: 'FROM logs | WHERE level == ?myVar' }])
+      isRelated(sibling, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?myVar' }]])
     ).toBe(true);
   });
 
@@ -40,7 +40,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
     const sibling = esqlSibling('FROM logs | WHERE level == ?other');
 
     expect(
-      isRelated(sibling, [esqlVariable('myVar')], [{ esql: 'FROM logs | WHERE level == ?other' }])
+      isRelated(sibling, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?other' }]])
     ).toBe(false);
   });
 
@@ -48,7 +48,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
     const esqlVariable$ = new BehaviorSubject(esqlVariable('myVar'));
     const { isRelated } = panelIsRelatedByEsqlVariable({ esqlVariable$ });
 
-    expect(isRelated({}, [esqlVariable('myVar')], [undefined])).toBe(false);
+    expect(isRelated({}, [esqlVariable('myVar')], [[]])).toBe(false);
   });
 
   test('returns false when sibling query is passed but sibling does not publish ES|QL', () => {
@@ -56,7 +56,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
     const { isRelated } = panelIsRelatedByEsqlVariable({ esqlVariable$ });
 
     expect(
-      isRelated({}, [esqlVariable('myVar')], [{ esql: 'FROM logs | WHERE level == ?myVar' }])
+      isRelated({}, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?myVar' }]])
     ).toBe(false);
   });
 
@@ -66,7 +66,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
     const sibling = esqlSibling('FROM logs | WHERE level == ?myVar');
 
     expect(
-      isRelated(sibling, [esqlVariable('myVar')], [{ esql: 'FROM logs | WHERE level == ?myVar' }])
+      isRelated(sibling, [esqlVariable('myVar')], [[{ esql: 'FROM logs | WHERE level == ?myVar' }]])
     ).toBe(true);
 
     esqlVariable$.next(esqlVariable('renamedVar'));
@@ -74,7 +74,7 @@ describe('panelIsRelatedByEsqlVariable', () => {
       isRelated(
         esqlSibling('FROM logs | WHERE level == ?renamedVar'),
         [esqlVariable('renamedVar')],
-        [{ esql: 'FROM logs | WHERE level == ?renamedVar' }]
+        [[{ esql: 'FROM logs | WHERE level == ?renamedVar' }]]
       )
     ).toBe(true);
   });
@@ -87,9 +87,9 @@ describe('panelIsRelatedByEsqlVariable', () => {
     });
     const sibling = { query$: siblingQuery$ };
 
-    expect(isRelated(sibling, [esqlVariable('myVar')], [siblingQuery$.value])).toBe(false);
+    expect(isRelated(sibling, [esqlVariable('myVar')], [[siblingQuery$.value]])).toBe(false);
 
     siblingQuery$.next({ esql: 'FROM logs | WHERE level == ?myVar' });
-    expect(isRelated(sibling, [esqlVariable('myVar')], [siblingQuery$.value])).toBe(true);
+    expect(isRelated(sibling, [esqlVariable('myVar')], [[siblingQuery$.value]])).toBe(true);
   });
 });
