@@ -8,7 +8,7 @@
  */
 
 import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { describeIssue, findMatchingIssues } from './match_issues';
+import { candidateIssues, describeIssue, findMatchingIssues, indexIssues } from './match_issues';
 import { groupIntoSuites } from './suites';
 import { flakyTest, githubIssue, SUITE_PATH } from './test_fixtures';
 
@@ -88,6 +88,64 @@ describe('describeIssue', () => {
       testName: undefined,
       text: 'Flaky a.ts\n',
     });
+  });
+});
+
+describe('indexIssues / candidateIssues', () => {
+  const numbers = (details: ReturnType<typeof candidateIssues>) =>
+    details.map(({ issue }) => issue.number).sort();
+
+  it('indexes issues by every file name they mention, with JUnit dots restored', () => {
+    const index = indexIssues([
+      describeIssue(ftrIssue(1, 'x-pack/test/a.ts', 'a b')),
+      describeIssue(githubIssue({ number: 2, title: 'Flaky Scout test suite: src/b/c.spec.ts' })),
+      describeIssue(
+        githubIssue({ number: 3, body: 'Fails in `src/d/e.test.tsx` and mentions f.js too' })
+      ),
+    ]);
+
+    expect([...index.byFileName.keys()].sort()).toEqual([
+      'a.ts',
+      'c.spec.ts',
+      'e.test.tsx',
+      'f.js',
+    ]);
+    expect(index.byFileName.get('a.ts')?.map(({ issue }) => issue.number)).toEqual([1]);
+  });
+
+  it('selects the issues naming the file, the Jest directory or one of the Scout test ids', () => {
+    const [suite] = groupIntoSuites([
+      flakyTest({ testId: 'id-1', filePath: 'src/plugins/a/b.test.ts' }),
+      flakyTest({ testId: 'id-2', filePath: 'src/plugins/a/b.test.ts' }),
+    ]);
+    const index = indexIssues([
+      describeIssue(githubIssue({ number: 1, body: 'see src/plugins/a/b.test.ts' })),
+      describeIssue(githubIssue({ number: 2, body: 'see elsewhere/b.test.ts' })),
+      describeIssue(jestIssue(3, 'src/plugins/a', 'A b c')),
+      describeIssue(jestIssue(4, 'src/plugins/other', 'A b c')),
+      describeIssue(scoutIssue(5, 'id-2', 'some test', 'moved/renamed.spec.ts')),
+      describeIssue(scoutIssue(6, 'id-9', 'some test', 'moved/renamed.spec.ts')),
+      describeIssue(githubIssue({ number: 7, body: 'nothing to do with it' })),
+    ]);
+
+    expect(numbers(candidateIssues(suite, index))).toEqual([1, 2, 3, 5]);
+  });
+
+  it('finds the same matches through the index as against every issue', () => {
+    const [suite] = groupIntoSuites([
+      flakyTest({ testId: 'id-1', title: 'creates default alert' }),
+    ]);
+    const details = [
+      describeIssue(scoutIssue(10, 'id-1', 'creates default alert')),
+      describeIssue(githubIssue({ number: 11, title: `Flaky Scout test suite: ${SUITE_PATH}` })),
+      describeIssue(scoutIssue(12, 'id-x', 'another test')),
+      describeIssue(scoutIssue(13, 'id-y', 'unrelated', 'x-pack/other.spec.ts')),
+      describeIssue(jestIssue(14, 'src/plugins/a', 'A creates default alert')),
+    ];
+
+    const viaIndex = findMatchingIssues(suite, candidateIssues(suite, indexIssues(details)));
+    expect(viaIndex).toEqual(findMatchingIssues(suite, details));
+    expect(viaIndex.map(({ issue }) => issue.number)).toEqual([11, 10, 12]);
   });
 });
 

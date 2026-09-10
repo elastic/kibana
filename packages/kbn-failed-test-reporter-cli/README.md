@@ -14,11 +14,14 @@ tests by file and tells, for every file, which `failed-test` issues are about it
 nothing is filed or edited. Filing issues for the untracked suites is a separate step that does not
 exist yet.
 
-Open and closed `failed-test` issues both count. Rather than paging through the ~20k issues
-elastic/kibana has filed over the years, the command searches for the suites' file names, a
-handful per query (`label:failed-test "a.spec.ts" OR "b.test.ts" …`), which also finds issues
-about a moved file or with JUnit's `path·ts` spelling. The matching rules then decide which suite
-an issue is really about:
+Open and closed `failed-test` issues both count. The command lists every open `failed-test` issue
+and the closed ones updated in the last `--closed-since-days` (default 365) through the issues
+API, about a hundred requests against the core rate limit, and matches locally. It deliberately
+avoids the search API, whose 30-requests-a-minute limit is shared with every other CI job using the
+same token and whose 1000-result cap and 256-character queries lose issues silently. Issues are
+indexed by the file names they mention (after restoring JUnit's `path·ts` spelling), the Jest
+directory in their classname and the Scout test id, so a suite is only compared with the issues
+that could be about it. The matching rules then decide which suite an issue is really about:
 
 - `suite`: it is titled `Flaky <framework> test suite: <file>`;
 - `test`: a per-test issue filed by `report_failed_tests` about one of the flaky tests, by the
@@ -38,7 +41,8 @@ GITHUB_TOKEN=... node scripts/check_flaky_test_issues --input .scout/flaky_tests
 ```
 
 The result is logged per suite and written as JSON to `--summary-path`. `--github-repo owner/name`
-checks another repository, e.g. a sandbox.
+checks another repository, e.g. a sandbox. Closed issues last updated before the
+`--closed-since-days` horizon never count as tracking a suite; open ones always do.
 
 The [kibana / scout / report-flaky-tests](https://buildkite.com/elastic/kibana-scout-report-flaky-tests)
 pipeline runs both commands daily and annotates the build with the tracked and untracked suites.

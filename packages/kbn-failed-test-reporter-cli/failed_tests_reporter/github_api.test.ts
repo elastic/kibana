@@ -90,9 +90,10 @@ describe('nextPageUrl()', () => {
   });
 });
 
-describe('GithubApi#searchIssues()', () => {
+describe('GithubApi#listIssues()', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.useRealTimers();
   });
 
   const issue = (number: number, extra: Record<string, unknown> = {}) => ({
@@ -107,7 +108,7 @@ describe('GithubApi#searchIssues()', () => {
   });
 
   const page = (items: unknown[], nextUrl?: string) =>
-    new Response(JSON.stringify({ total_count: items.length, incomplete_results: false, items }), {
+    new Response(JSON.stringify(items), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
@@ -115,21 +116,46 @@ describe('GithubApi#searchIssues()', () => {
       },
     });
 
-  it('scopes the query to the repository and unwraps the items', async () => {
+  /** No pause between pages, so tests do not need timers for a plain listing. */
+  const list = (api: GithubApi, options: Partial<Parameters<GithubApi['listIssues']>[0]> = {}) =>
+    api.listIssues({ state: 'open', pageIntervalMs: 0, ...options });
+
+  it('lists the issues of the repository with the given filters, 100 a page', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
       .mockImplementation(async () => page([issue(5), issue(6)]));
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false, repo: 'elastic/sandbox' });
-    const issues = await api.searchIssues({ query: 'label:failed-test "a.ts" OR "b.ts"' });
+    const since = new Date('2025-09-10T12:00:00.000Z');
+    const issues = await list(api, {
+      state: 'closed',
+      labels: ['failed-test', 'skipped-test'],
+      since,
+      sort: 'updated',
+      direction: 'asc',
+    });
 
     const url = new URL(String(fetchMock.mock.calls[0][0]));
-    expect(url.origin + url.pathname).toBe('https://api.github.com/search/issues');
-    expect(url.searchParams.get('q')).toBe(
-      'repo:elastic/sandbox is:issue label:failed-test "a.ts" OR "b.ts"'
-    );
-    expect(url.searchParams.get('per_page')).toBe('100');
+    expect(url.origin + url.pathname).toBe('https://api.github.com/repos/elastic/sandbox/issues');
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      state: 'closed',
+      labels: 'failed-test,skipped-test',
+      since: '2025-09-10T12:00:00.000Z',
+      sort: 'updated',
+      direction: 'asc',
+      per_page: '100',
+    });
     expect(issues.map(({ number }) => number)).toEqual([5, 6]);
+  });
+
+  it('sends only the state and page size when no filter is given', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => page([]));
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    await list(api);
+
+    const url = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(Object.fromEntries(url.searchParams)).toEqual({ state: 'open', per_page: '100' });
   });
 
   it('follows the Link header, drops pull requests and normalizes missing bodies', async () => {
@@ -140,12 +166,12 @@ describe('GithubApi#searchIssues()', () => {
       // A short first page that is not the last one
       return page(
         [issue(1), issue(2, { pull_request: {} })],
-        'https://api.github.com/search/issues?q=x&per_page=100&page=2'
+        'https://api.github.com/repositories/7833168/issues?state=open&per_page=100&page=2'
       );
     });
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const issues = await api.searchIssues({ query: 'x' });
+    const issues = await list(api);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(issues.map(({ number, body }) => [number, body])).toEqual([
@@ -154,32 +180,42 @@ describe('GithubApi#searchIssues()', () => {
     ]);
   });
 
-  it('still fetches in dry-run mode because searching is read-only', async () => {
+  it('pauses between pages but not before the first one', async () => {
+    jest.useFakeTimers();
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async (url) => {
+      const pageNumber = new URL(String(url)).searchParams.get('page') ?? '1';
+      return pageNumber === '3'
+        ? page([issue(3)])
+        : page(
+            [issue(Number(pageNumber))],
+            `https://api.github.com/repos/elastic/kibana/issues?page=${Number(pageNumber) + 1}`
+          );
+    });
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    const pending = api.listIssues({ state: 'open', pageIntervalMs: 300 });
+
+    await jest.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(300);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await jest.advanceTimersByTimeAsync(300);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    expect((await pending).map(({ number }) => number)).toEqual([1, 2, 3]);
+  });
+
+  it('still fetches in dry-run mode because listing is read-only', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(async () => page([issue(1)]));
 
     const api = new GithubApi({ log, token: undefined, dryRun: true });
-    const issues = await api.searchIssues({ query: 'x' });
+    const issues = await list(api);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(issues).toHaveLength(1);
   });
 
-  it('stops after maxPages and warns', async () => {
-    jest
-      .spyOn(global, 'fetch')
-      .mockImplementation(async () =>
-        page([issue(1)], 'https://api.github.com/search/issues?q=x&page=99')
-      );
-    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
-
-    const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const issues = await api.searchIssues({ query: 'x', maxPages: 2 });
-
-    expect(issues).toHaveLength(2);
-    expect(warning).toHaveBeenCalledWith(expect.stringContaining('results are incomplete'));
-  });
-
-  it('waits and retries when rate limited', async () => {
+  it('waits as long as retry-after says when rate limited', async () => {
     jest.useFakeTimers();
     const fetchMock = jest
       .spyOn(global, 'fetch')
@@ -190,13 +226,12 @@ describe('GithubApi#searchIssues()', () => {
     jest.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const pending = api.searchIssues({ query: 'x' });
+    const pending = list(api);
     await jest.advanceTimersByTimeAsync(7000);
     const issues = await pending;
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(issues).toHaveLength(1);
-    jest.useRealTimers();
   });
 
   it('waits until the primary rate limit resets when only the x-ratelimit headers are sent', async () => {
@@ -218,7 +253,7 @@ describe('GithubApi#searchIssues()', () => {
     const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
 
     const api = new GithubApi({ log, token: 'secret', dryRun: false });
-    const pending = api.searchIssues({ query: 'x' });
+    const pending = list(api);
     await jest.advanceTimersByTimeAsync(resetInSeconds * 1000);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await jest.advanceTimersByTimeAsync(2000);
@@ -227,6 +262,50 @@ describe('GithubApi#searchIssues()', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(issues).toHaveLength(1);
     expect(warning).toHaveBeenCalledWith(expect.stringMatching(/rate limited, waiting 2[12]s/));
-    jest.useRealTimers();
+  });
+
+  it('backs off from a minute when a secondary rate limit sends no headers at all', async () => {
+    jest.useFakeTimers();
+    const secondaryLimit = () =>
+      new Response(
+        JSON.stringify({
+          message:
+            'You have exceeded a secondary rate limit. Please wait a few minutes before you try again.',
+        }),
+        { status: 403 }
+      );
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockImplementationOnce(async () => secondaryLimit())
+      .mockImplementationOnce(async () => secondaryLimit())
+      .mockImplementationOnce(async () => page([issue(1)]));
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    const pending = list(api);
+
+    await jest.advanceTimersByTimeAsync(60_000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await jest.advanceTimersByTimeAsync(120_000);
+    const issues = await pending;
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(issues).toHaveLength(1);
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('rate limited, waiting 60s'));
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('rate limited, waiting 120s'));
+  });
+
+  it('does not retry a 403 that is not a rate limit', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
+      async () =>
+        new Response(JSON.stringify({ message: 'Resource not accessible by integration' }), {
+          status: 403,
+        })
+    );
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+
+    await expect(list(api)).rejects.toThrow('Resource not accessible by integration');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

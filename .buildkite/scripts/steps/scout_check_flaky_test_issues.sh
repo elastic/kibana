@@ -4,7 +4,8 @@ set -euo pipefail
 # Tells, for every flaky test suite in the report produced by scout_report_flaky_tests.sh, which
 # GitHub failed-test issues are about it, open or closed, via `node scripts/check_flaky_test_issues`.
 # Read-only: nothing is filed or edited.
-# FLAKY_TESTS_GITHUB_REPO names the repository whose issues are checked. GITHUB_TOKEN
+# FLAKY_TESTS_GITHUB_REPO names the repository whose issues are checked; every open failed-test
+# issue is fetched, plus those closed in the last FLAKY_TESTS_CLOSED_ISSUES_DAYS days. GITHUB_TOKEN
 # (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
@@ -13,6 +14,7 @@ source .buildkite/scripts/common/util.sh
 cd "${KIBANA_DIR:-$(pwd)}"
 
 FLAKY_TESTS_GITHUB_REPO="${FLAKY_TESTS_GITHUB_REPO:-elastic/kibana}"
+FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 
 REPORT_DIR="target/flaky_tests"
 # Uploaded by the discover-flaky-tests step; keep the paths in sync
@@ -28,19 +30,21 @@ echo "--- Download flaky test report"
 download_artifact "$REPORT_PATH" . --step discover-flaky-tests
 
 echo "+++ Check GitHub issues of flaky suites"
-echo "    Repository : $FLAKY_TESTS_GITHUB_REPO"
+echo "    Repository         : $FLAKY_TESTS_GITHUB_REPO"
+echo "    Closed issues since: $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 
 node scripts/check_flaky_test_issues \
   --input "$REPORT_PATH" \
   --summary-path "$SUMMARY_PATH" \
-  --github-repo "$FLAKY_TESTS_GITHUB_REPO"
+  --github-repo "$FLAKY_TESTS_GITHUB_REPO" \
+  --closed-since-days "$FLAKY_TESTS_CLOSED_ISSUES_DAYS"
 
 echo "--- Upload issue summary"
 buildkite-agent artifact upload "$SUMMARY_PATH"
 
 echo "--- Annotate build"
 suites="$(jq -r '.suites' "$SUMMARY_PATH")"
-issues="$(jq -r '.candidateIssues' "$SUMMARY_PATH")"
+issues="$(jq -r '.issues | "\(.open) open and \(.closed) closed since \(.closedSince[:10])"' "$SUMMARY_PATH")"
 tracked_open="$(jq -r '[.results[] | select(.status == "tracked" and any(.issues[]; .state == "open"))] | length' "$SUMMARY_PATH")"
 counts="$(jq -r --arg open "$tracked_open" '.counts | "**\(.tracked)** tracked by existing issues (\($open) by an open one), **\(.untracked)** without any"' "$SUMMARY_PATH")"
 
@@ -70,7 +74,7 @@ section() {
 }
 
 {
-  echo "Checked the ${issues} open or closed \`failed-test\` issues in \`${FLAKY_TESTS_GITHUB_REPO}\` that mention one of the ${suites} flaky suites' file names: ${counts}."
+  echo "Checked the ${suites} flaky suites against the \`failed-test\` issues in \`${FLAKY_TESTS_GITHUB_REPO}\` (${issues}): ${counts}."
   section tracked "Tracked by existing issues" true
   section untracked "No issue" true
   echo

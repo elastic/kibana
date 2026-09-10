@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
 import type { FlakyTestReport } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GithubApi, GithubIssue, GithubIssueState } from '../failed_tests_reporter/github_api';
-import { describeIssue, findMatchingIssues, type IssueMatch } from './match_issues';
-import { groupIntoSuites, type FlakySuite } from './suites';
+import {
+  candidateIssues,
+  describeIssue,
+  findMatchingIssues,
+  indexIssues,
+  type IssueMatch,
+} from './match_issues';
+import { groupIntoSuites } from './suites';
 
 /**
  * Label shared with the issues `report_failed_tests` files for individual failures, so flaky
@@ -20,19 +25,15 @@ import { groupIntoSuites, type FlakySuite } from './suites';
  */
 export const FAILED_TEST_LABEL = 'failed-test';
 
-/**
- * GitHub rejects search queries longer than 256 characters; `GithubApi` prepends
- * `repo:<owner>/<name> is:issue ` (up to ~50 characters for the repositories we use).
- */
-const MAX_QUERY_LENGTH = 200;
-
-/** GitHub also rejects search queries with more than five `AND` / `OR` / `NOT` operators. */
-const MAX_QUERY_TERMS = 6;
-
 export interface CheckFlakySuiteIssuesOptions {
   report: FlakyTestReport;
   github: GithubApi;
   log: ToolingLog;
+  /**
+   * Closed issues updated before this time are not fetched and so never count as tracking a
+   * suite; every open issue does, however old.
+   */
+  closedSince: Date;
 }
 
 export interface MatchedIssueRef {
@@ -52,43 +53,47 @@ export type FlakySuiteIssueStatus =
 export interface FlakySuiteIssuesSummary {
   generatedAt: Date;
   suites: number;
-  /** `failed-test` issues, open or closed, that mention one of the suites' file names. */
-  candidateIssues: number;
+  /** `failed-test` issues checked: every open one and the closed ones updated since `closedSince`. */
+  issues: { open: number; closed: number; closedSince: Date };
   counts: Record<FlakySuiteIssueStatus['status'], number>;
   results: FlakySuiteIssueStatus[];
 }
 
 /**
- * Search queries that together return every `failed-test` issue mentioning one of the suites'
- * file names, as few as the query length and operator limits allow. The file name rather than
- * the path so that issues about a moved file, or with JUnit's `path·ts` spelling, are found too;
- * the matching rules then sort out which suite, if any, an issue is really about.
+ * Every open `failed-test` issue plus the closed ones updated since `closedSince`, via the issue
+ * listing rather than the search API: no result cap, no query length limit and only the core
+ * rate limit, so a few thousand issues cost under a hundred requests. Matching happens locally.
  */
-export const suiteSearchQueries = (
-  suites: readonly Pick<FlakySuite, 'filePath'>[],
-  { maxLength = MAX_QUERY_LENGTH, maxTerms = MAX_QUERY_TERMS } = {}
-): string[] => {
-  const prefix = `label:${FAILED_TEST_LABEL} `;
-  const terms = [...new Set(suites.map(({ filePath }) => `"${Path.basename(filePath)}"`))];
+const fetchFailedTestIssues = async (
+  github: GithubApi,
+  closedSince: Date,
+  log: ToolingLog
+): Promise<{ issues: GithubIssue[]; open: number; closed: number }> => {
+  const requestsBefore = github.getRequestCount();
+  const open = await github.listIssues({ state: 'open', labels: [FAILED_TEST_LABEL] });
+  log.info(`Fetched ${open.length} open ${FAILED_TEST_LABEL} issues`);
 
-  const queries: string[] = [];
-  let current = '';
-  let currentTerms = 0;
-  for (const term of terms) {
-    const next = current ? `${current} OR ${term}` : `${prefix}${term}`;
-    if (current && (next.length > maxLength || currentTerms >= maxTerms)) {
-      queries.push(current);
-      current = `${prefix}${term}`;
-      currentTerms = 1;
-    } else {
-      current = next;
-      currentTerms++;
-    }
+  // Ascending by update time so issues updated while paging land on later pages, not earlier ones
+  const closed = await github.listIssues({
+    state: 'closed',
+    labels: [FAILED_TEST_LABEL],
+    since: closedSince,
+    sort: 'updated',
+    direction: 'asc',
+  });
+  log.info(
+    `Fetched ${closed.length} ${FAILED_TEST_LABEL} issues closed and updated since ` +
+      `${closedSince.toISOString()} (${
+        github.getRequestCount() - requestsBefore
+      } requests in total)`
+  );
+
+  // An issue closed between the two listings is in both; keep the later, closed, version
+  const byNumber = new Map<number, GithubIssue>();
+  for (const issue of [...open, ...closed]) {
+    byNumber.set(issue.number, issue);
   }
-  if (current) {
-    queries.push(current);
-  }
-  return queries;
+  return { issues: [...byNumber.values()], open: open.length, closed: closed.length };
 };
 
 /**
@@ -100,29 +105,20 @@ export const checkFlakySuiteIssues = async ({
   report,
   github,
   log,
+  closedSince,
 }: CheckFlakySuiteIssuesOptions): Promise<FlakySuiteIssuesSummary> => {
   const suites = groupIntoSuites(report.flaky);
   log.info(`${report.flaky.length} flaky tests in ${suites.length} suites`);
 
-  const queries = suiteSearchQueries(suites);
-  const candidates = new Map<number, GithubIssue>();
-  for (const query of queries) {
-    for (const issue of await github.searchIssues({ query })) {
-      candidates.set(issue.number, issue);
-    }
-  }
-  log.info(
-    `Found ${candidates.size} ${FAILED_TEST_LABEL} issues mentioning a flaky suite's file name ` +
-      `in ${queries.length} searches`
-  );
-  const details = [...candidates.values()].map(describeIssue);
+  const { issues, open, closed } = await fetchFailedTestIssues(github, closedSince, log);
+  const index = indexIssues(issues.map(describeIssue));
 
   const results: FlakySuiteIssueStatus[] = [];
   const counts: FlakySuiteIssuesSummary['counts'] = { tracked: 0, untracked: 0 };
 
   for (const suite of suites) {
     const { filePath } = suite;
-    const matches = findMatchingIssues(suite, details);
+    const matches = findMatchingIssues(suite, candidateIssues(suite, index));
     if (matches.length === 0) {
       log.info(`no issue: ${filePath}`);
       results.push({ status: 'untracked', filePath });
@@ -149,7 +145,7 @@ export const checkFlakySuiteIssues = async ({
   return {
     generatedAt: report.generatedAt,
     suites: suites.length,
-    candidateIssues: candidates.size,
+    issues: { open, closed, closedSince },
     counts,
     results,
   };

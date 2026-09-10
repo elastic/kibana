@@ -84,6 +84,73 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
   };
 };
 
+/** Source file names (`foo.spec.ts`, `bar.js`) anywhere in a text, after `·` was restored. */
+const SOURCE_FILE_NAME = /[\w.-]+\.(?:tsx?|jsx?)\b/g;
+
+/**
+ * Issues keyed by everything `findMatchingIssues` can match on, so that a suite only has to be
+ * checked against the few issues that could be about it rather than every issue fetched.
+ */
+export interface IssueIndex {
+  /** File names mentioned anywhere in the title or body, e.g. `default_status_alert.spec.ts`. */
+  byFileName: Map<string, IssueDetails[]>;
+  /** Directory named by a Jest classname, for the issues that never name the file. */
+  byJestDirectory: Map<string, IssueDetails[]>;
+  byScoutTestId: Map<string, IssueDetails[]>;
+}
+
+const addTo = (index: Map<string, IssueDetails[]>, key: string, details: IssueDetails) => {
+  const existing = index.get(key);
+  if (existing) {
+    existing.push(details);
+  } else {
+    index.set(key, [details]);
+  }
+};
+
+export const indexIssues = (issues: readonly IssueDetails[]): IssueIndex => {
+  const index: IssueIndex = {
+    byFileName: new Map(),
+    byJestDirectory: new Map(),
+    byScoutTestId: new Map(),
+  };
+
+  for (const details of issues) {
+    const { text, filePath, suiteFilePath, jestDirectory, scoutTestId } = details;
+    const fileNames = new Set(text.match(SOURCE_FILE_NAME) ?? []);
+    for (const named of [filePath, suiteFilePath]) {
+      if (named) {
+        fileNames.add(Path.basename(named));
+      }
+    }
+    for (const fileName of fileNames) {
+      addTo(index.byFileName, fileName, details);
+    }
+    if (jestDirectory) {
+      addTo(index.byJestDirectory, jestDirectory, details);
+    }
+    if (scoutTestId) {
+      addTo(index.byScoutTestId, scoutTestId, details);
+    }
+  }
+
+  return index;
+};
+
+/** The issues that could match the suite: they name its file, its Jest directory or one of its tests. */
+export const candidateIssues = (suite: FlakySuite, index: IssueIndex): IssueDetails[] => {
+  const candidates = new Set<IssueDetails>([
+    ...(index.byFileName.get(Path.basename(suite.filePath)) ?? []),
+    ...(index.byJestDirectory.get(Path.dirname(suite.filePath)) ?? []),
+  ]);
+  for (const { testId } of suite.tests) {
+    for (const details of index.byScoutTestId.get(testId) ?? []) {
+      candidates.add(details);
+    }
+  }
+  return [...candidates];
+};
+
 /** Whether a full JUnit test name (`describe … title`) ends with the flaky test's title. */
 const namesTest = (testName: string, titles: readonly string[]): boolean =>
   titles.some((title) => testName === title || testName.endsWith(` ${title}`));

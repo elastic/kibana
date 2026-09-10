@@ -20,6 +20,13 @@ import { checkFlakySuiteIssues } from './checker';
 
 const DEFAULT_INPUT = 'target/flaky_tests/flaky_tests.json';
 const DEFAULT_SUMMARY_PATH = 'target/flaky_tests/github_issues.json';
+/**
+ * A year covers the closed issues that could still be about a test in today's report; older ones
+ * are mostly about tests since fixed, moved or removed, and fetching all of them would double the
+ * requests.
+ */
+const DEFAULT_CLOSED_SINCE_DAYS = 365;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export function runCheckFlakyTestIssuesCli() {
   run(
@@ -29,21 +36,29 @@ export function runCheckFlakyTestIssuesCli() {
       const summaryPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('summary-path'));
       const token = process.env.GITHUB_TOKEN;
       if (!token) {
-        throw createFlagError('GITHUB_TOKEN must be set to search GitHub issues');
+        throw createFlagError('GITHUB_TOKEN must be set to list GitHub issues');
       }
       const repo = flagsReader.requiredString('github-repo');
       if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
         throw createFlagError('--github-repo must be of the form owner/name');
       }
+      const closedSinceDays = flagsReader.requiredNumber('closed-since-days');
+      if (!Number.isInteger(closedSinceDays) || closedSinceDays < 1) {
+        throw createFlagError('--closed-since-days must be a positive integer');
+      }
+      const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
       log.info(`Reading flaky test report from ${inputPath}`);
       const { data: report } = ScoutFlakyTests.fromFile(inputPath);
-      log.info(`Checking open and closed failed-test issues in ${repo}`);
+      log.info(
+        `Checking open failed-test issues and those closed in the last ${closedSinceDays} days in ${repo}`
+      );
 
       const summary = await checkFlakySuiteIssues({
         report,
         github: new GithubApi({ log, token, dryRun: false, repo }),
         log,
+        closedSince,
       });
 
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
@@ -66,22 +81,24 @@ export function runCheckFlakyTestIssuesCli() {
         Tell, for every flaky test suite in a report written by
         \`node scripts/scout discover-flaky-tests\`, which GitHub failed-test issues are about it,
         open or closed: a suite issue, per-test issues, or none. Read-only: nothing is filed or edited.
-        One GitHub search per handful of suites, by file name.
+        Lists every open failed-test issue and the recently closed ones, then matches locally.
 
         Examples:
           GITHUB_TOKEN=... node scripts/check_flaky_test_issues --input .scout/flaky_tests.json
       `,
       flags: {
-        string: ['input', 'summary-path', 'github-repo'],
+        string: ['input', 'summary-path', 'github-repo', 'closed-since-days'],
         default: {
           input: DEFAULT_INPUT,
           'summary-path': DEFAULT_SUMMARY_PATH,
           'github-repo': DEFAULT_GITHUB_REPO,
+          'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
         },
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
           --summary-path        Where to write the JSON summary [default: ${DEFAULT_SUMMARY_PATH}]
           --github-repo         owner/name of the repository whose issues are checked [default: ${DEFAULT_GITHUB_REPO}]
+          --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
         `,
       },
     }
