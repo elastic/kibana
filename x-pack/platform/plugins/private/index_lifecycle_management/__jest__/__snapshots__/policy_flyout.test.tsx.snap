@@ -1007,7 +1007,7 @@ exports[`View policy flyout shows all phases 1`] = `
             >
               <button
                 aria-label="Manage policy"
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                 data-test-subj="managePolicyButton"
                 type="button"
               >

@@ -59,7 +59,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-m-base-primary"
           data-test-subj="mlFilterListsButtonCreate"
           type="button"
         >
@@ -75,7 +75,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
       >
         <div>
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-danger"
+            class="euiButton emotion-euiButtonDisplay-m-base-danger"
             data-test-subj="mlFilterListsDeleteButton"
             type="button"
           >
@@ -667,7 +667,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-m-base-primary"
           data-test-subj="mlFilterListsButtonCreate"
           type="button"
         >
@@ -683,7 +683,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
       >
         <div>
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+            class="euiButton emotion-euiButtonDisplay-m-isDisabled-base-disabled"
             data-test-subj="mlFilterListsDeleteButton"
             disabled=""
             type="button"

@@ -64,7 +64,7 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
                 class="emotion-euiCard__footer"
               >
                 <a
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-fill-primary"
                   data-test-subj="empty-page-actions-action"
                   href="my/url/from/nowwhere"
                   rel="noreferrer"
@@ -124,7 +124,7 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-base-primary"
             data-test-subj="empty-page-actions-action"
             href="my/url/from/nowwhere"
             rel="noreferrer"

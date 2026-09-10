@@ -50,7 +50,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <a
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-fill-primary"
             href="http://some-host/bar"
             rel="noopener noreferrer"
             target="_blank"
@@ -122,7 +122,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <a
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-fill-primary"
             href="http://some-host/bar"
             rel="noopener noreferrer"
             target="_blank"
@@ -680,7 +680,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
                   data-test-subj="loginSubmit"
                   type="submit"
                 >
@@ -883,7 +883,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
                 class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
                   data-test-subj="loginSubmit"
                   type="submit"
                 >
@@ -1067,7 +1067,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
                 class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
                   data-test-subj="loginSubmit"
                   type="submit"
                 >
@@ -1265,7 +1265,7 @@ exports[`LoginPage page renders as expected 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
                   data-test-subj="loginSubmit"
                   type="submit"
                 >
@@ -1456,7 +1456,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
                   data-test-subj="loginSubmit"
                   type="submit"
                 >

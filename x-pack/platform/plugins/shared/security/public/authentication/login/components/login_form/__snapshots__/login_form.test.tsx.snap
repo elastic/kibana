@@ -180,7 +180,7 @@ exports[`LoginForm renders as expected 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-fullWidth-fill-primary"
           data-test-subj="loginSubmit"
           type="submit"
         >

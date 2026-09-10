@@ -64,7 +64,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <a
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
         href="/test/base/path/app/management/kibana/dataViews"
         rel="noopener noreferrer"
         target="_blank"
