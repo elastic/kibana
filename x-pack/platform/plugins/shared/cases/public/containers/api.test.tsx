@@ -159,7 +159,6 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           includeComments: true,
-          mode: 'legacy',
         },
         signal: abortCtrl.signal,
       });

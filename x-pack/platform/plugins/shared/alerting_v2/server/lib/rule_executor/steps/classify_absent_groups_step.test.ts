@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -33,7 +34,7 @@ const createPluginConfigAccessor = () => {
       run: {
         alerts: { max: 10000 },
         maxGroupsPerExecution: 10000,
-        query: { maxResponseSize: 50 * 1024 * 1024 },
+        query: { maxResponseSize: ByteSizeValue.parse('50mb') },
       },
     },
     esql: { responseFormat: 'json' },
