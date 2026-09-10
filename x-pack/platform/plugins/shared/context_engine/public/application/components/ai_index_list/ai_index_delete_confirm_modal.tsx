@@ -23,7 +23,7 @@ import { useKibana } from '../../hooks/use_kibana';
 interface AiIndexDeleteConfirmModalProps {
   aiIndex: AiIndexHttpItem;
   onClose: () => void;
-  onSuccess: () => Promise<void>;
+  onSuccess: () => void;
 }
 
 export const AiIndexDeleteConfirmModal = ({
@@ -74,11 +74,13 @@ export const AiIndexDeleteConfirmModal = ({
           })
         );
       }
-      await onSuccess();
-      onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      return;
     }
+
+    onClose();
+    onSuccess();
   };
 
   return (

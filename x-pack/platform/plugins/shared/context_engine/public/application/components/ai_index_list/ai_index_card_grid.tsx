@@ -6,14 +6,16 @@
  */
 
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGrid, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useContentListItems,
   useContentListPhase,
   useContentListSearch,
 } from '@kbn/content-list-provider';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
 import { toAiIndexHttpItem } from '../../utils/ai_index_content_list_utils';
@@ -25,10 +27,23 @@ const GRID_COLUMNS = 3;
 
 export const AiIndexCardGrid = () => {
   const { createContextEngineUrl } = useNavigation();
+  const {
+    services: { notifications },
+  } = useKibana();
   const phase = useContentListPhase();
   const { items, totalItems, hasNoResults, refetch } = useContentListItems();
   const { setQueryFromText } = useContentListSearch();
   const [aiIndexToDelete, setAiIndexToDelete] = useState<AiIndexHttpItem | null>(null);
+
+  const onDeleteSuccess = useCallback(() => {
+    void refetch().catch((e) => {
+      notifications.toasts.addError(e instanceof Error ? e : new Error(String(e)), {
+        title: i18n.translate('xpack.contextEngine.landing.deleteListRefreshError', {
+          defaultMessage: 'AI index was deleted, but the list could not be refreshed',
+        }),
+      });
+    });
+  }, [notifications.toasts, refetch]);
 
   if (phase === 'initialLoad') {
     return <AiIndexListSkeleton />;
@@ -103,7 +118,7 @@ export const AiIndexCardGrid = () => {
         <AiIndexDeleteConfirmModal
           aiIndex={aiIndexToDelete}
           onClose={() => setAiIndexToDelete(null)}
-          onSuccess={refetch}
+          onSuccess={onDeleteSuccess}
         />
       )}
     </>

@@ -47,7 +47,7 @@ const renderModal = (
   overrides: Partial<AiIndexHttpItem> = {},
   {
     onClose = jest.fn(),
-    onSuccess = jest.fn().mockResolvedValue(undefined),
+    onSuccess = jest.fn(),
   }: { onClose?: jest.Mock; onSuccess?: jest.Mock } = {}
 ) => {
   const services = createServices();
@@ -154,7 +154,7 @@ describe('AiIndexDeleteConfirmModal', () => {
               <AiIndexDeleteConfirmModal
                 aiIndex={{ ...aiIndex, automations: [{ type: 'workflow', value: 'wf-1' }] }}
                 onClose={onClose}
-                onSuccess={jest.fn().mockResolvedValue(undefined)}
+                onSuccess={jest.fn()}
               />
             </QueryClientProvider>
           </KibanaContextProvider>
