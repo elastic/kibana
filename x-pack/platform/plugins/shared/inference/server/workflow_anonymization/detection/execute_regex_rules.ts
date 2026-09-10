@@ -18,7 +18,7 @@ function compileRule(rawPattern: string): CompiledRule {
   } catch {
     // RE2 does not support lookahead, lookbehind, or backreferences. Fall back to
     // native RegExp. ReDoS protection is provided by the Piscina worker timeout and
-    // pool-rebuild on abort.
+    // per-task abort via AbortSignal.
     return { engine: 'native', pattern: new RegExp(rawPattern, 'g') };
   }
 }
@@ -80,7 +80,7 @@ function findSpans(
  *
  * RE2JS is tried first for each pattern. Patterns that contain constructs RE2 does
  * not support (lookahead, lookbehind, backreferences) fall back to native RegExp.
- * The Piscina worker timeout and pool-rebuild on abort provide ReDoS protection for
+ * The Piscina worker timeout and per-task AbortSignal provide ReDoS protection for
  * native RegExp patterns.
  *
  * Zero-length matches advance one character and continue scanning; they do not
