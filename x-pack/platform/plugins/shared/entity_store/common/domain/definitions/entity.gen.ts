@@ -37,7 +37,12 @@ export const EntityRelationship = lazySchema(() =>
       /**
        * Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
        */
-      ids: z.array(z.string()).optional(),
+      ids: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.'
+        ),
     })
     .strict()
 );
@@ -52,7 +57,7 @@ export const EngineMetadata = lazySchema(() =>
       /**
        * The engine type that produced this entity record.
        */
-      Type: z.string().optional(),
+      Type: z.string().optional().describe('The engine type that produced this entity record.'),
     })
     .strict()
 );
@@ -77,35 +82,40 @@ export const EntityField = lazySchema(() =>
       /**
        * Unique identifier for this entity.
        */
-      id: z.string().optional(),
+      id: z.string().optional().describe('Unique identifier for this entity.'),
       /**
        * Human-readable name of the entity.
        */
-      name: z.string().optional(),
+      name: z.string().optional().describe('Human-readable name of the entity.'),
       /**
        * The entity type.
        */
-      type: z.string().optional(),
+      type: z.string().optional().describe('The entity type.'),
       /**
        * Optional sub-type classification for the entity.
        */
-      sub_type: z.string().optional(),
+      sub_type: z.string().optional().describe('Optional sub-type classification for the entity.'),
       /**
        * Sources that produced this entity record.
        */
-      source: z.array(z.string()).optional(),
+      source: z.array(z.string()).optional().describe('Sources that produced this entity record.'),
       /**
        * Schema version of the entity record.
        */
-      schema_version: z.string().optional(),
+      schema_version: z.string().optional().describe('Schema version of the entity record.'),
       /**
        * URL associated with the entity.
        */
-      url: z.string().optional(),
+      url: z.string().optional().describe('URL associated with the entity.'),
       /**
        * Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
        */
-      created_by: z.string().optional(),
+      created_by: z
+        .string()
+        .optional()
+        .describe(
+          'Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).'
+        ),
       EngineMetadata: EngineMetadata.optional(),
       /**
        * Boolean flags describing characteristics of the entity.
@@ -115,38 +125,62 @@ export const EntityField = lazySchema(() =>
           /**
            * Watchlist identifiers the entity belongs to (v2).
            */
-          watchlists: z.array(z.string()).optional(),
+          watchlists: z
+            .array(z.string())
+            .optional()
+            .describe('Watchlist identifiers the entity belongs to (v2).'),
           /**
            * Whether the entity is classified as an asset.
            */
-          asset: z.boolean().optional(),
+          asset: z.boolean().optional().describe('Whether the entity is classified as an asset.'),
           /**
            * Whether the entity is managed (for example, via a directory service).
            */
-          managed: z.boolean().optional(),
+          managed: z
+            .boolean()
+            .optional()
+            .describe('Whether the entity is managed (for example, via a directory service).'),
           /**
            * Whether multi-factor authentication is enabled for the entity.
            */
-          mfa_enabled: z.boolean().optional(),
+          mfa_enabled: z
+            .boolean()
+            .optional()
+            .describe('Whether multi-factor authentication is enabled for the entity.'),
           /**
            * Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
            */
-          storage_class: z.string().optional(),
+          storage_class: z
+            .string()
+            .optional()
+            .describe(
+              'Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).'
+            ),
           /**
            * Action-level permissions granted to this entity (not roles or groups).
            */
-          permissions: z.array(z.string()).optional(),
+          permissions: z
+            .array(z.string())
+            .optional()
+            .describe('Action-level permissions granted to this entity (not roles or groups).'),
           /**
            * Known redirect URIs or URLs (e.g. OAuth application callbacks).
            */
-          known_redirects: z.array(z.string()).optional(),
+          known_redirects: z
+            .array(z.string())
+            .optional()
+            .describe('Known redirect URIs or URLs (e.g. OAuth application callbacks).'),
           /**
            * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
            */
-          oauth_consent_restriction: z.string().optional(),
+          oauth_consent_restriction: z
+            .string()
+            .optional()
+            .describe('OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).'),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Boolean flags describing characteristics of the entity.'),
       /**
        * Behavioral signals observed for the entity.
        */
@@ -155,14 +189,21 @@ export const EntityField = lazySchema(() =>
           /**
            * Detection rule names that flagged this entity (v2).
            */
-          rule_names: z.array(z.string()).optional(),
+          rule_names: z
+            .array(z.string())
+            .optional()
+            .describe('Detection rule names that flagged this entity (v2).'),
           /**
            * Machine learning anomaly job identifiers (v2).
            */
-          anomaly_job_ids: z.array(z.string()).optional(),
+          anomaly_job_ids: z
+            .array(z.string())
+            .optional()
+            .describe('Machine learning anomaly job identifiers (v2).'),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Behavioral signals observed for the entity.'),
       /**
        * Timestamps tracking the entity lifecycle.
        */
@@ -171,18 +212,31 @@ export const EntityField = lazySchema(() =>
           /**
            * When the entity was first observed.
            */
-          first_seen: z.string().datetime().optional(),
+          first_seen: z
+            .string()
+            .datetime()
+            .optional()
+            .describe('When the entity was first observed.'),
           /**
            * When the entity was last observed.
            */
-          last_seen: z.string().datetime().optional(),
+          last_seen: z
+            .string()
+            .datetime()
+            .optional()
+            .describe('When the entity was last observed.'),
           /**
            * When the entity last generated activity.
            */
-          last_activity: z.string().datetime().optional(),
+          last_activity: z
+            .string()
+            .datetime()
+            .optional()
+            .describe('When the entity last generated activity.'),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Timestamps tracking the entity lifecycle.'),
       /**
        * Connections between this entity and other entities.
        */
@@ -191,35 +245,45 @@ export const EntityField = lazySchema(() =>
           /**
            * Entities this entity administers (for example, a user who is an admin of a service).
            */
-          administers: EntityRelationship.optional(),
+          administers: EntityRelationship.optional().describe(
+            'Entities this entity administers (for example, a user who is an admin of a service).'
+          ),
           /**
            * Entities this entity communicates with.
            */
-          communicates_with: EntityRelationship.optional(),
+          communicates_with: EntityRelationship.optional().describe(
+            'Entities this entity communicates with.'
+          ),
           /**
            * Entities this entity depends on.
            */
-          depends_on: EntityRelationship.optional(),
+          depends_on: EntityRelationship.optional().describe('Entities this entity depends on.'),
           /**
            * Entities inferred to be owned by this entity.
            */
-          owns_inferred: EntityRelationship.optional(),
+          owns_inferred: EntityRelationship.optional().describe(
+            'Entities inferred to be owned by this entity.'
+          ),
           /**
            * Entities this entity accesses infrequently.
            */
-          accesses_infrequently: EntityRelationship.optional(),
+          accesses_infrequently: EntityRelationship.optional().describe(
+            'Entities this entity accesses infrequently.'
+          ),
           /**
            * Entities this entity accesses frequently.
            */
-          accesses_frequently: EntityRelationship.optional(),
+          accesses_frequently: EntityRelationship.optional().describe(
+            'Entities this entity accesses frequently.'
+          ),
           /**
            * Entities owned by this entity.
            */
-          owns: EntityRelationship.optional(),
+          owns: EntityRelationship.optional().describe('Entities owned by this entity.'),
           /**
            * Entities supervised by this entity.
            */
-          supervises: EntityRelationship.optional(),
+          supervises: EntityRelationship.optional().describe('Entities supervised by this entity.'),
           /**
            * Resolution metadata linking this entity to another.
            */
@@ -228,7 +292,10 @@ export const EntityField = lazySchema(() =>
               /**
                * entity.id of the entity this one resolves to
                */
-              resolved_to: z.string().optional(),
+              resolved_to: z
+                .string()
+                .optional()
+                .describe('entity.id of the entity this one resolves to'),
               /**
                * Aggregated risk score for the resolution group.
                */
@@ -237,24 +304,41 @@ export const EntityField = lazySchema(() =>
                   /**
                    * Lexical description of the resolution group's aggregated risk.
                    */
-                  calculated_level: EntityRiskLevels.optional(),
+                  calculated_level: EntityRiskLevels.optional().describe(
+                    "Lexical description of the resolution group's aggregated risk."
+                  ),
                   /**
                    * The raw numeric value of the resolution group's aggregated risk score.
                    */
-                  calculated_score: z.number().optional(),
+                  calculated_score: z
+                    .number()
+                    .optional()
+                    .describe(
+                      "The raw numeric value of the resolution group's aggregated risk score."
+                    ),
                   /**
                    * The normalized numeric value of the resolution group's aggregated risk score.
                    */
-                  calculated_score_norm: z.number().min(0).max(100).optional(),
+                  calculated_score_norm: z
+                    .number()
+                    .min(0)
+                    .max(100)
+                    .optional()
+                    .describe(
+                      "The normalized numeric value of the resolution group's aggregated risk score."
+                    ),
                 })
                 .strict()
-                .optional(),
+                .optional()
+                .describe('Aggregated risk score for the resolution group.'),
             })
             .strict()
-            .optional(),
+            .optional()
+            .describe('Resolution metadata linking this entity to another.'),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Connections between this entity and other entities.'),
       /**
        * Risk scoring information for the entity.
        */
@@ -263,18 +347,31 @@ export const EntityField = lazySchema(() =>
           /**
            * Lexical description of the entity's risk.
            */
-          calculated_level: EntityRiskLevels.optional(),
+          calculated_level: EntityRiskLevels.optional().describe(
+            "Lexical description of the entity's risk."
+          ),
           /**
            * The raw numeric value of the given entity's risk score.
            */
-          calculated_score: z.number().optional(),
+          calculated_score: z
+            .number()
+            .optional()
+            .describe("The raw numeric value of the given entity's risk score."),
           /**
            * The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
            */
-          calculated_score_norm: z.number().min(0).max(100).optional(),
+          calculated_score_norm: z
+            .number()
+            .min(0)
+            .max(100)
+            .optional()
+            .describe(
+              "The normalized numeric value of the given entity's risk score. Useful for comparing with other entities."
+            ),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Risk scoring information for the entity.'),
     })
     .strict()
 );
@@ -299,39 +396,44 @@ export const Asset = lazySchema(() =>
       /**
        * Unique identifier for the asset.
        */
-      id: z.string().optional(),
+      id: z.string().optional().describe('Unique identifier for the asset.'),
       /**
        * Human-readable asset name.
        */
-      name: z.string().optional(),
+      name: z.string().optional().describe('Human-readable asset name.'),
       /**
        * The owner of the asset.
        */
-      owner: z.string().optional(),
+      owner: z.string().optional().describe('The owner of the asset.'),
       /**
        * Serial number of the asset.
        */
-      serial_number: z.string().optional(),
+      serial_number: z.string().optional().describe('Serial number of the asset.'),
       /**
        * Model name or number.
        */
-      model: z.string().optional(),
+      model: z.string().optional().describe('Model name or number.'),
       /**
        * Vendor or manufacturer.
        */
-      vendor: z.string().optional(),
+      vendor: z.string().optional().describe('Vendor or manufacturer.'),
       /**
        * Deployment environment (for example, production, staging).
        */
-      environment: z.string().optional(),
+      environment: z
+        .string()
+        .optional()
+        .describe('Deployment environment (for example, production, staging).'),
       /**
        * The criticality level assigned to this asset.
        */
-      criticality: AssetCriticalityLevel.nullable().optional(),
+      criticality: AssetCriticalityLevel.nullable()
+        .optional()
+        .describe('The criticality level assigned to this asset.'),
       /**
        * Business unit the asset belongs to.
        */
-      business_unit: z.string().optional(),
+      business_unit: z.string().optional().describe('Business unit the asset belongs to.'),
     })
     .strict()
 );
@@ -346,15 +448,25 @@ export const EntityRiskSummary = lazySchema(() =>
       /**
        * Lexical description of the entity's risk.
        */
-      calculated_level: EntityRiskLevels.optional(),
+      calculated_level: EntityRiskLevels.optional().describe(
+        "Lexical description of the entity's risk."
+      ),
       /**
        * The raw numeric value of the given entity's risk score.
        */
-      calculated_score: z.number().optional(),
+      calculated_score: z
+        .number()
+        .optional()
+        .describe("The raw numeric value of the given entity's risk score."),
       /**
        * The normalized numeric value of the given entity's risk score.
        */
-      calculated_score_norm: z.number().min(0).max(100).optional(),
+      calculated_score_norm: z
+        .number()
+        .min(0)
+        .max(100)
+        .optional()
+        .describe("The normalized numeric value of the given entity's risk score."),
     })
     .strict()
 );
@@ -369,7 +481,11 @@ export const UserEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z.string().datetime().optional(),
+      '@timestamp': z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
       /**
        * Elastic Common Schema (ECS) user fields collected on the entity.
@@ -379,50 +495,59 @@ export const UserEntity = lazySchema(() =>
           /**
            * Observed full names of the user.
            */
-          full_name: z.array(z.string()).optional(),
+          full_name: z.array(z.string()).optional().describe('Observed full names of the user.'),
           /**
            * Observed user domains.
            */
-          domain: z.array(z.string()).optional(),
+          domain: z.array(z.string()).optional().describe('Observed user domains.'),
           /**
            * Observed roles assigned to the user.
            */
-          roles: z.array(z.string()).optional(),
+          roles: z.array(z.string()).optional().describe('Observed roles assigned to the user.'),
           /**
            * Primary user name.
            */
-          name: z.string().optional(),
+          name: z.string().optional().describe('Primary user name.'),
           /**
            * Observed user identifiers.
            */
-          id: z.array(z.string()).optional(),
+          id: z.array(z.string()).optional().describe('Observed user identifiers.'),
           /**
            * Observed email addresses.
            */
-          email: z.array(z.string()).optional(),
+          email: z.array(z.string()).optional().describe('Observed email addresses.'),
           /**
            * Observed user hashes.
            */
-          hash: z.array(z.string()).optional(),
+          hash: z.array(z.string()).optional().describe('Observed user hashes.'),
           risk: EntityRiskSummary.optional(),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Elastic Common Schema (ECS) user fields collected on the entity.'),
       asset: Asset.optional(),
       /**
        * Custom key-value labels attached to the entity.
        */
-      labels: z.object({}).catchall(z.unknown()).optional(),
+      labels: z
+        .object({})
+        .catchall(z.unknown())
+        .optional()
+        .describe('Custom key-value labels attached to the entity.'),
       /**
        * Tags attached to the entity.
        */
-      tags: z.array(z.string()).optional(),
+      tags: z.array(z.string()).optional().describe('Tags attached to the entity.'),
       event: z
         .object({
           /**
            * When the event was ingested into Elasticsearch.
            */
-          ingested: z.string().datetime().optional(),
+          ingested: z
+            .string()
+            .datetime()
+            .optional()
+            .describe('When the event was ingested into Elasticsearch.'),
         })
         .strict()
         .optional(),
@@ -440,7 +565,11 @@ export const HostEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z.string().datetime().optional(),
+      '@timestamp': z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
       /**
        * Elastic Common Schema (ECS) host fields collected on the entity.
@@ -450,35 +579,35 @@ export const HostEntity = lazySchema(() =>
           /**
            * Observed hostnames.
            */
-          hostname: z.array(z.string()).optional(),
+          hostname: z.array(z.string()).optional().describe('Observed hostnames.'),
           /**
            * Observed host domains.
            */
-          domain: z.array(z.string()).optional(),
+          domain: z.array(z.string()).optional().describe('Observed host domains.'),
           /**
            * Observed IP addresses.
            */
-          ip: z.array(z.string()).optional(),
+          ip: z.array(z.string()).optional().describe('Observed IP addresses.'),
           /**
            * Primary host name.
            */
-          name: z.string().optional(),
+          name: z.string().optional().describe('Primary host name.'),
           /**
            * Observed host identifiers.
            */
-          id: z.array(z.string()).optional(),
+          id: z.array(z.string()).optional().describe('Observed host identifiers.'),
           /**
            * Observed host types.
            */
-          type: z.array(z.string()).optional(),
+          type: z.array(z.string()).optional().describe('Observed host types.'),
           /**
            * Observed MAC addresses.
            */
-          mac: z.array(z.string()).optional(),
+          mac: z.array(z.string()).optional().describe('Observed MAC addresses.'),
           /**
            * Observed CPU architectures.
            */
-          architecture: z.array(z.string()).optional(),
+          architecture: z.array(z.string()).optional().describe('Observed CPU architectures.'),
           /**
            * Elastic Common Schema (ECS) host.os fields collected on the entity latest index (v2).
            */
@@ -493,26 +622,38 @@ export const HostEntity = lazySchema(() =>
               version: z.string().optional(),
             })
             .strict()
-            .optional(),
+            .optional()
+            .describe(
+              'Elastic Common Schema (ECS) host.os fields collected on the entity latest index (v2).'
+            ),
           risk: EntityRiskSummary.optional(),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Elastic Common Schema (ECS) host fields collected on the entity.'),
       asset: Asset.optional(),
       /**
        * Custom key-value labels attached to the entity.
        */
-      labels: z.object({}).catchall(z.unknown()).optional(),
+      labels: z
+        .object({})
+        .catchall(z.unknown())
+        .optional()
+        .describe('Custom key-value labels attached to the entity.'),
       /**
        * Tags attached to the entity.
        */
-      tags: z.array(z.string()).optional(),
+      tags: z.array(z.string()).optional().describe('Tags attached to the entity.'),
       event: z
         .object({
           /**
            * When the event was ingested into Elasticsearch.
            */
-          ingested: z.string().datetime().optional(),
+          ingested: z
+            .string()
+            .datetime()
+            .optional()
+            .describe('When the event was ingested into Elasticsearch.'),
         })
         .strict()
         .optional(),
@@ -530,7 +671,11 @@ export const ServiceEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z.string().datetime().optional(),
+      '@timestamp': z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
       /**
        * Elastic Common Schema (ECS) service fields collected on the entity.
@@ -540,23 +685,26 @@ export const ServiceEntity = lazySchema(() =>
           /**
            * Primary service name.
            */
-          name: z.string().optional(),
+          name: z.string().optional().describe('Primary service name.'),
           /**
            * Service address.
            */
-          address: z.string().optional(),
+          address: z.string().optional().describe('Service address.'),
           /**
            * Service environment (for example, production, staging).
            */
-          environment: z.string().optional(),
+          environment: z
+            .string()
+            .optional()
+            .describe('Service environment (for example, production, staging).'),
           /**
            * Ephemeral identifier of the service.
            */
-          ephemeral_id: z.string().optional(),
+          ephemeral_id: z.string().optional().describe('Ephemeral identifier of the service.'),
           /**
            * Unique identifier of the service.
            */
-          id: z.string().optional(),
+          id: z.string().optional().describe('Unique identifier of the service.'),
           /**
            * Node information for the service.
            */
@@ -565,49 +713,59 @@ export const ServiceEntity = lazySchema(() =>
               /**
                * Node name.
                */
-              name: z.string().optional(),
+              name: z.string().optional().describe('Node name.'),
               /**
                * Node role.
                */
-              role: z.string().optional(),
+              role: z.string().optional().describe('Node role.'),
               /**
                * Node roles.
                */
-              roles: z.array(z.string()).optional(),
+              roles: z.array(z.string()).optional().describe('Node roles.'),
             })
             .strict()
-            .optional(),
+            .optional()
+            .describe('Node information for the service.'),
           /**
            * Current state of the service.
            */
-          state: z.string().optional(),
+          state: z.string().optional().describe('Current state of the service.'),
           /**
            * Service type.
            */
-          type: z.string().optional(),
+          type: z.string().optional().describe('Service type.'),
           /**
            * Service version.
            */
-          version: z.string().optional(),
+          version: z.string().optional().describe('Service version.'),
           risk: EntityRiskSummary.optional(),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Elastic Common Schema (ECS) service fields collected on the entity.'),
       asset: Asset.optional(),
       /**
        * Custom key-value labels attached to the entity.
        */
-      labels: z.object({}).catchall(z.unknown()).optional(),
+      labels: z
+        .object({})
+        .catchall(z.unknown())
+        .optional()
+        .describe('Custom key-value labels attached to the entity.'),
       /**
        * Tags attached to the entity.
        */
-      tags: z.array(z.string()).optional(),
+      tags: z.array(z.string()).optional().describe('Tags attached to the entity.'),
       event: z
         .object({
           /**
            * When the event was ingested into Elasticsearch.
            */
-          ingested: z.string().datetime().optional(),
+          ingested: z
+            .string()
+            .datetime()
+            .optional()
+            .describe('When the event was ingested into Elasticsearch.'),
         })
         .strict()
         .optional(),
@@ -625,7 +783,11 @@ export const GenericEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z.string().datetime().optional(),
+      '@timestamp': z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
       asset: Asset.optional(),
       /**
@@ -671,7 +833,8 @@ export const GenericEntity = lazySchema(() =>
             .optional(),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe('Elastic Common Schema (ECS) cloud fields for cloud-hosted entities.'),
       /**
        * Elastic Common Schema (ECS) orchestrator fields for container-orchestrated entities.
        */
@@ -709,7 +872,10 @@ export const GenericEntity = lazySchema(() =>
           type: z.string().optional(),
         })
         .strict()
-        .optional(),
+        .optional()
+        .describe(
+          'Elastic Common Schema (ECS) orchestrator fields for container-orchestrated entities.'
+        ),
       labels: z.object({}).catchall(z.unknown()).optional(),
       tags: z.array(z.string()).optional(),
       event: z
