@@ -8,6 +8,7 @@
  */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
+import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
@@ -36,6 +37,10 @@ export function handleRouteError(
   error: Error,
   options?: { checkNotFound?: boolean }
 ) {
+  if (error instanceof InvalidAccessControlError) {
+    return response.badRequest({ body: { message: error.message } });
+  }
+
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
   }

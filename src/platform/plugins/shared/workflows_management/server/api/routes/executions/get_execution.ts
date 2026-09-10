@@ -60,6 +60,7 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
           const { includeInput, includeOutput } = request.query;
           const spaceId = spaces.getSpaceId(request);
           const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            request,
             includeInput,
             includeOutput,
           });

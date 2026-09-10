@@ -354,7 +354,8 @@ describe('createWorkflowsInboxProvider', () => {
 
       expect(api.getStepExecution).toHaveBeenCalledWith(
         { executionId: 'run-1', id: 'step-exec-1' },
-        'default'
+        'default',
+        expect.objectContaining({ id: '123' })
       );
       // Verify the lookup happens before the resume call so a stale
       // response cannot race past the check.

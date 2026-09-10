@@ -78,7 +78,7 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     origin: string,
     context: AttachmentResolveContext
   ): Promise<WorkflowYamlData | undefined> => {
-    const workflow = await api.getWorkflow(origin, context.spaceId);
+    const workflow = await api.getWorkflow(origin, context.spaceId, context.request);
     if (!workflow) return undefined;
     return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
   },
@@ -90,7 +90,7 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
       return false;
     }
 
-    const workflow = await api.getWorkflow(attachment.origin, context.spaceId);
+    const workflow = await api.getWorkflow(attachment.origin, context.spaceId, context.request);
     if (
       !workflow ||
       Date.parse(workflow.lastUpdatedAt) <= Date.parse(attachment.origin_snapshot_at)

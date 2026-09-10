@@ -50,14 +50,17 @@ export function registerGetStepExecutionRoute({ router, api, spaces }: RouteDepe
         try {
           const { executionId, stepExecutionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId);
+          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            request,
+          });
           if (!workflowExecution) {
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
           const stepExecution = await api.getStepExecution(
             { executionId, id: stepExecutionId },
-            spaceId
+            spaceId,
+            request
           );
           if (!stepExecution) {
             return response.notFound();

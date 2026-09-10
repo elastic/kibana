@@ -11,8 +11,10 @@ import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ExecutionStatus,
+  getWorkflowPermissions,
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
+  WorkflowRepository,
 } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
@@ -115,6 +117,31 @@ export async function runWorkflow({
     if (meteringService) {
       void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
     }
+    return;
+  }
+
+  const currentWorkflow = await new WorkflowRepository({
+    esClient: dependencies.coreStart.elasticsearch.client.asInternalUser,
+    logger,
+  }).getWorkflow(execution.workflowId, spaceId, { includeGlobal: true });
+  const profileId =
+    currentWorkflow?.access_control?.access_mode === 'private'
+      ? (await dependencies.coreStart.userProfile.getCurrentProfileId({ request: fakeRequest })) ??
+        undefined
+      : undefined;
+  if (
+    currentWorkflow &&
+    !getWorkflowPermissions(currentWorkflow, profileId)[execution.isTestRun ? 'edit' : 'execute']
+  ) {
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.FAILED,
+      finishedAt: new Date().toISOString(),
+      error: {
+        type: 'WorkflowAccessDeniedError',
+        message: 'Workflow execution access was removed.',
+      },
+    });
     return;
   }
 

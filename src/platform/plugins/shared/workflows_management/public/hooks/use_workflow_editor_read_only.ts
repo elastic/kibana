@@ -18,7 +18,9 @@ export const useWorkflowEditorReadOnly = (): boolean => {
   const workflow = useSelector(selectWorkflow);
   const { activeTab } = useWorkflowUrlState();
   const { canCreateWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
-  const canEditWorkflow = workflowId ? canUpdateWorkflow : canCreateWorkflow;
+  const canEditWorkflow = workflowId
+    ? canUpdateWorkflow && workflow?.permissions?.edit !== false
+    : canCreateWorkflow;
 
   // The executions tab shows past execution snapshots, so editing is never meaningful there. The URL
   // is the source of truth so the editor is read-only right away, before the store catches up.

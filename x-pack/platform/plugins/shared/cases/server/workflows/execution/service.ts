@@ -154,7 +154,7 @@ export class CasesWorkflowRunService {
       });
     }
 
-    const workflow = await this.management.getWorkflow(workflowId, spaceId);
+    const workflow = await this.management.getWorkflow(workflowId, spaceId, request);
     if (!workflow) {
       throw Boom.notFound(`Workflow "${workflowId}" was not found.`);
     }

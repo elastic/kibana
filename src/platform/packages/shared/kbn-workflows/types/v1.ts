@@ -14,6 +14,7 @@ import {
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -367,7 +368,7 @@ export const EsWorkflowSchema = z.object({
   version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,
@@ -461,7 +462,8 @@ export interface UpdatedWorkflowResponseDto {
   validationErrors: string[];
 }
 
-export interface WorkflowDetailDto {
+export interface WorkflowDetailDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description?: string;
@@ -487,7 +489,8 @@ export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
 }
 export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
-export interface WorkflowListItemDto {
+export interface WorkflowListItemDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description: string;

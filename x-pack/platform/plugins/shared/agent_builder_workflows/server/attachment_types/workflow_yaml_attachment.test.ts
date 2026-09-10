@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -30,14 +32,14 @@ interface RegisteredAttachmentType {
   ) => { valid: true; data: unknown } | { valid: false; error: string };
   resolve: (
     origin: string,
-    context: { spaceId: string }
+    context: { spaceId: string; request: KibanaRequest }
   ) => Promise<{ yaml: string; workflowId: string; name: string } | undefined>;
   isStale: (
     attachment: VersionedAttachment<
       typeof WORKFLOW_YAML_ATTACHMENT_TYPE,
       WorkflowYamlAttachmentData
     >,
-    context: { spaceId: string }
+    context: { spaceId: string; request: KibanaRequest }
   ) => Promise<boolean>;
   format: (
     attachment: {
@@ -132,16 +134,23 @@ describe('workflow_yaml_attachment', () => {
       const type = registerAndCapture({ getWorkflow });
 
       getWorkflow.mockResolvedValueOnce({ id: 'w1', yaml: 'version: "1"', name: 'My Workflow' });
-      await expect(type.resolve('w1', { spaceId: 'default' })).resolves.toEqual({
+      await expect(
+        type.resolve('w1', { spaceId: 'default', request: httpServerMock.createKibanaRequest() })
+      ).resolves.toEqual({
         yaml: 'version: "1"',
         workflowId: 'w1',
         name: 'My Workflow',
       });
-      expect(getWorkflow).toHaveBeenCalledWith('w1', 'default');
+      expect(getWorkflow).toHaveBeenCalledWith('w1', 'default', expect.any(Object));
 
       getWorkflow.mockResolvedValueOnce(undefined);
-      await expect(type.resolve('missing', { spaceId: 'default' })).resolves.toBeUndefined();
-      expect(getWorkflow).toHaveBeenCalledWith('missing', 'default');
+      await expect(
+        type.resolve('missing', {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBeUndefined();
+      expect(getWorkflow).toHaveBeenCalledWith('missing', 'default', expect.any(Object));
     });
   });
 
@@ -156,7 +165,10 @@ describe('workflow_yaml_attachment', () => {
       const type = registerAndCapture({ getWorkflow });
 
       await expect(
-        type.isStale(createWorkflowAttachment('name: Old workflow'), { spaceId: 'default' })
+        type.isStale(createWorkflowAttachment('name: Old workflow'), {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
       ).resolves.toBe(false);
     });
 
@@ -179,7 +191,12 @@ steps:
     with:
       message: hello`);
 
-      await expect(type.isStale(attachment, { spaceId: 'default' })).resolves.toBe(false);
+      await expect(
+        type.isStale(attachment, {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBe(false);
     });
 
     it('returns true when the persisted workflow YAML has changed', async () => {
@@ -194,6 +211,7 @@ steps:
       await expect(
         type.isStale(createWorkflowAttachment('name: Original workflow'), {
           spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
         })
       ).resolves.toBe(true);
     });

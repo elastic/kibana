@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EsWorkflow, WorkflowDetailDto } from '../..';
+import type { EsWorkflow, WorkflowAccessControl, WorkflowDetailDto } from '../..';
 import { pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
@@ -90,6 +90,10 @@ export class WorkflowRepository {
         typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
       return {
         id: workflowId,
+        ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
+        ...(source.access_control
+          ? { access_control: source.access_control as WorkflowAccessControl }
+          : {}),
         name: source.name as string,
         description: source.description as string | undefined,
         enabled: source.enabled as boolean,

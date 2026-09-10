@@ -33,6 +33,11 @@ import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
+const mockGetCurrentWorkflow = jest.fn().mockResolvedValue(null);
+jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
+  WorkflowRepository: jest.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
+}));
 jest.mock('./setup_dependencies');
 jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
   handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
@@ -137,6 +142,47 @@ describe('runWorkflow', () => {
       });
 
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
+    });
+
+    describe('current workflow access', () => {
+      it('stops a queued run after execution access is removed', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('former-executor');
+        await runWorkflowWithDefaults();
+        expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+          })
+        );
+        expect(workflowRuntime.start).not.toHaveBeenCalled();
+      });
+
+      it('runs a public workflow without requiring an ACL profile', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'public', entries: [] },
+        });
+        await runWorkflowWithDefaults();
+        expect(dependencies.coreStart.userProfile.getCurrentProfileId).not.toHaveBeenCalled();
+        expect(workflowRuntime.start).toHaveBeenCalled();
+      });
+
+      it('resolves the execution profile before checking a private workflow', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('owner');
+        await runWorkflowWithDefaults();
+        expect(dependencies.coreStart.userProfile.getCurrentProfileId).toHaveBeenCalledWith({
+          request: fakeRequest,
+        });
+        expect(workflowRuntime.start).toHaveBeenCalled();
+      });
     });
 
     describe('happy path / wiring', () => {

@@ -1,0 +1,190 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { randomUUID } from 'node:crypto';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+
+apiTest.describe('Workflow access control', { tag: tags.stateful.classic }, () => {
+  const spaceId = `workflow-acl-${randomUUID()}`;
+  let workflowId: string;
+  let readerProfileId: string;
+  let ownerHeaders: Record<string, string>;
+  let readerHeaders: Record<string, string>;
+  const headers = {
+    'kbn-xsrf': 'scout',
+    'x-elastic-internal-origin': 'kibana',
+    'elastic-api-version': '2023-10-31',
+  };
+  const yaml = `name: Access control test
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: message
+    type: console
+    with:
+      message: access test
+`;
+
+  apiTest.beforeAll(async ({ apiClient, samlAuth, kbnClient }) => {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/api/spaces/space',
+      body: { id: spaceId, name: spaceId },
+    });
+    const owner = await samlAuth.asInteractiveUser('admin');
+    const reader = await samlAuth.asInteractiveUser({
+      elasticsearch: { cluster: [] },
+      kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: [spaceId] }],
+    });
+    ownerHeaders = { ...headers, ...owner.cookieHeader };
+    readerHeaders = { ...headers, ...reader.cookieHeader };
+    const profile = await apiClient.get('internal/security/user_profile', {
+      headers: readerHeaders,
+    });
+    expect(profile).toHaveStatusCode(200);
+    readerProfileId = profile.body.uid;
+    const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
+      headers: ownerHeaders,
+      body: { yaml },
+    });
+    expect(created).toHaveStatusCode(200);
+    workflowId = created.body.id;
+  });
+
+  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    if (workflowId) {
+      await apiClient.delete(`s/${spaceId}/api/workflows/workflow/${workflowId}`, {
+        headers: ownerHeaders,
+      });
+    }
+    await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
+  });
+
+  apiTest(
+    'enforces private, viewer, executor, editor, and public access',
+    async ({ apiClient }) => {
+      const accessPath = `s/${spaceId}/internal/workflows/${workflowId}/access_control`;
+      const workflowPath = `s/${spaceId}/api/workflows/workflow/${workflowId}`;
+      const makePrivate = await apiClient.put(accessPath, {
+        headers: ownerHeaders,
+        body: { access_mode: 'private', entries: [] },
+      });
+      expect(makePrivate).toHaveStatusCode(200);
+      expect(await apiClient.get(workflowPath, { headers: readerHeaders })).toHaveStatusCode(404);
+      expect(
+        await apiClient.post(`${workflowPath}/run`, {
+          headers: readerHeaders,
+          body: { inputs: {} },
+        })
+      ).toHaveStatusCode(404);
+      const hiddenList = await apiClient.get(`s/${spaceId}/api/workflows`, {
+        headers: readerHeaders,
+      });
+      expect(hiddenList).toHaveStatusCode(200);
+      expect(hiddenList.body.total).toBe(0);
+      const hiddenStats = await apiClient.get(`s/${spaceId}/api/workflows/stats`, {
+        headers: readerHeaders,
+      });
+      expect(hiddenStats).toHaveStatusCode(200);
+      expect(hiddenStats.body.workflows.enabled).toBe(0);
+
+      let executionId: string | undefined;
+      for (const role of ['viewer', 'executor', 'editor'] as const) {
+        const shared = await apiClient.put(accessPath, {
+          headers: ownerHeaders,
+          body: { access_mode: 'private', entries: [{ type: 'user', id: readerProfileId, role }] },
+        });
+        expect(shared).toHaveStatusCode(200);
+        expect(shared.body.entries[0].added_at).toBeDefined();
+        const read = await apiClient.get(workflowPath, { headers: readerHeaders });
+        expect(read).toHaveStatusCode(200);
+        expect(read.body.permissions).toMatchObject({
+          read: true,
+          execute: role !== 'viewer',
+          edit: role === 'editor',
+          manage: false,
+        });
+        const run = await apiClient.post(`${workflowPath}/run`, {
+          headers: readerHeaders,
+          body: { inputs: {} },
+        });
+        expect(run).toHaveStatusCode(role === 'viewer' ? 403 : 200);
+        if (role !== 'viewer') executionId = run.body.workflowExecutionId;
+        await expect
+          .poll(
+            async () => {
+              if (role === 'viewer') return 'denied';
+              const execution = await apiClient.get(
+                `s/${spaceId}/api/workflows/executions/${executionId}`,
+                {
+                  headers: readerHeaders,
+                }
+              );
+              return execution.body.status;
+            },
+            { timeout: 60000 }
+          )
+          .toBe(role === 'viewer' ? 'denied' : 'completed');
+        const edit = await apiClient.put(workflowPath, { headers: readerHeaders, body: { yaml } });
+        expect(edit).toHaveStatusCode(role === 'editor' ? 200 : 403);
+        const testDraft = await apiClient.post(`s/${spaceId}/api/workflows/test`, {
+          headers: readerHeaders,
+          body: { workflowId, workflowYaml: yaml, inputs: {} },
+        });
+        expect(testDraft).toHaveStatusCode(role === 'editor' ? 200 : 403);
+        expect(
+          await apiClient.put(accessPath, {
+            headers: readerHeaders,
+            body: { access_mode: 'public', entries: [] },
+          })
+        ).toHaveStatusCode(403);
+      }
+
+      expect(
+        await apiClient.put(accessPath, {
+          headers: ownerHeaders,
+          body: { access_mode: 'public', entries: [] },
+        })
+      ).toHaveStatusCode(200);
+      expect(await apiClient.get(workflowPath, { headers: readerHeaders })).toHaveStatusCode(200);
+      expect(
+        await apiClient.post(`${workflowPath}/run`, {
+          headers: readerHeaders,
+          body: { inputs: {} },
+        })
+      ).toHaveStatusCode(200);
+      expect(
+        await apiClient.put(workflowPath, { headers: readerHeaders, body: { yaml } })
+      ).toHaveStatusCode(200);
+      expect(
+        await apiClient.put(accessPath, {
+          headers: ownerHeaders,
+          body: { access_mode: 'private', entries: [] },
+        })
+      ).toHaveStatusCode(200);
+      expect(await apiClient.get(workflowPath, { headers: readerHeaders })).toHaveStatusCode(404);
+      expect(executionId).toBeDefined();
+      expect(
+        await apiClient.get(`s/${spaceId}/api/workflows/executions/${executionId}`, {
+          headers: readerHeaders,
+        })
+      ).toHaveStatusCode(404);
+      const hiddenExecutions = await apiClient.get(
+        `s/${spaceId}/api/workflows/workflow/executions`,
+        {
+          headers: readerHeaders,
+        }
+      );
+      expect(hiddenExecutions).toHaveStatusCode(200);
+      expect(hiddenExecutions.body.total).toBe(0);
+    }
+  );
+});

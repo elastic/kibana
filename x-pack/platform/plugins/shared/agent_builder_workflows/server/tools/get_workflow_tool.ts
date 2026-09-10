@@ -139,7 +139,7 @@ from an automation list directly to \`generate_workflow\` unless it was attached
         };
       }
 
-      const workflow = await api.getWorkflow(workflowId, spaceId);
+      const workflow = await api.getWorkflow(workflowId, spaceId, request);
 
       if (!workflow) {
         return {

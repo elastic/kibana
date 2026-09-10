@@ -26,6 +26,8 @@ export const transformStorageDocumentToWorkflowDto = (
   }
   return {
     id,
+    ...(source.owner_id ? { owner_id: source.owner_id } : {}),
+    ...(source.access_control ? { access_control: source.access_control } : {}),
     name: source.name,
     description: source.description,
     enabled: source.enabled,

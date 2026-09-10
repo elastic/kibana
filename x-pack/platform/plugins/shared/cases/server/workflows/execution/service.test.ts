@@ -100,6 +100,7 @@ describe('CasesWorkflowRunService', () => {
       ids: ['case-1'],
     });
     expect(casesClient.cases.get).toHaveBeenCalledWith({ id: 'case-1' });
+    expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default', request);
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
     expect(ensureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
       management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]

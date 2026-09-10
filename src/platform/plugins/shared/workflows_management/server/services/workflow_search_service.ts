@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
   WorkflowAggsDto,
@@ -155,7 +156,13 @@ export class WorkflowSearchService {
   async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
+    options?: {
+      includeExecutionHistory?: boolean;
+      includeManagedExecutionHistory?: boolean;
+      request?: KibanaRequest;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      executionAccessFilter?: estypes.QueryDslQueryContainer;
+    }
   ): Promise<WorkflowListDto> {
     const {
       size = 100,
@@ -177,6 +184,8 @@ export class WorkflowSearchService {
       deleted: 'not_deleted',
       managed: resolvedManagedFilter,
     });
+
+    if (options?.accessControlFilter) must.push(options.accessControlFilter);
 
     must.push(
       ...buildConditionalTermsFilters([
@@ -251,13 +260,20 @@ export class WorkflowSearchService {
 
   async getWorkflowStats(
     spaceId: string,
-    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
+    options?: {
+      includeExecutionStats?: boolean;
+      includeManagedExecutionStats?: boolean;
+      request?: KibanaRequest;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      executionAccessFilter?: estypes.QueryDslQueryContainer;
+    }
   ): Promise<WorkflowStatsDto> {
     const statsFilter = buildWorkflowFilters({
       space: { id: spaceId, includeGlobal: true },
       deleted: 'not_deleted',
       managed: 'unmanaged',
     });
+    if (options?.accessControlFilter) statsFilter.must.push(options.accessControlFilter);
     const statsResponse = await this.deps.workflowStorage.getClient().search({
       size: 0,
       track_total_hits: true,
@@ -285,6 +301,7 @@ export class WorkflowSearchService {
     if (options?.includeExecutionStats) {
       workflowsStats.executions = await this.getExecutionHistoryStats(spaceId, {
         includeManagedExecutions: options.includeManagedExecutionStats === true,
+        accessControlFilter: options.executionAccessFilter,
       });
     }
 
@@ -313,6 +330,7 @@ export class WorkflowSearchService {
         deleted: 'not_deleted',
         managed: options?.managedFilter ?? 'unmanaged',
       });
+      if (options?.accessControlFilter) aggsFilter.must.push(options.accessControlFilter);
       const aggsResponse = await this.deps.workflowStorage.getClient().search({
         size: 0,
         track_total_hits: true,
@@ -352,7 +370,10 @@ export class WorkflowSearchService {
 
   private async getExecutionHistoryStats(
     spaceId: string,
-    options?: { includeManagedExecutions?: boolean }
+    options?: {
+      includeManagedExecutions?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+    }
   ) {
     try {
       const thirtyDaysAgo = new Date();
@@ -364,6 +385,7 @@ export class WorkflowSearchService {
           bool: {
             must: [
               { range: { createdAt: { gte: thirtyDaysAgo.toISOString() } } },
+              ...(options?.accessControlFilter ? [options.accessControlFilter] : []),
               { term: { spaceId } },
             ],
             ...(options?.includeManagedExecutions

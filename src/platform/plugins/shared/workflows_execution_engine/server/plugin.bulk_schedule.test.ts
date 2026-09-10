@@ -46,6 +46,7 @@ jest.mock('@kbn/workflows', () => {
   return {
     ...actual,
     WorkflowRepository: jest.fn().mockImplementation(() => ({
+      getWorkflow: jest.fn().mockResolvedValue(null),
       areWorkflowsEnabled: mockAreWorkflowsEnabled,
       isWorkflowEnabled: mockIsWorkflowEnabled,
     })),
