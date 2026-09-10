@@ -15,11 +15,14 @@ import {
   getDatasetById,
   getDefaultDatasetIds,
   hasExplicitDatasetSelection,
-  resolveRequestedDatasetIds,
+  resolveRequestedDatasets,
 } from '.';
 
 const getOptInDatasetIds = (): string[] =>
   getAllDatasetIds().filter((id) => getDatasetById(id)?.optIn);
+
+const resolveRequestedDatasetIds = (selectedDatasets: string | undefined): string[] =>
+  resolveRequestedDatasets(selectedDatasets).map(({ id }) => id);
 
 describe('dataset registry', () => {
   it('marks incidents as the only opt-in dataset', () => {
@@ -44,9 +47,11 @@ describe('dataset selection', () => {
     }
   );
 
-  it('selects incidents when explicitly requested', () => {
+  it('resolves selections to the registered dataset configs', () => {
+    expect(resolveRequestedDatasets(INCIDENTS_NAMESPACE)).toEqual([
+      getDatasetById(INCIDENTS_NAMESPACE),
+    ]);
     expect(hasExplicitDatasetSelection(INCIDENTS_NAMESPACE)).toBe(true);
-    expect(resolveRequestedDatasetIds(INCIDENTS_NAMESPACE)).toEqual([INCIDENTS_NAMESPACE]);
   });
 
   it.each(['all', `${INCIDENTS_NAMESPACE},all,${OTEL_DEMO_NAMESPACE}`])(
@@ -69,9 +74,11 @@ describe('dataset selection', () => {
     ]);
   });
 
-  it('reports unknown and available dataset ids', () => {
-    expect(() => resolveRequestedDatasetIds('missing-dataset')).toThrow(
+  it('reports unknown and available dataset ids without naming a caller', () => {
+    expect(() => resolveRequestedDatasets('missing-dataset')).toThrow(
       `Unknown dataset(s): missing-dataset. Available: ${getAllDatasetIds().join(', ')}.`
     );
+    expect(() => resolveRequestedDatasets('missing-dataset')).not.toThrow(/SIGEVENTS_DATASET/);
+    expect(() => resolveRequestedDatasets('missing-dataset')).not.toThrow(/--dataset/);
   });
 });

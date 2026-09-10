@@ -13,7 +13,7 @@ import {
   listAvailableSnapshots,
 } from '../../src/data_generators/replay';
 import type { GcsConfig } from '../../src/data_generators/replay';
-import { getDatasetById, getAllDatasetIds, resolveRequestedDatasetIds } from '../../src/datasets';
+import { getAllDatasetIds, resolveRequestedDatasets } from '../../src/datasets';
 import { readKibanaConfig } from '../lib/kibana';
 
 const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
@@ -57,19 +57,12 @@ run(
       return;
     }
 
-    const datasetsToProbe = resolveRequestedDatasetIds(selectedDatasetIds);
+    const datasetConfigs = resolveRequestedDatasets(selectedDatasetIds);
 
-    if (datasetsToProbe.length === 0) {
+    if (datasetConfigs.length === 0) {
       throw new Error(`No dataset selected. Pass --dataset <id[,id]>, "all", or "list".`);
     }
 
-    const datasetConfigs = datasetsToProbe.map((id) => {
-      const datasetConfig = getDatasetById(id);
-      if (!datasetConfig) {
-        throw new Error(`Dataset "${id}" is registered but has no config`);
-      }
-      return datasetConfig;
-    });
     const unsupportedDatasetIds = datasetConfigs
       .filter(({ replayMode }) => replayMode === 'managed-stream')
       .map(({ id }) => id);
@@ -112,7 +105,7 @@ run(
     );
 
     log.info(`Run: ${SIGEVENTS_SNAPSHOT_RUN} | ES: ${esUrl}`);
-    log.info(`Datasets: ${datasetsToProbe.join(', ')} | Scenario: ${scenario}`);
+    log.info(`Datasets: ${datasetConfigs.map(({ id }) => id).join(', ')} | Scenario: ${scenario}`);
     log.info(`ES|QL probes: ${esqlProbes.length} | Modes: ${modes.join(', ') || '(none)'}`);
 
     for (const datasetConfig of datasetConfigs) {

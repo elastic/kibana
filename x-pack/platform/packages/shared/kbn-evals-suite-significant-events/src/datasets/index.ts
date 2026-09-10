@@ -36,27 +36,30 @@ export const getDefaultDatasetIds = (): string[] => getDefaultDatasets().map(({ 
 export const hasExplicitDatasetSelection = (selectedDatasetIds: string | undefined): boolean =>
   Boolean(selectedDatasetIds?.trim());
 
-export const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): string[] => {
+export const resolveRequestedDatasets = (
+  selectedDatasetIds: string | undefined
+): DatasetConfig[] => {
   const normalizedSelectedDatasetIds = selectedDatasetIds?.trim();
 
   if (!normalizedSelectedDatasetIds) {
-    return getDefaultDatasetIds();
+    return getDefaultDatasets();
   }
 
-  const requestedDatasets = [
+  const requestedDatasetIds = [
     ...new Set(normalizedSelectedDatasetIds.split(',').map((id) => id.trim())),
   ].filter(Boolean);
 
-  if (requestedDatasets.includes(ALL_DATASETS_SELECTOR)) {
-    return getAllDatasetIds();
+  if (requestedDatasetIds.includes(ALL_DATASETS_SELECTOR)) {
+    return [...DATASETS];
   }
 
-  const unknownDatasetIds = requestedDatasets.filter((id) => getDatasetById(id) == null);
-  if (unknownDatasetIds.length > 0) {
-    const available = getAllDatasetIds().join(', ');
+  const requestedDatasets = requestedDatasetIds.flatMap((id) => getDatasetById(id) ?? []);
+  if (requestedDatasets.length !== requestedDatasetIds.length) {
+    const unknownDatasetIds = requestedDatasetIds.filter((id) => getDatasetById(id) == null);
     throw new Error(
-      `Unknown dataset(s): ${unknownDatasetIds.join(', ')}. Available: ${available}. ` +
-        `Set SIGEVENTS_DATASET to a dataset id, a comma-separated list, or "${ALL_DATASETS_SELECTOR}".`
+      `Unknown dataset(s): ${unknownDatasetIds.join(', ')}. ` +
+        `Available: ${getAllDatasetIds().join(', ')}. ` +
+        `Select a dataset id, a comma-separated list, or "${ALL_DATASETS_SELECTOR}".`
     );
   }
 
@@ -64,9 +67,7 @@ export const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefine
 };
 
 export const getActiveDatasets = (): DatasetConfig[] =>
-  resolveRequestedDatasetIds(process.env.SIGEVENTS_DATASET).flatMap(
-    (id) => getDatasetById(id) ?? []
-  );
+  resolveRequestedDatasets(process.env.SIGEVENTS_DATASET);
 
 export const resolveScenarioSnapshotSource = ({
   scenarioId,

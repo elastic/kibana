@@ -120,7 +120,7 @@ run(
   async ({ log, flags }) => {
     const datasetIds = getAllDatasetIds();
     const defaultDatasetId = getDefaultDatasetIds()[0];
-    const datasetId = flags.dataset == null ? defaultDatasetId : String(flags.dataset);
+    const datasetId = String(flags.dataset || defaultDatasetId);
 
     if (datasetId === 'list') {
       log.info(`Registered datasets: ${datasetIds.join(', ')}`);
