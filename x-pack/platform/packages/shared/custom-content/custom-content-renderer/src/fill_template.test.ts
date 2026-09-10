@@ -96,4 +96,25 @@ describe('fillTemplate', () => {
     );
     expect(result).toContain('<p>hello</p>');
   });
+
+  // The engine is fetched over the network now, so a failed load must not be memoized —
+  // otherwise one transient failure breaks every later render until a page reload.
+  it('retries after a failed engine load instead of caching the failure', async () => {
+    jest.resetModules();
+    let attempt = 0;
+    jest.doMock('liquidjs', () => {
+      attempt += 1;
+      if (attempt === 1) {
+        throw new Error('chunk load failed');
+      }
+      return jest.requireActual('liquidjs');
+    });
+
+    const { fillTemplate: fillWithMockedEngine } = await import('./fill_template');
+
+    await expect(fillWithMockedEngine('<p>hi</p>', [], [])).rejects.toThrow('chunk load failed');
+    await expect(fillWithMockedEngine('<p>hi</p>', [], [])).resolves.toBe('<p>hi</p>');
+
+    jest.dontMock('liquidjs');
+  });
 });
