@@ -5,7 +5,7 @@ exports[`Port renders correctly against snapshot 1`] = `
   class="css-q5yr96-PortContainer etea1110"
 >
   <a
-    class="euiLink emotion-euiLink-primary"
+    class="euiLink emotion-euiLink-text"
     data-test-subj="port-or-service-name-link"
     href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=443"
     rel="noopener noreferrer"
