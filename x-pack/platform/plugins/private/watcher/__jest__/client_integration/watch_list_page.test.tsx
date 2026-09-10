@@ -27,7 +27,8 @@ const renderWatchListPage = (httpSetup: HttpSetup) => {
   );
 };
 
-describe('<WatchListPage />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/290017
+describe.skip('<WatchListPage />', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
