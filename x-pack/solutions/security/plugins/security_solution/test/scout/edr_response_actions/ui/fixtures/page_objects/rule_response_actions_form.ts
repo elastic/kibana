@@ -104,13 +104,18 @@ export class RuleResponseActionsFormPage {
     await this.responseActionItem(0).waitFor({ state: 'visible' });
   }
 
-  /** Create form: the keypad is already on the Actions step. */
-  async waitForEndpointActionKeypad(): Promise<void> {
-    await this.endpointActionOption.waitFor({ state: 'visible' });
-  }
-
-  /** Edit form: existing rows hide the keypad behind "Add response action". */
-  async openEndpointActionKeypad(): Promise<void> {
+  /**
+   * The keypad is either already visible, or hidden behind "Add response
+   * action". `ResponseActionAddButton` only reads existing actions on first
+   * paint, so edit can land in either state.
+   */
+  async ensureEndpointActionKeypad(): Promise<void> {
+    await this.addResponseActionButton.or(this.endpointActionOption).waitFor({
+      state: 'visible',
+    });
+    if (await this.endpointActionOption.isVisible()) {
+      return;
+    }
     await this.addResponseActionButton.click();
     await this.endpointActionOption.waitFor({ state: 'visible' });
   }

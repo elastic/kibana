@@ -32,7 +32,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Elastic Defend keypad is disabled', async () => {
-          await ruleResponseActionsForm.waitForEndpointActionKeypad();
+          await ruleResponseActionsForm.ensureEndpointActionKeypad();
           await expect(ruleResponseActionsForm.endpointActionOption).toBeDisabled();
         });
       }
@@ -63,7 +63,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Elastic Defend keypad is disabled on edit', async () => {
-          await ruleResponseActionsForm.openEndpointActionKeypad();
+          await ruleResponseActionsForm.ensureEndpointActionKeypad();
           await expect(ruleResponseActionsForm.endpointActionOption).toBeDisabled();
         });
       }
