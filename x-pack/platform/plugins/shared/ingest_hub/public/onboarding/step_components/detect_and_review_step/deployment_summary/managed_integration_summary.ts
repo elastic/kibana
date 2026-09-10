@@ -17,10 +17,12 @@ export interface SummaryField {
 export function getManagedIntegrationSummaryFields({
   globalRegion,
   cfnStackName,
+  cfnTemplateVersion,
   connectorName,
 }: {
   globalRegion: string | undefined;
   cfnStackName: string | undefined;
+  cfnTemplateVersion: string | undefined;
   connectorName: string | undefined;
 }): SummaryField[] {
   return [
@@ -41,6 +43,11 @@ export function getManagedIntegrationSummaryFields({
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.cloudFormationStack',
       defaultMessage: 'CloudFormation stack',
       value: cfnStackName || null,
+    },
+    {
+      labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.ecfTemplateVersion',
+      defaultMessage: 'ECF template version',
+      value: cfnTemplateVersion || null,
     },
     {
       labelId: 'xpack.ingestHub.detectAndReviewStep.deploymentSummary.field.federatedIdentityName',
