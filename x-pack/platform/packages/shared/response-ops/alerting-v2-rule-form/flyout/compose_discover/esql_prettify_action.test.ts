@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import { prettifyQuery } from '@kbn/esql-utils';
 import { addPrettifyAction } from './esql_prettify_action';
 
@@ -39,7 +39,8 @@ const makeEditor = (value: string) => {
   };
 };
 
-const getRegisteredRun = (editor: { addAction: jest.Mock }) => editor.addAction.mock.calls[0][0].run;
+const getRegisteredRun = (editor: { addAction: jest.Mock }) =>
+  editor.addAction.mock.calls[0][0].run;
 
 describe('addPrettifyAction', () => {
   beforeEach(() => jest.clearAllMocks());

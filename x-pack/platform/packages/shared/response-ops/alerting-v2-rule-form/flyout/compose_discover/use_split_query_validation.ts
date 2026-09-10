@@ -101,10 +101,7 @@ export function useSplitQueryValidation({ baseQuery, callbacks }: UseSplitQueryV
       editorRef.current = editor;
       const modelUri = editor.getModel()?.uri.toString();
       if (modelUri) {
-        messagesDisposableRef.current = registerEditorMessages(
-          modelUri,
-          () => messagesRef.current
-        );
+        messagesDisposableRef.current = registerEditorMessages(modelUri, () => messagesRef.current);
       }
       contentDisposableRef.current = editor.onDidChangeModelContent(() => scheduleValidation());
       scheduleValidation();

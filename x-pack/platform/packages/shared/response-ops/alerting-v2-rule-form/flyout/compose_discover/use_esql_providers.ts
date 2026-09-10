@@ -113,7 +113,10 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
       addInlineSuggestTabKeybindings();
     }
 
-    const codeActions = ESQLLang.getCodeActionProvider?.({ ...stableCallbacks, getModelDependencies });
+    const codeActions = ESQLLang.getCodeActionProvider?.({
+      ...stableCallbacks,
+      getModelDependencies,
+    });
     if (codeActions) {
       disposables.push(monaco.languages.registerCodeActionProvider(ESQL_LANG_ID, codeActions));
     }
