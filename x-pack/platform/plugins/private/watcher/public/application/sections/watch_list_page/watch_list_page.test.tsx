@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import '@kbn/code-editor-mock/jest_helper';
 import type { LocationDescriptorObject } from 'history';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -40,10 +41,6 @@ jest.mock('../../app_context', () => ({
 const useLoadWatchesMock = jest.mocked(useLoadWatches);
 const deleteWatchesMock = jest.mocked(deleteWatches);
 
-/**
- * The `useLoadWatches` deserializer turns the API payload into `Watch` model instances, so the
- * fixtures are deserialized here to keep the mocked hook faithful to the real one.
- */
 const toWatchModels = (watches: Array<ReturnType<typeof getWatch>>) =>
   watches.map((watch) => Watch.fromUpstreamJson({ ...watch }));
 
@@ -86,9 +83,9 @@ const watchListPage = (
   </I18nProvider>
 );
 
-const renderWatchListPage = () => {
+const renderWatchListPage = async () => {
   const { rerender } = render(watchListPage);
-  // Re-rendering the same tree is how the polled `useLoadWatches` refresh is simulated.
+  await act(async () => {});
   return { rerender: () => rerender(watchListPage) };
 };
 
@@ -120,19 +117,19 @@ describe('<WatchListPage />', () => {
   });
 
   describe('WHEN the watches are still loading', () => {
-    it('SHOULD show the loading message', () => {
+    it('SHOULD show the loading message', async () => {
       setLoadWatchesResponse({ isLoading: true });
 
-      renderWatchListPage();
+      await renderWatchListPage();
 
       expect(screen.getByTestId('sectionLoading')).toHaveTextContent('Loading watches…');
     });
   });
 
   describe('WHEN there are no watches', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       setLoadWatchesResponse({ data: [] });
-      renderWatchListPage();
+      await renderWatchListPage();
     });
 
     it('SHOULD display an empty prompt with a button to create a watch', () => {
@@ -144,9 +141,9 @@ describe('<WatchListPage />', () => {
   describe('WHEN there are watches', () => {
     let rerenderWatchListPage: () => void;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       setLoadWatchesResponse({ data: toWatchModels(watches) });
-      ({ rerender: rerenderWatchListPage } = renderWatchListPage());
+      ({ rerender: rerenderWatchListPage } = await renderWatchListPage());
     });
 
     it('SHOULD show an error callout if the search is invalid', async () => {
@@ -164,7 +161,6 @@ describe('<WatchListPage />', () => {
       expect(screen.getByTestId(`watchIdColumn-${watch1.id}`)).toBeInTheDocument();
       expect(screen.getByTestId(`watchNameColumn-${watch1.id}`)).toHaveTextContent(watch1.name);
 
-      // The page polls for watches, so simulate a refresh returning a new set of model instances.
       setLoadWatchesResponse({ data: toWatchModels(watches) });
       rerenderWatchListPage();
 
