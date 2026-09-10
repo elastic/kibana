@@ -88,11 +88,7 @@ export const ObservabilityAlertingApp = ({
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
         <EuiPageSection paddingSize="m">
-          <EpisodesPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-          />
+          <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp} />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
@@ -107,11 +103,7 @@ export const ObservabilityAlertingApp = ({
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
         <EuiPageSection paddingSize="m">
-          <RulesPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-          />
+          <RulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp} />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
