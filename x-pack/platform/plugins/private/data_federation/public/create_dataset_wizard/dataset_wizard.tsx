@@ -151,6 +151,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
+  const [suppressExistingDataSourceAuthNotice, setSuppressExistingDataSourceAuthNotice] =
+    useState(false);
   const dataSourceStepRef = useRef<DataSourceStepHandle>(null);
   const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult>();
   const [isTestConfigPanelOpen, setIsTestConfigPanelOpen] = useState(false);
@@ -264,6 +266,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       const error = await createDataSource(dataSource);
       if (!error) {
+        setSuppressExistingDataSourceAuthNotice(true);
         setIsCreateDataSourceFlyoutOpen(false);
         void startConnectionCheck(dataSource.name.trim());
       }
@@ -676,6 +679,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           onRegionManualChange={handleRegionManualChange}
           isEditMode={isEditMode}
           syncedResourceRef={additionalSettingsSyncedResourceRef}
+          suppressExistingDataSourceAuthNotice={suppressExistingDataSourceAuthNotice}
+          onUserSelectedExistingDataSource={() => setSuppressExistingDataSourceAuthNotice(false)}
         />
       </div>
       {isFlow4 ? (

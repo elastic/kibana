@@ -142,6 +142,18 @@ describe('create_data_source_flyout_authentication', () => {
       expect(applied.settings).not.toHaveProperty('secret_key');
     });
 
+    it('handles missing settings when anonymous selected (s3)', () => {
+      const data: DataSourceWithSecrets = {
+        type: 's3',
+        name: 's3',
+        description: '',
+        settings: undefined as unknown as DataSourceWithSecrets['settings'],
+      };
+
+      const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
+      expect(applied.settings).toEqual({ auth: 'anonymous' });
+    });
+
     it('keeps no credentials or federated fields when anonymous selected (s3)', () => {
       const data: DataSourceWithSecrets = {
         type: 's3',

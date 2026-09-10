@@ -21,6 +21,7 @@ import {
 } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { DatasetFormatField } from '../dataset_format_field';
+import { ExistingDataSourceAuthNotice } from '../existing_data_source_auth_notice';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   isDatasetWizardFlow3,
@@ -56,6 +57,10 @@ export interface LogisticsStepProps {
   onRegionManualChange?: (regionId: string) => void;
   isEditMode?: boolean;
   syncedResourceRef?: MutableRefObject<string | null>;
+  /** Flow 3.9.6: hide the auth notice after the user connects a new source via the flyout. */
+  suppressExistingDataSourceAuthNotice?: boolean;
+  /** Flow 3.9.6: user picked an existing source from the dropdown (not via connect-new flyout). */
+  onUserSelectedExistingDataSource?: () => void;
 }
 
 interface LogisticsStepFieldsContentProps extends LogisticsStepProps {
@@ -76,7 +81,11 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
   isEditMode = false,
   syncedResourceRef,
   showFormatField,
+  suppressExistingDataSourceAuthNotice = false,
+  onUserSelectedExistingDataSource,
 }) => {
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
+
   const { field: dataSourceField, fieldState: dataSourceFieldState } = useController({
     name: 'data_source',
     control,
@@ -162,10 +171,16 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
 
   const onDataSourceChange = useCallback(
     (selectedValue: string) => {
+      onUserSelectedExistingDataSource?.();
       dataSourceField.onChange(selectedValue);
     },
-    [dataSourceField]
+    [dataSourceField, onUserSelectedExistingDataSource]
   );
+
+  const showExistingDataSourceAuthNotice =
+    isFlow396 &&
+    Boolean(dataSourceField.value?.trim()) &&
+    !suppressExistingDataSourceAuthNotice;
 
   const onResourceBlur = useCallback(() => {
     resourceField.onBlur();
@@ -232,9 +247,11 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
               name={dataSourceField.name}
               buttonRef={dataSourceField.ref}
               isInvalid={Boolean(dataSourceFieldState.error)}
-              showConnectionStatus={!isDatasetWizardFlow396(flowVariant)}
+              showConnectionStatus={!isFlow396}
             />
           </EuiFormRow>
+
+          <ExistingDataSourceAuthNotice show={showExistingDataSourceAuthNotice} />
 
           <EuiFormRow
             label={datasetWizardStrings.datasetNameLabel()}

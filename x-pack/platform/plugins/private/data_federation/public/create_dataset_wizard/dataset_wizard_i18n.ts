@@ -224,6 +224,17 @@ export const datasetWizardStrings = {
       defaultMessage: 'Connect new data source',
     }),
 
+  existingDataSourceAuthNoticeTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.existingDataSourceAuthNoticeTitle', {
+      defaultMessage: 'Check authentication for this dataset',
+    }),
+
+  existingDataSourceAuthNoticeBody: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.existingDataSourceAuthNoticeBody', {
+      defaultMessage:
+        'This connection must already be allowed to read the bucket and files you chose. Update the data source in ES|QL Data Federation if access fails.',
+    }),
+
   datasetNameLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.datasetNameLabel', {
       defaultMessage: 'Dataset name',

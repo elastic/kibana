@@ -258,14 +258,21 @@ const optionalNonEmptyStringFields = (
     })
   );
 
+/** React Hook Form may omit `settings` when no nested fields are registered (e.g. S3 anonymous). */
+const normalizeDataSourceSettings = (data: DataSourceWithSecrets): DataSourceWithSecrets => ({
+  ...data,
+  settings: (data.settings ?? {}) as DataSourceWithSecrets['settings'],
+});
+
 /** Applies UI authentication mode to the payload submitted to the API. */
 export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
+  const source = normalizeDataSourceSettings(data);
   const authSettings = mode === 'anonymous' ? { auth: 'anonymous' } : {};
 
-  switch (data.type) {
+  switch (source.type) {
     case 's3': {
       const {
         access_key: _accessKey,
@@ -278,30 +285,30 @@ export const applyAuthenticationModeToDataSource = (
         region: _region,
         auth: _auth,
         ...rest
-      } = data.settings;
+      } = source.settings;
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys') {
         applied = {
-          access_key: data.settings.access_key,
-          secret_key: data.settings.secret_key,
+          access_key: source.settings.access_key,
+          secret_key: source.settings.secret_key,
           auth: 'static_credentials',
         };
       } else if (mode === 'federated_identity') {
         applied = {
-          role_arn: data.settings.role_arn,
+          role_arn: source.settings.role_arn,
           auth: 'federated_identity',
           ...optionalNonEmptyStringFields({
-            jwt_audience: data.settings.jwt_audience,
-            role_session_name: data.settings.role_session_name,
-            sts_endpoint: data.settings.sts_endpoint,
-            sts_region: data.settings.sts_region,
+            jwt_audience: source.settings.jwt_audience,
+            role_session_name: source.settings.role_session_name,
+            sts_endpoint: source.settings.sts_endpoint,
+            sts_region: source.settings.sts_region,
           }),
         };
       }
 
       return {
-        ...data,
+        ...source,
         settings: {
           ...rest,
           ...authSettings,
@@ -317,24 +324,24 @@ export const applyAuthenticationModeToDataSource = (
         service_account_impersonation_url: _serviceAccountImpersonationUrl,
         auth: _auth,
         ...rest
-      } = data.settings;
-      const credentialsText = data.settings.credentials?.trim();
+      } = source.settings;
+      const credentialsText = source.settings.credentials?.trim();
 
       let applied: Record<string, unknown> = {};
       if (mode === 'access_and_secret_keys' && credentialsText) {
         applied = { credentials: credentialsText, auth: 'static_credentials' };
       } else if (mode === 'federated_identity') {
         applied = {
-          sts_audience: data.settings.sts_audience,
+          sts_audience: source.settings.sts_audience,
           auth: 'federated_identity',
           ...optionalNonEmptyStringFields({
-            jwt_audience: data.settings.jwt_audience,
-            service_account_impersonation_url: data.settings.service_account_impersonation_url,
+            jwt_audience: source.settings.jwt_audience,
+            service_account_impersonation_url: source.settings.service_account_impersonation_url,
           }),
         };
       }
       return {
-        ...data,
+        ...source,
         settings: {
           ...rest,
           ...authSettings,
@@ -351,37 +358,37 @@ export const applyAuthenticationModeToDataSource = (
         jwt_audience: _jwtAudience,
         auth: _auth,
         ...rest
-      } = data.settings;
+      } = source.settings;
 
       const base = { ...rest };
 
       if (mode === 'credentials') {
         return {
-          ...data,
+          ...source,
           settings: {
             ...base,
-            account: data.settings.account,
-            key: data.settings.key,
+            account: source.settings.account,
+            key: source.settings.key,
             auth: 'static_credentials',
           },
         };
       }
       if (mode === 'federated_identity') {
         return {
-          ...data,
+          ...source,
           settings: {
             ...base,
-            tenant_id: data.settings.tenant_id,
-            client_id: data.settings.client_id,
+            tenant_id: source.settings.tenant_id,
+            client_id: source.settings.client_id,
             auth: 'federated_identity',
             ...optionalNonEmptyStringFields({
-              jwt_audience: data.settings.jwt_audience,
+              jwt_audience: source.settings.jwt_audience,
             }),
           },
         };
       }
       return {
-        ...data,
+        ...source,
         settings: {
           ...base,
           ...authSettings,
@@ -389,6 +396,6 @@ export const applyAuthenticationModeToDataSource = (
       };
     }
     default:
-      return data;
+      return source;
   }
 };
