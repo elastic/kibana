@@ -124698,6 +124698,9 @@ components:
         alert_updated_by_user_name:
           description: The optional username of the user who updated the attack discovery alert
           type: string
+        alert_workflow_reason:
+          description: The optional kibana.alert.workflow_reason of this attack discovery, which records why the workflow status was last changed
+          type: string
         alert_workflow_status:
           description: The optional kibana.alert.workflow_status of this attack discovery
           type: string
@@ -126191,6 +126194,7 @@ components:
             - isolate
           type: string
         comment:
+          maxLength: 30000
           type: string
       required:
         - command
@@ -126199,11 +126203,14 @@ components:
         type: object
         properties:
           field:
+            maxLength: 2000
             type: string
           value:
             oneOf:
-              - type: string
+              - maxLength: 30000
+                type: string
               - items:
+                  maxLength: 30000
                   type: string
                 type: array
       description: 'Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}'
@@ -127343,6 +127350,7 @@ components:
           type: string
         comment:
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          maxLength: 30000
           type: string
         config:
           type: object
@@ -128403,6 +128411,7 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_EcsMapping'
         pack_id:
           description: 'To specify a query pack, use the packId field. Example: "packId": "processes_elastic"'
+          maxLength: 256
           type: string
         queries:
           items:
@@ -128410,9 +128419,11 @@ components:
           type: array
         query:
           description: 'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
+          maxLength: 30000
           type: string
         saved_query_id:
           description: 'To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"'
+          maxLength: 256
           type: string
         timeout:
           description: 'A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.'
@@ -128424,11 +128435,14 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_EcsMapping'
         id:
           description: Query ID
+          maxLength: 256
           type: string
         platform:
+          maxLength: 256
           type: string
         query:
           description: Query to run
+          maxLength: 30000
           type: string
         removed:
           type: boolean
@@ -128436,6 +128450,7 @@ components:
           type: boolean
         version:
           description: Query version
+          maxLength: 256
           type: string
       required:
         - id
@@ -129670,9 +129685,11 @@ components:
       properties:
         scriptId:
           description: The ID of the script to run (from the Kibana Script library)
+          maxLength: 256
           type: string
         scriptInput:
           description: The arguments to pass to the script (if any)
+          maxLength: 8192
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
@@ -129688,6 +129705,7 @@ components:
           type: string
         comment:
           description: Add a note that explains or describes the action. You can find your comment in the response actions history log
+          maxLength: 30000
           type: string
         config:
           type: object
@@ -130408,6 +130426,7 @@ components:
           type: string
         comment:
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          maxLength: 30000
           type: string
         config:
           type: object
