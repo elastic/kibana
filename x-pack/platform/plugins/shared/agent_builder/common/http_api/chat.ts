@@ -6,9 +6,6 @@
  */
 
 import type {
-  ConversationOrigin,
-  ConversationOriginType,
-  ConversationRoundAuthor,
   ConversationAction,
   ConversationAccessControl,
   ConversationRound,
@@ -41,6 +38,8 @@ export interface ChatRequestBodyPayload {
   project_routing?: string;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Use `never` to persist a message without executing the agent. */
+  trigger_mode?: 'always' | 'never';
 }
 
 export type ChatResponse = Omit<
@@ -56,12 +55,6 @@ export type ChatResponse = Omit<
 };
 
 export type ChatConverseResponse = ConversationWithPermissions | MessagePersistedResponse;
-
-/** Payload for the events-native chat endpoints. */
-export interface EventChatRequestBodyPayload extends ChatRequestBodyPayload {
-  trigger_mode?: 'always' | 'never';
-  origin?: ConversationOrigin & { type: ConversationOriginType; author?: ConversationRoundAuthor };
-}
 
 export interface MessagePersistedResponse {
   conversation_id: string;

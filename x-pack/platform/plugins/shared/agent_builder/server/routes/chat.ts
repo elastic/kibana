@@ -299,11 +299,7 @@ export const conversePayloadSchema = schema.object({
   ),
 });
 
-export const eventConversePayloadSchema = conversePayloadSchema.extends({
-  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
-    defaultValue: 'always',
-    meta: { description: 'Use never to persist a user message without executing the agent.' },
-  }),
+const callbackOriginSchema = {
   origin: schema.maybe(
     schema.object({
       type: schema.literal(ConversationOriginType.Slack),
@@ -317,10 +313,15 @@ export const eventConversePayloadSchema = conversePayloadSchema.extends({
       ),
     })
   ),
-});
+};
 
-export const callbackConversePayloadSchema = eventConversePayloadSchema.extends(
+export const callbackConversePayloadSchema = conversePayloadSchema.extends(
   {
+    ...callbackOriginSchema,
+    trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
+      defaultValue: 'always',
+      meta: { description: 'Use never to persist a user message without executing the agent.' },
+    }),
     execution_idempotency_key: schema.string({
       minLength: 1,
       maxLength: 256,
@@ -551,6 +552,7 @@ export function registerChatRoutes({
             request,
             spaceId,
             messageId: options.executionId,
+            origin: payload.origin,
           });
           return response.ok({ body });
         }

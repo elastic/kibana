@@ -11,7 +11,6 @@ import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
   ChatEventType,
-  ConversationOriginType,
   CONVERSATION_SCHEMA_VERSION,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
@@ -114,11 +113,6 @@ apiTest.describe(
           body: {
             trigger_mode: 'never',
             input: 'Pool limit is now 200',
-            origin: {
-              type: ConversationOriginType.Slack,
-              external_conversation_id: `message-only-${Date.now()}`,
-              author: { id: 'alice', full_name: 'Alice' },
-            },
           },
           responseType: 'json',
         });

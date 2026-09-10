@@ -70,6 +70,12 @@ describe('promptResponseEntrySchema', () => {
 });
 
 describe('conversePayloadSchema', () => {
+  it('rejects trigger_mode', () => {
+    expect(() => conversePayloadSchema.validate({ input: 'Hello', trigger_mode: 'never' })).toThrow(
+      /trigger_mode/
+    );
+  });
+
   it('rejects unsupported conversation access mode values', () => {
     expect(() =>
       conversePayloadSchema.validate({

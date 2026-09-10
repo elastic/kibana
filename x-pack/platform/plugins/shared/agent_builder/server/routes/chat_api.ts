@@ -10,7 +10,8 @@ import { firstValueFrom, toArray, of } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { EventChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
+import { schema } from '@kbn/config-schema';
+import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -19,7 +20,14 @@ import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { getMessageOnlyHandler } from './message_only';
-import { eventConversePayloadSchema } from './chat';
+import { conversePayloadSchema } from './chat';
+
+export const chatPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
+    defaultValue: 'always',
+    meta: { description: 'Use never to persist a user message without executing the agent.' },
+  }),
+});
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -60,14 +68,14 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: eventConversePayloadSchema },
+          request: { body: chatPayloadSchema },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
           const { execution: executionService, conversations: conversationsService } =
             getInternalServices();
-          const payload = request.body as EventChatRequestBodyPayload;
+          const payload = request.body as ChatRequestBodyPayload;
 
           if (payload.trigger_mode === 'never') {
             const body = await persistMessage({
@@ -124,13 +132,13 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: eventConversePayloadSchema },
+          request: { body: chatPayloadSchema },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
           const { execution: executionService } = getInternalServices();
-          const payload = request.body as EventChatRequestBodyPayload;
+          const payload = request.body as ChatRequestBodyPayload;
 
           if (payload.trigger_mode === 'never') {
             const data = await persistMessage({
