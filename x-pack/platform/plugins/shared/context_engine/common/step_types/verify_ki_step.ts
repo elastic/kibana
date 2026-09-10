@@ -65,7 +65,7 @@ export const kiVerifierEntrySchema = z.union([z.enum(KI_VERIFIER_IDS), kiVerifie
 
 export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;
 
-/** The key a verifier entry is deduplicated on; matches the `verifier` id in the summary. */
+/** Returns the id that identifies this verifier in results and duplicate checks. */
 export const getKiVerifierEntryKey = (entry: KiVerifierEntry): string =>
   typeof entry === 'string' ? entry : `${WORKFLOW_VERIFIER_ID_PREFIX}${entry.workflow_id}`;
 

@@ -31,12 +31,12 @@ export const WORKFLOW_VERIFIER_POLL_INTERVAL_MS = 1_000;
 
 export const MAX_REASON_LENGTH = 2048;
 
-/** Max nesting depth for verifier workflows; enforced here because `runWorkflow` bypasses the engine's depth guard. */
+/** How many levels deep a verifier workflow can call other verifier workflows. */
 export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 5;
 
 export const KI_VERIFIER_CHAIN_METADATA_KEY = 'ki_verifier_chain';
 
-/** The workflow ids from the outermost caller down to the current workflow, read from execution metadata. */
+/** Reads the list of caller workflow ids stored in the run's metadata. */
 export const readKiVerifierChain = (metadata: Record<string, unknown> | undefined): string[] => {
   const chain = metadata?.[KI_VERIFIER_CHAIN_METADATA_KEY];
   return Array.isArray(chain) ? chain.filter((id): id is string => typeof id === 'string') : [];
@@ -44,7 +44,7 @@ export const readKiVerifierChain = (metadata: Record<string, unknown> | undefine
 
 const MAX_LINEAGE_LOOKUPS = 10;
 
-/** Returns the full list of caller workflow ids, outermost first; throws if any parent workflow run record cannot be read. */
+/** Returns all workflow ids that triggered this run, from the original caller to this workflow; throws if any run record is missing. */
 export const resolveKiVerifierChain = async ({
   workflowId,
   metadata,
@@ -91,7 +91,7 @@ const workflowVerifierOutputSchema = z.object({
   reason: z.string().optional(),
 });
 
-/** Declared locally to avoid a project reference cycle with the workflows management plugin. */
+/** Defined here instead of importing from the workflows plugin to avoid a circular dependency. */
 export interface KiVerifierWorkflowRunner {
   getWorkflow(workflowId: string, spaceId: string): Promise<WorkflowDetailDto | null>;
   runWorkflow(
@@ -118,13 +118,13 @@ export interface WorkflowVerifierDependencies {
   workflowsManagement: KiVerifierWorkflowRunner;
   request: KibanaRequest;
   spaceId: string;
-  /** Records each verifier workflow run, mirroring the workflow run HTTP route's audit event. */
+  /** Logs an audit event for each verifier workflow that runs. */
   auditLogger?: AuditLogger;
-  /** Workflow ids from the outermost caller down to the calling workflow; forwarded so nested verifiers can detect cycles. */
+  /** The list of workflows that triggered this run, passed to child verifiers so they can detect cycles. */
   verifierChain: string[];
 }
 
-/** Audit action id shared with the workflows management run route. */
+/** Audit event action name, matching what the workflow run API records. */
 export const WORKFLOW_RUN_AUDIT_ACTION = 'workflow_run';
 
 const workflowRunAuditEvent = (
@@ -171,7 +171,7 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 
-// Mirrors the composition rules `workflow.execute` applies for an unmanaged parent.
+// Applies the same checks as workflow.execute would before running the workflow.
 const resolveRunnableWorkflow = async (
   workflowId: string,
   { workflowsManagement, spaceId }: WorkflowVerifierDependencies
@@ -227,7 +227,7 @@ const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerif
   }
 };
 
-/** Runs a workflow as a KI verifier; cancels the child execution if the parent is aborted. */
+/** Runs a workflow as a KI verifier; if the step is cancelled, the running workflow is cancelled too. */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
   dependencies: WorkflowVerifierDependencies
@@ -269,7 +269,7 @@ export const createWorkflowVerifier = (
         workflowsManagement
           .cancelWorkflowExecution(workflowExecutionId, spaceId, request)
           .catch(() => undefined);
-      // Reasons can echo user data, so only the execution id is logged for tracing.
+      // The reason may contain user data, so log only the execution id.
       const settle = (outcome: KiVerifierOutcome): KiVerifierOutcome => {
         if (!outcome.passed) {
           logger.debug(
@@ -290,7 +290,7 @@ export const createWorkflowVerifier = (
               { includeOutput: true }
             );
           } catch (error) {
-            // Execution documents can lag or reads can blip; keep polling until the deadline.
+            // Reads can fail temporarily; keep polling until the deadline.
             logger.debug(
               `KI verifier '${workflowId}' poll failed: ${errorTypeForTelemetry(
                 error
@@ -315,7 +315,7 @@ export const createWorkflowVerifier = (
           await sleep(WORKFLOW_VERIFIER_POLL_INTERVAL_MS, abortSignal);
         }
       } catch (error) {
-        // `signal.reason` may be a non-Error value, so check the signal itself as well.
+        // The abort reason isn't always an Error, so also check the signal directly.
         if (isAbortError(error) || abortSignal?.aborted) {
           logger.debug(
             `KI verifier '${workflowId}' aborted (workflow execution ${workflowExecutionId})`

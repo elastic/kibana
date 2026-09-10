@@ -24,7 +24,7 @@ import { withKiVerificationTelemetry } from './helpers';
 
 export interface WorkflowVerifierStepDependencies {
   workflowsManagement: KiVerifierWorkflowRunner;
-  /** Whether the request may execute workflows in the space, mirroring the run route's privilege. */
+  /** Checks if the request has permission to run workflows in the space. */
   checkExecutePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
 }
 
