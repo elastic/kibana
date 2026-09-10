@@ -60,27 +60,7 @@ const documentsDisplayModeSchema = z
   .optional()
   .meta({
     description:
-      'Discover display option: controls whether documents are shown as a formatted summary ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.',
-  });
-
-const jsonModeSettingsSchema = z
-  .object({
-    hide_nulls: z.boolean().optional().meta({
-      description: 'When true, fields with null values are hidden while in JSON mode.',
-    }),
-    wrap_lines: z.boolean().optional().meta({
-      description:
-        'When false, long values are truncated to a single line instead of wrapping while in JSON mode.',
-    }),
-    default_rendered_nodes: z.number().min(10).max(200).optional().meta({
-      description: 'How many rows each JSON cell renders by default while in JSON mode.',
-    }),
-  })
-  .strict()
-  .optional()
-  .meta({
-    description:
-      'Discover display option: controls how the source column is rendered in JSON mode (`documents_display_mode: "json"`).',
+      'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.',
   });
 
 export const dataTableLimitsSchema = z
@@ -123,24 +103,35 @@ export const dataTableSchema = z
       .optional()
       .meta({
         description:
-          'Discover display option: controls row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
+          'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
+          'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
+          'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
       }),
     documents_display_mode: documentsDisplayModeSchema,
-    json_mode_settings: jsonModeSettingsSchema,
+    hide_nulls: z.boolean().optional().meta({
+      description:
+        'Discover display option: controls whether fields with null values are hidden in JSON document view.',
+    }),
+    wrap_lines: z.boolean().optional().meta({
+      description:
+        'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.',
+    }),
+    default_rendered_nodes: z.number().min(10).max(200).optional().meta({
+      description:
+        'Discover display option: controls how many rows each JSON cell renders by default in JSON document view.',
+    }),
   })
   .strict()
   .meta({ id: 'discoverSessionEmbeddableDataTableSchema' });
@@ -172,21 +163,21 @@ export const panelOverridesSchema = z
       .optional()
       .meta({
         description:
-          'Discover display option: controls row spacing (`compact`, `expanded`, or `normal`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          'Discover display option: controls table row spacing (`compact`, `expanded`, or `normal`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls header row height (number 1–5 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          'Discover display option: controls table header row height (number 1–5 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls data row height (number 1–20 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
+          'Discover display option: controls table data row height (number 1–20 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
       }),
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
@@ -197,7 +188,18 @@ export const panelOverridesSchema = z
         'Discover display option: controls how many documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
     }),
     documents_display_mode: documentsDisplayModeSchema,
-    json_mode_settings: jsonModeSettingsSchema,
+    hide_nulls: z.boolean().optional().meta({
+      description:
+        'Discover display option: controls whether fields with null values are hidden in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+    }),
+    wrap_lines: z.boolean().optional().meta({
+      description:
+        'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+    }),
+    default_rendered_nodes: z.number().min(10).max(200).optional().meta({
+      description:
+        'Discover display option: controls how many rows each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+    }),
   })
   .strict()
   .default({});
