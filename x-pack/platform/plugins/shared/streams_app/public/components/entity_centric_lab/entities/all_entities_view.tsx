@@ -145,6 +145,11 @@ import {
   filterEntitiesByCluster,
   getKubernetesClusterNames,
 } from './kubernetes_cluster_filter';
+import {
+  CLOUD_PROVIDER_FILTER_ALL,
+  CloudProviderFilter,
+  filterEntitiesByProvider,
+} from './cloud_provider_filter';
 import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
@@ -618,8 +623,8 @@ const AllEntitiesViewInner = ({
   // current page (e.g. a Hosts-only attribute after navigating away) collapses
   // back to the default layout rather than rendering an empty grouping.
   const groupByFields = useMemo(
-    () => getGroupByFields(categoryScope, isElasticOn),
-    [categoryScope, isElasticOn]
+    () => getGroupByFields(categoryScope, isElasticOn, phaseVariation as string),
+    [categoryScope, isElasticOn, phaseVariation]
   );
   const activeGroupByFields = useMemo(
     () => resolveGroupByFields(groupBy, groupByFields),
@@ -655,11 +660,19 @@ const AllEntitiesViewInner = ({
   // Kubernetes cluster filter lifted to page level when on the K8s
   // category page so it appears in the toolbar row (the inner card's
   // header is hidden by `hideCategoryHeader`).
-  const isK8sCategoryPage = !!categoryScope && categoryScope === 'kubernetes' && isElasticOn;
+  const showK8sClusterFilter =
+    !!categoryScope && categoryScope === 'kubernetes' && isElasticOn;
   const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_CLUSTER_FILTER_ALL);
   const k8sClusterNames = useMemo(
-    () => (isK8sCategoryPage ? getKubernetesClusterNames(scopedEntities) : []),
-    [isK8sCategoryPage, scopedEntities]
+    () => (showK8sClusterFilter ? getKubernetesClusterNames(scopedEntities) : []),
+    [showK8sClusterFilter, scopedEntities]
+  );
+
+  // Cloud provider filter — shown on the Cloud category page in ElasticOn,
+  // mirrors the K8s cluster filter. Replaces the old CloudSideNav tree.
+  const isCloudCategoryPage = isCloudScoped && isElasticOn;
+  const [cloudProviderFilter, setCloudProviderFilter] = useState<string>(
+    CLOUD_PROVIDER_FILTER_ALL
   );
 
   // Pending-search consumption: the `search` string can't ride the
@@ -846,18 +859,22 @@ const AllEntitiesViewInner = ({
 
   // When on the K8s category page the cluster filter is lifted to page level.
   // Apply it to the filtered slice so counts, summary, and child views all
-  // reflect the selection. All downstream code uses `filteredEntities`.
-  const filteredEntities = useMemo(
+  // reflect the selection.
+  // Kubernetes cluster filter is page-level on the K8s category page so
+  // counts, summary, and child views all reflect the selection.
+  const filteredEntitiesAfterCluster = useMemo(
     () =>
-      isK8sCategoryPage && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL
+      showK8sClusterFilter && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL
         ? filterEntitiesByCluster(
             filteredEntitiesBeforeCluster,
             k8sClusterFilter,
             k8sClusterNames
           )
         : filteredEntitiesBeforeCluster,
-    [filteredEntitiesBeforeCluster, isK8sCategoryPage, k8sClusterFilter, k8sClusterNames]
+    [filteredEntitiesBeforeCluster, showK8sClusterFilter, k8sClusterFilter, k8sClusterNames]
   );
+  // Cloud provider filter lives inside the Cloud section card, not here.
+  const filteredEntities = filteredEntitiesAfterCluster;
 
   // ElasticOn summary "· N Groups": count distinct level-1 buckets under the
   // active grouping (Category by default), so the header stays truthful when
@@ -899,7 +916,7 @@ const AllEntitiesViewInner = ({
     Object.values(activeExtraFilters).some((values) => values.length > 0) ||
     labFilters.length > 0 ||
     search.trim() !== '' ||
-    (isK8sCategoryPage && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL);
+    (showK8sClusterFilter && k8sClusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
   const handleClearFilters = useCallback(() => {
@@ -907,6 +924,7 @@ const AllEntitiesViewInner = ({
     setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
     setLabFilters([]);
     setSearch('');
+    setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
     setK8sClusterFilter(KUBERNETES_CLUSTER_FILTER_ALL);
   }, [setActiveTagFilters]);
 
@@ -1525,7 +1543,7 @@ const AllEntitiesViewInner = ({
                       />
                     </EuiFlexItem>
                   ) : null}
-                  {isK8sCategoryPage && k8sClusterNames.length > 0 ? (
+                  {showK8sClusterFilter && k8sClusterNames.length > 0 ? (
                     <EuiFlexItem grow={false}>
                       <KubernetesClusterFilter
                         clusterNames={k8sClusterNames}
@@ -1625,11 +1643,13 @@ const AllEntitiesViewInner = ({
                   />
                 ) : tableStyleVariation === 'security' ? (
                   <SecurityGroupingView
+                    key={groupBy.join(',')}
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     groupByFields={groupByFields}
                     activeGroupBy={groupBy}
                     refreshTick={refreshTick}
+                    categoryScope={categoryScope}
                   />
                 ) : (
                   <EntitiesListView

@@ -272,7 +272,7 @@ export const ENTITY_HEALTH_METRIC: MetricDescriptor = {
  * Shared "Alerts" categorical metric. Surfaced both as a Color-by option
  * in the hex map and as a dedicated table column. The three states map
  * directly to an entity's `alerts` field: active (red), clear (green),
- * and N/A (grey / no alerts configured).
+ * and "no alert set up" (grey / no alerts configured).
  */
 export const ENTITY_ALERTS_METRIC_ID = 'entity-alerts';
 
@@ -280,21 +280,21 @@ const ENTITY_ALERTS_VALUES: readonly CategoricalValue[] = [
   {
     id: 'active',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.active', {
-      defaultMessage: 'Alerting',
+      defaultMessage: 'Resources with firing alerts',
     }),
     tone: 'danger',
   },
   {
     id: 'clear',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.clear', {
-      defaultMessage: 'OK',
+      defaultMessage: 'Resources with no firing alerts',
     }),
     tone: 'good',
   },
   {
     id: 'na',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.na', {
-      defaultMessage: 'N/A',
+      defaultMessage: 'Resources with no alert set up',
     }),
     tone: 'neutral',
   },
@@ -1132,10 +1132,13 @@ export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescripto
     }
   }
   // Phase 1: remove the Health metric entirely — Alerts is the primary signal.
+  // When localStorage has no entry, fall back to the registry default.
   try {
-    const phase = typeof window !== 'undefined'
+    const raw = typeof window !== 'undefined'
       ? window.localStorage.getItem('elasticOn_v_phase')
       : null;
+    // Import would create a circular dep, so inline the default id.
+    const phase = raw ?? 'phase1'; // must match PHASE_DIMENSION.defaultOption
     if (phase === 'phase1') {
       return metrics.filter((m) => m.id !== ENTITY_HEALTH_METRIC_ID);
     }
@@ -1153,9 +1156,10 @@ export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescripto
 export const getDefaultMetricId = (bucketKey: BucketKey): string => {
   const metrics = getBucketMetrics(bucketKey);
   try {
-    const phase = typeof window !== 'undefined'
+    const raw = typeof window !== 'undefined'
       ? window.localStorage.getItem('elasticOn_v_phase')
       : null;
+    const phase = raw ?? 'phase1'; // must match PHASE_DIMENSION.defaultOption
     if (phase === 'phase1') {
       const alertsMetric = metrics.find((m) => m.id === ENTITY_ALERTS_METRIC_ID);
       if (alertsMetric) return alertsMetric.id;
@@ -1420,7 +1424,8 @@ export const resolveMetricReading = (
   metric: MetricDescriptor,
   statId: StatId,
   entityHealth?: EntityHealthHint,
-  alertHint?: EntityAlertHint
+  alertHint?: EntityAlertHint,
+  alertActiveCount?: number
 ): MetricReading => {
   // Shared "Entity health" metric short-circuits the hash pipeline —
   // its whole point is to mirror the entity's canonical health exactly
@@ -1442,15 +1447,27 @@ export const resolveMetricReading = (
   }
 
   // Shared "Alerts" metric mirrors the entity's alert status directly.
+  // The tooltip displayValue uses the actual count for a richer label
+  // (e.g. "3 firing alerts") instead of the generic legend label.
   if (metric.id === ENTITY_ALERTS_METRIC_ID && metric.kind === 'categorical') {
     const hintId = alertHint ?? 'na';
     const value =
       metric.values.find((candidate) => candidate.id === hintId) ??
       metric.values.find((candidate) => candidate.id === 'na') ??
       metric.values[0];
+    let tooltipLabel: string;
+    if (hintId === 'na') {
+      tooltipLabel = 'No alert set up';
+    } else if (hintId === 'active' && alertActiveCount !== undefined) {
+      tooltipLabel = `${alertActiveCount} firing alert${alertActiveCount > 1 ? 's' : ''}`;
+    } else if (hintId === 'clear') {
+      tooltipLabel = '0 firing alert';
+    } else {
+      tooltipLabel = value.label;
+    }
     return {
       tone: value.tone,
-      displayValue: value.label,
+      displayValue: tooltipLabel,
       displayLabel: value.label,
       categoryId: value.id,
     };

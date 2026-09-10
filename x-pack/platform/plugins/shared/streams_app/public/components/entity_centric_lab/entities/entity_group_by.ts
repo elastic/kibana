@@ -18,6 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import {
+  ENTITY_CATEGORIES,
   TAG_KEY_LABEL,
   getCategoryDescriptor,
   getCategoryExtraFilters,
@@ -32,6 +33,13 @@ export interface GroupByFieldDef {
   readonly label: string;
   /** Bucket label for an entity ("Unknown" when the field is absent). */
   readonly valueOf: (entity: Entity) => string;
+  /**
+   * Optional canonical sort order for bucket labels. When provided,
+   * buckets are ordered by the position of their label in this map
+   * instead of the default count-descending sort. Labels not present
+   * in the map are appended after the canonical ones, alphabetically.
+   */
+  readonly canonicalOrder?: ReadonlyMap<string, number>;
 }
 
 /**
@@ -71,6 +79,63 @@ const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
   CLOUD_PROVIDERS.map((provider) => [provider.id, provider.label])
 );
 
+/** Canonical display order for categories — mirrors the left nav / hex view. */
+const CATEGORY_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map(
+  ENTITY_CATEGORIES.map((cat, idx) => [cat.label, idx])
+);
+
+/**
+ * Canonical display order for entity types — ensures K8s sub-types
+ * render in the same Clusters → Nodes → Namespaces → Deployments →
+ * Pods → Containers order everywhere. Types not listed here fall back
+ * to count-descending (the default).
+ */
+const TYPE_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map([
+  ['K8s cluster', 0],
+  ['K8s node', 1],
+  ['K8s namespace', 2],
+  ['K8s deployment', 3],
+  ['K8s pod', 4],
+  ['K8s container', 5],
+]);
+
+const ALERT_GROUP_LABELS = {
+  firing: i18n.translate(
+    'xpack.streams.entityCentricLab.entities.groupBy.alerts.firing',
+    { defaultMessage: 'Resources with firing alerts' }
+  ),
+  noSetup: i18n.translate(
+    'xpack.streams.entityCentricLab.entities.groupBy.alerts.noSetup',
+    { defaultMessage: 'Resources with no alerts set up' }
+  ),
+  ok: i18n.translate(
+    'xpack.streams.entityCentricLab.entities.groupBy.alerts.ok',
+    { defaultMessage: 'Resources with no firing alerts' }
+  ),
+};
+
+/** Canonical sort: firing first, then no setup, then OK. */
+const ALERT_GROUP_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map([
+  [ALERT_GROUP_LABELS.firing, 0],
+  [ALERT_GROUP_LABELS.noSetup, 1],
+  [ALERT_GROUP_LABELS.ok, 2],
+]);
+
+const alertGroupValue = (entity: Entity): string => {
+  if (!entity.alerts) return ALERT_GROUP_LABELS.noSetup;
+  if (entity.alerts.active > 0) return ALERT_GROUP_LABELS.firing;
+  return ALERT_GROUP_LABELS.ok;
+};
+
+const ALERTS_FIELD: GroupByFieldDef = {
+  id: 'alerts',
+  label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.alerts', {
+    defaultMessage: 'Alerts',
+  }),
+  valueOf: alertGroupValue,
+  canonicalOrder: ALERT_GROUP_CANONICAL_ORDER,
+};
+
 const CORE_FIELDS: readonly GroupByFieldDef[] = [
   {
     id: 'category',
@@ -78,6 +143,7 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
       defaultMessage: 'Category',
     }),
     valueOf: (entity) => getCategoryDescriptor(entity.category)?.label ?? entity.category,
+    canonicalOrder: CATEGORY_CANONICAL_ORDER,
   },
   {
     id: 'type',
@@ -85,6 +151,7 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
       defaultMessage: 'Type',
     }),
     valueOf: (entity) => entity.type || UNKNOWN,
+    canonicalOrder: TYPE_CANONICAL_ORDER,
   },
   {
     id: 'health',
@@ -114,11 +181,19 @@ const tagGroupByFields = (isElasticOn: boolean): GroupByFieldDef[] =>
  * Fields offered in the Group by dropdown. Includes the per-category "extra"
  * attributes (e.g. Hosts → OS / Cloud provider / Service name) when the page is
  * scoped to a category that declares them. ElasticOn omits Application.
+ *
+ * In Phase 1 the "Health" field is replaced by "Alerts" (no health concept).
  */
 export const getGroupByFields = (
   categoryScope?: EntityCategoryId,
-  isElasticOn = false
+  isElasticOn = false,
+  phase: string = 'phase3'
 ): GroupByFieldDef[] => {
+  const isPhase1 = phase === 'phase1';
+  const fields = isPhase1
+    ? CORE_FIELDS.filter((f) => f.id !== 'health')
+    : CORE_FIELDS;
+  const alertsField = isPhase1 ? [ALERTS_FIELD] : [];
   const attrFields: GroupByFieldDef[] = categoryScope
     ? getCategoryExtraFilters(categoryScope).map((def) => ({
         id: `attr:${def.key}`,
@@ -126,7 +201,7 @@ export const getGroupByFields = (
         valueOf: (entity: Entity) => entity.attributes?.[def.key] || UNKNOWN,
       }))
     : [];
-  return [...CORE_FIELDS, ...tagGroupByFields(isElasticOn), ...attrFields];
+  return [...fields, ...alertsField, ...tagGroupByFields(isElasticOn), ...attrFields];
 };
 
 export const getGroupByFieldDef = (
@@ -163,18 +238,34 @@ const groupOneLevel = (entities: readonly Entity[], def: GroupByFieldDef): Entit
     list.push(entity);
     buckets.set(label, list);
   }
-  return Array.from(buckets.entries())
-    .map(([label, rows]) => ({
-      key: label,
-      label,
-      entities: rows,
-      children: [] as EntityGroupNode[],
-    }))
-    .sort((a, b) => {
+  const nodes = Array.from(buckets.entries()).map(([label, rows]) => ({
+    key: label,
+    label,
+    entities: rows,
+    children: [] as EntityGroupNode[],
+  }));
+
+  const order = def.canonicalOrder;
+  if (order) {
+    const fallback = order.size;
+    nodes.sort((a, b) => {
+      const posA = order.get(a.label) ?? fallback;
+      const posB = order.get(b.label) ?? fallback;
+      if (posA !== posB) return posA - posB;
+      // Both items share the same canonical position (or both are unlisted):
+      // fall back to count-descending, then alphabetical.
       const sizeDelta = b.entities.length - a.entities.length;
       if (sizeDelta !== 0) return sizeDelta;
       return a.label.localeCompare(b.label);
     });
+  } else {
+    nodes.sort((a, b) => {
+      const sizeDelta = b.entities.length - a.entities.length;
+      if (sizeDelta !== 0) return sizeDelta;
+      return a.label.localeCompare(b.label);
+    });
+  }
+  return nodes;
 };
 
 /**

@@ -66,11 +66,17 @@ import {
 import { labThings } from '../lab_terminology';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import {
+  CLOUD_PROVIDER_FILTER_ALL,
+  CloudProviderFilter,
+  filterEntitiesByProvider,
+} from './cloud_provider_filter';
+import {
   ENTITY_HEALTH_METRIC,
   STAT_OPTIONS,
   alertHintFromEntity,
   bucketKeyFor,
   effectiveStatForMetric,
+  ENTITY_ALERTS_METRIC_ID,
   findMetric,
   getBucketMetrics,
   getMetricLegend,
@@ -654,13 +660,19 @@ const MetricTileTooltip = ({
             flexShrink: 0,
           }}
         />
-        <span style={{ flex: 1, opacity: 0.85 }}>
-          {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.metricLine', {
-            defaultMessage: '{metricLabel} ({stat})',
-            values: { metricLabel: metric.label, stat: getStatLabel(statId) },
-          })}
-        </span>
-        <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
+        {metric.id === ENTITY_ALERTS_METRIC_ID ? (
+          <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
+        ) : (
+          <>
+            <span style={{ flex: 1, opacity: 0.85 }}>
+              {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.metricLine', {
+                defaultMessage: '{metricLabel} ({stat})',
+                values: { metricLabel: metric.label, stat: getStatLabel(statId) },
+              })}
+            </span>
+            <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
+          </>
+        )}
       </div>
       {sparkline ? (
         <TileSparkline
@@ -777,7 +789,8 @@ const BucketTileRow = ({
         metric,
         effectiveStat,
         entity.health,
-        alertHintFromEntity(entity.alerts)
+        alertHintFromEntity(entity.alerts),
+        entity.alerts?.active
       ),
     }));
     const direction = metric.kind === 'numeric' ? metric.thresholds.direction : 'asc';
@@ -2005,8 +2018,8 @@ const CategoryHeader = ({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h3>{label ?? descriptor?.label ?? category}</h3>
+        <EuiTitle size="xs">
+          <h4>{label ?? descriptor?.label ?? category}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -2490,8 +2503,9 @@ const CloudProviderCard = ({
 };
 
 /**
- * Renders one {@link CloudProviderCard} per provider present in the
- * (already category-scoped) cloud slice, in canonical provider order.
+ * Renders Cloud entities inside a single panel with a provider filter
+ * dropdown (mirroring the Kubernetes cluster selector). When a provider
+ * is selected, only that provider's services are shown.
  */
 const CloudGroupedCards = ({
   entities,
@@ -2500,27 +2514,80 @@ const CloudGroupedCards = ({
   entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const hideHeader = useContext(HideCategoryHeaderContext);
+
+  const [providerFilter, setProviderFilter] = useState<string>(CLOUD_PROVIDER_FILTER_ALL);
+
+  const visibleEntities = useMemo(
+    () => filterEntitiesByProvider(entities, providerFilter),
+    [entities, providerFilter]
+  );
+
   const providerGroups = useMemo(
     () =>
       CLOUD_PROVIDERS.map((provider) => ({
         provider,
-        rows: entities.filter((entity) => entity.provider === provider.id),
+        rows: visibleEntities.filter((entity) => entity.provider === provider.id),
       })).filter((group) => group.rows.length > 0),
-    [entities]
+    [visibleEntities]
   );
 
+  const nestedContentClass = css`
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid ${euiTheme.colors.lightShade};
+  `;
+
   return (
-    <>
-      {providerGroups.map((group) => (
-        <EuiFlexItem key={group.provider.id} grow={false}>
-          <CloudProviderCard
-            provider={group.provider}
-            entities={group.rows}
-            onSelectEntity={onSelectEntity}
-          />
-        </EuiFlexItem>
-      ))}
-    </>
+    <EuiFlexItem grow={false}>
+      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+          {!hideHeader && (
+            <EuiFlexItem grow={false}>
+              <CategoryHeader category="cloud" total={visibleEntities.length} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <CloudProviderFilter value={providerFilter} onChange={setProviderFilter} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <div className={nestedContentClass}>
+          {providerGroups.map((group, index) => (
+            <React.Fragment key={group.provider.id}>
+              {index > 0 ? (
+                <div
+                  style={{
+                    padding: `${euiTheme.size.m} 0`,
+                    borderTop: `1px solid ${euiTheme.colors.lightShade}`,
+                  }}
+                />
+              ) : null}
+              {group.provider.services
+                .filter((service) =>
+                  group.rows.some((entity) => entity.type === service.entityType)
+                )
+                .map((service) => {
+                  const serviceRows = group.rows.filter(
+                    (entity) => entity.type === service.entityType
+                  );
+                  return (
+                    <SubTypeRow
+                      key={service.entityType}
+                      bucketKey={bucketKeyFor('cloud', service.entityType)}
+                      label={service.label}
+                      entities={serviceRows}
+                      onSelectEntity={onSelectEntity}
+                    />
+                  );
+                })}
+            </React.Fragment>
+          ))}
+        </div>
+      </EuiPanel>
+    </EuiFlexItem>
   );
 };
 
@@ -2736,8 +2803,8 @@ const CustomGroupTiles = ({
 const GroupBucketHeader = ({ label, total }: { label: string; total: number }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="s">
-        <h3>{label}</h3>
+      <EuiTitle size="xs">
+        <h4>{label}</h4>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

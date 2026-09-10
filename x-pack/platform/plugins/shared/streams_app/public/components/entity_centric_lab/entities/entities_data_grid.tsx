@@ -87,7 +87,7 @@ const ALERT_BADGE_COLOR: Record<string, 'danger' | 'success' | 'hollow'> = {
   na: 'hollow',
 };
 
-const ALERT_SORT_RANK: Record<string, number> = { active: 0, clear: 1, na: 2 };
+const ALERT_SORT_RANK: Record<string, number> = { active: 0, na: 1, clear: 2 };
 
 const alertStatusId = (entity: Entity): string => {
   if (!entity.alerts) return 'na';
@@ -95,10 +95,10 @@ const alertStatusId = (entity: Entity): string => {
 };
 
 const alertBadgeLabel = (entity: Entity): string => {
-  if (!entity.alerts) return 'N/A';
-  const { total, active } = entity.alerts;
-  if (active > 0) return `Alerting (${active}/${total})`;
-  return `OK (${total}/${total})`;
+  if (!entity.alerts) return 'No alert set up';
+  const { active } = entity.alerts;
+  if (active > 0) return `${active} firing alert${active > 1 ? 's' : ''}`;
+  return '0 firing alert';
 };
 
 const METRIC_PREFIX = 'metric:';
@@ -386,8 +386,13 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
       return entity.name.toLowerCase();
     case 'health':
       return HEALTH_RANK[entity.health];
-    case 'alerts':
-      return ALERT_SORT_RANK[alertStatusId(entity)] ?? 2;
+    case 'alerts': {
+      const rank = ALERT_SORT_RANK[alertStatusId(entity)] ?? 2;
+      const count = entity.alerts?.active ?? 0;
+      // Within the "firing" group, sort by count descending (worst first).
+      // Encode as rank * 10000 - count so higher counts sort earlier.
+      return rank * 10000 - count;
+    }
     case 'application':
     case 'environment':
     case 'team':

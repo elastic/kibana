@@ -64,7 +64,7 @@ export type DetailVariation = 'flyout' | 'largeFlyout' | 'flyoutExpandable' | 'f
 export const DETAIL_DIMENSION: VariationDimension = {
   id: 'detail',
   label: 'Detail view',
-  defaultOption: 'flyout',
+  defaultOption: 'flyoutExpandable',
   options: [
     { id: 'flyout', label: 'Flyout', description: 'Side flyout (current, size M)' },
     { id: 'largeFlyout', label: 'Large flyout', description: 'Wider flyout (size L)' },
@@ -82,7 +82,7 @@ export type PhaseVariation = 'phase1' | 'phase3';
 export const PHASE_DIMENSION: VariationDimension = {
   id: 'phase',
   label: 'Phase',
-  defaultOption: 'phase3',
+  defaultOption: 'phase1',
   options: [
     {
       id: 'phase1',
@@ -102,7 +102,7 @@ export type TableStyleVariation = 'default' | 'security';
 export const TABLE_STYLE_DIMENSION: VariationDimension = {
   id: 'tableStyle',
   label: 'Table style',
-  defaultOption: 'default',
+  defaultOption: 'security',
   options: [
     { id: 'default', label: 'Default', description: 'Current panel-based table layout' },
     {

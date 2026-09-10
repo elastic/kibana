@@ -404,6 +404,12 @@ function createNavTree({
     id: 'entityCentricLab-entitiesLlms',
     link: 'streams:entitiesLlms' as const,
   };
+  // Flat Cloud link for ElasticOn (no nested AWS/GCP/Azure panels — the
+  // provider filter lives on the page instead).
+  const cloudCategoryNodeFlat = {
+    id: 'entityCentricLab-entitiesCloudFlat',
+    link: 'streams:entitiesCloud' as const,
+  };
   // Catch-all bucket for entity types whose `category` field doesn't match a
   // canonical nav section (legacy seed values, "+ Create new category" inputs).
   const otherCategoryNode = {
@@ -802,11 +808,12 @@ function createNavTree({
   const elasticOnCategoryChildren = [
     // ElasticOn is infra-first: APM Services is omitted from
     // `latestCategoryChildrenTop` above; also drop the "Other" catch-all.
+    // Cloud is a single flat link (provider filter lives on the page).
     ...latestCategoryChildrenTop,
     ...latestCategoryChildrenBottom.filter(
       (child) => child.id !== 'entityCentricLab-entitiesOther'
     ),
-    ...latestCloudSubGroups,
+    cloudCategoryNodeFlat,
   ];
 
   const entitiesPanelChildren = superShortTermMode
@@ -822,8 +829,8 @@ function createNavTree({
     : elasticOnEnabled
     ? [
         // ElasticOn: Saved views, All entities, then a single category section
-        // (flat categories + AWS/GCP/Azure collapsible groups, no "Cloud" label
-        // or surrounding dividers), then Manage entity types.
+        // (flat categories + a single Cloud link), then Manage entity types.
+        // Cloud provider filter lives on the Cloud page itself.
         ...(savedViewsSection ? [savedViewsSection] : []),
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
         ...(elasticOnCategoryChildren.length > 0 ? [{ children: elasticOnCategoryChildren }] : []),

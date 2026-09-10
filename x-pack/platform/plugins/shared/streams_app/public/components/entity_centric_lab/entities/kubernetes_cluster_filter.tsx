@@ -26,17 +26,16 @@ import { labThings, useIsElasticOn } from '../lab_terminology';
 export const KUBERNETES_CLUSTER_FILTER_ALL = '__all__';
 
 /**
- * Canonical sub-type ordering. Reading flow goes infra-first
- * (Clusters → Nodes → Namespaces) and workloads after (Pods →
- * Deployments → Containers). Shared so the Grouped grid and List
- * view stay in lock-step.
+ * Canonical sub-type ordering. Infra-first (Clusters → Nodes →
+ * Namespaces → Deployments) then workloads (Pods → Containers).
+ * Shared so the Grouped grid and List view stay in lock-step.
  */
 export const KUBERNETES_SUB_TYPE_ORDER: readonly string[] = [
   'Clusters',
   'Nodes',
   'Namespaces',
-  'Pods',
   'Deployments',
+  'Pods',
   'Containers',
 ];
 

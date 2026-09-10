@@ -768,7 +768,11 @@ export const EntitiesListView = ({
           );
         }
         return (
-          <EuiFlexItem key={`${item.category}-${item.subTypeLabel ?? ''}-${index}`} grow={false}>
+          <EuiFlexItem
+            key={`${item.category}-${item.subTypeLabel ?? ''}-${index}`}
+            grow={false}
+            style={index > 0 ? { marginTop: 8 } : undefined}
+          >
             {enableColumnSettings ? (
               <EntityDataGridSection
                 category={item.category}
