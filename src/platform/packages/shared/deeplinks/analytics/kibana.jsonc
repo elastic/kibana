@@ -2,9 +2,9 @@
   "type": "shared-common",
   "id": "@kbn/deeplinks-analytics",
   "owner": [
-    "@elastic/kibana-data-discovery",
-    "@elastic/kibana-presentation",
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-discover",
+    "@elastic/kibana-dashboards",
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared"

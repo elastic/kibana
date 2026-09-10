@@ -211,7 +211,7 @@
     "src/platform/packages/private/analytics/utils/analytics_collection_utils": "'analytics_collection_utils' should be kebab-case",
     "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case"
   },
-  "@elastic/kibana-esql": {
+  "@elastic/kibana-discover": {
     "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
   },
   "@elastic/kibana-management": {
@@ -239,7 +239,7 @@
     "src/setup_node_env": "'setup_node_env' should be kebab-case",
     "x-pack/dev-tools": "'dev-tools' should be snake_case"
   },
-  "@elastic/kibana-presentation": {
+  "@elastic/kibana-dashboards": {
     "src/platform/packages/shared/presentation/presentation_containers": "'presentation_containers' should be kebab-case",
     "src/platform/packages/shared/presentation/presentation_publishing": "'presentation_publishing' should be kebab-case",
     "src/platform/packages/shared/presentation/presentation_publishing_schemas": "'presentation_publishing_schemas' should be kebab-case",
@@ -302,7 +302,7 @@
     "x-pack/platform/packages/shared/security/plugin_types_public": "'plugin_types_public' should be kebab-case",
     "x-pack/platform/packages/shared/security/plugin_types_server": "'plugin_types_server' should be kebab-case"
   },
-  "@elastic/kibana-visualizations": {
+  "@elastic/kibana-dashboards": {
     "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/schema/serializedValue.ts": "'serializedValue.ts' should be snake_case",
     "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts": "'basicXY.mock.ts' should be snake_case",
     "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/esqlXY.mock.ts": "'esqlXY.mock.ts' should be snake_case",
