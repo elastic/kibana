@@ -50,6 +50,13 @@ const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
   return {
     addAttachmentType: jest.fn(),
     getAttachmentUiDefinition: jest.fn(),
+    getClient: jest.fn(() => ({
+      create: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
+    })),
   };
 };
 
@@ -105,6 +112,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       };
     }),
     addAttachment: jest.fn(),
+    openConversationDetails: jest.fn().mockResolvedValue(jest.fn()),
     removeAttachment: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
     getAgentBuilderAccess: jest.fn().mockResolvedValue({

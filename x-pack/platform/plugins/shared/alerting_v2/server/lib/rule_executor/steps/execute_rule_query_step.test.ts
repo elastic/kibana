@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -44,7 +45,11 @@ const createPluginConfigAccessor = ({
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: maxAlertsPerRun }, query: { maxResponseSize: 50 * 1024 * 1024 } },
+      run: {
+        alerts: { max: maxAlertsPerRun },
+        query: { maxResponseSize: ByteSizeValue.parse('50mb') },
+        maxGroupsPerExecution: 10000,
+      },
     },
     esql: { responseFormat },
   };

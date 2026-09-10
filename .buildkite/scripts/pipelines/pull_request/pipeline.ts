@@ -21,6 +21,7 @@ import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
+  getAffectedPackages,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
@@ -48,6 +49,48 @@ const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
+
+// this covers external dependency changes, which the package graph below cannot see.
+const STORYBOOK_BUILD_CRITICAL_PATHS = [
+  /^yarn\.lock$/,
+  /^pnpm-workspace\.yaml$/,
+  /^\.buildkite\/scripts\/steps\/storybooks\//,
+];
+
+/**
+ * Runs Storybooks when `@kbn/storybook` (or its config package) is in the
+ * downstream closure of the changed packages, so toolchain changes outside
+ * story paths are still covered.
+ */
+const isStorybookBuildAffected = async (): Promise<boolean> => {
+  if (await doAnyChangesMatch(STORYBOOK_BUILD_CRITICAL_PATHS)) {
+    return true;
+  }
+
+  try {
+    // On sparse&shallow checkout, git strategy doesn't work as expected,
+    // we need to manually feed in changed files,
+    // and make sure **/kibana.jsonc and **/tsconfig.json are included in the checkout
+    const prChanges = await getPrChangesCached();
+    const affectedPackages = await getAffectedPackages(undefined, {
+      strategy: 'git',
+      includeDownstream: true,
+      ignoreUncategorizedChanges: true,
+      changedFiles: prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      ),
+    });
+    return (
+      affectedPackages.has('@kbn/storybook') || affectedPackages.has('@kbn/ui-storybook-config')
+    );
+  } catch (error) {
+    console.error(
+      'Failed to resolve affected packages for the Storybook gate, running Storybooks to be safe',
+      error
+    );
+    return true;
+  }
+};
 
 (async () => {
   const pipeline: string[] = [];
@@ -289,7 +332,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /.*stor(ies|y).*/,
         /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:build-storybooks')
+      GITHUB_PR_LABELS.includes('ci:build-storybooks') ||
+      (await isStorybookBuildAffected())
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
     }
@@ -712,6 +756,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
+      );
+    }
+
+    // Run the warm-start memory check systematically; it is non-blocking.
+    if (!scoutTestsOnly) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/warm_start_memory_bench.yml', cancelable)
       );
     }
 

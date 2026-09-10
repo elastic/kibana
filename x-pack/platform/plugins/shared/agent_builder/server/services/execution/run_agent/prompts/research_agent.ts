@@ -14,7 +14,7 @@ import {
   getRelevantSkillsPointerInstructions,
   createRelevantSkillsNoticeMessage,
 } from './utils/skills';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { prepareMessages } from '../utils/to_langchain_messages';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
@@ -37,13 +37,14 @@ export const getResearchAgentPrompt = async (
     conversationTimestamp,
     relevantSkillsEnabled,
     relevantSkills,
+    imageResolver,
   } = params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
   // The summary is sourced from processedConversation.compactionSummary,
   // which is set during the compaction phase in the conversation pipeline.
-  const previousRoundsAsMessages = await convertPreviousRounds({
+  const previousRoundsAsMessages = await prepareMessages({
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
@@ -64,6 +65,7 @@ export const getResearchAgentPrompt = async (
       cycleLimit,
       resultTransformer,
       toolManager,
+      imageResolver,
     })),
   ];
 };
@@ -109,7 +111,7 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions, aiIndices },
+  configuration: { instructions: customInstructions, aiIndexCatalog },
   outputSchema,
   skills,
   spaceId,
@@ -196,7 +198,11 @@ ${
 
 ${conversationMetadataSection}
 
-${getAiIndicesInstructions({ enabled: experimentalFeatures.aiIndices, aiIndices, spaceId })}
+${getAiIndicesInstructions({
+  enabled: experimentalFeatures.aiIndices,
+  catalog: aiIndexCatalog ?? [],
+  spaceId,
+})}
 
 ## INSTRUCTIONS
 

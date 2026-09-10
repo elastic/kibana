@@ -14,8 +14,17 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type { ProcessedConversationRound } from './prepare_conversation';
-import { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+import type { ProcessedConversationRound } from '../../../../test_utils/timeline';
+import {
+  estimateMessagesTokens,
+  estimatePerRoundTokens as estimateTimelineTokens,
+} from './estimate_conversation_tokens';
+import { timelineFromRounds } from '../../../../test_utils/timeline';
+
+const estimatePerRoundTokens = (
+  rounds: ProcessedConversationRound[],
+  deps: Parameters<typeof estimateTimelineTokens>[1]
+) => estimateTimelineTokens(timelineFromRounds(rounds), deps);
 
 const createMockToolManager = (
   summarizers: Map<
@@ -72,6 +81,20 @@ describe('estimateMessagesTokens', () => {
     expect(
       estimateMessagesTokens([new ToolMessage({ content: 'x'.repeat(40), tool_call_id: '1' })])
     ).toBe(10);
+  });
+
+  it('uses a flat cost for image_url content parts instead of character-based estimation', () => {
+    const bigBase64 = 'a'.repeat(400_000); // ~1 MB PNG-scale payload
+    const withImage = estimateMessagesTokens([
+      new HumanMessage({
+        content: [
+          { type: 'text', text: 'What is this?' },
+          { type: 'image_url', image_url: { url: `data:image/png;base64,${bigBase64}` } },
+        ],
+      }),
+    ]);
+    // If we were estimating char/4, this would be ~100k. Flat cost keeps it well below that.
+    expect(withImage).toBeLessThan(2_000);
   });
 });
 

@@ -45,7 +45,8 @@ const annotateStorybookDocsArtifacts = (
   registry: BuildDocsRegistryResult
 ) => {
   const annotation = [
-    '### Storybook docs artifacts',
+    '<details>',
+    '<summary>Storybook docs artifacts</summary>',
     '',
     `* Commit: \`${STORYBOOK_DOCS_ARCHIVE_SHA}\``,
     `* Registry: [${STORYBOOK_DOCS_REGISTRY_FILE}](${STORYBOOK_DOCS_REGISTRY_URL})`,
@@ -66,6 +67,8 @@ const annotateStorybookDocsArtifacts = (
     `    artifact: ${STORYBOOK_DOCS_ARCHIVE_URL}`,
     `    integrity: ${archive.integrity}`,
     '```',
+    '',
+    '</details>',
   ].join('\n');
 
   execSync('buildkite-agent annotate --style info --context storybook-docs-artifacts', {
@@ -81,7 +84,7 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
       logsBuffer.push(chunk.toString());
     };
 
-    const child = spawn('yarn', ['storybook', '--site', storybook], {
+    const child = spawn('pnpm', ['storybook', '--site', storybook], {
       stdio: 'pipe',
       env: {
         ...process.env,

@@ -6,7 +6,11 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
+export {
+  getChartTypeReviewPromptContent,
+  getChartTypeSelectionPromptContent,
+} from './lens/chart_type_guidance';
+export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
 export { selectDefaultTimeRange } from './time_range/select_default_time_range';
@@ -15,3 +19,8 @@ export type {
   SelectedTimeRange,
 } from './time_range/select_default_time_range';
 export { buildVegaConfig } from './vega';
+export { generateVisualizationEsql } from './shared/generate_visualization_esql';
+export type {
+  GenerateVisualizationEsqlParams,
+  GeneratedVisualizationEsql,
+} from './shared/generate_visualization_esql';

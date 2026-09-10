@@ -86,6 +86,7 @@ export const RuleAttributesIncludedInAAD = [
 // update from AAD
 export type RuleAttributesNotPartiallyUpdatable =
   | 'apiKey'
+  | 'uiamApiKey'
   | 'enabled'
   | 'name'
   | 'tags'
@@ -218,6 +219,10 @@ export function setupSavedObjects(
       properties: {
         apiKeyId: {
           type: 'keyword',
+        },
+        uiamApiKeyId: {
+          type: 'keyword',
+          ignore_above: 1024,
         },
         createdAt: {
           type: 'date',

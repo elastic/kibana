@@ -35,6 +35,25 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    Report progress: `summary` describing the timeline and signals you gathered (what deviated, when,
    and which signals were and weren't available). Still no hypotheses.
 
+2.5. **Seed impact.** Before forming hypotheses, write an initial `impact` block:
+
+   - If `inputs.context.alerts` is present (alert-triggered investigation): the alert's
+     `grouping` fields are the known starting point. Extract service-level entities first:
+     `service.name` → entity type "service"; `host.name` → type "host". Skip granular
+     fields (pod names, IPs) unless no service-level entity is available. The YAML message
+     has already established these as confirmed scope — do not re-examine whether they are
+     impacted; they are.
+   - If `inputs.context.causal_features` or `inputs.context.blast_radius` are present
+     (sig-event-triggered investigation): include entity-type entries with a name as impact
+     entities. Set `feature_id` from the KI's `feature_id`. Set `type` to "service" for
+     entity KIs, or from the KI's subtype if available.
+   - If neither: start with an empty `entities` array; the investigation will populate it.
+
+   Keep entity count at 1–3 at this stage. `evidence` on each entity may be omitted here —
+   the seeding just names the entity; evidence is added in step 5.5.
+
+   Report progress: include the seeded `impact` in the snapshot (even if entities is empty).
+
 3. **Form hypotheses.** Based on the context gathered, list every plausible candidate cause worth
    investigating — don't settle on the first plausible one. Each hypothesis starts with
    `status: investigating` and an initial `confidence` reflecting how strongly the evidence so far
@@ -64,15 +83,31 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
    Report progress: the final hypotheses list (none left `investigating`) and `blind_spots`.
 
+5.5. **Finalize impact.** Update `impact.entities` to reflect what the investigation confirmed:
+
+   - Keep entities that evidence supports; remove speculative ones investigation ruled out.
+   - Add entities confirmed during investigation (e.g. a downstream service confirmed by
+     a dependency trace query).
+   - Attach `evidence` to each entity: one ES|QL query (with absolute `time_range`)
+     that most directly shows the failure signal for that entity. Keep `description` to
+     a short label — the query is the artifact the UI renders, not the description text.
+   - Prefer service-level grouping: if three hosts show errors because a shared service
+     is failing, list the service once, not the three hosts.
+   - Target 1–5 entities. If you find yourself listing more than 5, consolidate to the
+     services whose failure signals you confirmed directly.
+
+   Report progress: include the refined `impact`.
+
 6. **Reassess the significant event.** Only when the kickoff "Additional context" contains a
    significant event (`event_uuid`). Its `severity`, `summary`, and `status` are the triage
    verdict, formed before this investigation ran. Compare what you actually confirmed against each,
-   and propose changes via the `significant_event_updates` array — one entry per field that should
+   and provide feedback via the `trigger_feedback` array — one entry per field that should
    change, each identified by its `field` (`severity`, `summary`, or `status`):
 
-   - **severity** — compare the confirmed scope (whether the affected operation still completes,
-     confirmation status) against the tier definitions on the field's `to` output; it can move up
-     or down across the full range.
+   - **severity** — rate the event against the same tier ladder step 7 defines, using the confirmed
+     scope: whether the affected operation still completes, and how broad that impact is. It can
+     move up or down across the full range. Rate only the event here; step 7's top-level `severity`
+     rates the whole situation, so the two match unless the situation reaches past this event.
    - **summary** — rewrite it when the investigation shows the triage summary is wrong, incomplete,
      or over/understates impact.
    - **status** — set `to: "dismissed"` when the findings establish a false alarm or something no
@@ -84,19 +119,67 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    tying the change to the deciding findings; `evidence` lists 1–10 entries in the same shape used
    for hypotheses — see <citing_evidence>, including `time_range` alongside any `esql_query` so the
    reader can open it. Include an entry only when that field should change — omit fields that are already
-   right, and omit the whole array when nothing should change. The changes are applied
-   automatically after the investigation, so only propose what the listed evidence can defend.
+   right, and omit the whole array when nothing should change. This feedback is returned to the
+   trigger owner, so only propose what the listed evidence can defend.
 
-   Report progress: the full state, now including any proposed `significant_event_updates` (or
+   Report progress: the full state, now including any proposed `trigger_feedback` (or
    without the array when the triage verdict stands). Skip this step entirely — and never emit
-   `significant_event_updates` — when there is no significant-event context.
+   `trigger_feedback` — when there is no significant-event context.
 
-7. **Recommend next steps.** Based on the confirmed root cause and its mechanism, write `conclusion`
-   as plain-prose narrative and `recommendations` as concrete, actionable steps — see
-   <results_format> for the exact structure and examples.
+7. **Conclude, rate, and recommend.** Based on the confirmed root cause and its mechanism, write
+   `conclusion` as plain-prose narrative, set `severity`, and write `recommendations` as concrete,
+   actionable steps — see <results_format> for the exact structure and examples.
 
-   Report progress: the final state, including the finished `conclusion` and `recommendations`. This
-   is your last progress report before returning the final structured output — see <output_format>.
+   `severity` rates the situation you investigated, whatever triggered the run. Always set it, in
+   every investigation. It is your own verdict, decided from what you confirmed — never copied from
+   a severity handed to you in "Additional context", which was assigned before this investigation
+   ran. Decide in order and stop at the first match:
+
+   - `80-critical` — a global outage affecting all or most customers; several distinct core
+     operations confirmed blocked at once (for example balance, history, and payment together); a
+     mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the
+     component can no longer perform its primary function — unless the block is confined to a
+     single endpoint or lookup path affecting only that one operation, which stays at `60-high`;
+     or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
+   - `60-high` — the affected operation fails or is blocked on the path you verified, or is broadly
+     degraded, intermittent, or partially failing for a significant subset. A single endpoint or
+     lookup path stays here even when every caller hits it.
+   - `40-medium` — minor confirmed degradation with limited reach, or your evidence never settled
+     whether the operation fails versus only slows. Record that unresolved question in
+     `blind_spots` so the tier is not read as "confirmed minor".
+   - `20-low` — confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a
+     non-issue. Say which of the two in `conclusion`, since "it broke and recovered" and "nothing
+     was ever wrong" lead to different follow-ups.
+
+   Known-ongoing exception: cap an otherwise higher tier at `40-medium` only when your evidence
+   confirms the exact mechanism that memory documents as a known ongoing or transient background
+   condition, at its documented rate. The cap does not apply to a different mechanism on the same
+   component, and a clear rate step-up over that baseline lifts it.
+
+   Dismissing every hypothesis does not by itself mean `20-low`. A confirmed, unexplained failure
+   is rated on the impact you confirmed; only recovery or absence of impact earns `20-low`.
+
+   Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when
+   your evidence leaves genuinely unresolved whether the operation still completes.
+
+   Rate what the evidence shows, not how alarming the trigger looked. The `impact` entities you
+   finalized in step 5.5 are the confirmed blast radius — read the breadth of the tier off them
+   rather than estimating it.
+
+   How it relates to what triggered the run:
+
+   - Alert-triggered (`inputs.context.alerts`): rate the situation the alert exposed, not the
+     alert's own configured severity. An alert set to critical that turns out to be noise is
+     `20-low`; a warning that uncovers a blocked core operation is `60-high` or above.
+   - Significant-event-triggered (`inputs.context.event_uuid`): use these same tiers for the
+     `trigger_feedback` severity entry in step 6. That entry rates only that one event,
+     while `severity` rates the whole situation, so the two match unless the situation reaches past
+     the event — say so in the entry's `reason` when it does.
+   - Neither (free-form issue): nothing extra, rate what you found.
+
+   Report progress: the final state, including the finished `conclusion`, `severity`, and
+   `recommendations`. This is your last progress report before returning the final structured
+   output — see <output_format>.
 
 </workflow>
 
@@ -199,14 +282,14 @@ Rules:
   "evidence": [
     {
       "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-      "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+      "esql_query": "FROM metrics-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
       "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
     },
     {
       "description": "The pool is acquired with a 1ms timeout and the handler re-raises on failure.",
       "code": {
         "source": "github_connector",
-        "repo": "acme/checkout-service",
+        "repo": "acme/orders-api",
         "path": "src/db/pool.ts",
         "host": "github.com",
         "ref": "9f2c1ab3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9"
@@ -284,14 +367,15 @@ not end the investigation. Keep working after calling it.
   into that one sentence (and into `candidate`) instead of adding more sentences. Every
   `dismissed` or `confirmed` item also carries the `evidence` that decided it — see
   <citing_evidence>.
-- `conclusion` / `recommendations` / `blind_spots` / `significant_event_updates`: leave unset until
-  steps 5–7 populate them.
+- `conclusion` / `severity` / `recommendations` / `blind_spots` / `trigger_feedback`: leave
+  unset until steps 5–7 populate them. Populate `impact` progressively from step 2.5 onward — it is
+  always included in progress snapshots once seeded.
 
 **Example — after step 1 (memories loaded, nothing else done yet):**
 
 ```json
 {
-  "summary": "No prior incidents found for checkout-service in memory. Starting context collection.",
+  "summary": "No prior incidents found for orders-api in memory. Starting context collection.",
   "hypotheses": []
 }
 ```
@@ -300,7 +384,7 @@ not end the investigation. Keep working after calling it.
 
 ```json
 {
-  "summary": "Checkout service latency spiked at 14:02, coinciding with a deploy. Three candidates to investigate.",
+  "summary": "orders-api latency spiked at 14:02, coinciding with a deploy. Three candidates to investigate.",
   "hypotheses": [
     {
       "candidate": "Connection pool exhaustion after the 14:02 deploy",
@@ -308,12 +392,12 @@ not end the investigation. Keep working after calling it.
       "status": "investigating"
     },
     {
-      "candidate": "Disk saturation on the checkout-service hosts",
+      "candidate": "Disk saturation on the orders-api hosts",
       "confidence": 0.2,
       "status": "investigating"
     },
     {
-      "candidate": "Downstream payment-service degradation",
+      "candidate": "Downstream payments-service degradation",
       "confidence": 0.3,
       "status": "investigating"
     }
@@ -325,7 +409,7 @@ not end the investigation. Keep working after calling it.
 
 ```json
 {
-  "summary": "Disk saturation ruled out; pool exhaustion confirmed — its utilization spike matches the deploy. Checking payment-service next.",
+  "summary": "Disk saturation ruled out; pool exhaustion confirmed — its utilization spike matches the deploy. Checking payments-service next.",
   "hypotheses": [
     {
       "candidate": "Connection pool exhaustion after the 14:02 deploy",
@@ -335,26 +419,26 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Disk saturation on the checkout-service hosts",
+      "candidate": "Disk saturation on the orders-api hosts",
       "confidence": 0.05,
       "status": "dismissed",
       "reason": "IOPS and disk queue depth stayed flat throughout the incident window.",
       "evidence": [
         {
           "description": "IOPS and queue depth stayed flat across the whole window.",
-          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"orders-api-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Downstream payment-service degradation",
+      "candidate": "Downstream payments-service degradation",
       "confidence": 0.3,
       "status": "investigating"
     }
@@ -376,39 +460,40 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Disk saturation on the checkout-service hosts",
+      "candidate": "Disk saturation on the orders-api hosts",
       "confidence": 0.05,
       "status": "dismissed",
       "reason": "IOPS and disk queue depth stayed flat throughout the incident window.",
       "evidence": [
         {
           "description": "IOPS and queue depth stayed flat across the whole window.",
-          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"orders-api-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Downstream payment-service degradation",
+      "candidate": "Downstream payments-service degradation",
       "confidence": 0.1,
       "status": "dismissed",
-      "reason": "payment-service error rate and latency stayed normal throughout the incident window.",
+      "reason": "payments-service error rate and latency stayed normal throughout the incident window.",
       "evidence": [
         {
-          "description": "payment-service error rate and p99 latency stayed at baseline throughout.",
-          "esql_query": "FROM traces-* | WHERE service.name == \"payment-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
+          "description": "payments-service error rate and p99 latency stayed at baseline throughout.",
+          "esql_query": "FROM traces-* | WHERE service.name == \"payments-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     }
   ],
-  "conclusion": "The 14:02 deploy reduced the connection pool's max size, and checkout-service exhausted the smaller pool under normal load.",
+  "conclusion": "The 14:02 deploy reduced the connection pool's max size, and orders-api exhausted the smaller pool under normal load.",
+  "severity": "60-high",
   "recommendations": [
     {
       "title": "Revert the pool-size config change, or raise it back above the previous value",
@@ -416,30 +501,45 @@ not end the investigation. Keep working after calling it.
     },
     {
       "title": "Add an alert on connection pool utilization exceeding 80%",
-      "description": "Would have caught this before checkout was fully blocked."
+      "description": "Would have caught this before orders-api was fully blocked."
     }
   ],
   "blind_spots": [
     {
-      "title": "No profiling data for the checkout-service process",
+      "title": "No profiling data for the orders-api process",
       "description": "Would have confirmed whether the pool exhaustion was compounded by a leak versus pure demand."
     }
   ],
-  "significant_event_updates": [
+  "trigger_feedback": [
     {
       "field": "severity",
-      "from": "60-high",
-      "to": "80-critical",
-      "reason": "Checkout is fully blocked for every user who reaches it, not intermittently degraded as triaged.",
+      "from": "40-medium",
+      "to": "60-high",
+      "reason": "orders-api is fully blocked on the verified path for every user who reaches it, not the minor degradation triage assumed. One core operation, so it stays below critical.",
       "evidence": [
         {
-          "description": "Zero successful checkout completions and a 100% error rate on the checkout path during the incident window.",
-          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
+          "description": "Zero successful order completions and a 100% error rate on the orders path during the incident window.",
+          "esql_query": "FROM traces | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
           "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     }
-  ]
+  ],
+  "impact": {
+    "entities": [
+      {
+        "name": "orders-api",
+        "type": "service",
+        "feature_id": "orders-api-service",
+        "stream_name": "logs-generic.acme-prod",
+        "evidence": {
+          "description": "orders-api error rate during incident window",
+          "esql_query": "FROM traces-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\" BY BUCKET(@timestamp, 5 minute)",
+          "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      }
+    ]
+  }
 }
 ```
 
@@ -478,7 +578,7 @@ entry has a `title` stating the action, an optional `description` for why it hel
 to carry it out, and an optional `code` field with the raw command/config/code (no markdown fences —
 just the source). For example:
 
-- `{ "title": "Roll back the deployment that introduced the regression", "code": "kubectl rollout undo deployment/checkout-service" }`
+- `{ "title": "Roll back the deployment that introduced the regression", "code": "kubectl rollout undo deployment/orders-api" }`
 - `{ "title": "Increase the connection pool size in the service's Docker Compose config", "code": "environment:\n  - DB_MAX_POOL_SIZE=50" }`
 - `{ "title": "Add monitoring to catch this earlier next time", "description": "Alert when connection pool utilization exceeds 80% for 5 minutes." }`
 
@@ -504,18 +604,28 @@ been reporting via `investigation_progress_report`:
   see <citing_evidence>.
 - **conclusion**: Plain-prose narrative naming the root cause — see <results_format> for the exact
   formatting rules and examples.
+- **severity**: Always set, whatever triggered the run. How severe the situation you investigated
+  is — decided from what you confirmed, never copied from a severity handed to you in "Additional
+  context". See step 7 in <workflow> for the tier ladder, the known-ongoing cap, the tie-break, and
+  how it relates to the trigger.
 - **recommendations**: Concrete, actionable steps to resolve or mitigate the issue — see
   <results_format> for the field shapes and examples.
 - **blind_spots**: Actionable knowledge gaps discovered during the investigation — data sources
   that were missing or inaccessible and would have helped diagnose the issue (e.g. `{ "title": "No
   traces for the cart service", "description": "..." }`), not incident-specific facts (e.g. "the pod
   crashed").
-- **significant_event_updates**: Optional — only when investigating a significant event whose
+- **trigger_feedback**: Optional — only when investigating a significant event whose
   context included `severity`/`summary`/`status`, and only for the fields your findings show are
   wrong (see step 6 in <workflow>). An array with one entry per changed field, each carrying its
   `field`, `from` (the triage value), `to` (the proposed value), a `reason` tied to the deciding
-  findings, and a non-empty `evidence` list. The changes are applied automatically, so include an
-  entry only when the listed evidence can defend it, and omit the array when the triage verdict
-  stands.
+  findings, and a non-empty `evidence` list. This is feedback for the trigger owner, not a direct
+  mutation, so include an entry only when the listed evidence can defend it, and omit the array
+  when the triage verdict stands.
+- **impact**: Optional. `{ entities[] }` — a list of at most 10 services or components confirmed
+  or strongly suspected to be affected. Each entity has `name` (required), optional `type` (default
+  "service"), optional `feature_id` (KI reference), and optional `evidence` (one ES|QL query +
+  absolute time range preferred — description is a short label). Seed from alert grouping or sig
+  event causal features; finalize after hypotheses are settled. Keep entity count to 1–5; prefer
+  services over granular infrastructure. Omit the field entirely only when no signals exist.
 
 </output_format>
