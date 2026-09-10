@@ -127,31 +127,6 @@ Callers import `FlyoutTemplate` from `@kbn/flyout-template` and need a `kbn_refe
 
 For what each zone accepts — sections, subsections, accordions, tabs, header badges/meta blocks/info blocks, footer actions — see the [`@kbn/flyout-template` README](../../../../platform/packages/shared/shared-ux/flyout/template/README.md).
 
-#### `useFlyoutTemplate`
-
-React callers can use the `useFlyoutTemplate` hook instead of calling `open` directly. It owns the `OverlayRef`, tracks whether the flyout is open, closes it if the component unmounts, and returns focus to a trigger element.
-
-```tsx
-const triggerRef = useRef<HTMLButtonElement>(null);
-const details = useFlyoutTemplate(overlays, { returnFocusTo: triggerRef });
-
-<EuiButton
-  buttonRef={triggerRef}
-  onClick={() =>
-    details.open({ size: 'm' }, () => (
-      <FlyoutTemplate>
-        <FlyoutTemplate.Header title="Alert details" />
-        <FlyoutTemplate.Body>
-          <AlertSummary alertId={alertId} />
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    ))
-  }
->
-  {details.isOpen ? 'Close details' : 'Open details'}
-</EuiButton>;
-```
-
 ### `overlays.openSystemFlyout` (deprecated)
 
 > **Deprecated.** Use [`overlays.openFlyoutTemplate`](#overlaysopenflyouttemplate) instead.
