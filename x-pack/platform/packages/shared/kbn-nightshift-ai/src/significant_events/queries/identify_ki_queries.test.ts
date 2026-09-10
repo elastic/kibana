@@ -435,6 +435,36 @@ describe('identifyKIQueries agent', () => {
       ]);
     });
 
+    it('keeps valid siblings when query rewriting fails', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [
+          [
+            scriptedQuery('malformed query', { esql: undefined }),
+            scriptedQuery('FROM logs | WHERE message == "valid"'),
+          ],
+        ],
+      });
+
+      expect(result.queries).toEqual([
+        expect.objectContaining({
+          esql: 'FROM logs, logs.* | WHERE message == "valid"',
+        }),
+      ]);
+
+      const response = addQueriesResponses[0] as {
+        response: {
+          queries: Array<{ status: string; failureReason?: string }>;
+        };
+      };
+      expect(response.response.queries).toEqual([
+        expect.objectContaining({
+          status: 'Failed to add',
+          failureReason: 'validation_error',
+        }),
+        expect.objectContaining({ status: 'Added' }),
+      ]);
+    });
+
     it('forwards maxDurationMs to the reasoning agent', async () => {
       const { capturedOptions } = await runIdentifyKIQueries({
         maxDurationMs: 300000,

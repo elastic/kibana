@@ -220,25 +220,27 @@ export async function validateKIQueries({
   const acceptedQueries: ValidatedKIQuery[] = [];
   const results = await Promise.all(
     queries.map(async (query): Promise<QueryValidationResult> => {
-      const rewritten = replaceFromSources(query.esql, targetSources);
-      const exactDuplicate = collectQueryAttempts
-        ? normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))
-        : undefined;
-
-      if (requireQueryIntent && typeof query.expects_matches !== 'boolean') {
-        hasIntentFailures = true;
-        return {
-          query,
-          valid: false,
-          status: 'Failed to add',
-          failureReason: 'missing_intent',
-          exactDuplicate,
-          error:
-            'Missing intent: set "expects_matches" to true when the query is grounded in evidence currently present and should match rows in the evaluation window, or to false when it deliberately watches for a plausible future condition not present in the current evidence.',
-        };
-      }
+      let exactDuplicate: boolean | undefined;
 
       try {
+        const rewritten = replaceFromSources(query.esql, targetSources);
+        exactDuplicate = collectQueryAttempts
+          ? normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))
+          : undefined;
+
+        if (requireQueryIntent && typeof query.expects_matches !== 'boolean') {
+          hasIntentFailures = true;
+          return {
+            query,
+            valid: false,
+            status: 'Failed to add',
+            failureReason: 'missing_intent',
+            exactDuplicate,
+            error:
+              'Missing intent: set "expects_matches" to true when the query is grounded in evidence currently present and should match rows in the evaluation window, or to false when it deliberately watches for a plausible future condition not present in the current evidence.',
+          };
+        }
+
         const derivedType = deriveQueryType(query.esql);
         const warnings: string[] = [];
         if (query.type && query.type !== derivedType) {
