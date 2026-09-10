@@ -221,7 +221,7 @@ apiTest.describe(
                 )}`
             );
           } catch (err) {
-            log.warn(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
+            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
           }
 
           if (attempt < maxAttempts) {
