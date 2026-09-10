@@ -54,7 +54,11 @@ describe('verify_ki workflow step', () => {
     } as unknown as ReturnType<typeof startServices.uiSettings.asScopedToClient>);
     coreSetup.getStartServices.mockResolvedValue([startServices, {}, undefined]);
     telemetry = mockKiStepTelemetry();
-    workflowsManagement = { executeWorkflow: jest.fn(), cancelWorkflowExecution: jest.fn() };
+    workflowsManagement = {
+      executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
+      getWorkflowExecution: jest.fn(),
+      cancelWorkflowExecution: jest.fn(),
+    };
   });
 
   const makeDefinition = (withWorkflows = true) =>
@@ -74,8 +78,9 @@ describe('verify_ki workflow step', () => {
   };
 
   const completedWith = (output: unknown) => ({
-    workflowExecutionId: 'exec-1',
-    execution: { status: ExecutionStatus.COMPLETED, error: null, context: { output } },
+    status: ExecutionStatus.COMPLETED,
+    error: null,
+    context: { output },
   });
 
   it('passes a KI with valid ES|QL', async () => {
@@ -226,7 +231,7 @@ describe('verify_ki workflow step', () => {
 
     it('runs the listed built-in and workflow verifiers in declaration order', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.executeWorkflow
+      workflowsManagement.getWorkflowExecution
         .mockResolvedValueOnce(completedWith({ passed: true }) as never)
         .mockResolvedValueOnce(completedWith({ passed: false, reason: 'has PII' }) as never);
 
@@ -246,7 +251,7 @@ describe('verify_ki workflow step', () => {
 
     it('runs only the listed verifiers', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.executeWorkflow.mockResolvedValue(
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: true }) as never
       );
 
@@ -271,7 +276,7 @@ describe('verify_ki workflow step', () => {
 
     it('runs the workflow in the executing space with the step request', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.executeWorkflow.mockResolvedValue(
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: true }) as never
       );
 
@@ -283,7 +288,7 @@ describe('verify_ki workflow step', () => {
           inputs: { ki: { title: 'x' } },
           request: { headers: {} },
           spaceId: 'space-a',
-          completionTimeoutSec: 15,
+          waitForCompletion: false,
         })
       );
     });
@@ -313,7 +318,7 @@ describe('verify_ki workflow step', () => {
 
     it('reports custom verifier failures by kind, not id', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.executeWorkflow.mockResolvedValue(
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: false, reason: 'nope' }) as never
       );
 

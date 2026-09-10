@@ -7,27 +7,29 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { KiVerifierContext } from '../types';
 import type { KiVerifierWorkflowRunner } from './workflow_verifier';
-import { createWorkflowVerifier, WORKFLOW_VERIFIER_TRIGGERED_BY } from './workflow_verifier';
-
-type ExecuteWorkflowResult = Awaited<ReturnType<KiVerifierWorkflowRunner['executeWorkflow']>>;
+import {
+  createWorkflowVerifier,
+  WORKFLOW_VERIFIER_POLL_INTERVAL_MS,
+  WORKFLOW_VERIFIER_TRIGGERED_BY,
+} from './workflow_verifier';
 
 const request = { headers: {} } as unknown as KibanaRequest;
 const spaceId = 'space-a';
+const executionId = 'exec-1';
 
 const execution = (
   status: ExecutionStatus,
   overrides: Partial<{ output: unknown; error: { type: string; message: string } }> = {}
-): ExecuteWorkflowResult => ({
-  workflowExecutionId: 'exec-1',
-  execution: {
+): WorkflowExecutionDto =>
+  ({
     status,
     error: overrides.error ?? null,
     context: 'output' in overrides ? { output: overrides.output } : undefined,
-  } as unknown as ExecuteWorkflowResult['execution'],
-});
+  } as unknown as WorkflowExecutionDto);
 
 describe('createWorkflowVerifier', () => {
   let workflowsManagement: jest.Mocked<KiVerifierWorkflowRunner>;
@@ -40,14 +42,20 @@ describe('createWorkflowVerifier', () => {
     );
 
   beforeEach(() => {
+    jest.useFakeTimers();
     workflowsManagement = {
-      executeWorkflow: jest.fn(),
+      executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: executionId }),
+      getWorkflowExecution: jest.fn(),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
     context = {
       esClient: elasticsearchServiceMock.createElasticsearchClient(),
       logger: loggingSystemMock.createLogger(),
     };
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('prefixes the id with workflow:', () => {
@@ -76,37 +84,52 @@ describe('createWorkflowVerifier', () => {
   });
 
   describe('verify', () => {
-    it('runs the workflow with the KI as input and waits for completion', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
-        execution(ExecutionStatus.COMPLETED, { output: { passed: true } })
+    const completed = (output: unknown) => {
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        execution(ExecutionStatus.COMPLETED, { output })
       );
+    };
+
+    it('dispatches the workflow with the KI as input without waiting', async () => {
+      completed({ passed: true });
       const ki = { type: 'runbook', title: 'x' };
 
-      await makeVerifier({ timeout_sec: 30 }).verify(ki, context);
+      await makeVerifier().verify(ki, context);
 
       expect(workflowsManagement.executeWorkflow).toHaveBeenCalledWith({
         workflowId: 'my-verifier',
         inputs: { ki },
         request,
         spaceId,
-        waitForCompletion: true,
-        completionTimeoutSec: 30,
+        waitForCompletion: false,
         triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
+      });
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(executionId, spaceId, {
+        includeOutput: true,
       });
     });
 
+    it('polls until the execution reaches a terminal status', async () => {
+      workflowsManagement.getWorkflowExecution
+        .mockResolvedValueOnce(execution(ExecutionStatus.RUNNING))
+        .mockResolvedValueOnce(execution(ExecutionStatus.RUNNING))
+        .mockResolvedValueOnce(execution(ExecutionStatus.COMPLETED, { output: { passed: true } }));
+
+      const pending = makeVerifier().verify({}, context);
+      await jest.advanceTimersByTimeAsync(WORKFLOW_VERIFIER_POLL_INTERVAL_MS * 2);
+
+      await expect(pending).resolves.toEqual({ passed: true });
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledTimes(3);
+    });
+
     it('passes when the workflow output passed', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
-        execution(ExecutionStatus.COMPLETED, { output: { passed: true } })
-      );
+      completed({ passed: true });
 
       await expect(makeVerifier().verify({}, context)).resolves.toEqual({ passed: true });
     });
 
     it('fails with the workflow reason', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
-        execution(ExecutionStatus.COMPLETED, { output: { passed: false, reason: 'has PII' } })
-      );
+      completed({ passed: false, reason: 'has PII' });
 
       await expect(makeVerifier().verify({}, context)).resolves.toEqual({
         passed: false,
@@ -115,9 +138,7 @@ describe('createWorkflowVerifier', () => {
     });
 
     it('fails with a default reason when the workflow gave none', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
-        execution(ExecutionStatus.COMPLETED, { output: { passed: false } })
-      );
+      completed({ passed: false });
 
       await expect(makeVerifier().verify({}, context)).resolves.toEqual({
         passed: false,
@@ -126,9 +147,7 @@ describe('createWorkflowVerifier', () => {
     });
 
     it('fails on malformed output', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
-        execution(ExecutionStatus.COMPLETED, { output: { verdict: 'ok' } })
-      );
+      completed({ verdict: 'ok' });
 
       await expect(makeVerifier().verify({}, context)).resolves.toEqual({
         passed: false,
@@ -137,7 +156,9 @@ describe('createWorkflowVerifier', () => {
     });
 
     it('fails on missing output', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(execution(ExecutionStatus.COMPLETED));
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        execution(ExecutionStatus.COMPLETED)
+      );
 
       await expect(makeVerifier().verify({}, context)).resolves.toEqual({
         passed: false,
@@ -146,7 +167,7 @@ describe('createWorkflowVerifier', () => {
     });
 
     it('fails with the execution error when the workflow failed', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
         execution(ExecutionStatus.FAILED, { error: { type: 'Error', message: 'step blew up' } })
       );
 
@@ -156,8 +177,8 @@ describe('createWorkflowVerifier', () => {
       });
     });
 
-    it('fails when the workflow is waiting for input', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
+    it('fails and cancels when the workflow is waiting for input', async () => {
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
         execution(ExecutionStatus.WAITING_FOR_INPUT)
       );
 
@@ -165,31 +186,52 @@ describe('createWorkflowVerifier', () => {
         passed: false,
         reason: expect.stringContaining('waiting for input'),
       });
+      expect(workflowsManagement.cancelWorkflowExecution).toHaveBeenCalledWith(
+        executionId,
+        spaceId,
+        request
+      );
     });
 
     it('fails and cancels the execution on timeout', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue({
-        workflowExecutionId: 'exec-1',
-        timedOut: true,
-      });
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        execution(ExecutionStatus.RUNNING)
+      );
 
-      await expect(makeVerifier().verify({}, context)).resolves.toEqual({
+      const pending = makeVerifier({ timeout_sec: 2 }).verify({}, context);
+      await jest.advanceTimersByTimeAsync(2_000);
+
+      await expect(pending).resolves.toEqual({
         passed: false,
-        reason: "Verifier workflow 'my-verifier' timed out after 60s",
+        reason: "Verifier workflow 'my-verifier' timed out after 2s",
       });
       expect(workflowsManagement.cancelWorkflowExecution).toHaveBeenCalledWith(
-        'exec-1',
+        executionId,
+        spaceId,
+        request
+      );
+    });
+
+    it('cancels the execution and rethrows when aborted mid-poll', async () => {
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        execution(ExecutionStatus.RUNNING)
+      );
+      const controller = new AbortController();
+
+      const pending = makeVerifier().verify({}, { ...context, abortSignal: controller.signal });
+      await jest.advanceTimersByTimeAsync(WORKFLOW_VERIFIER_POLL_INTERVAL_MS / 2);
+      controller.abort();
+
+      await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+      expect(workflowsManagement.cancelWorkflowExecution).toHaveBeenCalledWith(
+        executionId,
         spaceId,
         request
       );
     });
 
     it('truncates long reasons', async () => {
-      workflowsManagement.executeWorkflow.mockResolvedValue(
-        execution(ExecutionStatus.COMPLETED, {
-          output: { passed: false, reason: 'x'.repeat(5000) },
-        })
-      );
+      completed({ passed: false, reason: 'x'.repeat(5000) });
 
       const outcome = await makeVerifier().verify({}, context);
 
@@ -203,7 +245,7 @@ describe('createWorkflowVerifier', () => {
       await expect(makeVerifier().verify({}, context)).rejects.toThrow('workflow not found');
     });
 
-    it('throws before running when already aborted', async () => {
+    it('throws before dispatching when already aborted', async () => {
       const controller = new AbortController();
       controller.abort();
 

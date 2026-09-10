@@ -7,18 +7,21 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import {
   DEFAULT_KI_VERIFIER_TIMEOUT_SEC,
   type KiVerifierWorkflow,
 } from '../../../common/step_types/verify_ki_step';
+import { isAbortError } from '../../telemetry';
 import type { KiVerifier, KiVerifierOutcome, KnowledgeIndicator } from '../types';
 
 /** Prefix distinguishing workflow verifier ids from built-in ids in the summary. */
 export const WORKFLOW_VERIFIER_ID_PREFIX = 'workflow:';
 
 export const WORKFLOW_VERIFIER_TRIGGERED_BY = 'context-engine:verify-ki';
+
+export const WORKFLOW_VERIFIER_POLL_INTERVAL_MS = 1_000;
 
 const MAX_REASON_LENGTH = 2048;
 
@@ -39,13 +42,13 @@ export interface KiVerifierWorkflowRunner {
     request: KibanaRequest;
     spaceId: string;
     waitForCompletion: boolean;
-    completionTimeoutSec: number;
     triggeredBy: string;
-  }): Promise<{
-    workflowExecutionId: string;
-    execution?: WorkflowExecutionDto;
-    timedOut?: boolean;
-  }>;
+  }): Promise<{ workflowExecutionId: string }>;
+  getWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string,
+    options?: { includeOutput?: boolean }
+  ): Promise<WorkflowExecutionDto | null>;
   cancelWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -64,12 +67,59 @@ const fail = (reason: string): KiVerifierOutcome => ({
   reason: reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH)}…` : reason,
 });
 
-/** Runs a user-authored workflow as a KI verifier, failing closed on any outcome other than a clean pass. */
+/** Resolves after `ms`, or rejects with the signal's reason as soon as it aborts. */
+const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+
+const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerifierOutcome => {
+  switch (execution.status) {
+    case ExecutionStatus.COMPLETED: {
+      const parsed = workflowVerifierOutputSchema.safeParse(execution.context?.output);
+      if (!parsed.success) {
+        return fail(
+          `Verifier workflow '${workflowId}' returned invalid output; expected { passed: boolean, reason?: string }`
+        );
+      }
+      if (parsed.data.passed) {
+        return { passed: true };
+      }
+      return fail(
+        parsed.data.reason ?? `Verifier workflow '${workflowId}' failed without a reason`
+      );
+    }
+    case ExecutionStatus.FAILED:
+      return fail(
+        `Verifier workflow '${workflowId}' failed: ${execution.error?.message ?? 'unknown error'}`
+      );
+    case ExecutionStatus.WAITING_FOR_INPUT:
+      return fail(
+        `Verifier workflow '${workflowId}' is waiting for input; verifier workflows must complete without human input`
+      );
+    default:
+      return fail(`Verifier workflow '${workflowId}' ended with status '${execution.status}'`);
+  }
+};
+
+/**
+ * Runs a user-authored workflow as a KI verifier, failing closed on any outcome
+ * other than a clean pass. The child execution is polled with the step's abort
+ * signal, so cancelling the parent cancels the child and rethrows promptly.
+ */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
   { workflowsManagement, request, spaceId }: WorkflowVerifierDependencies
 ): KiVerifier => {
-  const completionTimeoutSec = timeoutSec ?? DEFAULT_KI_VERIFIER_TIMEOUT_SEC;
+  const timeoutMs = (timeoutSec ?? DEFAULT_KI_VERIFIER_TIMEOUT_SEC) * 1000;
 
   return {
     id: `${WORKFLOW_VERIFIER_ID_PREFIX}${workflowId}`,
@@ -83,49 +133,45 @@ export const createWorkflowVerifier = (
     async verify(ki, { abortSignal }) {
       abortSignal?.throwIfAborted();
 
-      const { workflowExecutionId, execution, timedOut } =
-        await workflowsManagement.executeWorkflow({
-          workflowId,
-          inputs: { ki },
-          request,
-          spaceId,
-          waitForCompletion: true,
-          completionTimeoutSec,
-          triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
-        });
+      const { workflowExecutionId } = await workflowsManagement.executeWorkflow({
+        workflowId,
+        inputs: { ki },
+        request,
+        spaceId,
+        waitForCompletion: false,
+        triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
+      });
+      const cancel = () =>
+        workflowsManagement
+          .cancelWorkflowExecution(workflowExecutionId, spaceId, request)
+          .catch(() => undefined);
+      const deadline = Date.now() + timeoutMs;
 
-      if (timedOut || !execution) {
-        await workflowsManagement.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
-        return fail(`Verifier workflow '${workflowId}' timed out after ${completionTimeoutSec}s`);
-      }
-
-      switch (execution.status) {
-        case ExecutionStatus.COMPLETED: {
-          const parsed = workflowVerifierOutputSchema.safeParse(execution.context?.output);
-          if (!parsed.success) {
-            return fail(
-              `Verifier workflow '${workflowId}' returned invalid output; expected { passed: boolean, reason?: string }`
-            );
-          }
-          if (parsed.data.passed) {
-            return { passed: true };
-          }
-          return fail(
-            parsed.data.reason ?? `Verifier workflow '${workflowId}' failed without a reason`
+      try {
+        while (true) {
+          const execution = await workflowsManagement.getWorkflowExecution(
+            workflowExecutionId,
+            spaceId,
+            { includeOutput: true }
           );
+          if (execution && isTerminalStatus(execution.status)) {
+            return toOutcome(workflowId, execution);
+          }
+          if (execution?.status === ExecutionStatus.WAITING_FOR_INPUT) {
+            await cancel();
+            return toOutcome(workflowId, execution);
+          }
+          if (Date.now() >= deadline) {
+            await cancel();
+            return fail(`Verifier workflow '${workflowId}' timed out after ${timeoutMs / 1000}s`);
+          }
+          await sleep(WORKFLOW_VERIFIER_POLL_INTERVAL_MS, abortSignal);
         }
-        case ExecutionStatus.FAILED:
-          return fail(
-            `Verifier workflow '${workflowId}' failed: ${
-              execution.error?.message ?? 'unknown error'
-            }`
-          );
-        case ExecutionStatus.WAITING_FOR_INPUT:
-          return fail(
-            `Verifier workflow '${workflowId}' is waiting for input; verifier workflows must complete without human input`
-          );
-        default:
-          return fail(`Verifier workflow '${workflowId}' ended with status '${execution.status}'`);
+      } catch (error) {
+        if (isAbortError(error)) {
+          await cancel();
+        }
+        throw error;
       }
     },
   };
