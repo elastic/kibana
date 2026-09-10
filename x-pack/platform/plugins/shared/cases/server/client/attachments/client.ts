@@ -8,7 +8,7 @@
 import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/domain';
 import type {
   DocumentResponse,
-  AttachmentsFindResponse,
+  AttachmentsFindResponseV2,
   BulkGetAttachmentsResponseV2,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -61,7 +61,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponse>;
+  find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponseV2>;
   /**
    * Retrieves all documents attached to a case given a single case ID
    */
