@@ -56,10 +56,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
               defaultMessage: 'Undo',
             })}
             color="text"
-            size="s"
-            css={css`
-              width: ${euiTheme.size.l};
-            `}
+            size="xs"
             disabled={historyConfig.undo.disabled}
             iconType={'undo'}
             onClick={historyConfig.undo.onClick}
@@ -83,10 +80,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
               defaultMessage: 'Redo',
             })}
             color="text"
-            size="s"
-            css={css`
-              width: ${euiTheme.size.l};
-            `}
+            size="xs"
             disabled={historyConfig.redo.disabled}
             iconType={'redo'}
             onClick={historyConfig.redo.onClick}
