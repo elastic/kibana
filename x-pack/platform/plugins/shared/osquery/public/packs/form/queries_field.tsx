@@ -296,6 +296,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           setSelectedItems={setTableSelectedItems}
           packSchedule={packSchedule}
           packMinOsqueryVersion={packMinOsqueryVersion}
+          packPlatform={packPlatform}
         />
       ) : null}
       <EuiSpacer />

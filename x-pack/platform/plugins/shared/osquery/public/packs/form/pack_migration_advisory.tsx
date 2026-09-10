@@ -15,6 +15,26 @@ interface PackMigrationAdvisoryProps {
 
 const SESSION_KEY_PREFIX = 'osquery.pack.migration-advisory-dismissed.';
 
+// `sessionStorage` property access itself throws `SecurityError` when storage
+// is blocked (all-cookies-blocked, sandboxed iframe). The read happens in a
+// `useState` initializer, so an unguarded throw would take down the whole pack
+// form rather than just this callout. Same guard as `history_filter_storage`.
+const readDismissed = (key: string): boolean => {
+  try {
+    return sessionStorage.getItem(key) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const writeDismissed = (key: string): void => {
+  try {
+    sessionStorage.setItem(key, 'true');
+  } catch {
+    // storage unavailable — the callout simply reappears next session
+  }
+};
+
 /**
  * Shown once per session when an existing pack has non-uniform per-query
  * `version` or `(snapshot, removed)` pairs — indicating the user may want
@@ -22,10 +42,10 @@ const SESSION_KEY_PREFIX = 'osquery.pack.migration-advisory-dismissed.';
  */
 export const PackMigrationAdvisory: React.FC<PackMigrationAdvisoryProps> = ({ packId }) => {
   const sessionKey = SESSION_KEY_PREFIX + packId;
-  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem(sessionKey) === 'true');
+  const [dismissed, setDismissed] = useState(() => readDismissed(sessionKey));
 
   const handleDismiss = useCallback(() => {
-    sessionStorage.setItem(sessionKey, 'true');
+    writeDismissed(sessionKey);
     setDismissed(true);
   }, [sessionKey]);
 

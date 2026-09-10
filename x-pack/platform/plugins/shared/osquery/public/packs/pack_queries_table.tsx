@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +38,12 @@ export interface PackQueriesTableProps {
    * it rather than claiming "All".
    */
   packMinOsqueryVersion?: string;
+  /**
+   * Pack-level OS default, same reasoning as `packMinOsqueryVersion`: a query
+   * with no `platform` of its own is narrowed to these OSes on the agent, so
+   * showing all three badges would overstate where it runs.
+   */
+  packPlatform?: string;
 }
 
 const DISABLED_ROW_STYLE: React.CSSProperties = { opacity: 0.6 };
@@ -81,6 +88,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   setSelectedItems,
   packSchedule,
   packMinOsqueryVersion,
+  packPlatform,
 }) => {
   const renderScheduleColumn = useCallback(
     (_: unknown, item: PackQueryFormData) => {
@@ -162,24 +170,42 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
     [onEditClick]
   );
 
-  const renderPlatformColumn = useCallback((platform: string) => {
-    const ids = platform
-      ? platform
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [...PLATFORM_IDS];
+  // A query with no `platform` of its own inherits the pack-level default, so
+  // falling back to all three badges would overstate where it runs — the same
+  // display dishonesty the Min version column below avoids. Inherited badges
+  // are marked so they stay distinguishable from a per-query platform.
+  const renderPlatformColumn = useCallback(
+    (platform: string) => {
+      const effectivePlatform = platform || packPlatform;
+      const inherited = !platform && !!packPlatform;
+      const ids = effectivePlatform
+        ? effectivePlatform
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [...PLATFORM_IDS];
 
-    return (
-      <EuiFlexGroup gutterSize="xs" wrap>
-        {ids.map((id) => (
-          <EuiFlexItem key={id} grow={false}>
-            <EuiBadge color="hollow">{isPlatformId(id) ? OS_LABELS[id] : id}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
-  }, []);
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap alignItems="center">
+          {ids.map((id) => (
+            <EuiFlexItem key={id} grow={false}>
+              <EuiBadge color="hollow">{isPlatformId(id) ? OS_LABELS[id] : id}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+          {inherited ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.osquery.pack.queriesTable.osInheritedLabel', {
+                  defaultMessage: '(pack default)',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      );
+    },
+    [packPlatform]
+  );
 
   // A query with no `version` of its own inherits the pack-level floor, so
   // rendering "All" for it would misreport what actually runs on the agent —
