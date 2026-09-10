@@ -207,6 +207,7 @@ interface HarnessOptions {
   features?: Feature[];
   /** When set, `get_stream_features` rejects with this error. */
   getFeaturesError?: Error;
+  getFeaturesErrorOnCall?: number;
   /** Wall-clock budget forwarded to the reasoning agent. */
   maxDurationMs?: number;
   /** Overrides the ES client, so tests can script probe/validation responses. */
@@ -227,8 +228,14 @@ const scriptedQuery = (
 });
 
 const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
+  let getFeaturesCallCount = 0;
   const getFeatures = jest.fn(async () => {
-    if (options.getFeaturesError) {
+    getFeaturesCallCount += 1;
+    if (
+      options.getFeaturesError &&
+      (options.getFeaturesErrorOnCall === undefined ||
+        options.getFeaturesErrorOnCall === getFeaturesCallCount)
+    ) {
       throw options.getFeaturesError;
     }
     return (options.features ?? [
@@ -421,6 +428,68 @@ describe('identifyKIQueries agent', () => {
   });
 
   describe('query attempt diagnostics', () => {
+    it('validates feature links from authoritative state without callback closure state', async () => {
+      const { result } = await runIdentifyKIQueries({
+        callGetStreamFeatures: false,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message:"failure"')]],
+      });
+
+      expect(result.queries).toEqual([
+        expect.objectContaining({
+          esql: 'FROM logs, logs.* | WHERE message : "failure"',
+          features: [{ id: 'feat-1', run_id: undefined }],
+        }),
+      ]);
+    });
+
+    it('keeps valid siblings when query rewriting fails', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [
+          [
+            scriptedQuery('malformed query', { esql: undefined }),
+            scriptedQuery('FROM logs | WHERE message == "valid"'),
+          ],
+        ],
+      });
+
+      expect(result.queries).toEqual([
+        expect.objectContaining({
+          esql: 'FROM logs, logs.* | WHERE message == "valid"',
+        }),
+      ]);
+
+      const response = addQueriesResponses[0] as {
+        response: {
+          queries: Array<{ status: string; failureReason?: string }>;
+        };
+      };
+      expect(response.response.queries).toEqual([
+        expect.objectContaining({
+          status: 'Failed to add',
+          failureReason: 'validation_error',
+        }),
+        expect.objectContaining({ status: 'Added' }),
+      ]);
+    });
+
+    it('reports authoritative feature reload failures', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        getFeaturesError: new Error('ES unavailable'),
+        getFeaturesErrorOnCall: 2,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "failure"')]],
+      });
+
+      expect(result.queries).toHaveLength(0);
+      expect(result.toolUsage.get_stream_features.failures).toBe(0);
+      expect(result.toolUsage.add_queries.failures).toBe(1);
+      expect(addQueriesResponses[0]).toEqual({
+        response: {
+          queries: [],
+          error: 'ES unavailable',
+        },
+      });
+    });
+
     it('forwards maxDurationMs to the reasoning agent', async () => {
       const { capturedOptions } = await runIdentifyKIQueries({
         maxDurationMs: 300000,
