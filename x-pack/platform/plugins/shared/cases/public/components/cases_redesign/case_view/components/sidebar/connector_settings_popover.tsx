@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { useConfigureCasesNavigation } from '../../../../../common/navigation/hooks';
-import * as redesignI18n from '../../../translations';
+import * as redesignI18n from '../../../../case_view/translations';
 import { SidebarSectionSettingsButton } from './sidebar_section_settings_button';
 
 export interface ConnectorSettingsPopoverProps {

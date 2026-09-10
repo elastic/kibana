@@ -16666,7 +16666,6 @@
     "xpack.cases.casesRedesign.details.reportedBy": "报告者：{name}",
     "xpack.cases.casesRedesign.details.showFields": "显示字段",
     "xpack.cases.casesRedesign.details.showMetrics": "显示指标",
-    "xpack.cases.casesRedesign.details.title": "案例详情（重新设计）",
     "xpack.cases.casesRedesign.details.unknownReporter": "未知",
     "xpack.cases.casesRedesign.details.viewingCase": "查看案例：{caseId}。此页面正在建设中。",
     "xpack.cases.casesRedesign.list.title": "案例列表（重新设计）",

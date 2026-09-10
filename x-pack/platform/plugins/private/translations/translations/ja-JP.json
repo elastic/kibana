@@ -16661,7 +16661,6 @@
     "xpack.cases.casesRedesign.details.reportedBy": "報告者：{name}",
     "xpack.cases.casesRedesign.details.showFields": "フィールドを表示",
     "xpack.cases.casesRedesign.details.showMetrics": "メトリックを表示",
-    "xpack.cases.casesRedesign.details.title": "ケース詳細（再設計）",
     "xpack.cases.casesRedesign.details.unknownReporter": "不明",
     "xpack.cases.casesRedesign.details.viewingCase": "ケースを表示：{caseId}このページは作成中です。",
     "xpack.cases.casesRedesign.list.title": "ケースリスト（再設計）",

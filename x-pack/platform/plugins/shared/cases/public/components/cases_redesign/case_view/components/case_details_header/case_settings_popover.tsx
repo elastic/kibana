@@ -11,7 +11,6 @@ import { EuiPopoverTitle, EuiSpacer, EuiSwitch, EuiWrappingPopover } from '@elas
 import { useCasesFeatures } from '../../../../../common/use_cases_features';
 import * as i18n from '../../../../case_view/translations';
 import { EXTRACT_OBSERVABLES_LABEL } from '../../../../../common/translations';
-import { SHOW_METRICS } from '../../../translations';
 
 interface CaseSettingsPopoverProps {
   syncAlerts: boolean;
@@ -85,7 +84,7 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
       )}
       {hasMetrics && (
         <EuiSwitch
-          label={SHOW_METRICS}
+          label={i18n.SHOW_METRICS}
           checked={showMetrics}
           onChange={(e) => onShowMetricsChange(e.target.checked)}
           compressed

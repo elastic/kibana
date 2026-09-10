@@ -11,7 +11,6 @@ import { isEmpty } from 'lodash/fp';
 import { useEuiTheme } from '@elastic/eui';
 import { useCaseViewNavigation } from '../../../../../../common/navigation';
 import * as caseViewI18n from '../../../../../case_view/translations';
-import * as redesignI18n from '../../../../translations';
 import { CaseUserAvatar } from '../../../../../user_profiles/user_avatar';
 import type { UserInfoWithAvatar } from '../../../../../user_profiles/types';
 
@@ -65,7 +64,7 @@ export const UserAvatarWithEmail: React.FC<UserAvatarWithEmailProps> = ({
     return <CaseUserAvatar size="s" userInfo={userInfo} />;
   }
 
-  const clickToSendEmailLabel = redesignI18n.CLICK_TO_SEND_EMAIL(email ?? '');
+  const clickToSendEmailLabel = caseViewI18n.CLICK_TO_SEND_EMAIL(email ?? '');
 
   return (
     <a

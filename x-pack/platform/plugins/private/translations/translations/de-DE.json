@@ -16617,7 +16617,6 @@
     "xpack.cases.casesRedesign.details.reportedBy": "Berichtet von: {name}",
     "xpack.cases.casesRedesign.details.showFields": "Felder anzeigen",
     "xpack.cases.casesRedesign.details.showMetrics": "Metriken anzeigen",
-    "xpack.cases.casesRedesign.details.title": "Ticketdetails (Neugestaltung)",
     "xpack.cases.casesRedesign.details.unknownReporter": "Unbekannt",
     "xpack.cases.casesRedesign.details.viewingCase": "Ticket anzeigen: {caseId}. Diese Seite befindet sich im Aufbau.",
     "xpack.cases.casesRedesign.list.title": "Ticketliste (Neugestaltung)",

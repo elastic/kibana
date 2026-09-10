@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../../../translations';
+import * as i18n from '../../../../case_view/translations';
 
 interface SidebarSectionSettingsButtonProps {
   onClick?: () => void;
