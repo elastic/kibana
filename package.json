@@ -2192,7 +2192,7 @@
     "watchpack": "1.7.5",
     "web-streams-polyfill": "4.2.0",
     "webpack": "5.96.1",
-    "webpack-bundle-analyzer": "4.10.2",
+    "webpack-bundle-analyzer": "5.3.2",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "5.2.6",
     "webpack-merge": "6.0.1",
