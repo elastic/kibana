@@ -25,6 +25,7 @@ import type {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../rule_creation/components/alert_suppression_edit';
 import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
@@ -144,6 +145,11 @@ export enum AlertSuppressionDurationType {
   PerTimePeriod = 'per-time-period',
 }
 
+export interface AlertSuppressionGroupByV2FormEntry {
+  field: string;
+  sequenceIndex?: number;
+}
+
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -170,6 +176,7 @@ export interface DefineStepRule {
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
+  [ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME]: AlertSuppressionGroupByV2FormEntry[];
   [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType;
   [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: Duration;
   [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategy;

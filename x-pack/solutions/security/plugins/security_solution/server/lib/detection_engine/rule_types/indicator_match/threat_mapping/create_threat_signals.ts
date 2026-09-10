@@ -45,6 +45,7 @@ import {
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 import { getDataStreamNamespaceFilter } from '../../utils/get_data_stream_namespace_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
+import { getEffectiveSuppressionGroupByFields } from '../../utils/effective_alert_suppression_fields';
 
 export const createThreatSignals = async ({
   sharedParams,
@@ -343,9 +344,8 @@ export const createThreatSignals = async ({
 
   const license = await firstValueFrom(licensing.license$);
   const hasPlatinumLicense = license.hasAtLeast('platinum');
-  const isAlertSuppressionConfigured = Boolean(
-    completeRule.ruleParams.alertSuppression?.groupBy?.length
-  );
+  const isAlertSuppressionConfigured =
+    getEffectiveSuppressionGroupByFields(completeRule.ruleParams.alertSuppression).length > 0;
 
   const isAlertSuppressionActive = isAlertSuppressionConfigured && hasPlatinumLicense;
 

@@ -23,6 +23,7 @@ import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../comm
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
+import { eqlSequenceHasAllSuppressionFieldValues } from './suppression_utils';
 
 import type {
   DetectionAlertLatest,
@@ -30,11 +31,11 @@ import type {
   EqlShellAlertLatest,
   WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 import type { EqlRuleParams } from '../../rule_schema';
 import { bulkCreate, wrapHits } from '../factories';
 import type { BuildReasonMessage } from './reason_formatters';
+import { getEffectiveSuppressionGroupByFields } from './effective_alert_suppression_fields';
 
 export interface BulkCreateSuppressedAlertsParams {
   sharedParams: SecuritySharedParams;
@@ -82,7 +83,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
-      alertSuppression?.groupBy || [],
+      getEffectiveSuppressionGroupByFields(alertSuppression),
       ['fields'],
       mergeSourceAndFields
     );
@@ -139,11 +140,14 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     const buildingBlocks = alertGroupFromSequence.buildingBlocks;
     if (shellAlert) {
       if (!suppressOnMissingFields) {
-        // does the shell alert have all the suppression fields?
-        const hasEverySuppressionField = alertSuppression.groupBy.every(
-          (suppressionPath) =>
-            robustGet({ key: suppressionPath, document: shellAlert._source }) != null
+        const buildingBlockSources = buildingBlocks.map(
+          (block) => block._source as Record<string, unknown>
         );
+        const hasEverySuppressionField = eqlSequenceHasAllSuppressionFieldValues({
+          alertSuppression,
+          shellAlertSource: shellAlert._source as Record<string, unknown>,
+          buildingBlockSources,
+        });
         if (!hasEverySuppressionField) {
           unsuppressibleWrappedDocs.push(shellAlert, ...buildingBlocks);
         } else {
@@ -206,6 +210,8 @@ export const executeBulkCreateAlerts = async <
   // this allows to lift max signals limitation to higher value
   // and can detects events beyond default max_signals value
   const suppressionMaxSignals = maxNumberOfAlertsMultiplier * tuple.maxSignals;
+  // Rule-level duration only; optional per-field durations on groupByV2 are not applied here yet
+  // (field-specific suppression windows — https://github.com/elastic/kibana/issues/193110).
   const suppressionDuration = alertSuppression?.duration;
 
   const suppressionWindow = suppressionDuration

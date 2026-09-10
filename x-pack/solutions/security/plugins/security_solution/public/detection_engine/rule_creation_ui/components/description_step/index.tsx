@@ -22,7 +22,12 @@ import { buildRelatedIntegrationsDescription } from '../../../common/components/
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+  Duration,
+  AlertSuppressionGroupByV2FormEntry,
+} from '../../../common/types';
 import type { FieldValueTimeline } from '../../../rule_creation/components/pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
 import type { ListItems } from './types';
@@ -32,6 +37,7 @@ import {
   buildAlertSuppressionWindowDescription,
   buildEqlOptionsDescription,
   buildHighlightedFieldsOverrideDescription,
+  buildEqlGroupByV2Description,
   buildIntervalDescription,
   buildNoteDescription,
   buildQueryBarDescription,
@@ -56,6 +62,8 @@ import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
 import {
+  isEqlRule,
+  isEqlSequenceQuery,
   isSuppressionRuleConfiguredWithDuration,
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithMissingFields,
@@ -65,6 +73,7 @@ import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
@@ -199,6 +208,29 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
+const hasActiveSuppressionGrouping = (formData: unknown): boolean => {
+  const ruleType = get('ruleType', formData) as Type;
+  if (isThresholdRule(ruleType)) {
+    return get(THRESHOLD_ALERT_SUPPRESSION_ENABLED, formData) === true;
+  }
+  const groupBy =
+    (get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, formData) as string[] | undefined) ?? [];
+  if (groupBy.length > 0) {
+    return true;
+  }
+  if (isEqlRule(ruleType)) {
+    const eqlQuery = get('queryBar.query.query', formData) as string | undefined;
+    if (!isEqlSequenceQuery(eqlQuery)) {
+      return false;
+    }
+    const v2 = get(ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME, formData) as
+      | AlertSuppressionGroupByV2FormEntry[]
+      | undefined;
+    return Boolean(v2?.some((e) => e?.field && e.field.trim().length > 0));
+  }
+  return false;
+};
+
 /* eslint complexity: ["error", 25]*/
 // eslint-disable-next-line complexity
 export const getDescriptionItem = (
@@ -238,6 +270,18 @@ export const getDescriptionItem = (
     }
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, ruleType);
+  } else if (field === ALERT_SUPPRESSION_GROUP_BY_V2_FIELD_NAME) {
+    const ruleType: Type = get('ruleType', data);
+    const eqlQuery = get('queryBar.query.query', data) as string | undefined;
+    if (
+      !isEqlRule(ruleType) ||
+      !isSuppressionRuleConfiguredWithGroupBy(ruleType) ||
+      !isEqlSequenceQuery(eqlQuery)
+    ) {
+      return [];
+    }
+    const entries = get(field, data) as AlertSuppressionGroupByV2FormEntry[] | undefined;
+    return buildEqlGroupByV2Description(label, entries ?? [], ruleType);
   } else if (field === ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME) {
     return [];
   } else if (field === ALERT_SUPPRESSION_DURATION_FIELD_NAME) {
@@ -249,10 +293,10 @@ export const getDescriptionItem = (
     }
 
     // threshold rule has suppression duration without grouping fields, but suppression should be explicitly enabled by user
-    // query rule have suppression duration only if group by fields selected
+    // other rule types need at least one suppression grouping source (legacy group_by, or EQL group_by_v2)
     const showDuration = isThresholdRule(ruleType)
       ? get(THRESHOLD_ALERT_SUPPRESSION_ENABLED, data) === true
-      : get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0;
+      : hasActiveSuppressionGrouping(data);
 
     if (showDuration) {
       const value: Duration = get(field, data);
@@ -273,7 +317,7 @@ export const getDescriptionItem = (
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
-    if (get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0) {
+    if (hasActiveSuppressionGrouping(data)) {
       const value = get(field, data);
       return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {
