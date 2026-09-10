@@ -87,38 +87,39 @@ describe('ObservabilityAlertingPlugin', () => {
       expect.objectContaining({
         id: OBSERVABILITY_ALERTING_APP_ID,
         appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
+        euiIconType: 'logoObservability',
         status: AppStatus.inaccessible,
         visibleIn: [],
         deepLinks: expect.arrayContaining([
           expect.objectContaining({
             id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
             path: OBSERVABILITY_ALERTING_INBOX_PATH,
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rules-v1',
             path: '/rules/v1',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rules-v2',
             path: '/rules/v2',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rule-library',
             path: '/rule-library',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'action-policies',
             path: '/action-policies',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'execution-history',
             path: '/execution-history',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
         ]),
       })

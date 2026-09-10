@@ -134,6 +134,11 @@ export class ObservabilityNavigation {
     return this.sidePanel(id).or(this.nestedPanel(id));
   }
 
+  /** Child of a side panel or a nested More panel — overflow opens the latter. */
+  navItemInPanelByDeepLinkId(panelId: string, deepLinkId: string): Locator {
+    return this.anyPanel(panelId).locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
+  }
+
   /**
    * Resolve a body nav item wherever it renders. It lives in the primary nav on some
    * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
@@ -148,10 +153,34 @@ export class ObservabilityNavigation {
     return this.navItemInMoreByDeepLinkId(deepLinkId);
   }
 
+  /** Same overflow handling as `revealBodyNavItemByDeepLinkId`, keyed by node `id`. */
+  async revealBodyNavItemById(id: string): Promise<Locator> {
+    const primaryItem = this.navItemInPrimaryById(id);
+    if (await primaryItem.isVisible()) {
+      return primaryItem;
+    }
+    await this.openMoreMenu();
+    return this.navItemInMoreById(id);
+  }
+
   /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */
   async clickBodyNavItemByDeepLinkId(deepLinkId: string) {
     const item = await this.revealBodyNavItemByDeepLinkId(deepLinkId);
     await item.click();
+  }
+
+  async openPanelById(id: string): Promise<void> {
+    const opener = await this.revealBodyNavItemById(id);
+    await opener.click();
+    await this.anyPanel(id).waitFor({
+      state: 'visible',
+      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
+  }
+
+  async clickPanelNavItemByDeepLinkId(panelId: string, deepLinkId: string): Promise<void> {
+    await this.openPanelById(panelId);
+    await this.navItemInPanelByDeepLinkId(panelId, deepLinkId).click();
   }
 
   /** If More is already open, Escape first so the next open is the root list. */
