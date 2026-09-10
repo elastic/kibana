@@ -7,46 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { DeferredInitState } from '@kbn/core-deferred-init-common';
 
 /**
- * Lifecycle state of a plugin's deferred (lazy) Elasticsearch initialization.
+ * Lifecycle state of a lazy plugin's deferred phases (`lazyInitialize()` followed by `start()`)
+ * on this Kibana instance.
  *
- * - `idle`: registered but not yet started. Boot pays nothing for it.
- * - `initializing`: the deferred work is currently running.
- * - `available`: the deferred work completed successfully; routes serve normally.
- * - `failed`: the deferred work threw. May be re-triggered.
+ * - `idle`: registered but not yet triggered. Boot pays nothing for it.
+ * - `initializing`: `lazyInitialize()` or the deferred `start()` is currently running.
+ * - `available`: both phases completed; the start contract exists and routes serve normally.
+ * - `failed`: the last attempt threw. Retried on a backoff, and on demand once retries are spent.
  *
  * @public
  * @experimental
  */
-export type InitState = 'idle' | 'initializing' | 'available' | 'failed';
-
-/**
- * Context handed to a plugin's {@link Plugin.lazyInitialize} method when core runs
- * its deferred initialization. Built from internal-user clients so it works for both
- * request-triggered and programmatic triggers (no incoming request required).
- *
- * @public
- * @experimental
- */
-export interface LazyInitContext {
-  elasticsearch: {
-    /** Internal-user Elasticsearch client. */
-    client: ElasticsearchClient;
-  };
-  /**
-   * Internal-user saved objects repository.
-   *
-   * @remarks
-   * This is an internal-user repository: it bypasses space restrictions and can read/write any
-   * registered saved object type. Prefer the {@link LazyInitContext.elasticsearch} client for most
-   * initialization work; reach for this only when you genuinely need saved-object semantics
-   * (references, migrations, encryption) during deferred init.
-   */
-  savedObjects: ISavedObjectsRepository;
-  /** Logger scoped to the plugin's deferred initialization. */
-  logger: Logger;
-}
+export type InitState = DeferredInitState;

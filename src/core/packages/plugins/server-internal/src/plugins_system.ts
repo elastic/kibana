@@ -14,7 +14,8 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { LazyInitContext } from '@kbn/core-plugins-server';
+import type { NodeRoles } from '@kbn/core-node-server';
+import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -34,13 +35,14 @@ const Sec = 1000;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
-  private readonly runtimeResolver = new RuntimePluginContractResolver();
+  private readonly runtimeResolver: RuntimePluginContractResolver;
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
   private pluginNamesByOpaqueId?: Map<PluginOpaqueId, PluginName>;
+  private nodeRoles?: NodeRoles;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -48,6 +50,15 @@ export class PluginsSystem<T extends PluginType> {
     private readonly deferredInitEngine?: DeferredInitEngine
   ) {
     this.log = coreContext.logger.get('plugins-system', this.type);
+    this.runtimeResolver = new RuntimePluginContractResolver(this.log.get('contract-resolver'));
+  }
+
+  /**
+   * Records this node's roles. A node without the `ui` role never receives the requests that
+   * would trigger a lazy plugin, so {@link startPlugins} triggers them itself once boot is done.
+   */
+  public setNodeRoles(roles: NodeRoles): void {
+    this.nodeRoles = roles;
   }
 
   public addPlugin(plugin: PluginWrapper) {
@@ -197,7 +208,7 @@ export class PluginsSystem<T extends PluginType> {
           engine.state$(plugin.name).pipe(map((state) => toServiceStatus(plugin.name, state)))
         );
         this.log.info(
-          `Plugin "${plugin.name}" opted into deferred initialization; its Elasticsearch work will run lazily on first request, not at boot.`
+          `Plugin "${plugin.name}" opted into lazy initialization; its lazyInitialize() and start() will run on first trigger, not at boot.`
         );
       }
 
@@ -246,14 +257,13 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
-    // Awaiting a lazy plugin's deferred init (via `loadPluginContract`/`waitForInit`) from inside
+    // Awaiting a lazy plugin's deferred phases (via `loadPluginContract`/`trigger`) from inside
     // `start()` would block this loop and defeat lazy initialization, so the engine rejects such
     // calls while the start cycle is active. Cleared in `finally` so a thrown `start()` can't leave
     // the flag stuck for post-boot callers.
     this.deferredInitEngine?.beginStartCycle();
     try {
       for (const pluginName of this.satupPlugins) {
-        this.log.debug(`Starting plugin "${pluginName}"...`);
         const plugin = this.plugins.get(pluginName)!;
         const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
         const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
@@ -265,12 +275,32 @@ export class PluginsSystem<T extends PluginType> {
 
           return depContracts;
         }, {} as Record<PluginName, unknown>);
+        const startContext = createPluginStartContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        });
 
+        // A lazy plugin's `start()` is not part of boot. Its dependencies have all started by now
+        // (topological order, and lazy plugins cannot themselves be dependencies), so everything
+        // `lazyInitialize()`/`start()` will need is captured here and handed to the engine, which
+        // runs the two on this instance's first trigger. Attaching the runner before the loop
+        // moves on matters: a dependent may call `loadPluginContract` for this plugin from a
+        // request that arrives before the loop finishes.
+        if (this.deferredInitEngine && plugin.enableLazyInitialize) {
+          this.log.debug(`Deferring start of lazy plugin "${pluginName}" to its first trigger...`);
+          this.attachDeferredRunner(
+            this.deferredInitEngine,
+            plugin,
+            startContext,
+            pluginDepContracts
+          );
+          continue;
+        }
+
+        this.log.debug(`Starting plugin "${pluginName}"...`);
         let contract: unknown;
-        const contractOrPromise = plugin.start(
-          createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
-          pluginDepContracts
-        );
+        const contractOrPromise = plugin.start(startContext, pluginDepContracts);
         if (isPromise(contractOrPromise)) {
           if (this.coreContext.env.mode.dev) {
             this.log.warn(
@@ -293,24 +323,6 @@ export class PluginsSystem<T extends PluginType> {
           contract = contractOrPromise;
         }
 
-        // Attach the deferred-init runner before moving on to the next plugin. Dependencies start
-        // before dependents (topological order), so a dependent that calls
-        // `core.plugins.loadPluginContract` for a lazy dependency post-boot must already find the
-        // runner attached — attaching it only after the whole start loop finished would miss the
-        // window where an early request arrives before that.
-        if (this.deferredInitEngine && plugin.enableLazyInitialize) {
-          const ctx: LazyInitContext = {
-            elasticsearch: { client: deps.elasticsearch.client.asInternalUser },
-            savedObjects: deps.savedObjects.createInternalRepository(),
-            logger: this.coreContext.logger.get('deferred-init', pluginName),
-          };
-          this.deferredInitEngine.setRunner(
-            pluginName,
-            (lazyCtx) => plugin.runLazyInitialize(lazyCtx),
-            ctx
-          );
-        }
-
         contracts.set(pluginName, contract);
         // Unblocks any dependent whose own `start()` is mid-loop, already awaiting this plugin's
         // contract via `onStart` — otherwise that dependent would have to wait for the whole loop
@@ -322,8 +334,58 @@ export class PluginsSystem<T extends PluginType> {
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
+    this.triggerLazyPluginsOnHeadlessNode();
 
     return contracts;
+  }
+
+  /**
+   * Hands the engine the two deferred phases of a lazy plugin, bound to the start context and
+   * dependency contracts the boot loop just computed for it. Neither runs here.
+   */
+  private attachDeferredRunner(
+    engine: DeferredInitEngine,
+    plugin: PluginWrapper,
+    startContext: CoreStart,
+    pluginDepContracts: Record<PluginName, unknown>
+  ): void {
+    const pluginName = plugin.name;
+    engine.setRunner(pluginName, {
+      lazyInitialize: () => plugin.runLazyInitialize(startContext, pluginDepContracts),
+      start: async () => {
+        this.log.debug(`Starting lazy plugin "${pluginName}"...`);
+        const contract = await plugin.start(startContext, pluginDepContracts);
+        // Published before the engine flips to `available`, so a `loadPluginContract` or
+        // `onLazyStartService` that wakes up on that transition finds the contract in place.
+        this.runtimeResolver.notifyStartContractAvailable(pluginName, contract);
+      },
+    });
+  }
+
+  /**
+   * A node without the `ui` role serves no pages and no UI-driven API calls, so nothing would
+   * ever trigger its lazy plugins; their background tasks would be claimed and skipped forever.
+   * There is nothing worth deferring on such a node, so kick every lazy plugin now that boot is
+   * done. Non-blocking: the phases run concurrently with the rest of core's start.
+   */
+  private triggerLazyPluginsOnHeadlessNode(): void {
+    if (!this.deferredInitEngine || this.nodeRoles === undefined || this.nodeRoles.ui) {
+      return;
+    }
+    const lazyPluginNames = this.satupPlugins.filter(
+      (pluginName) => this.plugins.get(pluginName)!.enableLazyInitialize
+    );
+    if (lazyPluginNames.length === 0) {
+      return;
+    }
+    this.log.info(
+      `This node has no "ui" role, so no request can trigger its lazy plugins; triggering [${lazyPluginNames.join(
+        ','
+      )}] now.`
+    );
+    for (const pluginName of lazyPluginNames) {
+      this.deferredInitEngine.ensureInitialized(pluginName);
+    }
   }
 
   public async stopPlugins() {

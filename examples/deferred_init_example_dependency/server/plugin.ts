@@ -11,10 +11,11 @@ import type { PluginInitializerContext, Plugin, Logger } from '@kbn/core/server'
 
 /**
  * `deferredInitExampleDependency`'s start contract. An ordinary (non-lazy) plugin: its `start()`
- * runs at boot like any other plugin's. It exists so `deferred_init_example` can demonstrate
- * loading a normal dependency's start contract from inside its own `lazyInitialize` via
- * `core.plugins.loadPluginContract` — the same mechanism `deferred_init_example_consumer` uses to
- * load a *lazy* plugin's contract from a route handler, but here the caller is the lazy side.
+ * runs at boot like any other plugin's. It exists so `deferred_init_example` can demonstrate that
+ * a lazy plugin keeps ordinary `requiredPlugins`, and that their start contracts are injected into
+ * its `lazyInitialize()` and `start()` exactly as they would be for any plugin -- no accessor
+ * needed, because every non-lazy plugin has started long before a lazy plugin's deferred phases
+ * run.
  */
 export interface DeferredInitExampleDependencyStartContract {
   getGreeting(): string;

@@ -20,6 +20,8 @@ import type {
 } from '@kbn/core-http-request-handler-context-server';
 import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { LazyInitPlugins } from '@kbn/core-plugins-contracts-server';
+import type { PluginName } from '@kbn/core-base-common';
 import type { PluginWrapper } from './plugin';
 import type {
   PluginsServicePrebootSetupDeps,
@@ -29,6 +31,22 @@ import type {
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 import { createGuardedRouter, type DeferredInitEngine } from './deferred_init';
+
+/**
+ * The `core.plugins.lazyInit` contract, scoped to the calling plugin. Identical on the setup and
+ * start contexts: every method is post-boot-safe, and only `trigger()` ever causes a lazy plugin
+ * to run its deferred phases.
+ */
+const createLazyInitContract = (
+  pluginName: PluginName,
+  runtimeResolver: IRuntimePluginContractResolver
+): LazyInitPlugins => ({
+  trigger: () => runtimeResolver.trigger(pluginName),
+  getStatus: (target) => runtimeResolver.getLazyInitStatus(pluginName, target),
+  status$: (target) => runtimeResolver.lazyInitStatus$(pluginName, target),
+  onLazyStartService: (target, callback) =>
+    runtimeResolver.onLazyStartService(pluginName, target, callback),
+});
 
 /** @internal */
 export interface InstanceInfo {
@@ -199,13 +217,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
 }): CoreSetup {
   const router = deps.http.createRouter('', plugin.opaqueId);
 
-  // Defined only for plugins that opted into deferred init, so the surfaces below can narrow on
+  // Defined only for plugins that opted into lazy init, so the router gating below can narrow on
   // it instead of re-checking both conditions (and asserting non-null) at each use.
   const lazyInitEngine = plugin.enableLazyInitialize ? deferredInitEngine : undefined;
 
-  // For plugins opted into deferred init, hand the plugin a guarded router whose routes return
-  // 503 until init completes. Resolved lazily (memoized) on first `createRouter()` call.
-  // Asset serving via `resources` keeps the raw, un-gated router.
+  // For lazy plugins, hand the plugin a guarded router whose routes return 503 until its deferred
+  // phases complete. Resolved lazily (memoized) on first `createRouter()` call. Asset serving via
+  // `resources` keeps the raw, un-gated router.
   let exposedRouter: IRouter | undefined;
   const getExposedRouter = (): IRouter => {
     if (!exposedRouter) {
@@ -329,9 +347,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
       loadPluginContract: (dependencyName) =>
         runtimeResolver.loadPluginContract(plugin.name, dependencyName),
-      lazyInit: lazyInitEngine
-        ? { waitForInit: () => lazyInitEngine.waitUntilAvailable(plugin.name) }
-        : undefined,
+      lazyInit: createLazyInitContract(plugin.name, runtimeResolver),
     },
     pricing: {
       isFeatureAvailable: deps.pricing.isFeatureAvailable,
@@ -447,6 +463,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
       loadPluginContract: (dependencyName) =>
         runtimeResolver.loadPluginContract(plugin.name, dependencyName),
+      lazyInit: createLazyInitContract(plugin.name, runtimeResolver),
     },
     pricing: deps.pricing,
     security: {

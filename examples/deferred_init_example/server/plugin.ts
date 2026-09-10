@@ -13,7 +13,6 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  LazyInitContext,
   ElasticsearchClient,
 } from '@kbn/core/server';
 import type { DeferredInitExampleDependencyStartContract } from '@kbn/deferred-init-example-dependency-plugin/server';
@@ -34,23 +33,18 @@ interface DeferredInitExampleDoc {
   initializedAt: string;
   /**
    * UUID of the instance whose `lazyInitialize` last wrote this document. The document is
-   * cluster-side, so it is shared by the whole deployment and every instance rewrites it — this
+   * cluster-side, so it is shared by the whole deployment and every instance rewrites it; this
    * field is what makes "each instance runs the work" visible in the data itself.
    */
   initializedBy: string;
 }
 
 /**
- * State `lazyInitialize` warms in the memory of the instance it runs on: nothing persists it, and
- * a peer instance's run does not populate it here.
+ * State `lazyInitialize` produces in the memory of the instance it runs on: nothing persists it,
+ * and a peer instance's run does not populate it here.
  *
- * Keeping instance-local state like this is only sound because deferred init is per instance:
- * core runs `lazyInitialize` exactly once on every instance, so anything that can legitimately
- * read this state (this plugin's gated routes, or a consumer holding the start contract handed
- * out by `loadPluginContract`) is downstream of this instance's own successful run. Under the
- * previous design — a distributed lock plus a shared saved object recording the outcome — an
- * instance could adopt `available` from a run that happened elsewhere and never execute
- * `lazyInitialize` itself, which made any in-memory field like this unsafe to read.
+ * Core runs `lazyInitialize()` and then `start()` on every instance, in that order, so `start()`
+ * reads this once and closes over it. Nothing downstream needs a readiness check.
  */
 export interface DeferredInitExampleInstanceState {
   /** UUID of the instance that produced this state, i.e. the one serving the request. */
@@ -60,41 +54,42 @@ export interface DeferredInitExampleInstanceState {
   completedPhases: readonly string[];
 }
 
+/** The start contracts core injects into this plugin's `lazyInitialize()` and `start()`. */
+export interface DeferredInitExampleStartDeps {
+  deferredInitExampleDependency: DeferredInitExampleDependencyStartContract;
+}
+
 /**
- * `deferredInitExample`'s start contract. Consumed in-process by other plugins via
- * `core.plugins.loadPluginContract<DeferredInitExampleStartContract>('deferredInitExample')` (or
- * `context.loadPluginContract` in a route handler), which waits for this plugin's deferred init
- * before returning it — see the `deferred_init_example_consumer` demo plugin.
+ * `deferredInitExample`'s start contract. It does not exist until this instance has run
+ * `lazyInitialize()` and `start()`, so every holder of it is downstream of both. Other plugins
+ * reach it via `core.plugins.loadPluginContract('deferredInitExample')` (or
+ * `context.loadPluginContract` in a route handler), which triggers those phases and waits, or via
+ * `core.plugins.lazyInit.onLazyStartService('deferredInitExample', cb)`, which only waits. See the
+ * `deferred_init_example_consumer` demo plugin.
  *
- * Core never injects this contract into a dependent's `setup()`/`start()` arguments: a
- * deferred-init plugin may not be declared under `requiredPlugins`/`optionalPlugins` at all, so
- * `loadPluginContract` is the only way in.
+ * Core never injects this contract into a dependent's `setup()`/`start()` arguments: a lazy plugin
+ * may not be declared under `requiredPlugins`/`optionalPlugins` at all.
  */
 export interface DeferredInitExampleStartContract {
   /** Reads the cluster-side document written by whichever instance last ran `lazyInitialize`. */
   getDoc(): Promise<DeferredInitExampleDoc>;
-  /**
-   * Reads the calling instance's own in-memory deferred-init state. Synchronous, with no
-   * readiness check or polling at the call site, because a caller can only hold this contract
-   * after this instance's `lazyInitialize` succeeded.
-   */
+  /** Reads the state this instance's own `lazyInitialize` produced. Synchronous, no check. */
   getInstanceState(): DeferredInitExampleInstanceState;
 }
 
 export class DeferredInitExampleServerPlugin
-  implements Plugin<object, DeferredInitExampleStartContract>
+  implements
+    Plugin<
+      object,
+      DeferredInitExampleStartContract,
+      Record<string, never>,
+      DeferredInitExampleStartDeps
+    >
 {
   private readonly logger: Logger;
   private readonly config: DeferredInitExampleConfig;
   private readonly instanceUuid: string;
-  // `LazyInitContext` has no `core`/`plugins` field, so this is captured here, during `start()`,
-  // purely so `lazyInitialize` below can reach `core.plugins.loadPluginContract` later. Guaranteed
-  // set by the time `lazyInitialize` can ever run: core only attaches the deferred-init runner
-  // for this plugin right after `start()` itself resolves.
-  private core?: CoreStart;
-  // Populated by `lazyInitialize`, read by the routes and the start contract. See
-  // `DeferredInitExampleInstanceState` for why a plain instance field is now the right place for
-  // deferred-init output.
+  // Produced by `lazyInitialize`, consumed by `start`. Core guarantees that order on this instance.
   private instanceState?: DeferredInitExampleInstanceState;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -103,8 +98,66 @@ export class DeferredInitExampleServerPlugin
     this.instanceUuid = initializerContext.env.instanceUuid;
   }
 
-  public async lazyInitialize(ctx: LazyInitContext): Promise<void> {
-    const { logger, elasticsearch } = ctx;
+  /**
+   * Runs at boot, like every plugin's `setup()`. Registration only: routes here are gated by
+   * core, so their handlers only ever run after `lazyInitialize()` and `start()` have completed
+   * on this instance. That is why `getStartServices()` inside them resolves immediately with the
+   * contract `start()` built, and why nothing here does any Elasticsearch work of its own.
+   */
+  public setup(
+    core: CoreSetup<DeferredInitExampleStartDeps, DeferredInitExampleStartContract>
+  ): object {
+    this.logger.debug('deferredInitExample: Setup');
+
+    const router = core.http.createRouter();
+
+    router.get(
+      {
+        path: DATA_ROUTE,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Demo/dev route; exercises lazy initialization.',
+          },
+        },
+        validate: false,
+      },
+      async (_context, _request, response) => {
+        const [, , self] = await core.getStartServices();
+        return response.ok({ body: await self.getDoc() });
+      }
+    );
+
+    router.get(
+      {
+        path: INSTANCE_STATE_ROUTE,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Demo/dev route; exercises lazy initialization.',
+          },
+        },
+        validate: false,
+      },
+      async (_context, _request, response) => {
+        const [, , self] = await core.getStartServices();
+        return response.ok({ body: self.getInstanceState() });
+      }
+    );
+
+    return {};
+  }
+
+  /**
+   * The costly, retriable phase. Runs on this instance's first trigger, never at boot, with the
+   * same arguments `start()` receives: `core` is the real `CoreStart`, and `plugins` carries the
+   * injected start contracts of this plugin's ordinary dependencies.
+   */
+  public async lazyInitialize(
+    core: CoreStart,
+    plugins: DeferredInitExampleStartDeps
+  ): Promise<void> {
+    const { logger } = this;
     logger.info(
       '[deferredInitExample] lazyInitialize: running deferred Elasticsearch initialization'
     );
@@ -125,21 +178,16 @@ export class DeferredInitExampleServerPlugin
     await delay(this.config.initDelayMs);
     completedPhases.push('defaultState');
 
-    // Phase 3: cross-plugin trigger path — load `deferredInitExampleDependency`'s start contract
-    // in-process. This is the same `loadPluginContract` `deferred_init_example_consumer` calls
-    // from a route handler, but called here from inside `lazyInitialize` itself via the `core`
-    // captured on `this` in `start()` below.
-    logger.info('[deferredInitExample] step: loading deferredInitExampleDependency start contract');
-    const dependency =
-      await this.core!.plugins.loadPluginContract<DeferredInitExampleDependencyStartContract>(
-        'deferredInitExampleDependency'
-      );
-    const greeting = dependency.getGreeting();
-    completedPhases.push('loadedDependencyContract');
+    // Phase 3: use an ordinary dependency's start contract. It is injected here exactly as it
+    // would be into `start()`, because every non-lazy dependency has started long before this
+    // runs. No accessor, no captured `core`, no waiting.
+    logger.info('[deferredInitExample] step: reading deferredInitExampleDependency greeting');
+    const greeting = plugins.deferredInitExampleDependency.getGreeting();
+    completedPhases.push('readDependencyGreeting');
 
     // Phase 4: real direct ES write (create index + mapping, write the default document).
     logger.info('[deferredInitExample] step: creating index and writing default document');
-    const { client } = elasticsearch;
+    const client = core.elasticsearch.client.asInternalUser;
 
     // `lazyInitialize` runs once per Kibana instance, so several instances can reach this point
     // concurrently against the same cluster: tolerate a peer having created the index between the
@@ -179,8 +227,8 @@ export class DeferredInitExampleServerPlugin
     });
     completedPhases.push('wroteDefaultDocument');
 
-    // Phase 5: publish the instance-local state. Assigned once, at the end, so a run that throws
-    // earlier leaves nothing half-warmed behind — core re-runs this whole method on this instance
+    // Phase 5: hand the result to `start()`. Assigned once, at the end, so a run that throws
+    // earlier leaves nothing half-built behind. Core re-runs this whole method on this instance
     // when it retries, rather than resuming it.
     this.instanceState = {
       instanceUuid: this.instanceUuid,
@@ -191,55 +239,25 @@ export class DeferredInitExampleServerPlugin
     logger.info('[deferredInitExample] lazyInitialize: deferred initialization complete');
   }
 
-  public setup(core: CoreSetup): object {
-    this.logger.debug('deferredInitExample: Setup');
-
-    const router = core.http.createRouter();
-
-    router.get(
-      {
-        path: DATA_ROUTE,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Demo/dev route; exercises deferred-init.',
-          },
-        },
-        validate: false,
-      },
-      async (context, _request, response) => {
-        const { elasticsearch } = await context.core;
-        const doc = await this.getDocFrom(elasticsearch.client.asInternalUser);
-        return response.ok({ body: doc });
-      }
-    );
-
-    router.get(
-      {
-        path: INSTANCE_STATE_ROUTE,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Demo/dev route; exercises deferred-init.',
-          },
-        },
-        validate: false,
-      },
-      // Reads memory this plugin's own `lazyInitialize` warmed, with no readiness check: core
-      // gates every route of a lazy plugin behind its deferred init, so this handler cannot run
-      // before `lazyInitialize` succeeded on this instance.
-      (_context, _request, response) => response.ok({ body: this.getInstanceState() })
-    );
-
-    return {};
-  }
-
+  /**
+   * Deferred: core calls this only after `lazyInitialize()` succeeded on this instance, so the
+   * contract is built over initialized state and its methods need no readiness checks. If
+   * `lazyInitialize()` threw, this never runs; core retries the failed phase instead.
+   */
   public start(core: CoreStart): DeferredInitExampleStartContract {
     this.logger.debug('deferredInitExample: Started');
-    this.core = core;
+
+    const { instanceState } = this;
+    if (!instanceState) {
+      // Core's ordering guarantee makes this unreachable; a throw here is a core bug, not a state
+      // callers are expected to handle.
+      throw new Error('[deferredInitExample] start() ran before lazyInitialize() completed');
+    }
+
+    const client = core.elasticsearch.client.asInternalUser;
     return {
-      getDoc: async () => this.getDocFrom(core.elasticsearch.client.asInternalUser),
-      getInstanceState: () => this.getInstanceState(),
+      getDoc: () => this.getDocFrom(client),
+      getInstanceState: () => instanceState,
     };
   }
 
@@ -249,21 +267,6 @@ export class DeferredInitExampleServerPlugin
       id: DOC_ID,
     });
     return result._source!;
-  }
-
-  /**
-   * Asserts rather than reports readiness: every legitimate caller (a gated route of this plugin,
-   * or a consumer that obtained the start contract from `loadPluginContract`) is downstream of a
-   * successful `lazyInitialize` on this instance, so an unset field here is a core-level bug, not
-   * a state a consumer is expected to poll through.
-   */
-  private getInstanceState(): DeferredInitExampleInstanceState {
-    if (!this.instanceState) {
-      throw new Error(
-        '[deferredInitExample] instance state is not warmed: lazyInitialize has not completed on this instance'
-      );
-    }
-    return this.instanceState;
   }
 
   public stop(): void {}

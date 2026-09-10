@@ -23,7 +23,7 @@ export type {
 
 export { SharedGlobalConfigKeys } from './shared_global_config';
 
-export type { InitState, LazyInitContext } from './deferred_init';
+export type { InitState } from './deferred_init';
 
 export {
   DeferredInitializationError,

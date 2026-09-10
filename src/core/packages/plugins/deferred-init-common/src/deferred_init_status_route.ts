@@ -35,6 +35,14 @@ export const getDeferredInitStatusPath = (pluginId: string): string =>
 export type DeferredInitState = 'idle' | 'initializing' | 'available' | 'failed';
 
 /**
+ * The two deferred lifecycle phases core runs, in order, on a lazy plugin's first trigger:
+ * the retriable `lazyInitialize()` and then the deferred `start()`.
+ *
+ * @internal
+ */
+export type DeferredInitPhase = 'lazyInitialize' | 'start';
+
+/**
  * Body of the {@link DEFERRED_INIT_STATUS_ROUTE} response, shared between the server route
  * registration and the browser status client so the two can't drift.
  *
@@ -43,10 +51,12 @@ export type DeferredInitState = 'idle' | 'initializing' | 'available' | 'failed'
 export interface DeferredInitStatusResponse {
   pluginId: string;
   status: DeferredInitState;
-  /** Present only when `status === 'failed'`: the plugin's most recent lazyInitialize() error. */
+  /** Present only when `status === 'failed'`: the plugin's most recent deferred-phase error. */
   error?: { message: string };
   /** Present only when `status === 'failed'`: how many consecutive attempts have failed. */
   attempts?: number;
+  /** Present only when `status === 'failed'`: which deferred phase the last attempt failed in. */
+  phase?: DeferredInitPhase;
 }
 
 /**

@@ -19,6 +19,10 @@ export const createRuntimePluginContractResolverMock =
       onStart: jest.fn(),
       notifyStartContractAvailable: jest.fn(),
       loadPluginContract: jest.fn(),
+      trigger: jest.fn(),
+      getLazyInitStatus: jest.fn(),
+      lazyInitStatus$: jest.fn(),
+      onLazyStartService: jest.fn(),
       resolveSetupRequests: jest.fn(),
       resolveStartRequests: jest.fn(),
     };

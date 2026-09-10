@@ -15,16 +15,16 @@ import type { InitState } from '@kbn/core-plugins-server';
  * plugin's `/status` entry.
  *
  * Deferring work is a healthy, expected state, so `idle` and `initializing` report `available`:
- * a lazy plugin that simply hasn't run its deferred work yet must NOT drag Kibana's overall
+ * a lazy plugin that simply hasn't run its deferred phases yet must NOT drag Kibana's overall
  * status (the worst of all plugin statuses) down, which would break the FTR/Scout "wait until
  * ready" check.
  *
- * A `failed` deferred initialization reports `degraded` ("some features may not be working")
- * rather than `unavailable`. Deferred init runs once per Kibana instance, so a failure is local
- * to this instance and scoped to this one plugin: its own routes 503, and nothing else on the
- * instance is affected. `degraded` says exactly that, and keeps one lazy plugin's failed init
- * from pinning the reported `overall` status to `unavailable`. The descriptive summary still
- * conveys the precise lifecycle state, and the browser reads the detailed state from the
+ * A `failed` attempt reports `degraded` ("some features may not be working") rather than
+ * `unavailable`. The deferred phases run once per Kibana instance, so a failure is local to this
+ * instance and scoped to this one plugin: its own routes 503, and nothing else on the instance is
+ * affected. `degraded` says exactly that, and keeps one lazy plugin's failure from pinning the
+ * reported `overall` status to `unavailable`. The descriptive summary still conveys the precise
+ * lifecycle state, and the browser reads the detailed state (including the failed phase) from the
  * deferred-init status route rather than this level.
  *
  * @internal
@@ -36,18 +36,18 @@ export const toServiceStatus = (pluginId: string, state: InitState): ServiceStat
     case 'initializing':
       return {
         level: ServiceStatusLevels.available,
-        summary: `${pluginId} is initializing (deferred initialization in progress)`,
+        summary: `${pluginId} is initializing (lazy initialization and start in progress)`,
       };
     case 'failed':
       return {
         level: ServiceStatusLevels.degraded,
-        summary: `${pluginId} deferred initialization failed`,
+        summary: `${pluginId} lazy initialization failed`,
       };
     case 'idle':
     default:
       return {
         level: ServiceStatusLevels.available,
-        summary: `${pluginId} is idle (deferred initialization not started)`,
+        summary: `${pluginId} is idle (lazy initialization not triggered yet)`,
       };
   }
 };

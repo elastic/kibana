@@ -56,7 +56,11 @@ export function registerDeferredInitStatusRoute(router: IRouter, engine: Deferre
       const body: DeferredInitStatusResponse = {
         pluginId,
         status,
-        ...(failure && { error: { message: failure.message }, attempts: failure.attempts }),
+        ...(failure && {
+          error: { message: failure.message },
+          attempts: failure.attempts,
+          phase: failure.phase,
+        }),
       };
       return response.ok({ body });
     }

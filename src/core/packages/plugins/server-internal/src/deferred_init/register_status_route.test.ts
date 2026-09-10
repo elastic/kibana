@@ -56,10 +56,10 @@ describe('registerDeferredInitStatusRoute', () => {
     });
   });
 
-  it('includes the error message and attempt count when failed', async () => {
+  it('includes the error message, attempt count and failed phase when failed', async () => {
     const engine = createEngineMock();
     engine.ensureInitialized.mockReturnValue('failed');
-    engine.getFailureDetails.mockReturnValue({ message: 'boom', attempts: 3 });
+    engine.getFailureDetails.mockReturnValue({ message: 'boom', attempts: 3, phase: 'start' });
     const { handler } = createHandler(engine);
     const response = mockRouter.createResponseFactory();
 
@@ -75,6 +75,7 @@ describe('registerDeferredInitStatusRoute', () => {
         status: 'failed',
         error: { message: 'boom' },
         attempts: 3,
+        phase: 'start',
       },
     });
   });

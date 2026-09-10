@@ -20,7 +20,6 @@ export type {
   ExposedToBrowserDescriptor,
   DynamicConfigDescriptor,
   InitState,
-  LazyInitContext,
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';

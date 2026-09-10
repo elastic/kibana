@@ -16,7 +16,6 @@ import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type {
-  LazyInitContext,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializer,
@@ -80,7 +79,13 @@ export class PluginWrapper<
   private readonly startDependencies$ = new Subject<
     [CoreStart, TPluginsStart, TStart | undefined]
   >();
+  /**
+   * Backs `core.getStartServices()`. Resolves when this plugin's `start()` returns, which for a
+   * lazy plugin is after its deferred phases ran on this instance, not at boot. Rejects if the
+   * plugin stops without ever having started (see {@link stop}).
+   */
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
+  private startInvoked = false;
 
   constructor(
     public readonly params: {
@@ -104,6 +109,10 @@ export class PluginWrapper<
     this.runtimePluginDependencies = params.manifest.runtimePluginDependencies;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
+    // `stop()` rejects `startDependencies` for a plugin that never started. Anyone awaiting
+    // `getStartServices()` still observes that rejection; this handler only keeps the promise
+    // from surfacing as an unhandled rejection when nobody was waiting on it.
+    this.startDependencies.catch(() => {});
   }
 
   public async init() {
@@ -130,12 +139,13 @@ export class PluginWrapper<
   }
 
   /**
-   * Runs the plugin's deferred initialization work. Invoked lazily by the deferred-init
-   * engine (never at boot), with a context built from internal-user clients.
+   * Runs the plugin's `lazyInitialize()`. Invoked by the deferred-init engine on this instance's
+   * first trigger (never at boot), right before the deferred `start()`, with the same arguments
+   * `start()` receives.
    */
-  public async runLazyInitialize(ctx: LazyInitContext): Promise<void> {
+  public async runLazyInitialize(startContext: CoreStart, plugins: TPluginsStart): Promise<void> {
     if (this.instance != null && 'lazyInitialize' in this.instance) {
-      await this.instance.lazyInitialize?.(ctx);
+      await this.instance.lazyInitialize?.(startContext, plugins);
     }
   }
 
@@ -186,6 +196,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
+    this.startInvoked = true;
     this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
@@ -206,13 +217,30 @@ export class PluginWrapper<
 
   /**
    * Calls optional `stop` function exposed by the plugin initializer.
+   *
+   * A lazy plugin whose deferred `start()` never ran on this instance has nothing start-time to
+   * tear down, so its `stop()` is skipped; `setup()`-time registrations need no cleanup. Either
+   * way, anyone still awaiting `getStartServices()` is released with a rejection rather than left
+   * hanging past shutdown.
    */
   public async stop() {
     if (!this.definition) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    await this.instance?.stop?.();
+    if (this.enableLazyInitialize && !this.startInvoked) {
+      this.log.debug(
+        `Lazy plugin "${this.name}" was never started on this instance; skipping its stop().`
+      );
+      this.startDependencies$.error(
+        new Error(
+          `Plugin "${this.name}" is stopping without having started; its start services will never be available.`
+        )
+      );
+    } else {
+      await this.instance?.stop?.();
+      this.startDependencies$.complete();
+    }
     await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;

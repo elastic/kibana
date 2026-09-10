@@ -16,6 +16,7 @@ export {
   getDeferredInitStatusPath,
 } from './src/deferred_init_status_route';
 export type {
+  DeferredInitPhase,
   DeferredInitState,
   DeferredInitStatusResponse,
   DeferredInitUnavailableBody,

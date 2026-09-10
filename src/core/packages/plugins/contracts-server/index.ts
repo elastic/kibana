@@ -10,7 +10,7 @@
 export type {
   PluginsServiceSetup,
   PluginsServiceStart,
-  LazyInitPluginsSetup,
+  LazyInitPlugins,
   PluginContractMap,
   PluginContractResolver,
   PluginContractResolverResponse,

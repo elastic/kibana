@@ -149,6 +149,7 @@ export class PluginsService
         roles: node.roles,
       },
     });
+    this.standardPluginsSystem.setNodeRoles(node.roles);
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);

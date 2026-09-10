@@ -12,7 +12,7 @@ import type { InitState } from '@kbn/core-plugins-server';
 import { toServiceStatus } from './status_mapping';
 
 describe('toServiceStatus', () => {
-  it('reports `available` when the deferred init has completed', () => {
+  it('reports `available` once both deferred phases have completed', () => {
     expect(toServiceStatus('myPlugin', 'available')).toEqual({
       level: ServiceStatusLevels.available,
       summary: 'myPlugin is available',
@@ -34,10 +34,10 @@ describe('toServiceStatus', () => {
   // `degraded`, not `unavailable`: the failure is local to this instance and scoped to this one
   // plugin (its own routes 503), so it should not pin the reported `overall` status to
   // `unavailable`.
-  it('reports `degraded` only when the deferred init has failed', () => {
+  it('reports `degraded` only when the last attempt has failed', () => {
     expect(toServiceStatus('myPlugin', 'failed')).toEqual({
       level: ServiceStatusLevels.degraded,
-      summary: 'myPlugin deferred initialization failed',
+      summary: 'myPlugin lazy initialization failed',
     });
   });
 });

@@ -8,4 +8,8 @@
  */
 
 export const PLUGIN_ID = 'deferredInitExampleConsumer';
+export const LAZY_PLUGIN_ID = 'deferredInitExample';
+/** Triggers the lazy plugin (via `context.loadPluginContract`) and waits for it. */
 export const DATA_ROUTE = '/api/deferred_init_example_consumer/doc';
+/** Reads the lazy plugin's state on this instance without ever triggering it. */
+export const STATUS_ROUTE = '/api/deferred_init_example_consumer/status';

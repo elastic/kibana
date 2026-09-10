@@ -292,7 +292,6 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
   InitState,
-  LazyInitContext,
 } from '@kbn/core-plugins-server';
 export {
   DeferredInitializationError,
