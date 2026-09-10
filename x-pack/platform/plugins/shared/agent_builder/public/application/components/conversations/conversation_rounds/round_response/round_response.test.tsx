@@ -62,7 +62,6 @@ describe('RoundResponse', () => {
         response={round.response}
         steps={round.steps}
         isLoading={false}
-        isLastRound={false}
         rawRound={round}
       />
     );
@@ -86,7 +85,6 @@ describe('RoundResponse', () => {
         response={round.response}
         steps={round.steps}
         isLoading={true}
-        isLastRound={false}
         rawRound={round}
       />
     );

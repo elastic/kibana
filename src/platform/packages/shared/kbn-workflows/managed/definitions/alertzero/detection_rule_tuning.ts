@@ -9,7 +9,10 @@
 
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
-import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
+import {
+  renderScheduledWorkerYaml,
+  type ScheduledWorkerTemplateValues,
+} from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID =
@@ -20,7 +23,7 @@ export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   id: ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(DETECTION_RULE_TUNING_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
+  version: 4,
+  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+    renderScheduledWorkerYaml(DETECTION_RULE_TUNING_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;

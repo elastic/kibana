@@ -35,6 +35,7 @@ import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  basePath?: string;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -63,30 +64,43 @@ const StandardProviders = ({
   );
 };
 
-export const AlertingV2RulesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
+export const AlertingV2RulesPage = ({
+  container,
+  setBreadcrumbs,
+  basePath = '',
+}: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <RulesApp />
+    <RulesApp basePath={basePath} />
   </StandardProviders>
 );
 
-export const AlertingV2RuleLibraryPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
+export const AlertingV2RuleLibraryPage = ({
+  container,
+  setBreadcrumbs,
+  basePath = '',
+}: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <RuleLibraryApp />
+    <RuleLibraryApp basePath={basePath} />
   </StandardProviders>
 );
 
-export const AlertingV2ActionPoliciesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
+export const AlertingV2ActionPoliciesPage = ({
+  container,
+  setBreadcrumbs,
+  basePath = '',
+}: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <ActionPoliciesApp />
+    <ActionPoliciesApp basePath={basePath} />
   </StandardProviders>
 );
 
 export const AlertingV2ExecutionHistoryPage = ({
   container,
   setBreadcrumbs,
+  basePath = '',
 }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
-    <ExecutionHistoryApp />
+    <ExecutionHistoryApp basePath={basePath} />
   </StandardProviders>
 );
 
@@ -96,6 +110,7 @@ export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
+  basePath = '',
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -124,7 +139,7 @@ export const AlertingV2EpisodesPage = ({
         <QueryClientProvider client={queryClient}>
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <I18nProvider>
-              <EpisodesApp />
+              <EpisodesApp basePath={basePath} />
             </I18nProvider>
           </BreadcrumbProvider>
         </QueryClientProvider>

@@ -11,7 +11,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { RuleLibraryPage } from '../pages/rule_library_page/rule_library_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const RuleLibraryApp = () => {
+export const RuleLibraryApp = ({ basePath = '' }: { basePath?: string }) => {
   return (
     <RequireAlertingPrivilege
       features={['rules']}
@@ -20,7 +20,7 @@ export const RuleLibraryApp = () => {
       })}
     >
       <Routes>
-        <Route exact path="/">
+        <Route exact path={`${basePath}/`}>
           <RuleLibraryPage />
         </Route>
       </Routes>

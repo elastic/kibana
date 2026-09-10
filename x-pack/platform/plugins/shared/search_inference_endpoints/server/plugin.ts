@@ -186,6 +186,8 @@ export class SearchInferenceEndpointsPlugin
         get: featureRegistry.get.bind(featureRegistry),
         getAll: featureRegistry.getAll.bind(featureRegistry),
         register: featureRegistry.register.bind(featureRegistry),
+        updateRecommendedEndpoints:
+          featureRegistry.updateRecommendedEndpoints.bind(featureRegistry),
       },
       endpoints: {
         getForFeature: async (featureId: string, request: KibanaRequest) => {

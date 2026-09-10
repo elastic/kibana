@@ -265,7 +265,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               response={response}
               steps={steps}
               isLoading={isLoadingCurrentRound}
-              isLastRound={isCurrentRound}
               conversationAttachments={conversationAttachments}
               attachmentRefs={attachmentRefs}
               conversationId={conversationId}

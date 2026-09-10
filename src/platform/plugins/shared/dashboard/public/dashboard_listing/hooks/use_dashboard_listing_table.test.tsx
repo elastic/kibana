@@ -16,6 +16,7 @@ import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import type { DashboardSavedObjectUserContent } from '../types';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
+import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
@@ -177,7 +178,7 @@ describe('useDashboardListingTable', () => {
     expect(tableListViewTableProps).toEqual(expectedProps);
   });
 
-  test('should call deleteDashboards when deleteItems is called', () => {
+  test('should call deleteDashboards when deleteItems is called', async () => {
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -185,13 +186,15 @@ describe('useDashboardListingTable', () => {
       })
     );
 
-    act(() => {
-      result.current.tableListViewTableProps.deleteItems?.([
+    await act(async () => {
+      await result.current.tableListViewTableProps.deleteItems?.([
         { id: 'test-id' } as DashboardSavedObjectUserContent,
       ]);
     });
 
     expect(dashboardClient.delete).toHaveBeenCalled();
+    expect(getDashboardRecentlyAccessedService().remove).toHaveBeenCalledWith('test-id');
+    expect(coreServices.chrome.recentlyAccessed.remove).toHaveBeenCalledWith('test-id');
   });
 
   test('should call goToDashboard when editItem is called', () => {

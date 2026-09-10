@@ -29,9 +29,3 @@ export interface SaveDashboardProps {
   lastSavedId?: string;
   accessMode?: SavedObjectAccessControl['accessMode'];
 }
-
-export interface SaveDashboardReturn {
-  id?: string;
-  error?: string;
-  redirectRequired?: boolean;
-}

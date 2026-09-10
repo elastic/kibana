@@ -36,6 +36,7 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
+import { PendingProposalsPanel } from '../../components/pending_proposals';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -209,6 +210,12 @@ export const ConversationsPage: React.FC = () => {
             surfaceFilter={surfaceFilter}
             onSurfaceFilterChange={setSurfaceFilter}
           />
+        </EuiFlexItem>
+
+        {/* Durable proposals from the investigation proposals API. Hidden when
+            empty so the queue below is unaffected when nothing is pending. */}
+        <EuiFlexItem grow={false}>
+          <PendingProposalsPanel hideWhenEmpty />
         </EuiFlexItem>
 
         {isLoading ? (

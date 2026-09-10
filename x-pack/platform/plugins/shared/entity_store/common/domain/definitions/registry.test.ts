@@ -6,7 +6,11 @@
  */
 
 import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
-import { getEntityDefinitionWithoutId } from './registry';
+import {
+  getEntityDefinitionWithoutId,
+  hasPriorityVariant,
+  resolveExtractionMode,
+} from './registry';
 
 /**
  * Tests that all entity definitions parse against the entitySchema (does not throw errors)
@@ -17,4 +21,23 @@ describe('entitiesDefinitionRegistry', () => {
 
     expect(() => entitySchema.parse({ ...definition, id: entityType })).not.toThrow();
   });
+});
+
+describe('hasPriorityVariant', () => {
+  it.each(ALL_ENTITY_TYPES)('%s: returns false', (type) => {
+    expect(hasPriorityVariant(type)).toBe(false);
+  });
+});
+
+describe('resolveExtractionMode', () => {
+  it.each(ALL_ENTITY_TYPES)('%s: returns single when flag is off', (type) => {
+    expect(resolveExtractionMode(false, type)).toBe('single');
+  });
+
+  it.each(ALL_ENTITY_TYPES)(
+    '%s: returns single when flag is on and no priority variant is registered',
+    (type) => {
+      expect(resolveExtractionMode(true, type)).toBe('single');
+    }
+  );
 });

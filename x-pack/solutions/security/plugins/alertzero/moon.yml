@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/alertzero-common'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/i18n'

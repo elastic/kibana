@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core'
+  - '@kbn/datemath'
   - '@kbn/alerting-plugin'
   - '@kbn/logging'
   - '@kbn/config-schema'

@@ -135,7 +135,8 @@ Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on 
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
-- `system-security-rule-tuning` — implementation used by the Detection Rule Tuning Worker
+- `system-security-rule-tuning-worker` — the tuning sweep; the Rule Tuning Worker dispatches it (`workflow.executeAsync`) on its schedule setting (default 2h) per enabled space, and it remains directly callable for manual runs
+- `system-security-rule-tuning-review` — launched per noisy rule by the tuning sweep, each run holding its own approval gate
 - `system-security-rule-creation` — implementation used by the Detection Rule Creation Worker
 - `system-security-rule-preview` — called by both of the above
 
@@ -169,7 +170,7 @@ The Workers service owns per-space installation, reading persisted values, enabl
 
 Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-`system-security-floor-attack-discovery` is the only scheduled Worker today.
+Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`) and `system-security-detection-rule-tuning` (default `2h`, also keeps a `manual` trigger for on-demand sweeps).
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 
@@ -207,7 +208,7 @@ Tests to update:
 
 - `managed_workflow_definitions.test.ts` — add `scheduleInterval` to the Worker's `templateRepresentativeValuesById` entry, and update its fingerprint row to `<newVersion>:<newHash>` (the failure message prints the hash).
 - `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry to `triggerType: 'scheduled'` and its `scheduleInterval`. That assertion compares the Worker's full trigger list, so widen it if the Worker keeps `manual` too.
-- `worker_settings.test.ts` — `UNSCHEDULED_WORKER_IDS` excludes only Attack Discovery today; add the new Worker so the "rejects an interval patch" cases stop running against it.
+- `worker_settings.test.ts` — add the new Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
 
 ## Working-group contribution map
 
