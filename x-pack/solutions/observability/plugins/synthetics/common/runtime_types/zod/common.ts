@@ -83,3 +83,29 @@ export const NonEmptyString = z.string().refine((input) => input.trim() !== '');
  * and each element are validated exactly as the element codec dictates.
  */
 export const nonEmptyArray = <T extends z.ZodType>(schema: T) => z.array(schema).min(1);
+
+export const LocationType = z.looseObject({
+  lat: z.string(),
+  lon: z.string(),
+});
+
+export const CheckGeoType = z.looseObject({
+  name: z.string(),
+  location: LocationType.optional(),
+});
+
+export const SummaryType = z.looseObject({
+  up: z.number().optional(),
+  down: z.number().optional(),
+  geo: CheckGeoType.optional(),
+});
+
+export const StatesIndexStatusType = z.looseObject({
+  indexExists: z.boolean(),
+  indices: z.string(),
+});
+
+export const DateRangeType = z.looseObject({
+  from: z.string(),
+  to: z.string(),
+});
