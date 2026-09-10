@@ -1144,7 +1144,6 @@ packages:
   - 'src/platform/test/plugin_functional/plugins/index_patterns'
   - 'src/platform/test/plugin_functional/plugins/kbn_top_nav'
   - 'src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations'
-  - 'src/platform/test/plugin_functional/plugins/management_test_plugin'
   - 'src/platform/test/plugin_functional/plugins/rendering_plugin'
   - 'src/platform/test/plugin_functional/plugins/saved_object_export_transforms'
   - 'src/platform/test/plugin_functional/plugins/saved_object_import_warnings'
