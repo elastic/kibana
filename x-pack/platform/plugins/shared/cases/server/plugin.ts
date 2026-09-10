@@ -238,6 +238,7 @@ export class CasePlugin
             management: plugins.workflowsManagement.management,
             logger: this.logger,
             audit: plugins.security.audit,
+            attachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
           })
         : undefined;
 
