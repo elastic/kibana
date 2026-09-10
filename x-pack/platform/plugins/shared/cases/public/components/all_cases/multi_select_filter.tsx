@@ -176,9 +176,11 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
             numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
           >
-            <EuiText size="s" className="eui-textTruncate">
-              {buttonLabel}
-            </EuiText>
+            {buttonLabel && (
+              <EuiText size="s" className="eui-textTruncate">
+                {buttonLabel}
+              </EuiText>
+            )}
           </EuiFilterButton>
         </ConditionalTooltip>
       }
