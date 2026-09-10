@@ -77,7 +77,7 @@ describe('ViewInDropdown', () => {
     });
   });
 
-  it('both Discover and Lens items have the expected href/handler after panel opens', async () => {
+  it('Discover item opens in a new tab', async () => {
     renderDropdown({
       actionId: 'action-xyz',
       startDate: '2025-06-15T10:00:00.000Z',
@@ -92,15 +92,37 @@ describe('ViewInDropdown', () => {
     });
   });
 
-  it('Discover item opens in new tab', async () => {
+  it('closes the panel when the trigger is clicked a second time', async () => {
     renderDropdown();
 
     fireEvent.click(screen.getByText('View in'));
+    await waitFor(() => expect(screen.getByText('View in Discover')).toBeInTheDocument());
 
-    await waitFor(() => {
-      const discoverLink = screen.getByText('View in Discover').closest('a');
-      expect(discoverLink).toHaveAttribute('target', '_blank');
-    });
+    fireEvent.click(screen.getByText('View in'));
+    await waitFor(() => expect(screen.queryByText('View in Discover')).not.toBeInTheDocument());
+  });
+
+  it('closes the panel after the Discover item is selected', async () => {
+    renderDropdown();
+
+    fireEvent.click(screen.getByText('View in'));
+    await waitFor(() => expect(screen.getByText('View in Discover')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('View in Discover'));
+
+    await waitFor(() => expect(screen.queryByText('View in Discover')).not.toBeInTheDocument());
+  });
+
+  it('closes the panel after the Lens item is selected', async () => {
+    renderDropdown();
+
+    fireEvent.click(screen.getByText('View in'));
+    await waitFor(() => expect(screen.getByText('View in Lens')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('View in Lens'));
+
+    await waitFor(() => expect(screen.queryByText('View in Lens')).not.toBeInTheDocument());
+    expect(mockNavigateToPrefilledEditor).toHaveBeenCalled();
   });
   describe('scheduled executions', () => {
     it('passes scheduleId and executionCount through to the Discover item', async () => {

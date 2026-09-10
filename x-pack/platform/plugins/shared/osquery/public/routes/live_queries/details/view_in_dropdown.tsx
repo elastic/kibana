@@ -28,14 +28,14 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
   executionCount,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const handleOpen = useCallback(() => setIsOpen(true), []);
+  const handleToggle = useCallback(() => setIsOpen((open) => !open), []);
   const handleClose = useCallback(() => setIsOpen(false), []);
 
   const trigger = (
     <EuiButtonEmpty
       iconType="chevronSingleDown"
       iconSide="right"
-      onClick={handleOpen}
+      onClick={handleToggle}
       data-test-subj="query-details-view-in"
     >
       <FormattedMessage id="xpack.osquery.queryDetailsHeader.viewIn" defaultMessage="View in" />
@@ -52,6 +52,7 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
         endDate={endDate}
         scheduleId={scheduleId}
         executionCount={executionCount}
+        onMenuItemClick={handleClose}
       />,
       <ViewResultsInLensAction
         key="lens"
@@ -61,9 +62,10 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
         endDate={endDate}
         scheduleId={scheduleId}
         executionCount={executionCount}
+        onMenuItemClick={handleClose}
       />,
     ],
-    [actionId, startDate, endDate, scheduleId, executionCount]
+    [actionId, startDate, endDate, scheduleId, executionCount, handleClose]
   );
 
   return (

@@ -29,6 +29,7 @@ interface ViewResultsInLensActionProps {
   mode?: string;
   scheduleId?: string;
   executionCount?: number;
+  onMenuItemClick?: () => void;
 }
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
@@ -39,6 +40,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   mode,
   scheduleId,
   executionCount,
+  onMenuItemClick,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
@@ -73,6 +75,14 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
     [actionId, endDate, executionCount, lensService, logsDataView, mode, scheduleId, startDate]
   );
 
+  const handleMenuItemClick = useCallback(
+    (event: any) => {
+      handleClick(event);
+      onMenuItemClick?.();
+    },
+    [handleClick, onMenuItemClick]
+  );
+
   const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
 
   if (!isLensAvailable) {
@@ -81,7 +91,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 
   if (buttonType === ViewResultsActionButtonType.menuItem) {
     return (
-      <EuiContextMenuItem icon="lensApp" onClick={handleClick} disabled={isDisabled}>
+      <EuiContextMenuItem icon="lensApp" onClick={handleMenuItemClick} disabled={isDisabled}>
         {VIEW_IN_LENS}
       </EuiContextMenuItem>
     );

@@ -18,50 +18,50 @@ interface RunBySubtitleProps {
 }
 
 const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
+  const actionId = data.action_id;
+  const createdAt = data['@timestamp'];
+  const userProfileUid = data.user_profile_uid;
+  const userId = data.user_id;
+
   const profileItems = useMemo<LiveHistoryRow[]>(
     () =>
-      data.user_profile_uid
+      userProfileUid
         ? [
             {
-              id: data.action_id,
+              id: actionId,
               sourceType: 'live',
               source: 'Live',
-              timestamp: data['@timestamp'],
+              timestamp: createdAt,
               queryText: '',
               agentCount: 0,
               successCount: undefined,
               errorCount: undefined,
               totalRows: undefined,
-              userProfileUid: data.user_profile_uid,
-              userId: data.user_id,
+              userProfileUid,
+              userId,
             },
           ]
         : [],
-    [data]
+    [actionId, createdAt, userProfileUid, userId]
   );
 
   const { profilesMap, isLoading } = useBulkGetUserProfiles(profileItems);
 
-  const timestamp = formatDate(data['@timestamp']);
-  const elasticValues = useMemo(() => ({ timestamp }), [timestamp]);
-  const onValues = useMemo(() => ({ timestamp }), [timestamp]);
+  const timestamp = formatDate(createdAt);
 
-  if (!data.user_id && !data.user_profile_uid) {
+  if (!userId && !userProfileUid) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="query-details-run-by">
         <FormattedMessage
           id="xpack.osquery.queryDetailsHeader.runByElastic"
           defaultMessage="Run by: Elastic on {timestamp}"
-          values={elasticValues}
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          values={{ timestamp }}
         />
       </EuiText>
     );
   }
 
-  // `RunByColumn` renders an EuiFlexGroup (a block-level box), which would break the
-  // subtitle onto separate lines if inlined into flowing text. Lay the parts out as a
-  // single non-wrapping flex row instead, and keep `RunByColumn` untouched — the packs
-  // and saved-queries tables depend on its current markup.
   return (
     <EuiText size="s" color="subdued" data-test-subj="query-details-run-by">
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
@@ -70,8 +70,8 @@ const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <RunByColumn
-            userId={data.user_id}
-            userProfileUid={data.user_profile_uid}
+            userId={userId}
+            userProfileUid={userProfileUid}
             profilesMap={profilesMap}
             isLoadingProfiles={isLoading}
           />
@@ -80,7 +80,8 @@ const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
           <FormattedMessage
             id="xpack.osquery.queryDetailsHeader.runByOn"
             defaultMessage="on {timestamp}"
-            values={onValues}
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{ timestamp }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

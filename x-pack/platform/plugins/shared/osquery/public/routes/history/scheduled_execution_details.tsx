@@ -17,19 +17,11 @@ import {
   useScheduledExecutionDetails,
   mapScheduledDetailsToQueryData,
 } from '../../actions/use_scheduled_execution_details';
-import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { QueryDetailsHeader } from '../live_queries/details/query_details_header';
 import { ResultTabs } from '../saved_queries/edit/tabs';
 import { ExportFiltersProvider } from '../../results/export_filters_context';
+import { getPackViewDateWindow } from '../../common/pack_view_date_window';
 import type { LiveQueryDetailsItem } from '../../actions/use_live_query_details';
-
-const tableWrapperCss = {
-  paddingLeft: '10px',
-};
-
-// Results for one execution land shortly after its scheduled time; a 24h window
-// comfortably covers agent check-in lag without pulling in neighbouring executions.
-const EXECUTION_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const ScheduledExecutionDetailsPageComponent = () => {
   const { scheduleId, executionCount: executionCountStr } = useParams<{
@@ -59,27 +51,13 @@ const ScheduledExecutionDetailsPageComponent = () => {
     [data, scheduleId]
   );
 
-  // A scheduled execution always represents exactly one query at one execution count
-  // (see `mapScheduledDetailsToQueryData`), so it uses the same single-query header as
-  // ad-hoc live queries rather than the multi-row pack table.
   const headerData = useMemo<LiveQueryDetailsItem | undefined>(() => {
     if (!queryData) return undefined;
 
-    // Anchor the View-in links to an absolute window around this execution. Without an
-    // end bound they fall back to a relative `now-7d`, which silently misses any
-    // execution older than a week and makes Discover/Lens look empty.
-    const timestamp = data?.timestamp;
-    const expiration = timestamp
-      ? new Date(new Date(timestamp).getTime() + EXECUTION_WINDOW_MS).toISOString()
-      : undefined;
-
     return {
       action_id: scheduleId,
-      '@timestamp': timestamp ?? '',
-      expiration,
+      '@timestamp': data?.timestamp ?? '',
       queries: queryData,
-      // A scheduled run targets agents via its pack policy, not an explicit
-      // selection, so there is no agent selection to surface in the header.
       agent_all: false,
       agent_ids: [],
       agent_platforms: [],
@@ -87,12 +65,50 @@ const ScheduledExecutionDetailsPageComponent = () => {
     };
   }, [queryData, scheduleId, data?.timestamp]);
 
+  // `data.timestamp` is the newest response document for this execution, so the
+  // View-in window has to bracket it in both directions — anchoring the start there
+  // would exclude every earlier agent response.
+  const viewInWindow = useMemo(
+    () => getPackViewDateWindow({ isScheduled: true, timestamp: data?.timestamp }),
+    [data?.timestamp]
+  );
+
   if (!isValid) {
     return <Redirect to={historyPath} />;
   }
 
+  const backToHistoryButton = (
+    <EuiButtonEmpty {...historyNavProps} iconType="chevronSingleLeft">
+      <FormattedMessage
+        id="xpack.osquery.scheduledExecutionDetails.backToHistory"
+        defaultMessage="Back to History"
+      />
+    </EuiButtonEmpty>
+  );
+
+  const emptyPrompt = (
+    <EuiEmptyPrompt
+      iconType="search"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.osquery.scheduledExecutionDetails.emptyTitle"
+            defaultMessage="No details for this execution"
+          />
+        </h2>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.osquery.scheduledExecutionDetails.emptyBody"
+          defaultMessage="This scheduled execution has no recorded results yet."
+        />
+      }
+      actions={backToHistoryButton}
+    />
+  );
+
   const detailsBlock =
-    headerData && queryData ? (
+    headerData && queryData?.length ? (
       <ExportFiltersProvider>
         <QueryDetailsHeader
           actionId={scheduleId}
@@ -100,6 +116,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
           scheduleId={scheduleId}
           executionCount={executionCount}
           packName={data?.packName}
+          viewInStartDate={viewInWindow.startDate}
+          viewInEndDate={viewInWindow.endDate}
         />
         <ResultTabs
           actionId={queryData[0].action_id}
@@ -110,18 +128,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         />
       </ExportFiltersProvider>
     ) : (
-      <div css={tableWrapperCss}>
-        <PackQueriesStatusTable
-          actionId={scheduleId}
-          data={queryData}
-          startDate={data?.timestamp}
-          showResultsHeader
-          hideResultsTitle
-          scheduleId={scheduleId}
-          executionCount={executionCount}
-          packName={data?.packName}
-        />
-      </div>
+      emptyPrompt
     );
 
   const errorPrompt = (
@@ -141,14 +148,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
           defaultMessage="There was an error loading the details for this scheduled execution. Please try again."
         />
       }
-      actions={
-        <EuiButtonEmpty {...historyNavProps} iconType="chevronSingleLeft">
-          <FormattedMessage
-            id="xpack.osquery.scheduledExecutionDetails.backToHistory"
-            defaultMessage="Back to History"
-          />
-        </EuiButtonEmpty>
-      }
+      actions={backToHistoryButton}
     />
   );
 
@@ -163,8 +163,6 @@ const ScheduledExecutionDetailsPageComponent = () => {
       {errorPrompt}
     </>
   ) : (
-    // No leading spacer: the page container already supplies padding, and the header
-    // starts with its own title block.
     detailsBlock
   );
 

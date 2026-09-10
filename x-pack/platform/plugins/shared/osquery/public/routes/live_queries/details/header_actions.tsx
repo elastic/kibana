@@ -36,6 +36,8 @@ interface HeaderActionsProps {
   onSaveQuery?: () => void;
   scheduleId?: string;
   executionCount?: number;
+  viewInStartDate?: string;
+  viewInEndDate?: string;
 }
 
 const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
@@ -44,6 +46,8 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
   onSaveQuery,
   scheduleId,
   executionCount,
+  viewInStartDate,
+  viewInEndDate,
 }) => {
   const isScheduled = !!scheduleId && executionCount != null;
   const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
@@ -53,6 +57,7 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
   const query = data.queries?.[0];
   const queryActionId = query?.action_id;
   const timelineValue = useMemo(() => (queryActionId ? [queryActionId] : []), [queryActionId]);
+  const agentIds = data.agents;
 
   const exportFilters = useExportFilters(queryActionId);
 
@@ -86,15 +91,15 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
           <EuiFlexItem grow={false}>
             <ViewInDropdown
               actionId={queryActionId}
-              startDate={data['@timestamp']}
-              endDate={data.expiration}
+              startDate={viewInStartDate ?? data['@timestamp']}
+              endDate={viewInEndDate ?? data.expiration}
               scheduleId={scheduleId}
               executionCount={executionCount}
             />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <AddToCaseWrapper actionId={actionId} isIcon={false} size="m" />
+          <AddToCaseWrapper actionId={actionId} agentIds={agentIds} isIcon={false} size="m" />
         </EuiFlexItem>
         {queryActionId && (
           <EuiFlexItem grow={false}>

@@ -13,15 +13,10 @@ const titleCss = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap' as const,
-  // EuiText applies default heading margins, which open a gap between the title and the
-  // subtitle directly beneath it.
   marginBottom: 0,
 };
 
-// CSS ellipsis alone lets a very long query claim the full container width on wide
-// screens, crowding the action row. Trim the rendered text as well; the untruncated
-// query stays available via the native `title` tooltip. Kept short deliberately — the
-// title identifies the query at a glance, it is not the place to read it.
+// Trimmed as well as ellipsized; the full query stays in the `title` tooltip.
 const MAX_TITLE_LENGTH = 60;
 
 interface QueryTitleProps {

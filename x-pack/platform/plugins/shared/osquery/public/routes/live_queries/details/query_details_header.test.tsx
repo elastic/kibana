@@ -250,8 +250,6 @@ describe('QueryDetailsHeader', () => {
   });
 
   describe('back navigation', () => {
-    // The page-level chrome already provides a back arrow next to the page title, so the
-    // header must not render a second one.
     it('does not render its own back-to-history control', () => {
       renderHeader();
 
@@ -264,6 +262,16 @@ describe('QueryDetailsHeader', () => {
       expect(screen.queryByTestId('query-details-back-to-history')).not.toBeInTheDocument();
     });
   });
+  describe('execution count formatting', () => {
+    it('should not locale-format a high execution count', () => {
+      renderHeader({ scheduleId: 'schedule-1', executionCount: 1152, packName: 'My Pack' });
+
+      const subtitle = screen.getByTestId('query-details-scheduled-run');
+      expect(subtitle).toHaveTextContent('Execution #1152');
+      expect(subtitle).not.toHaveTextContent('Execution #1,152');
+    });
+  });
+
   describe('long query titles', () => {
     const longQuery = `SELECT ${'a'.repeat(400)} FROM processes`;
 
@@ -273,7 +281,6 @@ describe('QueryDetailsHeader', () => {
       });
 
       const title = screen.getByTestId('query-details-title');
-      // Cap is 60 chars + the ellipsis character.
       expect(title.textContent!.length).toBeLessThanOrEqual(61);
       expect(title.textContent).toMatch(/\u2026$/);
       expect(title).toHaveAttribute('title', longQuery);

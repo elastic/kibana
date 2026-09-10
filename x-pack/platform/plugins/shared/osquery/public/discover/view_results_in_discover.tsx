@@ -21,6 +21,7 @@ interface ViewResultsInDiscoverActionProps {
   mode?: string;
   scheduleId?: string;
   executionCount?: number;
+  onMenuItemClick?: () => void;
 }
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
@@ -30,6 +31,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   startDate,
   scheduleId,
   executionCount,
+  onMenuItemClick,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
@@ -131,6 +133,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         icon="discoverApp"
         href={discoverUrl}
         target="_blank"
+        onClick={onMenuItemClick}
         disabled={!actionId || !discoverUrl.length}
       >
         {VIEW_IN_DISCOVER}
