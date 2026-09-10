@@ -11,6 +11,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 29788
+  alertzero: 13291
   apm: 53172
   apmShared: 5852
   apmSourcesAccess: 2747
@@ -142,12 +143,12 @@ pageLoadAssetSize:
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
+  observabilityAlerting: 3500
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
   observabilityShared: 86067
   osquery: 48500
   painlessLab: 6299
-  pnd: 13291
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860

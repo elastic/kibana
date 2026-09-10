@@ -39,6 +39,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
     },
     color,
     seriesType,
+    customFunction: 'AVG',
     dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
