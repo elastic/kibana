@@ -238,28 +238,32 @@ describe('generateYamlSchemaFromConnectors', () => {
         steps: [{ name: 'step', type: 'notify', with: withValue }],
       });
 
-    it('accepts a {{ expr }} template for an array param', () => {
-      expect(parse({ recipients: '{{ workflow.inputs.recipients }}', subject: 'hi' }).success).toBe(
-        true
-      );
-    });
-
     it('accepts a ${{ expr }} template for an array param', () => {
       expect(
         parse({ recipients: '${{ workflow.inputs.recipients }}', subject: 'hi' }).success
       ).toBe(true);
     });
 
-    it('rejects a plain string for an array param', () => {
-      expect(parse({ recipients: 'not-a-template', subject: 'hi' }).success).toBe(false);
-    });
-
-    it('rejects a partial template string (text before {{ }}) for an array param', () => {
-      expect(parse({ recipients: 'prefix-{{ expr }}', subject: 'hi' }).success).toBe(false);
+    // Only `${{ … }}` survives as an array at runtime: WorkflowTemplatingEngine returns the raw
+    // evaluated value for that form only, and renders everything else to a string. Accepting any
+    // of the shapes below would let YAML be saved that hands the connector a string — or, for the
+    // multi-expression forms, throws "The provided expression is invalid" mid-execution, because
+    // evaluateExpression slices from the first `{{` to the last `}}`.
+    it.each([
+      ['a plain string', 'not-a-template'],
+      ['a bare {{ expr }} template (renders to a string, not an array)', '{{ recipients }}'],
+      ['text before the expression', 'prefix-${{ expr }}'],
+      ['text after the expression', '${{ expr }}-suffix'],
+      ['two concatenated expressions', '${{ a }}-${{ b }}'],
+      ['an expression with literal text between two others', '${{ a }} literal ${{ b }}'],
+      ['leading whitespace (the runtime check does not trim)', '  ${{ expr }}'],
+      ['trailing whitespace (the runtime check does not trim)', '${{ expr }}  '],
+    ])('rejects %s for an array param', (_label, recipients) => {
+      expect(parse({ recipients, subject: 'hi' }).success).toBe(false);
     });
 
     it('rejects a template string exceeding TEMPLATE_EXPRESSION_MAX_LENGTH', () => {
-      const long = `{{ ${'x'.repeat(TEMPLATE_EXPRESSION_MAX_LENGTH)} }}`;
+      const long = `\${{ ${'x'.repeat(TEMPLATE_EXPRESSION_MAX_LENGTH)} }}`;
       expect(parse({ recipients: long, subject: 'hi' }).success).toBe(false);
     });
 
@@ -284,7 +288,7 @@ describe('generateYamlSchemaFromConnectors', () => {
       expect(
         schema.safeParse({
           ...BASE_WORKFLOW,
-          steps: [{ name: 's', type: 'opt.step', with: { tags: '{{ workflow.inputs.tags }}' } }],
+          steps: [{ name: 's', type: 'opt.step', with: { tags: '${{ workflow.inputs.tags }}' } }],
         }).success
       ).toBe(true);
       // omitting the optional field is still valid
@@ -296,19 +300,56 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).toBe(true);
     });
 
-    it('widens default-wrapped array params', () => {
+    it('widens default-wrapped array params without making them required', () => {
       const connector: ConnectorContractUnion = {
         summary: 'Def',
         description: null,
         type: 'def.step',
-        paramsSchema: z.object({ tags: z.array(z.string()).default([]) }),
+        // Mirrors a real shipped connector: InferenceRerankParamsSchema declares
+        // `input: z.array(z.string()).default([])` as a top-level param.
+        paramsSchema: z.object({ tags: z.array(z.string()).default([]), query: z.string() }),
         outputSchema: z.unknown(),
       };
       const schema = generateYamlSchemaFromConnectors([connector]);
       expect(
         schema.safeParse({
           ...BASE_WORKFLOW,
-          steps: [{ name: 's', type: 'def.step', with: { tags: '{{ workflow.inputs.tags }}' } }],
+          steps: [
+            {
+              name: 's',
+              type: 'def.step',
+              with: { tags: '${{ workflow.inputs.tags }}', query: 'q' },
+            },
+          ],
+        }).success
+      ).toBe(true);
+
+      // Widening must not strip `.default()`. If it did, every existing workflow that omits a
+      // defaulted array param would stop validating — including on update, since this schema
+      // gates persistence and not just editor feedback.
+      const omitted = schema.safeParse({
+        ...BASE_WORKFLOW,
+        steps: [{ name: 's', type: 'def.step', with: { query: 'q' } }],
+      });
+      expect(omitted.success).toBe(true);
+      expect(omitted.data).toMatchObject({ steps: [{ with: { tags: [] } }] });
+    });
+
+    it('widens array params wrapped in both .optional() and .default()', () => {
+      const connector: ConnectorContractUnion = {
+        summary: 'Both',
+        description: null,
+        type: 'both.step',
+        paramsSchema: z.object({ tags: z.array(z.string()).optional().default([]) }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      // Stacked wrappers must still be unwrapped down to the array, otherwise the field is
+      // silently skipped and the template string is reported as a type error.
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'both.step', with: { tags: '${{ workflow.inputs.tags }}' } }],
         }).success
       ).toBe(true);
     });
@@ -330,7 +371,7 @@ describe('generateYamlSchemaFromConnectors', () => {
             {
               name: 's',
               type: 'strict.step',
-              with: { ids: '{{ workflow.inputs.ids }}', unknown_key: 'bad' },
+              with: { ids: '${{ workflow.inputs.ids }}', unknown_key: 'bad' },
             },
           ],
         }).success
@@ -359,7 +400,7 @@ describe('generateYamlSchemaFromConnectors', () => {
             {
               name: 's',
               type: 'refined.step',
-              with: { ids: '{{ workflow.inputs.ids }}', name: 'x' },
+              with: { ids: '${{ workflow.inputs.ids }}', name: 'x' },
             },
           ],
         }).success
