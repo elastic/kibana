@@ -48,7 +48,7 @@ export const updateAttachmentStepCommonDefinition: CommonStepDefinition<
   id: UpdateAttachmentStepTypeId,
   category: StepCategory.Ai,
   label: i18n.translate('xpack.agentBuilder.workflowSteps.updateAttachment.label', {
-    defaultMessage: 'Update attachment',
+    defaultMessage: 'Update conversation attachment',
   }),
   description: i18n.translate('xpack.agentBuilder.workflowSteps.updateAttachment.description', {
     defaultMessage:

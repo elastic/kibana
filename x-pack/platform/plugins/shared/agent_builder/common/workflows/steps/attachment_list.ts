@@ -32,8 +32,7 @@ const AttachmentSummarySchema = z.object({
 
 const OutputSchema = z.object({
   attachments: z.array(AttachmentSummarySchema).meta({
-    description:
-      'Summary of each attachment: id, type, current_version, description, active. Excludes raw version data. Use `ai.attachment.read` to fetch a specific version content.',
+    description: 'Summary of each attachment: id, type, current_version, description, active.',
   }),
   total_token_estimate: z.number().meta({
     description: 'Aggregate estimated token count across the returned attachments.',
@@ -52,18 +51,17 @@ export const listAttachmentsStepCommonDefinition: CommonStepDefinition<
   id: ListAttachmentsStepTypeId,
   category: StepCategory.Ai,
   label: i18n.translate('xpack.agentBuilder.workflowSteps.listAttachments.label', {
-    defaultMessage: 'List attachments',
+    defaultMessage: 'List conversation attachments',
   }),
   description: i18n.translate('xpack.agentBuilder.workflowSteps.listAttachments.description', {
-    defaultMessage:
-      'Lists attachments on a conversation. Returns summaries only; use `ai.attachment.read` for raw content.',
+    defaultMessage: 'Lists attachments on a conversation. Returns summaries only,',
   }),
   documentation: {
     details: i18n.translate(
       'xpack.agentBuilder.workflowSteps.listAttachments.documentation.details',
       {
         defaultMessage:
-          'Returns a lightweight summary of each attachment (`id`, `type`, `current_version`, `description`, `active`) plus a total token estimate. The step deliberately omits version payloads to keep step outputs small; fetch a specific version with `ai.attachment.read`.',
+          'Returns a lightweight summary of each attachment (`id`, `type`, `current_version`, `description`, `active`) plus a total token estimate.',
       }
     ),
     examples: [

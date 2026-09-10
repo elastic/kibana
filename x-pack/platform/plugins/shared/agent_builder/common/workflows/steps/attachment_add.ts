@@ -58,7 +58,7 @@ export const addAttachmentStepCommonDefinition: CommonStepDefinition<
   id: AddAttachmentStepTypeId,
   category: StepCategory.Ai,
   label: i18n.translate('xpack.agentBuilder.workflowSteps.addAttachment.label', {
-    defaultMessage: 'Add attachment',
+    defaultMessage: 'Add conversation attachment',
   }),
   description: i18n.translate('xpack.agentBuilder.workflowSteps.addAttachment.description', {
     defaultMessage: 'Adds an attachment to an existing conversation.',
@@ -68,7 +68,7 @@ export const addAttachmentStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.addAttachment.documentation.details',
       {
         defaultMessage:
-          'Adds a new attachment to the specified conversation. Either `data` (by-value) or `origin` (by-reference) must be provided. Returns the created attachment id, its type, and its current version (always 1 on create).',
+          'Adds a new attachment to the specified conversation. Either `data` (by-value) or `origin` (by-reference) must be provided. Returns the created attachment id, type, and version.',
       }
     ),
     examples: [

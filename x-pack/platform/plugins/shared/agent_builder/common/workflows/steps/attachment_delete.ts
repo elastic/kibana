@@ -21,15 +21,14 @@ const InputSchema = z.object({
     description: 'The ID of the attachment to delete.',
   }),
   permanent: z.boolean().optional().meta({
-    description:
-      'When true, permanently removes the attachment (only allowed when unreferenced and not created from flyout configuration). Defaults to a soft delete.',
+    description: 'When true, permanently removes the attachment. Defaults to soft delete.',
   }),
 });
 
 const OutputSchema = z.object({
   success: z.boolean().meta({ description: 'Always true on success.' }),
   permanent: z.boolean().meta({
-    description: 'Whether the delete was permanent (mirrors the input flag).',
+    description: 'Whether the delete was permanent.',
   }),
 });
 
@@ -45,7 +44,7 @@ export const deleteAttachmentStepCommonDefinition: CommonStepDefinition<
   id: DeleteAttachmentStepTypeId,
   category: StepCategory.Ai,
   label: i18n.translate('xpack.agentBuilder.workflowSteps.deleteAttachment.label', {
-    defaultMessage: 'Delete attachment',
+    defaultMessage: 'Delete conversation attachment',
   }),
   description: i18n.translate('xpack.agentBuilder.workflowSteps.deleteAttachment.description', {
     defaultMessage:
@@ -56,7 +55,7 @@ export const deleteAttachmentStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.deleteAttachment.documentation.details',
       {
         defaultMessage:
-          'By default, performs a soft delete — the attachment is marked inactive and can be restored later. Passing `permanent: true` removes the record entirely; this is blocked when the attachment is referenced in prior conversation rounds or was created from flyout configuration.',
+          'By default, performs a soft delete — the attachment is marked inactive and can be restored later. Passing `permanent: true` removes the record entirely.',
       }
     ),
     examples: [

@@ -42,7 +42,7 @@ export const readAttachmentStepCommonDefinition: CommonStepDefinition<
   id: ReadAttachmentStepTypeId,
   category: StepCategory.Ai,
   label: i18n.translate('xpack.agentBuilder.workflowSteps.readAttachment.label', {
-    defaultMessage: 'Read attachment',
+    defaultMessage: 'Read conversation attachment',
   }),
   description: i18n.translate('xpack.agentBuilder.workflowSteps.readAttachment.description', {
     defaultMessage: 'Reads the raw content of an attachment at a specific version.',
