@@ -106,6 +106,13 @@ function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
+/** Splits a comma-separated `is one of` value into trimmed, non-empty members. */
+const splitCommaSeparatedValues = (value: string): string[] =>
+  value
+    .split(',')
+    .map((member) => member.trim())
+    .filter(Boolean);
+
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
@@ -382,7 +389,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
                   : blocklistEntry.field,
               type: ListOperatorTypeEnum.MATCH_ANY,
               ...(typeof blocklistEntry.value === 'string'
-                ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
+                ? { value: splitCommaSeparatedValues(blocklistEntry.value) }
                 : {}),
             },
           ],
@@ -408,7 +415,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
               field,
               type: ListOperatorTypeEnum.MATCH_ANY,
               ...(typeof blocklistEntry.value === 'string'
-                ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
+                ? { value: splitCommaSeparatedValues(blocklistEntry.value) }
                 : {}),
             },
           ],
@@ -427,10 +434,10 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const generateBlocklistEntryValue = useCallback(
       (value: string | string[], newOperator: ListOperatorTypeEnum) => {
         if (newOperator === ListOperatorTypeEnum.MATCH) {
-          return { value: Array.isArray(value) ? value.join(',') : value };
+          return { value: Array.isArray(value) ? value.join(', ') : value };
         } else {
           return {
-            value: (typeof value === 'string' ? value.split(',') : value).filter(Boolean),
+            value: typeof value === 'string' ? splitCommaSeparatedValues(value) : value,
           };
         }
       },
@@ -519,11 +526,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnValueAdd = useCallback(
       (option: string) => {
-        const splitValues = option
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean);
-        const value = [...blocklistEntry.value, ...splitValues];
+        const value = [...blocklistEntry.value, ...splitCommaSeparatedValues(option)];
 
         const nextItem = {
           ...item,

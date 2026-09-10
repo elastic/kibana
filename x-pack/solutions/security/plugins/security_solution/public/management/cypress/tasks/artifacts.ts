@@ -384,7 +384,7 @@ export const blocklistFormSelectors = {
       cy.getByTestSubj('blocklist-form-values-input').within(() => {
         cy.getByTestSubj('comboBoxInput').within(() => {
           cy.getByTestSubj('blocklist-form-values-input-Elastic');
-          cy.getByTestSubj('blocklist-form-values-input- Inc.');
+          cy.getByTestSubj('blocklist-form-values-input-Inc.');
         });
       });
     } else {
