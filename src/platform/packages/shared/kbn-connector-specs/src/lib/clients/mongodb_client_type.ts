@@ -76,6 +76,14 @@ const ensureHostsAllowed = async (
  * mongodb:// URI does not carry it. DNS TXT-record-provided defaults (replicaSet, authSource)
  * are no longer consulted once the +srv scheme is dropped — the driver still auto-discovers
  * replica-set topology from the resolved hosts without an expected replicaSet name.
+ *
+ * Residual trust: after connecting, the MongoDB driver performs Server Discovery and Monitoring
+ * (SDAM) — it reads the `hello` response from each host and opens connections to any additional
+ * replica-set members advertised there. Those discovered hostnames are not re-checked against
+ * xpack.actions.allowedHosts. This means the allowlist check trusts allowlisted MongoDB endpoints
+ * not to advertise internal hostnames. Operators who need to prevent topology discovery entirely
+ * (for example, on standalone instances) can append `?directConnection=true` to the connection
+ * URI, which instructs the driver to connect to exactly the one seed host and skip SDAM.
  */
 const pinToResolvedHosts = (
   connectionString: ConnectionStringType,
