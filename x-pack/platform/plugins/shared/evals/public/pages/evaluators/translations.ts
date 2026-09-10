@@ -75,6 +75,41 @@ export const NO_RESULTS_DESCRIPTION = i18n.translate(
   'xpack.evals.evaluators.noResultsDescription',
   { defaultMessage: 'Change the search or filters and try again.' }
 );
+export const NO_USER_DEFINED_TITLE = i18n.translate('xpack.evals.evaluators.noUserDefinedTitle', {
+  defaultMessage: 'No custom evaluators yet',
+});
+export const NO_USER_DEFINED_DESCRIPTION = i18n.translate(
+  'xpack.evals.evaluators.noUserDefinedDescription',
+  {
+    defaultMessage:
+      'Create an LLM judge to score traces against criteria you define, then test it before saving.',
+  }
+);
+export const CLEAR_FILTERS_BUTTON = i18n.translate(
+  'xpack.evals.evaluators.clearFiltersButtonLabel',
+  { defaultMessage: 'Clear filters' }
+);
+export const CREATE_SUCCESS = (name: string) =>
+  i18n.translate('xpack.evals.evaluators.createSuccessMessage', {
+    defaultMessage: 'Created evaluator {name}',
+    values: { name },
+  });
+export const UPDATE_SUCCESS = (name: string, version: string) =>
+  i18n.translate('xpack.evals.evaluators.updateSuccessMessage', {
+    defaultMessage: 'Saved {name} as version {version}',
+    values: { name, version },
+  });
+export const DELETE_SUCCESS = (name: string) =>
+  i18n.translate('xpack.evals.evaluators.deleteSuccessMessage', {
+    defaultMessage: 'Deleted evaluator {name}',
+    values: { name },
+  });
+export const SAVE_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.saveErrorTitle', {
+  defaultMessage: 'Could not save this evaluator',
+});
+export const TEST_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.testErrorTitle', {
+  defaultMessage: 'Could not run this test',
+});
 export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.loadErrorTitle', {
   defaultMessage: 'Unable to load evaluators',
 });

@@ -32,6 +32,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
   UserDefinedEvaluatorDraft,
   type JudgeEvidence,
@@ -172,6 +174,8 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   onClose,
 }) => {
   const titleId = useGeneratedHtmlId();
+  const { services } = useKibana<{ notifications?: NotificationsStart }>();
+  const toasts = services.notifications?.toasts;
   const {
     data: evaluatorData,
     isLoading: isLoadingEvaluator,
@@ -196,11 +200,15 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const [referenceData, setReferenceData] = useState('{}');
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  // Kept apart from `formError` because a server rejection highlights no field, and
+  // routing it through EuiForm would title it "address the highlighted errors".
+  const [submitError, setSubmitError] = useState<{ title: string; message: string } | null>(null);
   const [testResult, setTestResult] = useState<TestEvaluatorResponse['result'] | null>(null);
 
   useEffect(() => {
     setFormError(null);
     setFieldErrors({});
+    setSubmitError(null);
     setTestResult(null);
   }, [
     connectorId,
@@ -315,6 +323,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
   const onSave = async () => {
     setFormError(null);
     setFieldErrors({});
+    setSubmitError(null);
     const judge = buildDraft();
     if (!judge) {
       return;
@@ -322,26 +331,29 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
 
     try {
       if (mode === 'create') {
-        await createEvaluator.mutateAsync({
+        const created = await createEvaluator.mutateAsync({
           name: name.trim(),
           description: description.trim(),
           judge,
         });
+        toasts?.addSuccess(i18n.CREATE_SUCCESS(created.evaluator.name));
       } else if (evaluatorName) {
-        await updateEvaluator.mutateAsync({
+        const updated = await updateEvaluator.mutateAsync({
           name: evaluatorName,
           updates: { description: description.trim(), judge },
         });
+        toasts?.addSuccess(i18n.UPDATE_SUCCESS(updated.evaluator.name, updated.evaluator.version));
       }
       onClose();
     } catch (error) {
-      setFormError(getErrorMessage(error));
+      setSubmitError({ title: i18n.SAVE_ERROR_TITLE, message: getErrorMessage(error) });
     }
   };
 
   const onTest = async () => {
     setFormError(null);
     setFieldErrors({});
+    setSubmitError(null);
     setTestResult(null);
     const judge = buildDraft();
     if (!judge) {
@@ -387,7 +399,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       });
       setTestResult(response.result);
     } catch (error) {
-      setFormError(getErrorMessage(error));
+      setSubmitError({ title: i18n.TEST_ERROR_TITLE, message: getErrorMessage(error) });
     }
   };
 
@@ -416,6 +428,17 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
           />
         ) : (
           <EuiForm isInvalid={Boolean(formError)} error={formError ?? undefined} component="form">
+            {submitError ? (
+              <>
+                <KbnDangerCallout
+                  announceOnMount
+                  title={submitError.title}
+                  data-test-subj="evalsEvaluatorSubmitError"
+                  text={<p>{submitError.message}</p>}
+                />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             <EuiFormRow
               label={i18n.NAME_LABEL}
               helpText={i18n.NAME_HELP}
@@ -602,6 +625,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                         updateScore(score.id, { description: event.target.value })
                       }
                       fullWidth
+                      data-test-subj={`evalsEvaluatorScoreDescription-${score.id}`}
                     />
                   </EuiFormRow>
                   {score.type === 'categorical' && (
@@ -610,6 +634,7 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                         value={score.labels}
                         onChange={(event) => updateScore(score.id, { labels: event.target.value })}
                         fullWidth
+                        data-test-subj={`evalsEvaluatorScoreLabels-${score.id}`}
                       />
                     </EuiFormRow>
                   )}

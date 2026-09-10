@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
@@ -25,6 +26,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ListEvaluatorsResponse } from '@kbn/evals-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { useDeleteEvaluator, useEvaluators } from '../../hooks/use_evaluators_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { getErrorMessage } from '../../utils/get_error_message';
@@ -69,6 +72,8 @@ const EvaluatorInputs: React.FC<{ evaluator: EvaluatorSummary }> = ({ evaluator 
 export const EvaluatorsPage: React.FC = () => {
   const deleteModalTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<{ notifications?: NotificationsStart }>();
+  const toasts = services.notifications?.toasts;
   const { canManage } = useEvalsPermissions();
   const { data, isLoading, error, refetch } = useEvaluators();
   const deleteEvaluator = useDeleteEvaluator();
@@ -158,11 +163,20 @@ export const EvaluatorsPage: React.FC = () => {
     setActionError(null);
     try {
       await deleteEvaluator.mutateAsync(pendingDelete.name);
+      toasts?.addSuccess(i18n.DELETE_SUCCESS(pendingDelete.name));
       setPendingDelete(null);
     } catch (deleteError) {
       setActionError(getErrorMessage(deleteError));
       setPendingDelete(null);
     }
+  };
+
+  const hasActiveFilters = Boolean(search.trim()) || kind !== 'all' || origin !== 'all';
+
+  const clearFilters = () => {
+    setSearch('');
+    setKind('all');
+    setOrigin('all');
   };
 
   return (
@@ -250,10 +264,48 @@ export const EvaluatorsPage: React.FC = () => {
         ) : (
           <>
             {!isLoading && evaluators.length === 0 ? (
+              // Filtering to user-defined before creating any is the feature's entry point,
+              // so that case gets a create action rather than advice to change the filters.
               <EuiEmptyPrompt
-                iconType="search"
-                title={<h2>{i18n.NO_RESULTS_TITLE}</h2>}
-                body={<p>{i18n.NO_RESULTS_DESCRIPTION}</p>}
+                iconType={origin === 'user_defined' ? 'plusInCircle' : 'search'}
+                title={
+                  <h2>
+                    {origin === 'user_defined' ? i18n.NO_USER_DEFINED_TITLE : i18n.NO_RESULTS_TITLE}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {origin === 'user_defined'
+                      ? i18n.NO_USER_DEFINED_DESCRIPTION
+                      : i18n.NO_RESULTS_DESCRIPTION}
+                  </p>
+                }
+                actions={[
+                  ...(canManage
+                    ? [
+                        <EuiButton
+                          key="create"
+                          fill
+                          iconType="plusInCircle"
+                          onClick={() => setEditor({ mode: 'create' })}
+                          data-test-subj="evalsEvaluatorEmptyCreate"
+                        >
+                          {i18n.CREATE_BUTTON}
+                        </EuiButton>,
+                      ]
+                    : []),
+                  ...(hasActiveFilters
+                    ? [
+                        <EuiButtonEmpty
+                          key="clear"
+                          onClick={clearFilters}
+                          data-test-subj="evalsEvaluatorClearFilters"
+                        >
+                          {i18n.CLEAR_FILTERS_BUTTON}
+                        </EuiButtonEmpty>,
+                      ]
+                    : []),
+                ]}
               />
             ) : (
               <EuiBasicTable
