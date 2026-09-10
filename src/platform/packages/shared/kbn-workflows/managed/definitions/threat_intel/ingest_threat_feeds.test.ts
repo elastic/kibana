@@ -58,6 +58,36 @@ describe('THREAT_INTEL_INGEST_FEEDS_WORKFLOW yaml', () => {
     expect((enabledFilter?.term as { enabled: { value: boolean } }).enabled.value).toBe(true);
   });
 
+  // Load-bearing for future space-owned sources: this workflow is installed once,
+  // globally. A `space_id` filter here (even one that accepted the current space
+  // plus `*`) would silently exclude a source owned by any other real space,
+  // because there is only ever one instance of this workflow and it has no "current
+  // space" of its own. `enabled` is deliberately the only gate.
+  it('loads sources space-blind, with no space_id filter on load_sources', () => {
+    const step = findStepByName(workflow.steps, 'load_sources') as {
+      with?: { query?: { bool?: { filter?: Array<Record<string, unknown>> } } };
+    };
+    const filters = step?.with?.query?.bool?.filter ?? [];
+    const spaceFilter = filters.find(
+      (f) => (f.terms as { space_id?: unknown } | undefined)?.space_id !== undefined
+    );
+    expect(spaceFilter).toBeUndefined();
+  });
+
+  // Same reasoning as load_sources: a duplicate report written under a
+  // space-owned source's own `space_id` still has to suppress a re-fetch of the
+  // same fingerprint, so dedup cannot be scoped to a single space either.
+  it('dedupes space-blind, with no space_id filter on check_dedup', () => {
+    const step = findStepByName(workflow.steps, 'check_dedup') as {
+      with?: { query?: { bool?: { filter?: Array<Record<string, unknown>> } } };
+    };
+    const filters = step?.with?.query?.bool?.filter ?? [];
+    const spaceFilter = filters.find(
+      (f) => (f.terms as { space_id?: unknown } | undefined)?.space_id !== undefined
+    );
+    expect(spaceFilter).toBeUndefined();
+  });
+
   it('fetches sources only from within the load_sources foreach', () => {
     // If a `fetch_source` step existed outside the enabled-filtered foreach, it could fetch
     // a source the filter excluded. It must live under `dispatch_each_source`.
