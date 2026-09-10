@@ -9,6 +9,7 @@ import {
   merge,
   of,
   filter,
+  map,
   tap,
   catchError,
   throwError,
@@ -26,7 +27,12 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ConversationAction,
+  ConverseInput,
+  ConversationRoundAuthor,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -39,6 +45,7 @@ import {
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
@@ -63,6 +70,7 @@ import {
   createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
+  appendResumeExecution$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -285,6 +293,8 @@ const handleConversationExecution = async ({
         title$,
         agentEvents$,
         action,
+        nextInput,
+        author,
       })
     : EMPTY;
 
@@ -332,6 +342,9 @@ const handleConversationExecution = async ({
 
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         filter((event) => !isRoundStartedEvent(event)),
+        // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
+        // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
+        map(stripResumeExecution),
         handleCancellation(abortSignal),
         tap((event) => {
           if (isConversationCreatedEvent(event) && !author) {
@@ -373,6 +386,7 @@ const handleConversationExecution = async ({
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
+                conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
               });
             }
           } catch (error) {
@@ -505,6 +519,14 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
 const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
   !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
 
+const stripResumeExecution = (event: ChatEvent): ChatEvent => {
+  if (!isRoundCompleteEvent(event) || !event.data.resume_execution) {
+    return event;
+  }
+  const { resume_execution: _resumeExecution, ...data } = event.data;
+  return { ...event, data };
+};
+
 const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
   const lastRound = conversation.rounds[conversation.rounds.length - 1];
   return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
@@ -516,12 +538,16 @@ const buildPersistenceEvents = ({
   title$,
   agentEvents$,
   action,
+  nextInput,
+  author,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
+  nextInput: ConverseInput;
+  author?: ConversationRoundAuthor;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -549,6 +575,19 @@ const buildPersistenceEvents = ({
         })
       )
     );
+  }
+
+  // A resume of an events-native conversation appends a new execution (append-only); the pause is
+  // never rewritten. Legacy (non-events-native) resumes and regenerate keep the rounds-path write.
+  if (isResume && !isRegenerate && isEventsNativeVersion(conversation.schema_version)) {
+    return appendResumeExecution$({
+      conversation,
+      conversationClient,
+      roundCompletedEvents$,
+      input: nextInput,
+      author,
+      title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+    });
   }
 
   return conversation.operation === 'CREATE'
