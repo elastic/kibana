@@ -113,8 +113,6 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
       addInlineSuggestTabKeybindings();
     }
 
-    // `getModelDependencies` resolves each model's latest validation messages from
-    // the registry, so quick fixes can be matched to the markers on that model.
     const codeActions = ESQLLang.getCodeActionProvider?.({ ...stableCallbacks, getModelDependencies });
     if (codeActions) {
       disposables.push(monaco.languages.registerCodeActionProvider(ESQL_LANG_ID, codeActions));
