@@ -26,6 +26,9 @@ export const FAILED_TEST_LABEL = 'failed-test';
  */
 const MAX_QUERY_LENGTH = 200;
 
+/** GitHub also rejects search queries with more than five `AND` / `OR` / `NOT` operators. */
+const MAX_QUERY_TERMS = 6;
+
 export interface CheckFlakySuiteIssuesOptions {
   report: FlakyTestReport;
   github: GithubApi;
@@ -57,26 +60,29 @@ export interface FlakySuiteIssuesSummary {
 
 /**
  * Search queries that together return every `failed-test` issue mentioning one of the suites'
- * file names, as few as the query length limit allows. The file name rather than the path so
- * that issues about a moved file, or with JUnit's `path·ts` spelling, are found too; the
- * matching rules then sort out which suite, if any, an issue is really about.
+ * file names, as few as the query length and operator limits allow. The file name rather than
+ * the path so that issues about a moved file, or with JUnit's `path·ts` spelling, are found too;
+ * the matching rules then sort out which suite, if any, an issue is really about.
  */
 export const suiteSearchQueries = (
   suites: readonly Pick<FlakySuite, 'filePath'>[],
-  maxLength = MAX_QUERY_LENGTH
+  { maxLength = MAX_QUERY_LENGTH, maxTerms = MAX_QUERY_TERMS } = {}
 ): string[] => {
   const prefix = `label:${FAILED_TEST_LABEL} `;
   const terms = [...new Set(suites.map(({ filePath }) => `"${Path.basename(filePath)}"`))];
 
   const queries: string[] = [];
   let current = '';
+  let currentTerms = 0;
   for (const term of terms) {
     const next = current ? `${current} OR ${term}` : `${prefix}${term}`;
-    if (current && next.length > maxLength) {
+    if (current && (next.length > maxLength || currentTerms >= maxTerms)) {
       queries.push(current);
       current = `${prefix}${term}`;
+      currentTerms = 1;
     } else {
       current = next;
+      currentTerms++;
     }
   }
   if (current) {

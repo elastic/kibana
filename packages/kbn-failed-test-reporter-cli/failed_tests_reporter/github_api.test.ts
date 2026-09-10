@@ -198,4 +198,35 @@ describe('GithubApi#searchIssues()', () => {
     expect(issues).toHaveLength(1);
     jest.useRealTimers();
   });
+
+  it('waits until the primary rate limit resets when only the x-ratelimit headers are sent', async () => {
+    jest.useFakeTimers();
+    const resetInSeconds = 20;
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockImplementationOnce(
+        async () =>
+          new Response('API rate limit exceeded', {
+            status: 403,
+            headers: {
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + resetInSeconds),
+            },
+          })
+      )
+      .mockImplementationOnce(async () => page([issue(1)]));
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+
+    const api = new GithubApi({ log, token: 'secret', dryRun: false });
+    const pending = api.searchIssues({ query: 'x' });
+    await jest.advanceTimersByTimeAsync(resetInSeconds * 1000);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(2000);
+    const issues = await pending;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(issues).toHaveLength(1);
+    expect(warning).toHaveBeenCalledWith(expect.stringMatching(/rate limited, waiting 2[12]s/));
+    jest.useRealTimers();
+  });
 });

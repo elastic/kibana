@@ -74,6 +74,24 @@ interface RequestOptions {
   maxAttempts?: number;
 }
 
+/**
+ * Seconds to wait before retrying a rate-limited request, or 0 if the response is not rate
+ * limited. Secondary limits send `retry-after`; primary limits (e.g. 30 searches a minute)
+ * only send `x-ratelimit-remaining: 0` and the reset time as a unix timestamp.
+ */
+const rateLimitRetryAfterSeconds = (headers: Headers): number => {
+  const retryAfter = Number(headers.get('retry-after'));
+  if (retryAfter > 0) {
+    return retryAfter;
+  }
+  if (headers.get('x-ratelimit-remaining') === '0') {
+    const resetAt = Number(headers.get('x-ratelimit-reset')) * 1000;
+    const waitSeconds = Math.ceil((resetAt - Date.now()) / 1000) + 1;
+    return Number.isFinite(waitSeconds) ? Math.max(1, waitSeconds) : 60;
+  }
+  return 0;
+};
+
 export class GithubApi {
   private readonly log: ToolingLog;
   private readonly token: string | undefined;
@@ -295,7 +313,7 @@ export class GithubApi {
         }
 
         // Rate limited (the search API allows 30 requests a minute): wait as long as GitHub says
-        const retryAfterSeconds = Number(response.headers.get('retry-after'));
+        const retryAfterSeconds = rateLimitRetryAfterSeconds(response.headers);
         if ((response.status === 403 || response.status === 429) && retryAfterSeconds > 0) {
           if (attempt < maxAttempts) {
             this.log.warning(`${errorResponseLog}: rate limited, waiting ${retryAfterSeconds}s`);

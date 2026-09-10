@@ -52,7 +52,7 @@ describe('suiteSearchQueries', () => {
       { filePath: 'x-pack/d/third.ts' },
     ];
 
-    expect(suiteSearchQueries(suites, 60)).toEqual([
+    expect(suiteSearchQueries(suites, { maxLength: 60 })).toEqual([
       'label:failed-test "first.spec.ts" OR "second.test.ts"',
       'label:failed-test "third.ts"',
     ]);
@@ -60,6 +60,15 @@ describe('suiteSearchQueries', () => {
       'label:failed-test "first.spec.ts" OR "second.test.ts" OR "third.ts"',
     ]);
     expect(suiteSearchQueries([])).toEqual([]);
+  });
+
+  it('never uses more than five OR operators per query, which GitHub rejects', () => {
+    const suites = Array.from({ length: 8 }, (_, i) => ({ filePath: `dir/t${i}.ts` }));
+
+    expect(suiteSearchQueries(suites)).toEqual([
+      'label:failed-test "t0.ts" OR "t1.ts" OR "t2.ts" OR "t3.ts" OR "t4.ts" OR "t5.ts"',
+      'label:failed-test "t6.ts" OR "t7.ts"',
+    ]);
   });
 });
 

@@ -38,7 +38,7 @@ export function runCheckFlakyTestIssuesCli() {
 
       log.info(`Reading flaky test report from ${inputPath}`);
       const { data: report } = ScoutFlakyTests.fromFile(inputPath);
-      log.info(`Checking open issues in ${repo}`);
+      log.info(`Checking open and closed failed-test issues in ${repo}`);
 
       const summary = await checkFlakySuiteIssues({
         report,
