@@ -11437,17 +11437,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/episodes/_bulk_action:
+  /api/alerting/v2/episodes/_bulk_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_action</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create actions for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-action
+        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-episodes-bulk-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11460,30 +11460,26 @@ paths:
         content:
           application/json:
             examples:
-              bulkCreateEpisodeActionRequest:
-                summary: Acknowledge one episode and assign another
+              bulkAckEpisodeActionRequest:
+                summary: Acknowledge two alert episodes
                 value:
-                  - action_type: ack
-                    episode_id: episode-1
-                  - action_type: assign
-                    assignee_uid: u_abc123
-                    episode_id: episode-2
+                  items:
+                    - episode_id: episode-1
+                    - episode_id: episode-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_episode_actions_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request'
       responses:
         '200':
           content:
             application/json:
               examples:
-                bulkCreateEpisodeActionResponse:
+                bulkAckEpisodeActionResponse:
                   summary: One action created, one episode not found
                   value:
                     affected_count: 1
                     errors:
                       - error:
                           code: ALERT_EPISODE_NOT_FOUND
-                          details:
-                            episode_id: episode-2
                           message: Alert episode with episode_id [episode-2] not found
                         id: episode-2
               schema:
@@ -11494,15 +11490,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Bulk body is an empty array
+                  summary: Items list is empty
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        '':
+                        items:
                           - At least one action must be provided
                     error: Bad Request
-                    message: At least one action must be provided
+                    message: 'items: At least one action must be provided'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11558,7 +11554,489 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk create alert episode actions
+      summary: Bulk acknowledge alert episodes
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/episodes/_bulk_activate:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_activate</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-episodes-bulk-activate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkActivateEpisodeActionRequest:
+                summary: Reopen an alert episode with a reason
+                value:
+                  items:
+                    - episode_id: episode-1
+                      reason: manual reopen
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkActivateEpisodeActionResponse:
+                  summary: All actions created
+                  value:
+                    affected_count: 1
+                    errors: []
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the number of created actions and per-item errors for actions that were not created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Items list is empty
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        items:
+                          - At least one action must be provided
+                    error: Bad Request
+                    message: 'items: At least one action must be provided'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk activate alert episodes
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/episodes/_bulk_assign:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_assign</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-episodes-bulk-assign
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkAssignEpisodeActionRequest:
+                summary: Assign one episode and clear the assignee of another
+                value:
+                  items:
+                    - assignee_uid: u_abc123
+                      episode_id: episode-1
+                    - assignee_uid: null
+                      episode_id: episode-2
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkAssignEpisodeActionResponse:
+                  summary: All actions created
+                  value:
+                    affected_count: 2
+                    errors: []
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the number of created actions and per-item errors for actions that were not created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Items list is empty
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        items:
+                          - At least one action must be provided
+                    error: Bad Request
+                    message: 'items: At least one action must be provided'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk assign alert episodes
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/episodes/_bulk_deactivate:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_deactivate</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-episodes-bulk-deactivate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkDeactivateEpisodeActionRequest:
+                summary: Close an alert episode with a reason
+                value:
+                  items:
+                    - episode_id: episode-1
+                      reason: false positive
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkDeactivateEpisodeActionResponse:
+                  summary: All actions created
+                  value:
+                    affected_count: 1
+                    errors: []
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the number of created actions and per-item errors for actions that were not created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Items list is empty
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        items:
+                          - At least one action must be provided
+                    error: Bad Request
+                    message: 'items: At least one action must be provided'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk deactivate alert episodes
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/episodes/_bulk_unack:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_unack</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-episodes-bulk-unack
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkUnackEpisodeActionRequest:
+                summary: Unacknowledge two alert episodes
+                value:
+                  items:
+                    - episode_id: episode-1
+                    - episode_id: episode-2
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkUnackEpisodeActionResponse:
+                  summary: All actions created
+                  value:
+                    affected_count: 2
+                    errors: []
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the number of created actions and per-item errors for actions that were not created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Items list is empty
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        items:
+                          - At least one action must be provided
+                    error: Bad Request
+                    message: 'items: At least one action must be provided'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk unacknowledge alert episodes
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -15852,17 +16330,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/series/_bulk_action:
+  /api/alerting/v2/series/_bulk_snooze:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/_bulk_action</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/_bulk_snooze</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create actions for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-series-bulk-action
+        Create the same action for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-series-bulk-snooze
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -15875,34 +16353,25 @@ paths:
         content:
           application/json:
             examples:
-              bulkCreateSeriesActionRequest:
-                summary: Tag, snooze, and unsnooze three alert episode series
+              bulkSnoozeSeriesActionRequest:
+                summary: Snooze one series until a date and one indefinitely
                 value:
-                  - action_type: tag
-                    group_hash: group-hash-1
-                    tags:
-                      - production
-                  - action_type: snooze
-                    expiry: '2026-01-16T12:00:00.000Z'
-                    group_hash: group-hash-2
-                  - action_type: unsnooze
-                    group_hash: group-hash-3
+                  items:
+                    - expiry: '2026-01-16T12:00:00.000Z'
+                      group_hash: group-hash-1
+                    - group_hash: group-hash-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_series_actions_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_series_request'
       responses:
         '200':
           content:
             application/json:
               examples:
-                bulkCreateSeriesActionResponse:
-                  summary: Two actions processed, one series not found.
+                bulkSnoozeSeriesActionResponse:
+                  summary: All actions created
                   value:
                     affected_count: 2
-                    errors:
-                      - error:
-                          code: ALERT_GROUP_NOT_FOUND
-                          message: Alert series with group_hash [group-hash-3] not found
-                        id: group-hash-3
+                    errors: []
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
           description: Returns the number of created actions and per-item errors for actions that were not created.
@@ -15911,15 +16380,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Bulk body is an empty array
+                  summary: Items list is empty
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        '':
+                        items:
                           - At least one action must be provided
                     error: Bad Request
-                    message: At least one action must be provided
+                    message: 'items: At least one action must be provided'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -15975,7 +16444,255 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk create alert episode series actions
+      summary: Bulk snooze alert episode series
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/series/_bulk_tag:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/_bulk_tag</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create the same action for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-series-bulk-tag
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkTagSeriesActionRequest:
+                summary: Tag two alert episode series with production
+                value:
+                  items:
+                    - group_hash: group-hash-1
+                      tags:
+                        - production
+                    - group_hash: group-hash-2
+                      tags:
+                        - production
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_series_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkTagSeriesActionResponse:
+                  summary: One action created, one series not found
+                  value:
+                    affected_count: 1
+                    errors:
+                      - error:
+                          code: ALERT_GROUP_NOT_FOUND
+                          message: Alert series with group_hash [group-hash-2] not found
+                        id: group-hash-2
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the number of created actions and per-item errors for actions that were not created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Items list is empty
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        items:
+                          - At least one action must be provided
+                    error: Bad Request
+                    message: 'items: At least one action must be provided'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk tag alert episode series
+      tags:
+        - alerting-v2
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/alerting/v2/series/_bulk_unsnooze:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/_bulk_unsnooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create the same action for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+      operationId: post-alerting-v2-series-bulk-unsnooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkUnsnoozeSeriesActionRequest:
+                summary: Clear the snooze on two alert episode series
+                value:
+                  items:
+                    - group_hash: group-hash-1
+                    - group_hash: group-hash-2
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkUnsnoozeSeriesActionResponse:
+                  summary: All actions created
+                  value:
+                    affected_count: 2
+                    errors: []
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the number of created actions and per-item errors for actions that were not created.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Items list is empty
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        items:
+                          - At least one action must be provided
+                    error: Bad Request
+                    message: 'items: At least one action must be provided'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Bulk unsnooze alert episode series
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -97116,17 +97833,6 @@ components:
       required:
         - data_view_id
         - field_name
-    Kibana_HTTP_APIs_alerting_ack_episode_action:
-      additionalProperties: false
-      type: object
-      properties:
-        action_type:
-          description: Acknowledges an alerting episode.
-          enum:
-            - ack
-          type: string
-      required:
-        - action_type
     Kibana_HTTP_APIs_alerting_action_policy_destination:
       description: An action policy destination configuration.
       discriminator:
@@ -97326,14 +98032,38 @@ components:
                 - every_time
               type: string
           description: The throttle strategy.
-    Kibana_HTTP_APIs_alerting_activate_alert_action:
+    Kibana_HTTP_APIs_alerting_bulk_ack_episodes_item:
       additionalProperties: false
       type: object
       properties:
-        action_type:
-          description: Activates an alert.
-          enum:
-            - activate
+        episode_id:
+          description: Identifier of the alert episode to apply the action to.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - episode_id
+    Kibana_HTTP_APIs_alerting_bulk_ack_episodes_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 ack actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_episodes_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
+    Kibana_HTTP_APIs_alerting_bulk_activate_episodes_item:
+      additionalProperties: false
+      type: object
+      properties:
+        episode_id:
+          description: Identifier of the alert episode to apply the action to.
+          maxLength: 150
+          minLength: 1
           type: string
         reason:
           description: Reason for activating the alert.
@@ -97341,25 +98071,51 @@ components:
           minLength: 1
           type: string
       required:
-        - action_type
         - reason
-    Kibana_HTTP_APIs_alerting_assign_episode_action:
+        - episode_id
+    Kibana_HTTP_APIs_alerting_bulk_activate_episodes_request:
       additionalProperties: false
       type: object
       properties:
-        action_type:
-          description: Assigns an alerting episode to a user, or clears the assignee when null.
-          enum:
-            - assign
-          type: string
+        items:
+          description: List of 1 to 100 activate actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_episodes_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
+    Kibana_HTTP_APIs_alerting_bulk_assign_episodes_item:
+      additionalProperties: false
+      type: object
+      properties:
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
           maxLength: 256
           nullable: true
           type: string
+        episode_id:
+          description: Identifier of the alert episode to apply the action to.
+          maxLength: 150
+          minLength: 1
+          type: string
       required:
-        - action_type
         - assignee_uid
+        - episode_id
+    Kibana_HTTP_APIs_alerting_bulk_assign_episodes_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 assign actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_episodes_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
     Kibana_HTTP_APIs_alerting_bulk_by_ids_request:
       additionalProperties: false
       type: object
@@ -97398,48 +98154,36 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-    Kibana_HTTP_APIs_alerting_bulk_create_episode_action_item:
-      allOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_episode_alert_action'
-        - additionalProperties: false
-          description: Episode-level alert action payload with episode identifier for bulk requests.
-          type: object
-          properties:
-            episode_id:
-              description: Identifier of the alert episode to apply the action to.
-              maxLength: 150
-              minLength: 1
-              type: string
-          required:
-            - episode_id
-    Kibana_HTTP_APIs_alerting_bulk_create_episode_actions_request:
-      description: Request body for bulk create episode-level alert actions. Array of 1 to 100 actions, each with episode_id and action payload.
-      items:
-        $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_episode_action_item'
-      maxItems: 100
-      minItems: 1
-      type: array
-    Kibana_HTTP_APIs_alerting_bulk_create_series_action_item:
-      allOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_series_alert_action'
-        - additionalProperties: false
-          description: Series-level alert action payload with series identifier for bulk requests.
-          type: object
-          properties:
-            group_hash:
-              description: Hash identifying the alert episode series to apply the action to.
-              maxLength: 256
-              minLength: 1
-              type: string
-          required:
-            - group_hash
-    Kibana_HTTP_APIs_alerting_bulk_create_series_actions_request:
-      description: Request body for bulk create series-level alert actions. Array of 1 to 100 actions, each with group_hash and action payload.
-      items:
-        $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_series_action_item'
-      maxItems: 100
-      minItems: 1
-      type: array
+    Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item:
+      additionalProperties: false
+      type: object
+      properties:
+        episode_id:
+          description: Identifier of the alert episode to apply the action to.
+          maxLength: 150
+          minLength: 1
+          type: string
+        reason:
+          description: Reason for deactivating the alert.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+        - reason
+        - episode_id
+    Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 deactivate actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_episodes_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
     Kibana_HTTP_APIs_alerting_bulk_dry_run_response:
       additionalProperties: false
       description: Dry-run preview returned by a by-query bulk endpoint when `force` is false.
@@ -97548,6 +98292,116 @@ components:
       required:
         - ids
         - snoozed_until
+    Kibana_HTTP_APIs_alerting_bulk_snooze_series_item:
+      additionalProperties: false
+      type: object
+      properties:
+        expiry:
+          description: ISO datetime when snooze should expire.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
+          type: string
+        group_hash:
+          description: Hash identifying the alert episode series to apply the action to.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - group_hash
+    Kibana_HTTP_APIs_alerting_bulk_snooze_series_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 snooze actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_series_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
+    Kibana_HTTP_APIs_alerting_bulk_tag_series_item:
+      additionalProperties: false
+      type: object
+      properties:
+        group_hash:
+          description: Hash identifying the alert episode series to apply the action to.
+          maxLength: 256
+          minLength: 1
+          type: string
+        tags:
+          description: List of tags to add to the alert.
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          type: array
+      required:
+        - tags
+        - group_hash
+    Kibana_HTTP_APIs_alerting_bulk_tag_series_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 tag actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_series_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
+    Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item:
+      additionalProperties: false
+      type: object
+      properties:
+        episode_id:
+          description: Identifier of the alert episode to apply the action to.
+          maxLength: 150
+          minLength: 1
+          type: string
+      required:
+        - episode_id
+    Kibana_HTTP_APIs_alerting_bulk_unack_episodes_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 unack actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
+    Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_item:
+      additionalProperties: false
+      type: object
+      properties:
+        group_hash:
+          description: Hash identifying the alert episode series to apply the action to.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - group_hash
+    Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_request:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          description: List of 1 to 100 unsnooze actions to create.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_item'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - items
     Kibana_HTTP_APIs_alerting_composed_rule_query:
       additionalProperties: false
       description: 'Composed query: a shared base with appendable breach and recovery segments.'
@@ -97589,39 +98443,6 @@ components:
       required:
         - format
         - base
-    Kibana_HTTP_APIs_alerting_deactivate_alert_action:
-      additionalProperties: false
-      type: object
-      properties:
-        action_type:
-          description: Deactivates an alert.
-          enum:
-            - deactivate
-          type: string
-        reason:
-          description: Reason for deactivating the alert.
-          maxLength: 1024
-          minLength: 1
-          type: string
-      required:
-        - action_type
-        - reason
-    Kibana_HTTP_APIs_alerting_episode_alert_action:
-      description: 'Request body for creating an episode-level alert action. One of: ack, unack, assign, activate, deactivate.'
-      discriminator:
-        mapping:
-          ack: '#/components/schemas/Kibana_HTTP_APIs_alerting_ack_episode_action'
-          activate: '#/components/schemas/Kibana_HTTP_APIs_alerting_activate_alert_action'
-          assign: '#/components/schemas/Kibana_HTTP_APIs_alerting_assign_episode_action'
-          deactivate: '#/components/schemas/Kibana_HTTP_APIs_alerting_deactivate_alert_action'
-          unack: '#/components/schemas/Kibana_HTTP_APIs_alerting_unack_episode_action'
-        propertyName: action_type
-      oneOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_ack_episode_action'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_unack_episode_action'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_assign_episode_action'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_activate_alert_action'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_deactivate_alert_action'
     Kibana_HTTP_APIs_alerting_error_response:
       additionalProperties: false
       type: object
@@ -98468,18 +99289,6 @@ components:
           type: array
       required:
         - tags
-    Kibana_HTTP_APIs_alerting_series_alert_action:
-      description: 'Request body for creating a series-level alert action. One of: tag, snooze, unsnooze.'
-      discriminator:
-        mapping:
-          snooze: '#/components/schemas/Kibana_HTTP_APIs_alerting_snooze_alert_action'
-          tag: '#/components/schemas/Kibana_HTTP_APIs_alerting_tag_alert_action'
-          unsnooze: '#/components/schemas/Kibana_HTTP_APIs_alerting_unsnooze_alert_action'
-        propertyName: action_type
-      oneOf:
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_tag_alert_action'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_snooze_alert_action'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_unsnooze_alert_action'
     Kibana_HTTP_APIs_alerting_snooze_action_policy_request:
       additionalProperties: false
       type: object
@@ -98491,22 +99300,6 @@ components:
           type: string
       required:
         - snoozed_until
-    Kibana_HTTP_APIs_alerting_snooze_alert_action:
-      additionalProperties: false
-      type: object
-      properties:
-        action_type:
-          description: Snoozes an alert.
-          enum:
-            - snooze
-          type: string
-        expiry:
-          description: ISO datetime when snooze should expire.
-          format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-          type: string
-      required:
-        - action_type
     Kibana_HTTP_APIs_alerting_standalone_rule_query:
       additionalProperties: false
       description: 'Standalone queries: independent full queries for breach, recovery, and no_data.'
@@ -98555,48 +99348,6 @@ components:
       required:
         - format
         - breach
-    Kibana_HTTP_APIs_alerting_tag_alert_action:
-      additionalProperties: false
-      type: object
-      properties:
-        action_type:
-          description: Adds tags to an alert.
-          enum:
-            - tag
-          type: string
-        tags:
-          description: List of tags to add to the alert.
-          items:
-            maxLength: 128
-            minLength: 1
-            type: string
-          maxItems: 20
-          type: array
-      required:
-        - action_type
-        - tags
-    Kibana_HTTP_APIs_alerting_unack_episode_action:
-      additionalProperties: false
-      type: object
-      properties:
-        action_type:
-          description: Removes acknowledgement from an alerting episode.
-          enum:
-            - unack
-          type: string
-      required:
-        - action_type
-    Kibana_HTTP_APIs_alerting_unsnooze_alert_action:
-      additionalProperties: false
-      type: object
-      properties:
-        action_type:
-          description: Removes snooze from an alert.
-          enum:
-            - unsnooze
-          type: string
-      required:
-        - action_type
     Kibana_HTTP_APIs_alerting_update_action_policy:
       additionalProperties: false
       type: object
