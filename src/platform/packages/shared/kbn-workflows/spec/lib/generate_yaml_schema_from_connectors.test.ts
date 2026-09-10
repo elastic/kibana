@@ -336,5 +336,41 @@ describe('generateYamlSchemaFromConnectors', () => {
         }).success
       ).toBe(false);
     });
+
+    it('does not throw for a connector whose paramsSchema has object-level refinements', () => {
+      const connector: ConnectorContractUnion = {
+        summary: 'Refined',
+        description: null,
+        type: 'refined.step',
+        paramsSchema: z
+          .object({ ids: z.array(z.string()), name: z.string() })
+          .refine((v) => v.ids.length > 0, 'ids must not be empty'),
+        outputSchema: z.unknown(),
+      };
+      // Schema construction must not throw even though paramsSchema has a refinement.
+      expect(() => generateYamlSchemaFromConnectors([connector])).not.toThrow();
+
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      // Template string still accepted for the array field.
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'refined.step',
+              with: { ids: '{{ workflow.inputs.ids }}', name: 'x' },
+            },
+          ],
+        }).success
+      ).toBe(true);
+      // The object-level refinement is preserved: an empty ids array fails.
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'refined.step', with: { ids: [], name: 'x' } }],
+        }).success
+      ).toBe(false);
+    });
   });
 });
