@@ -15,7 +15,7 @@ type CasesPageBodyProps = EuiPageSectionProps;
 export const CasesPageBody = ({ children, ...props }: CasesPageBodyProps) => {
   const { variant } = useCasesPageLayout();
 
-  if (variant === 'legacy' || variant === 'fullHeight') {
+  if (variant === 'fullHeight') {
     return <>{children}</>;
   }
 

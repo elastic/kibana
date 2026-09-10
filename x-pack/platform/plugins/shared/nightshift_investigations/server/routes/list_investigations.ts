@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { INVESTIGATION_STATUSES } from '../../common';
+import { INVESTIGATION_STATUSES, MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute({
@@ -26,6 +26,7 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
         .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
         .transform((v) => (Array.isArray(v) ? v : [v]))
         .optional(),
+      concurrency_key: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
       created_after: z.string().max(100).datetime({ offset: true }).optional(),
       created_before: z.string().max(100).datetime({ offset: true }).optional(),
       started_after: z.string().max(100).datetime({ offset: true }).optional(),

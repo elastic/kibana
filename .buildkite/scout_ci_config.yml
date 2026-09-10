@@ -18,6 +18,7 @@ plugins:
     - context_engine
     - cross_cluster_replication
     - custom_branding
+    - custom_content
     - dashboard
     - dashboard_markdown
     - data
@@ -31,7 +32,6 @@ plugins:
     - dev_tools
     - discover
     - discoverCustomizationExamples
-    - discover_enhanced
     - discoveries
     - embeddable_alerts_table
     - entity_store
@@ -50,6 +50,7 @@ plugins:
     - infra
     - ingest_hub
     - ingest_pipelines
+    - interactive_setup
     - intercepts
     - kibana_overview
     - kql
