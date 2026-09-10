@@ -275,12 +275,13 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // Relay client authentication supplied alongside an inbound UIAM bearer token. Otherwise use
-    // `internal`: unlike `getScopedHeaders`, this never reads a credential off the wire, so no
-    // attestation is involved. For a real request the credential comes from the auth provider's
-    // post-authentication headers (Kibana already vouched for it), and for a fake one Kibana
-    // minted it. The exception is a fake request marked as carrying a user-created (external)
-    // UIAM credential, which UIAM rejects when presented with client authentication.
+    // If the credential is an internal UIAM credential, it might require client authentication.
+    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
+    // credential off the wire. For a real request it takes the auth provider's post-authentication
+    // headers (Kibana already vouched for that credential), and for a fake one the credential was
+    // minted by Kibana itself, so neither needs an attestation to be trusted. The exception is a
+    // fake request explicitly marked as carrying a user-created (external) UIAM credential, which
+    // UIAM rejects when presented with client authentication.
     const isUiamInboundToken =
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
       isUiamCredential(authorizationHeader);
