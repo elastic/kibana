@@ -52,45 +52,20 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const entries = context.input.verifiers ?? [];
-      const { workflow, metadata, parent } = context.contextManager.getContext();
-      const { spaceId } = workflow;
-      const hasWorkflowVerifiers = entries.some((entry) => typeof entry !== 'string');
-      if (
-        hasWorkflowVerifiers &&
-        workflowVerifierDeps &&
-        !(await workflowVerifierDeps.checkExecutePrivilege(fakeRequest, spaceId))
-      ) {
-        throw new ExecutionError({
-          type: 'PermissionError',
-          message: 'Insufficient privileges to execute workflows as KI verifiers',
-        });
-      }
-
-      // The chain of workflows that led here, ending with this workflow.
-      const verifierChain =
-        hasWorkflowVerifiers && workflowVerifierDeps
-          ? await resolveKiVerifierChain({
-              workflowId: workflow.id,
-              metadata,
-              parent,
-              spaceId,
-              workflowsManagement: workflowVerifierDeps.workflowsManagement,
-            })
-          : [workflow.id];
-      if (hasWorkflowVerifiers && verifierChain.length > MAX_KI_VERIFIER_WORKFLOW_DEPTH) {
-        throw new ExecutionError({
-          type: 'InputValidationError',
-          message: `Verifier workflows are nested too deeply (chain: ${verifierChain.join(
-            ' -> '
-          )}); the maximum depth is ${MAX_KI_VERIFIER_WORKFLOW_DEPTH}`,
-        });
-      }
-
-      const auditLogger = coreStart.security.audit.asScoped(fakeRequest);
-      const verifiers = entries.map((entry): string | KiVerifier => {
-        if (typeof entry === 'string') {
-          return entry;
+      /** Resolves the listed entries to verifiers, guarding custom workflow verifiers first. */
+      const buildVerifiers = async (): Promise<Array<string | KiVerifier> | undefined> => {
+        const entries = context.input.verifiers;
+        if (entries === undefined) {
+          return undefined;
+        }
+        const { workflow, metadata, parent } = context.contextManager.getContext();
+        const { spaceId } = workflow;
+        const builtInIds = entries.filter(
+          (entry): entry is Exclude<typeof entry, { workflow_id: string }> =>
+            typeof entry === 'string'
+        );
+        if (builtInIds.length === entries.length) {
+          return builtInIds;
         }
         if (!workflowVerifierDeps) {
           throw new ExecutionError({
@@ -99,35 +74,66 @@ export const createVerifyKiStepDefinition = (
               'Custom KI verifiers require the workflowsManagement plugin, which is not available.',
           });
         }
-        if (verifierChain.includes(entry.workflow_id)) {
+        if (!(await workflowVerifierDeps.checkExecutePrivilege(fakeRequest, spaceId))) {
           throw new ExecutionError({
-            type: 'InputValidationError',
-            message: `Verifier workflow '${entry.workflow_id}' would call itself (chain: ${[
-              ...verifierChain,
-              entry.workflow_id,
-            ].join(' -> ')})`,
+            type: 'PermissionError',
+            message: 'Insufficient privileges to execute workflows as KI verifiers',
           });
         }
-        return createWorkflowVerifier(entry, {
-          workflowsManagement: workflowVerifierDeps.workflowsManagement,
-          request: fakeRequest,
+
+        // The chain of workflows that led here, ending with this workflow.
+        const verifierChain = await resolveKiVerifierChain({
+          workflowId: workflow.id,
+          metadata,
+          parent,
           spaceId,
-          auditLogger,
-          verifierChain,
+          workflowsManagement: workflowVerifierDeps.workflowsManagement,
         });
-      });
+        if (verifierChain.length > MAX_KI_VERIFIER_WORKFLOW_DEPTH) {
+          throw new ExecutionError({
+            type: 'InputValidationError',
+            message: `Verifier workflows are nested too deeply (chain: ${verifierChain.join(
+              ' -> '
+            )}); the maximum depth is ${MAX_KI_VERIFIER_WORKFLOW_DEPTH}`,
+          });
+        }
+
+        const auditLogger = coreStart.security.audit.asScoped(fakeRequest);
+        return entries.map((entry): string | KiVerifier => {
+          if (typeof entry === 'string') {
+            return entry;
+          }
+          if (verifierChain.includes(entry.workflow_id)) {
+            throw new ExecutionError({
+              type: 'InputValidationError',
+              message: `Verifier workflow '${entry.workflow_id}' would call itself (chain: ${[
+                ...verifierChain,
+                entry.workflow_id,
+              ].join(' -> ')})`,
+            });
+          }
+          return createWorkflowVerifier(entry, {
+            workflowsManagement: workflowVerifierDeps.workflowsManagement,
+            request: fakeRequest,
+            spaceId,
+            auditLogger,
+            verifierChain,
+          });
+        });
+      };
 
       const summary = await withKiVerificationTelemetry({
         analyticsService,
         logger,
         run: async () => {
+          const verifiers = await buildVerifiers();
           try {
             return await service.verifyKi(context.input.ki, {
               isEnabled,
               esClient: context.contextManager.getScopedEsClient(),
               logger,
               abortSignal: context.abortSignal,
-              verifiers: context.input.verifiers === undefined ? undefined : verifiers,
+              verifiers,
             });
           } catch (error) {
             if (error instanceof KiVerificationInputError) {

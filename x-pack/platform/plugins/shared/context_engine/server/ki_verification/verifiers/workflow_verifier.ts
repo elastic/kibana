@@ -7,15 +7,20 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AuditEvent, AuditLogger } from '@kbn/core-security-server';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type {
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../../../common/ki_verification';
 import {
   DEFAULT_KI_VERIFIER_TIMEOUT_SEC,
   type KiVerifierWorkflow,
 } from '../../../common/step_types/verify_ki_step';
-import { isAbortError } from '../../telemetry';
+import { errorTypeForTelemetry, isAbortError } from '../../telemetry';
 import type { KiVerifier, KiVerifierOutcome, KnowledgeIndicator } from '../types';
 
 export { WORKFLOW_VERIFIER_ID_PREFIX };
@@ -28,7 +33,7 @@ export const MAX_REASON_LENGTH = 2048;
 
 /**
  * How many levels of verifier workflows may nest (a verifier whose own
- * `verifyKi` step runs verifier workflows, and so on). `executeWorkflow`
+ * `verifyKi` step runs verifier workflows, and so on). `runWorkflow`
  * bypasses the engine's event-chain depth guard, so the step enforces this.
  */
 export const MAX_KI_VERIFIER_WORKFLOW_DEPTH = 3;
@@ -101,18 +106,20 @@ const workflowVerifierOutputSchema = z.object({
 /**
  * The subset of the workflows management API a workflow verifier needs. Declared
  * locally because this plugin cannot reference the workflows management plugin's
- * types without a project reference cycle.
+ * types without a project reference cycle. `runWorkflow` is used instead of
+ * `executeWorkflow` because it returns the execution id without waiting on the
+ * execution document, keeping dispatch inside the verifier's own deadline.
  */
 export interface KiVerifierWorkflowRunner {
-  executeWorkflow(params: {
-    workflowId: string;
-    inputs: Record<string, unknown>;
-    request: KibanaRequest;
-    spaceId: string;
-    waitForCompletion: boolean;
-    triggeredBy: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<{ workflowExecutionId: string }>;
+  getWorkflow(workflowId: string, spaceId: string): Promise<WorkflowDetailDto | null>;
+  runWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, unknown>,
+    request: KibanaRequest,
+    triggeredBy?: string,
+    metadata?: Record<string, unknown>
+  ): Promise<string>;
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -183,6 +190,37 @@ const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 
+/**
+ * Loads the verifier workflow and applies the same composition rules as
+ * `workflow.execute` for an unmanaged parent: only an enabled, valid,
+ * unmanaged workflow visible in the executing space may run.
+ */
+const resolveRunnableWorkflow = async (
+  workflowId: string,
+  { workflowsManagement, spaceId }: WorkflowVerifierDependencies
+): Promise<WorkflowExecutionEngineModel> => {
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+  if (!workflow) {
+    throw new ExecutionError({
+      type: 'NotFoundError',
+      message: `Verifier workflow '${workflowId}' not found`,
+    });
+  }
+  if (workflow.managed) {
+    throw new ExecutionError({
+      type: 'InputValidationError',
+      message: `Verifier workflow '${workflowId}' is a managed workflow; only unmanaged workflows can run as KI verifiers`,
+    });
+  }
+  if (!workflow.enabled || !workflow.valid || !workflow.definition) {
+    throw new ExecutionError({
+      type: 'InputValidationError',
+      message: `Verifier workflow '${workflowId}' is disabled or invalid and cannot run`,
+    });
+  }
+  return toWorkflowExecutionEngineModel(workflow);
+};
+
 const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerifierOutcome => {
   switch (execution.status) {
     case ExecutionStatus.COMPLETED: {
@@ -219,14 +257,9 @@ const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerif
  */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
-  {
-    workflowsManagement,
-    request,
-    spaceId,
-    auditLogger,
-    verifierChain,
-  }: WorkflowVerifierDependencies
+  dependencies: WorkflowVerifierDependencies
 ): KiVerifier => {
+  const { workflowsManagement, request, spaceId, auditLogger, verifierChain } = dependencies;
   const timeoutMs = (timeoutSec ?? DEFAULT_KI_VERIFIER_TIMEOUT_SEC) * 1000;
 
   return {
@@ -240,18 +273,20 @@ export const createWorkflowVerifier = (
     },
     async verify(ki, { abortSignal, logger }) {
       abortSignal?.throwIfAborted();
+      const deadline = Date.now() + timeoutMs;
 
       let workflowExecutionId: string;
       try {
-        ({ workflowExecutionId } = await workflowsManagement.executeWorkflow({
-          workflowId,
-          inputs: { ki },
-          request,
+        const workflow = await resolveRunnableWorkflow(workflowId, dependencies);
+        abortSignal?.throwIfAborted();
+        workflowExecutionId = await workflowsManagement.runWorkflow(
+          workflow,
           spaceId,
-          waitForCompletion: false,
-          triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
-          metadata: { [KI_VERIFIER_CHAIN_METADATA_KEY]: verifierChain },
-        }));
+          { ki },
+          request,
+          WORKFLOW_VERIFIER_TRIGGERED_BY,
+          { [KI_VERIFIER_CHAIN_METADATA_KEY]: verifierChain }
+        );
       } catch (error) {
         auditLogger?.log(workflowRunAuditEvent(workflowId, { error }));
         throw error;
@@ -261,7 +296,6 @@ export const createWorkflowVerifier = (
         workflowsManagement
           .cancelWorkflowExecution(workflowExecutionId, spaceId, request)
           .catch(() => undefined);
-      const deadline = Date.now() + timeoutMs;
       // Reasons can echo user data, so only the execution id is logged for tracing.
       const settle = (outcome: KiVerifierOutcome): KiVerifierOutcome => {
         if (!outcome.passed) {
@@ -275,11 +309,23 @@ export const createWorkflowVerifier = (
       try {
         while (true) {
           abortSignal?.throwIfAborted();
-          const execution = await workflowsManagement.getWorkflowExecution(
-            workflowExecutionId,
-            spaceId,
-            { includeOutput: true }
-          );
+          let execution: WorkflowExecutionDto | null;
+          try {
+            execution = await workflowsManagement.getWorkflowExecution(
+              workflowExecutionId,
+              spaceId,
+              { includeOutput: true }
+            );
+          } catch (error) {
+            // Execution documents can lag or reads can blip; keep polling until the deadline.
+            logger.debug(
+              `KI verifier '${workflowId}' poll failed: ${errorTypeForTelemetry(
+                error
+              )} (workflow execution ${workflowExecutionId})`
+            );
+            execution = null;
+          }
+          abortSignal?.throwIfAborted();
           if (execution && isTerminalStatus(execution.status)) {
             return settle(toOutcome(workflowId, execution));
           }

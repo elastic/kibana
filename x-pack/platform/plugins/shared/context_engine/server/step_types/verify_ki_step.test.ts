@@ -87,7 +87,16 @@ describe('verify_ki workflow step', () => {
     esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
     telemetry = mockKiStepTelemetry();
     workflowsManagement = {
-      executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
+      getWorkflow: jest.fn().mockImplementation(async (id: string) => ({
+        id,
+        name: id,
+        enabled: true,
+        valid: true,
+        managed: false,
+        definition: { name: id, triggers: [{ type: 'manual' }], steps: [] },
+        yaml: '',
+      })),
+      runWorkflow: jest.fn().mockResolvedValue('exec-1'),
       getWorkflowExecution: jest.fn(),
       cancelWorkflowExecution: jest.fn(),
     };
@@ -415,14 +424,14 @@ describe('verify_ki workflow step', () => {
 
       await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii', timeout_sec: 15 }] });
 
-      expect(workflowsManagement.executeWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({
-          workflowId: 'no-pii',
-          inputs: { ki: { title: 'x' } },
-          request: { headers: {} },
-          spaceId: 'space-a',
-          waitForCompletion: false,
-        })
+      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a');
+      expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'no-pii' }),
+        'space-a',
+        { ki: { title: 'x' } },
+        { headers: {} },
+        'context-engine:verify-ki',
+        expect.anything()
       );
     });
 
@@ -434,7 +443,7 @@ describe('verify_ki workflow step', () => {
         { verifiers: [{ workflow_id: 'runbook-only', applies_to: { types: ['runbook'] } }] }
       );
 
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
       expect(output).toEqual({ passed: true, results: [] });
     });
 
@@ -451,16 +460,16 @@ describe('verify_ki workflow step', () => {
       expect(thrown.message).toBe('Duplicate verifier id: "workflow:no-pii"');
     });
 
-    it('propagates a workflow dispatch failure', async () => {
+    it('fails the step when a verifier workflow does not exist', async () => {
       setContextEngineEnabled(true);
-      workflowsManagement.executeWorkflow.mockRejectedValue(new Error('Workflow not found'));
+      workflowsManagement.getWorkflow.mockResolvedValue(null);
 
       await expect(
         runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'missing' }] })
-      ).rejects.toThrow('Workflow not found');
+      ).rejects.toThrow("Verifier workflow 'missing' not found");
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
         outcome: 'failure',
-        errorType: 'Error',
+        errorType: 'NotFoundError',
       });
     });
 
@@ -492,8 +501,13 @@ describe('verify_ki workflow step', () => {
         { verifiers: [{ workflow_id: 'no-pii' }], metadata: { ki_verifier_chain: ['root-wf'] } }
       );
 
-      expect(workflowsManagement.executeWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ metadata: { ki_verifier_chain: ['root-wf', 'parent-wf'] } })
+      expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'space-a',
+        expect.anything(),
+        expect.anything(),
+        'context-engine:verify-ki',
+        { ki_verifier_chain: ['root-wf', 'parent-wf'] }
       );
     });
 
@@ -510,7 +524,7 @@ describe('verify_ki workflow step', () => {
       expect(thrown.message).toBe(
         "Verifier workflow 'parent-wf' would call itself (chain: parent-wf -> parent-wf)"
       );
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('rejects a verifier workflow already in the calling chain', async () => {
@@ -525,7 +539,7 @@ describe('verify_ki workflow step', () => {
       expect(thrown.message).toBe(
         "Verifier workflow 'root-wf' would call itself (chain: root-wf -> parent-wf -> root-wf)"
       );
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('follows workflow.execute lineage so a cycle through a sub-workflow is rejected', async () => {
@@ -553,7 +567,7 @@ describe('verify_ki workflow step', () => {
       expect(thrown.message).toBe(
         "Verifier workflow 'root-wf' would call itself (chain: root-wf -> verifier-wf -> parent-wf -> root-wf)"
       );
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('fails closed when an ancestor execution cannot be read', async () => {
@@ -569,7 +583,7 @@ describe('verify_ki workflow step', () => {
           }
         )
       ).rejects.toThrow("ancestor execution 'gone' is not readable");
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('rejects verifier workflows nested beyond the maximum depth', async () => {
@@ -585,7 +599,7 @@ describe('verify_ki workflow step', () => {
 
       expect(thrown.type).toBe('InputValidationError');
       expect(thrown.message).toContain('nested too deeply');
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('lets built-ins run at any depth', async () => {
@@ -622,8 +636,11 @@ describe('verify_ki workflow step', () => {
 
       expect(thrown).toBeInstanceOf(ExecutionError);
       expect(thrown.type).toBe('PermissionError');
-      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
-      expect(telemetry.analyticsService.reportKiVerification).not.toHaveBeenCalled();
+      expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
+      expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+        outcome: 'failure',
+        errorType: 'PermissionError',
+      });
     });
 
     it('skips the execute privilege check when only built-ins are listed', async () => {
@@ -663,6 +680,10 @@ describe('verify_ki workflow step', () => {
           makeHandlerContext({ title: 'x' }, esClient, { verifiers: [{ workflow_id: 'no-pii' }] })
         )
       ).rejects.toThrow('workflowsManagement plugin');
+      expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+        outcome: 'failure',
+        errorType: 'FeatureDisabledError',
+      });
     });
 
     it('runs built-ins without workflowsManagement when no workflow verifier is listed', async () => {
