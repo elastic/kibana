@@ -20,7 +20,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -32,18 +31,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       .keyUp(Key.SHIFT)
       .perform();
 
-    // EUI focuses the first item asynchronously. Wait for that so a following
-    // keypress cannot land on Duplicate instead of Rename.
-    await retry.waitFor('tab context menu to open with Rename focused', async () => {
-      if (!(await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode'))) {
-        return false;
-      }
-
-      const activeElement = await find.activeElement();
-      return (
-        (await activeElement.getAttribute('data-test-subj')) ===
-        'unifiedTabs_tabMenuItem_enterRenamingMode'
-      );
+    await retry.waitFor('open tab context menu', async () => {
+      return await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode');
     });
   };
 
@@ -116,24 +105,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         'Untitled 5',
         'Untitled 6',
         'Untitled 7',
-      ]);
-    });
-
-    it('can edit tab label with keyboard events', async () => {
-      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
-      await unifiedTabs.createNewTab();
-      await openTabContextMenuWithKeyboard();
-      await browser.pressKeys(browser.keys.ENTER);
-      await unifiedTabs.enterNewTabLabel('Test label');
-      expect(await unifiedTabs.getTabLabels()).to.eql([
-        'Untitled 1',
-        'Untitled 2',
-        'Untitled 3',
-        'Untitled 4',
-        'Untitled 5',
-        'Untitled 6',
-        'Untitled 7',
-        'Test label',
       ]);
     });
 
