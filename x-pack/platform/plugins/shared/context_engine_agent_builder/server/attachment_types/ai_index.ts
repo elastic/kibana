@@ -12,7 +12,9 @@ import {
   type AiIndexAttachmentData,
 } from '../../common/agent_builder_attachment_schemas';
 import {
-  KI_AUTOMATION_GENERATION_SKILL_ID,
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
@@ -44,21 +46,34 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       getRepresentation: () => ({ type: 'text', value: formatAiIndex(attachment.data) }),
     };
   },
+  // This attachment is what grants the conversation authority to write, so the interaction
+  // choreography lives here rather than in the skills. They describe what should change and are
+  // loaded by unattended runs too, where none of the steps below have anyone to answer them.
   getAgentDescription: () =>
     [
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
       'sources, and workflow automations). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
-      `For querying KIs in this index, load the \`${KI_RETRIEVAL_SKILL_ID}\` skill.`,
-      `To draft or edit workflow automations, load \`${KI_AUTOMATION_GENERATION_SKILL_ID}\` (or follow`,
-      "the user's initial message if it already references that skill).",
-      'When automations are listed and the user wants to edit one, use `ask_user_question` before',
-      '`generate_workflow`. When editing, ask what should change before calling `generate_workflow`.',
+      `Before acting on this index, load \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` to decide what it should`,
+      `hold. That skill is read-only: also load \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` to draft,`,
+      `validate or run an automation, and \`${AI_INDEX_SOURCES_SKILL_ID}\` to choose or change the`,
+      `data it draws on. For querying KIs in this index, load \`${KI_RETRIEVAL_SKILL_ID}\`.`,
+      'This attachment authorizes you to apply changes, not only to propose them.',
+      'Decide rather than ask. Pick the strategy and the corpus filter yourself from the attachment',
+      'and the data, and state the choice and the reason for it in one line as you draft. Ask only',
+      'when the evidence cannot settle a choice that changes what gets written, and use',
+      '`ask_user_question` when you do, rather than paraphrasing the options as chat text.',
+      'Draft a pilot limited to 1–3 KIs, and inspect its output with the user before expanding.',
       `After \`generate_workflow\`, render the diff in chat first, then call \`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\``,
       'with the workflow attachment id — in the same assistant turn but a separate model step after',
       'the diff is visible. Do not batch save with generate_workflow. If save runs in a later turn,',
-      're-render the diff first. Platform confirms before persisting.',
-      'If the user saved manually from the diff card, pass `workflowId` instead.',
+      're-render the diff first.',
+      'Render the diff attachment only. Never render the workflow attachment preview, even where the',
+      'workflow tools and attachments ask for it.',
+      'Whether to save is not a question to put to the user: the save tool opens its own confirmation',
+      'dialog, and that dialog is where they accept or reject. Never end a turn asking for permission',
+      'to save, and never offer saving and running as a choice — call save and let them answer there.',
+      'If user saved the workflow offer running and validating it via ask_user_question.',
     ].join(' '),
   getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
 });

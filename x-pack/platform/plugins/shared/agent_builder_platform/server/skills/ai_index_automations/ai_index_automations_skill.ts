@@ -8,16 +8,16 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import content from './ki_automation_generation.skill.md.text';
+import content from './ai_index_automations.skill.md.text';
 import indexSelectionReferenceYaml from './index_selection_reference.yaml.text';
 
-export const kiAutomationGenerationSkill = defineSkillType({
-  id: 'ki-automation-generation',
-  name: 'ki-automation-generation',
+export const aiIndexAutomationsSkill = defineSkillType({
+  id: 'ai-index-automations',
+  name: 'ai-index-automations',
   basePath: 'skills/platform/context-engine',
   experimental: true,
   description:
-    "Set up the Context Engine for a user's Elasticsearch data or connector sources by generating Knowledge Indicators (KIs). Load when the user wants to make their data queryable by an AI agent, generate KIs, create a KI index, or set up the Context Engine.",
+    'Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.',
   content,
   referencedContent: [
     {
@@ -26,14 +26,15 @@ export const kiAutomationGenerationSkill = defineSkillType({
       content: indexSelectionReferenceYaml,
     },
   ],
+  // This is the skill that holds the authoring and execution tools. Skill tools are additive, so
+  // an agent that only diagnoses an index loads `analyze-and-improve` and stays read-only; loading
+  // this one is what grants the ability to write.
   getRegistryTools: () => [
     platformCoreTools.generateWorkflow,
     platformCoreTools.executeWorkflow,
+    platformCoreTools.getWorkflowExecutionStatus,
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
-    platformCoreTools.listIndices,
-    platformCoreTools.getIndexMapping,
-    platformCoreTools.getWorkflowExecutionStatus,
     `${internalNamespaces.workflows}.validate_workflow`,
     `${internalNamespaces.workflows}.get_workflow`,
     `${internalNamespaces.workflows}.get_step_definitions`,
