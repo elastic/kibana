@@ -372,6 +372,59 @@ describe('runEsqlMatcherRule', () => {
     expect(result.lastRun?.skippedNoopBuckets).toBe(1);
   });
 
+  it('counts a singleton unresolved group with no existing targets as a no-op skip', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'solo@corp.com',
+              unresolvedIds: ['user-solo'],
+              namespaces: ['okta'],
+            }),
+          ]
+        )
+      );
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient)
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(mockEsClient.search).not.toHaveBeenCalled();
+    expect(result.lastRun?.skippedNoopBuckets).toBe(1);
+  });
+
+  it('counts a missing-entity fetch as a no-op skip and warns', async () => {
+    const logger = loggerMock.create();
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'alice@corp.com',
+              unresolvedIds: ['user-okta', 'user-entra'],
+              namespaces: ['okta', 'entra_id'],
+            }),
+          ]
+        )
+      );
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, { logger })
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(result.lastRun?.skippedNoopBuckets).toBe(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Elasticsearch returned none')
+    );
+  });
+
   it('retargets an out-of-group existing target when a higher-priority unresolved member wins', async () => {
     (mockEsClient.esql.query as jest.Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))

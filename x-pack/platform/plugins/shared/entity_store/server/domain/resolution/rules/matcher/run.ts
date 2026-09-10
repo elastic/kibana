@@ -256,6 +256,7 @@ async function resolveMatchGroup(
   }
 
   if (row.unresolvedIds.length < 2 && row.existingTargetIds.length === 0) {
+    stats.skippedNoopBuckets++;
     return;
   }
 
@@ -280,7 +281,8 @@ async function resolveMatchGroup(
 
     const candidates = uniqueById([...unresolved, ...existingTargets]);
     if (candidates.length === 0) {
-      logger.debug(
+      stats.skippedNoopBuckets++;
+      logger.warn(
         `${ruleId}: expected entities for bucket '${row.matchValue}' but Elasticsearch returned none`
       );
       return;
