@@ -3549,6 +3549,17 @@ paths:
                   description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
                   type: boolean
                   x-state: Technical Preview; added in 9.6.0
+                reasoning_level:
+                  description: 'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+                  enum:
+                    - none
+                    - minimal
+                    - low
+                    - medium
+                    - high
+                    - xhigh
+                  type: string
+                  x-state: Experimental; added in 9.6.0
       responses:
         '200':
           content:
@@ -4018,6 +4029,17 @@ paths:
                   description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
                   type: boolean
                   x-state: Technical Preview; added in 9.6.0
+                reasoning_level:
+                  description: 'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+                  enum:
+                    - none
+                    - minimal
+                    - low
+                    - medium
+                    - high
+                    - xhigh
+                  type: string
+                  x-state: Experimental; added in 9.6.0
       responses:
         '200':
           content:
