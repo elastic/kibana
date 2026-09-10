@@ -8,9 +8,15 @@
  */
 
 import type { NavigationTreeDefinitionUI, ProjectNavigationLinks } from '@kbn/core-chrome-browser';
-import { filter, firstValueFrom, of, throwError } from 'rxjs';
+import { filter, firstValueFrom, of, Subject, throwError } from 'rxjs';
 import type { MenuItem } from '@kbn/ui-side-navigation/types';
-import { attachPopoverSections, resolveLinksContent } from './resolve_navigation_content';
+import {
+  attachPopoverSections,
+  joinNavigationContent,
+  resolveLinksContent,
+  type NavigationItemsSnapshot,
+  type ResolvedLinksSnapshot,
+} from './resolve_navigation_content';
 import type { NavigationItems } from './to_navigation_items';
 
 const tree = {
@@ -160,5 +166,75 @@ describe('attachPopoverSections', () => {
 
     expect(attached.navItems.primaryItems[0].popoverSections).toBeUndefined();
     expect(attached.navItems.primaryItems[0].sections).toEqual(existing);
+  });
+});
+
+describe('joinNavigationContent', () => {
+  const otherTree = { ...tree, id: 'oblt' } as NavigationTreeDefinitionUI;
+
+  const navSnapshot = (
+    navTree: NavigationTreeDefinitionUI = tree,
+    solutionId: NavigationItemsSnapshot['solutionId'] = 'es'
+  ): NavigationItemsSnapshot => ({
+    tree: navTree,
+    solutionId,
+    items: createNavigationItems(createMenuItem('dashboards')),
+  });
+
+  const linksSnapshot = (
+    navTree: NavigationTreeDefinitionUI,
+    label: string
+  ): ResolvedLinksSnapshot => ({
+    tree: navTree,
+    resolved: [
+      {
+        nodeId: 'dashboards',
+        lists: [
+          {
+            id: 'recentlyViewed',
+            title: 'Recently viewed',
+            items: [{ id: label, href: `/${label}`, label }],
+          },
+        ],
+      },
+    ],
+  });
+
+  const labels = (state: { navItems: NavigationItems['navItems'] }) =>
+    state.navItems.primaryItems[0].popoverSections?.[0].items[0].label;
+
+  it('reattaches onto the last converted items when only lists emit', () => {
+    const links$ = new Subject<ResolvedLinksSnapshot>();
+    const emissions: Array<string | undefined> = [];
+    const sub = joinNavigationContent(of(navSnapshot()), links$).subscribe((state) => {
+      emissions.push(labels(state));
+    });
+
+    links$.next(linksSnapshot(tree, 'One'));
+    links$.next(linksSnapshot(tree, 'Two'));
+    sub.unsubscribe();
+
+    expect(emissions).toEqual(['One', 'Two']);
+  });
+
+  it('emits the new tree without the previous tree’s lists, then attaches the new lists', () => {
+    const navItems$ = new Subject<NavigationItemsSnapshot>();
+    const links$ = new Subject<ResolvedLinksSnapshot>();
+    const emissions: Array<{ tree: string; label?: string }> = [];
+    const sub = joinNavigationContent(navItems$, links$).subscribe((state) => {
+      emissions.push({ tree: state.solutionId, label: labels(state) });
+    });
+
+    navItems$.next(navSnapshot(tree, 'es'));
+    links$.next(linksSnapshot(tree, 'A'));
+    navItems$.next(navSnapshot(otherTree, 'oblt'));
+    links$.next(linksSnapshot(otherTree, 'B'));
+    sub.unsubscribe();
+
+    expect(emissions).toEqual([
+      { tree: 'es', label: 'A' },
+      { tree: 'oblt', label: undefined },
+      { tree: 'oblt', label: 'B' },
+    ]);
   });
 });

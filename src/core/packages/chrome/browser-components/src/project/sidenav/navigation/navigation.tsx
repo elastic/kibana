@@ -18,7 +18,7 @@ import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
-import { attachPopoverSections, resolveLinksContent } from './resolve_navigation_content';
+import { joinNavigationContent, resolveLinksContent } from './resolve_navigation_content';
 import { PanelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
@@ -70,25 +70,29 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
       distinctUntilChanged()
     );
 
+    const navigationItems$ = navigation$.pipe(
+      map((nav) => ({
+        tree: nav.navigationTree,
+        solutionId: nav.solutionId,
+        items: toNavigationItems(
+          nav.navigationTree,
+          nav.activeNodes,
+          nav.overflowItemIds,
+          panelStateManager
+        ),
+      }))
+    );
+
     const resolvedLinks$ = combineLatest([
       tree$,
       registeredLinks$.pipe(distinctUntilChanged()),
-    ]).pipe(switchMap(([tree, registrations]) => resolveLinksContent(tree, registrations)));
-
-    return combineLatest([navigation$, resolvedLinks$]).pipe(
-      map(([nav, resolved]) => ({
-        ...attachPopoverSections(
-          toNavigationItems(
-            nav.navigationTree,
-            nav.activeNodes,
-            nav.overflowItemIds,
-            panelStateManager
-          ),
-          resolved
-        ),
-        solutionId: nav.solutionId,
-      }))
+    ]).pipe(
+      switchMap(([tree, registrations]) =>
+        resolveLinksContent(tree, registrations).pipe(map((resolved) => ({ tree, resolved })))
+      )
     );
+
+    return joinNavigationContent(navigationItems$, resolvedLinks$);
   }, [chrome, basePath]);
 
   return useObservable(items$, null);

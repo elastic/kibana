@@ -14,12 +14,13 @@ import type {
   ProjectNavigationLinkItem,
   ProjectNavigationLinkList,
   ProjectNavigationLinks,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { MenuItem, SecondaryMenuItem } from '@kbn/ui-side-navigation/types';
 import { catchError, combineLatest, map, of, startWith, type Observable } from 'rxjs';
 import type { NavigationItems } from './to_navigation_items';
 
-export interface ResolvedLinkList {
+interface ResolvedLinkList {
   id: string;
   title: string;
   items: SecondaryMenuItem[];
@@ -28,6 +29,17 @@ export interface ResolvedLinkList {
 export interface ResolvedLinksPlacement {
   nodeId: string;
   lists: ResolvedLinkList[];
+}
+
+export interface NavigationItemsSnapshot {
+  tree: NavigationTreeDefinitionUI;
+  solutionId: SolutionId;
+  items: NavigationItems;
+}
+
+export interface ResolvedLinksSnapshot {
+  tree: NavigationTreeDefinitionUI;
+  resolved: readonly ResolvedLinksPlacement[];
 }
 
 const toSecondaryMenuItem = (
@@ -147,3 +159,18 @@ export const attachPopoverSections = (
     },
   };
 };
+
+/**
+ * Attach resolved lists onto already-converted menu items.
+ * Same tree → attach. Different tree (stale placements while resolve restarts) → no lists.
+ */
+export const joinNavigationContent = (
+  navigationItems$: Observable<NavigationItemsSnapshot>,
+  resolvedLinks$: Observable<ResolvedLinksSnapshot>
+): Observable<NavigationItems & { solutionId: SolutionId }> =>
+  combineLatest([navigationItems$, resolvedLinks$]).pipe(
+    map(([nav, links]) => ({
+      ...attachPopoverSections(nav.items, nav.tree === links.tree ? links.resolved : []),
+      solutionId: nav.solutionId,
+    }))
+  );
