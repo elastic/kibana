@@ -38,6 +38,7 @@ export interface WorkflowAttachmentValidationContext {
   inputs: Record<string, unknown>;
 }
 
+/** Enables an attachment type as a workflow origin with optional target resolution and validation. */
 export interface AttachmentWorkflowDefinition {
   /**
    * Resolves the attachment targets that may be named by a workflow origin.
