@@ -14,9 +14,9 @@ import {
   useOnboardingFeatureFlag,
 } from '../helpers/onboarding';
 
-// Minimal aws manifest with elb (managed_integration) so ManagedIntegrationsSection renders.
-// hide_in_var_group_options forces identityFederationSupported=false on all inputs so
-// LazyAwsStaticKeysForm mounts immediately without a radio-toggle path.
+// Minimal aws manifest with elb (managed_integration). Identity federation is supported
+// (no hide_in_var_group_options) so LazyAwsIdentityFederationSetup renders and immediately
+// calls onReadyChange(true) via the pre-seeded connectorId, enabling the deploy button.
 const MOCK_AWS_PACKAGE = {
   item: {
     version: '7.1.1',
@@ -29,7 +29,6 @@ const MOCK_AWS_PACKAGE = {
         inputs: [
           {
             type: 'aws-s3',
-            hide_in_var_group_options: { credential_type: ['identity_federation'] },
           },
         ],
       },
@@ -54,6 +53,18 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
 
   test.beforeEach(async ({ page }) => {
     await mockAwsPackage(page, MOCK_AWS_PACKAGE);
+    // Return empty connector list immediately so AwsIdentityFederationSetup finishes loading
+    // without waiting on a real server response. The pre-seeded connectorId still marks the
+    // form ready via onReadyChange(true) from initialConnectorId.
+    await page.route(
+      (url) => /\/api\/fleet\/cloud_connectors/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        })
+    );
   });
 
   test('Deploy fires SO POST with connector and provider, then navigates to detect-and-review', async ({
@@ -110,6 +121,9 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     );
 
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+    // Playwright waits for the button to be actionable (enabled) before clicking.
+    // The button becomes enabled once LazyAwsIdentityFederationSetup mounts and calls
+    // onReadyChange(true) via the pre-seeded initialConnectorId.
     await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
     // Verify SO POST fired with the connector, provider, and services.
@@ -120,7 +134,8 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     expect(body.mechanisms).toContain('managed_integration');
     expect(body.services).toContain('elb');
 
-    // onContinue() fires immediately on deploy — user lands on detect-and-review.
+    // After deploy completes the Next button is enabled; clicking it navigates to detect-and-review.
+    await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
     await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
   });
 
