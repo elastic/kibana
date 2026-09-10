@@ -10,6 +10,7 @@ import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
+import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
 import { ensureValidInput } from './preflight_checks';
 
 describe('preflight_checks', () => {
@@ -18,7 +19,7 @@ describe('preflight_checks', () => {
       it('should not throw when message is provided', () => {
         const input: ConverseInput = { message: 'hello' };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, timeline: [] })).not.toThrow();
       });
 
       it('should not throw when attachments are provided', () => {
@@ -26,7 +27,7 @@ describe('preflight_checks', () => {
           attachments: [{ type: AttachmentType.text, data: { content: 'content' } }],
         };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, timeline: [] })).not.toThrow();
       });
 
       it('should not throw when both message and attachments are provided', () => {
@@ -35,13 +36,13 @@ describe('preflight_checks', () => {
           attachments: [{ type: AttachmentType.text, data: { content: 'content' } }],
         };
 
-        expect(() => ensureValidInput({ input })).not.toThrow();
+        expect(() => ensureValidInput({ input, timeline: [] })).not.toThrow();
       });
 
       it('should throw when no input is provided', () => {
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input })).toThrow(
+        expect(() => ensureValidInput({ input, timeline: [] })).toThrow(
           /No standard input was provided to continue the conversation/
         );
       });
@@ -49,7 +50,7 @@ describe('preflight_checks', () => {
       it('should throw when only empty attachments array is provided', () => {
         const input: ConverseInput = { attachments: [] };
 
-        expect(() => ensureValidInput({ input })).toThrow(
+        expect(() => ensureValidInput({ input, timeline: [] })).toThrow(
           /No standard input was provided to continue the conversation/
         );
       });
@@ -60,7 +61,9 @@ describe('preflight_checks', () => {
         });
         const input: ConverseInput = { message: 'next message' };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, timeline: roundsToEvents(conversation) })
+        ).not.toThrow();
       });
 
       it('should not throw when action=regenerate (input comes from last round)', () => {
@@ -69,7 +72,9 @@ describe('preflight_checks', () => {
         });
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input, conversation, action: 'regenerate' })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, timeline: roundsToEvents(conversation), action: 'regenerate' })
+        ).not.toThrow();
       });
     });
 
@@ -99,7 +104,9 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, timeline: roundsToEvents(conversation) })
+        ).not.toThrow();
       });
 
       it('should not throw when all prompt responses are provided for multiple prompts', () => {
@@ -111,14 +118,16 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, timeline: roundsToEvents(conversation) })
+        ).not.toThrow();
       });
 
       it('should throw when no prompt response is provided', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
         const input: ConverseInput = {};
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
+        expect(() => ensureValidInput({ input, timeline: roundsToEvents(conversation) })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
@@ -131,7 +140,7 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
+        expect(() => ensureValidInput({ input, timeline: roundsToEvents(conversation) })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
@@ -144,7 +153,7 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).toThrow(
+        expect(() => ensureValidInput({ input, timeline: roundsToEvents(conversation) })).toThrow(
           /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
@@ -157,7 +166,9 @@ describe('preflight_checks', () => {
           },
         };
 
-        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+        expect(() =>
+          ensureValidInput({ input, timeline: roundsToEvents(conversation) })
+        ).not.toThrow();
       });
     });
   });
