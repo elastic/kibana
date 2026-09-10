@@ -22,6 +22,9 @@ describe('mountObservabilityAlertingApp', () => {
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
+      createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
+        Object.fromEntries(Object.entries(paths).map(([k, v]) => [k, { app: appId, basePath: v }]))
+      ),
     };
     const triggersActionsUi = {
       getClassicRulesPage: () => <div />,
