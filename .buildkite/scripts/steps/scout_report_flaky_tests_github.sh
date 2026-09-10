@@ -68,18 +68,17 @@ else
   counts="$(jq -r '.counts | "**\(.created)** created, **\(.existing)** already tracked, **\(.skipped)** skipped by the cap"' "$SUMMARY_PATH")"
 fi
 
-# One bullet per suite of the given action; created issues link to GitHub except in dry-run mode,
-# where nothing was filed.
+# One bullet per suite of the given action, linking the GitHub issue whenever a real one exists:
+# always for "existing" (the search runs even in dry-run mode), for "created" only once something
+# was actually filed, never for "skipped".
 list_suites() {
   local action="$1"
-  if [[ "$mode" == "dry run" && "$action" == "created" ]]; then
-    jq -r --arg action "$action" '.actions[] | select(.action == $action) | "- `\(.filePath)`"' "$SUMMARY_PATH"
-  elif [[ "$action" == "skipped" ]]; then
-    jq -r --arg action "$action" '.actions[] | select(.action == $action) | "- `\(.filePath)`"' "$SUMMARY_PATH"
-  else
-    jq -r --arg action "$action" '.actions[] | select(.action == $action)
-      | "- [#\(.issue.number)](\(.issue.url)) `\(.filePath)`"' "$SUMMARY_PATH"
+  local link="true"
+  if [[ "$action" == "skipped" || ("$action" == "created" && "$mode" == "dry run") ]]; then
+    link="false"
   fi
+  jq -r --arg action "$action" --argjson link "$link" '.actions[] | select(.action == $action)
+    | "- " + (if $link then "[#\(.issue.number)](\(.issue.url)) " else "" end) + "`\(.filePath)`"' "$SUMMARY_PATH"
 }
 
 # Markdown section for one action, collapsed when it is likely to be long
