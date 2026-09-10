@@ -61,6 +61,19 @@ export const reconcileThreatIntelAttributeWorkflows = async ({
   }
 };
 
+/** Uninstalls one workflow, tolerating not-found so a partial prior install still cleans up. */
+const uninstallTolerant = async (
+  managedWorkflowsClient: SecurityManagedWorkflowsClient,
+  workflowId: string,
+  options: { spaceId: string; workflowIdSuffix?: string }
+): Promise<void> => {
+  try {
+    await managedWorkflowsClient.uninstall(workflowId, options);
+  } catch {
+    // tolerate not-found / already-gone
+  }
+};
+
 /**
  * Removes the two global TI workflows and every per-space attribute instance.
  * Tolerates not-found so a partial prior install still cleans up.
@@ -73,23 +86,15 @@ export const uninstallThreatIntelManagedWorkflows = async ({
   spaceIds: readonly string[];
 }): Promise<void> => {
   for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
-    try {
-      await managedWorkflowsClient.uninstall(workflowId, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-    } catch {
-      // tolerate not-found / already-gone
-    }
+    await uninstallTolerant(managedWorkflowsClient, workflowId, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
   }
 
   for (const spaceId of spaceIds) {
-    try {
-      await managedWorkflowsClient.uninstall(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
-    } catch {
-      // tolerate not-found / already-gone
-    }
+    await uninstallTolerant(managedWorkflowsClient, THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+      spaceId,
+      workflowIdSuffix: spaceId,
+    });
   }
 };

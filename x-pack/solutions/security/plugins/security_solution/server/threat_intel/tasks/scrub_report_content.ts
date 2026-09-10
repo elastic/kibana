@@ -16,6 +16,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { isTransientEsStatus } from '../lib/es_retry';
 
 export const SCRUB_REPORT_CONTENT_TASK_TYPE = 'threat_intel:scrub_report_content';
 export const SCRUB_REPORT_CONTENT_TASK_ID = 'threat_intel:scrub_report_content:default';
@@ -170,7 +171,7 @@ export const registerScrubReportContentTask = ({
               // Reports index not created yet; nothing to age out.
               return { state: previousState };
             }
-            if (status === 503 || status === 429) {
+            if (isTransientEsStatus(status)) {
               throwRetryableError(
                 new Error(`Elasticsearch transient failure during content scrub: ${message}`),
                 new Date(Date.now() + 60_000)

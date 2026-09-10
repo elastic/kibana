@@ -27,6 +27,7 @@ import {
   THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { isTransientEsStatus } from '../lib/es_retry';
 import { normalizeProvenanceUrl } from '../services/provenance_url';
 
 export const PROMOTE_THREAT_INDICATORS_TASK_TYPE = 'threat_intel:promote_threat_indicators';
@@ -159,18 +160,10 @@ interface IocIndicatorOp {
 }
 
 /**
- * Ceiling on the sources[] provenance array.
- *
- * `sources` is a `nested` field, so every entry is its own Lucene document and the
- * index caps them at `index.mapping.nested_objects.limit` (10,000). A commonly
- * repeated IOC accumulates one entry per citing report forever, and the run that
- * crossed the ceiling made every later scripted update to that document fail,
- * including the `last_seen` refresh. That is a permanent rejection, so it also used
- * to pin the sync checkpoint. The linear dedup scan below is O(n) per update too,
- * so an unbounded array gets slower with every citation.
- *
- * 1000 is far more provenance than an analyst reads and leaves an order of
- * magnitude of headroom under the index limit.
+ * Ceiling on the sources[] provenance array. `sources` is `nested`, capped at
+ * 10,000 entries by `index.mapping.nested_objects.limit`; crossing it makes
+ * every later scripted update to the document fail permanently, which used
+ * to stall the sync checkpoint. 1000 leaves an order of magnitude of headroom.
  */
 const MAX_SOURCE_CITATIONS = 1000;
 
@@ -240,27 +233,17 @@ const isIocType = (value: unknown): value is IocType =>
   typeof value === 'string' && (IOC_TYPES as readonly string[]).includes(value);
 
 /**
- * Tiers that reach the Indicator Match index.
+ * Tiers that reach the Indicator Match index. The index holds every
+ * *candidate* indicator labelled by tier, and consumers filter on `ioc_tier`
+ * for the precision they need (a hunt query wants recall, a blocking rule
+ * wants precision) — so `uncertain` is stored rather than dropped.
  *
- * The index holds the full set of *candidate* indicators, each labelled with the
- * tier that produced it, and consumers filter on `ioc_tier` for the precision they
- * need. Precision is a property of the consumer, not of the intel: a hunt query
- * wants recall, a blocking rule wants precision, and a single write-time threshold
- * cannot serve both. `uncertain` is therefore stored rather than dropped.
- *
- * `reference` and `denied` stay out. Those are not low-confidence candidates, they
- * are values `extract_iocs` has already judged not to be indicators: the report's
- * own citation URLs, private and reserved addresses, security-vendor and research
- * domains, and the benign denylist. The reports index keeps them in
- * `extracted.iocs` if anything ever wants them.
- *
- * An IOC with no tier is also excluded. A row with no `ioc_tier` cannot be filtered
- * by a consumer, which is incoherent under a contract that says filter on
- * `ioc_tier`. Nothing in the pipeline emits an untiered IOC today.
- *
- * The per-space, tier-filtered alias is the read-side enforcement. Consumers must
- * use that alias rather than the raw backing index, which contains every space and
- * every candidate tier.
+ * `reference` and `denied` stay out: those are values `extract_iocs` already
+ * judged not to be indicators (citation URLs, private/reserved addresses,
+ * vendor domains, the benign denylist), not low-confidence candidates.
+ * Untiered IOCs are excluded too, since nothing can filter on a missing
+ * `ioc_tier`. The per-space, tier-filtered alias is the read-side
+ * enforcement — consumers must use it, not the raw backing index.
  */
 const PROMOTABLE_TIERS: ReadonlySet<string> = new Set([
   'discriminating',
@@ -276,15 +259,11 @@ const MAX_DOC_ID_BYTES = 512;
 
 /**
  * Case folding is per type because it is not uniformly safe. Domains, emails,
- * hashes, and IP literals are case-insensitive identifiers, so folding them
- * collapses what are really duplicates. A URL is not: its path and query are
- * case-sensitive, and a Base58 wallet address encodes information in its case.
- * Folding either would give two distinct indicators the same id, and since the
- * scripted update only appends provenance, the second value would never make it
- * into the document and would be unmatchable.
- *
- * `new URL()` already lowercases scheme and host while preserving the rest,
- * which is exactly the split we want.
+ * hashes, and IP literals are case-insensitive, so folding collapses real
+ * duplicates. URLs and Base58 wallet addresses are case-sensitive, so folding
+ * them would collide two distinct indicators onto one id and drop the
+ * second's value (the scripted update only appends provenance). `new URL()`
+ * lowercases scheme and host while preserving the rest, which is the split we want.
  */
 const canonicalIndicatorValue = (type: IocType, value: string): string => {
   if (type === 'wallet') return value;
@@ -299,20 +278,16 @@ const canonicalIndicatorValue = (type: IocType, value: string): string => {
 };
 
 /**
- * Stable id per IOC per space so re-running the task is idempotent. Keyed
- * `<space_id>:<type>:<canonical_value>` so the same value cited by reports in
- * different spaces stays in separate docs and sources[] never merges across
+ * Stable id per IOC per space (`<space_id>:<type>:<canonical_value>`) so
+ * re-running the task is idempotent and `sources[]` never merges across
  * space boundaries — the promote scan runs as the internal user over every
- * space's reports, so the space prefix is what enforces the isolation the rest
- * of the pipeline relies on. Space ids cannot contain `:`, so the prefix parses
- * cleanly (`GET /…/_doc/default:ip:1.2.3.4`).
+ * space's reports, so this prefix is what enforces that isolation. Space ids
+ * cannot contain `:`, so the prefix parses cleanly.
  *
- * Over 512 bytes the readable form is replaced by a hash of the canonical value.
- * URL indicators can run to the full report body length, and an over-long id is
- * an item-level bulk rejection, which used to hold the sync checkpoint and stall
- * promotion for every space. Short values keep their readable id, so this does
- * not re-key the indicators that already exist; the only ids that change are the
- * ones that could never be written in the first place.
+ * Over 512 bytes (Elasticsearch's id limit — URL indicators can run to the
+ * full report body length) the readable form is replaced by a hash of the
+ * canonical value; short values keep their readable id unchanged, so this
+ * only affects ids that could never have been written in the first place.
  */
 const indicatorId = (spaceId: string, type: IocType, value: string): string => {
   const canonical = canonicalIndicatorValue(type, value);
@@ -467,11 +442,7 @@ export const buildBulkOpsForTest = buildBulkOps;
  */
 export const SOURCES_UPSERT_SCRIPT_FOR_TEST = SOURCES_UPSERT_SCRIPT;
 
-/**
- * Statuses and error types worth waiting out. Everything else is treated as
- * permanent.
- */
-const RETRYABLE_BULK_STATUSES: ReadonlySet<number> = new Set([408, 429, 500, 502, 503, 504]);
+/** Error types worth waiting out, alongside `TRANSIENT_ES_STATUSES`. */
 const RETRYABLE_BULK_ERROR_TYPES: ReadonlySet<string> = new Set([
   'es_rejected_execution_exception',
   'circuit_breaking_exception',
@@ -482,24 +453,18 @@ const RETRYABLE_BULK_ERROR_TYPES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Splits an item-level bulk failure into "try again later" and "this will never
- * work", because the two need opposite handling and conflating them is a trap.
- *
- * Holding the checkpoint on a transient failure is right: the next run re-scans
- * the range and the write lands. Holding it on a permanent one stalls the whole
- * pipeline, because the same document fails on every subsequent run,
- * `lastSyncedAt` never advances, and no space gets a new indicator again until
- * somebody reads the logs. A too-long id, a mapping conflict, and a document
- * that has outgrown the nested-objects limit are all in that second category.
- *
- * The default is `permanent` on purpose. An unrecognised error that is actually
- * transient costs one batch of indicators, which the next enrichment cycle
- * re-cites anyway. An unrecognised error treated as retryable costs the entire
- * index, indefinitely.
+ * Splits an item-level bulk failure into "try again later" (holds the sync
+ * checkpoint so the next run re-scans the range) vs. "this will never work"
+ * (a too-long id, a mapping conflict, a nested-objects-limit doc — counted
+ * and logged instead, since retrying holds the checkpoint and stalls
+ * promotion for every space forever). Unrecognised errors default to
+ * permanent: treating a genuinely transient one as permanent costs one batch
+ * of indicators, but treating a permanent one as retryable costs the whole
+ * index indefinitely.
  */
 const isRetryableBulkFailure = (item: estypes.BulkResponseItem | undefined): boolean => {
   if (!item) return false;
-  if (RETRYABLE_BULK_STATUSES.has(item.status)) return true;
+  if (isTransientEsStatus(item.status)) return true;
   const type = item.error?.type;
   return typeof type === 'string' && RETRYABLE_BULK_ERROR_TYPES.has(type);
 };
@@ -613,7 +578,7 @@ export const registerPromoteThreatIndicatorsTask = ({
               // Treat as no-op and let the next scheduled run pick up.
               return { state: previousState satisfies PromoteThreatIndicatorsState };
             }
-            if (status === 503 || status === 429) {
+            if (isTransientEsStatus(status)) {
               throwRetryableError(
                 new Error(
                   `Elasticsearch transient failure opening the report scan PIT: ${message}`
@@ -671,7 +636,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                 // Anything else (mapping conflict, RBAC) is permanent for this
                 // run and surfaces in the next attempt.
                 const status = (err as { statusCode?: number }).statusCode;
-                if (status === 503 || status === 429) {
+                if (isTransientEsStatus(status)) {
                   throwRetryableError(
                     new Error(`Elasticsearch transient failure during report scan: ${message}`),
                     new Date(Date.now() + 60_000)
@@ -754,7 +719,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                   } catch (err) {
                     const message = (err as Error).message ?? String(err);
                     const status = (err as { statusCode?: number }).statusCode;
-                    if (status === 503 || status === 429 || status === 500 || status === 408) {
+                    if (isTransientEsStatus(status)) {
                       throwRetryableError(
                         new Error(
                           `Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`
