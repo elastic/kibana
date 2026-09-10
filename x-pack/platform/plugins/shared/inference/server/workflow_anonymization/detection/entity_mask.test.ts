@@ -69,7 +69,15 @@ describe('generateEntityToken', () => {
       // same HMAC input string.
       const a = generateEntityToken('scope', 'A:B', 'C');
       const b = generateEntityToken('scope', 'A', 'B:C');
-      expect(a).not.toBe(b);
+      // Compare hash portions only — the entityClass prefixes differ by construction,
+      // so comparing the full token would pass even if the HMAC inputs collided.
+      expect(a.slice(a.lastIndexOf('_') + 1)).not.toBe(b.slice(b.lastIndexOf('_') + 1));
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('throws for an empty entityClass', () => {
+      expect(() => generateEntityToken('scope', '', 'value')).toThrow('entityClass');
     });
   });
 
