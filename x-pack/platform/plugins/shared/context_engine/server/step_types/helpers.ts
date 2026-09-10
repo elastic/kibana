@@ -106,6 +106,9 @@ export const withKiVerificationTelemetry = async ({
   try {
     const summary = await run();
     const failures = summary.results.filter((result) => !result.passed);
+    const failedWorkflowVerifierCount = failures.filter(({ verifier }) =>
+      verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX)
+    ).length;
     analyticsService.reportKiVerification({
       outcome: 'success',
       passed: summary.passed,
@@ -118,6 +121,7 @@ export const withKiVerificationTelemetry = async ({
           )
         ),
       ],
+      failedWorkflowVerifierCount,
     });
     if (summary.passed) {
       logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);

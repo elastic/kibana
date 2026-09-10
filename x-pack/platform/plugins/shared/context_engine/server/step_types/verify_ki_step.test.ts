@@ -286,6 +286,7 @@ describe('verify_ki workflow step', () => {
       passed: true,
       verifiersRun: 1,
       failedVerifierIds: [],
+      failedWorkflowVerifierCount: 0,
     });
     expect(telemetry.logger.debug).toHaveBeenCalledTimes(1);
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
@@ -307,6 +308,7 @@ describe('verify_ki workflow step', () => {
       passed: false,
       verifiersRun: 1,
       failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID],
+      failedWorkflowVerifierCount: 0,
     });
   });
 
@@ -334,6 +336,7 @@ describe('verify_ki workflow step', () => {
       passed: true,
       verifiersRun: 0,
       failedVerifierIds: [],
+      failedWorkflowVerifierCount: 0,
     });
   });
 
@@ -489,6 +492,7 @@ describe('verify_ki workflow step', () => {
         passed: false,
         verifiersRun: 2,
         failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow'],
+        failedWorkflowVerifierCount: 1,
       });
     });
 
@@ -668,7 +672,11 @@ describe('verify_ki workflow step', () => {
       );
 
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith(
-        expect.objectContaining({ verifiersRun: 2, failedVerifierIds: ['workflow'] })
+        expect.objectContaining({
+          verifiersRun: 2,
+          failedVerifierIds: ['workflow'],
+          failedWorkflowVerifierCount: 2,
+        })
       );
     });
 

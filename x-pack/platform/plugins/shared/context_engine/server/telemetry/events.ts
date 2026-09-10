@@ -79,6 +79,7 @@ export interface ReportKiVerificationEventParams {
   passed?: boolean;
   verifiers_run?: number;
   failed_verifier_ids?: string[];
+  failed_workflow_verifier_count?: number;
   error_type?: string;
 }
 
@@ -126,6 +127,14 @@ const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
     _meta: {
       description:
         'Distinct failing verifier ids. Present only when a completed run failed verification.',
+      optional: true,
+    },
+  },
+  failed_workflow_verifier_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of custom verifier workflows that failed. Present when at least one failed.',
       optional: true,
     },
   },
