@@ -48,7 +48,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
 
   // Require the full `metrics-<dataset>-<namespace>` shape: without a namespace the
   // derived name cannot match the `exemplars-*.otel-*` template pattern.
-  if (namespaceSeparatorIndex === -1 || namespaceSeparatorIndex === suffix.length - 1) {
+  if (namespaceSeparatorIndex <= 0 || namespaceSeparatorIndex === suffix.length - 1) {
     return undefined;
   }
 
