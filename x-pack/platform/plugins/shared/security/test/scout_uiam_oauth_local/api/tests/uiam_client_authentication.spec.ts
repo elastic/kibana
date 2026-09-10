@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -23,7 +23,7 @@ apiTest.describe(
           headers: {
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
           },
           responseType: 'json',
         });
@@ -43,7 +43,7 @@ apiTest.describe(
           headers: {
             ...COMMON_UNSAFE_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
           },
           responseType: 'json',
           body: {},
@@ -61,7 +61,7 @@ apiTest.describe(
           headers: {
             ...COMMON_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
           },
           responseType: 'json',
         });
@@ -78,7 +78,7 @@ apiTest.describe(
           headers: {
             ...COMMON_UNSAFE_HEADERS,
             Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
           },
           responseType: 'json',
           body: {},

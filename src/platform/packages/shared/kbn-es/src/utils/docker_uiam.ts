@@ -23,6 +23,7 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from '@kbn/mock-idp-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -222,7 +223,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--env',
       'uiam.cosmos.gateway_connection_mode=true',
       '--env',
-      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET},${MOCK_IDP_GATEWAY_SHARED_SECRET}`,
       '--env',
       `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
       '--env',
@@ -330,7 +331,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--env',
     'uiam.cosmos.gateway_connection_mode=true',
     '--env',
-    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+    `uiam.internal.shared.secrets=${MOCK_IDP_UIAM_SHARED_SECRET},${MOCK_IDP_GATEWAY_SHARED_SECRET}`,
     '--env',
     `uiam.tokens.jwt.signature.secrets=${MOCK_IDP_UIAM_SIGNING_SECRET}`,
     '--env',
