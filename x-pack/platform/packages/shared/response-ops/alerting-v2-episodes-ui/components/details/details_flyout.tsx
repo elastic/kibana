@@ -24,6 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { canManuallyAddToChat, EpisodeAddToChatButton } from '@kbn/alerting-v2-browser-shared';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded } from '../../types/rule_state';
@@ -279,14 +280,27 @@ export const AlertEpisodeDetailsFlyout = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EpisodeFooterActionMenu
-                actions={compatibleActions}
-                episodes={episodes}
-                viewDetailsHref={services.http.basePath.prepend(
-                  getAlertEpisodeDetailsPath(episodeId)
-                )}
-                onSuccess={invalidateEpisodeQueries}
-              />
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                {episode && canManuallyAddToChat(episode, services) ? (
+                  <EuiFlexItem grow={false}>
+                    <EpisodeAddToChatButton
+                      episode={episode}
+                      rule={showRuleDependentTabs ? ruleState.rule : undefined}
+                      services={services}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EpisodeFooterActionMenu
+                    actions={compatibleActions}
+                    episodes={episodes}
+                    viewDetailsHref={services.http.basePath.prepend(
+                      getAlertEpisodeDetailsPath(episodeId)
+                    )}
+                    onSuccess={invalidateEpisodeQueries}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

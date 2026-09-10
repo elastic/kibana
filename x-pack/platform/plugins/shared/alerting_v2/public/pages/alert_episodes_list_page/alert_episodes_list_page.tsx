@@ -37,8 +37,10 @@ import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/componen
 import { css } from '@emotion/react';
 import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PluginStart } from '@kbn/core-di';
 import { useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
@@ -172,6 +174,9 @@ export const AlertEpisodesListPage = () => (
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
@@ -423,11 +428,13 @@ const AlertEpisodesListPageContent = () => {
             uiSettings: services.uiSettings,
             unifiedDocViewer: services.unifiedDocViewer,
             dataViews: services.dataViews,
+            application: services.application,
+            agentBuilder,
           }}
         />
       );
     },
-    [closeFlyout, episodeActions, services]
+    [agentBuilder, closeFlyout, episodeActions, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(

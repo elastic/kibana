@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ManualAddToChatServices } from '@kbn/alerting-v2-browser-shared';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -23,4 +25,6 @@ export interface AlertEpisodeDetailsServices {
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
   userProfile: UserProfileService;
+  application: ApplicationStart;
+  agentBuilder?: ManualAddToChatServices['agentBuilder'];
 }

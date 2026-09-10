@@ -150,6 +150,25 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * Alerts write access plus Agent Builder read (`show`). Used to assert the
+ * episode flyout "Add to chat" button is visible when the user can open chat.
+ */
+export const ALERTING_V2_ALERTS_ALL_WITH_AGENT_BUILDER_READ_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_alerts: ['all'],
+        agentBuilder: ['read'],
+        discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_ACTION_POLICIES_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [

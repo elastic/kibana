@@ -21,7 +21,10 @@ export { useAutoAttach } from './agent_builder/add_to_chat/auto/use_auto_attach'
 export { useEpisodeAutoAttach } from './agent_builder/add_to_chat/auto/use_episode_auto_attach';
 export { useRuleAutoAttach } from './agent_builder/add_to_chat/auto/use_rule_auto_attach';
 export { useActionPolicyAutoAttach } from './agent_builder/add_to_chat/auto/use_action_policy_auto_attach';
-export { useManualAddToChat } from './agent_builder/add_to_chat/manual/use_manual_add_to_chat';
+export {
+  useManualAddToChat,
+  canManuallyAddToChat,
+} from './agent_builder/add_to_chat/manual/use_manual_add_to_chat';
 export { AddToChatButton } from './agent_builder/add_to_chat/manual/add_to_chat_button';
 export type { AddToChatButtonProps } from './agent_builder/add_to_chat/manual/add_to_chat_button';
 export { EpisodeAddToChatButton } from './agent_builder/add_to_chat/manual/episode_add_to_chat_button';
