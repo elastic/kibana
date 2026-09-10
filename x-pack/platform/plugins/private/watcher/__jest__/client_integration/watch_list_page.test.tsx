@@ -18,17 +18,20 @@ import { WatchListPage } from '../../public/application/sections/watch_list_page
 import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 import { REFRESH_INTERVALS } from '../../common/constants';
 
-const renderWatchListPage = (httpSetup: HttpSetup) => {
+const renderWatchListPage = async (httpSetup: HttpSetup) => {
   const Wrapped = WithAppDependencies(WatchListPage, httpSetup);
   render(
     <I18nProvider>
       <Wrapped />
     </I18nProvider>
   );
+  // Drain the microtask-only on-mount watches request so assertions don't race RTL's fake-timer waitFor.
+  await act(async () => {
+    await jest.advanceTimersByTimeAsync(0);
+  });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/290017
-describe.skip('<WatchListPage />', () => {
+describe('<WatchListPage />', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
@@ -61,7 +64,7 @@ describe.skip('<WatchListPage />', () => {
           ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches: [] });
 
-          renderWatchListPage(httpSetup);
+          await renderWatchListPage(httpSetup);
           await screen.findByTestId('emptyPrompt');
         });
 
@@ -96,7 +99,7 @@ describe.skip('<WatchListPage />', () => {
           ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches });
 
-          renderWatchListPage(httpSetup);
+          await renderWatchListPage(httpSetup);
           await screen.findByTestId('watchesTable');
         });
 
