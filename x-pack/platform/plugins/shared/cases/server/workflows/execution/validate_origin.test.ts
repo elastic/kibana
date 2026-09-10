@@ -829,3 +829,199 @@ describe('parseSelectedDocumentPairs', () => {
     ]);
   });
 });
+
+// ── getDefaultTargets — positional index pairing (A1) ────────────────────────
+
+// Register security.alert with workflow: {} (no validateTargets) to exercise the default
+// alignment path. The same alert-comment fixtures used by other describe blocks work here.
+const workflowOnlyRegistry = new UnifiedAttachmentTypeRegistry();
+workflowOnlyRegistry.register({ id: 'security.alert', schema: z.any(), workflow: {} });
+
+describe('getDefaultTargets — positional index alignment', () => {
+  // A sparse index array: the empty string must not shift idx2/idx3 onto the wrong ids.
+  it('keeps each id paired with its own index when the index array has empty entries', () => {
+    const caseWithAlert = {
+      ...theCase,
+      comments: [
+        {
+          type: 'alert',
+          alertId: ['a1', 'a2', 'a3'],
+          index: ['', 'idx2', 'idx3'],
+          id: 'so-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+      ],
+    } as unknown as Case;
+
+    // 'a1' has no valid index; 'a2' → 'idx2'; 'a3' → 'idx3'. The origin targets a2.
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'a2',
+        },
+        caseId: 'case-1',
+        selectedAlerts: [{ _id: 'a2', _index: 'idx2' }],
+        attachedAlerts: [{ id: 'a2', index: 'idx2', attached_at: '' }],
+        selectedDocuments: [],
+        attachedEvents: [],
+        attachmentTypeRegistry,
+        inputs: { event: { alertIds: [{ _id: 'a2', _index: 'idx2' }] } },
+        theCase: caseWithAlert,
+      })
+    ).not.toThrow();
+  });
+});
+
+// ── resolveAttachmentOrigin — malformed sibling skipped (A2) ─────────────────
+
+describe('resolveAttachmentOrigin — malformed sibling attachment is skipped', () => {
+  it('resolves a valid attachment origin even when the case holds a malformed sibling comment', () => {
+    const caseWithMixed = {
+      ...theCase,
+      comments: [
+        // Malformed: alertId and index arrays have different lengths.
+        {
+          type: 'alert',
+          alertId: ['a1', 'a2'],
+          index: ['i1'],
+          id: 'so-bad',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        // Valid: a single well-formed alert.
+        {
+          type: 'alert',
+          alertId: 'a9',
+          index: '.idx',
+          id: 'so-good',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+      ],
+    } as unknown as Case;
+
+    // The origin targets the valid attachment; the malformed one must not prevent resolution.
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'a9',
+        },
+        caseId: 'case-1',
+        selectedAlerts: [{ _id: 'a9', _index: '.idx' }],
+        attachedAlerts: [{ id: 'a9', index: '.idx', attached_at: '' }],
+        selectedDocuments: [],
+        attachedEvents: [],
+        attachmentTypeRegistry,
+        inputs: { event: { alertIds: [{ _id: 'a9', _index: '.idx' }] } },
+        theCase: caseWithMixed,
+      })
+    ).not.toThrow();
+  });
+});
+
+// ── targetsById — duplicate _id under different indices (A3) ─────────────────
+
+describe('targetsById — same _id under multiple indices', () => {
+  it('throws when the same attachment id is attached under two different indices', () => {
+    const caseWithDuplicateId = {
+      ...theCase,
+      comments: [
+        {
+          type: 'alert',
+          alertId: 'a1',
+          index: 'idx-a',
+          id: 'so-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        {
+          type: 'alert',
+          alertId: 'a1',
+          index: 'idx-b',
+          id: 'so-2',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+      ],
+    } as unknown as Case;
+
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'a1',
+        },
+        caseId: 'case-1',
+        selectedAlerts: [{ _id: 'a1', _index: 'idx-a' }],
+        attachedAlerts: [{ id: 'a1', index: 'idx-a', attached_at: '' }],
+        selectedDocuments: [],
+        attachedEvents: [],
+        attachmentTypeRegistry,
+        inputs: { event: { alertIds: [{ _id: 'a1', _index: 'idx-a' }] } },
+        theCase: caseWithDuplicateId,
+      })
+    ).toThrow(/multiple indices/);
+  });
+});
+
+// ── default alignment — workflow: {} (no validateTargets) (A4) ────────────────
+
+describe('default alignment for types registered with workflow: {}', () => {
+  // Use a standard alert comment so `resolveAttachmentOrigin` maps it to `security.alert`,
+  // which is the only type registered in `workflowOnlyRegistry`.
+  const caseWithAlert = {
+    ...theCase,
+    comments: [{ type: 'alert', alertId: 'so-v1', index: '.alerts-idx' }],
+  } as unknown as Case;
+
+  it('throws when no alert or document inputs are provided (empty selection)', () => {
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'so-v1',
+        },
+        caseId: 'case-1',
+        // so-v1 is attached to the case (membership passes) but no alerts are selected.
+        selectedAlerts: [],
+        attachedAlerts: [{ id: 'so-v1', index: '.alerts-idx', attached_at: '' }],
+        selectedDocuments: [],
+        attachedEvents: [],
+        attachmentTypeRegistry: workflowOnlyRegistry,
+        inputs: {},
+        theCase: caseWithAlert,
+      })
+    ).toThrow('Attachment workflow origins require selected alert or document inputs.');
+  });
+
+  it('throws when the origin target is not in the selected alerts', () => {
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'so-v1',
+        },
+        caseId: 'case-1',
+        // Selection references a different alert — disjoint from the origin target `so-v1`.
+        selectedAlerts: [{ _id: 'other-id', _index: 'idx' }],
+        attachedAlerts: [
+          { id: 'so-v1', index: '.alerts-idx', attached_at: '' },
+          { id: 'other-id', index: 'idx', attached_at: '' },
+        ],
+        selectedDocuments: [],
+        attachedEvents: [],
+        attachmentTypeRegistry: workflowOnlyRegistry,
+        inputs: { event: { alertIds: [{ _id: 'other-id', _index: 'idx' }] } },
+        theCase: caseWithAlert,
+      })
+    ).toThrow('Attachment workflow origin "so-v1" is not selected.');
+  });
+});

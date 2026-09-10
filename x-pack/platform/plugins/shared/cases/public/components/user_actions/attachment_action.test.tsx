@@ -59,7 +59,11 @@ describe('renderAttachmentAction', () => {
     const action = {
       type: AttachmentActionType.CUSTOM as const,
       isPrimary: true,
-      render: () => <button data-test-subj="custom-action-button">Custom</button>,
+      render: () => (
+        <button type="button" data-test-subj="custom-action-button">
+          {'Custom'}
+        </button>
+      ),
     };
 
     render(
@@ -78,13 +82,13 @@ describe('renderAttachmentAction', () => {
       render: () => null,
     };
 
-    const { container } = render(
+    render(
       <TestProviders>
-        <div>{renderAttachmentAction(action, 'test-subj-1')}</div>
+        <div data-test-subj="wrapper">{renderAttachmentAction(action, 'test-subj-1')}</div>
       </TestProviders>
     );
 
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(screen.getByTestId('wrapper')).toBeEmptyDOMElement();
   });
 
   it('applies the testSubj to the BUTTON flex item', () => {
@@ -95,13 +99,13 @@ describe('renderAttachmentAction', () => {
       onClick: jest.fn(),
     };
 
-    const { container } = render(
+    render(
       <TestProviders>
         <div>{renderAttachmentAction(action, 'my-custom-subj')}</div>
       </TestProviders>
     );
 
     // The outer EuiFlexItem should carry the testSubj
-    expect(container.querySelector('[data-test-subj="my-custom-subj"]')).toBeInTheDocument();
+    expect(screen.getByTestId('my-custom-subj')).toBeInTheDocument();
   });
 });
