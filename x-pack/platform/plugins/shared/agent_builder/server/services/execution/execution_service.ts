@@ -19,7 +19,6 @@ import {
   createBadRequestError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentExecutionService,
   AgentExecution,
@@ -85,7 +84,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const validatedAttachments = await this.validateAttachmentsIfProvided(
+    const validatedAttachments = await this.deps.attachmentsService.validateAttachments(
       params.nextInput.attachments,
       request
     );
@@ -392,34 +391,5 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
-  }
-
-  private async validateAttachmentsIfProvided(
-    attachments: AttachmentInput[] | undefined,
-    request: KibanaRequest
-  ): Promise<AttachmentInput[] | undefined> {
-    if (!attachments || attachments.length === 0) {
-      return undefined;
-    }
-
-    const validated: AttachmentInput[] = [];
-    for (const attachment of attachments) {
-      const result = await this.deps.attachmentsService.validate(attachment, request);
-      if (!result.valid) {
-        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
-      }
-      const a = result.attachment as Attachment;
-      validated.push({
-        id: a.id,
-        type: a.type,
-        data: a.data,
-        ...(a.description !== undefined ? { description: a.description } : {}),
-        ...(a.hidden !== undefined ? { hidden: a.hidden } : {}),
-        ...(a.origin !== undefined ? { origin: a.origin } : {}),
-        ...(a.groupId !== undefined ? { group_id: a.groupId } : {}),
-      });
-    }
-
-    return validated;
   }
 }

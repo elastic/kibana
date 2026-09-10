@@ -89,6 +89,7 @@ describe('AgentExecutionService', () => {
 
   const attachmentsService: AttachmentServiceStart = {
     validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
+    validateAttachments: jest.fn().mockImplementation(async (attachments) => attachments),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn().mockReturnValue([]),
   };
@@ -110,6 +111,9 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (attachmentsService.validateAttachments as jest.Mock).mockImplementation(
+      async (attachments) => attachments
+    );
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',
       '@timestamp': new Date().toISOString(),
@@ -236,10 +240,9 @@ describe('AgentExecutionService', () => {
     });
 
     it('validates attachments and throws on invalid attachment', async () => {
-      (attachmentsService.validate as jest.Mock).mockResolvedValue({
-        valid: false,
-        error: 'boom',
-      });
+      (attachmentsService.validateAttachments as jest.Mock).mockRejectedValue(
+        new Error('Attachment validation failed: boom')
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -257,6 +260,10 @@ describe('AgentExecutionService', () => {
         })
       ).rejects.toThrow('Attachment validation failed: boom');
 
+      expect(attachmentsService.validateAttachments).toHaveBeenCalledWith(
+        [{ type: 'some_type', data: { foo: 'bar' } }],
+        request
+      );
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 

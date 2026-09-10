@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
-import type { KibanaRequest } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
@@ -43,31 +40,6 @@ const validateContextMessagePayload = (payload: ChatRequestBodyPayload): Context
   }
 
   return payload as ContextMessagePayload;
-};
-
-const validateContextMessageAttachments = async ({
-  attachments,
-  attachmentsService,
-  request,
-}: {
-  attachments: AttachmentInput[];
-  attachmentsService: AttachmentServiceStart;
-  request: KibanaRequest;
-}): Promise<AttachmentInput[]> => {
-  const validated: AttachmentInput[] = [];
-
-  for (const input of attachments) {
-    const result = await attachmentsService.validate(input, request);
-
-    if (!result.valid) {
-      throw createBadRequestError(`Attachment validation failed: ${result.error}`);
-    }
-
-    const attachment = result.attachment as Attachment;
-    validated.push({ ...input, id: attachment.id ?? uuidv4(), data: attachment.data });
-  }
-
-  return validated;
 };
 
 /** Events-native chat API */
@@ -121,17 +93,21 @@ export function registerChatApiRoutes({
               getInternalServices();
             const client = await conversationsService.getScopedClient({ request });
 
-            const attachments = await validateContextMessageAttachments({
-              attachments: contextMessagePayload.attachments ?? [],
-              attachmentsService,
-              request,
-            });
+            let attachments: AttachmentInput[] | undefined;
+            try {
+              attachments = await attachmentsService.validateAttachments(
+                contextMessagePayload.attachments ?? [],
+                request
+              );
+            } catch (error) {
+              throw createBadRequestError(error instanceof Error ? error.message : String(error));
+            }
 
             const author = await conversationsService.getConversationRoundAuthor({ request });
             const body = await persistContextMessage({
               conversationId: contextMessagePayload.conversation_id,
               message: contextMessagePayload.input ?? '',
-              attachments,
+              attachments: attachments ?? [],
               conversationClient: client,
               getTypeDefinition: attachmentsService.getTypeDefinition,
               author,

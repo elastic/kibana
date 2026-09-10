@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceStart } from '@kbn/core/server';
+import type { SavedObjectsServiceStart, KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -14,7 +14,11 @@ import {
   type AttachmentTypeRegistry,
 } from './attachment_type_registry';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
-import { validateAttachment } from './validate_attachment';
+import {
+  toAttachmentInput,
+  validateAttachment,
+  validateAttachments as validateAttachmentList,
+} from './validate_attachment';
 
 export interface AttachmentServiceStartDeps {
   spaces?: SpacesPluginStart;
@@ -52,18 +56,28 @@ export class AttachmentServiceImpl implements AttachmentService {
   }
 
   start(deps: AttachmentServiceStartDeps): AttachmentServiceStart {
+    const getResolveContext = (request: KibanaRequest) => ({
+      request,
+      spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
+      savedObjectsClient: deps.savedObjects.getScopedClient(request),
+    });
+
     return {
       validate: (attachment, request) => {
-        const resolveContext = {
-          request,
-          spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
-          savedObjectsClient: deps.savedObjects.getScopedClient(request),
-        };
         return validateAttachment({
           attachment,
           registry: this.attachmentTypeRegistry,
-          resolveContext,
+          resolveContext: getResolveContext(request),
         });
+      },
+      validateAttachments: async (attachments, request) => {
+        const validatedAttachments = await validateAttachmentList({
+          attachments,
+          registry: this.attachmentTypeRegistry,
+          resolveContext: getResolveContext(request),
+        });
+
+        return validatedAttachments?.map(toAttachmentInput);
       },
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);

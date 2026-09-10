@@ -7,7 +7,7 @@
 
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createResolveContextMock } from '../../test_utils';
-import { validateAttachment } from './validate_attachment';
+import { validateAttachment, validateAttachments } from './validate_attachment';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
 const createRegistry = (definition: {
@@ -109,5 +109,35 @@ describe('validateAttachment', () => {
           'Error during attachment validation: Either data or origin must be provided for an attachment',
       });
     });
+  });
+});
+
+describe('validateAttachments', () => {
+  const resolveContext = createResolveContextMock();
+
+  it('validates each attachment and returns validated attachment shape', async () => {
+    const registry = createRegistry({
+      validate: async (input) => ({ valid: true, data: input }),
+    });
+
+    await expect(
+      validateAttachments({
+        attachments: [
+          {
+            type: 'text',
+            data: { body: 'context' },
+            group_id: 'group-1',
+          },
+        ],
+        registry,
+        resolveContext,
+      })
+    ).resolves.toEqual([
+      expect.objectContaining({
+        type: 'text',
+        data: { body: 'context' },
+        groupId: 'group-1',
+      }),
+    ]);
   });
 });

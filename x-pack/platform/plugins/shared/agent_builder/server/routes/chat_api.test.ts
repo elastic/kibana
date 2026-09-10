@@ -239,10 +239,7 @@ describe('context message acknowledgements', () => {
       },
       attachments: {
         getTypeDefinition: jest.fn(),
-        validate: jest.fn().mockResolvedValue({
-          valid: true,
-          attachment: { id: 'attachment-1', type: 'text', data: { text: 'context' } },
-        }),
+        validateAttachments: jest.fn().mockImplementation(async (attachments) => attachments),
       },
       execution: { executeAgent },
       callbackDeliveryService: { validateCallbackUrl },
@@ -271,6 +268,7 @@ describe('context message acknowledgements', () => {
       response
     );
     expect(result.status).toBe(200);
+    expect(services.attachments.validateAttachments).toHaveBeenCalledWith([], expect.any(Object));
     expect(appendContextMessage).toHaveBeenCalledTimes(1);
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
@@ -319,6 +317,49 @@ describe('context message acknowledgements', () => {
 
     expect(result.status).toBe(400);
     expect(getInternalServices).not.toHaveBeenCalled();
+  });
+
+  it('returns a bad request when context message attachments are invalid', async () => {
+    const { router, handlers } = captureHandlers();
+    const appendContextMessage = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ appendContextMessage }),
+        getConversationRoundAuthor: async () => ({ id: 'user' }),
+      },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validateAttachments: jest
+          .fn()
+          .mockRejectedValue(
+            new Error('Attachment validation failed: Unknown attachment type: bad')
+          ),
+      },
+    };
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: () => services,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          attachments: [{ type: 'bad', data: {} }],
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(appendContextMessage).not.toHaveBeenCalled();
   });
 
   it('requires input or attachments before persisting a context message request', async () => {

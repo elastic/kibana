@@ -57,6 +57,38 @@ export const validateAttachment = async <Type extends string, Data>({
   }
 };
 
+export const validateAttachments = async ({
+  attachments,
+  registry,
+  resolveContext,
+}: {
+  attachments: AttachmentInput[] | undefined;
+  registry: AttachmentTypeRegistry;
+  resolveContext: AttachmentResolveContext;
+}): Promise<Array<Attachment<string, unknown>> | undefined> => {
+  if (!attachments || attachments.length === 0) {
+    return undefined;
+  }
+
+  const validated: Array<Attachment<string, unknown>> = [];
+
+  for (const attachment of attachments) {
+    const result = await validateAttachment({
+      attachment,
+      registry,
+      resolveContext,
+    });
+
+    if (!result.valid) {
+      throw new Error(`Attachment validation failed: ${result.error}`);
+    }
+
+    validated.push(result.attachment);
+  }
+
+  return validated;
+};
+
 const resolveAttachment = async <Type extends string, Data>({
   attachment,
   resolveContext,
@@ -85,3 +117,13 @@ const resolveAttachment = async <Type extends string, Data>({
   }
   return resolved as Data;
 };
+
+export const toAttachmentInput = (attachment: Attachment<string, unknown>): AttachmentInput => ({
+  id: attachment.id,
+  type: attachment.type,
+  data: attachment.data,
+  ...(attachment.description !== undefined ? { description: attachment.description } : {}),
+  ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
+  ...(attachment.origin !== undefined ? { origin: attachment.origin } : {}),
+  ...(attachment.groupId !== undefined ? { group_id: attachment.groupId } : {}),
+});
