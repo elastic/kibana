@@ -102,7 +102,12 @@ export class SystemFlyoutService {
       this.activeFlyouts.delete(flyoutId);
     });
 
+    // Idempotent: the flyout template composes this into the element's own `onClose`, so a
+    // content handler that forwards the prop reaches it twice. `options.onClose` must fire once.
     const onCloseFlyout = () => {
+      if (flyoutRef.isClosed) {
+        return;
+      }
       onClose?.(flyoutRef);
       flyoutRef.close();
     };
@@ -222,8 +227,10 @@ export class SystemFlyoutService {
             onClose,
           });
 
+        // `onClose` is deliberately absent: the template keeps it a required element prop, fed
+        // by the `onClose` handed to `Content`, and composes `close` in behind it.
         const managed: FlyoutTemplateManaged = {
-          props: { ...templateProps, id: flyoutElementId, onClose: onCloseFlyout },
+          props: { ...templateProps, id: flyoutElementId },
           close: onCloseFlyout,
         };
 
@@ -236,7 +243,7 @@ export class SystemFlyoutService {
           >
             <FlyoutTemplateManagedProvider value={managed}>
               <FlyoutMountGuard onError={onCloseFlyout}>
-                <Content />
+                <Content onClose={onCloseFlyout} />
               </FlyoutMountGuard>
             </FlyoutTemplateManagedProvider>
           </KibanaRenderContextProvider>,

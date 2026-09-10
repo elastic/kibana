@@ -12,14 +12,29 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
 import { FlyoutTemplateManagedProvider, useFlyoutClose } from './context';
 import type { FlyoutTemplateManaged } from './context';
+import type { FlyoutTemplateProps } from './types';
 
 const noop = () => {};
 
 const managed = (overrides: Partial<FlyoutTemplateManaged> = {}): FlyoutTemplateManaged => ({
-  props: { session: 'never', onClose: noop, 'data-test-subj': 'managedFlyout' },
+  props: { session: 'never', 'data-test-subj': 'managedFlyout' },
   close: noop,
   ...overrides,
 });
+
+/** Managed content, written the way flyout authors do: `onClose` arrives as a prop. */
+const Content = ({
+  onClose = noop,
+  extraProps = {},
+}: {
+  onClose?: FlyoutTemplateProps['onClose'];
+  extraProps?: Partial<FlyoutTemplateProps>;
+}) => (
+  <FlyoutTemplate onClose={onClose} {...extraProps}>
+    <FlyoutTemplate.Header title="Managed" />
+    <FlyoutTemplate.Body>body content</FlyoutTemplate.Body>
+  </FlyoutTemplate>
+);
 
 const renderManaged = (value: FlyoutTemplateManaged, children: React.ReactNode) =>
   render(<FlyoutTemplateManagedProvider value={value}>{children}</FlyoutTemplateManagedProvider>);
@@ -30,13 +45,6 @@ describe('a managed FlyoutTemplate', () => {
   });
 
   it('renders zones a content component declares', () => {
-    const Content = () => (
-      <FlyoutTemplate>
-        <FlyoutTemplate.Header title="Managed" />
-        <FlyoutTemplate.Body>body content</FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
     renderManaged(managed(), <Content />);
 
     expect(screen.getByTestId('managedFlyoutHeader')).toBeInTheDocument();
@@ -46,13 +54,7 @@ describe('a managed FlyoutTemplate', () => {
   it('takes root props from the opener rather than the element', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
 
-    renderManaged(
-      managed(),
-      <FlyoutTemplate data-test-subj="ignoredSubj" size="l">
-        <FlyoutTemplate.Header title="Managed" />
-        <FlyoutTemplate.Body>body content</FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
+    renderManaged(managed(), <Content extraProps={{ 'data-test-subj': 'ignoredSubj', size: 'l' }} />);
 
     expect(screen.getByTestId('managedFlyoutHeader')).toBeInTheDocument();
     expect(screen.queryByTestId('ignoredSubjHeader')).not.toBeInTheDocument();
@@ -64,13 +66,7 @@ describe('a managed FlyoutTemplate', () => {
   it('does not warn when the element carries only children', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
 
-    renderManaged(
-      managed(),
-      <FlyoutTemplate>
-        <FlyoutTemplate.Header title="Managed" />
-        <FlyoutTemplate.Body>body content</FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
+    renderManaged(managed(), <Content />);
 
     expect(warn).not.toHaveBeenCalled();
   });
@@ -83,9 +79,8 @@ describe('a managed FlyoutTemplate', () => {
       </button>
     );
 
-    renderManaged(
-      managed({ close }),
-      <FlyoutTemplate>
+    const WithCloseButton = () => (
+      <FlyoutTemplate onClose={noop}>
         <FlyoutTemplate.Header title="Managed" />
         <FlyoutTemplate.Body>
           <CloseButton />
@@ -93,7 +88,52 @@ describe('a managed FlyoutTemplate', () => {
       </FlyoutTemplate>
     );
 
+    renderManaged(managed({ close }), <WithCloseButton />);
+
     fireEvent.click(screen.getByRole('button', { name: 'dismiss' }));
+
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('tears down even when the element handler swallows the close', () => {
+    const close = jest.fn();
+    renderManaged(managed({ close }), <Content onClose={() => {}} />);
+
+    fireEvent.click(screen.getByLabelText('Close this dialog'));
+
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs the element handler before tearing down, and tears down once', () => {
+    const order: string[] = [];
+    const close = jest.fn(() => order.push('close'));
+    renderManaged(
+      managed({ close }),
+      <Content onClose={() => order.push('element')} />
+    );
+
+    fireEvent.click(screen.getByLabelText('Close this dialog'));
+
+    expect(order).toEqual(['element', 'close']);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('tears down even when the element handler throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(noop);
+    const swallow = (event: ErrorEvent) => event.preventDefault();
+    window.addEventListener('error', swallow);
+    const close = jest.fn();
+    renderManaged(
+      managed({ close }),
+      <Content
+        onClose={() => {
+          throw new Error('handler blew up');
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText('Close this dialog'));
+    window.removeEventListener('error', swallow);
 
     expect(close).toHaveBeenCalledTimes(1);
   });

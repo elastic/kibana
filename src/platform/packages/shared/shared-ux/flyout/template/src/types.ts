@@ -155,6 +155,7 @@ export interface FlyoutFooterProps {
 /** Props for the root `FlyoutTemplate` component. */
 export type FlyoutTemplateProps = Pick<
   EuiFlyoutProps,
+  | 'onClose'
   | 'size'
   | 'minWidth'
   | 'type'
@@ -173,8 +174,6 @@ export type FlyoutTemplateProps = Pick<
   | 'focusTrapProps'
   | 'closeButtonProps'
 > & {
-  /** Dismiss handler. Omit only when a managing opener supplies one. */
-  onClose?: EuiFlyoutProps['onClose'];
   'aria-label'?: EuiFlyoutProps['aria-label'];
   'aria-labelledby'?: EuiFlyoutProps['aria-labelledby'];
   'data-test-subj'?: string;

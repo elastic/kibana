@@ -121,11 +121,11 @@ Footer action buttons are not derived; their `data-test-subj` passes through to 
 `core.overlays.openFlyoutTemplate` takes the template's root props and a component that renders `FlyoutTemplate` with its zones. Because the component renders the template itself, the zones are literal children of it and every rule documented above still applies.
 
 ```tsx
-const AlertDetails = () => {
+const AlertDetails = ({ onClose }) => {
   const alert = useAlert();
 
   return (
-    <FlyoutTemplate>
+    <FlyoutTemplate onClose={onClose}>
       <FlyoutTemplate.Header title="Alert details" />
       <FlyoutTemplate.Body>
         <FlyoutTemplate.Body.Section title="Summary">
@@ -139,6 +139,8 @@ const AlertDetails = () => {
 core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
 ```
 
-The component is a real React boundary, so it may use hooks and re-render. The `FlyoutTemplate` it renders takes no root props — those come from the options argument, and props passed here are ignored and warn in development. `useFlyoutClose` dismisses the flyout from any depth inside the content. See `@kbn/core-overlays-browser` for the full signature.
+The component is a real React boundary, so it may use hooks and re-render. `onClose` is the only root prop it sets — it stays required so a `FlyoutTemplate` can never be rendered without a way to dismiss it — and it arrives as a prop on the content component. Every other root prop comes from the options argument; props passed here are ignored and warn in development. See `@kbn/core-overlays-browser` for the full signature.
+
+Wrapping `onClose` is fine; declining to call it does not keep the flyout open. EUI's flyout manager routes the close button, history navigation, and cascade closes through that prop and has already removed the flyout by the time a handler runs, so the template tears down regardless. `useFlyoutClose` is available for content nested too deeply to receive the prop.
 
 **A part written inside another component does not render.** Parts are identified by parsing direct JSX children, so one returned from inside a component sits behind a boundary the parser cannot see through and silently renders nothing. Keep parts in the JSX of the zone that parses them, and put your own components inside those parts.

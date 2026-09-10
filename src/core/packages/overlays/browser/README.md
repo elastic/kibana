@@ -79,12 +79,11 @@ Opens a system flyout rendered as a `FlyoutTemplate` — the sanctioned way to b
 The component is a real React boundary: it may use hooks, load its own data, and re-render as that data arrives.
 
 ```tsx
-const MyFlyout = () => {
+const MyFlyout = ({ onClose }) => {
   const details = useDetails();
-  const close = useFlyoutClose();
 
   return (
-    <FlyoutTemplate>
+    <FlyoutTemplate onClose={onClose}>
       <FlyoutTemplate.Header title="My Flyout" />
       <FlyoutTemplate.Body>
         <FlyoutTemplate.Body.Section title="Details">
@@ -92,7 +91,7 @@ const MyFlyout = () => {
         </FlyoutTemplate.Body.Section>
       </FlyoutTemplate.Body>
       <FlyoutTemplate.Footer>
-        <FlyoutTemplate.Footer.SecondaryAction label="Cancel" onClick={close} />
+        <FlyoutTemplate.Footer.SecondaryAction label="Cancel" onClick={onClose} />
         <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={save} />
       </FlyoutTemplate.Footer>
     </FlyoutTemplate>
@@ -108,13 +107,17 @@ const flyoutRef = overlays.openFlyoutTemplate(
 flyoutRef.close();
 ```
 
-**The `FlyoutTemplate` takes no root props here.** Every root prop comes from the options argument, which is also the only place that can vary them per call. Props passed to a managed `FlyoutTemplate` are ignored and warn in development. A flyout whose root props depend on its own data has to own its lifecycle and render `FlyoutTemplate` directly in a React tree.
+**`onClose` is the only root prop the content sets**, and it arrives as a prop on the content component. It stays required so the declarative contract cannot be satisfied by a flyout nobody can dismiss. Every other root prop comes from the options argument, which is also the only place that can vary them per call — props passed to a managed `FlyoutTemplate` are ignored and warn in development. A flyout whose root props depend on its own data has to own its lifecycle and render `FlyoutTemplate` directly in a React tree.
+
+Wrapping `onClose` to add behaviour is fine, but **declining to call it does not keep the flyout open.** The flyout manager routes the close button, history navigation, and cascade closes through that prop, and has already removed the flyout by the time any handler runs, so the template tears down either way. This also differs from `openFlyout`, where `options.onClose` replaces the close and a handler that skips `flyout.close()` does keep the flyout open. A consumer migrating a guard of that shape needs to know it cannot work here.
+
+`useFlyoutClose` exists for content nested too deeply to receive the `onClose` prop — a button inside a `Body.Section`, say — and is not needed at the top level.
 
 Content with nothing to load is the same shape, just without the hooks. The second argument is always a component, so nothing inside it is evaluated until the flyout mounts.
 
 ```tsx
-const StaticFlyout = () => (
-  <FlyoutTemplate>
+const StaticFlyout = ({ onClose }) => (
+  <FlyoutTemplate onClose={onClose}>
     <FlyoutTemplate.Header title="Static" />
     <FlyoutTemplate.Body>Nothing to load.</FlyoutTemplate.Body>
   </FlyoutTemplate>

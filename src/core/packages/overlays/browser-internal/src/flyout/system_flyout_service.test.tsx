@@ -383,9 +383,9 @@ describe('SystemFlyoutService', () => {
     /** Minimal content component: a `FlyoutTemplate` with header and body zones. */
     const content =
       (title: string, body: React.ReactNode = 'content') =>
-      () =>
+      ({ onClose }: { onClose: () => void }) =>
         (
-          <FlyoutTemplate>
+          <FlyoutTemplate onClose={onClose}>
             <FlyoutTemplate.Header title={title} />
             <FlyoutTemplate.Body>{body}</FlyoutTemplate.Body>
           </FlyoutTemplate>
@@ -407,10 +407,10 @@ describe('SystemFlyoutService', () => {
     });
 
     it('runs content hooks inside React, so state updates re-render the zones', () => {
-      const Content = () => {
+      const Content = ({ onClose }: { onClose: () => void }) => {
         const [count, setCount] = React.useState(0);
         return (
-          <FlyoutTemplate>
+          <FlyoutTemplate onClose={onClose}>
             <FlyoutTemplate.Header title={`Count ${count}`} />
             <FlyoutTemplate.Body>
               <button type="button" onClick={() => setCount(count + 1)}>
@@ -451,15 +451,74 @@ describe('SystemFlyoutService', () => {
       expect((ref as SystemFlyoutRef).isClosed).toBe(true);
     });
 
+    it('tears down even when the content swallows the onClose it was given', () => {
+      // EUI has already dropped the flyout by the time any handler runs, so a wrapper that
+      // never calls through must not be able to leave it rendered and untracked.
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => (
+        <FlyoutTemplate onClose={() => {}}>
+          <FlyoutTemplate.Header title="Swallows close" />
+          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      ));
+
+      const { getByLabelText } = render(mockReactDomRender.mock.calls[0][0]);
+      fireEvent.click(getByLabelText('Close this dialog'));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('fires onClose from options once when the content passes the prop through', () => {
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate(
+        { session: 'never', onClose },
+        content('Passes through')
+      );
+
+      const { getByLabelText } = render(mockReactDomRender.mock.calls[0][0]);
+      fireEvent.click(getByLabelText('Close this dialog'));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('tears down even when the content onClose handler throws', () => {
+      silenceReactErrors();
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => (
+        <FlyoutTemplate
+          onClose={() => {
+            throw new Error('handler blew up');
+          }}
+        >
+          <FlyoutTemplate.Header title="Throws on close" />
+          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      ));
+
+      // React re-throws a handler error through a synthetic event, which jsdom would surface
+      // as an unhandled error and fail the run. The throw is not what is under test here; the
+      // `finally` having run anyway is.
+      const swallow = (event: ErrorEvent) => event.preventDefault();
+      window.addEventListener('error', swallow);
+      const { getByLabelText } = render(mockReactDomRender.mock.calls[0][0]);
+      fireEvent.click(getByLabelText('Close this dialog'));
+      window.removeEventListener('error', swallow);
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
     it('invokes onClose from options before closing the ref', () => {
       const onClose = jest.fn();
       const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, content('Closeable'));
 
       expect((ref as SystemFlyoutRef).isClosed).toBe(false);
 
-      managedValue().props.onClose();
+      managedValue().close();
 
-      expect(onClose).toHaveBeenCalledWith(ref);
+      expect(onClose).toHaveBeenCalledTimes(1);
       expect((ref as SystemFlyoutRef).isClosed).toBe(true);
     });
 
@@ -498,8 +557,8 @@ describe('SystemFlyoutService', () => {
 
     it('applies the resolved props even when the content passes its own to FlyoutTemplate', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      systemFlyouts.openTemplate({ session: 'never', size: 'l' }, () => (
-        <FlyoutTemplate size="s">
+      systemFlyouts.openTemplate({ session: 'never', size: 'l' }, ({ onClose }) => (
+        <FlyoutTemplate onClose={onClose} size="s">
           <FlyoutTemplate.Header title="Overridden" />
           <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
         </FlyoutTemplate>
@@ -530,7 +589,7 @@ describe('SystemFlyoutService', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect((ref as SystemFlyoutRef).isClosed).toBe(true);
-      expect(onClose).toHaveBeenCalledWith(ref);
+      expect(onClose).toHaveBeenCalledTimes(1);
       expect(error).toHaveBeenCalled();
     });
 

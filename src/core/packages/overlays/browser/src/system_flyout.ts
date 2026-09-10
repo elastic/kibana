@@ -62,24 +62,47 @@ export interface OverlaySystemFlyoutStart {
  */
 export type OverlayFlyoutTemplateOpenOptions = Omit<FlyoutTemplateProps, 'children' | 'onClose'> & {
   /**
-   * Called when the flyout is dismissed, before the returned {@link OverlayRef} is closed.
-   * The overlay closes itself afterwards either way.
+   * Called when the flyout is dismissed, just before the returned {@link OverlayRef} is
+   * closed. Purely a notification: the flyout manager has already dropped the flyout by the
+   * time this runs, so returning without doing anything does not keep it open.
+   *
+   * Note this differs from `openFlyout`, where `onClose` replaces the close and a handler
+   * that declines to call `flyout.close()` keeps the flyout open. That is not achievable for
+   * a managed flyout; supporting it needs an upstream hook that runs before the manager
+   * mutates. See <backlog issue> for the veto use case.
    */
-  onClose?: (flyout: OverlayRef) => void;
+  onClose?: () => void;
 };
+
+/**
+ * Props handed to the content of a `FlyoutTemplate`-based flyout.
+ *
+ * @public
+ */
+export interface OverlayFlyoutTemplateContentProps {
+  /**
+   * Dismisses the flyout: runs `options.onClose`, then closes the returned {@link OverlayRef}.
+   *
+   * Pass it to the `FlyoutTemplate` element's `onClose`. Wrapping it to add behaviour is fine;
+   * declining to call it does not keep the flyout open, because the flyout manager routes
+   * history navigation and cascade closes through that same prop and has already dropped the
+   * flyout by then. The template tears down either way.
+   */
+  onClose: () => void;
+}
 
 /**
  * A component rendering a `FlyoutTemplate` and its zones.
  *
  * It is a real React boundary, so it may use hooks, load its own data, and re-render as that
  * data arrives, and nothing inside it is evaluated until the flyout mounts. The
- * `FlyoutTemplate` it renders takes no root props — those come from
- * {@link OverlayFlyoutTemplateOpenOptions} — and `useFlyoutClose` dismisses the flyout from
- * any depth inside it.
+ * `FlyoutTemplate` it renders takes no root props other than `onClose` — the rest come from
+ * {@link OverlayFlyoutTemplateOpenOptions}.
  *
  * @public
  */
-export type OverlayFlyoutTemplateContent = React.ComponentType;
+export type OverlayFlyoutTemplateContent =
+  React.ComponentType<OverlayFlyoutTemplateContentProps>;
 
 /**
  * APIs to open and manage `FlyoutTemplate`-based fly-out dialogs.

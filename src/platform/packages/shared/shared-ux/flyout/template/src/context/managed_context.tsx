@@ -15,12 +15,13 @@ import type { FlyoutTemplateProps } from '../types';
  * Supplied by an opener that owns the flyout's lifecycle.
  *
  * Under it, `FlyoutTemplate` takes every root prop from `props` and ignores its own, so the
- * `id`, `session`, and `onClose` the opener's bookkeeping matches on cannot be contradicted
- * from inside the subtree.
+ * `id` and `session` the opener's bookkeeping matches on cannot be contradicted from inside
+ * the subtree. `onClose` stays the element's own, sourced from `useFlyoutClose`, so the
+ * declarative contract can keep requiring it.
  */
 export interface FlyoutTemplateManaged {
-  /** Fully resolved root props; `children` still comes from the `FlyoutTemplate` element. */
-  props: Omit<FlyoutTemplateProps, 'children'>;
+  /** Resolved root props; `children` and `onClose` still come from the `FlyoutTemplate` element. */
+  props: Omit<FlyoutTemplateProps, 'children' | 'onClose'>;
   /** Dismisses the flyout exactly as the close button does. */
   close: () => void;
 }

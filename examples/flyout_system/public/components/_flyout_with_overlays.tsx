@@ -171,8 +171,8 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
           returnFocusRef.current?.focus();
         },
       },
-      () => (
-        <FlyoutTemplate>
+      ({ onClose }) => (
+        <FlyoutTemplate onClose={onClose}>
           <FlyoutTemplate.Header title={`Child flyout ${label} of ${title}`} collapsed />
           <FlyoutTemplate.Body>
             <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />
@@ -279,8 +279,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           },
           historyKey,
         },
-        () => (
-          <FlyoutTemplate>
+        ({ onClose }) => (
+          <FlyoutTemplate onClose={onClose}>
             <FlyoutTemplate.Header
               title={title}
               description={

@@ -15,6 +15,7 @@ export type {
   OverlayFlyoutTemplateStart,
   OverlayFlyoutTemplateOpenOptions,
   OverlayFlyoutTemplateContent,
+  OverlayFlyoutTemplateContentProps,
 } from './src/system_flyout';
 export type {
   OverlayModalStart,
