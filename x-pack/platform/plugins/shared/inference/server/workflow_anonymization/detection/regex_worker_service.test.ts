@@ -94,20 +94,47 @@ describe('PiiRegexWorkerService', () => {
     ).rejects.toThrow('timed out');
   });
 
-  it('returns [] and logs when failureMode is allow_unsafe', async () => {
-    service = new PiiRegexWorkerService(createTestConfig(), logger);
-    const badPayload: PiiRegexWorkerTaskPayload = {
-      rules: [{ entityClass: 'BAD', pattern: '(unclosed' }],
-      records: [{ content: 'test' }],
-    };
+  describe('allow_unsafe failure mode', () => {
+    it('skips the invalid rule and still returns matches from valid rules', async () => {
+      service = new PiiRegexWorkerService(createTestConfig(), logger);
+      const results = await service.run(
+        {
+          rules: [
+            { entityClass: 'BAD', pattern: '(unclosed' },
+            { entityClass: 'IP', pattern: '\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b' },
+          ],
+          records: [{ content: 'connect to 10.0.0.1' }],
+        },
+        'allow_unsafe'
+      );
 
-    const results = await service.run(badPayload, 'allow_unsafe');
+      // The bad rule is skipped; the good IP rule still fires
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({ entityClass: 'IP', matchValue: '10.0.0.1' });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'PII regex rule skipped: pattern could not be compiled',
+        expect.objectContaining({ entityClass: 'BAD' })
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
 
-    expect(results).toEqual([]);
-    expect(logger.error).toHaveBeenCalledWith(
-      'PII regex detection failed; proceeding without anonymization',
-      expect.objectContaining({ error: expect.anything() })
-    );
+    it('returns [] when every rule is invalid', async () => {
+      service = new PiiRegexWorkerService(createTestConfig(), logger);
+      const results = await service.run(
+        {
+          rules: [{ entityClass: 'BAD', pattern: '(unclosed' }],
+          records: [{ content: 'test' }],
+        },
+        'allow_unsafe'
+      );
+
+      expect(results).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'PII regex rule skipped: pattern could not be compiled',
+        expect.objectContaining({ entityClass: 'BAD' })
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
   });
 
   it('throws when failureMode is block (default)', async () => {

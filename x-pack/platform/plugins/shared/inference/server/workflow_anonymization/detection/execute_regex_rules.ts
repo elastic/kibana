@@ -12,7 +12,7 @@ type CompiledRule =
   | { engine: 're2'; pattern: ReturnType<typeof RE2JS.compile> }
   | { engine: 'native'; pattern: RegExp };
 
-function compileRule(rawPattern: string, re2Only = false): CompiledRule {
+export function compileRule(rawPattern: string, re2Only = false): CompiledRule {
   try {
     return { engine: 're2', pattern: RE2JS.compile(rawPattern) };
   } catch (err) {

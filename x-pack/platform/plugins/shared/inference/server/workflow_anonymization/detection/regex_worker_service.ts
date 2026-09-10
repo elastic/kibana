@@ -9,7 +9,7 @@ import Piscina from 'piscina';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowAnonymizationWorkerConfig } from '../../config';
 import type { PiiRegexWorkerTaskPayload, PiiRegexMatch, PiiDetectionFailureMode } from './types';
-import { executeRegexRules } from './execute_regex_rules';
+import { compileRule, executeRegexRules } from './execute_regex_rules';
 
 function runSync(payload: PiiRegexWorkerTaskPayload): PiiRegexMatch[] {
   // On the sync path there is no timeout to contain catastrophic backtracking, so
@@ -57,21 +57,27 @@ export class PiiRegexWorkerService {
   /**
    * Executes PII regex rules against records.
    *
-   * Throws when a rule has an invalid RE2 pattern and `failureMode` is `'block'`
-   * (the default). With `'allow_unsafe'`, logs and returns no matches for the entire payload.
+   * Throws when a rule has an invalid pattern and `failureMode` is `'block'` (the default).
+   * With `'allow_unsafe'`, invalid rules are logged individually and skipped; the remaining
+   * rules still run and return their matches. Infrastructure failures (timeout, queue
+   * saturation) return no matches for the entire payload regardless of `failureMode`.
    *
    * When the worker pool is disabled, runs synchronously on the main event loop.
    * In that mode only RE2-compilable patterns are accepted; patterns that require
-   * native RegExp (lookahead / lookbehind / backreferences) are rejected to prevent
-   * unbounded backtracking on the event loop.
+   * native RegExp (lookahead / lookbehind / backreferences) are also skipped (or rejected
+   * in `'block'` mode) to prevent unbounded backtracking on the event loop.
    */
   async run(
     payload: PiiRegexWorkerTaskPayload,
     failureMode: PiiDetectionFailureMode = 'block'
   ): Promise<PiiRegexMatch[]> {
+    const re2Only = !this.enabled;
+    const effectivePayload =
+      failureMode === 'allow_unsafe' ? this.filterRules(payload, re2Only) : payload;
+
     try {
       if (!this.enabled) {
-        return runSync(payload);
+        return runSync(effectivePayload);
       }
       if (!this.worker) {
         throw new Error('PII regex worker pool was not initialized');
@@ -81,7 +87,7 @@ export class PiiRegexWorkerService {
       const timer = setTimeout(() => controller.abort(), this.config.taskTimeout.asMilliseconds());
 
       try {
-        return await this.worker.run(payload, { signal: controller.signal });
+        return await this.worker.run(effectivePayload, { signal: controller.signal });
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           throw new Error(
@@ -101,6 +107,8 @@ export class PiiRegexWorkerService {
       }
     } catch (err) {
       if (failureMode === 'allow_unsafe') {
+        // Only infrastructure failures reach here (timeout, saturation, worker crash).
+        // Rule-level errors were already handled by filterRules above.
         this.logger.error('PII regex detection failed; proceeding without anonymization', {
           error: err,
         });
@@ -108,6 +116,25 @@ export class PiiRegexWorkerService {
       }
       throw err;
     }
+  }
+
+  private filterRules(
+    payload: PiiRegexWorkerTaskPayload,
+    re2Only: boolean
+  ): PiiRegexWorkerTaskPayload {
+    const safeRules = payload.rules.filter((rule) => {
+      try {
+        compileRule(rule.pattern, re2Only);
+        return true;
+      } catch (err) {
+        this.logger.warn('PII regex rule skipped: pattern could not be compiled', {
+          entityClass: rule.entityClass,
+          error: err,
+        });
+        return false;
+      }
+    });
+    return { ...payload, rules: safeRules };
   }
 
   async stop(): Promise<void> {
