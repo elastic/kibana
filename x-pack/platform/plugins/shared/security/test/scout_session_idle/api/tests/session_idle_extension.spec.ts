@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import { apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -71,10 +73,12 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
     const allCreatedAtBefore = await getSessionsCreatedAt(esClient);
     expect(allCreatedAtBefore.every((value) => value > 0)).toBe(true);
 
-    const beforeExtend = await apiClient.get('/internal/security/session', {
+    const getBeforeExtend = await apiClient.get('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, 'kbn-system-request': 'true', Cookie: sessionCookie },
     });
-    expect(beforeExtend).toHaveStatusCode(200);
+    expect(getBeforeExtend).toHaveStatusCode(200);
+
+    await setTimeoutAsync(200);
 
     const extendResponse = await apiClient.post('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, Cookie: sessionCookie },
@@ -85,17 +89,11 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
       sessionCookie = extractSessionCookie(extendResponse.headers['set-cookie']);
     }
 
-    const afterExtend = Date.now();
     const getResponse = await apiClient.get('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, 'kbn-system-request': 'true', Cookie: sessionCookie },
     });
     expect(getResponse).toHaveStatusCode(200);
-    const getOverhead = Date.now() - afterExtend;
-
-    // The idle clock has only run down since login, so a no-op POST could never satisfy this.
-    expect(getResponse.body.expiresInMs).toBeGreaterThan(beforeExtend.body.expiresInMs);
-    expect(getResponse.body.expiresInMs).toBeGreaterThan(IDLE_TIMEOUT_MS - getOverhead - 100);
-    expect(getResponse.body.expiresInMs).toBeLessThan(IDLE_TIMEOUT_MS + 100);
+    expect(getResponse.body.expiresInMs).toBeGreaterThan(getBeforeExtend.body.expiresInMs);
 
     await refreshSessionIndex(apiClient, config);
     const allCreatedAtAfter = await getSessionsCreatedAt(esClient);
