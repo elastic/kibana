@@ -187,10 +187,10 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
 
     if (value instanceof z.ZodOptional) {
       isOptional = true;
-      value = value.unwrap();
+      value = value.unwrap() as z.ZodType;
     }
     if (value instanceof z.ZodDefault) {
-      value = value.removeDefault();
+      value = value.unwrap() as z.ZodType;
     }
 
     if (value instanceof z.ZodArray) {
