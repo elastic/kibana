@@ -11,6 +11,7 @@ import type { DatasetConfig } from './types';
 export const incidentsDataset: DatasetConfig = {
   id: INCIDENTS_NAMESPACE,
   description: 'Real-world incident snapshots captured from customer 0 clusters',
+  optIn: true,
   gcs: { bucket: GCS_BUCKET, basePathPrefix: INCIDENTS_GCS_BASE_PATH_PREFIX, runScoped: false },
   replayMode: 'managed-stream',
   kiFeatureExtraction: [

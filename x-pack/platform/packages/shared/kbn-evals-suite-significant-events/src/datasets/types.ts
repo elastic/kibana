@@ -141,6 +141,7 @@ export interface DiscoveryScenario {
 export interface DatasetConfig {
   id: string;
   description: string;
+  optIn?: true;
   gcs: GcsConfig;
   /**
    * How log data is replayed from the snapshot:

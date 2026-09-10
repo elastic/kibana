@@ -6,26 +6,41 @@
  */
 
 import {
-  BANK_OF_ANTHOS_NAMESPACE,
   INCIDENTS_NAMESPACE,
   OTEL_DEMO_NAMESPACE,
   QUARKUS_SUPER_HEROES_NAMESPACE,
 } from '../constants';
-import { hasExplicitDatasetSelection, resolveRequestedDatasetIds } from '.';
+import {
+  getAllDatasetIds,
+  getDatasetById,
+  getDefaultDatasetIds,
+  hasExplicitDatasetSelection,
+  resolveRequestedDatasetIds,
+} from '.';
 
-const DEFAULT_DATASET_IDS = [
-  OTEL_DEMO_NAMESPACE,
-  BANK_OF_ANTHOS_NAMESPACE,
-  QUARKUS_SUPER_HEROES_NAMESPACE,
-];
-const ALL_DATASET_IDS = [...DEFAULT_DATASET_IDS, INCIDENTS_NAMESPACE];
+const getOptInDatasetIds = (): string[] =>
+  getAllDatasetIds().filter((id) => getDatasetById(id)?.optIn);
+
+describe('dataset registry', () => {
+  it('marks incidents as the only opt-in dataset', () => {
+    expect(getOptInDatasetIds()).toEqual([INCIDENTS_NAMESPACE]);
+  });
+
+  it('derives the defaults from the registry by dropping opt-in datasets', () => {
+    expect(getDefaultDatasetIds()).not.toContain(INCIDENTS_NAMESPACE);
+    expect(getDefaultDatasetIds()).toEqual(
+      getAllDatasetIds().filter((id) => !getDatasetById(id)?.optIn)
+    );
+  });
+});
 
 describe('dataset selection', () => {
   it.each([undefined, '', '   '])(
     'selects the default datasets when the selection is %j',
     (selectedDatasets) => {
       expect(hasExplicitDatasetSelection(selectedDatasets)).toBe(false);
-      expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual(DEFAULT_DATASET_IDS);
+      expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual(getDefaultDatasetIds());
+      expect(resolveRequestedDatasetIds(selectedDatasets)).not.toContain(INCIDENTS_NAMESPACE);
     }
   );
 
@@ -35,10 +50,11 @@ describe('dataset selection', () => {
   });
 
   it.each(['all', `${INCIDENTS_NAMESPACE},all,${OTEL_DEMO_NAMESPACE}`])(
-    'selects every registered dataset when the selection is %j',
+    'selects every registered dataset, opt-in datasets included, when the selection is %j',
     (selectedDatasets) => {
       expect(hasExplicitDatasetSelection(selectedDatasets)).toBe(true);
-      expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual(ALL_DATASET_IDS);
+      expect(resolveRequestedDatasetIds(selectedDatasets)).toEqual(getAllDatasetIds());
+      expect(resolveRequestedDatasetIds(selectedDatasets)).toContain(INCIDENTS_NAMESPACE);
     }
   );
 
@@ -55,7 +71,7 @@ describe('dataset selection', () => {
 
   it('reports unknown and available dataset ids', () => {
     expect(() => resolveRequestedDatasetIds('missing-dataset')).toThrow(
-      `Unknown dataset(s): missing-dataset. Available: ${ALL_DATASET_IDS.join(', ')}.`
+      `Unknown dataset(s): missing-dataset. Available: ${getAllDatasetIds().join(', ')}.`
     );
   });
 });
