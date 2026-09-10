@@ -161,7 +161,7 @@ describe('executeRegexRules', () => {
     });
   });
 
-  describe('skips empty and non-string field values', () => {
+  describe('skips empty string fields', () => {
     it('ignores empty string fields', () => {
       const rules = [r('IP', '\\b\\d+\\.\\d+\\.\\d+\\.\\d+\\b')];
       const records = [{ content: '', other: '10.0.0.1' }];
