@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -20,7 +21,6 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { persistContextMessage } from '../services/execution/utils/conversations';
 import { chatPayloadSchema, contextMessagePayloadSchema, conversePayloadSchema } from './chat';
 
 type ContextMessagePayload = ChatRequestBodyPayload & {
@@ -104,11 +104,12 @@ export function registerChatApiRoutes({
             }
 
             const author = await conversationsService.getConversationRoundAuthor({ request });
-            const body = await persistContextMessage({
-              conversationId: contextMessagePayload.conversation_id,
+            const body = await client.appendContextMessage({
+              id: contextMessagePayload.conversation_id,
+              messageId: uuidv4(),
+              createdAt: new Date(),
               message: contextMessagePayload.input ?? '',
               attachments: attachments ?? [],
-              conversationClient: client,
               getTypeDefinition: attachmentsService.getTypeDefinition,
               author,
             });

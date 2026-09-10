@@ -27,8 +27,6 @@ import {
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ConversationClient } from '../../conversation';
 import {
   roundToEvents,
@@ -39,7 +37,6 @@ import {
   parseExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
-import type { ConversationWithPermissions } from '../../../../common/http_api/conversations';
 
 /**
  * Persist a new conversation and emit the corresponding event
@@ -399,38 +396,6 @@ export type ConversationWithOperation = Conversation & { operation: Conversation
 
 export const isNewConversation = (conversation: ConversationWithOperation): boolean => {
   return conversation.operation === 'CREATE';
-};
-
-export interface PersistContextMessageParams {
-  conversationId: string;
-  message: string;
-  attachments: AttachmentInput[];
-  conversationClient: ConversationClient;
-  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
-  author?: ConversationRoundAuthor;
-  messageId?: string;
-  createdAt?: Date;
-}
-
-export const persistContextMessage = async ({
-  conversationId,
-  message,
-  attachments,
-  conversationClient,
-  getTypeDefinition,
-  author,
-  messageId = uuidv4(),
-  createdAt = new Date(),
-}: PersistContextMessageParams): Promise<ConversationWithPermissions> => {
-  return await conversationClient.appendContextMessage({
-    id: conversationId,
-    messageId,
-    createdAt,
-    message,
-    attachments,
-    getTypeDefinition,
-    author,
-  });
 };
 
 export const getConversation = async ({
