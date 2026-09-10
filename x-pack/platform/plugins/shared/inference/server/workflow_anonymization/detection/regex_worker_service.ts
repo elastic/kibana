@@ -88,7 +88,9 @@ export class PiiRegexWorkerService {
             `PII regex detection task timed out after ${this.config.taskTimeout.asMilliseconds()}ms`
           );
         }
-        if (err instanceof Error && err.message === 'Task queue is at capacity') {
+        // Piscina does not expose a stable error code; match on the message
+        // (verified against piscina@5.3.1 dist/errors.js TaskQueueAtLimit).
+        if (err instanceof Error && err.message === 'Task queue is at limit') {
           throw new Error(
             `PII regex detection rejected: worker queue at capacity (maxQueue=${this.config.maxQueue})`
           );
