@@ -115,7 +115,17 @@ function useSurroundingLogs(
 
       try {
         const filters = instanceFilter ? [instanceFilter] : [];
-        const fetchBatch = async (rangeClause: Record<string, unknown>, sortDir: 'asc' | 'desc') => {
+        // Use the anchor's ES sort values as the search_after cursor. Discover fetches records
+        // with [@timestamp, _shard_doc] sort, so sort[0] is the timestamp and sort[1] is the
+        // _shard_doc tiebreaker. Falling back to [anchorTime, 0] is safe: worst case it
+        // slightly mispositions at exact timestamp ties, no worse than a plain range query.
+        const anchorSortValues = anchor.raw.sort as [string | number, string | number] | undefined;
+        const searchAfter: [string | number, string | number] = [
+          anchorSortValues?.[0] ?? (anchorTime as string | number),
+          anchorSortValues?.[1] ?? 0,
+        ];
+
+        const fetchBatch = async (sortDir: 'asc' | 'desc') => {
           const searchSource = services.data.search.searchSource.createEmpty();
           searchSource
             .setField('index', dataView)
@@ -124,13 +134,16 @@ function useSurroundingLogs(
             .setField('query', {
               query: {
                 bool: {
-                  must: { range: { [timeField]: rangeClause } },
                   must_not: { ids: { values: [anchor.raw._id!] } },
                 },
               },
               language: 'lucene',
             })
-            .setField('sort', [{ [timeField]: sortDir }] as EsQuerySortValue[]);
+            .setField('sort', [
+              { [timeField]: sortDir },
+              { _shard_doc: sortDir },
+            ] as EsQuerySortValue[])
+            .setField('searchAfter', searchAfter);
 
           const { rawResponse } = await lastValueFrom(
             searchSource.fetch$({ disableWarningToasts: true })
@@ -143,8 +156,8 @@ function useSurroundingLogs(
         };
 
         const [predecessors, successors] = await Promise.all([
-          fetchBatch({ lte: anchorTime, format: 'strict_date_optional_time' }, 'desc'),
-          fetchBatch({ gte: anchorTime, format: 'strict_date_optional_time' }, 'asc'),
+          fetchBatch('desc'),
+          fetchBatch('asc'),
         ]);
 
         if (!cancelled) {
