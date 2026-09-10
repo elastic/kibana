@@ -8,6 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { ColorFormat } from './color';
 import {
   expectReactElementWithNull,
@@ -35,8 +36,8 @@ const expectColoredReactElement = (
 
 describe('Color Format', () => {
   const checkMissingValues = (colorer: ColorFormat) => {
-    expect(colorer.convertToText(null)).toBe('(null)');
-    expect(colorer.convertToText(undefined)).toBe('(null)');
+    expect(colorer.convertToText(null)).toBe(NULL_LABEL);
+    expect(colorer.convertToText(undefined)).toBe(NULL_LABEL);
     expect(colorer.convertToText('')).toBe('(blank)');
     expectReactElementWithNull(colorer.convertToReact(null));
     expectReactElementWithNull(colorer.convertToReact(undefined));

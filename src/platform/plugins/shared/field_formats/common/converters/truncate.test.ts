@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { TruncateFormat } from './truncate';
 import {
   expectReactElementWithNull,
@@ -54,8 +55,8 @@ describe('String TruncateFormat', () => {
   test('missing value', () => {
     const truncate = new TruncateFormat({ fieldLength: 3.2 }, jest.fn());
 
-    expect(truncate.convertToText(null)).toBe('(null)');
-    expect(truncate.convertToText(undefined)).toBe('(null)');
+    expect(truncate.convertToText(null)).toBe(NULL_LABEL);
+    expect(truncate.convertToText(undefined)).toBe(NULL_LABEL);
     expect(truncate.convertToText('')).toBe('(blank)');
     expectReactElementWithNull(truncate.convertToReact(null));
     expectReactElementWithNull(truncate.convertToReact(undefined));

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { BoolFormat } from './boolean';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
@@ -69,8 +70,8 @@ describe('Boolean Format', () => {
   });
 
   test('handles a missing value', () => {
-    expect(boolean.convertToText(null)).toBe('(null)');
-    expect(boolean.convertToText(undefined)).toBe('(null)');
+    expect(boolean.convertToText(null)).toBe(NULL_LABEL);
+    expect(boolean.convertToText(undefined)).toBe(NULL_LABEL);
     expectReactElementWithNull(boolean.convertToReact(null));
     expectReactElementWithNull(boolean.convertToReact(undefined));
   });

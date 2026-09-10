@@ -11,6 +11,7 @@ import type { XYChartSeriesIdentifier } from '@elastic/charts';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { InvertedRawValueMap } from '../data_layers';
@@ -60,7 +61,7 @@ describe('getColorSeriesAccessorFn', () => {
           ['apache-integrations', 'apache-integrations'],
         ]),
       ],
-      ['aspnetcore.memory_pool.owner', new Map<string, RawValue>([['(null)', undefined]])],
+      ['aspnetcore.memory_pool.owner', new Map<string, RawValue>([[NULL_LABEL, undefined]])],
     ]);
 
     const getColor = getColorSeriesAccessorFn(
@@ -75,8 +76,8 @@ describe('getColorSeriesAccessorFn', () => {
       ['agent.name', 'aspnetcore.memory_pool.owner']
     );
 
-    const mysqlColor = getColor(createSeriesIdentifier('mysql-integrations', '(null)'));
-    const apacheColor = getColor(createSeriesIdentifier('apache-integrations', '(null)'));
+    const mysqlColor = getColor(createSeriesIdentifier('mysql-integrations', NULL_LABEL));
+    const apacheColor = getColor(createSeriesIdentifier('apache-integrations', NULL_LABEL));
 
     expect(mysqlColor?.toLowerCase()).toBe(defaultPaletteColors[0]);
     expect(apacheColor?.toLowerCase()).toBe(defaultPaletteColors[1]);

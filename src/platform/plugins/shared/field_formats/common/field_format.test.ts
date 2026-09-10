@@ -19,8 +19,8 @@ import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 import { highlightTags } from './utils/highlight/highlight_tags';
 import type { FieldFormatParams, ReactContextTypeOptions, TextContextTypeOptions } from './types';
-import { NULL_LABEL } from '@kbn/field-formats-common';
-import { expectReactElementAsArray } from './test_utils';
+import { MISSING_TOKEN, NULL_LABEL, NULL_TOKEN } from '@kbn/field-formats-common';
+import { expectReactElementAsArray, expectReactElementWithNull } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
 const renderReact = (node: React.ReactNode) =>
@@ -174,6 +174,26 @@ describe('FieldFormat class', () => {
         'color',
         result.current.euiTheme.colors.darkShade
       );
+    });
+
+    test('describes every missing value with the same label on the React placeholder', () => {
+      const f = getTestFormat();
+
+      expectReactElementWithNull(f.convertToReact(null));
+      expectReactElementWithNull(f.convertToReact(undefined));
+      expectReactElementWithNull(f.convertToReact(MISSING_TOKEN));
+    });
+
+    test('only the React path substitutes the dash, so charts keep the readable label', () => {
+      const f = getTestFormat();
+
+      // Charts consume convertToText, where nothing can surface the tooltip.
+      expect(NULL_LABEL).toBe('(null)');
+      expect(f.convertToText(null)).toBe(NULL_LABEL);
+
+      // Tables and Discover consume convertToReact, which pairs the dash with the label.
+      expect(NULL_TOKEN).toBe('-');
+      expect(renderReact(f.convertToReact(null))).toContain(NULL_TOKEN);
     });
 
     describe('default convertToReact highlight support', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { UrlFormat } from './url';
 import {
   expectReactElementWithNull,
@@ -48,8 +49,8 @@ describe('UrlFormat', () => {
   test('handles missing values', () => {
     const url = new UrlFormat({});
 
-    expect(url.convertToText(null)).toBe('(null)');
-    expect(url.convertToText(undefined)).toBe('(null)');
+    expect(url.convertToText(null)).toBe(NULL_LABEL);
+    expect(url.convertToText(undefined)).toBe(NULL_LABEL);
     expect(url.convertToText('')).toBe('(blank)');
     expectReactElementWithNull(url.convertToReact(null));
     expectReactElementWithNull(url.convertToReact(undefined));

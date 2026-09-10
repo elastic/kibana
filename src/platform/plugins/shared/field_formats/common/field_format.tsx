@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
-import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL, NULL_TOKEN } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
 import { asPrettyString, formatReactArray, formatTextArray } from './utils';
 import type {
@@ -238,7 +238,15 @@ export abstract class FieldFormat {
       return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
+      // Only the React path shows the bare dash, because only it can carry the tooltip that
+      // gives the dash meaning. Charts go through `convertToText` and keep NULL_LABEL.
+      // `role="img"` lets the dash carry an accessible name; a bare span maps to
+      // `role="generic"`, which ARIA forbids from being named.
+      return (
+        <span css={emptyValueStyles} role="img" title={NULL_LABEL} aria-label={NULL_LABEL}>
+          {NULL_TOKEN}
+        </span>
+      );
     }
   }
 }
