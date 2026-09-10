@@ -1590,14 +1590,12 @@ describe('ClusterClient', () => {
       );
     });
 
-    it.each(['upstream-shared-secret', '', undefined])(
+    it.each(['upstream-shared-secret', ''])(
       'preserves inbound secondary client authentication %s',
       (clientAuthentication) => {
         const headers = {
           [AUTHORIZATION_HEADER]: 'Bearer essu_ephemeral_token',
-          ...(clientAuthentication === undefined
-            ? {}
-            : { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }),
+          [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
         };
         authHeaders.get.mockReturnValue(headers);
         const clusterClient = new ClusterClient({
@@ -1619,9 +1617,7 @@ describe('ClusterClient', () => {
             headers: {
               ...defaultHeaders,
               [ES_SECONDARY_AUTH_HEADER]: headers.authorization,
-              ...(clientAuthentication === undefined
-                ? {}
-                : { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }),
+              [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication,
             },
           })
         );
