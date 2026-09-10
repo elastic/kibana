@@ -64,14 +64,20 @@ describe('host snapshot aggregations', () => {
     it('returns null for free memory instead of 0 bytes', () => {
       const semconvMemoryFree = memoryFree.semconv as Record<string, any>;
 
-      expect(semconvMemoryFree.memory_usage_free_stats.stats_bucket.buckets_path).toBe(
-        'memory_usage_free.avg'
+      expect(semconvMemoryFree.memory_usage_states.terms.include).toEqual([
+        'cached',
+        'free',
+        'slab_unreclaimable',
+        'slab_reclaimable',
+      ]);
+      expect(semconvMemoryFree.memory_usage_stats.stats_bucket.buckets_path).toBe(
+        'memory_usage_states.avg'
       );
-      expect(semconvMemoryFree.memoryFree.bucket_script.buckets_path.memoryFreeCount).toBe(
-        'memory_usage_free_stats.count'
+      expect(semconvMemoryFree.memoryFree.bucket_script.buckets_path.memoryUsageCount).toBe(
+        'memory_usage_stats.count'
       );
       expect(semconvMemoryFree.memoryFree.bucket_script.script).toBe(
-        'params.memoryFreeCount > 0 ? (params.memoryCachedTotal + params.memoryFreeTotal) - (params.memorySlabUnreclaimableTotal + params.memorySlabReclaimableTotal) : null'
+        'params.memoryUsageCount > 0 ? (params.memoryCachedTotal + params.memoryFreeTotal) - (params.memorySlabUnreclaimableTotal + params.memorySlabReclaimableTotal) : null'
       );
     });
 
