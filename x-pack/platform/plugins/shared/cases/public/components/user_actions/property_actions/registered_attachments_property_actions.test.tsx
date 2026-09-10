@@ -8,7 +8,7 @@
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import {
   noCasesPermissions,
@@ -18,8 +18,10 @@ import {
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/207328
-describe.skip('RegisteredAttachmentsPropertyActions', () => {
+// https://github.com/elastic/kibana/issues/207328
+describe('RegisteredAttachmentsPropertyActions', () => {
+  let user: UserEvent;
+
   const props = {
     isLoading: false,
     registeredAttachmentActions: [],
@@ -27,8 +29,18 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
     hideDefaultActions: false,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
   it('renders the correct number of actions', async () => {
@@ -36,7 +48,7 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
 
     expect(await screen.findByTestId('property-actions-user-action-group')).toBeInTheDocument();
   });
@@ -46,12 +58,12 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
+    await user.click(await screen.findByTestId('property-actions-user-action-trash'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
@@ -67,16 +79,16 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
+    await user.click(await screen.findByTestId('property-actions-user-action-trash'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByText('Delete'));
+    await user.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(props.onDelete).toHaveBeenCalled();
@@ -124,7 +136,7 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('property-actions-user-action-trash')).toBeInTheDocument();
