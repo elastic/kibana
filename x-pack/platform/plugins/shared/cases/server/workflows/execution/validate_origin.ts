@@ -286,7 +286,7 @@ export const validateOrigin = ({
 }: {
   origin: CaseWorkflowRunOrigin;
   caseId: string;
-  selectedAlerts: AlertPair[];
+  selectedAlerts: DocumentPair[];
   theCase: Case;
   attachedAlerts: DocumentResponse;
   selectedDocuments: DocumentPair[];
