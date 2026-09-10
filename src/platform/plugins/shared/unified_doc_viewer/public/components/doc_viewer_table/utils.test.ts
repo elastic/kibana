@@ -10,6 +10,12 @@
 import { buildFieldRowMock } from './field_row.mocks';
 import { getCellPositionAfterPinToggle } from './utils';
 
+const buildFieldRowWithDisplayName = (name: string, displayName: string) => {
+  const row = buildFieldRowMock({ name });
+  Object.defineProperty(row, 'dataViewField', { value: { displayName } });
+  return row;
+};
+
 describe('getCellPositionAfterPinToggle', () => {
   describe('when the field is not pinned', () => {
     it('returns the index as 2', () => {
@@ -17,11 +23,12 @@ describe('getCellPositionAfterPinToggle', () => {
         buildFieldRowMock({ name: 'field1' }),
         buildFieldRowMock({ name: 'field2' }),
       ];
+      const restRows = [buildFieldRowMock({ name: 'field3' })];
 
       const result = getCellPositionAfterPinToggle({
         field: 'field3',
         pinnedRows,
-        restRows: [],
+        restRows,
       });
 
       expect(result).toBe(2);
@@ -34,14 +41,31 @@ describe('getCellPositionAfterPinToggle', () => {
       { fieldName: 'field3', fields: ['field1', 'field2'], expectedIndex: 2 },
     ])('returns the index as $expectedIndex', ({ fieldName, fields, expectedIndex }) => {
       const pinnedRows = fields.map((name) => buildFieldRowMock({ name }));
+      const restRows = [buildFieldRowMock({ name: fieldName })];
 
       const result = getCellPositionAfterPinToggle({
         field: fieldName,
         pinnedRows,
-        restRows: [],
+        restRows,
       });
 
       expect(result).toBe(expectedIndex);
+    });
+
+    it('sorts by display name', () => {
+      const pinnedRows = [
+        buildFieldRowWithDisplayName('field_a', 'Zebra'),
+        buildFieldRowWithDisplayName('field_b', 'Banana'),
+      ];
+      const restRows = [buildFieldRowWithDisplayName('field_c', 'Apple')];
+
+      const result = getCellPositionAfterPinToggle({
+        field: 'field_c',
+        pinnedRows,
+        restRows,
+      });
+
+      expect(result).toBe(0);
     });
   });
 
@@ -113,5 +137,21 @@ describe('getCellPositionAfterPinToggle', () => {
         expect(result).toBe(expectedIndex);
       }
     );
+
+    it('sorts by display name', () => {
+      const pinnedRows = [
+        buildFieldRowWithDisplayName('field_a', 'Zebra'),
+        buildFieldRowWithDisplayName('field_c', 'Apple'),
+      ];
+      const restRows = [buildFieldRowWithDisplayName('field_b', 'Banana')];
+
+      const result = getCellPositionAfterPinToggle({
+        field: 'field_c',
+        pinnedRows,
+        restRows,
+      });
+
+      expect(result).toBe(1);
+    });
   });
 });

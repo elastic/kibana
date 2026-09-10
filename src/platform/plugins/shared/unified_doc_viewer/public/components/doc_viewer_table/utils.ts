@@ -9,6 +9,11 @@
 
 import type { FieldRow } from './field_row';
 
+const getFieldSortName = (row: FieldRow) => row.dataViewField?.displayName ?? row.name;
+
+const sortRowsByDisplayName = (rows: FieldRow[]) =>
+  rows.sort((rowA, rowB) => getFieldSortName(rowA).localeCompare(getFieldSortName(rowB)));
+
 export function getCellPositionAfterPinToggle({
   field,
   pinnedRows,
@@ -18,16 +23,18 @@ export function getCellPositionAfterPinToggle({
   pinnedRows: FieldRow[];
   restRows: FieldRow[];
 }) {
-  const allPinnedFields = pinnedRows.map((row) => row.name);
+  const fieldRow = [...pinnedRows, ...restRows].find((row) => row.name === field);
 
-  if (!allPinnedFields.includes(field)) {
-    const newPinnedSorted = [...allPinnedFields, field].sort((a, b) => a.localeCompare(b));
-    const newPinnedIndex = newPinnedSorted.indexOf(field);
-    return newPinnedIndex;
+  if (!fieldRow) {
+    return -1;
   }
 
-  const nonPinnedFields = [...restRows.map((row) => row.name), field];
-  const nonPinnedSorted = nonPinnedFields.sort((a, b) => a.localeCompare(b));
-  const newNonPinnedIndex = nonPinnedSorted.indexOf(field) + (pinnedRows.length - 1);
+  if (!pinnedRows.includes(fieldRow)) {
+    const newPinnedRows = sortRowsByDisplayName([...pinnedRows, fieldRow]);
+    return newPinnedRows.indexOf(fieldRow);
+  }
+
+  const newNonPinnedRows = sortRowsByDisplayName([...restRows, fieldRow]);
+  const newNonPinnedIndex = newNonPinnedRows.indexOf(fieldRow) + (pinnedRows.length - 1);
   return newNonPinnedIndex;
 }
