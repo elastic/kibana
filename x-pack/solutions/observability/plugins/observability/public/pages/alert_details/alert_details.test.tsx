@@ -19,7 +19,7 @@ import { Chance } from 'chance';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { from, of } from 'rxjs';
+import { of } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
