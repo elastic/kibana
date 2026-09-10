@@ -45,6 +45,7 @@ import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
@@ -57,6 +58,7 @@ import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } fr
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
+import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 
 export class AgentBuilderPlugin
   implements
@@ -78,6 +80,7 @@ export class AgentBuilderPlugin
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
   private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
+  private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -240,6 +243,12 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
+    registerAfterExecutionWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
+    });
+
     registerSkillToolsLoaderHook(serviceSetups, {
       analyticsService: this.analyticsService,
       trackingService: this.trackingService,
@@ -387,6 +396,13 @@ export class AgentBuilderPlugin
       logger: this.logger.get('model-provider'),
     });
 
+    this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
+      logger: this.logger.get('recommended-endpoints-poller'),
+      esClient: elasticsearch.client.asInternalUser,
+      features: searchInferenceEndpoints.features,
+    });
+    this.recommendedEndpointsPoller.start();
+
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
@@ -434,6 +450,7 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
+    this.recommendedEndpointsPoller?.stop();
     await this.teardownTracing?.();
   }
 
