@@ -119,18 +119,43 @@ const uninstallTolerant = async (
 };
 
 /**
+ * True when either global TI workflow is still persisted for this plugin. On a
+ * deployment that never turned the supply flag on, both are absent, letting
+ * `uninstallThreatIntelManagedWorkflows` skip space enumeration and every
+ * per-space uninstall call instead of paying N+3 no-op requests on every boot.
+ */
+const hasAnyGlobalThreatIntelWorkflowInstalled = async (
+  managedWorkflowsClient: SecurityManagedWorkflowsClient
+): Promise<boolean> => {
+  const states = await Promise.all(
+    GLOBAL_THREAT_INTEL_WORKFLOW_IDS.map((workflowId) =>
+      managedWorkflowsClient.getInstalledWorkflowState(workflowId, GLOBAL_WORKFLOW_SPACE_ID)
+    )
+  );
+  return states.some((state) => state !== null);
+};
+
+/**
  * Removes the two global TI workflows and every per-space attribute instance.
- * Tolerates not-found so a partial prior install still cleans up.
+ * Tolerates not-found so a partial prior install still cleans up. Short-circuits
+ * before enumerating spaces when neither global workflow is installed, since
+ * that is the steady state for every deployment that never had the supply flag
+ * on. Otherwise a 100-space deployment pays 103 sequential no-op calls on
+ * every restart just to confirm there is nothing to remove.
  */
 export const uninstallThreatIntelManagedWorkflows = async ({
   managedWorkflowsClient,
-  spaceIds,
+  getSpaceIds,
   logger,
 }: {
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
-  spaceIds: readonly string[];
+  getSpaceIds: () => Promise<readonly string[]>;
   logger: Logger;
 }): Promise<void> => {
+  if (!(await hasAnyGlobalThreatIntelWorkflowInstalled(managedWorkflowsClient))) {
+    return;
+  }
+
   for (const workflowId of GLOBAL_THREAT_INTEL_WORKFLOW_IDS) {
     await uninstallTolerant(
       managedWorkflowsClient,
@@ -140,6 +165,7 @@ export const uninstallThreatIntelManagedWorkflows = async ({
     );
   }
 
+  const spaceIds = await getSpaceIds();
   for (const spaceId of spaceIds) {
     await uninstallTolerant(
       managedWorkflowsClient,

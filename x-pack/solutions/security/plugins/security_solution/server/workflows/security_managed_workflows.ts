@@ -66,10 +66,9 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
         logger,
       });
     } else {
-      const spaceIds = await enumerateSpaceIds(createSpaceRepository(core));
       await uninstallThreatIntelManagedWorkflows({
         managedWorkflowsClient,
-        spaceIds,
+        getSpaceIds: () => enumerateSpaceIds(createSpaceRepository(core)),
         logger,
       });
     }

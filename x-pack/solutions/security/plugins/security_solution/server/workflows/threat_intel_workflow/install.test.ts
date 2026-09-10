@@ -22,7 +22,18 @@ const createClient = () => ({
   install: jest.fn().mockResolvedValue(undefined),
   uninstall: jest.fn().mockResolvedValue(undefined),
   ready: jest.fn().mockResolvedValue(undefined),
+  // Defaults to "nothing installed"; tests that exercise the uninstall path
+  // override this to report at least one global workflow as installed.
+  getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
 });
+
+const INSTALLED_STATE = {
+  workflowId: 'mock-workflow-id',
+  spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  definitionId: null,
+  templateValues: null,
+  documentVersion: 1,
+};
 
 let logger = loggingSystemMock.createLogger();
 
@@ -75,10 +86,11 @@ describe('threat intel managed workflow install', () => {
 
   it('uninstalls the two global workflows and attribute per space', async () => {
     const client = createClient();
+    client.getInstalledWorkflowState.mockResolvedValue(INSTALLED_STATE);
 
     await uninstallThreatIntelManagedWorkflows({
       managedWorkflowsClient: client as never,
-      spaceIds: ['default', 'space-a'],
+      getSpaceIds: async () => ['default', 'space-a'],
       logger,
     });
 
@@ -100,12 +112,13 @@ describe('threat intel managed workflow install', () => {
 
   it('tolerates uninstall failures so a partial prior install still cleans up', async () => {
     const client = createClient();
+    client.getInstalledWorkflowState.mockResolvedValue(INSTALLED_STATE);
     client.uninstall.mockRejectedValueOnce(new Error('missing')).mockResolvedValue(undefined);
 
     await expect(
       uninstallThreatIntelManagedWorkflows({
         managedWorkflowsClient: client as never,
-        spaceIds: ['default'],
+        getSpaceIds: async () => ['default'],
         logger,
       })
     ).resolves.toBeUndefined();
@@ -117,11 +130,12 @@ describe('threat intel managed workflow install', () => {
   // workflows keep running against alerts nobody is looking at any more.
   it('records an uninstall failure at debug rather than dropping it', async () => {
     const client = createClient();
+    client.getInstalledWorkflowState.mockResolvedValue(INSTALLED_STATE);
     client.uninstall.mockRejectedValueOnce(new Error('forbidden')).mockResolvedValue(undefined);
 
     await uninstallThreatIntelManagedWorkflows({
       managedWorkflowsClient: client as never,
-      spaceIds: ['default'],
+      getSpaceIds: async () => ['default'],
       logger,
     });
 
@@ -131,6 +145,44 @@ describe('threat intel managed workflow install', () => {
         { error: expect.any(Error) },
       ],
     ]);
+  });
+
+  // The whole point of the short circuit: a deployment that never turned the
+  // supply flag on should not enumerate spaces or fire per-space uninstalls on
+  // every restart just to confirm there is nothing to remove.
+  it('skips space enumeration and every uninstall call when neither global workflow is installed', async () => {
+    const client = createClient();
+    const getSpaceIds = jest.fn().mockResolvedValue(['default', 'space-a']);
+
+    await uninstallThreatIntelManagedWorkflows({
+      managedWorkflowsClient: client as never,
+      getSpaceIds,
+      logger,
+    });
+
+    expect(client.uninstall).not.toHaveBeenCalled();
+    expect(getSpaceIds).not.toHaveBeenCalled();
+  });
+
+  it('still uninstalls when only one of the two global workflows is installed', async () => {
+    const client = createClient();
+    client.getInstalledWorkflowState.mockImplementation(async (workflowId: string) =>
+      workflowId === THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID ? INSTALLED_STATE : null
+    );
+
+    await uninstallThreatIntelManagedWorkflows({
+      managedWorkflowsClient: client as never,
+      getSpaceIds: async () => ['default'],
+      logger,
+    });
+
+    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+      spaceId: 'default',
+      workflowIdSuffix: 'default',
+    });
   });
 });
 
