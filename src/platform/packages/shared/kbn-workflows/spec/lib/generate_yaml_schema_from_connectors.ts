@@ -204,7 +204,12 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
       modifications[key] = isOptional ? widened.optional() : widened;
     }
   }
-  return paramsSchema.extend(modifications);
+  if (Object.keys(modifications).length === 0) {
+    return paramsSchema;
+  }
+  // safeExtend preserves object-level refinements and the unknownKeys policy (strict/passthrough),
+  // unlike extend() which throws when the schema contains refinements.
+  return paramsSchema.safeExtend(modifications as Parameters<typeof paramsSchema.safeExtend>[0]);
 }
 
 function generateStepSchemaForConnector(
