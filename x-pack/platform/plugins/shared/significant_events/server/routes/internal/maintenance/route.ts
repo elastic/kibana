@@ -20,8 +20,6 @@ const bootstrapCleanupRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Bootstrap stale Significant Events cleanup for the current space',
-    description:
-      'Detection Engine manage only. The minted cleanup key calls events/_cleanup, which is Detection manage. Context Engine can pause activity but must not install a key that cannot run cleanup.',
   },
   security: {
     authz: {

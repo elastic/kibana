@@ -7,7 +7,6 @@
 
 export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
 
-/** HTTP `security.authz.requiredPrivileges` tags registered on the Nightshift feature. */
 export const NIGHTSHIFT_API_PRIVILEGES = {
   read: 'read_nightshift',
   manage: 'manage_nightshift',
