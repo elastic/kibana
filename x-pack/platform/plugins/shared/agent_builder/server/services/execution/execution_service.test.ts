@@ -89,7 +89,13 @@ describe('AgentExecutionService', () => {
 
   const attachmentsService: AttachmentServiceStart = {
     validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
-    validateAttachments: jest.fn().mockImplementation(async (attachments) => attachments),
+    validateAttachments: jest.fn().mockImplementation(async (attachments) =>
+      attachments?.map((attachment: { type: string; data: unknown }) => ({
+        id: 'attachment-1',
+        type: attachment.type,
+        data: attachment.data,
+      }))
+    ),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn().mockReturnValue([]),
   };
@@ -111,8 +117,12 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (attachmentsService.validateAttachments as jest.Mock).mockImplementation(
-      async (attachments) => attachments
+    (attachmentsService.validateAttachments as jest.Mock).mockImplementation(async (attachments) =>
+      attachments?.map((attachment: { type: string; data: unknown }) => ({
+        id: 'attachment-1',
+        type: attachment.type,
+        data: attachment.data,
+      }))
     );
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',

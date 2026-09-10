@@ -11,10 +11,11 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
+import { toAttachmentInput } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
@@ -93,7 +94,7 @@ export function registerChatApiRoutes({
               getInternalServices();
             const client = await conversationsService.getScopedClient({ request });
 
-            let attachments: AttachmentInput[] | undefined;
+            let attachments: Array<Attachment<string, unknown>> | undefined;
             try {
               attachments = await attachmentsService.validateAttachments(
                 contextMessagePayload.attachments ?? [],
@@ -107,7 +108,7 @@ export function registerChatApiRoutes({
             const body = await persistContextMessage({
               conversationId: contextMessagePayload.conversation_id,
               message: contextMessagePayload.input ?? '',
-              attachments: attachments ?? [],
+              attachments: attachments?.map(toAttachmentInput) ?? [],
               conversationClient: client,
               getTypeDefinition: attachmentsService.getTypeDefinition,
               author,

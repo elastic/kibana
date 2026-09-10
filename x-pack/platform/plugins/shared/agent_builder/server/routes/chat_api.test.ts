@@ -239,7 +239,13 @@ describe('context message acknowledgements', () => {
       },
       attachments: {
         getTypeDefinition: jest.fn(),
-        validateAttachments: jest.fn().mockImplementation(async (attachments) => attachments),
+        validateAttachments: jest.fn().mockImplementation(async (attachments) =>
+          attachments.map((attachment: { type: string; data: unknown }) => ({
+            id: 'attachment-1',
+            type: attachment.type,
+            data: attachment.data,
+          }))
+        ),
       },
       execution: { executeAgent },
       callbackDeliveryService: { validateCallbackUrl },

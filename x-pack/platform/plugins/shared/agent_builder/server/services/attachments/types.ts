@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ValidateAttachmentResult } from './validate_attachment';
@@ -22,7 +22,7 @@ export interface AttachmentServiceStart {
   validateAttachments(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
-  ): Promise<AttachmentInput[] | undefined>;
+  ): Promise<Array<Attachment<string, unknown>> | undefined>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
   getRegisteredTypeIds(): string[];
 }

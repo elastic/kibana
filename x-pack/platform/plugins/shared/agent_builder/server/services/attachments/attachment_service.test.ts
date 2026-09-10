@@ -93,7 +93,7 @@ describe('AttachmentService', () => {
           description: 'Context attachment',
           hidden: true,
           origin: 'saved-object:1',
-          group_id: 'group-1',
+          groupId: 'group-1',
         },
       ]);
     });

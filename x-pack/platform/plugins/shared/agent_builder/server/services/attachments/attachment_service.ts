@@ -15,7 +15,6 @@ import {
 } from './attachment_type_registry';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
 import {
-  toAttachmentInput,
   validateAttachment,
   validateAttachments as validateAttachmentList,
 } from './validate_attachment';
@@ -70,14 +69,12 @@ export class AttachmentServiceImpl implements AttachmentService {
           resolveContext: getResolveContext(request),
         });
       },
-      validateAttachments: async (attachments, request) => {
-        const validatedAttachments = await validateAttachmentList({
+      validateAttachments: (attachments, request) => {
+        return validateAttachmentList({
           attachments,
           registry: this.attachmentTypeRegistry,
           resolveContext: getResolveContext(request),
         });
-
-        return validatedAttachments?.map(toAttachmentInput);
       },
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);
