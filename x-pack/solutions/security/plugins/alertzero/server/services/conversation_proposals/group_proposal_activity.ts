@@ -6,7 +6,6 @@
  */
 
 import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
-import { ALERTZERO_PROPOSAL_BASELINE_CATEGORIES } from '@kbn/alertzero-common';
 import {
   CLOSED_GROUP_KEY,
   type ProposalActivityGroups,
@@ -18,9 +17,6 @@ export const groupProposalActivity = (
   titles: Map<string, string>
 ): ProposalActivityGroups => {
   const groups: ProposalActivityGroups = { [CLOSED_GROUP_KEY]: [] };
-  for (const cat of ALERTZERO_PROPOSAL_BASELINE_CATEGORIES) {
-    groups[cat] = [];
-  }
 
   for (const proposal of proposals) {
     const item: ProposalActivityItem = {
@@ -32,12 +28,11 @@ export const groupProposalActivity = (
 
     if (proposal.decidedAt) {
       groups[CLOSED_GROUP_KEY].push(item);
-    } else {
-      const key = proposal.category;
-      if (!groups[key]) {
-        groups[key] = [];
+    } else if (proposal.category) {
+      if (!groups[proposal.category]) {
+        groups[proposal.category] = [];
       }
-      groups[key].push(item);
+      groups[proposal.category].push(item);
     }
   }
 

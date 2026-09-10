@@ -44,13 +44,6 @@ export const buildInvestigationUrl = (id: string) =>
 /** Proposals grouped by category — AlertZero landing page. */
 export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as const;
 
-export const ALERTZERO_PROPOSAL_BASELINE_CATEGORIES = [
-  'contain',
-  'escalate',
-  'investigate',
-  'tune',
-] as const;
-
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
  * Can expand this to multiple scoped thin agents in the future if needed.

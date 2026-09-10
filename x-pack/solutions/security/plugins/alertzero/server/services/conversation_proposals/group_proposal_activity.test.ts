@@ -48,20 +48,26 @@ describe('groupProposalActivity', () => {
     const groups = groupProposalActivity(proposals, new Map());
 
     expect(groups[CLOSED_GROUP_KEY]).toHaveLength(1);
-    expect(groups.contain).toHaveLength(0);
+    expect(groups.contain).toBeUndefined();
   });
 
-  it('always seeds the baseline category keys even when empty', () => {
+  it('always initializes the closed key even when empty', () => {
     const groups = groupProposalActivity([], new Map());
 
     expect(groups).toHaveProperty(CLOSED_GROUP_KEY);
-    expect(groups).toHaveProperty('contain');
-    expect(groups).toHaveProperty('escalate');
-    expect(groups).toHaveProperty('investigate');
-    expect(groups).toHaveProperty('tune');
+    expect(groups[CLOSED_GROUP_KEY]).toHaveLength(0);
   });
 
-  it('passes through an unknown category string not in the baseline', () => {
+  it('does not seed baseline category keys when no proposals exist', () => {
+    const groups = groupProposalActivity([], new Map());
+
+    expect(groups).not.toHaveProperty('contain');
+    expect(groups).not.toHaveProperty('escalate');
+    expect(groups).not.toHaveProperty('investigate');
+    expect(groups).not.toHaveProperty('tune');
+  });
+
+  it('creates a category key on demand for any category string', () => {
     const proposals = [makeProposal({ status: 'pending', category: 'remediate' })];
     const groups = groupProposalActivity(proposals, new Map());
 
@@ -103,5 +109,13 @@ describe('groupProposalActivity', () => {
 
     expect(groups.investigate[0].id).toBe('first');
     expect(groups.investigate[1].id).toBe('second');
+  });
+
+  it('drops a pending proposal with no category', () => {
+    const proposal = makeProposal({ status: 'pending', category: undefined });
+    const groups = groupProposalActivity([proposal], new Map());
+
+    expect(groups[CLOSED_GROUP_KEY]).toHaveLength(0);
+    expect(Object.keys(groups)).toEqual([CLOSED_GROUP_KEY]);
   });
 });
