@@ -247,7 +247,10 @@ export async function loginWithSAML(
 ): Promise<string> {
   const { cookie, location } = await startSAMLHandshake(apiClient, providerName);
   const sessionCookie = await finishSAMLHandshake(apiClient, config, cookie, location);
-  await assertSessionCookie(apiClient, sessionCookie, 'a@b.c', { type: 'saml', name: providerName });
+  await assertSessionCookie(apiClient, sessionCookie, 'a@b.c', {
+    type: 'saml',
+    name: providerName,
+  });
   return sessionCookie;
 }
 
