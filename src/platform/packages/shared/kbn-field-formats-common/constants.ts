@@ -14,14 +14,17 @@ export const EMPTY_LABEL = i18n.translate('fieldFormats.blankLabel', {
   description: 'Represents the label used to replace an empty string value in tables and charts',
 });
 
-/** Displayed in place of a null value. Not translated: a dash is locale-independent. */
-export const NULL_LABEL = '-';
-
-export const NULL_TOOLTIP_LABEL = i18n.translate('fieldFormats.nullLabel', {
+export const NULL_LABEL = i18n.translate('fieldFormats.nullLabel', {
   defaultMessage: '(null)',
   description:
-    'Tooltip shown when hovering the dash that replaces a null value in tables and charts',
+    'Represents the label used to replace a null value in charts, and the tooltip describing the dash shown in tables and Discover',
 });
+
+/**
+ * Displayed in place of a null value in tables and Discover, where a tooltip can carry the
+ * meaning. Not translated: a dash is locale-independent.
+ */
+export const NULL_TOKEN = '-';
 
 export const NAN_LABEL = 'NaN';
 

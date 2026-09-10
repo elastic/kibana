@@ -8,7 +8,7 @@
 // Original test (remove during Scout migration): src/platform/test/functional/apps/discover/esql_2/_esql_view.ts
 
 import expect from '@kbn/expect';
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_TOKEN } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.discover.waitUntilTabIsLoaded();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
+        expect(await cell.getVisibleText()).to.be(NULL_TOKEN);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',

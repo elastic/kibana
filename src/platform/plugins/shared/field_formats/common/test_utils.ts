@@ -9,7 +9,7 @@
 
 import { render } from '@testing-library/react';
 import { isValidElement, type ReactNode } from 'react';
-import { NULL_LABEL, NULL_TOOLTIP_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
+import { NULL_LABEL, NULL_TOKEN, EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export const renderReactNode = (node: ReactNode) => render(node).container;
 
@@ -22,9 +22,9 @@ export const expectReactElementWithNull = (element: React.ReactNode) => {
   const { children } = renderReactNode(element);
   expect(children).toHaveLength(1);
   const node = children[0];
-  expect(node).toHaveTextContent(NULL_LABEL);
-  expect(node).toHaveAttribute('title', NULL_TOOLTIP_LABEL);
-  expect(node).toHaveAttribute('aria-label', NULL_TOOLTIP_LABEL);
+  expect(node).toHaveTextContent(NULL_TOKEN);
+  expect(node).toHaveAttribute('title', NULL_LABEL);
+  expect(node).toHaveAttribute('aria-label', NULL_LABEL);
 };
 
 /**

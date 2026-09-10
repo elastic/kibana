@@ -15,7 +15,7 @@ import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plu
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 import { getAggsFormats } from './get_aggs_formats';
-import { NULL_LABEL, MISSING_TOKEN } from '@kbn/field-formats-common';
+import { NULL_TOKEN, MISSING_TOKEN } from '@kbn/field-formats-common';
 
 const getAggFormat = (
   mapping: SerializedFieldFormat,
@@ -73,7 +73,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expect(getReactConvertText(format, undefined)).toBe(NULL_LABEL);
+    expect(getReactConvertText(format, undefined)).toBe(NULL_TOKEN);
   });
 
   test('creates custom format for ip_range', () => {
@@ -106,7 +106,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expect(getReactConvertText(format, undefined)).toBe(NULL_LABEL);
+    expect(getReactConvertText(format, undefined)).toBe(NULL_TOKEN);
   });
 
   test('creates custom format for range', () => {
@@ -123,7 +123,7 @@ describe('getAggsFormats', () => {
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convertToText(undefined)).toBe('');
-    expect(getReactConvertText(format, undefined)).toBe(NULL_LABEL);
+    expect(getReactConvertText(format, undefined)).toBe(NULL_TOKEN);
   });
 
   test('creates alternative format for range using the template parameter', () => {

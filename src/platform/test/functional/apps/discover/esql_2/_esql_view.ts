@@ -18,7 +18,7 @@
 
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_TOKEN } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      // Migration recommendation: MIGRATE; assert column order, not NULL_LABEL placeholder styling.
+      // Migration recommendation: MIGRATE; assert column order, not NULL_TOKEN placeholder styling.
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
+        expect(await cell.getVisibleText()).to.be(NULL_TOKEN);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',

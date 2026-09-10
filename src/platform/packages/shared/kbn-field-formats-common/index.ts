@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  EMPTY_LABEL,
-  NULL_LABEL,
-  NULL_TOOLTIP_LABEL,
-  NAN_LABEL,
-  MISSING_TOKEN,
-} from './constants';
+export { EMPTY_LABEL, NULL_LABEL, NULL_TOKEN, NAN_LABEL, MISSING_TOKEN } from './constants';

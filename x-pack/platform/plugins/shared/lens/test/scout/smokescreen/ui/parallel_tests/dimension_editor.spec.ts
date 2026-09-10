@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_TOKEN } from '@kbn/field-formats-common';
 import { expect } from '@kbn/scout/ui';
 import {
   createLogstashLensEditorSuiteSetup,
@@ -160,7 +160,7 @@ spaceTest.describe('Lens dimension editor', { tag: '@local-stateful-classic' }, 
     await lens.closeDimensionEditor();
     await lens.waitForVisualization();
 
-    await expect(lens.datatable.getCellLocator(0, 1)).toContainText(NULL_LABEL);
+    await expect(lens.datatable.getCellLocator(0, 1)).toContainText(NULL_TOKEN);
     await expect(lens.datatable.getCellLocator(1, 1)).toContainText('222,420.00');
     await expect(lens.datatable.getCellLocator(2, 1)).toContainText('702,050.00');
     await expect(lens.datatable.getCellLocator(3, 1)).toContainText('1,879,613.33');

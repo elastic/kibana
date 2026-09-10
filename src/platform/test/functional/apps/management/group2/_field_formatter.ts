@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_TOKEN } from '@kbn/field-formats-common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.TEXT,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STRING,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
 
             // check available formats for ES_FIELD_TYPES.TEXT
             expectFormatterTypes: [
@@ -212,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.KEYWORD,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.TRUNCATE,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue('truncateEditorLength', '3');
             },
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.INTEGER,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STRING,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             // check available formats for ES_FIELD_TYPES.INTEGER
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.NUMBER,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             // check available formats for ES_FIELD_TYPES.LONG
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
@@ -311,7 +311,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.NUMBER,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue('numberEditorFormatPattern', '+0,0');
             },
@@ -342,7 +342,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.URL,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             expect: async (renderedValueContainer) => {
               expect(await renderedValueContainer.findAllByTagName('a')).to.have.length(0);
             },
@@ -360,7 +360,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.URL,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue(
                 'urlEditorUrlTemplate',
@@ -393,7 +393,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.URL,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue(
                 'urlEditorUrlTemplate',
@@ -447,7 +447,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.DATE,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.DATE,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue('dateEditorPattern', 'MMM D, YYYY');
             },
@@ -484,7 +484,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.DATE_NANOS,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.DATE_NANOS,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
           },
         ]);
       });
@@ -506,7 +506,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.KEYWORD,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'look me up');
@@ -560,7 +560,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.BOOLEAN,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'true');
@@ -582,7 +582,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.KEYWORD,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'some key');
@@ -660,7 +660,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.DURATION,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue('durationEditorInputFormat', 'milliseconds');
             },
@@ -704,7 +704,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.STRING,
               FIELD_FORMAT_IDS.URL,
             ],
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue('numberEditorFormatPattern', '0.0%');
             },
@@ -722,7 +722,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.BYTES,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.setValue('numberEditorFormatPattern', '0b');
             },
@@ -747,7 +747,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.KEYWORD,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.COLOR,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
@@ -791,7 +791,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldType: ES_FIELD_TYPES.BOOLEAN,
             fieldValue: null,
             applyFormatterType: FIELD_FORMAT_IDS.COLOR,
-            expectFormattedValue: NULL_LABEL,
+            expectFormattedValue: NULL_TOKEN,
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
               expect(await span.getComputedStyle('background-color')).to.be('rgba(0, 0, 0, 0)');
