@@ -16,8 +16,15 @@ import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
 import { SyntheticsServerSetup } from '../types';
+import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 
 jest.mock('axios', () => jest.fn());
+jest.mock('../routes/synthetics_service/install_index_templates', () => ({
+  installSyntheticsIndexTemplates: jest.fn(),
+}));
+
+const installSyntheticsIndexTemplatesMock =
+  installSyntheticsIndexTemplates as jest.MockedFunction<typeof installSyntheticsIndexTemplates>;
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -567,6 +574,52 @@ describe('SyntheticsService', () => {
       expect(logger.debug).toHaveBeenCalledTimes(112);
       expect(logger.info).toHaveBeenCalledTimes(0);
       expect(logger.error).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('setupIndexTemplates', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      installSyntheticsIndexTemplatesMock.mockReset();
+    });
+
+    it('logs the failure at ERROR/WARN only on the first occurrence', async () => {
+      const { service } = getMockedService();
+      installSyntheticsIndexTemplatesMock.mockRejectedValue(
+        new Error('invalid_index_template_exception')
+      );
+
+      await service.setupIndexTemplates();
+      await service.setupIndexTemplates();
+      await service.setupIndexTemplates();
+
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(service.indexTemplateExists).toBe(false);
+    });
+
+    it('logs at ERROR again after a recovery followed by a new failure', async () => {
+      const { service } = getMockedService();
+
+      installSyntheticsIndexTemplatesMock.mockRejectedValueOnce(
+        new Error('invalid_index_template_exception')
+      );
+      await service.setupIndexTemplates();
+
+      installSyntheticsIndexTemplatesMock.mockResolvedValueOnce({
+        name: 'synthetics',
+        install_status: 'installed',
+      } as Awaited<ReturnType<typeof installSyntheticsIndexTemplates>>);
+      await service.setupIndexTemplates();
+
+      // reset so the next install attempt runs again
+      service.indexTemplateExists = false;
+      installSyntheticsIndexTemplatesMock.mockRejectedValueOnce(
+        new Error('invalid_index_template_exception')
+      );
+      await service.setupIndexTemplates();
+
+      expect(logger.error).toHaveBeenCalledTimes(2);
     });
   });
 });
