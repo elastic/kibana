@@ -92,7 +92,7 @@ Example targeting the new request-body tightening rule:
   "path": "/api/data_views/data_view",
   "method": "post",
   "reason": "Intentional tightening — approved by the owning team",
-  "approvedBy": "@elastic/kibana-data-discovery",
+  "approvedBy": "@elastic/kibana-discover",
   "oasdiffId": "kbn:request-additional-properties-tightened",
   "source": "/components/schemas/Data_views_create_data_view_request_object"
 }
