@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/agent-builder-platform-plugin'
   - '@kbn/dashboard-plugin'
+  - '@kbn/inference-workflows-plugin'
 tags:
   - plugin
   - prod
