@@ -846,6 +846,9 @@ node scripts/scout discover-flaky-tests
 # Include PR builds, widen the window, restrict to Jest and FTR
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
 
+# Flaky tests only, leaving consistently failing tests out of the report
+node scripts/scout discover-flaky-tests --classifications flaky
+
 # Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
 node scripts/scout discover-flaky-tests --summaryLimit 25
 ```

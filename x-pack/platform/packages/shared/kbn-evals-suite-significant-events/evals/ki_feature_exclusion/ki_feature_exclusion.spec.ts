@@ -11,6 +11,7 @@ import {
   createChatCallsEvaluator,
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -44,7 +45,20 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
+
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
         (dataset) => dataset.kiFeatureExclusion ?? [],
@@ -52,6 +66,20 @@ evaluate.describe(
         log
       );
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -94,11 +122,12 @@ evaluate.describe(
           async ({
             esClient,
             inferenceClient,
+            fetch,
+            connector,
             evaluationConnector,
             evaluators,
             traceEsClient,
             log,
-            logger,
             executorClient,
           }) => {
             const evaluatorInferenceClient = inferenceClient.bindTo({
@@ -143,8 +172,8 @@ evaluate.describe(
                     esClient,
                     excludeCount: input.exclude_count,
                     followUpRuns: input.follow_up_runs,
-                    inferenceClient,
-                    logger,
+                    fetch,
+                    connectorId: connector.id,
                     sampleSize: input.sample_document_count,
                     log,
                   });

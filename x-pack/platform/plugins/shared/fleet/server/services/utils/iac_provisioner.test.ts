@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { appContextService } from '../app_context';
 
 import { isIacProvisionerEnabled } from './iac_provisioner';
@@ -15,15 +16,27 @@ const mockEnvironment = ({
   isCloudEnabled = false,
   isServerlessEnabled = false,
   agentlessEnabled = false,
-  iacProvisionerEnabled = false,
+  iacProvisionerEnabled,
+}: {
+  isCloudEnabled?: boolean;
+  isServerlessEnabled?: boolean;
+  agentlessEnabled?: boolean;
+  iacProvisionerEnabled?: boolean;
 }) => {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: agentlessEnabled },
-    iacProvisioner: { enabled: iacProvisionerEnabled },
   } as any);
   jest
     .spyOn(appContextService, 'getCloud')
     .mockReturnValue({ isCloudEnabled, isServerlessEnabled } as any);
+
+  if (iacProvisionerEnabled === undefined) {
+    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);
+  } else {
+    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
+      getBooleanValue: jest.fn().mockResolvedValue(iacProvisionerEnabled),
+    } as any);
+  }
 };
 
 // Mirrors the client-side gate table in
@@ -35,12 +48,12 @@ describe('isIacProvisionerEnabled', () => {
 
   it.each([
     [
-      'cloud + agentless + flag',
+      'cloud + agentless + flag on',
       { isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true },
       true,
     ],
     [
-      'serverless + agentless + flag',
+      'serverless + agentless + flag on',
       { isServerlessEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true },
       true,
     ],
@@ -49,15 +62,31 @@ describe('isIacProvisionerEnabled', () => {
       { isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: false },
       false,
     ],
+    ['featureFlags service missing', { isCloudEnabled: true, agentlessEnabled: true }, false],
     [
       'agentless off',
       { isCloudEnabled: true, agentlessEnabled: false, iacProvisionerEnabled: true },
       false,
     ],
     ['self-managed', { agentlessEnabled: true, iacProvisionerEnabled: true }, false],
-  ])('%s => %s', (_label, environment, expected) => {
+  ])('%s => %s', async (_label, environment, expected) => {
     mockEnvironment(environment);
 
-    expect(isIacProvisionerEnabled()).toBe(expected);
+    await expect(isIacProvisionerEnabled()).resolves.toBe(expected);
+  });
+
+  it('evaluates fleet.enableIacProvisioner with fallback false', async () => {
+    mockEnvironment({
+      isCloudEnabled: true,
+      agentlessEnabled: true,
+      iacProvisionerEnabled: true,
+    });
+
+    await isIacProvisionerEnabled();
+
+    expect(appContextService.getFeatureFlags()?.getBooleanValue).toHaveBeenCalledWith(
+      ENABLE_IAC_PROVISIONER_FLAG,
+      false
+    );
   });
 });
