@@ -298,7 +298,15 @@ export const conversePayloadSchema = schema.object({
   ),
 });
 
-const callbackOriginSchema = {
+export const callbackConversePayloadSchema = conversePayloadSchema.extends({
+  execution_idempotency_key: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    meta: {
+      description:
+        'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
+    },
+  }),
   origin: schema.maybe(
     schema.object({
       type: schema.literal(ConversationOriginType.Slack),
@@ -312,22 +320,6 @@ const callbackOriginSchema = {
       ),
     })
   ),
-};
-
-export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  ...callbackOriginSchema,
-  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
-    defaultValue: 'always',
-    meta: { description: 'Use never to persist a user message without executing the agent.' },
-  }),
-  execution_idempotency_key: schema.string({
-    minLength: 1,
-    maxLength: 256,
-    meta: {
-      description:
-        'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
-    },
-  }),
   callback: schema.object({
     url: schema.string({
       minLength: 1,
@@ -531,8 +523,6 @@ export function registerChatRoutes({
         const { execution: executionService, callbackDeliveryService } = getInternalServices();
         const payload = request.body as ChatCallbackRequestBodyPayload;
 
-        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-
         try {
           callbackDeliveryService.validateCallbackUrl(payload.callback.url);
         } catch (error) {
@@ -542,8 +532,10 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
         const { executionId } = await executeAgent({
-          payload: { ...payload, trigger_mode: 'always' },
+          payload,
           request,
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),

@@ -91,7 +91,6 @@ describe('message-only contract', () => {
     expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
     expect(() =>
       callbackConversePayloadSchema.validate({
-        trigger_mode: 'never',
         input: 'hi',
         execution_idempotency_key: 'key',
         callback: {
@@ -100,11 +99,17 @@ describe('message-only contract', () => {
       })
     ).not.toThrow();
     expect(() =>
-      callbackConversePayloadSchema.validate({ trigger_mode: 'never', input: 'hi' })
-    ).toThrow();
-    expect(() =>
       callbackConversePayloadSchema.validate({
         trigger_mode: 'never',
+        input: 'hi',
+        execution_idempotency_key: 'key',
+        callback: {
+          url: 'https://callback.example.com/events',
+        },
+      })
+    ).toThrow('trigger_mode');
+    expect(() =>
+      callbackConversePayloadSchema.validate({
         input: 'hi',
         execution_idempotency_key: 'key',
       })
