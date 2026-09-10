@@ -47,3 +47,5 @@ export type InferenceConfig = TypeOf<typeof configSchema>;
 
 export type AnonymizationWorkerConfig = InferenceConfig['workers']['anonymization'];
 export type WorkflowAnonymizationFailureMode = InferenceConfig['anonymization']['failureMode'];
+// Placeholder until merged with 06-inference-anon-config which adds the split workers.workflowAnonymization block.
+export type WorkflowAnonymizationWorkerConfig = AnonymizationWorkerConfig;

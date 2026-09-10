@@ -67,6 +67,17 @@ describe('PiiRegexWorkerService', () => {
     expect(results[0].matchValue).toBe('10.0.0.1');
   });
 
+  it('throws on the sync path for patterns that require native RegExp (lookahead/lookbehind/backrefs)', async () => {
+    service = new PiiRegexWorkerService(createTestConfig({ enabled: false }), logger);
+    // (?=a) is a positive lookahead — RE2 rejects it; native RegExp can backtrack catastrophically
+    await expect(
+      service.run({
+        rules: [{ entityClass: 'MISC', pattern: '(?=a)a+' }],
+        records: [{ content: 'aaa' }],
+      })
+    ).rejects.toThrow();
+  });
+
   it('aborts the task and recreates the pool when taskTimeout elapses', async () => {
     service = new PiiRegexWorkerService(
       createTestConfig({ taskTimeout: { asMilliseconds: () => 1 } } as any),
