@@ -13,9 +13,6 @@ import { spaceTest, tags } from '../fixtures';
 const STATS_QUERY =
   'from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB';
 
-// The colour picker renders a multi-value `data-test-subj`, so it needs `~=`.
-const COLOR_PICKER = '[data-test-subj~="indexPattern-dimension-colorPicker"]';
-
 spaceTest.describe(
   'Discover ES|QL filtering from the table',
   { tag: tags.deploymentAgnostic },
@@ -73,7 +70,7 @@ spaceTest.describe(
 
     spaceTest(
       'keeps the visualization type and colour when appending a filter',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { discover, dataGrid, lens } = pageObjects;
 
         await discover.writeAndSubmitEsqlQuery(STATS_QUERY);
@@ -83,10 +80,10 @@ spaceTest.describe(
         await discover.openLensEditFlyout();
         await lens.switchToVisualization('line');
 
-        await page.testSubj.click('lnsXY_yDimensionPanel');
-        await page.locator(COLOR_PICKER).fill('#ff0000');
+        await lens.openXYDimensionEditor();
+        await lens.dimensionColorPicker.fill('#ff0000');
         // Committing the value rather than sleeping for the debounce.
-        await expect(page.locator(COLOR_PICKER)).toHaveValue('#FF0000');
+        await expect(lens.dimensionColorPicker).toHaveValue('#FF0000');
         await lens.closeDimensionEditor();
         await lens.applyFlyoutChanges();
 
@@ -96,8 +93,8 @@ spaceTest.describe(
         await discover.openLensEditFlyout();
         expect(await lens.getChartSwitchType()).toBe('Line');
 
-        await page.testSubj.click('lnsXY_yDimensionPanel');
-        await expect(page.locator(COLOR_PICKER)).toHaveValue('#FF0000');
+        await lens.openXYDimensionEditor();
+        await expect(lens.dimensionColorPicker).toHaveValue('#FF0000');
 
         // Close the flyout rather than ending the test on open, dirty editor state.
         // Cancelling dismisses the dimension editor with it, and unlike closing the

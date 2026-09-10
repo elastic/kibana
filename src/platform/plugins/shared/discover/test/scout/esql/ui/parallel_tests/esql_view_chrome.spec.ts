@@ -44,12 +44,23 @@ spaceTest.describe(
       await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeHidden();
       // no column sort button in ES|QL document view
       await expect(page.testSubj.locator('dataGridColumnSortingButton')).toBeHidden();
-      // expand toggle still present (rendered once per row, so scope to the first row)
+      // Expand toggle still present. Scoped by row rather than by column id: the
+      // toggle is rendered as extra content inside the `select` control column, so
+      // it has no column id of its own.
       await expect(
         page.locator(
           '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
         )
       ).toBeVisible();
+      // Alerts and Share stay available in ES|QL mode. Opening the overflow can only
+      // add visibility, so this holds whether an item sits there or at the top level.
+      await page.testSubj.click('app-menu-overflow-button');
+      await expect(page.testSubj.locator('app-menu-popover')).toBeVisible();
+      await expect(page.testSubj.locator('discoverAlertsButton')).toBeVisible();
+      await expect(page.testSubj.locator('shareTopNavButton')).toBeVisible();
+      await page.testSubj.click('app-menu-overflow-button');
+      await expect(page.testSubj.locator('app-menu-popover')).toBeHidden();
+
       // field stats don't show an edit link (no underlying data-view field to edit)
       await page.testSubj.click('field-@message-showDetails');
       await expect(page.testSubj.locator('discoverFieldListPanelEditItem')).toBeHidden();
@@ -104,8 +115,8 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'shows no-results callout when time range has no data, then recovers',
-      async ({ page, pageObjects }) => {
+      'restores results after moving away from and back to a populated time range',
+      async ({ pageObjects }) => {
         const { discover, datePicker, dataGrid } = pageObjects;
 
         await discover.writeAndSubmitEsqlQuery(STATS_QUERY);
@@ -114,12 +125,14 @@ spaceTest.describe(
         await dataGrid.waitForDocTableRendered();
         await expect(dataGrid.getCellValue(0, 'countB')).toHaveText('1');
 
-        // Collapse the time range to a single instant → no documents.
+        // Collapse the time range to a single instant so the query matches nothing.
+        // The empty state itself is asserted in no_results.test.tsx, where the data
+        // check is mocked — a shared deployment can't guarantee a zero-result query.
         await datePicker.setAbsoluteRange({
           from: 'Sep 19, 2015 @ 06:31:44.000',
           to: 'Sep 19, 2015 @ 06:31:44.000',
         });
-        await expect(page.testSubj.locator('discoverNoResults')).toBeVisible();
+        await discover.waitUntilTabIsLoaded();
 
         // Restore the default time range → data returns.
         await datePicker.setAbsoluteRange(DEFAULT_TIME_RANGE_DISPLAY);

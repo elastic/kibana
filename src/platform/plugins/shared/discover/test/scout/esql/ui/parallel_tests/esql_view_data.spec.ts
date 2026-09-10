@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
@@ -38,6 +39,9 @@ spaceTest.describe('Discover ES|QL view data', { tag: tags.deploymentAgnostic },
       await expect(dataGrid.getColumnHeader('bytes')).toBeVisible();
       await expect(dataGrid.getColumnHeader('machine.ram_range')).toBeVisible();
 
+      // machine.ram_range has no value in this data, so it renders the null placeholder.
+      await expect(dataGrid.getCellValue(0, 'machine.ram_range')).toHaveText(NULL_LABEL);
+
       // bytes should appear to the left of machine.ram_range in the grid
       const bytesBox = await dataGrid.getColumnHeader('bytes').boundingBox();
       const ramRangeBox = await dataGrid.getColumnHeader('machine.ram_range').boundingBox();
@@ -60,7 +64,7 @@ spaceTest.describe('Discover ES|QL view data', { tag: tags.deploymentAgnostic },
   spaceTest(
     'brushes histogram to narrow the time range without creating a filter',
     async ({ page, pageObjects }) => {
-      const { discover, datePicker } = pageObjects;
+      const { discover, datePicker, filterBar } = pageObjects;
 
       await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 100');
       await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
@@ -69,9 +73,10 @@ spaceTest.describe('Discover ES|QL view data', { tag: tags.deploymentAgnostic },
       await discover.brushHistogram();
       await discover.waitUntilTabIsLoaded();
 
-      // Time picker updates to the brushed window; no filter pill is added in ES|QL mode.
+      // The brush narrows the time picker itself rather than adding a filter pill.
       const newRange = await datePicker.getTimeRangeText();
       expect(newRange).not.toBe(initialRange);
+      await expect.poll(() => filterBar.getFilterCount()).toBe(0);
     }
   );
 });

@@ -10,8 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
-const ESQL_QUERY = 'from logstash-* | limit 10';
-
 spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -30,7 +28,7 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
   spaceTest('lists the Table and Visualization requests', async ({ page, pageObjects }) => {
     const { discover, inspector, unifiedTabs } = pageObjects;
 
-    await discover.writeAndSubmitEsqlQuery(ESQL_QUERY);
+    await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
 
     await unifiedTabs.openInspectorForActiveTab();
     await inspector.openInspectorRequestsView();

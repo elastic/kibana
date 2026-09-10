@@ -10,8 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
-const LOGSTASH_HIT_COUNT = '14,004';
-
 spaceTest.describe(
   'Discover ES|QL switching back to a data view',
   { tag: tags.deploymentAgnostic },
@@ -67,7 +65,7 @@ spaceTest.describe(
         await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
 
         await discover.selectClassicMode();
-        await expect(discover.getHitCountLocator()).toHaveText(LOGSTASH_HIT_COUNT);
+        await expect(discover.getHitCountLocator()).toHaveText('14,004');
 
         const dataViews = await discover.getAvailableDataViewsFromSearchBar();
         expect(dataViews).toContain('logstash-*');

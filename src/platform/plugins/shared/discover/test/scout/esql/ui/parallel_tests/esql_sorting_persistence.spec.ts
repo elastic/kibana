@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
 const SORT_QUERY = 'from logstash-* | sort @timestamp | limit 100';
+const COMPUTED_COLUMN_QUERY = `${SORT_QUERY} | keep bytes | eval var0 = abs(bytes) + 1`;
 
 spaceTest.describe('Discover ES|QL sorting persistence', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -53,6 +54,32 @@ spaceTest.describe('Discover ES|QL sorting persistence', { tag: tags.deploymentA
 
       await discover.loadSavedSearch(savedSearchTitle);
       await expect(dataGrid.getCellValue(0, 'bytes')).toHaveText('17,966');
+    }
+  );
+
+  spaceTest(
+    'restores sorting on a computed column after save, reload and reopen',
+    async ({ page, pageObjects, scoutSpace }) => {
+      const { discover, dataGrid } = pageObjects;
+      const savedSearchTitle = `esql computed sort persistence ${scoutSpace.id}`;
+
+      // `var0` is computed by the query rather than being a real field, so its sort
+      // state round-trips through a different path than a column like `bytes`.
+      await discover.writeAndSubmitEsqlQuery(COMPUTED_COLUMN_QUERY);
+      await dataGrid.sortColumn('var0', 'Sort High-Low');
+      await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('17,967');
+
+      await discover.saveSearch(savedSearchTitle);
+
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+      await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('17,967');
+
+      await discover.clickNewSearch();
+      await expect(dataGrid.getColumnHeader('var0')).toBeHidden();
+
+      await discover.loadSavedSearch(savedSearchTitle);
+      await expect(dataGrid.getCellValue(0, 'var0')).toHaveText('17,967');
     }
   );
 
