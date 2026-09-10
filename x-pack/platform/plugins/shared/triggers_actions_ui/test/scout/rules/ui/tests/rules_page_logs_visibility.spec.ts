@@ -6,7 +6,6 @@
  */
 
 import type { KbnClient } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { expect } from '@kbn/scout/ui';
 import { test, ACTIONS_ONLY_ROLE, RULES_V1_AND_V2_READ_ROLE } from '../fixtures';
@@ -39,65 +38,61 @@ const disableAlertingV2 = (kbnClient: KbnClient) =>
     ignoreErrors: [404],
   });
 
-test.describe(
-  'Rules page Logs visibility',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
-  () => {
-    test('hides the classic Logs tab when the user lacks rule-type read access', async ({
-      page,
-      browserAuth,
-    }) => {
+test.describe('Rules page Logs visibility', { tag: '@local-stateful-classic' }, () => {
+  test('hides the classic Logs tab when the user lacks rule-type read access', async ({
+    page,
+    browserAuth,
+  }) => {
+    await browserAuth.loginWithCustomRole(ACTIONS_ONLY_ROLE);
+    await page.gotoApp('rules');
+    await page.waitForURL(RULES_URL_RE);
+
+    await expect(page.testSubj.locator('rulesTab')).toBeVisible();
+    await expect(page.testSubj.locator('logsTab')).toBeHidden();
+  });
+
+  test('omits the Logs menu item when the user lacks rule-type read access', async ({
+    page,
+    browserAuth,
+    kbnClient,
+  }) => {
+    await enableAlertingV2(kbnClient);
+    try {
       await browserAuth.loginWithCustomRole(ACTIONS_ONLY_ROLE);
       await page.gotoApp('rules');
       await page.waitForURL(RULES_URL_RE);
 
-      await expect(page.testSubj.locator('rulesTab')).toBeVisible();
-      await expect(page.testSubj.locator('logsTab')).toBeHidden();
-    });
+      await page.testSubj.click('app-menu-overflow-button');
+      await expect(page.testSubj.locator('rulesLogsLink')).toBeHidden();
+    } finally {
+      await disableAlertingV2(kbnClient);
+    }
+  });
 
-    test('omits the Logs menu item when the user lacks rule-type read access', async ({
-      page,
-      browserAuth,
-      kbnClient,
-    }) => {
-      await enableAlertingV2(kbnClient);
-      try {
-        await browserAuth.loginWithCustomRole(ACTIONS_ONLY_ROLE);
-        await page.gotoApp('rules');
-        await page.waitForURL(RULES_URL_RE);
+  test('shows the Logs child page with its own heading, back button, no tabs, and no create button', async ({
+    page,
+    browserAuth,
+    kbnClient,
+  }) => {
+    await enableAlertingV2(kbnClient);
+    try {
+      await browserAuth.loginWithCustomRole(RULES_V1_AND_V2_READ_ROLE);
+      await page.gotoApp('rules');
+      await page.waitForURL(RULES_URL_RE);
 
-        await page.testSubj.click('app-menu-overflow-button');
-        await expect(page.testSubj.locator('rulesLogsLink')).toBeHidden();
-      } finally {
-        await disableAlertingV2(kbnClient);
-      }
-    });
+      await page.testSubj.click('app-menu-overflow-button');
+      await page.testSubj.click('rulesLogsLink');
+      await page.waitForURL(LOGS_URL_RE);
 
-    test('shows the Logs child page with its own heading, back button, no tabs, and no create button', async ({
-      page,
-      browserAuth,
-      kbnClient,
-    }) => {
-      await enableAlertingV2(kbnClient);
-      try {
-        await browserAuth.loginWithCustomRole(RULES_V1_AND_V2_READ_ROLE);
-        await page.gotoApp('rules');
-        await page.waitForURL(RULES_URL_RE);
-
-        await page.testSubj.click('app-menu-overflow-button');
-        await page.testSubj.click('rulesLogsLink');
-        await page.waitForURL(LOGS_URL_RE);
-
-        await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText('Logs');
-        await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
-          'Back to Rules'
-        );
-        await expect(page.testSubj.locator('v1RulesTab')).toBeHidden();
-        await expect(page.testSubj.locator('v2RulesTab')).toBeHidden();
-        await expect(page.testSubj.locator('createRuleButton')).toBeHidden();
-      } finally {
-        await disableAlertingV2(kbnClient);
-      }
-    });
-  }
-);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText('Logs');
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
+        'Back to Rules'
+      );
+      await expect(page.testSubj.locator('v1RulesTab')).toBeHidden();
+      await expect(page.testSubj.locator('v2RulesTab')).toBeHidden();
+      await expect(page.testSubj.locator('createRuleButton')).toBeHidden();
+    } finally {
+      await disableAlertingV2(kbnClient);
+    }
+  });
+});
