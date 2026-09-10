@@ -1,5 +1,5 @@
 {
-  "sha1": "2b3d9c8c65acb650e2488a4a3d662134d8ab1768",
+  "sha1": "2b01ca9ab386abff0cd46efd1967b9908d6ccf58",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,76 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
         "line": 108,
         "column": 30
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-917d88b3f6969ed",
+      "title": "Onboarding ECF Deployment Section pre-launch: ECF section is visible with launch button; no stack name field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 39,
+        "column": 8
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-7e7ee2a63c9223c",
+      "title": "Onboarding ECF Deployment Section post-launch: accordion stays expanded with Done badge; stack name field is pre-filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 52,
+        "column": 24
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-a180c0cddbd1be7",
+      "title": "Onboarding ECF Deployment Section post-launch: ECF version is displayed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 77,
+        "column": 24
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-be7cfaf857fe499",
+      "title": "Onboarding ECF Deployment Section post-launch: editing the stack name is written to session storage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 99,
+        "column": 22
+      }
+    },
+    {
+      "id": "82e34e527d8d9f5-16c68e10f90f8d8",
+      "title": "Onboarding ECF Deployment Section post-launch: invalid stack name shows inline error; Next button stays enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ecf_deployment_section.spec.ts",
+        "line": 128,
+        "column": 5
       }
     },
     {

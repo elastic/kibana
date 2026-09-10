@@ -210,6 +210,47 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+# Sets the GitHub stack root merge base, falling back to the current PR merge base.
+set_git_stack_merge_base() {
+  GITHUB_PR_STACK_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
+  GITHUB_PR_STACK_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+
+  local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+  local stack_target_branch
+  local stack_merge_base
+
+  if [[ -z "$github_token" || -z "${GITHUB_PR_BASE_OWNER:-}" || -z "${GITHUB_PR_BASE_REPO:-}" ]] || ! command -v gh >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! stack_target_branch="$(
+    GH_TOKEN="$github_token" gh api graphql \
+      -f owner="$GITHUB_PR_BASE_OWNER" \
+      -f repo="$GITHUB_PR_BASE_REPO" \
+      -F number="$GITHUB_PR_NUMBER" \
+      -f query='query($owner: String!, $repo: String!, $number: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $number) { stack { baseRefName } } } }' \
+      --jq '.data.repository.pullRequest.stack.baseRefName // empty' 2>/dev/null
+  )" || [[ -z "$stack_target_branch" ]]; then
+    return
+  fi
+
+  if git fetch origin "$stack_target_branch" 2>/dev/null; then
+    stack_merge_base="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$stack_merge_base" ]]; then
+    echo "Failed to resolve stack merge base; falling back to PR merge base" >&2
+    return
+  fi
+
+  GITHUB_PR_STACK_TARGET_BRANCH="$stack_target_branch"
+  GITHUB_PR_STACK_MERGE_BASE="$stack_merge_base"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+}
+
 # For merge-queue builds (gh-readonly-queue/* branches), resolves the merge base
 # against the target branch and the list of first-parent commits this merge group
 # will add to the target branch when it lands. These are reported to ci-stats so

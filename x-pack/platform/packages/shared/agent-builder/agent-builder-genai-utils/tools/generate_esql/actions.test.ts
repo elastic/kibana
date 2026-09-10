@@ -12,6 +12,7 @@ import {
   type ValidateQueryAction,
   type ExecuteQueryAction,
   type GenerateQueryAction,
+  type RequestDocumentationAction,
 } from './actions';
 
 describe('generate_esql actions', () => {
@@ -91,6 +92,85 @@ describe('generate_esql actions', () => {
         const toolContent = JSON.parse((messages[1] as ToolMessage).content as string);
         expect(toolContent.success).toBe(false);
         expect(toolContent.error).toBe('expected integer');
+      });
+    });
+
+    describe('request_documentation', () => {
+      const action: RequestDocumentationAction = {
+        type: 'request_documentation',
+        requestedKeywords: ['STATS', 'DATE_TRUNC'],
+        fetchedDoc: {
+          STATS: '### STATS\n\nAggregates rows.',
+          DATE_TRUNC: '### DATE_TRUNC\n\nRounds a date down.',
+        },
+      };
+
+      it('returns AI + user message carrying the documentation (withoutToolCalls=true)', () => {
+        const messages = formatAction(action, true);
+        expect(messages).toHaveLength(2);
+        expect(messages[0]).toBeInstanceOf(AIMessage);
+        expect((messages[0] as AIMessage).content).toBe(
+          'I need the ES|QL documentation for the following keywords: STATS, DATE_TRUNC'
+        );
+        expect(messages[1]).toBeInstanceOf(HumanMessage);
+        const userContent = (messages[1] as HumanMessage).content as string;
+        expect(userContent).toContain('Here is the documentation you requested');
+        expect(userContent).toContain('Aggregates rows.');
+        expect(userContent).toContain('Rounds a date down.');
+      });
+
+      // The generation step binds no tools. A tool call here makes models re-call the tool and
+      // triggers the inference layer's `doNotCallThisTool` placeholder injection, which keys off
+      // any tool call or tool message being present in the history.
+      it('emits no tool call and no tool message (withoutToolCalls=true)', () => {
+        const messages = formatAction(action, true);
+        expect(messages.some((message) => message instanceof ToolMessage)).toBe(false);
+        expect(
+          messages.some(
+            (message) => message instanceof AIMessage && (message.tool_calls ?? []).length > 0
+          )
+        ).toBe(false);
+      });
+
+      it('serializes the documentation identically to the tool result form', () => {
+        const conversational = formatAction(action, true);
+        const withToolCalls = formatAction(action, false);
+        const userContent = (conversational[1] as HumanMessage).content as string;
+        const toolContent = (withToolCalls[1] as ToolMessage).content as string;
+        expect(userContent).toContain(toolContent);
+      });
+
+      it('returns tool call + tool result when withoutToolCalls=false', () => {
+        const messages = formatAction(action, false);
+        expect(messages).toHaveLength(2);
+        expect(messages[0]).toBeInstanceOf(AIMessage);
+        const aiMessage = messages[0] as AIMessage;
+        expect(aiMessage.tool_calls).toHaveLength(1);
+        expect(aiMessage.tool_calls?.[0].name).toBe('request_documentation');
+        expect(aiMessage.tool_calls?.[0].args).toEqual({ keywords: action.requestedKeywords });
+        expect(messages[1]).toBeInstanceOf(ToolMessage);
+        const toolContent = JSON.parse((messages[1] as ToolMessage).content as string);
+        expect(toolContent.documentation).toEqual(action.fetchedDoc);
+      });
+
+      it('returns empty array when no documentation was fetched', () => {
+        expect(
+          formatAction({ type: 'request_documentation', requestedKeywords: [], fetchedDoc: {} })
+        ).toEqual([]);
+      });
+
+      it('falls back to the fetched keywords when none were explicitly requested', () => {
+        const messages = formatAction(
+          {
+            type: 'request_documentation',
+            requestedKeywords: [],
+            fetchedDoc: { STATS: '### STATS' },
+          },
+          true
+        );
+        expect((messages[0] as AIMessage).content).toBe(
+          'I need the ES|QL documentation for the following keywords: STATS'
+        );
       });
     });
   });
