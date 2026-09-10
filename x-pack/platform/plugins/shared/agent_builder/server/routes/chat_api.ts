@@ -5,20 +5,70 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { createBadRequestError } from '@kbn/agent-builder-common';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
+import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { conversePayloadSchema } from './chat';
+import { persistContextMessage } from '../services/execution/utils/conversations';
+import { chatPayloadSchema, contextMessagePayloadSchema, conversePayloadSchema } from './chat';
+
+type ContextMessagePayload = ChatRequestBodyPayload & {
+  trigger_mode: 'never';
+  conversation_id: string;
+};
+
+const validateContextMessagePayload = (payload: ChatRequestBodyPayload): ContextMessagePayload => {
+  try {
+    contextMessagePayloadSchema.validate(payload);
+  } catch (error) {
+    throw createBadRequestError(error instanceof Error ? error.message : String(error));
+  }
+
+  if (!payload.input?.trim() && !payload.attachments?.length) {
+    throw createBadRequestError('Context message requests require input or attachments');
+  }
+
+  return payload as ContextMessagePayload;
+};
+
+const validateContextMessageAttachments = async ({
+  attachments,
+  attachmentsService,
+  request,
+}: {
+  attachments: AttachmentInput[];
+  attachmentsService: AttachmentServiceStart;
+  request: KibanaRequest;
+}): Promise<AttachmentInput[]> => {
+  const validated: AttachmentInput[] = [];
+
+  for (const input of attachments) {
+    const result = await attachmentsService.validate(input, request);
+
+    if (!result.valid) {
+      throw createBadRequestError(`Attachment validation failed: ${result.error}`);
+    }
+
+    const attachment = result.attachment as Attachment;
+    validated.push({ ...input, id: attachment.id ?? uuidv4(), data: attachment.data });
+  }
+
+  return validated;
+};
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -28,7 +78,6 @@ export function registerChatApiRoutes({
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
-
   const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
@@ -42,7 +91,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning.',
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a context message without execution and returns the updated conversation; execution-only options are rejected.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -58,14 +107,41 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: conversePayloadSchema },
+          request: { body: chatPayloadSchema },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
-          const { execution: executionService, conversations: conversationsService } =
-            getInternalServices();
           const payload = request.body as ChatRequestBodyPayload;
+
+          if (payload.trigger_mode === 'never') {
+            const contextMessagePayload = validateContextMessagePayload(payload);
+
+            const { attachments: attachmentsService, conversations: conversationsService } =
+              getInternalServices();
+            const client = await conversationsService.getScopedClient({ request });
+
+            const attachments = await validateContextMessageAttachments({
+              attachments: contextMessagePayload.attachments ?? [],
+              attachmentsService,
+              request,
+            });
+
+            const author = await conversationsService.getConversationRoundAuthor({ request });
+            const body = await persistContextMessage({
+              conversationId: contextMessagePayload.conversation_id,
+              message: contextMessagePayload.input ?? '',
+              attachments,
+              conversationClient: client,
+              getTypeDefinition: attachmentsService.getTypeDefinition,
+              author,
+            });
+
+            return response.ok({ body });
+          }
+
+          const { conversations: conversationsService, execution: executionService } =
+            getInternalServices();
 
           await validateConfigurationOverrides({ payload, request });
           validateAction(payload);

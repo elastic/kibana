@@ -14,7 +14,8 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload } from './chat';
 
-export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
+export interface ChatCallbackRequestBodyPayload
+  extends Omit<ChatRequestBodyPayload, 'trigger_mode'> {
   execution_idempotency_key: string;
   origin?: ConversationOrigin & {
     type: ConversationOriginType;

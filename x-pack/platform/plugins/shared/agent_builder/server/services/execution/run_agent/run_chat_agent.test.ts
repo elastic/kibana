@@ -35,7 +35,7 @@ jest.mock('./utils', () => ({
   getPendingRound: jest.fn(),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
-  estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
+  estimateTimelineEntryTokens: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('./tools/register_internal_tools', () => ({

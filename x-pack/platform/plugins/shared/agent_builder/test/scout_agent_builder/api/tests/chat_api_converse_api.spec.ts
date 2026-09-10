@@ -104,6 +104,86 @@ apiTest.describe(
       await deleteConnectorById(kbnClient, connectorId);
     });
 
+    apiTest(
+      'context message sync requests persist context for the next model request',
+      async ({ apiClient }) => {
+        const requestsBefore = llmProxy.interceptedRequests.length;
+        const first = await apiClient.post(CHAT_CONVERSE, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {
+            trigger_mode: 'never',
+            input: 'Pool limit is now 200',
+          },
+          responseType: 'json',
+        });
+        expect(first).toHaveStatusCode(200);
+        const firstBody = first.body as GetConversationResponse;
+        const conversationId = firstBody.id;
+        const firstMessageId = firstBody.events?.[0].id;
+        conversationIds.push(conversationId);
+        const second = await apiClient.post(CHAT_CONVERSE, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {
+            trigger_mode: 'never',
+            conversation_id: conversationId,
+            input: 'Errors returned to normal',
+          },
+          responseType: 'json',
+        });
+        expect(second).toHaveStatusCode(200);
+        const stored = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
+        expect(stored.rounds).toStrictEqual([]);
+        expect(stored.events).toHaveLength(2);
+        expect(stored.events?.[0].id).toBe(firstMessageId);
+        expect(stored.events?.every((event) => event.type === TimelineEventType.userMessage)).toBe(
+          true
+        );
+        expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
+
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          response: 'Incident mitigated',
+          continueConversation: true,
+        });
+        const executed = await postChatConverse(apiClient, adminCredentials.apiKeyHeader, {
+          conversation_id: conversationId,
+          input: 'Summarize the incident',
+          connector_id: connectorId,
+        });
+        expect(executed).toHaveStatusCode(200);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        const modelRequest = llmProxy.interceptedRequests
+          .slice(requestsBefore)
+          .find(
+            (entry) => entry.matchingInterceptorName === 'final-assistant-response'
+          )?.requestBody;
+        expect(modelRequest).toBeDefined();
+        const contents = modelRequest?.messages.map((entry) => String(entry.content ?? '')) ?? [];
+        for (const text of [
+          'Pool limit is now 200',
+          'Errors returned to normal',
+          'Summarize the incident',
+        ]) {
+          expect(contents.filter((content) => content.includes(text))).toHaveLength(1);
+        }
+        expect(
+          contents.findIndex((content) => content.includes('Pool limit is now 200'))
+        ).toBeLessThan(
+          contents.findIndex((content) => content.includes('Errors returned to normal'))
+        );
+        expect(contents.join('\n')).toContain('Alice');
+        expect(
+          (
+            await getConversation(apiClient, adminCredentials.apiKeyHeader, conversationId)
+          ).events?.filter((event) => event.type === TimelineEventType.userMessage)
+        ).toHaveLength(3);
+      }
+    );
+
     apiTest('converse returns the conversation with its events timeline', async ({ apiClient }) => {
       const MOCKED_LLM_RESPONSE = 'ack from chat api';
       const MOCKED_LLM_TITLE = 'Chat API Title';

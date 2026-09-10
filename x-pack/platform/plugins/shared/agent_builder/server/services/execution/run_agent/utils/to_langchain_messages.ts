@@ -43,6 +43,7 @@ import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   groupTimelineRounds,
+  groupTimelineEntries,
   isAwaitingPrompt,
   roundResponse,
   type ProcessedTimelineEvent,
@@ -96,7 +97,7 @@ export const prepareMessages = async ({
   const attachmentTypeInstructionsProvided = new Set<string>();
 
   const previousRounds = groupTimelineRounds(conversation.timeline);
-  let rounds = previousRounds;
+  let entries = groupTimelineEntries(conversation.timeline);
   let input = conversation.nextInput;
   let inputTimestamp = conversationTimestamp;
 
@@ -104,7 +105,7 @@ export const prepareMessages = async ({
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
   const lastRound = previousRounds[previousRounds.length - 1];
   if (lastRound && isAwaitingPrompt(lastRound)) {
-    rounds = rounds.slice(0, rounds.length - 1);
+    entries = entries.filter((entry) => !('terminated' in entry) || entry.id !== lastRound.id);
     input = lastRound.userMessage.data;
     inputTimestamp = lastRound.userMessage.created_at;
   }
@@ -125,7 +126,18 @@ export const prepareMessages = async ({
     }
   }
 
-  for (const round of rounds) {
+  for (const round of entries) {
+    if (!('terminated' in round)) {
+      messages.push(
+        formatRoundInput({
+          input: round.userMessage.data,
+          timestamp: round.userMessage.created_at,
+          attachmentTypes: conversation.attachmentTypes,
+          attachmentTypeInstructionsProvided,
+        })
+      );
+      continue;
+    }
     messages.push(
       ...(await roundToLangchain(round, {
         resultTransformer,
@@ -225,7 +237,7 @@ export const roundToLangchain = async (
   return messages;
 };
 
-const formatRoundInput = ({
+export const formatRoundInput = ({
   input,
   timestamp,
   attachmentTypes,

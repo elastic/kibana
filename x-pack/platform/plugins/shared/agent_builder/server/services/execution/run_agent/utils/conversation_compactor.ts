@@ -18,7 +18,12 @@ import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversation } from './prepare_conversation';
-import { groupTimelineRounds, sliceTimelineRounds, type TimelineRound } from './context_timeline';
+import {
+  isAwaitingPrompt,
+  groupTimelineEntries,
+  sliceTimelineEntries,
+  type TimelineEntry,
+} from './context_timeline';
 import type { ContextBudget } from './context_budget';
 import { shouldTriggerCompaction } from './context_budget';
 import { prepareMessages } from './to_langchain_messages';
@@ -40,11 +45,11 @@ export interface CompactConversationOptions {
   chatModel: InferenceChatModel;
   contextBudget: ContextBudget;
   /**
-   * Per-round token counts for the rounds of `processedConversation.timeline`, in round order.
+   * Per-entry token counts for `processedConversation.timeline`, in context-entry order.
    * Computed once upstream so the trigger, before/after reporting, and hard truncation
    * all share the same summarization-aware estimate.
    */
-  perRoundTokenCounts: number[];
+  timelineEntryTokenCounts: number[];
   existingSummary?: CompactionSummary;
   logger: Logger;
   abortSignal?: AbortSignal;
@@ -143,15 +148,24 @@ export const compactConversation = async ({
   processedConversation,
   chatModel,
   contextBudget,
-  perRoundTokenCounts,
+  timelineEntryTokenCounts,
   existingSummary,
   logger,
   abortSignal,
   eventEmitter,
 }: CompactConversationOptions): Promise<CompactedConversation> => {
+  const entries = groupTimelineEntries(processedConversation.timeline);
+  const boundary =
+    existingSummary?.timeline_version === 1
+      ? entries.findIndex((entry) => entry.userMessage.id === existingSummary?.through_event_id)
+      : -1;
+  existingSummary =
+    boundary >= 0 && existingSummary?.summarized_entry_count === boundary + 1
+      ? existingSummary
+      : undefined;
   // Under threshold: apply existing summary if present (so the LLM sees
   // the compacted view) but don't report a new compaction event.
-  if (!shouldTriggerCompaction(perRoundTokenCounts, contextBudget, existingSummary)) {
+  if (!shouldTriggerCompaction(timelineEntryTokenCounts, contextBudget, existingSummary)) {
     if (existingSummary) {
       const compacted = applyExistingSummary(processedConversation, existingSummary);
       return {
@@ -163,10 +177,10 @@ export const compactConversation = async ({
     return { processedConversation, compactionTriggered: false };
   }
 
-  const rawTokens = sumTokens(perRoundTokenCounts);
+  const rawTokens = sumTokens(timelineEntryTokenCounts);
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
-      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
+      sumTokens(timelineEntryTokenCounts.slice(existingSummary.summarized_entry_count))
     : rawTokens;
   logger.info(
     `Compaction triggered: ${effectiveTokens} effective tokens (${rawTokens} raw) exceeds threshold of ${contextBudget.triggerThreshold}`
@@ -189,11 +203,12 @@ export const compactConversation = async ({
   );
 
   if (summarizationResult.summary) {
-    // Remaining rounds are the suffix after the summarized prefix, so their counts
-    // are perRoundTokenCounts sliced at summarized_round_count.
+    // Remaining entries are the suffix after the summarized prefix, so their counts
+    // are sliced at summarized_entry_count.
     const afterTokens =
-      sumTokens(perRoundTokenCounts.slice(summarizationResult.summary.summarized_round_count)) +
-      summarizationResult.summary.token_count;
+      sumTokens(
+        timelineEntryTokenCounts.slice(summarizationResult.summary.summarized_entry_count)
+      ) + summarizationResult.summary.token_count;
     if (afterTokens <= contextBudget.historyBudget) {
       logger.debug(
         `Summarization sufficient: ${afterTokens} tokens (budget: ${contextBudget.historyBudget})`
@@ -218,10 +233,10 @@ export const compactConversation = async ({
   }
 
   // Hard truncation fallback. When summarization produced a summary only the recent
-  // (suffix) rounds remain, so truncate over their counts; otherwise the full set.
+  // (suffix) entries remain, so truncate over their counts; otherwise the full set.
   const postSummaryCounts = summarizationResult.summary
-    ? perRoundTokenCounts.slice(summarizationResult.summary.summarized_round_count)
-    : perRoundTokenCounts;
+    ? timelineEntryTokenCounts.slice(summarizationResult.summary.summarized_entry_count)
+    : timelineEntryTokenCounts;
   const truncation = applyHardTruncation(
     summarizationResult.processedConversation,
     postSummaryCounts,
@@ -261,7 +276,7 @@ const applyExistingSummary = (
 ): ProcessedConversation => {
   return {
     ...conversation,
-    timeline: sliceTimelineRounds(conversation.timeline, summary.summarized_round_count),
+    timeline: sliceTimelineEntries(conversation.timeline, summary.summarized_entry_count ?? 0),
     compactionSummary: summary,
   };
 };
@@ -284,18 +299,19 @@ const summarizeOlderRounds = async (
   existingSummary?: CompactionSummary,
   abortSignal?: AbortSignal
 ): Promise<{ processedConversation: ProcessedConversation; summary?: CompactionSummary }> => {
-  const previousRounds = groupTimelineRounds(conversation.timeline);
-  const preserveCount = Math.min(PRESERVED_RECENT_ROUNDS, previousRounds.length);
+  const previousRounds = groupTimelineEntries(conversation.timeline);
+  const summarizeCount = oldestPreservedEntry(previousRounds);
 
-  if (previousRounds.length <= preserveCount) {
+  if (summarizeCount === 0) {
     return { processedConversation: conversation };
   }
 
-  const summarizeCount = previousRounds.length - preserveCount;
   const roundsToSummarize = previousRounds.slice(0, summarizeCount);
 
   // Phase 1: programmatic extraction from all older rounds (deterministic, not expensive)
-  const programmatic = extractProgrammaticSummary(roundsToSummarize);
+  const programmatic = extractProgrammaticSummary(
+    roundsToSummarize.filter((entry) => 'terminated' in entry)
+  );
 
   try {
     // Phase 2: LLM call for semantic fields and entity extraction.
@@ -320,7 +336,10 @@ const summarizeOlderRounds = async (
     const summaryTokenCount = estimateTokens(summaryText);
 
     const summary: CompactionSummary = {
-      summarized_round_count: roundsToSummarize.length,
+      summarized_round_count: roundsToSummarize.filter((entry) => 'terminated' in entry).length,
+      timeline_version: 1,
+      through_event_id: roundsToSummarize.at(-1)?.userMessage.id,
+      summarized_entry_count: roundsToSummarize.length,
       created_at: new Date().toISOString(),
       token_count: summaryTokenCount,
       structured_data: structuredData,
@@ -329,7 +348,7 @@ const summarizeOlderRounds = async (
     return {
       processedConversation: {
         ...conversation,
-        timeline: sliceTimelineRounds(conversation.timeline, summarizeCount),
+        timeline: sliceTimelineEntries(conversation.timeline, summarizeCount),
         compactionSummary: summary,
       },
       summary,
@@ -352,7 +371,7 @@ const summarizeOlderRounds = async (
  */
 const generateLlmSummary = async (
   conversation: ProcessedConversation,
-  roundsToSummarize: Array<TimelineRound<ProcessedConversation['timeline'][number]>>,
+  roundsToSummarize: Array<TimelineEntry<ProcessedConversation['timeline'][number]>>,
   programmatic: {
     tool_calls_summary: CompactionToolCallSummary[];
     agent_actions: string[];
@@ -364,7 +383,7 @@ const generateLlmSummary = async (
   // Only send rounds not already covered by the existing summary as raw history.
   // This avoids re-processing stale rounds and prevents the summarizer call
   // from overflowing the context window on second+ compactions.
-  const alreadySummarizedCount = existingSummary?.summarized_round_count ?? 0;
+  const alreadySummarizedCount = existingSummary?.summarized_entry_count ?? 0;
   const tempConversation: ProcessedConversation = {
     ...conversation,
     timeline: roundsToSummarize.slice(alreadySummarizedCount).flatMap((round) => round.events),
@@ -398,32 +417,43 @@ const generateLlmSummary = async (
 };
 
 /**
- * Drop oldest rounds one by one until the conversation fits within the history
- * budget, always preserving at least the most recent rounds. `perRoundCounts`
- * is index-aligned with the timeline's rounds; truncation is O(n) via a
+ * Drop oldest entries one by one until the conversation fits within the history
+ * budget, always preserving at least the most recent entries. `timelineEntryTokenCounts`
+ * is index-aligned with the timeline's entries; truncation is O(n) via a
  * rolling total and a start index (no per-step re-estimation or array shifting).
  */
 const applyHardTruncation = (
   conversation: ProcessedConversation,
-  perRoundCounts: number[],
+  timelineEntryTokenCounts: number[],
   budget: ContextBudget
 ): { conversation: ProcessedConversation; tokens: number } => {
-  let currentTokens = sumTokens(perRoundCounts);
+  let currentTokens = sumTokens(timelineEntryTokenCounts);
 
   if (currentTokens <= budget.historyBudget) {
     return { conversation, tokens: currentTokens };
   }
 
-  const minStart = groupTimelineRounds(conversation.timeline).length - PRESERVED_RECENT_ROUNDS;
+  const minStart = oldestPreservedEntry(groupTimelineEntries(conversation.timeline));
   let start = 0;
 
   while (start < minStart && currentTokens > budget.historyBudget) {
-    currentTokens -= perRoundCounts[start];
+    currentTokens -= timelineEntryTokenCounts[start];
     start++;
   }
 
   return {
-    conversation: { ...conversation, timeline: sliceTimelineRounds(conversation.timeline, start) },
+    conversation: { ...conversation, timeline: sliceTimelineEntries(conversation.timeline, start) },
     tokens: currentTokens,
   };
+};
+
+const oldestPreservedEntry = (
+  entries: Array<TimelineEntry<ProcessedConversation['timeline'][number]>>
+): number => {
+  const recentStart = Math.max(0, entries.length - PRESERVED_RECENT_ROUNDS);
+  const lastExecutionIndex = entries.findLastIndex((entry) => 'terminated' in entry);
+  const lastExecution = entries[lastExecutionIndex];
+  return lastExecution && 'terminated' in lastExecution && isAwaitingPrompt(lastExecution)
+    ? Math.min(recentStart, lastExecutionIndex)
+    : recentStart;
 };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { setTimeout as delay } from 'node:timers/promises';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { v4 as uuidv4 } from 'uuid';
 import type { GetResponse, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
@@ -22,6 +25,9 @@ import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
+  TimelineEventType,
+  isConversationAlreadyExistsError,
+  isEventsNativeVersion,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isConversationAccessControlRole,
@@ -36,6 +42,7 @@ import {
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
+import { userMessageActor } from './rounds_to_events';
 import type {
   ConversationWithPermissions,
   UpdateConversationAccessControlRequestBody,
@@ -52,6 +59,7 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
+  AppendContextMessageRequest,
   AddAttachmentsToLastRoundRequest,
   AppendEventsRequest,
   ConversationCreateRequest,
@@ -118,6 +126,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  appendContextMessage(request: AppendContextMessageRequest): Promise<ConversationWithPermissions>;
   appendEvents(
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
@@ -524,6 +533,108 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /** Appends timeline events onto a conversation.*/
+  async appendContextMessage(
+    request: AppendContextMessageRequest
+  ): Promise<ConversationWithPermissions> {
+    const {
+      id,
+      messageId,
+      createdAt,
+      message,
+      attachments,
+      getTypeDefinition,
+      create,
+      author,
+      origin,
+    } = request;
+    const createdAtIso = createdAt.toISOString();
+
+    const materialize = async (
+      current: Conversation
+    ): Promise<Pick<NormalizedConversation, 'events' | 'attachments' | 'read' | 'read_by'>> => {
+      const manager = createAttachmentStateManager(current.attachments ?? [], {
+        getTypeDefinition,
+      });
+      for (const attachment of attachments) {
+        if (attachment.id && manager.getAttachmentRecord(attachment.id)) {
+          await manager.update(attachment.id, attachment, ATTACHMENT_REF_ACTOR.user);
+        } else {
+          await manager.add(attachment, ATTACHMENT_REF_ACTOR.user);
+        }
+      }
+      return {
+        events: [
+          ...(current.events ?? []),
+          {
+            id: messageId,
+            type: TimelineEventType.userMessage,
+            created_at: createdAtIso,
+            actor: userMessageActor({ ...current, user: this.user }, { author, origin }),
+            data: { message, attachment_refs: manager.getAccessedRefs() },
+          },
+        ],
+        attachments: manager.getAll(),
+        read: false,
+        read_by: [],
+      };
+    };
+
+    if (create) {
+      await this.agentRegistry.get(create.agent_id, { access: 'use' });
+      const initial = {
+        ...create,
+        id,
+        user: this.user,
+        created_at: createdAtIso,
+        updated_at: createdAtIso,
+      };
+      try {
+        return await this.create({
+          ...create,
+          id,
+          user: this.user,
+          ...(await materialize(initial)),
+        });
+      } catch (error) {
+        if (!isConversationAlreadyExistsError(error)) throw error;
+      }
+    }
+
+    const writer = this.createWriter({ access: 'converse', maxRetries: 0 });
+    const maxRetries = 5;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const document = await this.getDocumentWithAccess({ conversationId: id, access: 'converse' });
+      const current = fromEs(document, this.user);
+      if (current.read_only) throw createBadRequestError('Conversation is read-only');
+      if (!isEventsNativeVersion(current.schema_version)) {
+        throw createInternalError('Standalone messages require canonical event storage');
+      }
+      // Replays must return before modifying attachments or unread state, including after a conflict.
+      if (current.events?.some((event) => event.id === messageId)) return await this.get(id);
+      const fields = await materialize(current);
+      try {
+        await writer.write({
+          id,
+          document: updateConversation({
+            conversation: current,
+            update: { id, ...fields },
+            updateDate: new Date(),
+            space: this.space,
+          }),
+          ifSeqNo: document._seq_no,
+          ifPrimaryTerm: document._primary_term,
+        });
+        return await this.get(id);
+      } catch (error) {
+        if (!isElasticsearchWriteConflict(error)) throw error;
+        if (attempt === maxRetries)
+          throw createConversationWriteConflictError({ conversationId: id });
+        await delay(400);
+      }
+    }
+    throw createConversationWriteConflictError({ conversationId: id });
+  }
+
   async appendEvents(
     request: AppendEventsRequest,
     options: { access: ConversationAccess } = { access: 'converse' }

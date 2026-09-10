@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerChatRoutes } from './chat';
 import { of, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChatEventType } from '@kbn/agent-builder-common';
@@ -220,5 +221,131 @@ describe('registerChatApiRoutes', () => {
     expect(response.notFound).toHaveBeenCalled();
     expect(result).toEqual({ status: 404 });
     expect(executeAgent).not.toHaveBeenCalled();
+  });
+});
+
+describe('context message acknowledgements', () => {
+  it('persists through sync converse without execution setup', async () => {
+    const { router, handlers } = captureHandlers();
+    const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
+    const appendContextMessage = jest.fn().mockResolvedValue(conversation);
+    const executeAgent = jest.fn();
+    const validateCallbackUrl = jest.fn();
+    const getStartServices = jest.fn();
+    const services = {
+      conversations: {
+        getScopedClient: async () => ({ appendContextMessage }),
+        getConversationRoundAuthor: async () => ({ id: 'user' }),
+      },
+      attachments: {
+        getTypeDefinition: jest.fn(),
+        validate: jest.fn().mockResolvedValue({
+          valid: true,
+          attachment: { id: 'attachment-1', type: 'text', data: { text: 'context' } },
+        }),
+      },
+      execution: { executeAgent },
+      callbackDeliveryService: { validateCallbackUrl },
+    };
+    const deps = {
+      router,
+      getInternalServices: () => services,
+      coreSetup: { getStartServices },
+      logger: loggingSystemMock.createLogger(),
+    };
+    registerChatApiRoutes(deps as never);
+    registerChatRoutes(deps as never);
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      {
+        ...activeContext(true),
+        agentBuilder: Promise.resolve({ spaces: { getSpaceId: () => 'default' } }),
+      },
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          input: 'context',
+        },
+      },
+      response
+    );
+    expect(result.status).toBe(200);
+    expect(appendContextMessage).toHaveBeenCalledTimes(1);
+    expect(result.payload).toEqual(conversation);
+    expect(executeAgent).not.toHaveBeenCalled();
+    expect(validateCallbackUrl).not.toHaveBeenCalled();
+    expect(getStartServices).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    'agent_id',
+    'access_control',
+    'read_only',
+    'prompts',
+    'action',
+    '_execution_mode',
+    'execution_id',
+    'connector_id',
+    'inference_id',
+    'browser_api_tools',
+    'configuration_overrides',
+    'project_routing',
+  ])('rejects %s before persisting a context message request', async (field) => {
+    const { router, handlers } = captureHandlers();
+    const getInternalServices = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+          input: 'context',
+          [field]: {},
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(getInternalServices).not.toHaveBeenCalled();
+  });
+
+  it('requires input or attachments before persisting a context message request', async () => {
+    const { router, handlers } = captureHandlers();
+    const getInternalServices = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices,
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      {
+        body: {
+          trigger_mode: 'never',
+          conversation_id: '00000000-0000-4000-8000-000000000001',
+        },
+      },
+      response
+    );
+
+    expect(result.status).toBe(400);
+    expect(getInternalServices).not.toHaveBeenCalled();
   });
 });

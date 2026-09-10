@@ -38,7 +38,7 @@ import type {
   ProcessedUserMessageEvent,
   TimelineRound,
 } from './context_timeline';
-import { groupTimelineRounds } from './context_timeline';
+import { groupTimelineRounds, groupTimelineEntries } from './context_timeline';
 
 export interface ProcessedConversation {
   /**
@@ -209,12 +209,13 @@ export const prepareConversation = async ({
     nextInput,
   });
 
-  // Rounds are processed in order: migrating a round's legacy attachments into the state manager
-  // determines which refs later rounds (and the next input) resolve to. Events outside a round
-  // (e.g. a run that never terminated) carry no context and are dropped.
+  // Process complete executions and independent messages in order so attachment versions
+  // resolve consistently. Incomplete execution inputs remain outside the model history.
   const processedInputs: ProcessedRoundInput[] = [];
   const processedTimeline: ProcessedTimelineEvent[] = [];
-  for (const round of effectiveRounds) {
+  const includedRounds = new Set(effectiveRounds.map((round) => round.id));
+  for (const round of groupTimelineEntries(timeline)) {
+    if ('terminated' in round && !includedRounds.has(round.id)) continue;
     attachmentStateManager.clearAccessTracking();
     const input = round.userMessage.data;
     if (input.attachments && input.attachments.length > 0) {

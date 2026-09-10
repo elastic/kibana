@@ -15,6 +15,8 @@ export {
   createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
+  persistContextMessage,
+  isNewConversation,
   appendResumeExecution$,
   placeholderConversation,
   type ConversationOperation,
