@@ -161,7 +161,7 @@ describe('AgentBasedSection', () => {
       expect(screen.getByTestId('agentBasedSection-addAgentButton')).not.toBeDisabled();
     });
 
-    it('clicking "Add agent" calls onDeploy', () => {
+    it('clicking "Deploy integrations" calls onDeploy', () => {
       const onDeploy = jest.fn();
       renderSection({ onDeploy });
       act(() => {

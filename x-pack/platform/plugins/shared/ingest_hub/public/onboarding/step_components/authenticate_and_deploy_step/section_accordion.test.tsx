@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Component under test ────────────────────────────────────────────────────
 
-import { SectionAccordion } from './section_accordion';
+import { DeploymentSectionAccordion } from './section_accordion';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -54,14 +54,14 @@ function renderAccordion(
 
   return render(
     <I18nProvider>
-      <SectionAccordion {...accordionProps} />
+      <DeploymentSectionAccordion {...accordionProps} />
     </I18nProvider>
   );
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
-describe('SectionAccordion', () => {
+describe('DeploymentSectionAccordion', () => {
   it('renders content open by default', () => {
     renderAccordion();
     expect(screen.getByTestId('section-content')).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('SectionAccordion', () => {
     act(() => {
       rerender(
         <I18nProvider>
-          <SectionAccordion
+          <DeploymentSectionAccordion
             icon="gear"
             title="Test Section"
             serviceCount={3}
@@ -104,7 +104,7 @@ describe('SectionAccordion', () => {
             headerButtonTestSubj="testSection-headerButton"
           >
             <div data-test-subj="section-content">Section content</div>
-          </SectionAccordion>
+          </DeploymentSectionAccordion>
         </I18nProvider>
       );
     });
@@ -119,7 +119,7 @@ describe('SectionAccordion', () => {
     act(() => {
       rerender(
         <I18nProvider>
-          <SectionAccordion
+          <DeploymentSectionAccordion
             icon="gear"
             title="Test Section"
             serviceCount={3}
@@ -129,7 +129,7 @@ describe('SectionAccordion', () => {
             headerButtonTestSubj="testSection-headerButton"
           >
             <div data-test-subj="section-content">Section content</div>
-          </SectionAccordion>
+          </DeploymentSectionAccordion>
         </I18nProvider>
       );
     });

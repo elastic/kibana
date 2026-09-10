@@ -36,7 +36,7 @@ import type {
 import type { AgentCredentialVars } from './package_inputs';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { SectionAccordion } from './section_accordion';
+import { DeploymentSectionAccordion } from './section_accordion';
 
 // ── Credential method type ────────────────────────────────────────────────────
 
@@ -410,7 +410,7 @@ export function AgentBasedSection({
 
   return (
     <>
-      <SectionAccordion
+      <DeploymentSectionAccordion
         icon="agentApp"
         title={i18n.translate('xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.title', {
           defaultMessage: 'Where to add this integration?',
@@ -623,8 +623,9 @@ export function AgentBasedSection({
               </>
             )}
 
-            {/* Primary CTA: Add agent — always visible. Pre-deploy: deploys and opens flyout.
-                Post-deploy: opens flyout directly so users can enroll additional agents. */}
+            {/* Primary CTA — always visible.
+                Pre-deploy: labelled "Deploy integrations", deploys then opens flyout.
+                Post-deploy: labelled "Add agent", opens flyout directly. */}
             <EuiButton
               fill
               isDisabled={!isAddAgentReady || isDeploying}
@@ -637,10 +638,15 @@ export function AgentBasedSection({
                   id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAgentButton.loading"
                   defaultMessage="Setting up..."
                 />
-              ) : (
+              ) : isDeployedForCurrentMode ? (
                 <FormattedMessage
                   id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.addAgentButton"
                   defaultMessage="Add agent"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.deployButton"
+                  defaultMessage="Deploy integrations"
                 />
               )}
             </EuiButton>
@@ -698,7 +704,7 @@ export function AgentBasedSection({
             </>
           )}
         </EuiPanel>
-      </SectionAccordion>
+      </DeploymentSectionAccordion>
 
       {/* Agent enrollment flyout — outside the accordion so it survives accordion collapsing on
           isDone. The flyout is a portal/overlay regardless of DOM position, but it must be mounted

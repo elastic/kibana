@@ -52,9 +52,10 @@ export function useAgentPolicySummary(): AgentPolicySummaryData {
   );
 
   const enrollmentToken = useMemo(() => {
+    if (!agentPolicyId) return undefined;
     const key = enrollmentKeysData?.items?.[0];
     return key?.name as string | undefined;
-  }, [enrollmentKeysData]);
+  }, [agentPolicyId, enrollmentKeysData]);
 
   // Agent count — polled on the same 10s cadence used by use_service_data_detection.ts.
   // Pass policyId when set; the hook always fires so we ignore the result when policyId is absent.

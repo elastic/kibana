@@ -171,8 +171,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // and AgentSetupCallout already says "This won't stop you from continuing."
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
-  const isNextDisabled =
-    (showMiSection && !isMiDone) || (showAgentSection && !isAgentDone) || (hasAnyEcf && !isEcfDone);
+  // Agent-based deploy is non-blocking — user can proceed to Step 4 without waiting for deploy
+  // or agent enrollment. Data detection and the service chips are shown in Step 4 instead.
+  const isNextDisabled = (showMiSection && !isMiDone) || (hasAnyEcf && !isEcfDone);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
