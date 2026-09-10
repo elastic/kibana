@@ -511,6 +511,45 @@ describe('CostEstimate', () => {
     );
   });
 
+  it('shows positive sub-cent costs instead of rounding them to zero', () => {
+    setCost({
+      data: costResponse({
+        today: period('today', {
+          groups: [
+            group('discovery', {
+              estimatedCost: 0.003,
+              totalTokens: 1,
+              priceableTokens: 1,
+            }),
+            group('investigation', {
+              estimatedCost: 0,
+              totalTokens: 0,
+              priceableTokens: 0,
+            }),
+            group('ki_extraction', {
+              estimatedCost: 0,
+              totalTokens: 0,
+              priceableTokens: 0,
+            }),
+            group('memory', {
+              estimatedCost: 0,
+              totalTokens: 0,
+              priceableTokens: 0,
+            }),
+          ],
+          totalEstimatedCost: 0.003,
+          totalTokens: 1,
+        }),
+      }),
+    });
+    renderExpandedCost();
+
+    expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent('<$0.01 today');
+    expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
+      '<$0.01'
+    );
+  });
+
   it('keeps a partial numeric floor visible', () => {
     setCost({
       data: costResponse({

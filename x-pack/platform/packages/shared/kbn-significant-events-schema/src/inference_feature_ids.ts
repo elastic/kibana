@@ -52,6 +52,3 @@ export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID =
 /** Memory investigation-gap reconciliation (telemetry and cost bucketing). */
 export const SIGNIFICANT_EVENTS_MEMORY_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID =
   'significant_events_memory_investigation_gaps' as const;
-
-/** Historical triage feature ID retained for token-usage documents. */
-export const SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID = 'significant_events_triage' as const;

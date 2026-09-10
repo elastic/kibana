@@ -9,8 +9,11 @@ import type { FakeRawRequest, KibanaRequest, Logger } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
+import pLimit from 'p-limit';
 import type { TokenTrackingCoverage } from '../../../common/cost';
 import type { SignificantEventsServer } from '../../types';
+
+const TRACKING_SETTINGS_READ_CONCURRENCY = 10;
 
 const createCoverage = (
   enabledSpaceCount: number,
@@ -68,8 +71,9 @@ export const resolveTokenTrackingCoverage = async ({
 
     const spaces = await spacesClient.getAll();
     const spaceIds = [...new Set<SpaceId>([DEFAULT_SPACE_ID, ...spaces.map((space) => space.id)])];
+    const limit = pLimit(TRACKING_SETTINGS_READ_CONCURRENCY);
     const enabledBySpace = await Promise.all(
-      spaceIds.map((spaceId) => readTrackingEnabled({ request, server, spaceId }))
+      spaceIds.map((spaceId) => limit(() => readTrackingEnabled({ request, server, spaceId })))
     );
     const enabledSpaceCount = enabledBySpace.filter(Boolean).length;
     return createCoverage(enabledSpaceCount, spaceIds.length);

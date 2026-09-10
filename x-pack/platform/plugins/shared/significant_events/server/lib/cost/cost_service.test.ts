@@ -19,7 +19,6 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { FEATURE_ID_TO_COST_BUDGET_GROUP, type TokenTrackingCoverage } from '../../../common/cost';
 import { calculateSignificantEventsCost, createUnavailableCostResponse } from './cost_service';
@@ -47,7 +46,6 @@ const PRICES: PriceMap = new Map([
 
 const KNOWN_FEATURE_IDS = [
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -197,7 +195,7 @@ describe('calculateSignificantEventsCost', () => {
     expect(result.month.periodEnd).toBe(PERIOD_END);
   });
 
-  it('filters on the parent feature id and maps all 11 feature IDs onto the four groups', async () => {
+  it('filters on the parent feature id and maps all 10 feature IDs onto the four groups', async () => {
     const features: Record<string, ReturnType<typeof featureBucket>> = {};
     for (const featureId of KNOWN_FEATURE_IDS) {
       features[featureId] = featureBucket({
@@ -284,14 +282,11 @@ describe('calculateSignificantEventsCost', () => {
           },
         },
       });
-      return { aggregations: aggregations({ total: 110, features }) };
+      return { aggregations: aggregations({ total: 100, features }) };
     });
 
     const result = await calculate({ esClient });
     expect(FEATURE_ID_TO_COST_BUDGET_GROUP[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]).toBe(
-      'discovery'
-    );
-    expect(FEATURE_ID_TO_COST_BUDGET_GROUP[SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID]).toBe(
       'discovery'
     );
     expect(result.today.groups.map((group) => group.group)).toEqual([
@@ -300,7 +295,7 @@ describe('calculateSignificantEventsCost', () => {
       'ki_extraction',
       'memory',
     ]);
-    expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(20);
+    expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(10);
     expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
       10
     );

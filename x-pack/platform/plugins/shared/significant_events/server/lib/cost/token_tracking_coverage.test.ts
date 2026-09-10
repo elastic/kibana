@@ -118,6 +118,38 @@ describe('resolveTokenTrackingCoverage', () => {
     });
   });
 
+  it('limits concurrent settings reads across spaces', async () => {
+    getAll.mockResolvedValue([
+      { id: 'default' },
+      ...Array.from({ length: 11 }, (_, index) => ({ id: `space-${index + 1}` })),
+    ]);
+    let activeReads = 0;
+    let maximumActiveReads = 0;
+    let releaseReads: () => void = () => {};
+    const readGate = new Promise<void>((resolve) => {
+      releaseReads = resolve;
+    });
+    getSetting.mockImplementation(async () => {
+      activeReads += 1;
+      maximumActiveReads = Math.max(maximumActiveReads, activeReads);
+      if (getSetting.mock.calls.length === 10) {
+        releaseReads();
+      }
+      await readGate;
+      activeReads -= 1;
+      return true;
+    });
+
+    await expect(
+      resolveTokenTrackingCoverage({ request, server: createServer(), logger })
+    ).resolves.toEqual({
+      status: 'full',
+      enabledSpaceCount: 12,
+      totalSpaceCount: 12,
+    });
+    expect(maximumActiveReads).toBe(10);
+  });
+
   it('returns unavailable coverage when a space setting cannot be read', async () => {
     getAll.mockResolvedValue([{ id: 'default' }]);
     getSetting.mockRejectedValue(new Error('settings failed'));
