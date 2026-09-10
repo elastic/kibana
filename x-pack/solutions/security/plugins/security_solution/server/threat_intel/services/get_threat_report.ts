@@ -61,13 +61,9 @@ export const getThreatReport = async (
     revision,
   };
 
-  // `attribution` is a nested array with one element per space (v29). Readers
-  // see only their own space's element, flattened back onto the report.
-  // Deliberately `space_id === spaceId` only, never `'*'`: annotation elements
-  // are keyed to the executing space even on global reports, the opposite of
-  // `buildSpaceFilterTerms`. A legacy flat object (an index not yet dropped and
-  // recreated after v29) is passed through unchanged rather than omitted, so a
-  // stale deployment stays distinguishable from "not hunted here".
+  // Nested per-space array (v29). Project the caller's element only (never '*');
+  // a legacy flat object is left alone so stale indexes stay distinguishable
+  // from "not hunted here".
   if (Array.isArray(source.attribution)) {
     const element = source.attribution.find(
       (el): el is Record<string, unknown> =>
@@ -78,7 +74,6 @@ export const getThreatReport = async (
     if (element) {
       result.attribution = element;
     } else {
-      // No element for this space: omit the field entirely ("not hunted here").
       delete result.attribution;
     }
   }

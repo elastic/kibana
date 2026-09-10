@@ -201,10 +201,8 @@ export const loadSourceReportStatsByAdapterId = async ({
             last_ingested: {
               max: { field: 'lineage.ingested_at' },
             },
-            // `attribution` is a nested array with one element per space (v29).
-            // A plain `sum` on a nested field silently returns 0, and an
-            // unfiltered nested sum would count every space's element, so the
-            // total is taken inside a nested agg filtered to the caller's space.
+            // Nested + filtered to the caller space (plain sum on nested is 0;
+            // unfiltered nested sum would count every space).
             env_hits: {
               nested: { path: 'attribution' },
               aggs: {

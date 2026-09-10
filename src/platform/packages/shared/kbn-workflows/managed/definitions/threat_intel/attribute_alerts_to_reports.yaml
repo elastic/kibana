@@ -3,11 +3,10 @@ version: "1"
 # alerts in the last 7d tie back to that report, then write the totals onto the doc.
 # IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
 # with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
-# The pass includes `space_id: "*"` catalog rows. `attribution` is a nested array with
-# one element per space, so each space's counts live on their own element and a shared
-# global report cannot be clobbered by another space's run. `retry_on_conflict` covers
-# that cross-space concurrency: `concurrency.key` only serializes runs within a space,
-# so two spaces can update the same global doc at once.
+# Includes `space_id: "*"` catalog rows. `attribution` is a nested per-space array, so
+# spaces cannot clobber each other. Writes use `elasticsearch.update` + script (Bulk
+# rejects scripts on indices with `semantic_text`). `retry_on_conflict` covers
+# cross-space concurrency on shared global docs (`concurrency.key` is per-space only).
 name: Attribute alerts to reports
 description: Count environment alerts linked to each threat report and store totals on the report
 tags:
@@ -58,15 +57,9 @@ steps:
       sort:
         - "@timestamp"
 
-  - name: init_attribution_bulk
-    type: data.set
-    with:
-      bulk_operations: []
-
-  # Static script, set once outside the loop. Held in a variable because `push:`
-  # cannot take an inline object literal (see build_bulk_update_meta below), so
-  # the op bodies reference it by name. Params carry every per-report value; the
-  # source never interpolates.
+  # Static script, set once outside the loop. Params carry every per-report value;
+  # the source never interpolates. Held in a variable so the update step can
+  # reference it without embedding a multi-line string inside Liquid.
   - name: set_attribution_script
     type: data.set
     with:
@@ -169,53 +162,25 @@ steps:
           layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'alert_count' | map: 'doc_count' | first | default: 0 }}"
           layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
 
-      # Bulk ops are built here and pushed by reference. `push:` takes a variable or
-      # a scalar; an inline object literal (`push: {'update': {...}}`) is not valid
-      # LiquidJS and throws TokenizationError at the opening brace.
-      - name: build_bulk_update_meta
-        type: data.set
+      # Scripted per-space upsert into the nested `attribution` array.
+      # Update API (not Bulk): Bulk rejects scripts on indices with `semantic_text`.
+      # No upsert body: the report was just loaded, so a missing doc must fail
+      # loudly rather than materialize a partial row. Never touches `revision`.
+      - name: write_attribution
+        type: elasticsearch.update
         with:
-          update_meta:
-            update:
-              _index: "{{ foreach.item._index }}"
-              _id: "{{ foreach.item._id }}"
-              # Two spaces can update the same global (`space_id: '*'`) report in the
-              # same hour; `concurrency.key` only serializes runs within a space.
-              retry_on_conflict: 3
-
-      - name: queue_bulk_update_meta
-        type: data.set
-        with:
-          bulk_operations: "${{ variables.bulk_operations | push: variables.update_meta }}"
-
-      # Scripted per-space upsert into the nested `attribution` array. No `upsert`:
-      # the report doc always exists (it was just loaded), so a missing doc should
-      # fail loudly rather than materialize a partial row with no space_id or
-      # revision. The script never touches `revision`.
-      - name: build_bulk_update_body
-        type: data.set
-        with:
-          update_body:
-            script:
-              lang: painless
-              source: "${{ variables.attribution_script }}"
-              params:
-                space_id: "{{ variables.spaceId }}"
-                window: "7d"
-                computed_at: "${{ now }}"
-                layer_1_ioc_match: "${{ variables.layer1_count }}"
-                layer_2_behavioral: "${{ variables.layer2_count }}"
-                environment_hits_total: "${{ variables.layer1_count | plus: variables.layer2_count }}"
-
-      - name: queue_bulk_update_body
-        type: data.set
-        with:
-          bulk_operations: "${{ variables.bulk_operations | push: variables.update_body }}"
-
-  - name: write_attributions_bulk
-    type: elasticsearch.bulk
-    if: "variables.bulk_operations.size > 0"
-    with:
-      operations: "${{ variables.bulk_operations }}"
-    on-failure:
-      continue: true
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          retry_on_conflict: 3
+          script:
+            lang: painless
+            source: "${{ variables.attribution_script }}"
+            params:
+              space_id: "{{ variables.spaceId }}"
+              window: "7d"
+              computed_at: "${{ now }}"
+              layer_1_ioc_match: "${{ variables.layer1_count }}"
+              layer_2_behavioral: "${{ variables.layer2_count }}"
+              environment_hits_total: "${{ variables.layer1_count | plus: variables.layer2_count }}"
+        on-failure:
+          continue: true

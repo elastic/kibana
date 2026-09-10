@@ -117,26 +117,22 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     expect(source as string).not.toContain('revision');
   });
 
-  /**
-   * The bulk-op queueing steps used to pass an inline object literal to `push:`
-   * (`push: {'update': {...}}`), which LiquidJS cannot tokenize: it has no object
-   * literal syntax in filter arguments, so every pass threw `TokenizationError`
-   * at the opening brace. `write_attributions_bulk` carries `on-failure: continue`,
-   * so the throw was swallowed and attribution was never written.
-   *
-   * These render the queueing steps through the real engine. They fail against
-   * the inline-literal form and pass once the ops are built in `data.set` steps
-   * and pushed as variables.
-   */
-  describe('bulk op queueing renders through the workflow Liquid engine', () => {
+  it('writes via elasticsearch.update, not bulk', () => {
+    // Bulk API rejects scripted updates on indices that contain semantic_text
+    // fields (the reports index does). The Update API accepts them.
+    const writeStep = findStepByName(workflow.steps, 'write_attribution');
+    expect(writeStep?.type).toBe('elasticsearch.update');
+    expect(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW.yaml).not.toContain('elasticsearch.bulk');
+  });
+
+  describe('write_attribution renders a scripted per-space upsert', () => {
     const engine = createWorkflowLiquidEngine();
-    // The script source comes from the workflow's own set_attribution_script step,
-    // so the body op is rendered with the real script, not a test double.
     const attributionScript = findStepByName(workflow.steps, 'set_attribution_script')?.with
       ?.attribution_script as string;
+    const writeStep = findStepByName(workflow.steps, 'write_attribution');
+
     const context = {
       variables: {
-        bulk_operations: [],
         layer1_count: 3,
         layer2_count: 4,
         spaceId: 'space-a',
@@ -146,77 +142,28 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
       now: '2024-06-01T00:00:00.000Z',
     };
 
-    const renderQueueingStep = (
-      buildStepName: string,
-      buildVariableName: string,
-      queueStepName: string,
-      contextOverrides: Record<string, unknown> = {}
-    ) => {
-      const mergedContext = { ...context, ...contextOverrides };
-
-      // The engine renders each step in order, so the `build_*` step's rendered
-      // value is in scope as a variable by the time the queueing step runs.
-      const buildStep = findStepByName(workflow.steps, buildStepName);
-      expect(buildStep).toBeDefined();
-      const built = renderValueRecursively(
-        engine,
-        buildStep?.with?.[buildVariableName],
-        mergedContext
-      );
-
-      const queueStep = findStepByName(workflow.steps, queueStepName);
-      expect(queueStep).toBeDefined();
-      const expression = queueStep?.with?.bulk_operations as string;
-      expect(typeof expression).toBe('string');
-
-      return evaluateExpression(engine, expression, {
-        ...mergedContext,
-        variables: {
-          ...(mergedContext.variables as Record<string, unknown>),
-          [buildVariableName]: built,
-        },
-      });
-    };
-
-    it('renders the update-action queueing step into a bulk op with retry_on_conflict', () => {
-      const ops = renderQueueingStep(
-        'build_bulk_update_meta',
-        'update_meta',
-        'queue_bulk_update_meta'
-      ) as Array<Record<string, unknown>>;
-      expect(Array.isArray(ops)).toBe(true);
-      expect(ops).toHaveLength(1);
-      // retry_on_conflict covers cross-space concurrency on shared global docs;
-      // concurrency.key only serializes runs within a space.
-      expect(ops[0].update).toEqual({
-        _index: '.kibana-threat-reports',
-        _id: 'report-1',
-        retry_on_conflict: 3,
-      });
-    });
-
-    it('renders the body queueing step into a scripted per-space upsert', () => {
-      const ops = renderQueueingStep(
-        'build_bulk_update_body',
-        'update_body',
-        'queue_bulk_update_body'
-      ) as Array<Record<string, unknown>>;
-      expect(Array.isArray(ops)).toBe(true);
-      expect(ops).toHaveLength(1);
-
-      const op = ops[0] as {
+    it('renders index, id, retry_on_conflict, and script params', () => {
+      expect(writeStep).toBeDefined();
+      const rendered = renderValueRecursively(engine, writeStep?.with, context) as {
+        index: string;
+        id: string;
+        retry_on_conflict: number;
         script: { lang: string; source: string; params: Record<string, unknown> };
         upsert?: unknown;
         doc?: unknown;
       };
-      // A scripted upsert, not a flat doc overwrite.
-      expect(op.doc).toBeUndefined();
-      expect(op.script.lang).toBe('painless');
-      // The real script from set_attribution_script, rendered intact.
-      expect(op.script.source).toBe(attributionScript);
-      expect(op.script.source).toContain('instanceof List');
-      // Params carry every per-report value; the source never interpolates.
-      expect(op.script.params).toEqual({
+
+      expect(rendered.index).toBe('.kibana-threat-reports');
+      expect(rendered.id).toBe('report-1');
+      // Cross-space concurrency on shared global docs; concurrency.key only
+      // serializes runs within a space.
+      expect(rendered.retry_on_conflict).toBe(3);
+      expect(rendered.doc).toBeUndefined();
+      expect(rendered.upsert).toBeUndefined();
+      expect(rendered.script.lang).toBe('painless');
+      expect(rendered.script.source).toBe(attributionScript);
+      expect(rendered.script.source).toContain('instanceof List');
+      expect(rendered.script.params).toEqual({
         space_id: 'space-a',
         window: '7d',
         computed_at: '2024-06-01T00:00:00.000Z',
@@ -224,22 +171,6 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
         layer_2_behavioral: 4,
         environment_hits_total: 7,
       });
-      // No upsert: the report doc always exists, so a missing doc must fail
-      // loudly rather than materialize a partial row.
-      expect(op.upsert).toBeUndefined();
-    });
-
-    it('appends to the existing bulk_operations array rather than replacing it', () => {
-      const ops = renderQueueingStep(
-        'build_bulk_update_meta',
-        'update_meta',
-        'queue_bulk_update_meta',
-        {
-          variables: { ...context.variables, bulk_operations: [{ existing: true }] },
-        }
-      ) as Array<Record<string, unknown>>;
-      expect(ops).toHaveLength(2);
-      expect(ops[0]).toEqual({ existing: true });
     });
   });
 });
