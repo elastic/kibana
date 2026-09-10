@@ -261,4 +261,173 @@ describe('save_automation tool', () => {
       expect(hasWorkflowExecutePrivilege).not.toHaveBeenCalled();
     });
   });
+
+  describe('overwrite confirmation', () => {
+    it('says an existing workflow is being replaced when yaml targets one by id', async () => {
+      const tool = createTool();
+      getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Carrier profile automation' });
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: "Carrier profile automation"\nsteps: []',
+          workflowId: 'workflow-1',
+          aiIndexId: 'my-ai-index',
+        })
+      );
+
+      expect(confirmation).toEqual(
+        expect.objectContaining({
+          title: 'Replace workflow automation',
+          confirm_text: 'Replace',
+          cancel_text: 'Cancel',
+        })
+      );
+      expect(confirmation?.message).toContain('replaces the saved definition');
+      expect(confirmation?.message).toContain('"Carrier profile automation"');
+      expect(confirmation?.message).toContain('cannot be recovered');
+    });
+
+    it('calls out a rename, which otherwise reads as a new automation', async () => {
+      const tool = createTool();
+      getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Old name' });
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: "New name"\nsteps: []',
+          workflowId: 'workflow-1',
+          aiIndexId: 'my-ai-index',
+        })
+      );
+
+      expect(confirmation?.message).toContain('"Old name"');
+      expect(confirmation?.message).toContain('renamed to "New name"');
+    });
+
+    it('does not claim a rename when the definition keeps the same name', async () => {
+      const tool = createTool();
+      getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Same name' });
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: "Same name"\nsteps: []',
+          workflowId: 'workflow-1',
+          aiIndexId: 'my-ai-index',
+        })
+      );
+
+      expect(confirmation?.message).not.toContain('renamed');
+    });
+
+    it('treats re-saving an attachment already saved once as the overwrite it is', async () => {
+      const tool = createTool();
+      getWorkflowMock.mockResolvedValue({ id: 'workflow-7', name: 'Index Metadata Pilot' });
+      const attachments = {
+        getAll: jest.fn().mockReturnValue([
+          {
+            id: 'attachment-1',
+            type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+            origin: 'workflow-7',
+            current_version: 1,
+            versions: [
+              {
+                version: 1,
+                data: { yaml: 'name: Index Metadata Pilot\nsteps: []' },
+              },
+            ],
+          },
+        ]),
+      } as unknown as AttachmentStateManager;
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext(
+          { workflowAttachmentId: 'attachment-1', aiIndexId: 'my-ai-index' },
+          attachments
+        )
+      );
+
+      expect(confirmation?.title).toBe('Replace workflow automation');
+      expect(getWorkflowMock).toHaveBeenCalledWith('workflow-7', 'default');
+    });
+
+    it('still offers a plain save when the attachment has never been saved', async () => {
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowAttachmentId: 'attachment-1',
+          aiIndexId: 'my-ai-index',
+        })
+      );
+
+      expect(confirmation?.title).toBe('Save workflow automation');
+      expect(confirmation?.message).not.toContain('replaces');
+    });
+
+    it('folds the run into the replace, so one dialog covers both', async () => {
+      const tool = createTool();
+      getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Carrier profile automation' });
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: "Carrier profile automation"\nsteps: []',
+          workflowId: 'workflow-1',
+          aiIndexId: 'my-ai-index',
+          run: true,
+        })
+      );
+
+      expect(confirmation).toEqual(
+        expect.objectContaining({
+          title: 'Replace and run workflow automation',
+          confirm_text: 'Replace and run',
+        })
+      );
+      expect(confirmation?.message).toContain('replaces the saved definition');
+      expect(confirmation?.message).toContain('full corpus');
+    });
+
+    it('names the target by id when the workflow name cannot be read', async () => {
+      hasWorkflowReadPrivilege.mockResolvedValue(false);
+      const tool = createTool();
+
+      const confirmation = await tool.confirmation?.getConfirmation?.(
+        createConfirmationContext({
+          workflowYaml: 'name: "Draft"\nsteps: []',
+          workflowId: 'workflow-1',
+          aiIndexId: 'my-ai-index',
+        })
+      );
+
+      expect(confirmation?.title).toBe('Replace workflow automation');
+      expect(confirmation?.message).toContain('with id "workflow-1"');
+    });
+  });
+
+  describe('schema', () => {
+    const parse = (params: Record<string, unknown>) =>
+      createTool().schema.safeParse({ aiIndexId: 'my-ai-index', ...params });
+
+    it('accepts a definition paired with the id of the workflow it replaces', () => {
+      expect(parse({ workflowYaml: 'name: x', workflowId: 'workflow-1' }).success).toBe(true);
+      expect(
+        parse({ workflowAttachmentId: 'attachment-1', workflowId: 'workflow-1' }).success
+      ).toBe(true);
+    });
+
+    it('still accepts each source on its own', () => {
+      expect(parse({ workflowYaml: 'name: x' }).success).toBe(true);
+      expect(parse({ workflowAttachmentId: 'attachment-1' }).success).toBe(true);
+      expect(parse({ workflowId: 'workflow-1' }).success).toBe(true);
+    });
+
+    it('rejects two definitions, which would be ambiguous about what gets saved', () => {
+      expect(parse({ workflowYaml: 'name: x', workflowAttachmentId: 'attachment-1' }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects a call with nothing to save or attach', () => {
+      expect(parse({}).success).toBe(false);
+    });
+  });
 });

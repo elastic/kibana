@@ -99,6 +99,23 @@ export const tryResolveWorkflowDisplayNameFromAttachments = (
   return latestVersion.data.name ?? parseWorkflowNameFromYaml(latestVersion.data.yaml);
 };
 
+/**
+ * The workflow a conversation attachment was last saved as, if any. Used to tell an overwrite
+ * apart from a first save before the write happens, so the confirmation can say which it is.
+ */
+export const tryResolveWorkflowOriginFromAttachments = (
+  attachments: AttachmentStateManager | undefined,
+  workflowAttachmentId: string
+): string | undefined => {
+  const attachment = attachments
+    ?.getAll()
+    .find(
+      (entry) => entry.id === workflowAttachmentId && entry.type === WORKFLOW_YAML_ATTACHMENT_TYPE
+    );
+
+  return attachment?.origin;
+};
+
 export const tryResolveAiIndexDisplayLabelFromAttachments = (
   attachments: AttachmentStateManager | undefined,
   aiIndexId?: string
@@ -302,7 +319,12 @@ const resolveWorkflowSource = (
   attachments: AttachmentStateManager
 ): ResolvedWorkflowSource => {
   if (params.workflowYaml !== undefined) {
-    return { yaml: params.workflowYaml };
+    // An explicit `workflowId` alongside a definition names the workflow to overwrite. Without
+    // one this is a create, and the id the YAML proposes for itself is deliberately not used:
+    // workflow ids are unique across every space and over soft-deleted tombstones, so supplying
+    // one turns any clash into a hard conflict that fails the save. Letting the server derive the
+    // id from the workflow's name is the same readability for none of the risk.
+    return { yaml: params.workflowYaml, existingWorkflowId: params.workflowId };
   }
 
   if (params.workflowAttachmentId === undefined) {
@@ -314,13 +336,11 @@ const resolveWorkflowSource = (
     params.workflowAttachmentId
   );
 
-  // The id a draft proposes for itself is deliberately not carried over to a create. Workflow ids
-  // are unique across every space and over soft-deleted tombstones, and supplying one turns any
-  // clash into a hard conflict that fails the save. Leaving it out lets the server derive an id
-  // from the workflow's name and disambiguate it, which is the same readability for none of the risk.
+  // An explicit id wins over what the attachment was last saved as: the caller naming a workflow
+  // is a more deliberate act than the attachment's own history.
   return {
     yaml,
-    existingWorkflowId: origin,
+    existingWorkflowId: params.workflowId ?? origin,
     attachmentId: params.workflowAttachmentId,
   };
 };
@@ -399,6 +419,19 @@ const persistWorkflow = async ({
       request,
       getSecurityStart,
     });
+
+    // Confirmed as an overwrite before overwriting: the user approved replacing a workflow that
+    // exists. If it does not, `updateWorkflow` would fail with a message about the id rather than
+    // about the choice, and the caller has a create available that it may not think to fall back
+    // to. A workflow can also have been deleted since the attachment recorded it.
+    const target = await workflowsManagement.getWorkflow(existingWorkflowId, spaceId);
+    if (!target) {
+      throw new Error(
+        `Workflow '${existingWorkflowId}' was not found in this space, so there is nothing to ` +
+          `overwrite. Omit workflowId to save this definition as a new automation.`
+      );
+    }
+
     await workflowsManagement.updateWorkflow(existingWorkflowId, { yaml }, spaceId, request);
     return { workflowId: existingWorkflowId, newlyCreated: false };
   }
@@ -521,7 +554,12 @@ export const saveAutomationHandler = async ({
   const aiIndexId = resolveAiIndexIdFromAttachments(aiIndexAttachments, params.aiIndexId);
   const aiIndexService = await getAiIndexService();
 
-  if (params.workflowId) {
+  // `workflowId` on its own attaches a workflow that is already saved. Paired with a definition it
+  // names the workflow to overwrite instead, which is the create/update path below.
+  const hasDefinition =
+    params.workflowYaml !== undefined || params.workflowAttachmentId !== undefined;
+
+  if (params.workflowId && !hasDefinition) {
     await assertWorkflowReadAccess({
       workflowId: params.workflowId,
       spaceId,
