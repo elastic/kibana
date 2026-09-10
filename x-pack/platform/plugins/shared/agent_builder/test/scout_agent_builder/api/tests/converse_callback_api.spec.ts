@@ -161,51 +161,6 @@ apiTest.describe(
     const getExecutionId = (requests: CallbackTestServerRequest[]): string =>
       (requests[0].body as ChatCallbackEventResponse).execution_id;
 
-    apiTest(
-      'message-only callback replays persist once without callback delivery',
-      async ({ apiClient }) => {
-        const requestsBefore = llmProxy.interceptedRequests.length;
-        const options = {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminInteractiveCookieHeader,
-            'elastic-api-version': INTERNAL_API_VERSION,
-          },
-          body: {
-            trigger_mode: 'never',
-            input: 'External context',
-            execution_idempotency_key: `message-${Date.now()}`,
-            origin: {
-              type: ConversationOriginType.Slack,
-              external_conversation_id: `thread-${Date.now()}`,
-              author: { id: 'external-user' },
-            },
-          },
-          responseType: 'json' as const,
-        };
-        const [first, replay] = await Promise.all([
-          apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, options),
-          apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, options),
-        ]);
-        expect(first).toHaveStatusCode(200);
-        expect(replay).toHaveStatusCode(200);
-        expect(replay.body).toStrictEqual(first.body);
-        const { conversation_id: conversationId } = first.body as {
-          conversation_id: string;
-          message_id: string;
-        };
-        conversationIds.add(conversationId);
-        const stored = await getConversation(
-          apiClient,
-          adminCredentials.apiKeyHeader,
-          conversationId
-        );
-        expect(stored.rounds).toStrictEqual([]);
-        expect(stored.events).toHaveLength(1);
-        expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
-      }
-    );
-
     apiTest('delivers completed response to callback URL', async ({ apiClient }) => {
       const mockedLlmResponse = 'Callback LLM response';
       const mockedLlmTitle = 'Callback Conversation Title';

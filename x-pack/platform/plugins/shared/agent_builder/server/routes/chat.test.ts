@@ -155,6 +155,22 @@ describe('callbackConversePayloadSchema', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
+  it('accepts trigger_mode but still requires callback delivery', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        trigger_mode: 'never',
+      })
+    ).not.toThrow();
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        trigger_mode: 'never',
+        callback: undefined,
+      })
+    ).toThrow(/callback/);
+  });
+
   it('accepts callback payloads without origin', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
@@ -299,7 +315,7 @@ describe('registerChatRoutes', () => {
     );
   });
 
-  it('schedules callback converse with origin for conversation resolution', async () => {
+  it('schedules callback converse with origin even when trigger_mode is never', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const validateCallbackUrl = jest.fn();
@@ -366,6 +382,7 @@ describe('registerChatRoutes', () => {
       {
         body: {
           agent_id: 'agent-1',
+          trigger_mode: 'never',
           input: 'Hello',
           execution_idempotency_key: 'Ev0PV23K4AB1',
           origin,

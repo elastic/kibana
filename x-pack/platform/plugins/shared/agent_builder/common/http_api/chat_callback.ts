@@ -20,7 +20,7 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
     type: ConversationOriginType;
     author?: ConversationRoundAuthor;
   };
-  callback?: {
+  callback: {
     url: string;
   };
 }

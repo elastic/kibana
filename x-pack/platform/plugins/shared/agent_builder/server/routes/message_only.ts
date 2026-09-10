@@ -10,7 +10,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, MessagePersistedResponse } from '../../common/http_api/chat';
-import type { ChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { getConversation } from '../services/execution/utils/conversations';
 import type { RouteDependencies } from './types';
 
@@ -22,13 +21,11 @@ export const getMessageOnlyHandler =
     request,
     spaceId,
     messageId = uuidv4(),
-    origin: externalOrigin,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     spaceId: string;
     messageId?: string;
-    origin?: ChatCallbackRequestBodyPayload['origin'];
   }): Promise<MessagePersistedResponse> => {
     const executionOptions = [
       'prompts',
@@ -50,9 +47,6 @@ export const getMessageOnlyHandler =
     }
     const services = getInternalServices();
     const client = await services.conversations.getScopedClient({ request });
-    const origin = externalOrigin
-      ? { external_conversation_id: externalOrigin.external_conversation_id }
-      : undefined;
     const conversation = await getConversation({
       agentId: payload.agent_id ?? agentBuilderDefaultAgentId,
       conversationId: payload.conversation_id,
@@ -60,18 +54,9 @@ export const getMessageOnlyHandler =
       conversationClient: client,
       accessControl: payload.access_control,
       readOnly: payload.read_only,
-      origin,
     });
-    // Origin creation and callback retries without a target must address the same document.
     if (conversation.operation === 'CREATE' && !payload.conversation_id) {
-      conversation.id = uuidv5(
-        JSON.stringify([
-          spaceId,
-          externalOrigin?.type,
-          origin?.external_conversation_id ?? messageId,
-        ]),
-        uuidv5.URL
-      );
+      conversation.id = uuidv5(JSON.stringify([spaceId, messageId]), uuidv5.URL);
     }
     const attachments: AttachmentInput[] = [];
     for (const input of payload.attachments ?? []) {
@@ -89,9 +74,7 @@ export const getMessageOnlyHandler =
       message: payload.input ?? '',
       author: await services.conversations.getConversationRoundAuthor({
         request,
-        origin: externalOrigin,
       }),
-      origin: externalOrigin ? { type: externalOrigin.type } : undefined,
       attachments,
       getTypeDefinition: services.attachments.getTypeDefinition,
     });

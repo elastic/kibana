@@ -31,7 +31,6 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
-import { getMessageOnlyHandler } from './message_only';
 import { getConverseHelpers, type ResolvedExecutionOptions } from './converse_helpers';
 
 export const promptResponseEntrySchema = schema.oneOf([
@@ -315,49 +314,38 @@ const callbackOriginSchema = {
   ),
 };
 
-export const callbackConversePayloadSchema = conversePayloadSchema.extends(
-  {
-    ...callbackOriginSchema,
-    trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
-      defaultValue: 'always',
-      meta: { description: 'Use never to persist a user message without executing the agent.' },
-    }),
-    execution_idempotency_key: schema.string({
+export const callbackConversePayloadSchema = conversePayloadSchema.extends({
+  ...callbackOriginSchema,
+  trigger_mode: schema.oneOf([schema.literal('always'), schema.literal('never')], {
+    defaultValue: 'always',
+    meta: { description: 'Use never to persist a user message without executing the agent.' },
+  }),
+  execution_idempotency_key: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    meta: {
+      description:
+        'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
+    },
+  }),
+  callback: schema.object({
+    url: schema.string({
       minLength: 1,
-      maxLength: 256,
-      meta: {
-        description:
-          'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
+      maxLength: 2048,
+      validate: (value) => {
+        try {
+          const parsedUrl = new URL(value);
+
+          if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+            return 'url must use http or https';
+          }
+        } catch {
+          return 'url must be a valid URL';
+        }
       },
     }),
-    callback: schema.maybe(
-      schema.object({
-        url: schema.string({
-          minLength: 1,
-          maxLength: 2048,
-          validate: (value) => {
-            try {
-              const parsedUrl = new URL(value);
-
-              if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-                return 'url must use http or https';
-              }
-            } catch {
-              return 'url must be a valid URL';
-            }
-          },
-        }),
-      })
-    ),
-  },
-  {
-    validate: (payload) => {
-      if (payload.trigger_mode !== 'never' && !payload.callback) {
-        return 'callback is required when trigger_mode is always';
-      }
-    },
-  }
-);
+  }),
+});
 
 export function registerChatRoutes({
   router,
@@ -366,7 +354,6 @@ export function registerChatRoutes({
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
-  const persistMessage = getMessageOnlyHandler({ getInternalServices });
 
   const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
@@ -545,20 +532,6 @@ export function registerChatRoutes({
         const payload = request.body as ChatCallbackRequestBodyPayload;
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-        if (payload.trigger_mode === 'never') {
-          const options = resolveExecutionOptions(payload, spaceId);
-          const body = await persistMessage({
-            payload,
-            request,
-            spaceId,
-            messageId: options.executionId,
-            origin: payload.origin,
-          });
-          return response.ok({ body });
-        }
-        if (!payload.callback) {
-          throw createBadRequestError('callback is required when trigger_mode is always');
-        }
 
         try {
           callbackDeliveryService.validateCallbackUrl(payload.callback.url);
@@ -570,7 +543,7 @@ export function registerChatRoutes({
         validateAction(payload);
 
         const { executionId } = await executeAgent({
-          payload,
+          payload: { ...payload, trigger_mode: 'always' },
           request,
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),

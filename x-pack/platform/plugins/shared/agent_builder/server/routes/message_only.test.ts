@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
 import { createConversationClientMock } from '../test_utils/conversations';
 import { getMessageOnlyHandler } from './message_only';
@@ -62,7 +61,7 @@ describe('message-only contract', () => {
     ).rejects.toThrow('input or attachments');
   });
 
-  it('assigns distinct public identities and stable callback/origin identities', async () => {
+  it('assigns distinct public identities', async () => {
     const payload: ChatRequestBodyPayload = {
       trigger_mode: 'never',
       input: 'hello',
@@ -71,14 +70,6 @@ describe('message-only contract', () => {
     const second = await persist({ request, spaceId: 'default', payload });
     expect(second.conversation_id).not.toBe(first.conversation_id);
     expect(second.message_id).not.toBe(first.message_id);
-    const callback = {
-      request,
-      spaceId: 'default',
-      payload,
-      messageId: 'callback-key',
-      origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread' },
-    };
-    expect(await persist(callback)).toEqual(await persist(callback));
     expect(getInternalServices().execution.executeAgent).not.toHaveBeenCalled();
   });
 
@@ -100,19 +91,20 @@ describe('message-only contract', () => {
         trigger_mode: 'never',
         input: 'hi',
         execution_idempotency_key: 'key',
+        callback: {
+          url: 'https://callback.example.com/events',
+        },
       })
     ).not.toThrow();
     expect(() =>
       callbackConversePayloadSchema.validate({ trigger_mode: 'never', input: 'hi' })
     ).toThrow();
-    for (const triggerMode of [undefined, 'always']) {
-      expect(() =>
-        callbackConversePayloadSchema.validate({
-          trigger_mode: triggerMode,
-          input: 'hi',
-          execution_idempotency_key: 'key',
-        })
-      ).toThrow('callback');
-    }
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        trigger_mode: 'never',
+        input: 'hi',
+        execution_idempotency_key: 'key',
+      })
+    ).toThrow('callback');
   });
 });
