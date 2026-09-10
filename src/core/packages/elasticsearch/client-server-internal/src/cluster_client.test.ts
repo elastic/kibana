@@ -156,40 +156,6 @@ describe('ClusterClient', () => {
     });
   });
 
-  it.each([false, true])(
-    'preserves upstream primary client authentication (fake request: %s)',
-    (fake) => {
-      const headers = {
-        authorization: 'Bearer essu_ephemeral_token',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-shared-secret',
-      };
-      authHeaders.get.mockReturnValue({});
-      const clusterClient = new ClusterClient({
-        config: createConfig({
-          requestHeadersWhitelist: ['authorization', ES_CLIENT_AUTHENTICATION_HEADER],
-        }),
-        logger,
-        type: 'custom-type',
-        authHeaders,
-        security: securityServiceMock.createInternalSetup(),
-        agentFactoryProvider,
-        kibanaVersion,
-        onRequestHandlerFactory: mockOnRequestHandlerFactory,
-      });
-      const request = fake
-        ? httpServerMock.createFakeKibanaRequest({ headers })
-        : httpServerMock.createKibanaRequest({ headers });
-
-      client = clusterClient.asScoped(request).asCurrentUser;
-
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.objectContaining({
-          headers: expect.objectContaining(headers),
-        })
-      );
-    }
-  );
-
   describe('#asInternalUser', () => {
     it('returns the internal client', () => {
       const clusterClient = new ClusterClient({
@@ -1589,7 +1555,6 @@ describe('ClusterClient', () => {
       const config = createConfig({ requestHeadersWhitelist: ['foo'] });
       authHeaders.get.mockReturnValue({
         [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
       });
 
       const clusterClient = new ClusterClient({

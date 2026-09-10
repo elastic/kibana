@@ -24,7 +24,11 @@ import type {
   ElasticsearchClientConfig,
   AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
-import { HTTPAuthorizationHeader, isExternalUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
@@ -234,10 +238,11 @@ export class ClusterClient implements ICustomClusterClient {
     let clientAuthentication: string | undefined | null;
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      const hasBearerClientAuthentication =
+      const hasUiamInboundClientAuthentication =
         credential?.scheme.toLowerCase() === 'bearer' &&
+        isUiamCredential(credential) &&
         scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER] !== undefined;
-      if (credential && !hasBearerClientAuthentication) {
+      if (credential && !hasUiamInboundClientAuthentication) {
         clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
             ? { credentialSource: 'inbound', credential, requestHeaders }
@@ -270,25 +275,26 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // Preserve inbound bearer client authentication, including its absence. API keys keep their
-    // existing internal/external client-authentication rules.
-    const isBearerScheme = authorizationHeader.scheme.toLowerCase() === 'bearer';
-    const requestHeaders =
-      isBearerScheme && isRealRequest(request)
-        ? ensureRawRequest(request).headers ?? {}
-        : undefined;
+    // Relay client authentication supplied alongside an inbound UIAM bearer token. Otherwise use
+    // `internal`: unlike `getScopedHeaders`, this never reads a credential off the wire, so no
+    // attestation is involved. For a real request the credential comes from the auth provider's
+    // post-authentication headers (Kibana already vouched for it), and for a fake one Kibana
+    // minted it. The exception is a fake request marked as carrying a user-created (external)
+    // UIAM credential, which UIAM rejects when presented with client authentication.
+    const isUiamInboundToken =
+      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
+      isUiamCredential(authorizationHeader);
+    const inboundUiamClientAuthentication = isUiamInboundToken
+      ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER]
+      : undefined;
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
     const clientAuthentication =
-      (isBearerScheme ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER] : undefined) ??
-      this.security?.uiam?.getElasticsearchClientAuthentication(
-        requestHeaders
-          ? { credentialSource: 'inbound', credential: authorizationHeader, requestHeaders }
-          : {
-              credentialSource: isExternalCredential ? 'external' : 'internal',
-              credential: authorizationHeader,
-            }
-      );
+      inboundUiamClientAuthentication ??
+      this.security?.uiam?.getElasticsearchClientAuthentication({
+        credentialSource: isExternalCredential ? 'external' : 'internal',
+        credential: authorizationHeader,
+      });
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
