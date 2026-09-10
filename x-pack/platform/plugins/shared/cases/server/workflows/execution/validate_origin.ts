@@ -36,9 +36,6 @@ interface DocumentPair {
   _index: string;
 }
 
-/** @deprecated Use `DocumentPair`. Kept as an alias so callers need no update. */
-type AlertPair = DocumentPair;
-
 /** The maximum number of documents that may be submitted in `inputs.event.documents` per run. */
 const MAX_DOCUMENTS_PER_WORKFLOW_RUN = 1000 as const;
 
@@ -85,7 +82,7 @@ const parseIndexedPairs = (value: unknown, inputPath: string, max: number): Docu
  * and still be fetched and injected into the workflow event. A nullish `alertIds` is treated as
  * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
  */
-export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
+export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): DocumentPair[] => {
   const { alertIds } = getRecord(inputs.event) ?? {};
   // A selected alert must be attached to the case, and a case holds at most MAX_ALERTS_PER_CASE
   // alerts, so anything larger cannot be legitimate — and would become an mget of that size.
