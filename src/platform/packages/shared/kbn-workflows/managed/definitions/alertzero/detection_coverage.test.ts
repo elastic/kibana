@@ -8,10 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import {
-  ALERTZERO_DETECTION_COVERAGE_WORKFLOW,
-  ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID,
-} from '.';
+import { ALERTZERO_DETECTION_COVERAGE_WORKFLOW, ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID } from '.';
 
 /**
  * The verdicts the detection-coverage skill may return. Duplicated here as a literal on
