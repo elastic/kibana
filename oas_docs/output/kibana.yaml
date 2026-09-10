@@ -68344,66 +68344,8 @@ paths:
                       nullable: true
                       pattern: '[smdh]$'
                       type: string
-                logExtractionByType:
-                  additionalProperties:
-                    type: object
-                    properties:
-                      additionalIndexPatterns:
-                        items:
-                          maxLength: 2048
-                          type: string
-                        maxItems: 1000
-                        nullable: true
-                        type: array
-                      delay:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                      docsLimit:
-                        maximum: 9007199254740991
-                        minimum: 1
-                        nullable: true
-                        type: integer
-                      excludedIndexPatterns:
-                        items:
-                          maxLength: 2048
-                          type: string
-                        maxItems: 1000
-                        nullable: true
-                        type: array
-                      frequency:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                      lookbackPeriod:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                      maxLogsPerPage:
-                        maximum: 9007199254740991
-                        minimum: 1
-                        nullable: true
-                        type: integer
-                      maxLogsPerWindow:
-                        maximum: 9007199254740991
-                        minimum: 0
-                        nullable: true
-                        type: integer
-                      maxLogsPerWindowCapBehavior:
-                        enum:
-                          - defer
-                          - drop
-                        nullable: true
-                        type: string
-                      maxTimeWindowSize:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                  type: object
+              required:
+                - logExtraction
       responses:
         '200':
           content:
@@ -76974,66 +76916,6 @@ paths:
                       nullable: true
                       pattern: '[smdh]$'
                       type: string
-                logExtractionByType:
-                  additionalProperties:
-                    type: object
-                    properties:
-                      additionalIndexPatterns:
-                        items:
-                          maxLength: 2048
-                          type: string
-                        maxItems: 1000
-                        nullable: true
-                        type: array
-                      delay:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                      docsLimit:
-                        maximum: 9007199254740991
-                        minimum: 1
-                        nullable: true
-                        type: integer
-                      excludedIndexPatterns:
-                        items:
-                          maxLength: 2048
-                          type: string
-                        maxItems: 1000
-                        nullable: true
-                        type: array
-                      frequency:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                      lookbackPeriod:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                      maxLogsPerPage:
-                        maximum: 9007199254740991
-                        minimum: 1
-                        nullable: true
-                        type: integer
-                      maxLogsPerWindow:
-                        maximum: 9007199254740991
-                        minimum: 0
-                        nullable: true
-                        type: integer
-                      maxLogsPerWindowCapBehavior:
-                        enum:
-                          - defer
-                          - drop
-                        nullable: true
-                        type: string
-                      maxTimeWindowSize:
-                        maxLength: 32
-                        nullable: true
-                        pattern: '[smdh]$'
-                        type: string
-                  type: object
       responses:
         '200':
           content:
