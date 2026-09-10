@@ -128,8 +128,9 @@ export interface BaseStepDefinition<
   deprecation?: StepDeprecationInfo;
 
   /**
-   * Execution modes supported by this step. Omitted means both modes.
-   * Durable or asynchronously resumed steps must explicitly declare async-only support.
+   * Execution modes supported by this step. Omitted means both modes are supported.
+   * Only steps that suspend the workflow and require a Task Manager callback to resume
+   * (e.g. wait, human-in-the-loop) need to declare ['async'] here.
    */
   supportedExecutionModes?: readonly [StepExecutionMode, ...StepExecutionMode[]];
 }
