@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import {
   EmbeddableProfilingSearchBar,
   type EmbeddableProfilingSearchBarProps,
@@ -32,7 +32,7 @@ import { ProcessesSearchBarHeader } from '../tabs/processes/processes_search_bar
 import { getIntegrationsAvailable } from '../utils';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
-import { HostHeaderTitle } from '../header/host_header_title';
+import { getHostHeaderBadges } from '../header/host_header_title';
 import { MetricsDetailAppHeader } from '../../../pages/metrics/header/metrics_detail_app_header';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
@@ -108,35 +108,48 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     <DatePicker />
   ) : null;
 
+  const hostHeaderBadges =
+    entity.type === 'host' ? getHostHeaderBadges({ title: entity.name, schema }) : undefined;
+
   return (
     <InfraPageTemplate
-      header={<MetricsDetailAppHeader title={entity.name} tabs={appHeaderTabs} />}
+      header={
+        <MetricsDetailAppHeader
+          title={entity.name}
+          tabs={appHeaderTabs}
+          badges={hostHeaderBadges}
+        />
+      }
+      pageSectionProps={{
+        paddingSize: 'none',
+      }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={entity.type}
       data-schema-selected={schema}
     >
-      {entity.type === 'host' || (rightSideItems && rightSideItems.length > 0) ? (
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            {entity.type === 'host' ? (
-              <HostHeaderTitle title={entity.name} schema={schema} includeTitle={false} />
-            ) : null}
-          </EuiFlexItem>
-          {rightSideItems && rightSideItems.length > 0 ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-                {rightSideItems.map((item, index) => (
-                  <EuiFlexItem key={index} grow={false}>
-                    {item}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      ) : null}
-      {tabControls}
-      <Content showDatePicker={false} showProfilingSearchBar={false} showTabSearchBar={false} />
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        {rightSideItems && rightSideItems.length > 0 ? (
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+          >
+            {rightSideItems.map((item, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                {item}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : null}
+        {tabControls ? (
+          <>
+            {tabControls}
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+        <Content showDatePicker={false} showProfilingSearchBar={false} showTabSearchBar={false} />
+      </EuiPageSection>
     </InfraPageTemplate>
   );
 };

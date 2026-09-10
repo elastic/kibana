@@ -31,11 +31,17 @@ jest.mock('./use_metrics_app_header_menu', () => ({
   }),
 }));
 
-const renderHeader = (tabs?: Array<{ id: string; label: string }>) =>
+const renderHeader = ({
+  tabs,
+  badges,
+}: {
+  tabs?: Array<{ id: string; label: string }>;
+  badges?: Array<{ label: string; renderCustomBadge: () => React.ReactElement }>;
+} = {}) =>
   render(
     <EuiProvider>
       <MockAppHeaderProvider>
-        <MetricsDetailAppHeader title="web-01" tabs={tabs} />
+        <MetricsDetailAppHeader title="web-01" tabs={tabs} badges={badges} />
       </MockAppHeaderProvider>
     </EuiProvider>
   );
@@ -81,9 +87,25 @@ describe('MetricsDetailAppHeader', () => {
   });
 
   it('renders asset-detail tabs on the header', async () => {
-    renderHeader([{ id: 'overview', label: 'Overview' }]);
+    renderHeader({ tabs: [{ id: 'overview', label: 'Overview' }] });
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument();
+  });
+
+  it('renders badges next to the title', async () => {
+    renderHeader({
+      badges: [
+        {
+          label: 'OpenTelemetry',
+          renderCustomBadge: () => <span data-test-subj="hostTitleIcon">icon</span>,
+        },
+      ],
+    });
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('web-01');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toContainElement(
+      screen.getByTestId('hostTitleIcon')
+    );
   });
 });

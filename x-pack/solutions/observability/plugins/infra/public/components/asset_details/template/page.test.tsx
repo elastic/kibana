@@ -103,9 +103,14 @@ jest.mock('../content/content', () => ({
 }));
 
 jest.mock('../header/host_header_title', () => ({
-  HostHeaderTitle: ({ includeTitle }: { includeTitle?: boolean }) => (
-    <div data-test-subj="hostHeaderExtras" data-include-title={String(includeTitle)} />
-  ),
+  getHostHeaderBadges: () => [
+    {
+      label: 'Host details',
+      renderCustomBadge: () => (
+        <div data-test-subj="hostHeaderExtras" data-include-title="false" />
+      ),
+    },
+  ],
 }));
 
 let lastInfraPageTemplateProps: { onboardingFlow?: string; header?: React.ReactNode } = {};
@@ -175,5 +180,8 @@ describe('Asset details Page', () => {
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('web-01');
     expect(screen.getByTestId('hostHeaderExtras')).toHaveAttribute('data-include-title', 'false');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toContainElement(
+      screen.getByTestId('hostHeaderExtras')
+    );
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderTab } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import React from 'react';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -15,9 +15,11 @@ import { useMetricsAppHeaderMenu } from './use_metrics_app_header_menu';
 export function MetricsDetailAppHeader({
   title,
   tabs,
+  badges,
 }: {
   title: string;
   tabs?: AppHeaderTab[];
+  badges?: AppHeaderBadge[];
 }): React.ReactElement {
   const { menu, flyouts } = useMetricsAppHeaderMenu();
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
@@ -25,7 +27,14 @@ export function MetricsDetailAppHeader({
 
   return (
     <>
-      <AppHeader title={title} back={back} tabs={tabs} menu={menu} spacing="standard" />
+      <AppHeader
+        title={title}
+        back={back}
+        tabs={tabs}
+        badges={badges}
+        menu={menu}
+        spacing="standard"
+      />
       {flyouts}
     </>
   );

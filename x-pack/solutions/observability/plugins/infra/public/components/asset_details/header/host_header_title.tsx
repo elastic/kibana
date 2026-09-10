@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { AgentIcon } from '@kbn/custom-icons';
+import { i18n } from '@kbn/i18n';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { PageTitleWithPopover } from './page_title_with_popover';
 
@@ -31,3 +33,23 @@ export const HostHeaderTitle = ({
     <PageTitleWithPopover name={title ?? ''} includeTitle={includeTitle} />
   );
 };
+
+/**
+ * Host title extras (OTel icon, APM popover) as AppHeader badges next to the title.
+ */
+export const getHostHeaderBadges = ({
+  title,
+  schema,
+}: {
+  title?: string;
+  schema?: DataSchemaFormat | null;
+}): AppHeaderBadge[] => [
+  {
+    label: i18n.translate('xpack.infra.assetDetails.header.hostTitleExtrasBadgeLabel', {
+      defaultMessage: 'Host details',
+    }),
+    renderCustomBadge: () => (
+      <HostHeaderTitle title={title} schema={schema} includeTitle={false} />
+    ),
+  },
+];
