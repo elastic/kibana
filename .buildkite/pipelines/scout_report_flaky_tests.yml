@@ -15,7 +15,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/scout_check_flaky_test_issues.sh
+  - command: .buildkite/scripts/steps/check_flaky_test_issues.sh
     label: ':github: Check GitHub issues of flaky suites'
     key: check-flaky-test-issues
     depends_on: discover-flaky-tests
