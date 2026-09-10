@@ -1064,6 +1064,37 @@ return BriefCard ? (
 
 The registry does not fetch card data or provide a default card when none is registered.
 
+### Conversation details header and footer
+
+Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
+`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
+`openConversationDetails`. It is supplied at render time, not through registration context.
+
+Template UI definitions can provide optional `detailsFlyout.header` and
+`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
+hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
+only the content for each slot. Without a custom header, the default title remains.
+Without a custom footer, no footer is rendered.
+
+Capture Agent Builder capabilities from the existing registration context, and
+provide any solution-specific React providers inside your components:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    header: InvestigationHeader,
+    footer: ({ conversation }) => (
+      <InvestigationFooter
+        conversation={conversation}
+        onOpenChat={() => context.openSidebarConversation(conversation.id)}
+      />
+    ),
+  },
+}));
+```
+
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
