@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
+import { CONNECTOR_ID_MAX_LENGTH, TEMPLATE_EXPRESSION_MAX_LENGTH } from '../../common/constants';
 import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
@@ -194,7 +194,13 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
     }
 
     if (value instanceof z.ZodArray) {
-      const widened: z.ZodType = z.union([z.string(), value]);
+      // Only accept whole-value Liquid template expressions (e.g. `${{ expr }}` or `{{ expr }}`),
+      // not arbitrary strings, so the editor still catches plain mistyped values.
+      const liquidTemplate = z
+        .string()
+        .regex(/^\s*\$?\{\{[\s\S]*\}\}\s*$/)
+        .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
+      const widened: z.ZodType = z.union([liquidTemplate, value]);
       modifications[key] = isOptional ? widened.optional() : widened;
     }
   }
