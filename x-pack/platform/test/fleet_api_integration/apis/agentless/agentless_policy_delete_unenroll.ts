@@ -38,7 +38,10 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await mockApiServer.close();
+      if (!mockApiServer) return;
+      await new Promise<void>((resolve, reject) => {
+        mockApiServer.close((err?: Error) => (err ? reject(err) : resolve()));
+      });
     });
 
     beforeEach(async () => {
