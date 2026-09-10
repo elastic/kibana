@@ -104,4 +104,6 @@ The MongoDB connector authenticates with a separate connection URI (host, port, 
 
 ::::{note}
 The username and password are stored as encrypted secrets and never exposed in Kibana UI or logs. Agent-facing tool actions (find, aggregate, count, listCollections) are read-only; insertOne, updateOne, and deleteOne are workflow-only and are never exposed to agents.
+
+If you are using this connector primarily with agents, use a MongoDB database user with read-only permissions (for example, the built-in `read` role in MongoDB). This limits the blast radius if an agent issues unexpected queries.
 ::::
