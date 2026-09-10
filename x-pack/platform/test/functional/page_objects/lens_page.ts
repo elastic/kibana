@@ -247,6 +247,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
+        // Selecting the operation re-renders the field picker (its options recompute for the new
+        // operation). Wait until the requested field is actually listed before selecting it, so the
+        // option click can't race that re-render and land on a stale/empty list (which silently
+        // leaves the column unset and only surfaces as the commit wait below timing out).
+        await retry.waitFor(`field picker to list ${field}`, async () => {
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          await comboBox.openOptionsList(fieldCombo);
+          return (
+            (await testSubjects.exists(`lns-fieldOption-${field}`, { timeout: 1000 })) ||
+            (await testSubjects.exists(`lns-fieldOptionIncompatible-${field}`, { timeout: 1000 }))
+          );
+        });
         await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
         // Close too early discards the operation→field transition. Do not wait on the
         // combobox input: setElement types `field` as a filter before the option is
