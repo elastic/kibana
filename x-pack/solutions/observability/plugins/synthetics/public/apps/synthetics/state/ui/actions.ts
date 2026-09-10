@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
-import {
+import { createAction } from 'redux-toolkit-v1';
+import type {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';

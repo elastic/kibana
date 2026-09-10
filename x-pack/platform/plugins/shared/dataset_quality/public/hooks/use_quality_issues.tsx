@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { FailedDocsError, QualityIssue } from '../../common/api_types';
+import type { FailedDocsError, QualityIssue } from '../../common/api_types';
 import {
   DEFAULT_FAILED_DOCS_ERROR_SORT_DIRECTION,
   DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD,
@@ -23,8 +23,8 @@ import {
   degradedFieldCauseFieldMalformed,
   degradedFieldCauseFieldMalformedTooltip,
 } from '../../common/translations';
-import { SortDirection } from '../../common/types';
-import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
+import type { SortDirection } from '../../common/types';
+import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { getFailedDocsErrorsColumns } from '../components/dataset_quality_details/quality_issue_flyout/failed_docs/columns';
@@ -41,7 +41,8 @@ export function useQualityIssues() {
   const {
     qualityIssues,
     expandedQualityIssue: expandedDegradedField,
-    showCurrentQualityIssues,
+    selectedIssueTypes,
+    selectedFields,
     failedDocsErrors,
   } = useSelector(service, (state) => state.context);
   const { data, table } = qualityIssues ?? {};
@@ -54,7 +55,17 @@ export function useQualityIssues() {
     sort: failedDocsErrorsSort,
   } = failedDocsErrorsTable;
 
-  const totalItemCount = data?.length ?? 0;
+  const filteredItems = useMemo(() => {
+    if (!data) return [];
+
+    return data.filter(
+      (item) =>
+        (selectedIssueTypes.length === 0 || selectedIssueTypes.includes(item.type)) &&
+        (selectedFields.length === 0 || selectedFields.includes(item.name))
+    );
+  }, [data, selectedIssueTypes, selectedFields]);
+
+  const totalItemCount = filteredItems?.length ?? 0;
 
   const pagination = {
     pageIndex: page,
@@ -84,9 +95,9 @@ export function useQualityIssues() {
   );
 
   const renderedItems = useMemo(() => {
-    const sortedItems = orderBy(data, sort.field, sort.direction);
+    const sortedItems = orderBy(filteredItems, sort.field, sort.direction);
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [data, sort.field, sort.direction, page, rowsPerPage]);
+  }, [filteredItems, sort.field, sort.direction, page, rowsPerPage]);
 
   const expandedRenderedItem = useMemo(() => {
     return renderedItems.find(
@@ -133,13 +144,11 @@ export function useQualityIssues() {
     [expandedDegradedField, service]
   );
 
-  const toggleCurrentQualityIssues = useCallback(() => {
-    service.send('TOGGLE_CURRENT_QUALITY_ISSUES');
-  }, [service]);
-
   const degradedFieldValues = useSelector(service, (state) =>
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.ignoredValues.done')
-      ? state.context.degradedFieldValues
+      ? 'degradedFieldValues' in state.context
+        ? state.context.degradedFieldValues
+        : undefined
       : undefined
   );
 
@@ -156,7 +165,9 @@ export function useQualityIssues() {
     ) ||
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.mitigation.success') ||
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.mitigation.error')
-      ? state.context.degradedFieldAnalysis
+      ? 'degradedFieldAnalysis' in state.context
+        ? state.context.degradedFieldAnalysis
+        : undefined
       : undefined
   );
 
@@ -168,6 +179,7 @@ export function useQualityIssues() {
     // 1st check if it's a field limit issue
     if (degradedFieldAnalysis.isFieldLimitIssue) {
       return {
+        isFieldLimitIssue: true,
         potentialCause: degradedFieldCauseFieldLimitExceeded,
         tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
         shouldDisplayIgnoredValuesAndLimit: false,
@@ -180,10 +192,11 @@ export function useQualityIssues() {
 
     if (fieldMapping && fieldMapping?.type === 'keyword' && fieldMapping?.ignore_above) {
       const isAnyValueExceedingIgnoreAbove = degradedFieldValues?.values.some(
-        (value) => value.length > fieldMapping.ignore_above!
+        (value: string) => value.length > fieldMapping.ignore_above!
       );
       if (isAnyValueExceedingIgnoreAbove) {
         return {
+          isFieldCharacterLimitIssue: true,
           potentialCause: degradedFieldCauseFieldIgnored,
           tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
           shouldDisplayIgnoredValuesAndLimit: true,
@@ -194,6 +207,7 @@ export function useQualityIssues() {
 
     // 3rd check if its a ignore_malformed issue. There is no check, at the moment.
     return {
+      isFieldMalformedIssue: true,
       potentialCause: degradedFieldCauseFieldMalformed,
       tooltipContent: degradedFieldCauseFieldMalformedTooltip,
       shouldDisplayIgnoredValuesAndLimit: false,
@@ -252,7 +266,7 @@ export function useQualityIssues() {
   );
 
   const triggerRollover = useCallback(() => {
-    service.send('ROLLOVER_DATA_STREAM');
+    service.send({ type: 'ROLLOVER_DATA_STREAM' });
   }, [service]);
 
   const failedDocsErrorsColumns = useMemo(() => getFailedDocsErrorsColumns(), []);
@@ -346,8 +360,6 @@ export function useQualityIssues() {
     isAnalysisInProgress,
     degradedFieldAnalysis,
     degradedFieldAnalysisFormattedResult,
-    toggleCurrentQualityIssues,
-    showCurrentQualityIssues,
     expandedRenderedItem,
     updateNewFieldLimit,
     isMitigationInProgress,

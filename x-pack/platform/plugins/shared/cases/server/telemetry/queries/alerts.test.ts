@@ -16,26 +16,117 @@ describe('alerts', () => {
     const savedObjectsClient = savedObjectsRepositoryMock.create();
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
-    savedObjectsClient.find.mockResolvedValue({
+    const legacyResponse = {
       total: 3,
       saved_objects: [],
       per_page: 1,
       page: 1,
       aggregations: {
-        counts: {
+        by_owner: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
           buckets: [
-            { topAlertsPerBucket: { value: 12 } },
-            { topAlertsPerBucket: { value: 5 } },
-            { topAlertsPerBucket: { value: 3 } },
+            {
+              key: 'cases',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+            },
+            {
+              key: 'observability',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+            },
           ],
         },
-        references: { cases: { max: { value: 1 } } },
-        uniqueAlertCommentsCount: { value: 5 },
       },
-    });
+    };
+
+    // Unified alerts (cases-attachments) query returns nothing here; the merge
+    // adds 0, so expectations below reflect the legacy (cases-comments) query.
+    const emptyUnifiedResponse = {
+      total: 0,
+      saved_objects: [],
+      per_page: 0,
+      page: 0,
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
+      savedObjectsClient.find
+        .mockResolvedValueOnce(legacyResponse)
+        .mockResolvedValueOnce(emptyUnifiedResponse);
+      // `maxOnACase` is sourced from a `search` on the case `total_alerts` counter.
+      savedObjectsClient.search.mockResolvedValue({
+        aggregations: {
+          maxCounter: { value: 2 },
+          byOwner: {
+            buckets: [
+              { key: 'cases', maxCounter: { value: 2 } },
+              { key: 'securitySolution', maxCounter: { value: 1 } },
+              { key: 'observability', maxCounter: { value: 0 } },
+            ],
+          },
+        },
+      } as unknown as Awaited<ReturnType<typeof savedObjectsClient.search>>);
     });
 
     it('it returns the correct res', async () => {
@@ -46,87 +137,127 @@ describe('alerts', () => {
 
       expect(res).toEqual({
         all: {
-          total: 5,
-          daily: 3,
-          weekly: 5,
+          total: 12,
+          daily: 12,
+          weekly: 12,
           monthly: 12,
+          maxOnACase: 2,
+        },
+        obs: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
+          maxOnACase: 0,
+        },
+        sec: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
           maxOnACase: 1,
+        },
+        main: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
+          maxOnACase: 2,
+        },
+      });
+    });
+
+    it('clamps the -1 total_alerts sentinel to 0 for maxOnACase', async () => {
+      savedObjectsClient.search.mockResolvedValueOnce({
+        aggregations: {
+          maxCounter: { value: -1 },
+          byOwner: {
+            buckets: [
+              { key: 'cases', maxCounter: { value: -1 } },
+              { key: 'securitySolution', maxCounter: { value: -1 } },
+              { key: 'observability', maxCounter: { value: -1 } },
+            ],
+          },
+        },
+      } as unknown as Awaited<ReturnType<typeof savedObjectsClient.search>>);
+
+      const res = await getAlertsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+
+      expect(res.all.maxOnACase).toBe(0);
+      expect(res.sec.maxOnACase).toBe(0);
+      expect(res.obs.maxOnACase).toBe(0);
+      expect(res.main.maxOnACase).toBe(0);
+    });
+
+    it('sources maxOnACase from the case total_alerts counter', async () => {
+      await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
+
+      expect(savedObjectsClient.search).toHaveBeenCalledWith({
+        type: ['cases'],
+        namespaces: ['*'],
+        size: 0,
+        aggs: {
+          maxCounter: { max: { field: 'cases.total_alerts' } },
+          byOwner: {
+            terms: {
+              field: 'cases.owner',
+              size: 3,
+              include: ['cases', 'observability', 'securitySolution'],
+            },
+            aggs: {
+              maxCounter: { max: { field: 'cases.total_alerts' } },
+            },
+          },
         },
       });
     });
 
     it('should call find with correct arguments', async () => {
       await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
-          counts: {
-            date_range: {
-              field: 'cases-comments.attributes.created_at',
-              format: 'dd/MM/yyyy',
-              ranges: [
-                {
-                  from: 'now-1d',
-                  to: 'now',
+          by_owner: {
+            aggs: {
+              counts: {
+                date_range: {
+                  field: 'cases-comments.attributes.created_at',
+                  format: 'dd/MM/yyyy',
+                  ranges: [
+                    {
+                      from: 'now-1d',
+                      to: 'now',
+                    },
+                    {
+                      from: 'now-1w',
+                      to: 'now',
+                    },
+                    {
+                      from: 'now-1M',
+                      to: 'now',
+                    },
+                  ],
                 },
-                {
-                  from: 'now-1w',
-                  to: 'now',
+                aggregations: {
+                  topAlertsPerBucket: {
+                    cardinality: {
+                      field: 'cases-comments.attributes.alertId',
+                    },
+                  },
                 },
-                {
-                  from: 'now-1M',
-                  to: 'now',
-                },
-              ],
-            },
-            aggregations: {
-              topAlertsPerBucket: {
+              },
+              uniqueAlertCommentsCount: {
                 cardinality: {
                   field: 'cases-comments.attributes.alertId',
                 },
               },
             },
-          },
-          references: {
-            aggregations: {
-              cases: {
-                aggregations: {
-                  ids: {
-                    terms: {
-                      field: 'cases-comments.references.id',
-                    },
-                    aggregations: {
-                      reverse: {
-                        reverse_nested: {},
-                        aggregations: {
-                          topAlerts: {
-                            cardinality: {
-                              field: 'cases-comments.attributes.alertId',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  max: {
-                    max_bucket: {
-                      buckets_path: 'ids>reverse.topAlerts',
-                    },
-                  },
-                },
-                filter: {
-                  term: {
-                    'cases-comments.references.type': 'cases',
-                  },
-                },
-              },
-            },
-            nested: {
-              path: 'cases-comments.references',
-            },
-          },
-          uniqueAlertCommentsCount: {
-            cardinality: {
-              field: 'cases-comments.attributes.alertId',
+            terms: {
+              field: 'cases-comments.attributes.owner',
+              include: ['cases', 'observability', 'securitySolution'],
+              size: 3,
             },
           },
         },
@@ -150,6 +281,37 @@ describe('alerts', () => {
         perPage: 0,
         type: 'cases-comments',
         namespaces: ['*'],
+      });
+    });
+
+    it('also queries unified alerts in cases-attachments', async () => {
+      await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
+
+      const unifiedCall = savedObjectsClient.find.mock.calls.find(
+        ([args]) => args.type === 'cases-attachments'
+      );
+
+      expect(unifiedCall).toBeDefined();
+      const [unifiedArgs] = unifiedCall!;
+      expect(unifiedArgs.aggs).toMatchObject({
+        by_owner: {
+          terms: { field: 'cases-attachments.attributes.owner' },
+          aggs: {
+            uniqueAlertCommentsCount: {
+              cardinality: { field: 'cases-attachments.attributes.attachmentId' },
+            },
+          },
+        },
+      });
+      expect(unifiedArgs.filter).toMatchObject({
+        arguments: expect.arrayContaining([
+          expect.objectContaining({
+            arguments: expect.arrayContaining([
+              expect.objectContaining({ value: 'cases-attachments.attributes.type' }),
+              expect.objectContaining({ value: 'security.alert' }),
+            ]),
+          }),
+        ]),
       });
     });
   });

@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Attribution } from '../../../../common/descriptor_types';
-import { ILayer } from '../../../classes/layers/layer';
+import type { Attribution } from '../../../../common/descriptor_types';
+import type { ILayer } from '../../../classes/layers/layer';
 import { AttributionPopover } from './attribution_popover';
 import { panelStrings } from '../../panel_strings';
 
@@ -40,7 +40,7 @@ export function AttributionFormRow(props: Props) {
             <div className="mapAttributionFormRow__field">
               <AttributionPopover
                 onChange={props.onChange}
-                popoverButtonIcon="plusInCircleFilled"
+                popoverButtonIcon="plusCircle"
                 popoverButtonLabel={i18n.translate('xpack.maps.attribution.addBtnLabel', {
                   defaultMessage: 'Add attribution',
                 })}

@@ -8,8 +8,9 @@
  */
 
 import { css, keyframes } from '@emotion/react';
-import { Observable } from 'rxjs';
-import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import type { Observable } from 'rxjs';
+import type { FC, MutableRefObject } from 'react';
+import React, { Fragment, useLayoutEffect, useRef, useState } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -37,6 +38,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
+  setAppNotFoundState: (active: boolean) => void;
   showPlainSpinner?: boolean;
 }
 
@@ -49,6 +51,7 @@ export const AppContainer: FC<Props> = ({
   createScopedHistory,
   appStatus,
   setIsMounting,
+  setAppNotFoundState,
   theme$,
   showPlainSpinner,
 }: Props) => {
@@ -66,9 +69,17 @@ export const AppContainer: FC<Props> = ({
       }
     };
 
-    if (!mounter || appStatus !== AppStatus.accessible) {
-      return setAppNotFound(true);
+    const isAppNotFound = !mounter || appStatus !== AppStatus.accessible;
+
+    if (isAppNotFound) {
+      setAppNotFoundState(true);
+      setAppNotFound(true);
+      return () => {
+        setAppNotFoundState(false);
+      };
     }
+
+    setAppNotFoundState(false);
     setAppNotFound(false);
 
     setIsMounting(true);
@@ -102,7 +113,10 @@ export const AppContainer: FC<Props> = ({
 
     mount();
 
-    return unmount;
+    return () => {
+      setAppNotFoundState(false);
+      unmount();
+    };
   }, [
     appId,
     appStatus,
@@ -112,6 +126,7 @@ export const AppContainer: FC<Props> = ({
     setAppActionMenu,
     appPath,
     setIsMounting,
+    setAppNotFoundState,
     theme$,
   ]);
 

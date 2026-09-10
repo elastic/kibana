@@ -6,12 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import React, { useState } from 'react';
-
 import {
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiModal,
   EuiModalBody,
@@ -19,10 +16,12 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 const PanelIdModal = ({
   suggestion,
@@ -34,19 +33,19 @@ const PanelIdModal = ({
   onSubmit: (id: string) => void;
 }) => {
   const [panelId, setPanelId] = useState<string>(suggestion);
+  const panelIdModalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={panelIdModalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={panelIdModalTitleId}>
           {i18n.translate('examples.gridExample.getPanelIdModalTitle', {
             defaultMessage: 'Panel ID',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          color="warning"
+        <KbnWarningCallout
           title={i18n.translate('examples.gridExample.getPanelIdWarning', {
             defaultMessage: 'Ensure the panel ID is unique, or you may get unexpected behaviour.',
           })}

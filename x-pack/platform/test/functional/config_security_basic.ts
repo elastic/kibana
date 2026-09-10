@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -69,6 +69,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests (Security Basic)',
+    },
+    security: {
+      cookieLogin: false, // these tests verify the login form itself
     },
   };
 }

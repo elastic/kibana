@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './src/es_schemas/raw';
-export * from './src/es_schemas/raw/fields';
+export type * from './src/es_schemas/raw';
+export type * from './src/es_schemas/raw/fields';

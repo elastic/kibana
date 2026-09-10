@@ -19,7 +19,7 @@ import {
   RULE_MEMORY_USAGE,
 } from '../../../common/constants';
 import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
-import { AlertState } from '../../../common/types/alerts';
+import type { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {

@@ -11,10 +11,11 @@ export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
 export type {
   JsonArray,
-  JsonValue,
   JsonObject,
-  SerializableRecord,
+  JsonValue,
   Serializable,
+  SerializableRecord,
+  AsSerializableRecord,
 } from './src/serializable';
 
 /**
@@ -111,6 +112,12 @@ export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 export type Writable<T> = {
   -readonly [K in keyof T]: T[K];
 };
+/**
+ *  Makes an object with readonly properties mutable.
+ */
+export type RecursiveWritable<T> = {
+  -readonly [K in keyof T]: RecursiveWritable<T[K]>;
+};
 
 /**
  * XOR for some properties applied to a type
@@ -138,7 +145,7 @@ export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 
 export type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 
-export type { DotObject, DedotObject } from './src/dot';
+export type { DedotObject, DotObject, DotKeysOf, PickDotted } from './src/dot';
 
 export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
 
@@ -172,3 +179,7 @@ export type RecursivePartial<T> = {
     : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;
+
+export { maybe } from './src/maybe';
+
+export type { OrStringRecursive } from './src/or_string_recursive';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('core plugins', () => {
@@ -28,5 +28,6 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./http_versioned'));
     loadTestFile(require.resolve('./dynamic_contract_resolving'));
     loadTestFile(require.resolve('./error_response'));
+    loadTestFile(require.resolve('./http_deprecation_warning'));
   });
 }

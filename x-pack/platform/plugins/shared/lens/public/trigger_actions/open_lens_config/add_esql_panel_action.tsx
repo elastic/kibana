@@ -6,14 +6,18 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { LensApi } from '@kbn/lens-common-2';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
-import type { LensApi } from '../../react_embeddable/types';
+import { mountInlinePanel } from '../../react_embeddable/mount';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -25,33 +29,54 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   constructor(protected readonly core: CoreStart) {}
 
   public getDisplayName(): string {
-    return i18n.translate('xpack.lens.app.createVisualizationLabel', {
-      defaultMessage: 'ES|QL',
+    return i18n.translate('xpack.lens.app.createEsqlVisualizationTitle', {
+      defaultMessage: 'Create visualization (query)',
+    });
+  }
+
+  public getDisplayNameTooltip() {
+    return i18n.translate('xpack.lens.app.createEsqlVisualizationDescription', {
+      defaultMessage: 'Build with the ES|QL editor',
     });
   }
 
   public getIconType() {
     // need to create a new one
-    return 'esqlVis';
+    return 'code';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable: api }: EmbeddableApiContext) {
+  public async execute({ embeddable: api, returnFocus }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
-    const embeddable = await api.addNewPanel<object, LensApi>({
-      panelType: 'lens',
-      serializedState: {
-        rawState: {
-          id: generateId(),
-          isNewPanel: true,
-          attributes: { references: [] },
-        },
+    if (!api || !apiHasAppContext(api)) {
+      return;
+    }
+    const uuid = generateId();
+
+    mountInlinePanel({
+      core: this.core,
+      api,
+      loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
+        const embeddable = await api.addNewPanel<object, LensApi>({
+          maybePanelId: uuid,
+          panelType: LENS_EMBEDDABLE_TYPE,
+          serializedState: {
+            id: uuid,
+            isNewPanel: true,
+            attributes: { references: [] },
+          },
+        });
+        if (!embeddable) {
+          throw new IncompatibleActionError();
+        }
+        return embeddable.getEditPanel?.({
+          closeFlyout,
+        });
       },
+      options: { uuid, returnFocus },
     });
-    // open the flyout if embeddable has been created successfully
-    embeddable?.onEdit?.();
   }
 }

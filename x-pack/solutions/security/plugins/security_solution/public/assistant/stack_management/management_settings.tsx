@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
@@ -42,7 +42,7 @@ export const ManagementSettings = React.memo(() => {
   const handleTabChange = useCallback(
     (tab: string) => {
       navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=${tab}`,
+        path: `ai/securityAiAssistantManagement?tab=${tab}`,
       });
     },
     [navigateToApp]
@@ -55,7 +55,7 @@ export const ManagementSettings = React.memo(() => {
           text: i18n.translate(
             'xpack.securitySolution.assistant.settings.breadcrumb.serverless.security',
             {
-              defaultMessage: 'AI Assistant for Security Settings',
+              defaultMessage: 'AI Assistant',
             }
           ),
         },
@@ -80,7 +80,7 @@ export const ManagementSettings = React.memo(() => {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {

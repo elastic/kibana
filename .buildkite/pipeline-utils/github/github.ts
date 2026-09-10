@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 
 export const KIBANA_COMMENT_SIGIL = 'kbn-message-context';
 
@@ -76,6 +77,25 @@ export const areChangesSkippable = async (
   );
 
   return !someFilesNotSkippable;
+};
+
+export const doAllChangesMatch = async (
+  path: RegExp,
+  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
+) => {
+  const prChanges = changes || (await getPrChangesCached());
+
+  if (prChanges.length >= 3000) {
+    return false;
+  }
+
+  const allChangesMatch = prChanges.every(
+    (change) =>
+      change.filename.match(path) &&
+      (!change.previous_filename || change.previous_filename.match(path))
+  );
+
+  return allChangesMatch;
 };
 
 export const doAnyChangesMatch = async (

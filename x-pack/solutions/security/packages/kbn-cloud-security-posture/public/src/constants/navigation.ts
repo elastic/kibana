@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  CLOUD_SECURITY_POSTURE_BASE_PATH,
-  CspBenchmarksPage,
-  CspPageNavigationItem,
-} from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarksPage, CspPageNavigationItem } from '@kbn/cloud-security-posture-common';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 
 export const NAV_ITEMS_NAMES = {

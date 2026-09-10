@@ -22,20 +22,20 @@ import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { setFieldFormats } from '@kbn/reporting-server';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
-import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 const mockLogger = loggingSystemMock.createLogger();
@@ -45,6 +45,9 @@ const taskInstanceFields = { startedAt: null, retryAt: null };
 let encryptedHeaders: string;
 let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
+const esClient = elasticsearchServiceMock.createClusterClient();
+const data = dataPluginMock.createStartContract();
+const searchSourceAsScoped = jest.spyOn(data.search.searchSource, 'asScoped');
 
 beforeAll(async () => {
   // use fieldFormats plugin for csv formats
@@ -74,16 +77,15 @@ beforeAll(async () => {
     context
   );
 
-  mockCsvSearchSourceExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockCsvSearchSourceExportType.setup({});
 
   mockCsvSearchSourceExportType.start({
-    esClient: elasticsearchServiceMock.createClusterClient(),
+    esClient,
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
-    data: dataPluginMock.createStartContract(),
+    data,
+    licensing: licensingMock.createStart(),
   });
 });
 
@@ -114,6 +116,9 @@ test('gets the csv content from job parameters', async () => {
           "size": 123,
         }
       `);
+  expect(esClient.asScoped).toHaveBeenCalledWith(fakeRawRequest, { projectRouting: 'space' });
+  expect(data.search.asScoped).toHaveBeenCalledWith(fakeRawRequest, { projectRouting: 'space' });
+  expect(searchSourceAsScoped).toHaveBeenCalledWith(fakeRawRequest, { projectRouting: 'space' });
 });
 
 test('uses the provided logger', async () => {
@@ -135,5 +140,5 @@ test('uses the provided logger', async () => {
     stream,
   });
 
-  expect(logSpy).toHaveBeenCalledWith('execute-job:cool-job-id');
+  expect(logSpy).toHaveBeenCalledWith('execute-job');
 });

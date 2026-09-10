@@ -18,7 +18,7 @@ import {
   registerManagementUsageCollector,
   createCollectorFetch,
 } from './telemetry_management_collector';
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -103,7 +103,7 @@ describe('createCollectorFetch', () => {
       const fetchFunction = createCollectorFetch(getUiSettingsClient);
       const result = await fetchFunction();
       expect(result).toBe(undefined);
-      expect(getUiSettingsClient).toBeCalledTimes(1);
+      expect(getUiSettingsClient).toHaveBeenCalledTimes(1);
     });
 
     it('returns all user changed settings', async () => {

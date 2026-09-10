@@ -20,8 +20,6 @@ import mdx from '../README.mdx';
 const mock = new NoDataPageStorybookMock();
 
 export default {
-  title: 'No Data/Page/No Data Page',
-  description: 'A component to display when there is no data available',
   parameters: {
     docs: {
       page: mdx,

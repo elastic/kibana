@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { APIRoutes } from '../common/api_routes';
@@ -21,6 +21,16 @@ import { putSynonymsSet } from './lib/put_synonyms_set';
 import { fetchUniqueRuleId } from './lib/fetch_unique_rule_id';
 import { putSynonymsRule } from './lib/put_synonyms_rule';
 import { fetchSynonymsSetExists } from './lib/fetch_synonyms_set_exists';
+
+const RESOURCE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
+
+const resourceIdSchema = schema.string({
+  maxLength: 512,
+  validate: (value) =>
+    RESOURCE_ID_REGEX.test(value)
+      ? undefined
+      : 'must only contain letters, numbers, hyphens (-), and underscores (_)',
+});
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -87,7 +97,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
+          synonymsSetId: resourceIdSchema,
         }),
       },
     },
@@ -127,7 +137,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
+          synonymsSetId: resourceIdSchema,
         }),
         query: schema.object({
           from: schema.number({ defaultValue: DEFAULT_PAGE_VALUE.from }),
@@ -184,8 +194,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
-          ruleId: schema.string(),
+          synonymsSetId: resourceIdSchema,
+          ruleId: resourceIdSchema,
         }),
       },
     },
@@ -234,8 +244,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
-          ruleId: schema.string(),
+          synonymsSetId: resourceIdSchema,
+          ruleId: resourceIdSchema,
         }),
       },
     },
@@ -284,7 +294,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
+          synonymsSetId: resourceIdSchema,
         }),
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
@@ -349,7 +359,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
+          synonymsSetId: resourceIdSchema,
         }),
       },
     },
@@ -397,11 +407,11 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: schema.string(),
-          ruleId: schema.string(),
+          synonymsSetId: resourceIdSchema,
+          ruleId: resourceIdSchema,
         }),
         body: schema.object({
-          synonyms: schema.string(),
+          synonyms: schema.string({ maxLength: 4096 }),
         }),
       },
     },

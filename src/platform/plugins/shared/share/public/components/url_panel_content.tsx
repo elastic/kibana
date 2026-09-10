@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCopy,
@@ -20,9 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
-  EuiSwitchEvent,
   withEuiTheme,
-  WithEuiThemeProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -32,9 +31,10 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '../../common';
-import { UrlParamExtension } from '../types';
-import {
+import type { UrlParamExtension } from '../types';
+import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
@@ -48,8 +48,8 @@ export interface UrlPanelContentProps {
   shareableUrl?: string;
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
+    locator: LocatorPublic<SerializableRecord>;
+    params: SerializableRecord;
   };
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
@@ -498,6 +498,7 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
     return (
       <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
+          name="exportUrlAs"
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}

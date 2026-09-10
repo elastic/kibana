@@ -5,9 +5,39 @@
  * 2.0.
  */
 
-import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
+import { isEqual } from 'lodash';
+import { secondsToCronFormatter } from '../formatting_utils';
+import type { MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
+
+const LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS = 16;
+
+/**
+ * Omits a field from the agent policy when its value matches the Heartbeat
+ * default, so the compiled stream (and the resulting agent payload) stays lean.
+ * Heartbeat applies the same default when the field is absent, so this is a
+ * no-op for the running monitor (see elastic/kibana#241818).
+ */
+export const omitDefaultFormatter =
+  (defaultValue: unknown, formatter?: FormatterFn): FormatterFn =>
+  (fields, key) => {
+    const value = fields[key];
+    if (isEqual(value, defaultValue)) {
+      return null;
+    }
+    return formatter ? formatter(fields, key) : (value as string) ?? null;
+  };
+
+/**
+ * Always omits a field from the agent policy. Used for UI-only metadata
+ * (`__ui`) that Heartbeat ignores, so it never needs to reach the agent
+ * (see elastic/kibana#241818). An empty value already resolved to `null`
+ * before, so dropping it unconditionally is a safe extension.
+ */
+export const omitFieldFormatter: FormatterFn = () => null;
 
 export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string[]) ?? [];
@@ -54,7 +84,6 @@ export const tlsArrayToYamlFormatter: FormatterFn = (fields, key) => {
 
 export const stringToJsonFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
-
   return value ? JSON.stringify(value) : null;
 };
 
@@ -67,8 +96,35 @@ export const stringifyString = (value?: string) => {
   }
 };
 
-export const secondsToCronFormatter: FormatterFn = (fields, key) => {
-  const value = (fields[key] as string) ?? '';
+export const privateTimeoutFormatter: FormatterFn = (fields) => {
+  const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
+  if (!value) return null;
 
-  return value ? `${value}s` : null;
+  // Heartbeat adds a 30s overhead to browser monitor timeouts internally,
+  // so we subtract it to match the user's expected total timeout.
+  // Clamp to 0 to guard against negative values if validation is bypassed.
+  if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
+    const timeoutSeconds = parseInt(value, 10);
+
+    if (isNaN(timeoutSeconds)) {
+      return null;
+    }
+
+    const adjustedTimeout = Math.max(
+      0,
+      timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS
+    );
+    return `${adjustedTimeout}s`;
+  }
+
+  // Lightweight monitors default to a 16s timeout, which is also Heartbeat's
+  // default, so it can be omitted from the policy (elastic/kibana#241818).
+  // `TimeoutString` accepts any numeric string, so compare with `Number` rather
+  // than `parseInt` -- the latter truncates `16.5` to the default and would
+  // silently drop a timeout the user explicitly asked for.
+  if (Number(value) === LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS) {
+    return null;
+  }
+
+  return secondsToCronFormatter(fields, ConfigKey.TIMEOUT);
 };

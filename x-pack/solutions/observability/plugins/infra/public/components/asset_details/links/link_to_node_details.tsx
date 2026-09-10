@@ -5,40 +5,46 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
-  assetId: string;
-  assetName?: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityName?: string;
+  entityType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ assetId, assetName, assetType }: LinkToNodeDetailsProps) => {
+export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNodeDetailsProps) => {
   const [state] = useAssetDetailsUrlState();
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
   // don't propagate the autoRefresh to the details page
-  const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
+  const { dateRange, autoRefresh: _, preferredSchema, ...assetDetails } = state ?? {};
 
   const assetDetailMenuItemLinkProps = getAssetDetailUrl({
-    assetType,
-    assetId,
+    entityType,
+    entityId,
     search: {
       ...assetDetails,
-      name: assetName,
+      name: entityName,
       from: parse(dateRange?.from ?? '')?.valueOf(),
       to: parse(dateRange?.to ?? '')?.valueOf(),
     },
+    preferredSchema: preferredSchema ?? DEFAULT_SCHEMA,
   });
 
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.infra.linkToNodeDetails.openaspageButton.ariaLabel', {
+        defaultMessage: 'Open as page',
+      })}
       data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
       flush="both"

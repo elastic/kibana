@@ -13,20 +13,24 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { ConfigType } from '../../../config';
+import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../../../common/constants';
+import type { Owner } from '../../../../common/constants/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
 
-const TASK_TYPE = 'cai:cases_analytics_index_synchronization';
 const SCHEDULE: IntervalSchedule = { interval: '5m' };
 
 export function registerCAISynchronizationTask({
   taskManager,
   logger,
   core,
+  analyticsConfig,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
+  analyticsConfig: ConfigType['analytics'];
 }) {
   const getESClient = async (): Promise<ElasticsearchClient> => {
     const [{ elasticsearch }] = await core.getStartServices();
@@ -34,38 +38,40 @@ export function registerCAISynchronizationTask({
   };
 
   taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
+    [ANALYTICS_SYNCHRONIZATION_TASK_TYPE]: {
       title: 'Synchronization for the cases analytics index',
       createTaskRunner: (context: RunContext) => {
-        return new AnalyticsIndexSynchronizationTaskFactory({ getESClient, logger }).create(
-          context
-        );
+        return new AnalyticsIndexSynchronizationTaskFactory({
+          getESClient,
+          logger,
+          analyticsConfig,
+        }).create(context);
       },
     },
   });
 }
 
-/**
- * @param {destIndex} string Should be a key of SYNCHRONIZATION_QUERIES_DICTIONARY
- */
+export function getSynchronizationTaskId(spaceId: string, owner: Owner): string {
+  return `cai_cases_analytics_sync_${spaceId}_${owner}`;
+}
+
 export async function scheduleCAISynchronizationTask({
-  taskId,
-  sourceIndex,
-  destIndex,
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
-  taskId: string;
-  sourceIndex: string;
-  destIndex: string;
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) {
+  const taskId = getSynchronizationTaskId(spaceId, owner);
   try {
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: TASK_TYPE,
-      params: { sourceIndex, destIndex },
+      taskType: ANALYTICS_SYNCHRONIZATION_TASK_TYPE,
+      params: { owner, spaceId },
       schedule: SCHEDULE, // every 5 minutes
       state: {},
     });

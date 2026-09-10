@@ -6,24 +6,26 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
-  AIMessageChunk,
   HumanMessage,
   isAIMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCount,
   InferenceConnector,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   InferenceConnectorType,
   MessageRole,
   createInferenceRequestError,
@@ -36,6 +38,9 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     connectorId: 'connector-id',
     name: 'My connector',
     config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...parts,
   };
 };
@@ -303,6 +308,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',
@@ -336,6 +342,7 @@ describe('InferenceChatModel', () => {
         model: 'super-duper-model',
         functionCallingMode: 'simulated',
         signal: abortCtrl.signal,
+        timeout: 60000,
         telemetryMetadata,
       });
 
@@ -352,6 +359,34 @@ describe('InferenceChatModel', () => {
         temperature: 0.7,
         modelName: 'super-duper-model',
         abortSignal: abortCtrl.signal,
+        timeout: 60000,
+        maxRetries: undefined,
+        stream: false,
+        metadata,
+      });
+    });
+
+    it('accepts timeout argument in constructor', async () => {
+      const timeout = 60000;
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        timeout,
+        telemetryMetadata,
+      });
+
+      const response = createResponse({ content: 'dummy' });
+      chatComplete.mockResolvedValue(response);
+
+      await chatModel.invoke('question');
+
+      // Verify the instance was created successfully and can make calls
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        connectorId: connector.connectorId,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        timeout: 60000,
+        maxRetries: undefined,
         stream: false,
         metadata,
       });
@@ -379,19 +414,184 @@ describe('InferenceChatModel', () => {
       });
 
       expect(chatComplete).toHaveBeenCalledTimes(1);
-      expect(chatComplete).toHaveBeenCalledWith({
-        connectorId: connector.connectorId,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        toolChoice: 'auto',
-        functionCalling: 'simulated',
-        temperature: 0,
-        modelName: 'some-other-model',
-        abortSignal: abortCtrl.signal,
-        stream: false,
-        metadata: {
-          connectorTelemetry: undefined,
-        },
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: connector.connectorId,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          functionCalling: 'simulated',
+          temperature: 0,
+          modelName: 'some-other-model',
+          abortSignal: abortCtrl.signal,
+          stream: false,
+          metadata: {
+            connectorTelemetry: undefined,
+          },
+        })
+      );
+
+      // We intentionally do not forward tool params unless tools are present.
+      expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
+    });
+
+    it('forwards cacheControl and sessionId per-call options to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        cacheControl: { type: 'ephemeral', ttl: '1h' },
+        sessionId: 'round-1',
       });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '1h' },
+          sessionId: 'round-1',
+        })
+      );
+    });
+
+    it('omits cacheControl and sessionId from chatComplete when not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0].cacheControl).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].sessionId).toBeUndefined();
+    });
+
+    it('forwards constructor-level cacheControl and sessionId to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '5m' },
+          sessionId: 'constructor-session',
+        })
+      );
+    });
+
+    it('per-call options take precedence over constructor-level cacheControl and sessionId', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        cacheControl: { type: 'ephemeral', ttl: '1h' },
+        sessionId: 'call-session',
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '1h' },
+          sessionId: 'call-session',
+        })
+      );
+    });
+
+    it('forwards cacheControl and sessionId via withConfig', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector }).withConfig({
+        cacheControl: { type: 'ephemeral' },
+        sessionId: 'round-2',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral' },
+          sessionId: 'round-2',
+        })
+      );
+    });
+
+    it('forwards reasoning per-call option to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        reasoning: { effort: 'low' },
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'low' },
+        })
+      );
+    });
+
+    it('omits reasoning from chatComplete when not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0].reasoning).toBeUndefined();
+    });
+
+    it('forwards constructor-level reasoning to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'medium' },
+        })
+      );
+    });
+
+    it('per-call reasoning takes precedence over constructor-level reasoning', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        reasoning: { effort: 'high' },
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'high' },
+        })
+      );
+    });
+
+    it('forwards reasoning via withConfig', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector }).withConfig({
+        reasoning: { effort: 'none' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'none' },
+        })
+      );
     });
   });
 
@@ -582,11 +782,8 @@ describe('InferenceChatModel', () => {
           ],
         },
         {
-          tool_calls: [{ toolCallId: '', index: 0, function: { name: 'myfun', arguments: '' } }],
-        },
-        {
           tool_calls: [
-            { toolCallId: '', index: 0, function: { name: 'ction', arguments: ' { "' } },
+            { toolCallId: '', index: 0, function: { name: 'myfunction', arguments: ' { "' } },
           ],
         },
         {
@@ -607,7 +804,8 @@ describe('InferenceChatModel', () => {
         concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
       }
 
-      expect(allChunks.length).toBe(5);
+      expect(allChunks.length).toBe(4);
+
       expect(concatChunk!.tool_calls).toEqual([
         {
           id: 'my-tool-call-id',
@@ -653,7 +851,9 @@ describe('InferenceChatModel', () => {
       });
 
       expect(concatChunk.usage_metadata).toEqual({
+        input_token_details: {},
         input_tokens: 5,
+        output_token_details: {},
         output_tokens: 20,
         total_tokens: 25,
       });
@@ -688,16 +888,15 @@ describe('InferenceChatModel', () => {
       });
       chatComplete.mockReturnValue(response);
 
-      const output = await chatModel.stream('Some question');
-
       const allChunks: AIMessageChunk[] = [];
       await expect(async () => {
+        const output = await chatModel.stream('Some question');
         for await (const chunk of output) {
           allChunks.push(chunk);
         }
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
-      expect(allChunks.length).toBe(2);
+      expect(allChunks.length).toBe(0);
     });
   });
 
@@ -738,6 +937,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',

@@ -11,7 +11,11 @@
 // happens in the root of your app. Optionally provide a custom title for the assistant:
 
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
-export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
+export {
+  AssistantProvider,
+  useAssistantContext,
+  useMaybeAssistantContext,
+} from './impl/assistant_context';
 
 // Step 2.1: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:
@@ -112,7 +116,6 @@ export {
 } from './impl/assistant_context/constants';
 
 export type { AIConnector } from './impl/connectorland/connector_selector';
-export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
   /** for rendering results in a code block */
@@ -191,6 +194,10 @@ export interface UseAssistantAvailability {
   hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
+  isAssistantVisible: boolean;
+  // When true, user has `All` privilege for `Management > AI Assistant`
+  isAssistantManagementEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -201,6 +208,8 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
-  // remove once product has signed off on prompt text
-  isStarterPromptsEnabled: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
 }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '@kbn/esql-ast';
+import { Parser, WrappingPrettyPrinter } from '@elastic/esql';
+import type { WrappingPrettyPrinterOptions } from '@elastic/esql';
 import * as React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 
@@ -19,7 +20,7 @@ export interface PrettyPrintProps {
 export const PrettyPrint: React.FC<PrettyPrintProps> = ({ src, opts }) => {
   const formatted = React.useMemo(() => {
     try {
-      const { root } = parse(src, { withFormatting: true });
+      const { root } = Parser.parse(src, { withFormatting: true });
 
       return WrappingPrettyPrinter.print(root, opts);
     } catch {

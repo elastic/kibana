@@ -12,12 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
-  kubernetesEnabled: false,
-  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -38,65 +32,69 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the SOC trends timerange and stats on D&R page
-   */
-  socTrendsEnabled: false,
-
-  /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
+   * `runscript` response actions for SentinelOne hosts.
    *
-   * Release: v8.13.0
+   * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneV1Enabled: true,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
+   * Memory Dump response actions support for Elastic Defend.
+   * Release: v9.3
    */
-  responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
-
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
-  /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: true,
+  responseActionsEndpointMemoryDump: true,
 
   /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
    */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+  responseActionsEndpointMemoryDumpRaw: true,
 
   /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
+   * `runscript` response action for Elastic Defend Endpoint
+   * Release: 9.4
    */
-  endpointManagementSpaceAwarenessEnabled: false,
+  responseActionsEndpointRunScript: true,
 
   /**
-   * Disables new notes
+   * Support for Automated Endpoint `runscript` (from rules)
+   * Release: 9.4
    */
-  securitySolutionNotesDisabled: false,
+  responseActionsEndpointAutomatedRunScript: true,
+
+  /**
+   * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
+   * Release: 9.4
+   */
+  responseActionsScriptLibraryManagement: true,
+
+  /**
+   * `cancel` response action for Elastic Defend Endpoint
+   * Release: 9.5
+   */
+  responseActionsEndpointCancel: true,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
+
+  /**
+   * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
+   */
+  defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -104,24 +102,30 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables advanced ESQL generation for the Assistant.
+   * Enable resetting risk scores to zero for outdated entities
    */
-  advancedEsqlGeneration: false,
+  enableRiskScoreResetToZero: true,
 
   /**
-   * Enables the Managed User section inside the new user details flyout.
+   * Enable privmon modifier in risk scoring calculation
    */
-  newUserDetailsFlyoutManagedUser: false,
+  enableRiskScorePrivmonModifier: true,
 
   /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  riskScoringPersistence: true,
+  riskScoreAssistantToolDisabled: false,
+  /**
+   * Enables the new Entity Analytics home page experience.
+   */
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
-   * Enables experimental Entity Analytics HTTP endpoints
+   * Enables the lead generation pipeline for Entity Analytics.
+   * When enabled, the lead generation engine, observation modules,
+   * API routes, and persistence indices are activated.
    */
-  riskScoringRoutesEnabled: true,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -129,105 +133,26 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables Protection Updates tab in the Endpoint Policy Details page
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  protectionUpdatesEnabled: true,
+  gapReasonDetectionEnabled: true,
 
   /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
+   * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  disableTimelineSaveTour: false,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
-   * Enables the risk engine privileges route
-   * and associated callout in the UI
+   * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
+   * Entity Analytics surfaces such as the entity flyout, and registers the
+   * `security.entity` unified cases attachment type.
    */
-  riskEnginePrivilegesRouteEnabled: true,
+  entityAttachmentsEnabled: true,
 
   /**
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   * Enables AI rule creation feature
    */
-  sentinelOneDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables SentinelOne manual host isolation response actions directly through the connector
-   * sub-actions framework.
-   * v8.12.0
-   */
-  sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables experimental Crowdstrike integration data to be available in Analyzer
-   */
-  crowdstrikeDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
-
-  /**
-   * Enables experimental JAMF integration data to be available in Analyzer
-   */
-  jamfDataInAnalyzerEnabled: true,
-
-  /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
-
-  /**
-   * Enables the new modal for the value list items
-   */
-  valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the storing of gaps in the event log
-   */
-  storeGapsInEventLogEnabled: true,
-
-  /**
-   * Enables scheduling gap fills for rules
-   */
-  bulkFillRuleGapsEnabled: false,
-
-  /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
-   */
-  filterProcessDescendantsForEventFiltersEnabled: true,
-
-  /**
-   * Enables the rule's bulk action to manage alert suppression
-   */
-  bulkEditAlertSuppressionEnabled: false,
-
-  /**
-   * Enables the new data ingestion hub
-   */
-  dataIngestionHubEnabled: false,
-
-  /**
-   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
-   * can be disabled if necessary in a given environment.
-   */
-  entityStoreDisabled: false,
-
-  /**
-   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
-   */
-  serviceEntityStoreEnabled: true,
-
-  /**
-   * Enables Privilege Monitoring
-   */
-  privilegedUserMonitoringDisabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -235,19 +160,15 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the Defend Insights feature
+   * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsights: true,
+  defendInsightsPolicyResponseFailure: true,
 
   /**
-   * Disables flyout history and new preview navigation
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   * Additionally: enables import/export for all Endpoint artifacts.
    */
-  newExpandableFlyoutNavigationDisabled: false,
-
-  /**
-   * Enables the ability to edit highlighted fields in the alertflyout
-   */
-  editHighlightedFields: true,
+  endpointExceptionsMovedUnderManagement: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -256,21 +177,7 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeRunScriptEnabled: true,
 
   /**
-   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
-   * Release: 8.18/9.0
-   */
-  responseActionsMSDefenderEndpointEnabled: true,
-
-  /**
-   * Enables banner for informing users about changes in data collection.
-   */
-  eventCollectionDataReductionBannerEnabled: true,
-
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
-
-  /**
-   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: true,
@@ -278,7 +185,183 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: false,
+  trustedAppsAdvancedMode: true,
+
+  /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevices: true,
+
+  /**
+   * Enables custom YARA signature management in Elastic Defend.
+   */
+  customYaraSignaturesEnabled: false,
+
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: true,
+
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: true,
+  /**
+   * Protects all the work related to the attacks and alerts alignment effort
+   */
+  enableAlertsAndAttacksAlignment: true,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: true,
+  /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: true,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: true,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: true,
+
+  /**
+   * Enables the Trial Companion feature.
+   */
+  trialCompanionEnabled: false,
+
+  /**
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
+   */
+  linuxDnsEvents: true,
+
+  /**
+   * Enables the Automatic Migration of Splunk dashboards in Security Solution
+   */
+  splunkV2DashboardsEnabled: true,
+
+  /**
+   * Enables Detection Engine Health UI
+   */
+  deHealthUIEnabled: false,
+
+  /**
+   * Enables Rule Health UI
+   */
+  ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: true,
+
+  /**
+   * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
+   * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
+   */
+  pciComplianceAgentBuilder: true,
+
+  /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   * Shipped dark by default; enable per environment via config.
+   */
+  endpointForensicAnalysisSkill: false,
+
+  /**
+   * Enables the investigate-rule Agent Builder skill.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   */
+  investigateRuleSkill: false,
+
+  /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: true,
+
+  /**
+   * Enables the recommend-prebuilt-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillRecommendPrebuiltRules: true,
+
+  /**
+   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
+   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
+   * Turning this flag on unregisters that advanced setting, forcing the
+   * legacy flyout and effectively removing the new flyout option.
+   */
+  newFlyoutSystemDisabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: true,
+
+  /**
+   * Enables entity ML anomaly details API
+   */
+  entityAnalyticsAnomalyDetails: true,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: true,
+
+  /**
+   * Enables the Detection Rule Changes History API endpoint
+   * (`GET /api/detection_engine/rules/_history`).
+   *
+   * Independent of the alerting framework's `xpack.alerting.ruleChangeTracking.enabled`
+   * config flag, which gates the underlying primitive that produces the history
+   * records. Both must be enabled for the API to return non-empty results.
+   */
+  ruleChangesHistoryEnabled: true,
+
+  /**
+   * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
+   * attachment (server type + client renderer). Gates registration so the feature can
+   * ship dark and be enabled per environment.
+   */
+  rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: true,
+
+  /**
+   * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
+   * from the locally stored kibana mappings after a MITRE version bump.
+   */
+  mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * Threat-intel supply pipeline (indices, ingest adapters, create
+   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
+   * off. Enable with:
+   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
+   */
+  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -294,7 +377,6 @@ const disableExperimentalPrefix = 'disable:' as const;
  * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
- * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (
   configValue: string[]

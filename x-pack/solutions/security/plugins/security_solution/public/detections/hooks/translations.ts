@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedAlertsTitle', {
-    values: { selectedAlertsFormatted, selectedAlerts },
-    defaultMessage:
-      'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllAlertsTitle', {
-    values: { totalAlertsFormatted, totalAlerts },
-    defaultMessage:
-      'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const CLEAR_SELECTION = i18n.translate(
-  'xpack.securitySolution.toolbar.bulkActions.clearSelectionTitle',
-  {
-    defaultMessage: 'Clear selection',
-  }
-);
-
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.bulkActions.updateAlertStatusFailed', {
     values: { conflicts },
@@ -109,5 +88,40 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   'xpack.securitySolution.bulkActions.closeSelectedTitle',
   {
     defaultMessage: 'Mark as closed',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.restartSuppressionTitle',
+  {
+    defaultMessage: 'Closing alert restarts alert suppression',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionTitle',
+  {
+    defaultMessage: "Closing alert doesn't interrupt alert suppression",
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CONFIRM_LABEL = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.confirmLabel',
+  {
+    defaultMessage: 'Continue',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_CANCEL_LABEL = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.cancelLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const ALERT_CLOSE_INFO_MODAL_DO_NOT_SHOW_AGAIN_LABEL = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.doNotShowAgainLabel',
+  {
+    defaultMessage: 'Do not show this message again.',
   }
 );

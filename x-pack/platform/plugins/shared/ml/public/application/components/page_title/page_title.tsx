@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React from 'react';
-
-const cssPageTitle = css({
-  minWidth: '300px',
-});
+import { EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface PageTitleProps {
-  title: string;
+  title: ReactNode;
 }
 
-export const PageTitle: FC<PageTitleProps> = ({ title }) => <div css={cssPageTitle}>{title}</div>;
+export const PageTitle: FC<PageTitleProps> = ({ title }) => {
+  const titleStyles = css`
+    word-break: normal;
+  `;
+  return (
+    <EuiTitle size="l" css={titleStyles}>
+      <h1>{title}</h1>
+    </EuiTitle>
+  );
+};

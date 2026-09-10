@@ -7,7 +7,7 @@
 
 import { DESCRIPTION, LIST_ITEM_ID, META, NAME } from '../../constants/index.mock';
 
-import { PatchListSchema } from '.';
+import type { PatchListSchema } from '.';
 
 export const getPathListSchemaMock = (): PatchListSchema => ({
   description: DESCRIPTION,

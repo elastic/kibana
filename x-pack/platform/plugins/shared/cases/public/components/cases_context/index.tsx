@@ -13,24 +13,18 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
-  CasesSettings,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
-import {
-  CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID,
-  DEFAULT_FEATURES,
-} from '../../../common/constants';
-import { KibanaServices, useKibana } from '../../common/lib/kibana';
+import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import type { CasesContextStoreAction } from './state/cases_context_reducer';
@@ -42,30 +36,21 @@ import { casesQueryClient } from './query_client';
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   owner: string[];
   permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
-  settings: CasesSettings;
 }
 
 export interface CasesContextProps
-  extends Pick<
-    CasesContextValue,
-    | 'owner'
-    | 'permissions'
-    | 'externalReferenceAttachmentTypeRegistry'
-    | 'persistableStateAttachmentTypeRegistry'
-  > {
+  extends Pick<CasesContextValue, 'owner' | 'permissions' | 'unifiedAttachmentTypeRegistry'> {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
-  settings?: CasesContextValue['settings'];
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -78,34 +63,21 @@ export const CasesProvider: FC<
 > = ({
   children,
   value: {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     owner,
     permissions,
     basePath = DEFAULT_BASE_PATH,
     features = {},
     releasePhase = 'ga',
     getFilesClient,
-    settings,
   },
   queryClient = casesQueryClient,
 }) => {
-  const {
-    settings: { client },
-  } = useKibana().services;
-
-  // UI setting enablement is behind the configuration flag, so will error without this wrapper
-  let displayIncrementalCaseId = false;
-  if (KibanaServices.getConfig()?.incrementalId?.enabled) {
-    displayIncrementalCaseId = client.get(CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID);
-  }
-
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
   const value: CasesContextValue = useMemo(
     () => ({
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       owner,
       permissions: {
         all: permissions.all,
@@ -119,6 +91,7 @@ export const CasesProvider: FC<
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
         assign: permissions.assign,
+        manageTemplates: permissions.manageTemplates,
       },
       basePath,
       /**
@@ -132,9 +105,6 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
-      settings: settings ?? {
-        displayIncrementalCaseId,
-      },
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.
@@ -154,6 +124,10 @@ export const CasesProvider: FC<
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      // Interim bug fix until we refactor this code to avoid passing objects in deps
+      // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
+      features.alerts?.all,
+      features.alerts?.read,
     ]
   );
 

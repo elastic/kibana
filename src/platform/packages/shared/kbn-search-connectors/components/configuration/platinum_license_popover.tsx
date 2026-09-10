@@ -11,6 +11,7 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -19,8 +20,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiPopoverProps,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,9 +42,15 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
   subscriptionLink,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const popoverTitleId = useGeneratedHtmlId();
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('searchConnectors.connectors.upgradeTitle', {
           defaultMessage: 'Upgrade to Elastic Platinum',
         })}
@@ -66,7 +73,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {subscriptionLink && (
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="popout" target="_blank" href={subscriptionLink}>
+              <EuiButton iconType="external" target="_blank" href={subscriptionLink}>
                 {i18n.translate('searchConnectors.connectors.subscriptionLabel', {
                   defaultMessage: 'Subscription plans',
                 })}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldNumber, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiFormAppend } from '@elastic/eui';
 
 interface Props {
   name: string;
@@ -22,13 +22,10 @@ export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
   return (
     <EuiFormRow label={label} error={errors} isInvalid={errors.length > 0}>
       <EuiFieldNumber
+        isInvalid={errors.length > 0}
         compressed
         value={value}
-        append={
-          <EuiText size="xs">
-            <strong>%</strong>
-          </EuiText>
-        }
+        append={<EuiFormAppend label="%" />}
         onChange={(e) => {
           let newValue = parseInt(e.target.value, 10);
           if (isNaN(newValue)) {

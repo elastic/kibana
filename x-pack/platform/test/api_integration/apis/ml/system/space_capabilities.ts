@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 
-import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';
 
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
-          canTestTrainedModels: true,
+          canTestTrainedModels: false,
           canCreateTrainedModels: false,
           canCreateInferenceEndpoint: false,
           canDeleteTrainedModels: false,

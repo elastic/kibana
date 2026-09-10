@@ -8,10 +8,12 @@
  */
 
 import { capitalize, chain, memoize } from 'lodash';
-import { Agent, AgentOptions } from 'https';
+import type { AgentOptions } from 'https';
+import { Agent } from 'https';
 import { URL } from 'url';
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import nodeFetch, { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
+import nodeFetch from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 import type { KibanaConfig } from '../kibana_config';
 

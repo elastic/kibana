@@ -9,8 +9,8 @@
 
 declare global {
   interface Window {
-    _checkCanSendTelemetry: () => Promise<boolean>;
-    _resetTelemetry: () => Promise<void>;
+    _checkCanSendTelemetry: (signal?: AbortSignal) => Promise<boolean>;
+    _resetTelemetry: (signal?: AbortSignal) => Promise<void>;
   }
 }
 

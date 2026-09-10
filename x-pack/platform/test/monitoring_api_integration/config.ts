@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -22,7 +22,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [...xPackAPITestsConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        // This suite installs its package fixtures by upload, and their names
+        // (kibana, logstash, ...) exist in the package registry. Fleet rejects
+        // such uploads by default.
+        '--xpack.fleet.internal.skipUploadPackageValidation=true',
+      ],
     },
   };
 }

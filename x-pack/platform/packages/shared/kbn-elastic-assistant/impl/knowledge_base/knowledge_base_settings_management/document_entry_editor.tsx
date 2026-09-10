@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { DocumentEntry } from '@kbn/elastic-assistant-common';
+import type { DocumentEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
 
@@ -63,6 +63,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
               color="subdued"
               style={{ lineHeight: 'inherit', marginRight: '4px' }}
               type="lock"
+              aria-hidden={true}
             />
             {i18n.SHARING_PRIVATE_OPTION_LABEL}
           </EuiText>
@@ -77,6 +78,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
               color="subdued"
               style={{ lineHeight: 'inherit', marginRight: '4px' }}
               type="globe"
+              aria-hidden={true}
             />
             {i18n.SHARING_GLOBAL_OPTION_LABEL}
           </EuiText>

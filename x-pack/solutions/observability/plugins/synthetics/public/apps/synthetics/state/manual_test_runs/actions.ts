@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
-import { ManualTestRun } from '.';
-import { TestNowResponse } from '../../../../../common/types';
+import { createAction } from 'redux-toolkit-v1';
+import type { ManualTestRun } from '.';
+import type { TestNowResponse } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const toggleTestNowFlyoutAction = createAction<string>('TOGGLE TEST NOW FLYOUT ACTION');

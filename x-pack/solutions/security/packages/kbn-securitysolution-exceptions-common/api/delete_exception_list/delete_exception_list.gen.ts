@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListId,
@@ -23,19 +23,34 @@ import {
   ExceptionList,
 } from '../model/exception_list_common.gen';
 
+export const DeleteExceptionListRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Exception list's identifier. Either `id` or `list_id` must be specified.
+     */
+    id: ExceptionListId.optional().describe(
+      "Exception list's identifier. Either `id` or `list_id` must be specified."
+    ),
+    /**
+     * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
+     */
+    list_id: ExceptionListHumanId.optional().describe(
+      'Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.'
+    ),
+    /**
+      * `single` deletes the list in the current Kibana space; `agnostic` deletes a global list. Must match the
+list you are removing when using `list_id` or `id`.
+
+      */
+    namespace_type: ExceptionNamespaceType.optional()
+      .default('single')
+      .describe(
+        '`single` deletes the list in the current Kibana space; `agnostic` deletes a global list. Must match the\nlist you are removing when using `list_id` or `id`.\n'
+      ),
+  })
+);
 export type DeleteExceptionListRequestQuery = z.infer<typeof DeleteExceptionListRequestQuery>;
-export const DeleteExceptionListRequestQuery = z.object({
-  /**
-   * Exception list's identifier. Either `id` or `list_id` must be specified.
-   */
-  id: ExceptionListId.optional(),
-  /**
-   * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
-   */
-  list_id: ExceptionListHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-});
 export type DeleteExceptionListRequestQueryInput = z.input<typeof DeleteExceptionListRequestQuery>;
 
+export const DeleteExceptionListResponse = lazySchema(() => ExceptionList);
 export type DeleteExceptionListResponse = z.infer<typeof DeleteExceptionListResponse>;
-export const DeleteExceptionListResponse = ExceptionList;

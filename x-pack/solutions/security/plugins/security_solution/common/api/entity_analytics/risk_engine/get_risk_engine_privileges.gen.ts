@@ -14,9 +14,10 @@
  *   version: 1
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { EntityAnalyticsPrivileges } from '../common/common.gen';
 
+export const RiskEngineGetPrivilegesResponse = lazySchema(() => EntityAnalyticsPrivileges);
 export type RiskEngineGetPrivilegesResponse = z.infer<typeof RiskEngineGetPrivilegesResponse>;
-export const RiskEngineGetPrivilegesResponse = EntityAnalyticsPrivileges;

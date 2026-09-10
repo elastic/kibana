@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAvatar,
   EuiButton,
   EuiCallOut,
   EuiDescriptionList,
@@ -15,17 +14,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPageHeader,
+  EuiPageSection,
   EuiPanel,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
+import { AppHeader } from '@kbn/app-header';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -38,6 +38,10 @@ import { getUserDisplayName } from '../../../../common/model';
 import { useCapabilities } from '../../../components/use_capabilities';
 import { UserAPIClient } from '../user_api_client';
 import { isUserDeprecated, isUserReserved } from '../user_utils';
+
+const usersListTitle = i18n.translate('xpack.security.management.users.usersTitle', {
+  defaultMessage: 'Users',
+});
 
 export interface EditUserPageProps {
   username: string;
@@ -60,7 +64,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
   const [action, setAction] = useState<EditUserPageAction>('none');
   const readOnly = !useCapabilities('users').save;
 
-  const backToUsers = () => history.push('/');
+  const backToUsers = () => {
+    if (history.length > 1) {
+      history.goBack();
+    } else {
+      history.push('/');
+    }
+  };
 
   useEffect(() => {
     getUser();
@@ -72,37 +82,40 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
     }
   }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const back = {
+    href: history.createHref({ pathname: '/' }),
+    label: usersListTitle,
+  };
+
   if (!user) {
-    return null;
+    return (
+      <>
+        <AppHeader title={username} back={back} spacing="bleed" />
+        <EuiSpacer size="l" />
+        <EuiPageSection alignment="center" color="subdued">
+          <SectionLoading inline data-test-subj="sectionLoading">
+            <FormattedMessage
+              id="xpack.security.management.users.editUserPage.loadingUserDescription"
+              defaultMessage="Loading…"
+            />
+          </SectionLoading>
+        </EuiPageSection>
+      </>
+    );
   }
 
   const isReservedUser = isUserReserved(user);
   const isDeprecatedUser = isUserDeprecated(user);
 
-  // We render email below the title already and don't need to duplicate it in the title itself.
   const title = getUserDisplayName({ full_name: user.full_name, username: user.username });
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiAvatar name={getUserDisplayName(user)} size="xl" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h1>{title}</h1>
-              </EuiTitle>
-              <EuiText>{user.email}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      <AppHeader title={title} description={user.email || undefined} back={back} spacing="bleed" />
       <EuiSpacer size="l" />
       {isDeprecatedUser ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.deprecatedUserWarning"
@@ -119,6 +132,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       ) : isReservedUser ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.reservedUserWarning"
@@ -132,6 +146,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       ) : user.enabled === false ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.disabledUserWarning"
@@ -190,7 +205,6 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
             />
           ) : undefined}
 
-          <EuiSpacer />
           <EuiHorizontalRule />
 
           <EuiPanel color="subdued" hasShadow={false} grow={false}>
@@ -333,6 +347,8 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               </EuiPanel>
             </>
           )}
+
+          <EuiHorizontalRule />
         </>
       )}
     </>

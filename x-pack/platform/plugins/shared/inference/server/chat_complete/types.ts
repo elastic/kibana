@@ -14,10 +14,15 @@ import type {
   Message,
   ToolOptions,
   ChatCompleteMetadata,
+  AnonymizationRule,
+  ChatCompletionReasoning,
+  ChatCompleteCacheControl,
 } from '@kbn/inference-common';
-import { KibanaRequest } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceExecutor } from './utils';
+import type { RegexWorkerService } from './anonymization/regex_worker_service';
 
 /**
  * Adapter in charge of communicating with a specific inference connector
@@ -43,9 +48,15 @@ export type InferenceAdapterChatCompleteOptions = {
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
+  reasoning?: ChatCompletionReasoning;
   modelName?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
+  stream?: boolean;
+  timeout?: number;
+  maxContentLength?: number;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 } & ToolOptions;
 
 /**
@@ -65,4 +76,7 @@ export interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   actions: ActionsPluginsStart;
   logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
 }

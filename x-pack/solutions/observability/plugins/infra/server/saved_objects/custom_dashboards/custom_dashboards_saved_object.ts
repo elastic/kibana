@@ -8,16 +8,9 @@
 import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InfraCustomDashboard } from '../../../common/custom_dashboards';
 
-// This feature is deprecated and will be removed in https://github.com/elastic/kibana/issues/220340
 export const INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'infra-custom-dashboards';
-
-interface InfraCustomDashboard {
-  dashboardSavedObjectId: string;
-  assetType: InventoryItemType;
-  dashboardFilterAssetIdEnabled: boolean;
-}
 
 const properties: Record<keyof InfraCustomDashboard, SavedObjectsFieldMapping> = {
   assetType: {
@@ -52,9 +45,11 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          dashboardIdList: schema.arrayOf(schema.string()),
-          assetType: schema.string(),
-          kuery: schema.maybe(schema.string()),
+          dashboardIdList: schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 100,
+          }),
+          assetType: schema.string({ maxLength: 64 }),
+          kuery: schema.maybe(schema.string({ maxLength: 2048 })),
         }),
       },
     },
@@ -78,8 +73,8 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
       ],
       schemas: {
         create: schema.object({
-          dashboardSavedObjectId: schema.string(),
-          assetType: schema.string(),
+          dashboardSavedObjectId: schema.string({ maxLength: 256 }),
+          assetType: schema.string({ maxLength: 64 }),
           dashboardFilterAssetIdEnabled: schema.boolean(),
         }),
       },

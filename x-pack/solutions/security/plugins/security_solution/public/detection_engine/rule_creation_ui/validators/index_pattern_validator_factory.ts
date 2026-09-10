@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ERROR_CODE } from '../../../shared_imports';
-import { fieldValidators, type FormData, type ValidationFunc } from '../../../shared_imports';
+import {
+  fieldValidators,
+  type FormData,
+  type ValidationFunc,
+  type ERROR_CODE,
+} from '../../../shared_imports';
 
 export function indexPatternValidatorFactory(): ValidationFunc<FormData, ERROR_CODE, unknown> {
   return fieldValidators.emptyField(

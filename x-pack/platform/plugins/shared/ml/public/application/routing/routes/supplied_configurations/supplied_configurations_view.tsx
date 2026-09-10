@@ -7,10 +7,9 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -20,8 +19,7 @@ import {
   getMlManagementBreadcrumb,
   getStackManagementBreadcrumb,
 } from '../../breadcrumbs';
-import { MlPageHeader } from '../../../components/page_header';
-import { ML_PAGES } from '../../../../locator';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../components/ml_app_header';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
@@ -40,41 +38,31 @@ export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp)
     getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     getMlManagementBreadcrumb('SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB', navigateToApp),
   ],
-  enableDatePicker: false,
   'data-test-subj': 'mlPageSuppliedConfigurations',
 });
 
 const PageWrapper: FC = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   return (
     <PageLoader context={context}>
-      <MlPageHeader>
-        <EuiFlexGroup
-          responsive={false}
-          wrap={false}
-          alignItems={'flexStart'}
-          gutterSize={'m'}
-          direction="column"
-          data-test-subj="mlPageSuppliedConfigurations"
-        >
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeader"
-              defaultMessage="Supplied configurations"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription"
-                defaultMessage="This page lists pre-defined anomaly detection job configurations with related Kibana assets."
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </MlPageHeader>
-      <SuppliedConfigurations />
+      <div data-test-subj="mlPageSuppliedConfigurations">
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
+            defaultMessage: 'Supplied configurations',
+          })}
+          description={i18n.translate(
+            'xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription',
+            {
+              defaultMessage:
+                'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',
+            }
+          )}
+          back={anomalyDetectionJobsBack}
+        />
+        <SuppliedConfigurations />
+      </div>
     </PageLoader>
   );
 };

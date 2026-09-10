@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggTimeSeriesFnName } from './time_series_fn';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 export { termsAggFilter } from './_terms_order_helper';
 

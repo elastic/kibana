@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function globalExecutionLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -77,6 +76,28 @@ export default function globalExecutionLogTests({ getService }: FtrProviderConte
       const sanitizedLogs = logs.filter((l: any) => [alertId, alertId2].includes(l.rule_id));
       const allLogsSpace0 = sanitizedLogs.every((l: any) => l.rule_id === alertId);
       expect(allLogsSpace0).to.be(true);
+    });
+
+    it('should return 403 when requesting namespaces the user has no privileges for', async () => {
+      const startDate = new Date().toISOString();
+      const { user, space } = UserAtSpaceScenarios[3]; // space_1_all: privileges only in space1
+      const spaceId = space.id;
+
+      const logResponse = await supertestWithoutAuth
+        .get(
+          `${getUrlPrefix(
+            spaceId
+          )}/internal/alerting/_global_execution_logs?date_start=${startDate}&namespaces=${JSON.stringify(
+            ['space1', 'space2']
+          )}`
+        )
+        .set('kbn-xsrf', 'foo')
+        .auth(user.username, user.password);
+
+      expect(logResponse.statusCode).to.be(403);
+      expect(logResponse.body.message).to.be(
+        'Unauthorized to find alerts for any rule types. Validate that you have permissions to access spaces: space1,space2'
+      );
     });
 
     it('should return logs from multiple spaces when passed the namespaces param', async () => {

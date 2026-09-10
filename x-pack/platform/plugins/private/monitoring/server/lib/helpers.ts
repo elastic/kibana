@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../common/types/es';
+import type { ElasticsearchResponse, ElasticsearchResponseHit } from '../../common/types/es';
 
 export const response = {
   hits: {

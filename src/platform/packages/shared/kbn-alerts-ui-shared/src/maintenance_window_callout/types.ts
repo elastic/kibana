@@ -9,6 +9,8 @@
 
 import type { WeekdayStr, Options } from '@kbn/rrule';
 import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-types';
+import type { Observable } from 'rxjs';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',
@@ -63,6 +65,9 @@ export interface KibanaServices {
   application: {
     capabilities: Record<string, any>;
   };
-  http: Pick<CoreStart['http'], 'fetch'>;
+  http: Pick<CoreStart['http'], 'fetch' | 'basePath'>;
+  licensing?: {
+    license$: Observable<ILicense>;
+  };
   notifications: Pick<CoreStart['notifications'], 'toasts'>;
 }

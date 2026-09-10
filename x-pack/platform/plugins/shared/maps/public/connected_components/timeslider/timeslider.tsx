@@ -6,17 +6,21 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Observable, switchMap, tap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { switchMap, tap } from 'rxjs';
 
+import { euiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   ControlGroupRenderer,
-  ControlGroupRendererApi,
-  type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
-} from '@kbn/controls-plugin/public';
+  type ControlGroupRendererApi,
+} from '@kbn/control-group-renderer';
 import type { TimeRange } from '@kbn/es-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { Timeslice } from '../../../common/descriptor_types';
+import type { Timeslice } from '../../../common/descriptor_types';
+import { getUiActions } from '../../kibana_services';
 
 export interface Props {
   setTimeslice: (timeslice?: Timeslice) => void;
@@ -25,6 +29,7 @@ export interface Props {
 }
 
 export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }: Props) {
+  const euiThemeContext = useEuiTheme();
   const [dataLoading, setDataLoading] = useState(false);
   const [api, setApi] = useState<ControlGroupRendererApi | undefined>();
 
@@ -34,7 +39,7 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
     }
 
     let canceled = false;
-    const subscription = api.timeslice$
+    const subscription = api.appliedTimeslice$
       .pipe(
         tap(() => {
           if (!canceled) setDataLoading(true);
@@ -62,23 +67,29 @@ export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }:
   }, [api, setTimeslice, waitForTimesliceToLoad$]);
 
   return (
-    <div className="mapTimeslider mapTimeslider--animation">
-      <ControlGroupRenderer
-        onApiAvailable={(nextApi: ControlGroupRendererApi) => {
-          setApi(nextApi);
-        }}
-        dataLoading={dataLoading}
-        getCreationOptions={async (
-          initialState: Partial<ControlGroupRuntimeState>,
-          builder: ControlGroupStateBuilder
-        ) => {
-          builder.addTimeSliderControl(initialState);
-          return {
-            initialState,
-          };
-        }}
-        timeRange={timeRange}
-      />
+    <div
+      className="mapTimeslider mapTimeslider--animation"
+      css={css`
+        .controlFrame__formControlLayout {
+          ${euiShadow(euiThemeContext, 'm')}
+        }
+      `}
+    >
+      <KibanaContextProvider services={{ uiActions: getUiActions() }}>
+        <ControlGroupRenderer
+          onApiAvailable={(nextApi: ControlGroupRendererApi) => {
+            setApi(nextApi);
+          }}
+          dataLoading={dataLoading}
+          getCreationOptions={async (initialState, builder: ControlGroupStateBuilder) => {
+            builder.addTimeSliderControl(initialState);
+            return {
+              initialState,
+            };
+          }}
+          timeRange={timeRange}
+        />
+      </KibanaContextProvider>
     </div>
   );
 }

@@ -8,7 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
+export const dataViewsListTitle = i18n.translate('indexPatternManagement.dataViewTable.title', {
+  defaultMessage: 'Data Views',
+});
 
 export function getListBreadcrumbs(withLink?: boolean) {
   return [

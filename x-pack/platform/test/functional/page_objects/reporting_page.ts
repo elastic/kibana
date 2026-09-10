@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import type SuperTest from 'supertest';
-import { format as formatUrl } from 'url';
 import { promisify } from 'util';
 
 import { INTERNAL_ROUTES, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
@@ -20,14 +19,15 @@ const mkdirAsync = promisify(fs.mkdir);
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
-  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly exports = this.ctx.getPageObject('exports');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
     await this.browser.execute(`
@@ -91,21 +91,20 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
-    this.log.debug(`getResponse for ${fullUrl}`);
-    const kibanaServerConfig = this.config.get('servers.kibana');
-    const baseURL = formatUrl({
-      ...kibanaServerConfig,
-      auth: false,
-    });
-    const urlWithoutBase = fullUrl.replace(baseURL, '');
-    const res = await this.security.testUserSupertest.get(urlWithoutBase);
+  async getResponse(url: string, isFullUrl: boolean = true): Promise<SuperTest.Response> {
+    this.log.debug(`getResponse for ${url}`);
+    let urlToUse = url;
+    if (isFullUrl) {
+      const parsedUrl = new URL(url);
+      urlToUse = `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+    }
+    const res = await this.security.testUserSupertest.get(urlToUse);
     return res ?? '';
   }
 
   async getReportInfo(jobId: string) {
     this.log.debug(`getReportInfo for ${jobId}`);
-    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`);
+    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`, false);
     return response.body;
   }
 
@@ -120,13 +119,13 @@ export class ReportingPageObject extends FtrService {
     this.log.debug(`openShareMenuItem title:${itemTitle}`);
     const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
     if (!isShareMenuOpen) {
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
     } else {
       // there is no easy way to ensure the menu is at the top level
       // so just close the existing menu
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
       // and then re-open the menu
-      await this.testSubjects.click('shareTopNavButton');
+      await this.appMenu.clickMenuItem('shareTopNavButton');
     }
     const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
     await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
@@ -135,7 +134,18 @@ export class ReportingPageObject extends FtrService {
 
   async openExportPopover() {
     this.log.debug('open export popover');
-    await this.exports.clickExportTopNavButton();
+
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      await this.exports.clickExportTopNavButton();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      await this.exports.clickExportTopNavButton();
+    }
   }
 
   async selectExportItem(label: string) {
@@ -143,7 +153,7 @@ export class ReportingPageObject extends FtrService {
   }
 
   async getQueueReportError() {
-    return await this.testSubjects.exists('errorToastMessage');
+    return await this.testSubjects.exists('errorToastBtn');
   }
 
   async getGenerateReportButton() {
@@ -190,7 +200,8 @@ export class ReportingPageObject extends FtrService {
     });
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {
-      await this.testSubjects.click('completeReportSuccess > toastCloseButton');
+      // If close button fails to be clicked, the toast should dismiss regardless.
+      await this.toasts.dismissAll();
     }
 
     return isToastPresent;

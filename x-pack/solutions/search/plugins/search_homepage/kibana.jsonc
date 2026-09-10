@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-homepage",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   "group": "search",
   "visibility": "private",
   "plugin": {
@@ -14,12 +14,16 @@
     ],
     "requiredPlugins": [
       "share",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
       "searchNavigation",
       "usageCollection",
+      "sampleDataIngest",
+      "dataViews",
+      "agentBuilder",
     ],
     "requiredBundles": [
       "kibanaReact"

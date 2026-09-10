@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import { nextTick } from '@kbn/test-jest-helpers';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { SecurityNavControlService } from './nav_control_service';
 import { SecurityLicenseService } from '../../common/licensing';
@@ -20,13 +20,8 @@ import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
-const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
 useUserProfileMock.mockReturnValue({
-  loading: true,
-});
-
-useCurrentUserMock.mockReturnValue({
   loading: true,
 });
 
@@ -51,7 +46,7 @@ const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContr
 });
 
 describe('SecurityNavControlService', () => {
-  it('can render and cleanup the control via the mount() function', async () => {
+  it('registers the user menu', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
@@ -62,66 +57,14 @@ describe('SecurityNavControlService', () => {
       securityApiClients: mockApiClients(coreStart.http),
     });
 
-    coreStart.chrome.navControls.registerRight = jest.fn();
-
     navControlService.start({ core: coreStart, authc });
-    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
-    const [{ mount }] = coreStart.chrome.navControls.registerRight.mock.calls[0];
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
+    const [content] = coreStart.chrome.next.userMenu.set.mock.calls[0];
 
-    const target = document.createElement('div');
-    const cleanup = mount(target);
-
-    await nextTick();
-
-    expect(target).toMatchInlineSnapshot(`
-      <div>
-        <div
-          class="css-qvyf25-redirectAppLinksStyles"
-          data-test-subj="kbnRedirectAppLink"
-        >
-          <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            id="headerUserMenu"
-          >
-            <button
-              aria-controls="headerUserMenu"
-              aria-expanded="false"
-              aria-haspopup="true"
-              aria-label="Account menu"
-              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-              data-test-subj="userMenuButton"
-              style="line-height: normal;"
-              type="button"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-              >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  <span
-                    class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
-                  >
-                    <span
-                      aria-label="Loading"
-                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                      role="progressbar"
-                    />
-                  </span>
-                </span>
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    `);
-
-    cleanup();
-
-    expect(target).toMatchInlineSnapshot(`<div />`);
+    expect(React.isValidElement(content)).toBe(true);
   });
 
-  it('should register the nav control once the license supports it', () => {
+  it('should register the user menu once the license supports it', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
     const coreStart = coreMock.createStart();
 
@@ -134,14 +77,14 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+    expect(coreStart.chrome.next.userMenu.set).not.toHaveBeenCalled();
 
     license$.next(validLicense);
 
-    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalled();
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalled();
   });
 
-  it('should not register the nav control for anonymous paths', () => {
+  it('should not register the user menu for anonymous paths', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
@@ -155,10 +98,10 @@ describe('SecurityNavControlService', () => {
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+    expect(coreStart.chrome.next.userMenu.set).not.toHaveBeenCalled();
   });
 
-  it('should only register the nav control once', () => {
+  it('should only register the user menu once', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
@@ -171,13 +114,13 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
 
     // trigger license change
     license$.next({} as ILicense);
     license$.next(validLicense);
 
-    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
   });
 
   it('should allow for re-registration if the service is restarted', () => {
@@ -193,12 +136,12 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
 
     navControlService.stop();
 
     navControlService.start({ core: coreStart, authc });
-    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(2);
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(2);
   });
 
   describe(`#start`, () => {
@@ -222,7 +165,7 @@ describe('SecurityNavControlService', () => {
       expect(navControlServiceStart).toHaveProperty('addUserMenuLinks');
     });
 
-    it('should register custom user menu links to be displayed in the nav controls', (done) => {
+    it('should register custom user menu links', (done) => {
       const coreStart = coreMock.createStart();
       const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
         core: coreStart,

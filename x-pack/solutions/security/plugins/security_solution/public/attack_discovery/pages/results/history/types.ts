@@ -9,3 +9,12 @@ export interface ConnectorFilterOptionData {
   description?: string;
   deleted?: boolean;
 }
+
+export interface SettingsOverrideOptions {
+  overrideConnectorId?: string;
+  overrideEnd?: string;
+  overrideFilter?: Record<string, unknown>;
+  overrideSize?: number;
+  overrideStart?: string;
+  trigger?: 'manual' | 'save_and_run';
+}

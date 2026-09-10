@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -19,22 +18,22 @@ import {
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { AbstractESAggSource } from '../../es_agg_source';
+import type { BucketProperties } from '../../../../../common/elasticsearch_util';
 import {
   getField,
   addFieldToDSL,
   extractPropertiesFromBucket,
-  BucketProperties,
 } from '../../../../../common/elasticsearch_util';
-import {
+import type {
   DataFilters,
   ESTermSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import type { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../../util/valid_string_config';
-import { ITermJoinSource } from '../types';
+import type { ITermJoinSource } from '../types';
 import type { IESAggSource, ESAggsSourceSyncMeta } from '../../es_agg_source';
-import { IField } from '../../../fields/field';
+import type { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
 import { isTermSourceComplete } from './is_term_source_complete';
 import { getJoinMetricsRequestName } from '../i18n_utils';
@@ -61,7 +60,9 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
 export class ESTermSource extends AbstractESAggSource implements ITermJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
-  static createDescriptor(descriptor: Partial<ESTermSourceDescriptor>): ESTermSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESTermSourceDescriptor>
+  ): ESTermSourceDescriptor & Required<Pick<ESTermSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.term)) {
       throw new Error('Cannot create an ESTermSource without a term');
@@ -74,7 +75,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   private readonly _termField: ESDocField;
-  readonly _descriptor: ESTermSourceDescriptor;
+  readonly _descriptor: ESTermSourceDescriptor & Required<Pick<ESTermSourceDescriptor, 'metrics'>>;
 
   constructor(descriptor: Partial<ESTermSourceDescriptor>) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
@@ -141,7 +142,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
@@ -169,6 +170,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);

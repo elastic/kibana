@@ -19,6 +19,7 @@ import {
   EuiModalFooter,
   EuiFlexGroup,
   EuiFlexItem,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { ImportedEvents } from '../imported_events';
@@ -127,6 +128,8 @@ export class ImportModal extends Component {
       includePastEvents,
     } = this.state;
 
+    const modalTitleId = htmlIdGenerator()('importModalTitle');
+
     let showRecurringWarning = false;
     let importedEvents;
 
@@ -142,11 +145,11 @@ export class ImportModal extends Component {
 
     return (
       <Fragment>
-        <EuiModal onClose={closeImportModal} maxWidth={true}>
+        <EuiModal onClose={closeImportModal} maxWidth={true} aria-labelledby={modalTitleId}>
           <EuiModalHeader>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle>
+                <EuiModalHeaderTitle id={modalTitleId}>
                   <FormattedMessage
                     id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
                     defaultMessage="Import events"

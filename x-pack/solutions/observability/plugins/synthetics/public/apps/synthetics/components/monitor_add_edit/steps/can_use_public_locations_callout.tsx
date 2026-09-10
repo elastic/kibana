@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const CanUsePublicLocationsCallout = ({
@@ -16,23 +17,21 @@ export const CanUsePublicLocationsCallout = ({
   if (!canUsePublicLocations) {
     return (
       <>
-        <EuiCallOut
-          color="warning"
+        <KbnWarningCallout
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.synthetics.publicLocations.readOnly.callout.title"
               defaultMessage="You do not have permission to use Elastic managed locations"
             />
           }
-          iconType="alert"
-        >
-          <p>
+          text={
             <FormattedMessage
               id="xpack.synthetics.publicLocations.readOnly.callout.content"
               defaultMessage="This monitor contains a Elastic managed location. To edit this monitor, you need to have permission to use Elastic managed locations."
             />
-          </p>
-        </EuiCallOut>
+          }
+        />
         <EuiSpacer size="m" />
       </>
     );

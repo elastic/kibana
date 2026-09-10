@@ -6,7 +6,8 @@
  */
 
 import { EuiButton, EuiForm } from '@elastic/eui';
-import React, { FormEventHandler } from 'react';
+import type { FormEventHandler } from 'react';
+import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QuestionInput } from './question_input';

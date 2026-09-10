@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/types/benchmarks/v1';
-import { CspRouter } from '../../types';
+import type { CspRouter } from '../../types';
 import { getBenchmarks as getBenchmarksV1 } from './v1';
 import { getBenchmarks as getBenchmarksV2 } from './v2';
 import { benchmarkResponseSchema } from '../../../common/types/latest';
@@ -85,7 +85,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           });
         } catch (err) {
           const error = transformError(err);
-          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          cspContext.logger.error(`Failed to fetch benchmarks: ${error.message}`);
           return response.customError({
             body: { message: error.message },
             statusCode: error.statusCode,

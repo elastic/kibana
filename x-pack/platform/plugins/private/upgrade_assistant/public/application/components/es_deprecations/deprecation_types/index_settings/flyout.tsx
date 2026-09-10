@@ -21,10 +21,10 @@ import {
   EuiText,
   EuiTextColor,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   IndexSettingAction,
   ResponseError,
@@ -128,14 +128,12 @@ export const RemoveIndexSettingsFlyout = ({
       <EuiFlyoutBody>
         {statusType === 'error' && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title={i18nTexts.errorTitle}
-              color="danger"
-              iconType="warning"
               data-test-subj="deleteSettingsError"
-            >
-              {statusDetails!.message as string}
-            </EuiCallOut>
+              text={statusDetails!.message as string}
+            />
             <EuiSpacer />
           </>
         )}

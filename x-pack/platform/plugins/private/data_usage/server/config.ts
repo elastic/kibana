@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
@@ -38,6 +38,7 @@ export const configSchema = schema.object({
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
+    maxSize: 1000,
   }),
 });
 

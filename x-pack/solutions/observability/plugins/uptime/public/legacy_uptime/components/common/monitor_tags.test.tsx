@@ -6,7 +6,8 @@
  */
 
 import { render, fireEvent, screen } from '@testing-library/react';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MonitorTags } from './monitor_tags';
 import * as hooks from '../../hooks/use_url_params';
@@ -57,8 +58,6 @@ describe('MonitorTags component', () => {
                 },
               },
             },
-            certificate_not_valid_before: '2020-11-03T07:38:14.000Z',
-            certificate_not_valid_after: '2021-01-26T07:38:14.000Z',
             established: true,
             cipher: 'TLS-AES-128-GCM-SHA256',
           },
@@ -119,8 +118,6 @@ describe('MonitorTags component', () => {
         },
       ],
       tls: {
-        certificate_not_valid_before: '2020-11-03T07:38:14.000Z',
-        certificate_not_valid_after: '2021-01-26T07:38:14.000Z',
         established: true,
         rtt: { handshake: { us: 39344 } },
         version_protocol: 'tls',

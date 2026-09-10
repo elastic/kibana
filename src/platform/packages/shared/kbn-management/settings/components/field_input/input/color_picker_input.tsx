@@ -8,14 +8,15 @@
  */
 
 import React from 'react';
-import { EuiColorPicker, EuiColorPickerProps } from '@elastic/eui';
+import type { EuiColorPickerProps } from '@elastic/eui';
+import { EuiColorPicker } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
-import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import type { UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
-import { InputProps } from '../types';
+import type { InputProps } from '../types';
 
 /**
  * Props for a {@link ColorPickerInput} component.

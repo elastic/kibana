@@ -6,7 +6,6 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
@@ -29,7 +28,6 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_SIGNALS_INDEX,
   DEFAULT_TO,
   VIEW_SELECTION,
 } from '../../../common/constants';
@@ -38,35 +36,13 @@ import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
-import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
-import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
 import { mockDataViewManagerState } from '../../data_view_manager/redux/mock';
-
-const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
-  mockIndexFields.map((field) => [field.name, field])
-);
-
-export const mockSourcererState: SourcererState = {
-  ...initialSourcererState,
-  signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
-  defaultDataView: {
-    ...initialSourcererState.defaultDataView,
-    browserFields: mockBrowserFields,
-    id: DEFAULT_DATA_VIEW_ID,
-    fields: mockFieldMap,
-    loading: false,
-    patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
-    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
-  },
-};
 
 export const mockGlobalState: State = {
   app: {
@@ -290,7 +266,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+      linkTo: [InputsModelId.timeline],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -307,7 +283,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: [InputsModelId.global, InputsModelId.socTrends],
+      linkTo: [InputsModelId.global],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -316,7 +292,7 @@ export const mockGlobalState: State = {
       },
       filters: [],
     },
-    socTrends: {
+    valueReport: {
       timerange: {
         kind: 'relative',
         fromStr: DEFAULT_FROM,
@@ -324,7 +300,7 @@ export const mockGlobalState: State = {
         from: '2020-07-06T08:20:18.966Z',
         to: '2020-07-07T08:20:18.966Z',
       },
-      linkTo: [InputsModelId.global, InputsModelId.timeline],
+      linkTo: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
@@ -443,62 +419,6 @@ export const mockGlobalState: State = {
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
     [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
-  },
-  sourcerer: {
-    ...mockSourcererState,
-    defaultDataView: {
-      ...mockSourcererState.defaultDataView,
-      title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
-    },
-    kibanaDataViews: [
-      {
-        ...mockSourcererState.defaultDataView,
-        title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
-      },
-    ],
-    sourcererScopes: {
-      ...mockSourcererState.sourcererScopes,
-      [SourcererScopeName.default]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [SourcererScopeName.detections]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          SourcererScopeName.detections,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [SourcererScopeName.timeline]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          SourcererScopeName.timeline,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [SourcererScopeName.analyzer]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-    },
   },
   globalUrlParam: {},
   /**

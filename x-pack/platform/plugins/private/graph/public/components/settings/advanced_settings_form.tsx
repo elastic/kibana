@@ -6,10 +6,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiFormAppend } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AdvancedSettings } from '../../types';
-import { SettingsStateProps } from './settings';
+import type { AdvancedSettings } from '../../types';
+import type { SettingsStateProps } from './settings';
 
 // Helper type to get all keys of an interface
 // that are of type number.
@@ -212,13 +212,11 @@ export function AdvancedSettingsForm({
           value={formState.timeoutMillis}
           onChange={getNumberUpdater('timeoutMillis')}
           append={
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('xpack.graph.settings.advancedSettings.timeoutUnit', {
-                  defaultMessage: 'ms',
-                })}
-              </strong>
-            </EuiText>
+            <EuiFormAppend
+              label={i18n.translate('xpack.graph.settings.advancedSettings.timeoutUnit', {
+                defaultMessage: 'ms',
+              })}
+            />
           }
         />
       </EuiFormRow>

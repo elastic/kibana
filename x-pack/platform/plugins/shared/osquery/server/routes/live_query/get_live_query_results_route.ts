@@ -6,17 +6,22 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { map } from 'lodash';
-import type { Observable } from 'rxjs';
+import { find, map } from 'lodash';
 import { lastValueFrom, zip } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { isFilters } from '@kbn/es-query';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  OSQUERY_INTEGRATION_NAME,
+} from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
@@ -32,6 +37,10 @@ import {
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
+import { getLiveQueryResultsResponseSchema } from './response_schemas';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -43,7 +52,7 @@ export const getLiveQueryResultsRoute = (
       path: '/api/osquery/live_queries/{id}/results/{actionId}',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
     })
@@ -61,26 +70,85 @@ export const getLiveQueryResultsRoute = (
               GetLiveQueryResultsRequestParamsSchema
             >(getLiveQueryResultsRequestParamsSchema),
           },
+          response: {
+            200: {
+              body: () => getLiveQueryResultsResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+
+          if (page * pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+            return response.badRequest({
+              body: {
+                message: `Cannot paginate beyond ${DEFAULT_MAX_TABLE_QUERY_SIZE} results. Use Discover for full access.`,
+                attributes: {
+                  code: 'PAGINATION_LIMIT_EXCEEDED',
+                },
+              },
+            });
+          }
+
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          let integrationNamespaces: Record<string, string[]> = {};
+
+          const logger = osqueryContext.logFactory.get('get_live_query_results');
+
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
+
+            logger.debug(
+              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+            );
+          }
+
+          if (request.query.esFilters) {
+            let parsed: unknown;
+            try {
+              parsed = JSON.parse(request.query.esFilters);
+            } catch {
+              return response.badRequest({ body: { message: 'esFilters contains invalid JSON' } });
+            }
+
+            if (!isFilters(parsed)) {
+              return response.badRequest({
+                body: { message: 'esFilters must be a valid filters array' },
+              });
+            }
+          }
+
+          const search = await getScopedSearch(
+            context,
+            request,
+            cpsActive,
+            osqueryContext.getStartServices
+          );
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -90,20 +158,41 @@ export const getLiveQueryResultsRoute = (
 
           const queries = actionDetails?._source?.queries;
 
+          // The results read below is keyed on the sub-action id taken straight from the
+          // URL, so it has to be confirmed to belong to the parent action rather than
+          // trusted as supplied. Without this, a caller holding any readable parent id
+          // could pair it with an arbitrary actionId — and under CPS the agent indices
+          // that read resolves against span every linked project.
+          if (!find(queries, ['action_id', request.params.actionId])) {
+            return response.notFound({ body: { message: 'Live query action not found' } });
+          }
+
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
           await lastValueFrom(
             zip(
               ...map(queries, (query) =>
-                getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+                getActionResponses(
+                  search,
+                  query.action_id,
+                  query.agents?.length ?? 0,
+                  namespacesOrUndefined,
+                  spaceId
+                )
               )
             )
           );
-
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                esFilters: request.query.esFilters,
+                startDate: request.query.startDate,
+                spaceId,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
@@ -114,8 +203,9 @@ export const getLiveQueryResultsRoute = (
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
+                integrationNamespaces: namespacesOrUndefined,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 

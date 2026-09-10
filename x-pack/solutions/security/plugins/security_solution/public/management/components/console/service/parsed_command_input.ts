@@ -6,7 +6,6 @@
  */
 
 import type { ParsedCommandInput, ParsedCommandInterface } from './types';
-import type { CommandDefinition } from '..';
 
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
@@ -111,54 +110,4 @@ export const getCommandNameFromTextInput = (input: string): string => {
   }
 
   return trimmedInput.substring(0, firstSpacePosition);
-};
-
-export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
-  let requiredArgs = '';
-  let optionalArgs = '';
-  const exclusiveOrArgs = [];
-
-  if (command.args) {
-    for (const [argName, argDefinition] of Object.entries(command.args)) {
-      if (argDefinition.required) {
-        if (requiredArgs.length) {
-          requiredArgs += ' ';
-        }
-        requiredArgs += `--${argName}`;
-      } else if (argDefinition.exclusiveOr) {
-        exclusiveOrArgs.push(`--${argName}`);
-      } else {
-        if (optionalArgs.length) {
-          optionalArgs += ' ';
-        }
-        optionalArgs += `--${argName}`;
-      }
-    }
-  }
-
-  const buildArgumentText = ({
-    required,
-    exclusive,
-    optional,
-  }: {
-    required?: string;
-    exclusive?: string;
-    optional?: string;
-  }) => {
-    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
-      optional && optional.length > 0 ? `[${optional}]` : ''
-    }`.trim();
-  };
-
-  return exclusiveOrArgs.length > 0
-    ? exclusiveOrArgs.map((exclusiveArg) => {
-        return buildArgumentText({
-          required: requiredArgs,
-          exclusive: exclusiveArg,
-          optional: optionalArgs,
-        });
-      })
-    : requiredArgs || optionalArgs
-    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
-    : [];
 };

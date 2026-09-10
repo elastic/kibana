@@ -11,7 +11,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix } from '../../../../common/lib/space_test_utils';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function listRuleTypes({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -29,9 +28,11 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
       context: [],
       params: [],
     },
+    auto_recover_alerts: true,
     category: 'kibana',
     producer: 'alertsFixture',
     minimum_license_required: 'basic',
+    is_internally_managed: false,
     is_exportable: true,
     recovery_action_group: {
       id: 'recovered',
@@ -62,9 +63,11 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
       context: [],
       params: [],
     },
+    auto_recover_alerts: true,
     category: 'kibana',
     producer: 'alertsRestrictedFixture',
     minimum_license_required: 'basic',
+    is_internally_managed: false,
     is_exportable: true,
     enabled_in_license: true,
     fieldsForAAD: [],

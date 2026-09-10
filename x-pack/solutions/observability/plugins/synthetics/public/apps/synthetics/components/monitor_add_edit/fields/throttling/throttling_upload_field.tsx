@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormAppend, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Validation } from '../../../../../../../common/types';
+import type { Validation } from '../../../../../../../common/types';
+import type {
+  ThrottlingConfig,
+  ThrottlingConfigValue,
+} from '../../../../../../../common/runtime_types';
 import {
   BandwidthLimitKey,
   ConfigKey,
   DEFAULT_BANDWIDTH_LIMIT,
-  ThrottlingConfig,
-  ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
 import { ThrottlingExceededMessage } from './throttling_exceeded_callout';
 import { OptionalLabel } from '../optional_label';
@@ -56,6 +58,10 @@ export const ThrottlingUploadField = ({
       }
     >
       <EuiFieldNumber
+        isInvalid={
+          (validate ? !!validate?.[ConfigKey.THROTTLING_CONFIG]?.(throttling) : false) ||
+          exceedsUploadLimits
+        }
         fullWidth
         min={0}
         step={0.001}
@@ -63,11 +69,7 @@ export const ThrottlingUploadField = ({
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('upload')}
         data-test-subj="syntheticsBrowserUploadSpeed"
-        append={
-          <EuiText size="xs">
-            <strong>Mbps</strong>
-          </EuiText>
-        }
+        append={<EuiFormAppend label="Mbps" />}
         readOnly={readOnly}
       />
     </EuiFormRow>

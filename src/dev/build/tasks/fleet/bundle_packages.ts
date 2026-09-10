@@ -10,12 +10,13 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import JSON5 from 'json5';
-import { load, dump } from 'js-yaml';
+import { parse } from 'hjson';
+import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { asyncForEach } from '@kbn/std';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { read, downloadToDisk, unzipBuffer, createZipFile, Config } from '../../lib';
+import type { Config } from '../../lib';
+import { read, downloadToDisk, unzipBuffer, createZipFile } from '../../lib';
 
 // Package storage v2 url
 export const PACKAGE_STORAGE_REGISTRY_URL = 'https://epr.elastic.co';
@@ -33,7 +34,7 @@ export async function bundleFleetPackages(pkgDir: string, log: ToolingLog, confi
   const configFilePath = config.resolveFromRepo('fleet_packages.json');
   const fleetPackages = (await read(configFilePath)) || '[]';
 
-  const parsedFleetPackages: FleetPackage[] = JSON5.parse(fleetPackages);
+  const parsedFleetPackages: FleetPackage[] = parse(fleetPackages);
 
   log.debug(
     `Found configured bundled packages: ${parsedFleetPackages
@@ -88,10 +89,10 @@ export async function bundleFleetPackages(pkgDir: string, log: ToolingLog, confi
           return;
         }
 
-        const manifestYml = await load(manifestEntry.buffer.toString('utf8'));
+        const manifestYml = await parseYaml(manifestEntry.buffer.toString('utf8'));
         manifestYml.version = stackVersion;
 
-        const newManifestYml = dump(manifestYml);
+        const newManifestYml = stringifyYaml(manifestYml);
         manifestEntry.buffer = Buffer.from(newManifestYml, 'utf8');
 
         // Update all paths to use the new version

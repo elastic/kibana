@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { interval, Observable, of, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { interval, of, throwError } from 'rxjs';
 import { shareReplay, switchMap, take } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchAbortController } from './search_abort_controller';
@@ -110,7 +111,7 @@ describe('SearchResponseCache', () => {
       await err$.toPromise().catch(errHandler);
       await res$.toPromise().catch(errHandler);
 
-      expect(errHandler).toBeCalledTimes(1);
+      expect(errHandler).toHaveBeenCalledTimes(1);
       expect(cache.get('123')).toBeUndefined();
       expect(cache.get('234')).not.toBeUndefined();
     });
@@ -131,7 +132,7 @@ describe('SearchResponseCache', () => {
       const errHandler = jest.fn();
       await err$.toPromise().catch(errHandler);
 
-      expect(errHandler).toBeCalledTimes(1);
+      expect(errHandler).toHaveBeenCalledTimes(1);
       expect(cache.get('123')).toBeUndefined();
     });
 

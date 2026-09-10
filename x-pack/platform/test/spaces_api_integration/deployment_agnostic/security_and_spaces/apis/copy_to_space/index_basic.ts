@@ -17,6 +17,7 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     before(async () => {
       await createUsersAndRoles(es, supertest);
     });
-    loadTestFile(require.resolve('./copy_to_space'));
+    loadTestFile(require.resolve('./copy_to_space.common'));
+    loadTestFile(require.resolve('./copy_to_space.basic'));
   });
 }

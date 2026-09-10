@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './container_logs';
+export * from './container_running';
 export * from './docker_servers_service';
-export * from './define_docker_servers_config';

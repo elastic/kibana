@@ -6,10 +6,8 @@
  */
 
 import { fromExpression } from '@kbn/interpreter';
-import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-
-const { set, del } = immutable;
+import { set, del } from '../../common/lib/object_path_immutable';
 
 export function syncFilterExpression(
   config: Record<string, any>,

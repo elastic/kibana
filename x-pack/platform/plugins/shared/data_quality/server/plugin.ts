@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
-import { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
+import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { Dependencies } from './types';
+import type { Dependencies } from './types';
 import { ELASTICSEARCH_FEATURE, KIBANA_FEATURE } from './features';
 import {
   DatasetQualityDetailsLocatorDefinition,
   DatasetQualityLocatorDefinition,
 } from '../common/locators';
 
-export class DataQualityPlugin implements Plugin<void, void, any, any> {
+export class DataQualityPlugin implements Plugin<void, void, Dependencies> {
   public setup(_coreSetup: CoreSetup, { features, share }: Dependencies) {
     features.registerKibanaFeature(KIBANA_FEATURE);
     features.registerElasticsearchFeature(ELASTICSEARCH_FEATURE);

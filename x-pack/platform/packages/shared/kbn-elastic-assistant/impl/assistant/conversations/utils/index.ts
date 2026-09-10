@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { Conversation } from '../../../..';
+import type { Conversation } from '../../../..';
 
 export const conversationContainsContentReferences = (conversation?: Conversation): boolean => {
   return (

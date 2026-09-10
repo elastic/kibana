@@ -9,7 +9,11 @@ import { AggregateStatusError } from '../../errors/aggregate_status_error';
 
 export class InvalidStateError extends AggregateStatusError {
   constructor(errors: Error[], message: string) {
-    super(errors, message, 400);
+    let overallMessage = message;
+    if (errors.length > 0) {
+      overallMessage += `: ${errors.map((error) => error.message).join(', ')}`;
+    }
+    super(errors, overallMessage, 400);
     this.name = 'InvalidStateError';
   }
 }

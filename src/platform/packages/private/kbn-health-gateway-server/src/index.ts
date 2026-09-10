@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import {
-  config as loggingConfig,
-  LoggingSystem,
-  LoggingConfigType,
-} from '@kbn/core-logging-server-internal';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
+import { config as loggingConfig, LoggingSystem } from '@kbn/core-logging-server-internal';
 import { getConfigService } from './config';
 import { config as kibanaConfig, KibanaService } from './kibana';
-import { config as serverConfig, Server, ServerStart } from './server';
+import type { ServerStart } from './server';
+import { config as serverConfig, Server } from './server';
 
 export async function bootstrap() {
   const loggingSystem = new LoggingSystem();

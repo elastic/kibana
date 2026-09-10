@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnFieldChangeType } from './certificate_form';
+import type { OnFieldChangeType } from './certificate_form';
 import { connectorsSelector } from '../../state/alerts/alerts';
-import { DefaultEmail as DefaultEmailType } from '../../../../common/runtime_types';
-import { UptimePluginServices } from '../../../plugin';
-import { SettingsPageFieldErrors } from '../../pages/settings';
+import type { DefaultEmail as DefaultEmailType } from '../../../../common/runtime_types';
+import type { UptimePluginServices } from '../../../plugin';
+import type { SettingsPageFieldErrors } from '../../pages/settings';
 
 export function DefaultEmail({
   errors,

@@ -9,13 +9,13 @@ import { chunk } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { MAX_INDICES_PER_REQUEST } from '../../../../common/constants';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { fetchIndices } from '../../../lib/fetch_indices';
 import { addBasePath } from '..';
 
 const bodySchema = schema.maybe(
   schema.object({
-    indexNames: schema.maybe(schema.arrayOf(schema.string())),
+    indexNames: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 })),
   })
 );
 

@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import * as labels from '../translations';
 import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
 
@@ -60,12 +61,11 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
   const button = (
     <EuiButtonEmpty
       data-test-subj="uptimeCreateAlertAddFilter"
-      disabled={items.length === 0}
-      iconType="plusInCircleFilled"
+      disabled={items.length === 0 || !dataView}
+      iconType="plusCircle"
       onClick={onButtonClick}
       size="s"
       flush="left"
-      isLoading={!dataView}
     >
       {labels.ADD_FILTER}
     </EuiButtonEmpty>
@@ -74,6 +74,9 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
   return (
     <EuiPopover
       id="singlePanel"
+      aria-label={i18n.translate('xpack.uptime.monitorStatusAlertAddFilter.popoverAriaLabel', {
+        defaultMessage: 'Add alert filter options',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

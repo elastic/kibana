@@ -9,26 +9,23 @@ import Boom from '@hapi/boom';
 import { createHash } from 'crypto';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ExternalReferenceAttachmentType,
-  PersistableStateAttachmentTypeSetup,
-} from '@kbn/cases-plugin/server/attachment_framework/types';
 import type { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
-import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
+import {
+  ANALYTICS_BACKFILL_TASK_TYPE,
+  CASES_TELEMETRY_TASK_NAME,
+} from '@kbn/cases-plugin/common/constants';
+import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
+import { toLegacyAttachmentResponse } from '@kbn/cases-plugin/server/common/attachments';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const hashFeed = parts.join('-');
   return hash.update(hashFeed).digest('hex');
 };
 
-const getExternalReferenceAttachmentTypeHash = (type: ExternalReferenceAttachmentType) => {
-  return hashParts([type.id]);
-};
-
-const getPersistableStateAttachmentTypeHash = (type: PersistableStateAttachmentTypeSetup) => {
+const getUnifiedAttachmentTypeHash = (type: { id: string }) => {
   return hashParts([type.id]);
 };
 
@@ -68,7 +65,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
   router.get(
     {
-      path: '/api/cases_fixture/registered_external_reference_attachments',
+      path: '/api/cases_fixture/registered_unified_attachments',
       security: {
         authz: {
           enabled: false,
@@ -80,47 +77,12 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
     async (context, request, response) => {
       try {
         const [_, { cases }] = await core.getStartServices();
-        const externalReferenceAttachmentTypeRegistry =
-          cases.getExternalReferenceAttachmentTypeRegistry();
+        const unifiedAttachmentTypeRegistry = cases.getUnifiedAttachmentTypeRegistry();
 
-        const allTypes = externalReferenceAttachmentTypeRegistry.list();
-
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getExternalReferenceAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
-
-        return response.ok({
-          body: hashMap,
-        });
-      } catch (error) {
-        logger.error(`Error : ${error}`);
-        throw error;
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: '/api/cases_fixture/registered_persistable_state_attachments',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {},
-    },
-    async (context, request, response) => {
-      try {
-        const [_, { cases }] = await core.getStartServices();
-        const persistableStateAttachmentTypeRegistry =
-          cases.getPersistableStateAttachmentTypeRegistry();
-
-        const allTypes = persistableStateAttachmentTypeRegistry.list();
+        const allTypes = unifiedAttachmentTypeRegistry.list();
 
         const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getPersistableStateAttachmentTypeHash(type);
+          map[type.id] = getUnifiedAttachmentTypeHash(type);
           return map;
         }, {} as Record<string, string>);
 
@@ -159,8 +121,11 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { cases }] = await core.getStartServices();
         const client = await cases.getCasesClientWithRequest(request);
 
+        // Client is unified-only now; project back to this fixture's legacy shape.
+        const attachments = await client.attachments.getAll({ caseID: request.params.id });
+
         return response.ok({
-          body: await client.attachments.getAll({ caseID: request.params.id }),
+          body: attachments.map(toLegacyAttachmentResponse),
         });
       } catch (error) {
         if (error.isBoom && error.output.statusCode === 403) {
@@ -284,6 +249,97 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { taskManager }] = await core.getStartServices();
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/scheduler/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (context, req, res) => {
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        logger.info(`Request to run scheduler task id: ${CAI_SCHEDULER_TASK_ID}`);
+        return res.ok({
+          body: await taskManager.runSoon(CAI_SCHEDULER_TASK_ID),
+        });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
+        return res.ok({ body: { id: CAI_SCHEDULER_TASK_ID, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/backfill/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskId: schema.string(),
+          sourceIndex: schema.string(),
+          destIndex: schema.string(),
+          sourceQuery: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId, sourceIndex, destIndex, sourceQuery } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+
+        return res.ok({
+          body: await taskManager.ensureScheduled({
+            id: taskId,
+            taskType: ANALYTICS_BACKFILL_TASK_TYPE,
+            params: { sourceIndex, destIndex, sourceQuery: JSON.parse(sourceQuery) },
+            runAt: new Date(),
+            state: {},
+          }),
+        });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/synchronization/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskId: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }

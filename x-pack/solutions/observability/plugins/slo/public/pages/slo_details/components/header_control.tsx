@@ -16,9 +16,9 @@ import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useCallback, useEffect, useState } from 'react';
-import { paths } from '../../../../common/locators/paths';
 import { useActionModal } from '../../../context/action_modal';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -199,8 +199,9 @@ export function HeaderControl({ slo }: Props) {
 
   const showRemoteLinkIcon = isRemote ? (
     <EuiIcon
-      type="popout"
+      type="external"
       size="s"
+      aria-hidden={true}
       css={{
         marginLeft: '10px',
       }}
@@ -210,13 +211,16 @@ export function HeaderControl({ slo }: Props) {
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.slo.sloDetailsHeaderControl.popoverAriaLabel', {
+          defaultMessage: 'SLO details actions',
+        })}
         data-test-subj="sloDetailsHeaderControlPopover"
         button={
           <EuiButton
             data-test-subj="o11yHeaderControlActionsButton"
             fill
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSize="s"
             onClick={handleActionsClick}
           >
@@ -227,9 +231,9 @@ export function HeaderControl({ slo }: Props) {
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          size="m"
           items={[
             <EuiContextMenuItem
               key="edit"

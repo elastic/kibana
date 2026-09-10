@@ -1,0 +1,2053 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZlHQD20hY07UD0HNBs-",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+      "@timestamp": "2025-09-13T08:35:06.451Z",
+      "agent": {
+        "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "name": "test-ea-april-2025",
+        "type": "filebeat",
+        "version": "8.18.3"
+      },
+      "asset": {
+        "category": "entity",
+        "create_date": "2023-02-22T17:32:00.000Z",
+        "id": "00u8fgtuln5yWODnG5d7",
+        "last_status_change_date": "2023-02-22T17:32:00.000Z",
+        "last_updated": "2023-02-22T17:32:00.000Z",
+        "status": "PROVISIONED",
+        "type": "okta_user"
+      },
+      "cloud": {
+        "account": {
+          "id": "elastic-security-dev"
+        },
+        "availability_zone": "us-east1-b",
+        "instance": {
+          "id": "2595859665373623247",
+          "name": "test-ea-april-2025"
+        },
+        "machine": {
+          "type": "e2-medium"
+        },
+        "project": {
+          "id": "elastic-security-dev"
+        },
+        "provider": "gcp",
+        "region": "us-east1",
+        "service": {
+          "name": "GCE"
+        }
+      },
+      "data_stream": {
+        "dataset": "entityanalytics_okta.user",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "elastic_agent": {
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "snapshot": true,
+        "version": "8.18.3"
+      },
+      "entityanalytics_okta": {
+        "groups": [
+          {
+            "id": "00gf1r6hcrcl7gaTH5d6",
+            "profile": {
+              "description": "All users in your organization",
+              "name": "Everyone"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "_links": {
+              "assignee": {
+                "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+              }
+            },
+            "assignment_type": "USER",
+            "created": "2023-02-22T17:44:08Z",
+            "id": "ra18fgz9a0OfCQOyn5d7",
+            "label": "Super Administrator",
+            "last_updated": "2023-02-22T17:44:08.000Z",
+            "status": "ACTIVE",
+            "type": "SUPER_ADMIN"
+          }
+        ],
+        "user": {
+          "_links": {
+            "self": {
+              "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+            }
+          },
+          "credentials": {
+            "recovery_question": {
+              "is_set": false
+            }
+          },
+          "type": {
+            "id": "otyf1r6hlGf9AXhZ95d6"
+          }
+        }
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "entityanalytics_okta.user",
+        "ingested": "2025-08-19T10:55:06.000Z",
+        "kind": "asset",
+        "type": [
+          "user",
+          "info"
+        ]
+      },
+      "host": {
+        "name": "dev-36006609.okta.com"
+      },
+      "input": {
+        "type": "entity-analytics"
+      },
+      "labels": {
+        "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+      },
+      "related": {
+        "user": [
+          "c793afae-8824-47e6-be6a-768943a6566b",
+          "Mable.Mann@elastic.co",
+          "Mable",
+          "Mann"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "entityanalytics_okta-entity"
+      ],
+      "user": {
+        "account": {
+          "activated_date": "2023-02-22T17:32:00.000Z",
+          "change_date": "2023-02-22T17:32:00.000Z",
+          "create_date": "2023-02-22T17:32:00.000Z",
+          "status": {
+            "deprovisioned": false,
+            "locked_out": false,
+            "password_expired": false,
+            "recovery": false,
+            "suspended": false
+          }
+        },
+        "email": "Mable.Mann@elastic.co",
+        "group": {
+          "id": [
+            "00gf1r6hcrcl7gaTH5d6"
+          ],
+          "name": [
+            "Everyone"
+          ]
+        },
+        "id": "00u8fgtuln5yWODnG5d7",
+        "name": "Mable.Mann",
+        "profile": {
+          "first_name": "Mable",
+          "last_name": "Mann",
+          "status": "PROVISIONED"
+        },
+        "roles": [
+          "Group Administrator"
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZlHQD20hY07UD0HNBs9",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+      "@timestamp": "2025-09-05T05:15:09.475Z",
+      "agent": {
+        "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "name": "test-ea-april-2025",
+        "type": "filebeat",
+        "version": "8.18.3"
+      },
+      "asset": {
+        "category": "entity",
+        "create_date": "2023-02-22T17:32:00.000Z",
+        "id": "00u8fgtuln5yWODnG5d7",
+        "last_status_change_date": "2023-02-22T17:32:00.000Z",
+        "last_updated": "2023-02-22T17:32:00.000Z",
+        "status": "PROVISIONED",
+        "type": "okta_user"
+      },
+      "cloud": {
+        "account": {
+          "id": "elastic-security-dev"
+        },
+        "availability_zone": "us-east1-b",
+        "instance": {
+          "id": "2595859665373623247",
+          "name": "test-ea-april-2025"
+        },
+        "machine": {
+          "type": "e2-medium"
+        },
+        "project": {
+          "id": "elastic-security-dev"
+        },
+        "provider": "gcp",
+        "region": "us-east1",
+        "service": {
+          "name": "GCE"
+        }
+      },
+      "data_stream": {
+        "dataset": "entityanalytics_okta.user",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "elastic_agent": {
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "snapshot": true,
+        "version": "8.18.3"
+      },
+      "entityanalytics_okta": {
+        "groups": [
+          {
+            "id": "00gf1r6hcrcl7gaTH5d6",
+            "profile": {
+              "description": "All users in your organization",
+              "name": "Everyone"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "_links": {
+              "assignee": {
+                "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+              }
+            },
+            "assignment_type": "USER",
+            "created": "2023-02-22T17:44:08Z",
+            "id": "ra18fgz9a0OfCQOyn5d7",
+            "label": "Super Administrator",
+            "last_updated": "2023-02-22T17:44:08.000Z",
+            "status": "ACTIVE",
+            "type": "SUPER_ADMIN"
+          }
+        ],
+        "user": {
+          "_links": {
+            "self": {
+              "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+            }
+          },
+          "credentials": {
+            "recovery_question": {
+              "is_set": false
+            }
+          },
+          "type": {
+            "id": "otyf1r6hlGf9AXhZ95d6"
+          }
+        }
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "entityanalytics_okta.user",
+        "ingested": "2025-08-19T10:55:06.000Z",
+        "kind": "asset",
+        "type": [
+          "user",
+          "info"
+        ]
+      },
+      "host": {
+        "name": "dev-36006609.okta.com"
+      },
+      "input": {
+        "type": "entity-analytics"
+      },
+      "labels": {
+        "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+      },
+      "related": {
+        "user": [
+          "fec0a54e-175b-40f1-ba0b-404765663b11",
+          "Kathryne.Ziemann@elastic.co",
+          "Kathryne",
+          "Ziemann"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "entityanalytics_okta-entity"
+      ],
+      "user": {
+        "account": {
+          "activated_date": "2023-02-22T17:32:00.000Z",
+          "change_date": "2023-02-22T17:32:00.000Z",
+          "create_date": "2023-02-22T17:32:00.000Z",
+          "status": {
+            "deprovisioned": false,
+            "locked_out": false,
+            "password_expired": false,
+            "recovery": false,
+            "suspended": false
+          }
+        },
+        "email": "Kathryne.Ziemann@elastic.co",
+        "group": {
+          "id": [
+            "00gf1r6hcrcl7gaTH5d6"
+          ],
+          "name": [
+            "Everyone"
+          ]
+        },
+        "id": "00u8fgtuln5yWODnG5d7",
+        "name": "Kathryne.Ziemann",
+        "profile": {
+          "first_name": "Kathryne",
+          "last_name": "Ziemann",
+          "status": "PROVISIONED"
+        },
+        "roles": [
+          "Read-only Administrator"
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZlHQD20hY07UD0HNBs_",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+      "@timestamp": "2025-09-03T14:10:03.361Z",
+      "agent": {
+        "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "name": "test-ea-april-2025",
+        "type": "filebeat",
+        "version": "8.18.3"
+      },
+      "asset": {
+        "category": "entity",
+        "create_date": "2023-02-22T17:32:00.000Z",
+        "id": "00u8fgtuln5yWODnG5d7",
+        "last_status_change_date": "2023-02-22T17:32:00.000Z",
+        "last_updated": "2023-02-22T17:32:00.000Z",
+        "status": "PROVISIONED",
+        "type": "okta_user"
+      },
+      "cloud": {
+        "account": {
+          "id": "elastic-security-dev"
+        },
+        "availability_zone": "us-east1-b",
+        "instance": {
+          "id": "2595859665373623247",
+          "name": "test-ea-april-2025"
+        },
+        "machine": {
+          "type": "e2-medium"
+        },
+        "project": {
+          "id": "elastic-security-dev"
+        },
+        "provider": "gcp",
+        "region": "us-east1",
+        "service": {
+          "name": "GCE"
+        }
+      },
+      "data_stream": {
+        "dataset": "entityanalytics_okta.user",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "elastic_agent": {
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "snapshot": true,
+        "version": "8.18.3"
+      },
+      "entityanalytics_okta": {
+        "groups": [
+          {
+            "id": "00gf1r6hcrcl7gaTH5d6",
+            "profile": {
+              "description": "All users in your organization",
+              "name": "Everyone"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "_links": {
+              "assignee": {
+                "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+              }
+            },
+            "assignment_type": "USER",
+            "created": "2023-02-22T17:44:08Z",
+            "id": "ra18fgz9a0OfCQOyn5d7",
+            "label": "Super Administrator",
+            "last_updated": "2023-02-22T17:44:08.000Z",
+            "status": "ACTIVE",
+            "type": "SUPER_ADMIN"
+          }
+        ],
+        "user": {
+          "_links": {
+            "self": {
+              "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+            }
+          },
+          "credentials": {
+            "recovery_question": {
+              "is_set": false
+            }
+          },
+          "type": {
+            "id": "otyf1r6hlGf9AXhZ95d6"
+          }
+        }
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "entityanalytics_okta.user",
+        "ingested": "2025-08-19T10:55:06.000Z",
+        "kind": "asset",
+        "type": [
+          "user",
+          "info"
+        ]
+      },
+      "host": {
+        "name": "dev-36006609.okta.com"
+      },
+      "input": {
+        "type": "entity-analytics"
+      },
+      "labels": {
+        "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+      },
+      "related": {
+        "user": [
+          "51d8a33b-a364-40b3-b58c-91988f7d0ae6",
+          "Nickolas.Dare-Watsica@elastic.co",
+          "Nickolas",
+          "Dare-Watsica"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "entityanalytics_okta-entity"
+      ],
+      "user": {
+        "account": {
+          "activated_date": "2023-02-22T17:32:00.000Z",
+          "change_date": "2023-02-22T17:32:00.000Z",
+          "create_date": "2023-02-22T17:32:00.000Z",
+          "status": {
+            "deprovisioned": false,
+            "locked_out": false,
+            "password_expired": false,
+            "recovery": false,
+            "suspended": false
+          }
+        },
+        "email": "Nickolas.Dare-Watsica@elastic.co",
+        "group": {
+          "id": [
+            "00gf1r6hcrcl7gaTH5d6"
+          ],
+          "name": [
+            "Everyone"
+          ]
+        },
+        "id": "00u8fgtuln5yWODnG5d7",
+        "name": "Nickolas.Dare-Watsica",
+        "profile": {
+          "first_name": "Nickolas",
+          "last_name": "Dare-Watsica",
+          "status": "PROVISIONED"
+        },
+        "roles": [
+          "Contractor"
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZlHQD20hY07UD0HNBtA",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+      "@timestamp": "2025-08-26T10:32:52.373Z",
+      "agent": {
+        "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "name": "test-ea-april-2025",
+        "type": "filebeat",
+        "version": "8.18.3"
+      },
+      "asset": {
+        "category": "entity",
+        "create_date": "2023-02-22T17:32:00.000Z",
+        "id": "00u8fgtuln5yWODnG5d7",
+        "last_status_change_date": "2023-02-22T17:32:00.000Z",
+        "last_updated": "2023-02-22T17:32:00.000Z",
+        "status": "PROVISIONED",
+        "type": "okta_user"
+      },
+      "cloud": {
+        "account": {
+          "id": "elastic-security-dev"
+        },
+        "availability_zone": "us-east1-b",
+        "instance": {
+          "id": "2595859665373623247",
+          "name": "test-ea-april-2025"
+        },
+        "machine": {
+          "type": "e2-medium"
+        },
+        "project": {
+          "id": "elastic-security-dev"
+        },
+        "provider": "gcp",
+        "region": "us-east1",
+        "service": {
+          "name": "GCE"
+        }
+      },
+      "data_stream": {
+        "dataset": "entityanalytics_okta.user",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "elastic_agent": {
+        "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+        "snapshot": true,
+        "version": "8.18.3"
+      },
+      "entityanalytics_okta": {
+        "groups": [
+          {
+            "id": "00gf1r6hcrcl7gaTH5d6",
+            "profile": {
+              "description": "All users in your organization",
+              "name": "Everyone"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "_links": {
+              "assignee": {
+                "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+              }
+            },
+            "assignment_type": "USER",
+            "created": "2023-02-22T17:44:08Z",
+            "id": "ra18fgz9a0OfCQOyn5d7",
+            "label": "Super Administrator",
+            "last_updated": "2023-02-22T17:44:08.000Z",
+            "status": "ACTIVE",
+            "type": "SUPER_ADMIN"
+          }
+        ],
+        "user": {
+          "_links": {
+            "self": {
+              "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+            }
+          },
+          "credentials": {
+            "recovery_question": {
+              "is_set": false
+            }
+          },
+          "type": {
+            "id": "otyf1r6hlGf9AXhZ95d6"
+          }
+        }
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "iam"
+        ],
+        "dataset": "entityanalytics_okta.user",
+        "ingested": "2025-08-19T10:55:06.000Z",
+        "kind": "asset",
+        "type": [
+          "user",
+          "info"
+        ]
+      },
+      "host": {
+        "name": "dev-36006609.okta.com"
+      },
+      "input": {
+        "type": "entity-analytics"
+      },
+      "labels": {
+        "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+      },
+      "related": {
+        "user": [
+          "ff649fc4-5d17-446d-957f-4f58f36e7b91",
+          "Florencio.Runolfsdottir@elastic.co",
+          "Florencio",
+          "Runolfsdottir"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "entityanalytics_okta-entity"
+      ],
+      "user": {
+        "account": {
+          "activated_date": "2023-02-22T17:32:00.000Z",
+          "change_date": "2023-02-22T17:32:00.000Z",
+          "create_date": "2023-02-22T17:32:00.000Z",
+          "status": {
+            "deprovisioned": false,
+            "locked_out": false,
+            "password_expired": false,
+            "recovery": false,
+            "suspended": false
+          }
+        },
+        "email": "Florencio.Runolfsdottir@elastic.co",
+        "group": {
+          "id": [
+            "00gf1r6hcrcl7gaTH5d6"
+          ],
+          "name": [
+            "Everyone"
+          ]
+        },
+        "id": "00u8fgtuln5yWODnG5d7",
+        "name": "Florencio.Runolfsdottir",
+        "profile": {
+          "first_name": "Florencio",
+          "last_name": "Runolfsdottir",
+          "status": "PROVISIONED"
+        },
+        "roles": [
+          "Intern"
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5y",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": { 
+     "@timestamp": "2025-09-26T05:58:04.557Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "705b5652-1e06-4556-9952-9332a5cb1d0e",
+              "Bennett.Becker@elastic.co",
+              "Bennett",
+              "Becker"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Bennett.Becker@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Bennett.Becker",
+            "profile": {
+              "first_name": "Bennett",
+              "last_name": "Becker",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Employee"
+            ]
+          }
+    }
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5r",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+          "@timestamp": "2025-09-25T18:35:38.366Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "dcf90e48-f0c4-4cb8-b1b6-5236176e8c0d",
+              "Hailee.Rodriguez@elastic.co",
+              "Hailee",
+              "Rodriguez"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Hailee.Rodriguez@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Hailee.Rodriguez",
+            "profile": {
+              "first_name": "Hailee",
+              "last_name": "Rodriguez",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Help Desk Administrator"
+            ]
+          }
+        }
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5u",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+          "@timestamp": "2025-09-25T02:15:18.644Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "9c941ca5-d92e-44db-bf77-56e888e559e9",
+              "Elinor.Johnston-Shanahan@elastic.co",
+              "Elinor",
+              "Johnston-Shanahan"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Elinor.Johnston-Shanahan@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Elinor.Johnston-Shanahan",
+            "profile": {
+              "first_name": "Elinor",
+              "last_name": "Johnston-Shanahan",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Read-only Administrator"
+            ]
+          }
+        }
+ 
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5x",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+          "@timestamp": "2025-09-19T01:03:26.610Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "3195d996-8c8f-4d1b-83c7-b40fabfcd543",
+              "Kaci.Batz@elastic.co",
+              "Kaci",
+              "Batz"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Kaci.Batz@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Kaci.Batz",
+            "profile": {
+              "first_name": "Kaci",
+              "last_name": "Batz",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Intern"
+            ]
+          }
+        }
+ 
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5t",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+      "source": {
+          "@timestamp": "2025-09-15T23:04:19.563Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "0532b81d-b7c8-46b7-9bee-ab3e82eb73b2",
+              "Devan.Nienow@elastic.co",
+              "Devan",
+              "Nienow"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Devan.Nienow@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Devan.Nienow",
+            "profile": {
+              "first_name": "Devan",
+              "last_name": "Nienow",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Mobile Administrator"
+            ]
+          }
+        }
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5s",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+      "source": {
+          "@timestamp": "2025-09-14T10:29:27.689Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "757724a4-de88-45f9-9759-13eebfca3e8f",
+              "Kaelyn.Shanahan@elastic.co",
+              "Kaelyn",
+              "Shanahan"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Kaelyn.Shanahan@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Kaelyn.Shanahan",
+            "profile": {
+              "first_name": "Kaelyn",
+              "last_name": "Shanahan",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Read-only Administrator"
+            ]
+          }
+        }
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5v",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+          "@timestamp": "2025-09-05T16:09:03.847Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "71cd6a00-0c10-4e0c-83e5-2d194fcf8551",
+              "Sincere.Labadie@elastic.co",
+              "Sincere",
+              "Labadie"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Sincere.Labadie@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Sincere.Labadie",
+            "profile": {
+              "first_name": "Sincere",
+              "last_name": "Labadie",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Intern"
+            ]
+          }
+        }
+}
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "id": "AZmLBcGV9XhZAwOqZV5w",
+    "index": ".ds-logs-entityanalytics_okta.user-default-2025.09.15-000001",
+    "source": {
+          "@timestamp": "2025-09-02T12:16:11.222Z",
+          "agent": {
+            "ephemeral_id": "4aae04bb-75fd-42a6-bf52-c0b0a1823dc6",
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "name": "test-ea-april-2025",
+            "type": "filebeat",
+            "version": "8.18.3"
+          },
+          "asset": {
+            "category": "entity",
+            "create_date": "2023-02-22T17:32:00.000Z",
+            "id": "00u8fgtuln5yWODnG5d7",
+            "last_status_change_date": "2023-02-22T17:32:00.000Z",
+            "last_updated": "2023-02-22T17:32:00.000Z",
+            "status": "PROVISIONED",
+            "type": "okta_user"
+          },
+          "cloud": {
+            "account": {
+              "id": "elastic-security-dev"
+            },
+            "availability_zone": "us-east1-b",
+            "instance": {
+              "id": "2595859665373623247",
+              "name": "test-ea-april-2025"
+            },
+            "machine": {
+              "type": "e2-medium"
+            },
+            "project": {
+              "id": "elastic-security-dev"
+            },
+            "provider": "gcp",
+            "region": "us-east1",
+            "service": {
+              "name": "GCE"
+            }
+          },
+          "data_stream": {
+            "dataset": "entityanalytics_okta.user",
+            "namespace": "default",
+            "type": "logs"
+          },
+          "ecs": {
+            "version": "8.11.0"
+          },
+          "elastic_agent": {
+            "id": "38ea09b4-0b3c-4c71-81ef-0342fdd249a8",
+            "snapshot": true,
+            "version": "8.18.3"
+          },
+          "entityanalytics_okta": {
+            "groups": [
+              {
+                "profile": {
+                  "name": "Everyone",
+                  "description": "All users in your organization"
+                },
+                "id": "00gf1r6hcrcl7gaTH5d6"
+              }
+            ],
+            "roles": [
+              {
+                "last_updated": "2023-02-22T17:44:08.000Z",
+                "_links": {
+                  "assignee": {
+                    "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                  }
+                },
+                "created": "2023-02-22T17:44:08Z",
+                "assignment_type": "USER",
+                "id": "ra18fgz9a0OfCQOyn5d7",
+                "label": "Super Administrator",
+                "type": "SUPER_ADMIN",
+                "status": "ACTIVE"
+              }
+            ],
+            "user": {
+              "_links": {
+                "self": {
+                  "href": "https://dev-36006609.okta.com/api/v1/users/00u8fgtuln5yWODnG5d7"
+                }
+              },
+              "credentials": {
+                "recovery_question": {
+                  "is_set": false
+                }
+              },
+              "type": {
+                "id": "otyf1r6hlGf9AXhZ95d6"
+              }
+            }
+          },
+          "event": {
+            "agent_id_status": "verified",
+            "category": [
+              "iam"
+            ],
+            "dataset": "entityanalytics_okta.user",
+            "ingested": "2025-08-19T10:55:06.000Z",
+            "kind": "asset",
+            "type": [
+              "user",
+              "info"
+            ]
+          },
+          "host": {
+            "name": "dev-36006609.okta.com"
+          },
+          "input": {
+            "type": "entity-analytics"
+          },
+          "labels": {
+            "identity_source": "entity-analytics-entityanalytics_okta.entity-db4f0fd2-9dbc-47a8-8f72-c7bee68c2ce3"
+          },
+          "related": {
+            "user": [
+              "34309bf8-a196-40fe-8a9d-330530cc63ff",
+              "Alexandre.Quigley@elastic.co",
+              "Alexandre",
+              "Quigley"
+            ]
+          },
+          "tags": [
+            "forwarded",
+            "entityanalytics_okta-entity"
+          ],
+          "user": {
+            "account": {
+              "activated_date": "2023-02-22T17:32:00.000Z",
+              "change_date": "2023-02-22T17:32:00.000Z",
+              "create_date": "2023-02-22T17:32:00.000Z",
+              "status": {
+                "deprovisioned": false,
+                "locked_out": false,
+                "password_expired": false,
+                "recovery": false,
+                "suspended": false
+              }
+            },
+            "email": "Alexandre.Quigley@elastic.co",
+            "group": {
+              "id": [
+                "00gf1r6hcrcl7gaTH5d6"
+              ],
+              "name": [
+                "Everyone"
+              ]
+            },
+            "id": "00u8fgtuln5yWODnG5d7",
+            "name": "Alexandre.Quigley",
+            "profile": {
+              "first_name": "Alexandre",
+              "last_name": "Quigley",
+              "status": "PROVISIONED"
+            },
+            "roles": [
+              "Temp"
+            ]
+          }
+        }
+}
+}

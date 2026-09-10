@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/agent-builder-server",
+    "@kbn/core-http-server",
+    "@kbn/inference-tracing",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-yaml",
+    "@kbn/workflows-management-plugin",
+    "@kbn/agent-builder-genai-utils"
+  ]
+}

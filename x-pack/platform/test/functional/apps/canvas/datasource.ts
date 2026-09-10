@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -35,7 +35,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       );
       // canvas application is only available when installation contains canvas workpads
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
 
       await kibanaServer.uiSettings.update({
@@ -61,7 +61,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
       );
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
       );
     });
 

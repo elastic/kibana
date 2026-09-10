@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from './core_editor';
+import type { Position } from './core_editor';
 
 export interface Token {
   /**

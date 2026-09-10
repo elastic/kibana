@@ -15,9 +15,10 @@ import type {
   MapSettings,
 } from '../../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializedState } from '../types';
+import type { MapApi } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { MapEmbeddableState } from '../../../common';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MAP_RENDERER_TYPE } from './types';
 
 function getLayers(layerList: LayerDescriptor[]) {
@@ -37,10 +38,6 @@ export interface Props {
   mapCenter?: MapCenterAndZoom;
   getTooltipRenderer?: () => RenderToolTipContent;
   onApiAvailable?: (api: MapApi) => void;
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   */
-  isSharable?: boolean;
 }
 
 export function MapRenderer(props: Props) {
@@ -63,27 +60,23 @@ export function MapRenderer(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <EmbeddableRenderer<MapSerializedState, MapApi>
+      <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           type: MAP_RENDERER_TYPE,
           getTooltipRenderer: props.getTooltipRenderer,
           hideFilterActions: props.hideFilterActions,
-          isSharable: props.isSharable,
           getSerializedStateForChild: () => {
             return {
-              rawState: {
-                attributes: {
-                  title: props.title ?? '',
-                  layerListJSON: JSON.stringify(getLayers(props.layerList)),
-                },
-                hidePanelTitles: !Boolean(props.title),
-                isLayerTOCOpen:
-                  typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
-                mapCenter: props.mapCenter,
-                mapSettings: props.mapSettings ?? {},
+              attributes: {
+                title: props.title ?? '',
+                layers: getLayers(props.layerList),
               },
-              references: [],
+              hidePanelTitles: !Boolean(props.title),
+              isLayerTOCOpen:
+                typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
+              mapCenter: props.mapCenter,
+              mapSettings: props.mapSettings ?? {},
             };
           },
           ...searchApi,

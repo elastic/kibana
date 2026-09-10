@@ -6,22 +6,21 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
-import {
-  BrowserFields,
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-} from '../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../plugin';
+import type { BrowserFields, EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export function useFleetPermissions() {
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
   const canSaveIntegrations: boolean = Boolean(fleet?.authz.integrations.writeIntegrationPolicies);
   const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
+  const canReadAgents = Boolean(fleet?.authz.fleet.readAgents);
   const canCreateAgentPolicies = Boolean(fleet?.authz.fleet.all);
 
   return {
     canReadAgentPolicies,
+    canReadAgents,
     canSaveIntegrations,
     canCreateAgentPolicies,
   };

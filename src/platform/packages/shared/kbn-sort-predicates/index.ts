@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSortingCriteria } from './src/sorting';
+export { getSortingCriteria, NonStringSortableFieldType } from './src/sorting';

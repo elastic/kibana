@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import { EuiFlexItem, EuiInlineEditText, EuiInlineEditTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
@@ -104,6 +105,11 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
         onSave={handleSave}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
         onCancel={() => handleCancel(connector[field] || '')}
+        data-test-subj={
+          field === 'description'
+            ? 'enterpriseSearchConnectorDescription'
+            : 'enterpriseSearchConnectorName'
+        }
       />
     </EuiFlexItem>
   );

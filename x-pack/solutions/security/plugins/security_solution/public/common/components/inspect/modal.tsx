@@ -12,28 +12,27 @@ import {
   EuiIconTip,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { ReactNode } from 'react';
-import React, { useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
 import { isString } from 'lodash/fp';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { getScopeFromPath } from '../../../data_view_manager/utils/paths';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
@@ -50,7 +49,7 @@ interface Request {
   index: string[];
   allowNoIndices: boolean;
   ignoreUnavailable: boolean;
-  body: Record<string, unknown>;
+  body?: Record<string, unknown>;
 }
 
 interface Response {
@@ -94,7 +93,15 @@ const parseInspectStrings = function <T>(stringsArray: string[]): T[] {
   }
 };
 
-const manageStringify = (object: Record<string, unknown> | Response): string => {
+const stringifyRequest = (inspectRequest: Request | Record<string, unknown>) => {
+  const { body } = inspectRequest;
+  if (body == null) {
+    return manageStringify(inspectRequest); // No body, the entire request object is the "body"
+  }
+  return isString(body) ? body : manageStringify(body);
+};
+
+const manageStringify = (object: object): string => {
   try {
     return JSON.stringify(object, null, 2);
   } catch {
@@ -122,17 +129,10 @@ export const ModalInspectQuery = ({
   title,
 }: ModalInspectProps) => {
   const { pathname } = useLocation();
-  const sourcererScope =
-    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname);
+  const sourcererScope = inputId === 'timeline' ? PageScope.timeline : getScopeFromPath(pathname);
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(sourcererScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView } = useDataView(sourcererScope);
+  const selectedPatterns = useSelectedPatterns(dataView);
 
   const modalTitleId = useGeneratedHtmlId();
 
@@ -258,9 +258,7 @@ export const ModalInspectQuery = ({
                   isVirtualized
                   lineNumbers
                 >
-                  {isString(inspectRequest.body)
-                    ? inspectRequest.body
-                    : manageStringify(inspectRequest.body)}
+                  {stringifyRequest(inspectRequest)}
                 </EuiCodeBlock>
               </Fragment>
             ))

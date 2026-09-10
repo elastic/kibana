@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScheduleUnit, SyntheticsMonitorSchedule } from '../runtime_types';
+import type { SyntheticsMonitorSchedule } from '../runtime_types';
+import { ScheduleUnit } from '../runtime_types';
 import { scheduleToMilli } from './schedule_to_time';
 
 describe('schedule_to_time', () => {

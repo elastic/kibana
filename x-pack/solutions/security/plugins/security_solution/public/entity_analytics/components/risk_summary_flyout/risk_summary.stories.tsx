@@ -10,7 +10,7 @@ import type { StoryFn } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { EntityType } from '../../../../common/search_strategy';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../../flyout/shared/mocks';
+import { mockRiskScoreState, mockEntityRiskScores } from '../../../flyout/shared/mocks';
 import { FlyoutRiskSummary } from './risk_summary';
 
 export default {
@@ -22,13 +22,14 @@ export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            entityRiskScores={mockEntityRiskScores}
             queryId={'testQuery'}
             recalculatingScore={false}
-            isLinkEnabled
+            isPreviewMode={false}
             entityType={EntityType.user}
           />
         </div>
@@ -37,37 +38,18 @@ export const Default: StoryFn = () => {
   );
 };
 
-export const LinkEnabledInPreviewMode: StoryFn = () => {
+export const InPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            entityRiskScores={mockEntityRiskScores}
             queryId={'testQuery'}
             recalculatingScore={false}
             openDetailsPanel={() => {}}
-            isLinkEnabled
             isPreviewMode
-            entityType={EntityType.user}
-          />
-        </div>
-      </TestProvider>
-    </StorybookProviders>
-  );
-};
-
-export const LinkDisabled: StoryFn = () => {
-  return (
-    <StorybookProviders>
-      <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
-          <FlyoutRiskSummary
-            riskScoreData={{ ...mockRiskScoreState, data: [] }}
-            queryId={'testQuery'}
-            recalculatingScore={false}
-            openDetailsPanel={() => {}}
-            isLinkEnabled={false}
             entityType={EntityType.user}
           />
         </div>

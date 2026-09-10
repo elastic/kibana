@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import type {
+  CreateSLOInput,
+  GetSLOResponse,
+  Indicator,
+  SLOTemplateResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { RecursivePartial } from '@kbn/utility-types';
+import type { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
+import { toPickerProjectRouting } from '../../../../common/project_routings';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
@@ -22,9 +29,9 @@ import {
   SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
   TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 
-export function transformSloResponseToCreateSloForm(
+export function transformSloResponseToFormState(
   values?: GetSLOResponse
 ): CreateSLOForm | undefined {
   if (!values) return undefined;
@@ -53,6 +60,13 @@ export function transformSloResponseToCreateSloForm(
     tags: values.tags,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      ...(values.settings?.preventCrossProjectSearch !== undefined && {
+        preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
+      }),
+      projectRoutings: toPickerProjectRouting(
+        values.settings?.projectRoutings,
+        values.settings?.preventCrossProjectSearch
+      ),
       syncDelay: values.settings?.syncDelay
         ? toMinutes(toDuration(values.settings.syncDelay))
         : SETTINGS_DEFAULT_VALUES.syncDelay,
@@ -60,6 +74,9 @@ export function transformSloResponseToCreateSloForm(
         ? toMinutes(toDuration(values.settings.frequency))
         : SETTINGS_DEFAULT_VALUES.frequency,
       syncField: values.settings?.syncField ?? null,
+    },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
     },
   };
 }
@@ -89,9 +106,15 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
+      ...(values.settings.projectRoutings !== undefined && {
+        projectRoutings: values.settings.projectRoutings,
+      }),
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
+    },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
     },
   };
 }
@@ -121,9 +144,18 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
+      ...(values.settings.preventCrossProjectSearch !== undefined && {
+        preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
+      }),
+      ...(values.settings.projectRoutings !== undefined && {
+        projectRoutings: values.settings.projectRoutings,
+      }),
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
+    },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
     },
   };
 }
@@ -179,9 +211,12 @@ function transformPartialIndicatorState(
   }
 }
 
-export function transformPartialSLOStateToFormState(
-  values: RecursivePartial<CreateSLOInput>
-): CreateSLOForm {
+export function transformPartialSLODataToFormState(
+  values?: RecursivePartial<CreateSLOInput> | SLOTemplateResponse
+): CreateSLOForm | undefined {
+  if (!values) {
+    return undefined;
+  }
   let state: CreateSLOForm;
   const indicator = transformPartialIndicatorState(values.indicator);
 
@@ -238,6 +273,12 @@ export function transformPartialSLOStateToFormState(
     if (values.settings.preventInitialBackfill) {
       state.settings.preventInitialBackfill = values.settings.preventInitialBackfill;
     }
+    if (values.settings.preventCrossProjectSearch !== undefined) {
+      state.settings.preventCrossProjectSearch = values.settings.preventCrossProjectSearch;
+    }
+    if (values.settings.projectRoutings !== undefined) {
+      state.settings.projectRoutings = values.settings.projectRoutings;
+    }
     if (values.settings.syncDelay) {
       state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));
     }
@@ -247,6 +288,12 @@ export function transformPartialSLOStateToFormState(
     if (values.settings.syncField) {
       state.settings.syncField = values.settings.syncField;
     }
+  }
+
+  if (values.artifacts?.dashboards) {
+    state.artifacts = {
+      dashboards: values.artifacts.dashboards.filter((d) => !!d?.id) as { id: string }[],
+    };
   }
 
   return state;

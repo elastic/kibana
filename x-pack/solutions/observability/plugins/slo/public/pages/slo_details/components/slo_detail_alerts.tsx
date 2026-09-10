@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import React, { Fragment } from 'react';
-
-import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { Fragment } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
@@ -34,11 +33,13 @@ export function SloDetailsAlerts({ slo }: Props) {
               bool: {
                 filter: [
                   { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.instanceId': slo.instanceId } },
+                  ...(slo.instanceId !== ALL_VALUE
+                    ? [{ term: { 'slo.instanceId': slo.instanceId } }]
+                    : []),
                 ],
               },
             }}
-            initialPageSize={100}
+            pageSize={100}
             services={{
               data,
               http,

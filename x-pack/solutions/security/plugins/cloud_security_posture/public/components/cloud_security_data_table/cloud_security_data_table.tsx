@@ -6,31 +6,30 @@
  */
 import React, { useMemo } from 'react';
 import _ from 'lodash';
-import {
-  DataGridDensity,
+import type {
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
-  useColumns,
 } from '@kbn/unified-data-table';
+import { DataGridDensity, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import {
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiDataGridStyle,
-  EuiProgress,
 } from '@elastic/eui';
-import { AddFieldFilterHandler } from '@kbn/unified-field-list';
+import { EuiProgress } from '@elastic/eui';
+import type { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
+import type { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
@@ -195,32 +194,40 @@ export const CloudSecurityDataTable = ({
     columns,
     sort,
   });
+  const isGroupingEnabled = groupSelectorComponent === undefined;
 
   /**
    * This object is used to determine if the table rendering will be virtualized and the virtualization wrapper height.
    * mode should be passed as a key to the UnifiedDataTable component to force a re-render when the mode changes.
    */
   const computeDataTableRendering = useMemo(() => {
-    // Enable virtualization mode when the table is set to a large page size.
-    const isVirtualizationEnabled = pageSize >= 100;
+    // Enable virtualization mode when the table is set to a large page size and has many rows.
+    const isVirtualizationEnabled = pageSize >= 100 && total >= 100;
 
     const getWrapperHeight = () => {
       if (height) return height;
 
-      // If virtualization is not needed the table will render unconstrained.
-      if (!isVirtualizationEnabled) return 'auto';
+      // constrain height when virtualization is enabled or for groups with more than 10 rows
+      if (isVirtualizationEnabled && !isGroupingEnabled) {
+        const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
+        const filterBarHeight = filters?.length > 0 ? 40 : 0;
+        const distributionBarHeight = hasDistributionBar ? 52 : 0;
+        return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      }
 
-      const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
-      const filterBarHeight = filters?.length > 0 ? 40 : 0;
-      const distributionBarHeight = hasDistributionBar ? 52 : 0;
-      return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      // constrain height for groups with more than 10 rows when grouping is enabled so users can see the groups without scrolling
+      if (isGroupingEnabled && total > 10) {
+        return 512;
+      }
+
+      return 'auto';
     };
 
     return {
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize, height, filters?.length, hasDistributionBar]);
+  }, [pageSize, total, height, filters?.length, hasDistributionBar, isGroupingEnabled]);
 
   const { filterManager } = data.query;
 

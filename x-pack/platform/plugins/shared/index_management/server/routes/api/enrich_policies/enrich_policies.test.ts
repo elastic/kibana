@@ -6,7 +6,8 @@
  */
 
 import { addInternalBasePath } from '..';
-import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
+import type { RequestMock } from '../../../test/helpers';
+import { RouterMock, routeDependencies } from '../../../test/helpers';
 import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
 import { createTestESEnrichPolicy } from '../../../test/helpers';
 
@@ -55,7 +56,7 @@ describe('Enrich policies API', () => {
       const error = new Error('Oh no!');
       getEnrichPolicies.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
   });
 
@@ -92,7 +93,7 @@ describe('Enrich policies API', () => {
       const error = new Error('Oh no!');
       executeEnrichPolicy.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
   });
 
@@ -129,7 +130,7 @@ describe('Enrich policies API', () => {
       const error = new Error('Oh no!');
       deleteEnrichPolicy.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
   });
 
@@ -218,7 +219,7 @@ describe('Enrich policies API', () => {
       deletePolicyMock.mockResolvedValue({ status: { status: 'OK' } });
 
       // Expect the API to fail and the policy to be deleted
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(executeError);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(executeError);
       expect(deletePolicyMock).toHaveBeenCalled();
     });
 
@@ -240,7 +241,7 @@ describe('Enrich policies API', () => {
       const error = new Error('Oh no!');
       createPolicyMock.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
   });
 
@@ -299,7 +300,7 @@ describe('Enrich policies API', () => {
       const error = new Error('Oh no!');
       fieldCapsMock.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
   });
 

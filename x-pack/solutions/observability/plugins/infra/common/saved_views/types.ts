@@ -9,7 +9,7 @@ import type {
   QueryObserverBaseResult,
   UseMutateAsyncFunction,
   UseMutateFunction,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 

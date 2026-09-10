@@ -8,7 +8,7 @@
  */
 
 import { SyntaxKind } from 'typescript';
-import { ParsedUsageCollection } from '../ts_parser';
+import type { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedImportedInterfaceFromExport: ParsedUsageCollection[] = [
   [

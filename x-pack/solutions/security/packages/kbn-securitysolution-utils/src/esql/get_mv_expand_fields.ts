@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { parse } from '@kbn/esql-ast';
-import { isColumnItem } from '@kbn/esql-validation-autocomplete';
+import { Parser, isColumn } from '@elastic/esql';
 
 export const getMvExpandFields = (query: string): string[] => {
-  const { root } = parse(query);
+  const { root } = Parser.parse(query);
 
   const mvExpandCommands = root.commands.filter((command) => command.name === 'mv_expand');
 
   return mvExpandCommands.reduce<string[]>((acc, command) => {
     const argument = command.args[0];
 
-    if (isColumnItem(argument) && argument.name) {
+    if (isColumn(argument) && argument.name) {
       acc.push(argument.name);
     }
 

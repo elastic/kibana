@@ -15,7 +15,7 @@ import chalk from 'chalk';
 import { createHash } from 'crypto';
 import Axios from 'axios';
 import { isAxiosResponseError } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { mkdirp } from './fs';
 

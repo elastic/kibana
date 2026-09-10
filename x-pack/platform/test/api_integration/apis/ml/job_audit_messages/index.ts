@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('job_audit_messages', function () {

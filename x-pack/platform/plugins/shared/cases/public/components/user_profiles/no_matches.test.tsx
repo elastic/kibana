@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { NoMatches } from './no_matches';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('NoMatches', () => {
   it('renders the no matches messages', () => {
-    render(<NoMatches />);
+    renderWithTestingProviders(<NoMatches />);
 
     expect(screen.getByText("User doesn't exist or is unavailable"));
   });

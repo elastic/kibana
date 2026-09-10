@@ -7,11 +7,11 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { useFetchPrompts } from './use_fetch_prompts';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
 import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 

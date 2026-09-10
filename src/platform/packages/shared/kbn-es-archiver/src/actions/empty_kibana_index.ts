@@ -8,7 +8,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { createStats, cleanSavedObjectIndices } from '../lib';

@@ -36,7 +36,7 @@ export function CardFooterContent() {
                 <HomeLink>
                   {i18n.translate(
                     'xpack.apm.settings.schema.success.returnText.serviceInventoryLink',
-                    { defaultMessage: 'Service Inventory' }
+                    { defaultMessage: 'Service inventory' }
                   )}
                 </HomeLink>
               ),

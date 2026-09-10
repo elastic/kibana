@@ -7,13 +7,9 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import {
-  DeleteConversationParams,
-  GetConversationByIdParams,
-  deleteConversation,
-  getConversationById,
-} from './conversations';
-import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
+import type { DeleteConversationParams, GetConversationByIdParams } from './conversations';
+import { deleteConversation, getConversationById } from './conversations';
+import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 let http: HttpSetupMock = coreMock.createSetup().http;
@@ -49,7 +45,7 @@ describe('conversations api', () => {
     http.fetch.mockRejectedValue(new Error('this is an error'));
     const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
-    await expect(deleteConversation(deleteProps)).rejects.toThrowError('this is an error');
+    await expect(deleteConversation(deleteProps)).rejects.toThrow('this is an error');
     expect(toasts.addError).toHaveBeenCalled();
   });
 
@@ -73,7 +69,7 @@ describe('conversations api', () => {
     http.fetch.mockRejectedValue(new Error('this is an error'));
     const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
 
-    await expect(getConversationById(getProps)).rejects.toThrowError('this is an error');
+    await expect(getConversationById(getProps)).rejects.toThrow('this is an error');
     expect(toasts.addError).toHaveBeenCalled();
   });
 });

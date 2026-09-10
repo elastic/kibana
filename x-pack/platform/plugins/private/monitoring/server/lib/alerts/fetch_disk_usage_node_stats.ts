@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
+import type { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
@@ -33,6 +33,16 @@ export async function fetchDiskUsageNodeStats(
     size: 0,
     query: {
       bool: {
+        // Frozen tier nodes allocate the searchable snapshot shared cache upfront
+        // (default `xpack.searchable.snapshot.shared_cache.size` is 90%), so they
+        // are expected to sit well above the default 80% disk usage threshold.
+        // Excluding them avoids false positives from the node-level disk usage
+        // alert.
+        must_not: [
+          {
+            term: { 'elasticsearch.node.roles': 'data_frozen' },
+          },
+        ],
         filter: [
           {
             terms: {

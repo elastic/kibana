@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestReport, makeTestCaseIter } from './test_report';
+import type { TestReport } from './test_report';
+import { makeTestCaseIter } from './test_report';
 
 export function* getReportMessageIter(report: TestReport) {
   for (const testCase of makeTestCaseIter(report)) {

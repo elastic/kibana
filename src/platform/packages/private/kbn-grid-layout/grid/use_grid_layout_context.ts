@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { GridLayoutStateManager } from './types';
+import type { GridLayoutStateManager } from './types';
 
 export interface GridLayoutContextType<UseCustomDragHandle extends boolean = boolean> {
   gridLayoutStateManager: GridLayoutStateManager;

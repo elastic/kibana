@@ -27,10 +27,10 @@ export default ({ getService }: FtrProviderContext): void => {
     const defaultSignalsIndex = 'siem-signals-default-000001';
 
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/signals/default');
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/cases/signals/default');
       await deleteAllCaseItems(es);
     });
 
@@ -43,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseReq,
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
       });
 
@@ -62,6 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseReq,
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
       });
 
@@ -142,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
           cases: updatedIndWithStatus.map((caseInfo) => ({
             id: caseInfo.id,
             version: caseInfo.version,
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: true },
           })),
         })
         .expect(200);

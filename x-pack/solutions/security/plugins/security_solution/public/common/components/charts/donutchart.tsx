@@ -56,6 +56,11 @@ export interface DonutChartProps {
   onPartitionClick?: (level: string) => void;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
+  /**
+   * Custom formatter for partition values (e.g., tooltips).
+   * Defaults to `defaultPartitionValueFormatter`.
+   */
+  valueFormatter?: (value: number) => string;
 }
 
 export interface DonutChartWrapperProps {
@@ -76,7 +81,14 @@ const getStyles = (
 ) => {
   return {
     donutTextWrapper: css`
-      top: ${isChartEmbeddablesEnabled && !dataExists ? '66%' : '34%'};
+      ${isChartEmbeddablesEnabled
+        ? `top: ${dataExists ? '34%' : '66%'};`
+        : `
+          // Center the whole label block on the donut, not just its top edge, so that
+          // multi-line labels (count + unit) stay vertically centered.
+          top: 50%;
+          transform: translateY(-50%);
+        `}
       width: 100%;
       max-width: 75%;
       position: absolute; // Make this position absolute in order to overlap the text onto the donut
@@ -128,6 +140,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
           css={styles.donutTextWrapper}
           alignItems="center"
           className={donutTextWrapperClassName}
+          data-test-subj="donut-chart-label"
           direction="column"
           gutterSize="none"
           justifyContent="center"
@@ -137,6 +150,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
             <EuiFlexItem className={className}>
               <EuiToolTip content={label}>
                 <EuiText
+                  tabIndex={0}
                   className={className}
                   size="s"
                   css={dataExists ? undefined : emptyLabelStyle}
@@ -163,6 +177,7 @@ export const DonutChart = ({
   onPartitionClick,
   title,
   totalCount,
+  valueFormatter,
 }: DonutChartProps) => {
   const { baseTheme, theme } = useThemes();
 
@@ -208,7 +223,9 @@ export const DonutChart = ({
               data={data}
               layout={PartitionLayout.sunburst}
               valueAccessor={(d: Datum) => d.value as number}
-              valueFormatter={(d: number) => `${defaultPartitionValueFormatter(d)}`}
+              valueFormatter={
+                valueFormatter ?? ((d: number) => `${defaultPartitionValueFormatter(d)}`)
+              }
               layers={[
                 {
                   groupByRollup: (d: Datum) => d.label ?? d.key,

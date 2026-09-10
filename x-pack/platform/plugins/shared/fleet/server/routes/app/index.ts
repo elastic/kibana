@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { GetSpaceResult } from '@kbn/spaces-plugin/common';
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
-import { API_VERSIONS } from '../../../common/constants';
+import { ALL_SPACES_ID, API_VERSIONS } from '../../../common/constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '../../types';
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
-import { type FleetConfigType } from '../../config';
 import { genericErrorResponse } from '../schema/errors';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
@@ -119,23 +121,49 @@ export const generateServiceTokenHandler: RequestHandler<
   }
 };
 
+/**
+ * The synthetic "all spaces" (`*`) entry appended to the agent-policy spaces
+ * list. It is modeled as a distinct type rather than a {@link GetSpaceResult}
+ * so the `*` sentinel never lives inside a real space's `id` — a prerequisite
+ * for branding `Space.id` as a nominal `SpaceId`
+ * (see https://github.com/elastic/kibana-team/issues/3680).
+ */
+interface AllSpacesEntry {
+  id: typeof ALL_SPACES_ID;
+  name: string;
+  disabledFeatures: string[];
+  color?: string;
+}
+
+const createAllSpacesEntry = (): AllSpacesEntry => ({
+  id: ALL_SPACES_ID,
+  name: 'All spaces',
+  disabledFeatures: [],
+  color: '',
+});
+
 export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
   null,
   null,
   TypeOf<typeof GenerateServiceTokenRequestSchema.body>
 > = async (context, request, response) => {
   const spaces = await (await context.fleet).getAllSpaces();
+
   const security = appContextService.getSecurity();
-  const spaceIds = spaces.map(({ id }) => id);
+  const spaceIds = [...spaces.map(({ id }) => id), ALL_SPACES_ID];
   const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
     kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
   });
 
-  const authorizedSpaces = spaces.filter(
+  const authorizedSpaces: Array<GetSpaceResult | AllSpacesEntry> = spaces.filter(
     (space) =>
       res.privileges.kibana.find((privilege) => privilege.resource === space.id)?.authorized ??
       false
   );
+
+  if (res.hasAllRequested) {
+    authorizedSpaces.push(createAllSpacesEntry());
+  }
 
   return response.ok({
     body: {
@@ -157,8 +185,10 @@ export const GenerateServiceTokenResponseSchema = schema.object({
   value: schema.string(),
 });
 
-export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+export const registerRoutes = (
+  router: FleetAuthzRouter,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   router.versioned
     .get({
       path: '/internal/fleet/telemetry/usage',
@@ -207,6 +237,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       summary: `Check permissions`,
+      description: `Check whether the current user has the required permissions to use Fleet. Optionally verifies Fleet Server setup privileges.`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -220,13 +251,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_check_permissions.yaml'),
+        },
         validate: {
           request: CheckPermissionsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => CheckPermissionsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -262,6 +298,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       summary: `Create a service token`,
+      description: `Create a Fleet Server service token. The token is used to enroll Fleet Server instances with Kibana.`,
       options: {
         tags: ['oas-tag:Fleet service tokens'],
       },
@@ -269,13 +306,19 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_generate_service_token.yaml'),
+        },
         validate: {
           request: GenerateServiceTokenRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GenerateServiceTokenResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -289,7 +332,7 @@ const getTelemetryUsageHandler: FleetRequestHandler = async (context, request, r
   if (!fetchUsage) {
     throw new Error('Fetch usage is not initialized.');
   }
-  const usage = await fetchUsage(new AbortController());
+  const usage = await fetchUsage(new AbortController().signal);
 
   return response.ok({
     body: {

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { awsS3SnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { CloudToolbarItems } from './cloud_toolbar_items';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
@@ -17,11 +16,7 @@ export const AwsS3ToolbarItems = (props: ToolbarProps) => {
   return (
     <>
       <CloudToolbarItems {...props} />
-      <MetricsAndGroupByToolbarItems
-        {...props}
-        metricTypes={awsS3SnapshotMetricTypes}
-        groupByFields={s3GroupByFields}
-      />
+      <MetricsAndGroupByToolbarItems {...props} groupByFields={s3GroupByFields} />
     </>
   );
 };

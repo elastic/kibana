@@ -7,12 +7,12 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import type { AutocompleteStart } from '@kbn/kql/public';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { capitalize } from 'lodash';
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { Job } from '@kbn/reporting-public';
+import type { Job } from '@kbn/reporting-public';
 import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { Frequency } from '@kbn/rrule';
 import type {
@@ -18,7 +19,7 @@ import {
   RRULE_TO_ISO_WEEKDAYS,
   RecurrenceEnd,
 } from '@kbn/response-ops-recurring-schedule-form/constants';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import type { ScheduledReport } from '../types';
 
 /**
@@ -47,9 +48,11 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
 export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
-      return 'discover session';
+      return 'Discover';
+    case 'ai_value_report':
+      return 'Value report';
     default:
-      return type;
+      return capitalize(type);
   }
 };
 
@@ -66,10 +69,6 @@ const isCustomRrule = (rRule: Rrule) => {
   if (rRule.interval && rRule.interval > 1) {
     return true;
   }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
-    return true;
-  }
   // frequency is weekly and there are multiple weekdays selected
   if (freq && freq === Frequency.WEEKLY && rRule.byweekday && rRule.byweekday.length > 1) {
     return true;
@@ -82,7 +81,7 @@ const isCustomRrule = (rRule: Rrule) => {
 };
 
 export const transformScheduledReport = (report: ScheduledReportApiJSON): ScheduledReport => {
-  const { title, schedule, notification } = report;
+  const { title, schedule, notification, id } = report;
   const rRule = schedule.rrule;
 
   const isCustomFrequency = isCustomRrule(rRule);
@@ -123,12 +122,41 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
   }
 
   return {
+    id,
     title,
     recurringSchedule,
+    // TODO dtstart should be required
+    startDate: rRule.dtstart!,
     reportTypeId: report.jobtype as ScheduledReport['reportTypeId'],
-    timezone: schedule.rrule.tzid,
+    timezone: rRule.tzid,
     recurring: true,
     sendByEmail: Boolean(notification?.email),
     emailRecipients: [...(notification?.email?.to || [])],
+    emailCcRecipients: [...(notification?.email?.cc || [])],
+    emailBccRecipients: [...(notification?.email?.bcc || [])],
+    emailSubject: notification?.email?.subject ?? '',
+    emailMessage: notification?.email?.message ?? '',
+  };
+};
+
+export const transformEmailNotification = ({
+  emailRecipients,
+  emailCcRecipients,
+  emailBccRecipients,
+  emailSubject,
+  emailMessage,
+}: {
+  emailRecipients: string[];
+  emailCcRecipients: string[];
+  emailBccRecipients: string[];
+  emailSubject: string;
+  emailMessage: string;
+}): NonNullable<NonNullable<ScheduledReportApiJSON['notification']>['email']> => {
+  return {
+    to: emailRecipients,
+    cc: emailCcRecipients,
+    bcc: emailBccRecipients,
+    subject: emailSubject,
+    message: emailMessage,
   };
 };

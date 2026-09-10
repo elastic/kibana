@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { infraSyncTaskRunner } from './task';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import {
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type {
   AgentlessConnectorsInfraService,
   ConnectorMetadata,
   PackagePolicyMetadata,
 } from './services';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createAgentlessPolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
 const DATE_1970 = '1970-01-01T00:00:00.000Z';
 
@@ -76,7 +79,7 @@ describe('infraSyncTaskRunner', () => {
 
   let logger: MockedLogger;
   let serviceMock: jest.Mocked<AgentlessConnectorsInfraService>;
-  let licensePluginStartMock: jest.Mocked<LicensingPluginStart>;
+  const getLicenseMock = jest.fn();
 
   const taskInstanceStub: ConcreteTaskInstance = {
     id: '',
@@ -102,6 +105,8 @@ describe('infraSyncTaskRunner', () => {
 
   const validLicenseMock = licensingMock.createLicenseMock();
   validLicenseMock.check.mockReturnValue({ state: 'valid' });
+  const { getStartServices } = coreMock.createSetup();
+  let agentlessConnectorsInfraServiceFactory: jest.Mocked<AgentlessConnectorsInfraServiceFactory>;
 
   beforeAll(async () => {
     logger = loggerMock.create();
@@ -112,9 +117,21 @@ describe('infraSyncTaskRunner', () => {
       removeDeployment: jest.fn(),
     } as unknown as jest.Mocked<AgentlessConnectorsInfraService>;
 
-    licensePluginStartMock = {
-      getLicense: jest.fn(),
-    } as unknown as jest.Mocked<LicensingPluginStart>;
+    agentlessConnectorsInfraServiceFactory = {
+      initialize: jest.fn(),
+      getAgentlessConnectorsInfraService: jest.fn().mockReturnValue(serviceMock),
+    } as unknown as jest.Mocked<AgentlessConnectorsInfraServiceFactory>;
+    const [coreStart, deps, unknown] = await getStartServices();
+    getStartServices.mockResolvedValue([
+      coreStart,
+      {
+        ...deps,
+        licensing: {
+          getLicense: getLicenseMock,
+        },
+      },
+      unknown,
+    ]);
   });
 
   beforeEach(() => {
@@ -124,29 +141,31 @@ describe('infraSyncTaskRunner', () => {
   test('Does nothing if no connectors or policies are configured', async () => {
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
-    )({ taskInstance: taskInstanceStub }).run();
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
+    )({
+      taskInstance: taskInstanceStub,
+    }).run();
 
-    expect(serviceMock.deployConnector).not.toBeCalled();
-    expect(serviceMock.removeDeployment).not.toBeCalled();
+    expect(serviceMock.deployConnector).not.toHaveBeenCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
   });
 
   test('Does nothing if connectors or policies requires deployment but license is not supported', async () => {
     serviceMock.getNativeConnectors.mockResolvedValue([mysqlConnector, githubConnector]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([sharepointPackagePolicy]);
-    licensePluginStartMock.getLicense.mockResolvedValue(invalidLicenseMock);
+    getLicenseMock.mockResolvedValue(invalidLicenseMock);
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).not.toBeCalled();
-    expect(serviceMock.removeDeployment).not.toBeCalled();
-    expect(logger.warn).toBeCalledWith(expect.stringMatching(/.*not compatible.*/));
-    expect(logger.warn).toBeCalledWith(expect.stringMatching(/.*license.*/));
+    expect(serviceMock.deployConnector).not.toHaveBeenCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/.*not compatible.*/));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/.*license.*/));
   });
 
   test('Does nothing if all connectors and package policies are in-sync', async () => {
@@ -160,32 +179,32 @@ describe('infraSyncTaskRunner', () => {
       githubPackagePolicy,
       sharepointPackagePolicy,
     ]);
-    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+    getLicenseMock.mockResolvedValue(validLicenseMock);
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).not.toBeCalled();
-    expect(serviceMock.removeDeployment).not.toBeCalled();
-    expect(logger.warn).not.toBeCalled();
+    expect(serviceMock.deployConnector).not.toHaveBeenCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   test('Deploys connectors if no policies has been created for these connectors', async () => {
     serviceMock.getNativeConnectors.mockResolvedValue([mysqlConnector, githubConnector]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([sharepointPackagePolicy]);
-    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+    getLicenseMock.mockResolvedValue(validLicenseMock);
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).toBeCalledWith(mysqlConnector);
-    expect(serviceMock.deployConnector).toBeCalledWith(githubConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(mysqlConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(githubConnector);
   });
 
   test('Deploys connectors even if another connectors failed to be deployed', async () => {
@@ -195,24 +214,24 @@ describe('infraSyncTaskRunner', () => {
       sharepointConnector,
     ]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([]);
-    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+    getLicenseMock.mockResolvedValue(validLicenseMock);
     serviceMock.deployConnector.mockImplementation(async (connector) => {
       if (connector === mysqlConnector || connector === githubConnector) {
         throw new Error('Cannot deploy these connectors');
       }
 
-      return createPackagePolicyMock();
+      return createAgentlessPolicyMock();
     });
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).toBeCalledWith(mysqlConnector);
-    expect(serviceMock.deployConnector).toBeCalledWith(githubConnector);
-    expect(serviceMock.deployConnector).toBeCalledWith(sharepointConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(mysqlConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(githubConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(sharepointConnector);
   });
 
   test('Removes a package policy if connectors has been soft-deleted', async () => {
@@ -222,29 +241,31 @@ describe('infraSyncTaskRunner', () => {
       githubConnector,
     ]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([sharepointPackagePolicy]);
-    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+    getLicenseMock.mockResolvedValue(validLicenseMock);
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).toBeCalledWith(sharepointPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(
+      sharepointPackagePolicy.package_policy_id
+    );
   });
 
   test('Does not remove a package policy if no connectors match the policy', async () => {
     serviceMock.getNativeConnectors.mockResolvedValue([mysqlConnector, githubConnector]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([sharepointPackagePolicy]);
-    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+    getLicenseMock.mockResolvedValue(validLicenseMock);
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).not.toBeCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
   });
 
   test('Removes deployments even if another connectors failed to be undeployed', async () => {
@@ -258,7 +279,7 @@ describe('infraSyncTaskRunner', () => {
       mysqlPackagePolicy,
       githubPackagePolicy,
     ]);
-    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+    getLicenseMock.mockResolvedValue(validLicenseMock);
     serviceMock.removeDeployment.mockImplementation(async (policyId) => {
       if (
         policyId === sharepointPackagePolicy.package_policy_id ||
@@ -270,12 +291,16 @@ describe('infraSyncTaskRunner', () => {
 
     await infraSyncTaskRunner(
       logger,
-      serviceMock,
-      licensePluginStartMock
+      getStartServices,
+      agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).toBeCalledWith(sharepointPackagePolicy.package_policy_id);
-    expect(serviceMock.removeDeployment).toBeCalledWith(mysqlPackagePolicy.package_policy_id);
-    expect(serviceMock.removeDeployment).toBeCalledWith(githubPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(
+      sharepointPackagePolicy.package_policy_id
+    );
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(mysqlPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(
+      githubPackagePolicy.package_policy_id
+    );
   });
 });

@@ -9,7 +9,8 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import type { TypeOptions } from './type';
+import { Type } from './type';
 
 export class BooleanType extends Type<boolean> {
   constructor(options?: TypeOptions<boolean>) {

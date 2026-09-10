@@ -12,12 +12,13 @@ import type {
   CoreUserProfileDelegateContract,
   GetUserProfileResponse,
 } from '@kbn/core-user-profile-browser';
-import { UserProfileData } from '@kbn/core-user-profile-common';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 
 export const getDefaultUserProfileImplementation = (): CoreUserProfileDelegateContract => {
   return {
     userProfile$: of(null),
     enabled$: of(false),
+    dataUpdates$: of({}),
     getCurrent: <D extends UserProfileData>() =>
       Promise.resolve(null as unknown as GetUserProfileResponse<D>),
     bulkGet: () => Promise.resolve([]),

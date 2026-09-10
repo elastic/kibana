@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH, CLOUD_SNAPSHOT_REPOSITORY } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 export function registerCloudBackupStatusRoutes({
   router,
   lib: { handleEsError },
+  current,
 }: RouteDependencies) {
   // GET most recent Cloud snapshot
   router.get(
@@ -25,7 +26,7 @@ export function registerCloudBackupStatusRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async (context, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async (context, request, response) => {
       const { client: clusterClient } = (await context.core).elasticsearch;
 
       try {

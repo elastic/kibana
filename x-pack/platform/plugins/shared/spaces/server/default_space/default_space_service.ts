@@ -22,7 +22,7 @@ import {
 import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { createDefaultSpace } from './create_default_space';
 import type { SpacesLicense } from '../../common/licensing';
@@ -34,6 +34,7 @@ interface Deps {
   spacesLicense: SpacesLicense;
   logger: Logger;
   solution?: SolutionId;
+  solutionSetupRequired?: boolean;
 }
 
 export const RETRY_SCALE_DURATION = 100;
@@ -66,7 +67,15 @@ export class DefaultSpaceService {
 
   private serviceStatus$?: BehaviorSubject<ServiceStatus>;
 
-  public setup({ coreStatus, getSavedObjects, license$, spacesLicense, logger, solution }: Deps) {
+  public setup({
+    coreStatus,
+    getSavedObjects,
+    license$,
+    spacesLicense,
+    logger,
+    solution,
+    solutionSetupRequired,
+  }: Deps) {
     const statusLogger = logger.get('status');
 
     this.serviceStatus$ = new BehaviorSubject({
@@ -99,6 +108,7 @@ export class DefaultSpaceService {
               getSavedObjects,
               logger,
               solution,
+              solutionSetupRequired,
             }).then(() => {
               return {
                 level: ServiceStatusLevels.available,

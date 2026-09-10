@@ -61,6 +61,7 @@ describe('getTopAssetsQuery', () => {
     const entitySubTypeAgg = entityTypeAgg.aggs?.entitySubType;
     expect(entitySubTypeAgg).toBeDefined();
     expect(entitySubTypeAgg.terms.field).toBe(ASSET_FIELDS.ENTITY_SUB_TYPE);
+    expect(entitySubTypeAgg.terms.missing).toBe('Uncategorized');
     expect(entitySubTypeAgg.aggs?.entityId?.value_count.field).toBe(ASSET_FIELDS.ENTITY_ID);
   });
 
@@ -110,6 +111,6 @@ describe('getTopAssetsQuery', () => {
   it('should throw an error if indexPattern is not provided', () => {
     expect(() => {
       getTopAssetsQuery({ query, sort, enabled: true });
-    }).toThrowError('Index pattern is required');
+    }).toThrow('Index pattern is required');
   });
 });

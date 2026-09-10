@@ -8,7 +8,7 @@
  */
 
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns } from '../../../common/types';
+import type { BucketColumns } from '../../../common/types';
 import { getAvailableFormatter } from '../formatters';
 
 export const getNodeLabel = (
@@ -19,7 +19,7 @@ export const getNodeLabel = (
 ): string => {
   const formatter = getAvailableFormatter(column, formatters, defaultFormatFactory);
   if (formatter) {
-    return formatter.convert(nodeName) ?? '';
+    return formatter.convertToText(nodeName) ?? '';
   }
 
   return String(nodeName);

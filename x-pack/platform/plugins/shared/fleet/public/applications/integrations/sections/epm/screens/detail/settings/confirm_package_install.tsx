@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -21,8 +22,11 @@ import { TransformInstallWithCurrentUserPermissionCallout } from '../../../../..
 
 export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
   const { onCancel, onConfirm, packageName, numOfAssets, numOfTransformAssets } = props;
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={
         <FormattedMessage
           id="xpack.fleet.integrations.settings.confirmInstallModal.installTitle"
@@ -30,6 +34,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
           values={{ packageName }}
         />
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={
@@ -47,8 +52,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
       }
       defaultFocusedButton="confirm"
     >
-      <EuiCallOut
-        iconType="info"
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.fleet.integrations.settings.confirmInstallModal.installCalloutTitle"

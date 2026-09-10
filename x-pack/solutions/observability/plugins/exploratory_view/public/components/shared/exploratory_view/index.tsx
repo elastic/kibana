@@ -14,7 +14,7 @@ import {
   withNotifyOnErrors,
   createSessionStorageStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useBreadcrumbs, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { LastUpdated } from './header/last_updated';
 import { ExploratoryView } from './exploratory_view';

@@ -41,6 +41,11 @@ export function defineEnrollRoutes({
     {
       path: '/internal/interactive_setup/enroll',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used during initial Kibana setup before authentication is configured.',
+        },
         authz: {
           enabled: false,
           reason:
@@ -49,6 +54,7 @@ export function defineEnrollRoutes({
       },
       validate: {
         body: schema.object({
+          // codeql[js/kibana/unbounded-array-in-schema] This is a pre-boot feature and the input is trusted.
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
             minSize: 1,
           }),
@@ -57,7 +63,6 @@ export function defineEnrollRoutes({
           code: schema.maybe(schema.string()),
         }),
       },
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       if (!verificationCode.verify(request.body.code)) {

@@ -6,8 +6,8 @@
  */
 
 import { last } from 'lodash';
-import PropTypes from 'prop-types';
-import React, { Fragment, ReactElement, ValidationMap } from 'react';
+import type { ReactElement, ValidationMap } from 'react';
+import React, { Fragment } from 'react';
 
 const PER_ROW_DEFAULT = 6;
 
@@ -63,10 +63,4 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
       ))}
     </Fragment>
   );
-};
-
-ItemGrid.propTypes = {
-  items: PropTypes.array,
-  itemsPerRow: PropTypes.number,
-  children: PropTypes.func.isRequired,
 };

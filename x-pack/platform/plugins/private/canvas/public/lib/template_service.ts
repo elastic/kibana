@@ -9,7 +9,7 @@
 
 import { API_ROUTE_TEMPLATES } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
-import { CanvasTemplate } from '../../types';
+import type { CanvasTemplate } from '../../types';
 import { coreServices } from '../services/kibana_services';
 
 const getApiPath = function () {

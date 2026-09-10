@@ -6,11 +6,14 @@
  */
 
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { Entry, ThreatMapEntries, FormattedEntry } from './types';
+import type { FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
-
+import type {
+  ThreatMapping,
+  ThreatMappingEntry,
+} from '../../../../common/api/detection_engine/model/rule_schema';
 import {
   getEntryOnFieldChange,
   getFormattedEntries,
@@ -70,7 +73,7 @@ describe('Helpers', () => {
         ],
       };
 
-      const payloadItem: Entry = {
+      const payloadItem: ThreatMappingEntry = {
         field: 'fieldA.name',
         type: 'mapping',
         value: 'fieldB.name',
@@ -100,7 +103,7 @@ describe('Helpers', () => {
         fields: [],
       };
 
-      const payloadItem: Entry = {
+      const payloadItem: ThreatMappingEntry = {
         field: 'fieldA.name',
         type: 'mapping',
         value: 'fieldB.name',
@@ -128,7 +131,7 @@ describe('Helpers', () => {
         fields: [],
       };
 
-      const payloadItem: Entry = {
+      const payloadItem: ThreatMappingEntry = {
         field: 'unknown',
         type: 'mapping',
         value: 'unknown',
@@ -144,11 +147,14 @@ describe('Helpers', () => {
   describe('#getFormattedEntries', () => {
     test('returns formatted entry with fallback field and value if it unable to find a matching index pattern field', () => {
       const payloadIndexPattern = getMockIndexPattern();
-      const payloadItems: Entry[] = [{ field: 'field.one', type: 'mapping', value: 'field.two' }];
+      const payloadItems: ThreatMappingEntry[] = [
+        { field: 'field.one', type: 'mapping', value: 'field.two' },
+      ];
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           entryIndex: 0,
           field: {
             name: 'field.one',
@@ -166,11 +172,14 @@ describe('Helpers', () => {
 
     test('it returns a fallback value if cannot match a pattern field', () => {
       const payloadIndexPattern = getMockIndexPattern();
-      const payloadItems: Entry[] = [{ field: 'machine.os', type: 'mapping', value: 'yolo' }];
+      const payloadItems: ThreatMappingEntry[] = [
+        { field: 'machine.os', type: 'mapping', value: 'yolo' },
+      ];
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -195,11 +204,14 @@ describe('Helpers', () => {
     test('it returns value and field when they match two independent index patterns', () => {
       const payloadIndexPattern = getMockIndexPattern();
       const threatIndexPattern = getMockIndexPattern();
-      const payloadItems: Entry[] = [{ field: 'machine.os', type: 'mapping', value: 'machine.os' }];
+      const payloadItems: ThreatMappingEntry[] = [
+        { field: 'machine.os', type: 'mapping', value: 'machine.os' },
+      ];
       const output = getFormattedEntries(payloadIndexPattern, threatIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -229,7 +241,7 @@ describe('Helpers', () => {
 
     test('it returns formatted entries', () => {
       const payloadIndexPattern: DataViewBase = getMockIndexPattern();
-      const payloadItems: Entry[] = [
+      const payloadItems: ThreatMappingEntry[] = [
         { field: 'machine.os', type: 'mapping', value: 'machine.os' },
         { field: 'ip', type: 'mapping', value: 'ip' },
       ];
@@ -237,6 +249,7 @@ describe('Helpers', () => {
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           field: {
             name: 'machine.os',
             type: 'string',
@@ -262,6 +275,7 @@ describe('Helpers', () => {
         },
         {
           id: '123',
+          negate: false,
           field: {
             name: 'ip',
             type: 'ip',
@@ -292,14 +306,14 @@ describe('Helpers', () => {
 
   describe('#getUpdatedEntriesOnDelete', () => {
     test('it removes entry corresponding to "entryIndex"', () => {
-      const payloadItem: ThreatMapEntries = {
+      const payloadItem: ThreatMapping[number] = {
         entries: [
           { field: 'field.one', type: 'mapping', value: 'field.one' },
           { field: 'field.two', type: 'mapping', value: 'field.two' },
         ],
       };
       const output = getUpdatedEntriesOnDelete(payloadItem, 0);
-      const expected: ThreatMapEntries = {
+      const expected: ThreatMapping[number] = {
         entries: [
           {
             field: 'field.two',
@@ -317,13 +331,14 @@ describe('Helpers', () => {
       const payloadItem = getMockEntry();
       const payloadIFieldType = getField('ip');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: Entry & { id: string }; index: number } = {
+      const expected: { updatedEntry: ThreatMappingEntry & { id: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
           field: 'ip',
           type: 'mapping',
           value: 'ip',
+          negate: false,
         },
       };
       expect(output).toEqual(expected);

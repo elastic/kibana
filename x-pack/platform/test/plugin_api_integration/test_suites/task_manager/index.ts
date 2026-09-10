@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('task_manager', function taskManagerSuite() {
@@ -14,11 +14,14 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./metrics_route'));
     loadTestFile(require.resolve('./health_route'));
     loadTestFile(require.resolve('./task_management'));
+    loadTestFile(require.resolve('./task_management_version_conflicts'));
     loadTestFile(require.resolve('./task_management_scheduled_at'));
     loadTestFile(require.resolve('./task_management_removed_types'));
     loadTestFile(require.resolve('./check_registered_task_types'));
     loadTestFile(require.resolve('./kibana_discovery_service'));
     loadTestFile(require.resolve('./task_partitions'));
+    loadTestFile(require.resolve('./task_cost'));
+    loadTestFile(require.resolve('./task_event_log'));
 
     loadTestFile(require.resolve('./migrations'));
   });

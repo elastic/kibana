@@ -11,10 +11,12 @@ export const exceptionListType = t.keyof({
   detection: null,
   rule_default: null,
   endpoint: null,
+  endpoint_trusted_devices: null,
   endpoint_trusted_apps: null,
   endpoint_events: null,
   endpoint_host_isolation_exceptions: null,
   endpoint_blocklists: null,
+  endpoint_custom_yara_signatures: null,
 });
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
@@ -24,7 +26,9 @@ export enum ExceptionListTypeEnum {
   RULE_DEFAULT = 'rule_default', // rule default, cannot be shared
   ENDPOINT = 'endpoint',
   ENDPOINT_TRUSTED_APPS = 'endpoint',
+  ENDPOINT_TRUSTED_DEVICES = 'endpoint_trusted_devices',
   ENDPOINT_EVENTS = 'endpoint_events',
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS = 'endpoint_host_isolation_exceptions',
   ENDPOINT_BLOCKLISTS = 'endpoint_blocklists',
+  ENDPOINT_CUSTOM_YARA_SIGNATURES = 'endpoint_custom_yara_signatures',
 }

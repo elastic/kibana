@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { awsEC2SnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import { CloudToolbarItems } from './cloud_toolbar_items';
 import type { ToolbarProps } from './types';
@@ -22,11 +21,7 @@ export const AwsEC2ToolbarItems = (props: ToolbarProps) => {
   return (
     <>
       <CloudToolbarItems {...props} />
-      <MetricsAndGroupByToolbarItems
-        {...props}
-        metricTypes={awsEC2SnapshotMetricTypes}
-        groupByFields={ec2groupByFields}
-      />
+      <MetricsAndGroupByToolbarItems {...props} groupByFields={ec2groupByFields} />
     </>
   );
 };

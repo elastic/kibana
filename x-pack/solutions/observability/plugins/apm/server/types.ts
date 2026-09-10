@@ -52,10 +52,17 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type {
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+} from '@kbn/observability-agent-builder-plugin/server';
 import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type { SLOServerSetup, SLOServerStart } from '@kbn/slo-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -73,9 +80,12 @@ export interface APMPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
@@ -83,6 +93,7 @@ export interface APMPluginSetupDependencies {
   home?: HomeServerPluginSetup;
   ml?: MlPluginSetup;
   security?: SecurityPluginSetup;
+  slo?: SLOServerSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -100,9 +111,12 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
+  embeddable: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
+  agentBuilder?: AgentBuilderPluginStart;
   actions?: ActionsPlugin['start'];
   alerting?: AlertingServerStart;
   cloud?: undefined;
@@ -110,6 +124,7 @@ export interface APMPluginStartDependencies {
   home?: HomeServerPluginStart;
   ml?: MlPluginStart;
   security?: SecurityPluginStart;
+  slo?: SLOServerStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;

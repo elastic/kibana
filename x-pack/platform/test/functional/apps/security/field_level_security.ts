@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -21,9 +21,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('field_level_security', () => {
     before('initialize tests', async () => {
       await security.testUser.setRoles(['cluster_security_manager', 'kibana_admin']);
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); // ( data)
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/security/flstest/data'
+      ); // ( data)
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
       );
       await browser.setWindowSize(1600, 1000);
     });
@@ -123,11 +125,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData).not.to.contain('ssn');
     });
 
+    it('should support case-sensitive fields', async function () {
+      await PageObjects.security.forceLogout();
+      await PageObjects.security.login();
+      await PageObjects.settings.navigateTo();
+      await PageObjects.security.clickElasticsearchRoles();
+      await PageObjects.security.addRole('a_casesenstive_fields_role', {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['flstest'],
+              privileges: ['read', 'view_index_metadata'],
+              field_security: {
+                grant: ['customer_*', 'Customer_*'],
+                except: ['customer_region', 'Customer_region'],
+              },
+            },
+          ],
+        },
+      });
+
+      await PageObjects.common.sleep(1000);
+
+      const roleDef = await security.role.get('a_casesenstive_fields_role');
+      expect(roleDef).to.eql({
+        _transform_error: [],
+        _unrecognized_applications: [],
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            {
+              allow_restricted_indices: false,
+              field_security: {
+                except: ['customer_region', 'Customer_region'],
+                grant: ['customer_*', 'Customer_*'],
+              },
+              names: ['flstest'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: ['all'],
+            feature: {},
+            spaces: ['*'],
+          },
+        ],
+        metadata: {},
+        name: 'a_casesenstive_fields_role',
+        transient_metadata: {
+          enabled: true,
+        },
+      });
+    });
+
     after(async function () {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
       );
       await security.testUser.restoreDefaults();
     });

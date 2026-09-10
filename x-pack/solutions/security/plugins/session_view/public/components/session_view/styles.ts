@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
@@ -47,7 +47,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
     };
 
     const fakeDisabled: CSSObject = {
-      color: euiTheme.colors.disabled,
+      color: euiTheme.colors.backgroundBaseDisabled,
     };
 
     return {

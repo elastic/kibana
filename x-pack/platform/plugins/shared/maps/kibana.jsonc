@@ -17,11 +17,13 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
+      "kql",
       "lens",
       "licensing",
       "features",
       "inspector",
       "data",
+      "dataViews",
       "fieldFormats",
       "fileUpload",
       "uiActions",
@@ -31,13 +33,12 @@
       "embeddable",
       "mapsEms",
       "share",
-      "presentationUtil",
       "contentManagement"
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "customIntegrations",
-      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",
@@ -54,7 +55,8 @@
       "unifiedSearch",
       "fieldFormats",
       "esql",
-      "savedObjects"
+      "savedObjects",
+      "presentationUtil"
     ],
     "extraPublicDirs": [
       "common"

@@ -9,11 +9,13 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { RenderOptions, render } from '@testing-library/react';
-import { ComponentType, MountRendererProps, mount } from 'enzyme';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import type { ComponentType, MountRendererProps } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
-import { PropsWithChildren, ReactElement } from 'react';
-import { LensAppServices } from '../app_plugin/types';
+import type { PropsWithChildren, ReactElement } from 'react';
+import type { LensAppServices } from '@kbn/lens-common';
 
 export const renderWithProviders = (
   ui: ReactElement,

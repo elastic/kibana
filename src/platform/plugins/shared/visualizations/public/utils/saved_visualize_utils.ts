@@ -8,19 +8,22 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import { asyncMap } from '@kbn/std';
+import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
-  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { VisualizationSavedObject, Reference } from '../../common/content_management';
-import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
-import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { VisualizationSavedObject } from '../../common/content_management';
+import { saveWithConfirmation } from './saved_objects_utils';
+import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
   SerializedVis,
@@ -35,8 +38,9 @@ import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 import { visualizationsClient } from '../content_management';
-import { VisualizationSavedObjectAttributes } from '../../common';
+import type { VisualizationSavedObjectAttributes } from '../../common';
 import { urlFor } from './url_utils';
+import { getEmbeddable } from '../services';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -49,25 +53,13 @@ const getDefaults = (opts: GetVisOptions) => ({
   version: 1,
 });
 
-export function mapHitSource(
+async function mapHitSource(
   visTypes: Pick<TypesStart, 'get'>,
-  {
-    attributes,
-    id,
-    references,
-    updatedAt,
-    managed,
-  }: {
-    attributes: SavedObjectAttributes;
-    id: string;
-    references: SavedObjectReference[];
-    updatedAt?: string;
-    managed?: boolean;
-  }
+  { attributes, id, references, updatedAt, managed }: VisualizationSavedObject
 ) {
   const newAttributes: {
     id: string;
-    references: SavedObjectReference[];
+    references: Reference[];
     managed?: boolean;
     url: string;
     savedObjectType?: string;
@@ -97,18 +89,19 @@ export function mapHitSource(
     }
   }
 
-  if (!typeName || !visTypes.get(typeName as string)) {
+  const visType = typeName ? await visTypes.get(typeName) : undefined;
+  if (!typeName || !visType) {
     newAttributes.error = 'Unknown visualization type';
     return newAttributes;
   }
 
-  newAttributes.type = visTypes.get(typeName as string);
+  newAttributes.type = visType;
   newAttributes.savedObjectType = 'visualization';
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
   newAttributes.editor = { editUrl: `/edit/${id}` };
-  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
+  newAttributes.readOnly = Boolean(newAttributes.type?.disableEdit);
 
   return newAttributes;
 }
@@ -154,8 +147,8 @@ export async function findListItems(
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
-  references?: SavedObjectReference[],
-  referencesToExclude?: SavedObjectReference[]
+  references?: Reference[],
+  referencesToExclude?: Reference[]
 ) {
   const visAliases = visTypes.getAliases();
   const extensions = visAliases
@@ -170,36 +163,41 @@ export async function findListItems(
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
-  const {
-    hits: savedObjects,
-    pagination: { total },
-  } = await visualizationsClient.search(
-    {
-      text: search ? `${search}*` : undefined,
-      limit: size,
+  const embeddableService = getEmbeddable();
+
+  const { hits: savedObjects, total } = await embeddableService.getSavedObjects({
+    type: searchOption('docTypes', 'visualization'),
+    limit: size,
+    ...(search.length && { search: `${search}*` }),
+    ...(references?.length && {
       tags: {
         included: references?.map((r) => r.id),
         excluded: referencesToExclude?.map((r) => r.id),
       },
-    },
-    {
-      types: searchOption('docTypes', 'visualization'),
-      searchFields: searchOption('searchFields', 'title^3', 'description'),
-    }
-  );
+    }),
+  });
 
   return {
     total,
-    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
+    hits: await asyncMap(savedObjects, async (savedObject: SavedObjectsFindResult) => {
       const config = extensionByType[savedObject.type];
+      const { updated_at, updated_by, created_at, created_by, ...rest } = savedObject;
+      const visObject = {
+        ...rest,
+        updatedAt: updated_at,
+        createdAt: created_at,
+      } as VisualizationSavedObject;
 
       if (config) {
         return {
-          ...config.toListItem(savedObject as any),
+          // TODO: understand why this SO can take any shape based on type?
+          // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
+          // See test case titled 'uses type-specific toListItem function, if available'
+          ...config.toListItem(visObject),
           references: savedObject.references,
         };
       } else {
-        return mapHitSource(visTypes, savedObject);
+        return await mapHitSource(visTypes, visObject);
       }
     }),
   };
@@ -240,7 +238,7 @@ export async function getSavedVisualization(
   } = await visualizationsClient.get(id);
 
   if (!resp.id) {
-    throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
+    throw new SavedObjectNotFound({ type: SAVED_VIS_TYPE, id: id || '' });
   }
 
   const attributes = _.cloneDeep(resp.attributes);
@@ -305,13 +303,9 @@ export async function getSavedVisualization(
 }
 
 export async function saveVisualization(
-  savedObject: VisSavedObject,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-    copyOnSave = false,
-  }: SaveVisOptions,
+  savedObject: ISavedVis &
+    Pick<VisSavedObject, 'displayName' | 'lastSavedTitle' | 'searchSource' | 'tags' | 'version'>,
+  { confirmOverwrite = false, copyOnSave = false }: SaveVisOptions,
   services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
   },
@@ -339,7 +333,7 @@ export async function saveVisualization(
     version: savedObject.version ?? '1',
     kibanaSavedObjectMeta: {},
   };
-  let references: SavedObjectReference[] = baseReferences;
+  let references: Reference[] = baseReferences;
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -371,20 +365,15 @@ export async function saveVisualization(
   }
 
   try {
-    await checkForDuplicateTitle(
-      savedObject,
-      copyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-      services
-    );
-    const createOpt = {
-      migrationVersion: savedObject.migrationVersion,
-      references: extractedRefs.references,
-    };
-
     const resp = confirmOverwrite
-      ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
+      ? await saveWithConfirmation(
+          attributes,
+          savedObject,
+          {
+            references: extractedRefs.references,
+          },
+          services
+        )
       : savedObject.id
       ? await visualizationsClient.update({
           id: savedObject.id,
@@ -419,4 +408,4 @@ export async function saveVisualization(
 }
 
 export const shouldShowMissedDataViewError = (error: Error): error is SavedObjectNotFound =>
-  error instanceof SavedObjectNotFound && error.savedObjectType === 'data view';
+  error instanceof SavedObjectNotFound && error.savedObjectType === DATA_VIEW_SAVED_OBJECT_TYPE;

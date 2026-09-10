@@ -21,9 +21,9 @@ export function ProgressIcon({ state }) {
   if (state === PROGRESS_STATES.WAITING) {
     return <EuiLoadingSpinner size="m" />;
   } else if (state === PROGRESS_STATES.DONE) {
-    return <EuiIcon type="check" size="m" color="primary" />;
+    return <EuiIcon aria-hidden={true} type="check" size="m" color="primary" />;
   } else if (state === PROGRESS_STATES.ERROR) {
-    return <EuiIcon type="cross" size="m" color="danger" />;
+    return <EuiIcon aria-hidden={true} type="cross" size="m" color="danger" />;
   }
 }
 

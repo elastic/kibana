@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
 // Kibana Platform.
-export { ExpressionsServerPlugin as Plugin };
+export type { ExpressionsServerPlugin as Plugin };
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ExpressionsServerPlugin } = await import('./plugin');
   return new ExpressionsServerPlugin(initializerContext);

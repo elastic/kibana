@@ -7,45 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT UI. All 7 tests interact with real browser pages
+ * (Discover and Dashboard) and assert on session lifecycle events via a global variable injected
+ * by the `session_notifications` fixture plugin — browser execution is mandatory.
+ *
+ * Migration notes:
+ * - The `session_notifications` fixture plugin
+ *   (src/platform/test/plugin_functional/plugins/session_notifications) exposes
+ *   `window.__SESSION_NOTIFICATIONS_PLUGIN__` to track session IDs. This plugin must remain
+ *   registered (or its window-global approach re-implemented) for the Scout run; alternatively,
+ *   expose session tracking through a Kibana API endpoint to avoid the browser.execute pattern.
+ * - The Discover sub-suite has a shared `before` that navigates and selects an index pattern;
+ *   each `it` also implicitly depends on the state left by the previous one (field added in test 3,
+ *   filter added in test 4). Decouple each case with its own navigation + `clearSessionIds` call
+ *   so Playwright can retry them independently.
+ * - The Dashboard sub-suite loads ES archiver data and a saved dashboard; bring those fixtures
+ *   into the Scout server config and use `kibanaServer` / `esArchiver` Scout equivalents for
+ *   setup/teardown.
+ * - `browser.execute()` maps to Playwright's `page.evaluate()`; the Scout `page` fixture covers
+ *   this pattern directly.
+ */
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { SessionNotificationsGlobalApi } from '@kbn/session-notifications-plugin/public';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const { common, header, dashboard, discover, unifiedFieldList } = getPageObjects([
+  const { common, dashboard, discover, unifiedFieldList } = getPageObjects([
     'common',
-    'header',
     'dashboard',
     'discover',
     'unifiedFieldList',
   ]);
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const browser = getService('browser');
 
-  const getSessionIds = async () => {
-    const sessionsBtn = await testSubjects.find('showSessionsButton');
-    await sessionsBtn.click();
-    const toast = await toasts.getElementByIndex(1);
-    const sessionIds = await toast.getVisibleText();
-    await toasts.dismissAll();
-    return sessionIds.split(',');
-  };
+  // The __SESSION_NOTIFICATIONS_PLUGIN__ global variable is defined in
+  // src/platform/test/plugin_functional/plugins/session_notifications/public/plugin.tsx
+  // specifically to allow these tests to access the session IDs tracked by the plugin
 
-  const clearSessionIds = async () => {
-    await testSubjects.click('clearSessionsButton');
-    await toasts.dismissAll();
-  };
+  const getSessionIds = () =>
+    browser.execute(() => {
+      const windowWithGlobalApi = window as {
+        __SESSION_NOTIFICATIONS_PLUGIN__?: SessionNotificationsGlobalApi;
+      };
+
+      return windowWithGlobalApi.__SESSION_NOTIFICATIONS_PLUGIN__?.getSessionIds() ?? [];
+    });
+
+  const clearSessionIds = () =>
+    browser.execute(() => {
+      const windowWithGlobalApi = window as {
+        __SESSION_NOTIFICATIONS_PLUGIN__?: SessionNotificationsGlobalApi;
+      };
+
+      windowWithGlobalApi.__SESSION_NOTIFICATIONS_PLUGIN__?.clearSessionIds();
+    });
 
   describe('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
+        await discover.selectIndexPattern('All logs');
+        await discover.waitUntilTabIsLoaded();
         await clearSessionIds();
-        await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {
@@ -54,7 +84,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('Starts on index pattern select', async () => {
         await discover.selectIndexPattern('shakespeare');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const sessionIds = await getSessionIds();
 
         expect(sessionIds.length).to.be(1);
@@ -62,7 +92,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('Starts on a refresh', async () => {
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
@@ -70,14 +100,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('Starts a new session on sort', async () => {
         await unifiedFieldList.clickFieldListItemAdd('speaker');
         await discover.clickFieldSort('speaker', 'Sort A-Z');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
 
       it('Starts a new session on filter change', async () => {
         await filterBar.addFilter({ field: 'line_number', operation: 'is', value: '4.3.108' });
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
@@ -94,7 +124,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         );
         await common.navigateToApp('dashboard');
         await dashboard.loadSavedDashboard('dashboard with filter');
-        await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {
@@ -115,7 +144,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('starts a session on refresh', async () => {
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });
@@ -130,7 +159,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           },
           async () => {
             await browser.refresh();
-            await header.waitUntilLoadingHasFinished();
+            await discover.waitUntilTabIsLoaded();
             await clearSessionIds();
           }
         );

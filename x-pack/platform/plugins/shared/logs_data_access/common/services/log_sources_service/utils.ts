@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogSource } from './types';
+import type { LogSource } from './types';
 
 export const flattenLogSources = (logSources: LogSource[]) =>
   logSources.map((source) => source.indexPattern).join(',');

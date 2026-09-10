@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 
 import { UseField, CheckBoxField, FormDataProvider } from '../../../shared_imports';
-import { NormalizedField } from '../../../types';
+import type { NormalizedField } from '../../../types';
 import { getFieldConfig } from '../../../lib';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { AnalyzerParameter } from './analyzer_parameter';

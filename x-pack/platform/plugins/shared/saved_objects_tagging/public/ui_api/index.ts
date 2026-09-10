@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { TagsCapabilities } from '../../common';
-import { ITagsCache, ITagInternalClient } from '../services';
-import { StartServices } from '../types';
+import type { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { TagsCapabilities } from '../../common';
+import type { ITagsCache, ITagInternalClient } from '../services';
+import type { StartServices } from '../types';
 import {
   getTagIdsFromReferences,
   replaceTagReferences,
   convertTagNameToId,
   getTag,
+  tagIdToReference,
 } from '../../common';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
@@ -50,6 +51,7 @@ export const getUiApi = ({
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
     getTagIdsFromReferences,
+    tagIdToReference,
     getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
     updateTagsReferences: replaceTagReferences,
     getTag: (tagId: string) => getTag(tagId, cache.getState()),

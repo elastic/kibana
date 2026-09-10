@@ -177,6 +177,7 @@ export function ServiceOverviewDependenciesTable({
       showPerPageOptions={showPerPageOptions}
       initialPageSize={5}
       showSparkPlots={showSparkPlots}
+      saveTableOptionsToUrl={false}
     />
   );
 }

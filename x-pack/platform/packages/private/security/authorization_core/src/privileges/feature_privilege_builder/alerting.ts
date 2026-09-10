@@ -26,12 +26,53 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getExecutionLog',
     'getActionErrorLog',
     'find',
+    'findMutedAlerts',
     'getRuleExecutionKPI',
     'getBackfill',
     'findBackfill',
     'findGaps',
+    'bulkEditParams',
+    'getGapAutoFillScheduler',
+    'findGapAutoFillSchedulerLogs',
+    'getHistory',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
+};
+
+const manualRunOperations: Record<AlertingEntity, string[]> = {
+  rule: ['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
+  alert: [],
+};
+
+const enableOperations: Record<AlertingEntity, string[]> = {
+  rule: ['enable', 'disable', 'bulkEnable', 'bulkDisable'],
+  alert: [],
+};
+
+const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
+  rule: [
+    'getGapAutoFillScheduler',
+    'findGapAutoFillSchedulerLogs',
+    'createGapAutoFillScheduler',
+    'updateGapAutoFillScheduler',
+    'deleteGapAutoFillScheduler',
+    'find',
+    'findBackfill',
+    'scheduleBackfill',
+  ],
+  alert: [],
+};
+
+// Covers both per-alert snooze/unsnooze and muteAlert/unmuteAlert
+const muteAlertsOperations: Record<AlertingEntity, string[]> = {
+  rule: ['muteAlert', 'unmuteAlert', 'snoozeAlert', 'unsnoozeAlert', 'findMutedAlerts'],
+  alert: [],
+};
+
+// Read-only access to per-alert mute/snooze state, without the ability to mute/unmute.
+const readMutedAlertsOperations: Record<AlertingEntity, string[]> = {
+  rule: ['findMutedAlerts'],
+  alert: [],
 };
 
 const writeOperations: Record<AlertingEntity, string[]> = {
@@ -40,22 +81,17 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'delete',
     'update',
     'updateApiKey',
-    'enable',
-    'disable',
     'muteAll',
     'unmuteAll',
     'muteAlert',
     'unmuteAlert',
     'snooze',
+    'unsnooze',
+    'snoozeAlert',
+    'unsnoozeAlert',
     'bulkEdit',
     'bulkDelete',
-    'bulkEnable',
-    'bulkDisable',
-    'unsnooze',
     'runSoon',
-    'scheduleBackfill',
-    'deleteBackfill',
-    'fillGaps',
   ],
   alert: ['update'],
 };
@@ -84,11 +120,23 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
 
     const getPrivilegesForEntity = (entity: AlertingEntity) => {
       const all = get(privilegeDefinition.alerting, `${entity}.all`) ?? [];
+      const enable = get(privilegeDefinition.alerting, `${entity}.enable`) ?? [];
+      const manualRun = get(privilegeDefinition.alerting, `${entity}.manual_run`) ?? [];
+      const manageRuleSettings =
+        get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
+      const muteAlerts = get(privilegeDefinition.alerting, `${entity}.mute_alerts`) ?? [];
+      const readMutedAlerts =
+        get(privilegeDefinition.alerting, `${entity}.read_muted_alerts`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
         ...getAlertingPrivilege(allOperations[entity], all, entity),
         ...getAlertingPrivilege(readOperations[entity], read, entity),
+        ...getAlertingPrivilege(enableOperations[entity], enable, entity),
+        ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
+        ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),
+        ...getAlertingPrivilege(muteAlertsOperations[entity], muteAlerts, entity),
+        ...getAlertingPrivilege(readMutedAlertsOperations[entity], readMutedAlerts, entity),
       ]);
     };
 

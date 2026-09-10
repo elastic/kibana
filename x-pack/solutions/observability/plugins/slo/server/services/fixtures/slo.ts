@@ -5,30 +5,25 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  ALL_VALUE,
+import type {
   CreateSLOParams,
   HistogramIndicator,
-  sloDefinitionSchema,
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_MODEL_VERSION, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
+import type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
-  Duration,
-  DurationUnit,
   Indicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
   SLODefinition,
-  StoredSLODefinition,
 } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import { Duration, DurationUnit } from '../../domain/models';
 import { twoMinute } from './duration';
 import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
 
@@ -167,6 +162,7 @@ const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updated
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
     preventInitialBackfill: false,
+    preventCrossProjectSearch: false,
   },
   tags: ['critical', 'k8s'],
   enabled: true,
@@ -189,15 +185,6 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
   ...params,
 });
 
-export const aStoredSLO = (slo: SLODefinition): SavedObject<StoredSLODefinition> => {
-  return {
-    id: slo.id,
-    attributes: sloDefinitionSchema.encode(slo),
-    type: SO_SLO_TYPE,
-    references: [],
-  };
-};
-
 export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition => {
   const now = new Date();
   return cloneDeep({
@@ -209,6 +196,7 @@ export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition =>
     createdBy: 'irrelevant',
     updatedBy: 'irrelevant',
     version: SLO_MODEL_VERSION,
+    enabled: true,
     ...params,
   });
 };

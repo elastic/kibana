@@ -6,17 +6,21 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { EnrichedDeprecationInfo } from '../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
+import { getOverviewBackTarget } from '../../lib/breadcrumbs';
 import { uiMetricService, UIM_ES_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { getEsDeprecationError } from '../../lib/get_es_deprecation_error';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
@@ -163,38 +167,39 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
 
   return (
     <div data-test-subj="esDeprecationsContent">
-      <EuiPageHeader
-        pageTitle={i18nTexts.pageTitle}
-        description={
-          <>
-            {i18nTexts.pageDescription} {getBatchReindexLink(docLinks)}
-          </>
-        }
-      >
-        <>
-          {remoteClusters && remoteClusters.length > 0 && (
-            <>
-              <EuiCallOut
-                title={i18nTexts.remoteClustersDetectedTitle}
-                color="warning"
-                iconType="question"
-                data-test-subj="remoteClustersWarningCallout"
-              >
-                <p>
-                  {i18nTexts.getRemoteClustersDetectedDescription(remoteClusters.length)}{' '}
-                  <RemoteClustersAppLink />
-                </p>
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
-          )}
+      <AppHeader
+        title={i18nTexts.pageTitle}
+        description={i18nTexts.pageDescription}
+        back={getOverviewBackTarget(history)}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+      <EuiText size="s">
+        <p>{getBatchReindexLink(docLinks)}</p>
+      </EuiText>
+      <EuiSpacer />
 
-          <DeprecationCount
-            totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
-            totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
+      {remoteClusters && remoteClusters.length > 0 && (
+        <>
+          <KbnWarningCallout
+            announceOnMount={false}
+            title={i18nTexts.remoteClustersDetectedTitle}
+            data-test-subj="remoteClustersWarningCallout"
+            text={
+              <p>
+                {i18nTexts.getRemoteClustersDetectedDescription(remoteClusters.length)}{' '}
+                <RemoteClustersAppLink />
+              </p>
+            }
           />
+          <EuiSpacer />
         </>
-      </EuiPageHeader>
+      )}
+
+      <DeprecationCount
+        totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
+        totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
+      />
 
       <EuiSpacer size="l" />
 

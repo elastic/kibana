@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { CertResult, SyntheticsParams } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import { createReducer } from 'redux-toolkit-v1';
+import type { CertResult, SyntheticsParams } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import { getCertsListAction } from './actions';
 
 export interface CertsListState {

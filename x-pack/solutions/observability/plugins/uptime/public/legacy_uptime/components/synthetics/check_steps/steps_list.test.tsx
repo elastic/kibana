@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { JourneyStep } from '../../../../../common/runtime_types/ping';
+import type { JourneyStep } from '../../../../../common/runtime_types/ping';
 import { StepsList } from './steps_list';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';

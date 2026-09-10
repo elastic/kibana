@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
+import type { Criteria } from '@elastic/eui';
 import {
   Comparators,
   EuiBasicTable,
-  type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiText,
-  Criteria,
+  EuiToolTip,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
-import { ClusterHealth } from '../clusters_health';
+import { ClusterHealth, type ClusterHealthStatus } from '../clusters_health';
 import { LOCAL_CLUSTER_KEY } from '../local_cluster';
 
 function getInitialExpandedRow(clusters: Record<string, estypes.ClusterDetails>) {
@@ -31,7 +33,7 @@ function getInitialExpandedRow(clusters: Record<string, estypes.ClusterDetails>)
 
 interface ClusterItem {
   name: string;
-  status: string;
+  status: ClusterHealthStatus;
   responseTime?: number;
 }
 
@@ -62,7 +64,7 @@ export function ClustersTable({ clusters }: Props) {
         name: key,
         status: clusters[key].status,
         responseTime: clusters[key].took,
-      };
+      } as ClusterItem;
     });
   }, [clusters]);
 
@@ -73,22 +75,24 @@ export function ClustersTable({ clusters }: Props) {
         defaultMessage: 'Name',
       }),
       render: (name: string) => {
+        const label =
+          name in expandedRows
+            ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
+                defaultMessage: 'Collapse table row to hide cluster details',
+              })
+            : i18n.translate('inspector.requests.clusters.table.expandRow', {
+                defaultMessage: 'Expand table row to view cluster details',
+              });
         return (
           <>
-            <EuiButtonIcon
-              data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
-              onClick={() => toggleDetails(name)}
-              aria-label={
-                name in expandedRows
-                  ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
-                      defaultMessage: 'Collapse table row to hide cluster details',
-                    })
-                  : i18n.translate('inspector.requests.clusters.table.expandRow', {
-                      defaultMessage: 'Expand table row to view cluster details',
-                    })
-              }
-              iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
-            />
+            <EuiToolTip content={label} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
+                onClick={() => toggleDetails(name)}
+                aria-label={label}
+                iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
+              />
+            </EuiToolTip>
             <EuiText size="xs" color="subdued">
               {name === LOCAL_CLUSTER_KEY
                 ? i18n.translate('inspector.requests.clusters.table.localClusterDisplayName', {
@@ -107,7 +111,7 @@ export function ClustersTable({ clusters }: Props) {
       name: i18n.translate('inspector.requests.clusters.table.statusLabel', {
         defaultMessage: 'Status',
       }),
-      render: (status: string) => {
+      render: (status: ClusterHealthStatus) => {
         return <ClusterHealth status={status} />;
       },
       sortable: items.length > 1,
@@ -134,6 +138,9 @@ export function ClustersTable({ clusters }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('inspector.requests.clusters.table.caption', {
+        defaultMessage: 'Cluster details',
+      })}
       items={
         sortField
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))

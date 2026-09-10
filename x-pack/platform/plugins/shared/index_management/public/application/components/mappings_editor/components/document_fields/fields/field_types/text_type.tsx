@@ -6,19 +6,15 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiDualRange, EuiFormRow } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { NormalizedField, Field as FieldType } from '../../../../types';
-import {
-  UseField,
-  UseMultiFields,
-  FieldHook,
-  FormDataProvider,
-  RangeField,
-} from '../../../../shared_imports';
+import type { NormalizedField, Field as FieldType } from '../../../../types';
+import type { FieldHook } from '../../../../shared_imports';
+import { UseField, UseMultiFields, FormDataProvider, RangeField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
@@ -207,23 +203,22 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                     formData.index_options !== 'offsets' && (
                       <>
                         <EuiSpacer size="s" />
-                        <EuiCallOut
+                        <KbnDangerCallout
+                          announceOnMount
                           title={i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
                             {
                               defaultMessage: 'Positions not enabled.',
                             }
                           )}
-                          color="danger"
-                          iconType="warning"
-                        >
-                          <p>
-                            {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
+                          text={i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
+                            {
                               defaultMessage:
                                 'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
-                            })}
-                          </p>
-                        </EuiCallOut>
+                            }
+                          )}
+                        />
                       </>
                     )}
                 </>

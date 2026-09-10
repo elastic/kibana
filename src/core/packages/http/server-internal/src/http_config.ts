@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'node:fs';
 import { EOL, hostname } from 'node:os';
 import url, { URL } from 'node:url';
 import type { Duration } from 'moment';
-import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { IHttpConfig, SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
+import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { IHttpConfig } from '@kbn/server-http-tools';
+import { SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
-import { CspConfig, CspConfigType } from './csp';
-import { ExternalUrlConfig } from './external_url';
+import type { CspConfigType } from './csp';
+import { CspConfig } from './csp';
+import type { ExternalUrlConfig } from './external_url';
 import {
   parseRawSecurityResponseHeadersConfig,
   securityResponseHeadersSchema,
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
-import { PermissionsPolicyConfigType } from './permissions_policy';
+import type { PermissionsPolicyConfigType } from './permissions_policy';
 import { type RateLimiterConfig, rateLimiterConfigSchema } from './rate_limiter';
 
 const SECOND = 1000;
@@ -38,6 +42,10 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 
 // The lower-case set of response headers which are forbidden within `customResponseHeaders`.
 const RESPONSE_HEADER_DENY_LIST = ['location', 'refresh'];
+
+// Auth schemes that may bypass kbn-xsrf (configured using `server.xsrf.allowedSchemes`).
+// Must be stateless; `basic` is excluded because browsers can cache and replay it cross-origin.
+const xsrfSchemeSchema = schema.oneOf([schema.literal('apikey'), schema.literal('bearer')]);
 
 const validHostName = () => {
   // see https://github.com/elastic/kibana/issues/139730
@@ -67,6 +75,18 @@ const configSchema = schema.object(
     name: schema.string({ defaultValue: () => validHostName() }),
     autoListen: schema.boolean({ defaultValue: true }),
     publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    selfHttp: schema.object({
+      target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
+        defaultValue: 'auto' as const,
+      }),
+      // Keep an eye on existing validation in src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts
+      // If this SSL validation starts becoming more complex we may want to share validation
+      ssl: schema.object({
+        certificateAuthorities: schema.maybe(
+          schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
+        ),
+      }),
+    }),
     basePath: schema.maybe(
       schema.string({
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
@@ -95,7 +115,7 @@ const configSchema = schema.object(
         allowCredentials: schema.boolean({ defaultValue: false }),
         allowOrigin: schema.oneOf(
           [
-            schema.arrayOf(hostURISchema, { minSize: 1 }),
+            schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 }),
             schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
           ],
           {
@@ -135,7 +155,7 @@ const configSchema = schema.object(
         defaultValue: 'http1',
       })
     ),
-    prototypeHardening: schema.boolean({ defaultValue: false }),
+    prototypeHardening: schema.boolean({ defaultValue: true }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -171,7 +191,7 @@ const configSchema = schema.object(
           schema.string({
             hostname: true,
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         )
       ),
     }),
@@ -184,9 +204,24 @@ const configSchema = schema.object(
       disableProtection: schema.boolean({ defaultValue: false }),
       allowlist: schema.arrayOf(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
-        { defaultValue: [] }
+        { defaultValue: [], maxSize: 100 }
       ),
+      // `as const` prevents the defaultValue literal from widening TypeOf<> to `string[]`.
+      allowedSchemes: offeringBasedSchema({
+        serverless: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: ['apikey', 'bearer'] as const,
+          maxSize: 2,
+        }),
+        traditional: schema.arrayOf(xsrfSchemeSchema, {
+          defaultValue: [] as const,
+          maxSize: 2,
+        }),
+      }),
     }),
+    excludeRoutes: schema.arrayOf(
+      schema.string({ validate: match(/^\//, 'must start with a slash') }),
+      { defaultValue: [], maxSize: 100 }
+    ),
     eluMonitor: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       logging: schema.object({
@@ -206,7 +241,7 @@ const configSchema = schema.object(
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
-        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [], maxSize: 100 }),
       },
       {
         validate(value) {
@@ -249,10 +284,28 @@ const configSchema = schema.object(
 
       /** This should not be configurable in serverless */
       useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
-        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
         serverless: schema.never(),
       }),
     }),
+
+    serverTiming: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
+
+    serverTimingElasticsearch: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
   },
   {
     validate: (rawConfig) => {
@@ -260,14 +313,21 @@ const configSchema = schema.object(
         return 'cannot use [rewriteBasePath] when [basePath] is not specified';
       }
 
-      if (rawConfig.publicBaseUrl) {
-        const parsedUrl = url.parse(rawConfig.publicBaseUrl);
+      const parsedUrl = rawConfig.publicBaseUrl && url.parse(rawConfig.publicBaseUrl);
+      if (parsedUrl) {
         if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
           return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
         }
         if (parsedUrl.path !== (rawConfig.basePath ?? '/')) {
           return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.path} !== ${rawConfig.basePath}`;
         }
+      }
+
+      if (
+        rawConfig.selfHttp.ssl.certificateAuthorities !== undefined &&
+        (rawConfig.selfHttp.target !== 'auto' || !parsedUrl || parsedUrl.protocol !== 'https:')
+      ) {
+        return '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS';
       }
 
       if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
@@ -346,6 +406,10 @@ export class HttpConfig implements IHttpConfig {
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public publicBaseUrl?: string;
+  public selfHttp: {
+    target: 'auto' | 'local';
+    ssl: { certificateAuthorities?: string[] };
+  };
   public rewriteBasePath: boolean;
   public cdn: CdnConfig;
   public ssl: SslConfig;
@@ -357,7 +421,13 @@ export class HttpConfig implements IHttpConfig {
   public csp: ICspConfig;
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
-  public xsrf: { disableProtection: boolean; allowlist: string[] };
+  public xsrf: {
+    disableProtection: boolean;
+    allowlist: string[];
+    // Literal union, not `string[]`: adding a scheme without updating consumers is a compile error.
+    allowedSchemes: Array<'apikey' | 'bearer'>;
+  };
+  public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
@@ -367,6 +437,8 @@ export class HttpConfig implements IHttpConfig {
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
   public rateLimiter: RateLimiterConfig;
+  public serverTiming: boolean;
+  public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -402,6 +474,14 @@ export class HttpConfig implements IHttpConfig {
     this.protocol = rawHttpConfig.protocol;
     this.basePath = rawHttpConfig.basePath;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
+    this.selfHttp = {
+      target: rawHttpConfig.selfHttp.target,
+      ssl: {
+        certificateAuthorities: readCertificateAuthorities(
+          rawHttpConfig.selfHttp.ssl?.certificateAuthorities
+        ),
+      },
+    };
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.payloadTimeout = rawHttpConfig.payloadTimeout;
@@ -413,9 +493,12 @@ export class HttpConfig implements IHttpConfig {
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
+    this.excludeRoutes = rawHttpConfig.excludeRoutes;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
     this.rateLimiter = rawHttpConfig.rateLimiter;
+    this.serverTiming = rawHttpConfig.serverTiming;
+    this.serverTimingElasticsearch = rawHttpConfig.serverTimingElasticsearch;
 
     // defaults to `true` if not set through config.
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
@@ -424,6 +507,19 @@ export class HttpConfig implements IHttpConfig {
     this.oas = rawHttpConfig.oas;
   }
 }
+
+const readCertificateAuthorities = (
+  certificateAuthorities: string | string[] | undefined
+): string[] | undefined => {
+  if (!certificateAuthorities) {
+    return undefined;
+  }
+
+  const paths = Array.isArray(certificateAuthorities)
+    ? certificateAuthorities
+    : [certificateAuthorities];
+  return paths.map((path) => readFileSync(path, 'utf8'));
+};
 
 const convertHeader = (entry: any): string => {
   return typeof entry === 'object' ? JSON.stringify(entry) : String(entry);

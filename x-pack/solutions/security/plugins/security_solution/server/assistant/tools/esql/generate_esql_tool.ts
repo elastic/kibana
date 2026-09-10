@@ -7,7 +7,7 @@
 
 import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { HumanMessage } from '@langchain/core/messages';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
@@ -22,7 +22,7 @@ export type GenerateEsqlParams = Require<
 const TOOL_NAME = 'GenerateESQLTool';
 
 const toolDetails = {
-  id: 'gnerate-esql-tool',
+  id: 'generate-esql-tool',
   name: TOOL_NAME,
   // note: this description is overwritten when `getTool` is called
   // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
@@ -43,7 +43,6 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
       inference != null &&
       connectorId != null &&
       assistantContext != null &&
-      assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration &&
       createLlmInstance != null
     );
   },

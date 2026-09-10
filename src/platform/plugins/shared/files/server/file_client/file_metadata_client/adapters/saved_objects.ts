@@ -14,9 +14,10 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
+import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 
-import { FindFileArgs } from '../../../file_service/file_action_types';
+import type { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
 import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
 import type {
@@ -70,7 +71,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
   async bulkGet({ ids, throwIfNotFound }: BulkGetArg): Promise<Array<FileDescriptor | null>> {
     const result = await this.soClient.bulkGet(ids.map((id) => ({ id, type: this.soType })));
     return result.saved_objects.map((so) => {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         if (throwIfNotFound) {
           throw new Error(`File [${so.id}] not found`);
         }

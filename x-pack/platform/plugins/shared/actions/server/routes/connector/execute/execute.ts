@@ -49,6 +49,9 @@ export const executeConnectorRoute = (
             description: 'Indicates a successful call.',
             body: () => connectorResponseSchemaV1,
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },
@@ -62,11 +65,15 @@ export const executeConnectorRoute = (
           return res.badRequest({ body: 'Execution of system action is not allowed' });
         }
 
+        const abortController = new AbortController();
+        req.events.aborted$.subscribe(() => abortController.abort());
+
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,
           actionId: id,
           source: asHttpRequestExecutionSource(req),
           relatedSavedObjects: [],
+          signal: abortController.signal,
         });
 
         return body

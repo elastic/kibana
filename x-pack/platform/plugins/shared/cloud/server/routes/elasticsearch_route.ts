@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
-import { ElasticsearchConfigType } from '../../common/types';
+import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchConfigType } from '../../common/types';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../../common/constants';
 
 export function setElasticsearchRoute({

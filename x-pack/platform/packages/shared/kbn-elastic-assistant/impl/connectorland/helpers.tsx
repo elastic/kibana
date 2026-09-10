@@ -11,9 +11,9 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { PRECONFIGURED_CONNECTOR } from './translations';
-import { AIConnector } from './connector_selector';
+import type { AIConnector } from './connector_selector';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 export enum OpenAiProviderType {
@@ -87,16 +87,21 @@ export const getConnectorTypeTitle = (
     return null;
   }
 
-  const actionType = connector.isPreconfigured
-    ? PRECONFIGURED_CONNECTOR
-    : getGenAiConfig(connector)?.apiProvider ??
-      getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+  const actionType =
+    connector.isPreconfigured || ('isEis' in connector && connector.isEis)
+      ? PRECONFIGURED_CONNECTOR
+      : getGenAiConfig(connector)?.apiProvider ??
+        getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
 
   return actionType;
 };
 
 export const isElasticManagedLlmConnector = (
   connector:
-    | { actionTypeId: AIConnector['actionTypeId']; isPreconfigured: AIConnector['isPreconfigured'] }
+    | {
+        actionTypeId: AIConnector['actionTypeId'];
+        isPreconfigured?: boolean;
+        isEis?: boolean;
+      }
     | undefined
-) => connector?.actionTypeId === '.inference' && connector?.isPreconfigured;
+) => (connector?.actionTypeId === '.inference' && connector?.isPreconfigured) || connector?.isEis;

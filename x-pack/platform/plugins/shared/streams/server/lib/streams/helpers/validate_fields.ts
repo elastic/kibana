@@ -5,38 +5,61 @@
  * 2.0.
  */
 
+import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { transpileIngestPipeline } from '@kbn/streamlang';
+import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import {
-  FieldDefinition,
-  Streams,
+  getRoot,
   isRoot,
   keepFields,
+  LOGS_ECS_STREAM_NAME,
   namespacePrefixes,
 } from '@kbn/streams-schema';
-import { MalformedFieldsError } from '../errors/malformed_fields_error';
+import { createStreamlangResolverOptions } from '../resolvers';
+import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
+import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
 export function validateAncestorFields({
   ancestors,
   fields,
+  streamName,
 }: {
   ancestors: Streams.WiredStream.Definition[];
   fields: FieldDefinition;
+  streamName: string;
 }) {
-  for (const ancestor of ancestors) {
-    for (const fieldName in fields) {
-      if (!Object.hasOwn(fields, fieldName)) {
-        continue;
+  const isEcsStream = getRoot(streamName) === LOGS_ECS_STREAM_NAME;
+
+  for (const fieldName in fields) {
+    if (!Object.hasOwn(fields, fieldName)) {
+      continue;
+    }
+
+    for (const ancestor of ancestors) {
+      const ancestorField = ancestor.ingest.wired.fields[fieldName];
+      if (ancestorField) {
+        const fieldType = fields[fieldName].type;
+        // Check for incompatible type changes
+        // Allow: parent has no type (doc-only) → child can set any type
+        if (fieldType !== undefined && ancestorField.type && ancestorField.type !== fieldType) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+          );
+        }
       }
-      if (
-        Object.entries(ancestor.ingest.wired.fields).some(
-          ([ancestorFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
-        )
-      ) {
-        throw new MalformedFieldsError(
-          `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
-        );
-      }
+    }
+
+    // System fields (e.g. `stream.name`) are managed by Streams itself and have no
+    // user-defined ES mapping, so the OTel naming rules don't apply to them.
+    if (fields[fieldName].type === 'system') {
+      continue;
+    }
+
+    // Skip OTEL namespace validation for logs.ecs streams which use ECS field conventions.
+    // Run this even when there are no ancestors so root streams are validated too.
+    if (!isEcsStream) {
       if (
         !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
         !keepFields.includes(fieldName)
@@ -49,7 +72,7 @@ export function validateAncestorFields({
         const prefixedName = `${prefix}${fieldName}`;
         if (
           Object.hasOwn(fields, prefixedName) ||
-          Object.hasOwn(ancestor.ingest.wired.fields, prefixedName)
+          ancestors.some((ancestor) => Object.hasOwn(ancestor.ingest.wired.fields, prefixedName))
         ) {
           throw new MalformedFieldsError(
             `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
@@ -79,6 +102,53 @@ export function validateSystemFields(definition: Streams.WiredStream.Definition)
   }
 }
 
+export function validateClassicFields(definition: Streams.ClassicStream.Definition) {
+  if (
+    Object.values(definition.ingest.classic.field_overrides || {}).some(
+      (field) => field.type === 'system'
+    )
+  ) {
+    throw new MalformedFieldsError(
+      `Stream ${definition.name} is not allowed to have system fields`
+    );
+  }
+}
+
+export async function validateSimulation(
+  definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
+  esClient: ElasticsearchClient
+) {
+  const processors =
+    'processors' in definition.ingest.processing
+      ? definition.ingest.processing.processors
+      : (
+          await transpileIngestPipeline(
+            definition.ingest.processing,
+            undefined,
+            createStreamlangResolverOptions(esClient)
+          )
+        ).processors;
+
+  if (processors.length === 0) {
+    return;
+  }
+
+  const simulationBody: IngestSimulateRequest = {
+    docs: [
+      {
+        _source: {},
+      },
+    ],
+    pipeline: {
+      processors,
+    },
+  };
+  const simulationResult = await executePipelineSimulation(esClient, simulationBody);
+  if (simulationResult.status === 'failure') {
+    throw new MalformedFieldsError(simulationResult.error.message);
+  }
+}
+
 export function validateDescendantFields({
   descendants,
   fields,
@@ -88,11 +158,15 @@ export function validateDescendantFields({
 }) {
   for (const descendant of descendants) {
     for (const fieldName in fields) {
+      if (!Object.hasOwn(fields, fieldName)) {
+        continue;
+      }
+      const fieldType = fields[fieldName].type;
       if (
-        Object.hasOwn(fields, fieldName) &&
+        fieldType !== undefined &&
         Object.entries(descendant.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && descendantFieldName === fieldName
+            descendantFieldName === fieldName && attr.type !== undefined && attr.type !== fieldType
         )
       ) {
         throw new MalformedFieldsError(

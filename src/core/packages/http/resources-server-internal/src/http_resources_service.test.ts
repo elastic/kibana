@@ -11,7 +11,8 @@ import type { RouteConfig } from '@kbn/core-http-server';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
-import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
+import type { PrebootDeps, SetupDeps } from './http_resources_service';
+import { HttpResourcesService } from './http_resources_service';
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import {
   createCoreRequestHandlerContextMock,
@@ -133,6 +134,42 @@ describe('HttpResources service', () => {
               }
             );
           });
+
+          it('merges Set-Cookie from rendering with caller-provided headers', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCoreApp({ headers: { 'x-extra': 'yes' } });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            expect(responseFactory.ok).toHaveBeenCalledWith(
+              expect.objectContaining({
+                headers: expect.objectContaining({
+                  'set-cookie': expect.arrayContaining([expect.stringContaining('KBN_LOCALE=')]),
+                  'x-extra': 'yes',
+                }),
+              })
+            );
+          });
+
+          it('preserves both KBN_LOCALE and a caller-provided set-cookie', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCoreApp({ headers: { 'set-cookie': 'foo=bar' } });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            const { headers } = (responseFactory.ok as jest.Mock).mock.calls[0][0];
+            const cookies: string[] = Array.isArray(headers['set-cookie'])
+              ? headers['set-cookie']
+              : [headers['set-cookie']];
+            expect(cookies.some((c: string) => c.includes('KBN_LOCALE='))).toBe(true);
+            expect(cookies.some((c: string) => c.includes('foo=bar'))).toBe(true);
+          });
         });
 
         describe('renderAnonymousCoreApp', () => {
@@ -154,6 +191,23 @@ describe('HttpResources service', () => {
                 isAnonymousPage: true,
               }
             );
+          });
+
+          it('preserves both KBN_LOCALE and a caller-provided set-cookie', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderAnonymousCoreApp({ headers: { 'set-cookie': 'foo=bar' } });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            const { headers } = (responseFactory.ok as jest.Mock).mock.calls[0][0];
+            const cookies: string[] = Array.isArray(headers['set-cookie'])
+              ? headers['set-cookie']
+              : [headers['set-cookie']];
+            expect(cookies.some((c: string) => c.includes('KBN_LOCALE='))).toBe(true);
+            expect(cookies.some((c: string) => c.includes('foo=bar'))).toBe(true);
           });
         });
 

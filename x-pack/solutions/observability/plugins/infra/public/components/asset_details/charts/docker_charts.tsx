@@ -27,7 +27,7 @@ interface Props extends MetricsChartsFields {
 const FRAGMENT_BASE = 'key-metrics';
 
 export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
+  ({ entityId, dataView, dateRange, metric, onShowAll }, ref) => {
     const { charts } = useDockerContainerPageViewMetricsCharts({
       metric,
       metricsDataViewId: dataView?.id,
@@ -37,6 +37,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
         title={
           <TitleWithTooltip
             title={CONTAINER_METRIC_GROUP_TITLES[metric]}
+            data-test-subj={`infraAssetDetailsDockerChartsSection${metric}Title`}
             tooltipContent={
               <EuiText size="xs">
                 <FormattedMessage
@@ -45,7 +46,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
                   values={{
                     link: (
                       <EuiLink
-                        data-test-subj="infraAssetDetailsViewContainerMetricsDocumentationLink"
+                        data-test-subj={`infraAssetDetailsDockerChartsSection${metric}DocumentationLink`}
                         href={`${CONTAINER_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
                         className={cx({
@@ -101,8 +102,9 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
               id={chart.id}
               key={chart.id}
               lensAttributes={chart}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
+              dataView={dataView}
               queryField={findInventoryFields('container').id}
             />
           ))}

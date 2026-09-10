@@ -29,29 +29,31 @@ const INTERVAL = '1m';
 export class FleetMetricsTask {
   private taskManager?: TaskManagerStartContract;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private esClient?: ElasticsearchClient;
 
   constructor(
     taskManager: TaskManagerSetupContract,
-    fetchAgentMetrics: (abortController: AbortController) => Promise<AgentMetrics | undefined>
+    fetchAgentMetrics: (signal: AbortSignal) => Promise<AgentMetrics | undefined>
   ) {
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          signal,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          signal: AbortSignal;
+        }) => {
           return {
             run: async () => {
               return withSpan({ name: TYPE, type: 'metrics' }, () =>
-                this.runTask(taskInstance, () => fetchAgentMetrics(this.abortController))
+                this.runTask(taskInstance, () => fetchAgentMetrics(signal))
               );
             },
-
-            cancel: async () => {
-              this.abortController.abort('task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

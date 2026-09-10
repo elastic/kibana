@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TableVisParams } from '../../../common';
+import type { TableVisParams } from '../../../common';
 
 export const usePagination = (visParams: TableVisParams, rowCount: number) => {
   const [pagination, setPagination] = useState({

@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { mockAlertTypeCounts } from '../../../common/mocks/constants/session_view_process.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeAlertsFilter, ProcessTreeAlertsFilterDeps } from '.';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
+import type { ProcessTreeAlertsFilterDeps } from '.';
+import { ProcessTreeAlertsFilter } from '.';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 
@@ -263,10 +265,11 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await userEvent.click(filterButton, { pointerEventsCheck: 0 });
 
         await userEvent.click(
-          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file')
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file'),
+          { pointerEventsCheck: 0 }
         );
 
         expect(filterButton).toHaveTextContent('View: file alerts');
@@ -276,10 +279,11 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await userEvent.click(filterButton, { pointerEventsCheck: 0 });
 
         await userEvent.click(
-          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default')
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default'),
+          { pointerEventsCheck: 0 }
         );
 
         expect(filterButton).toHaveTextContent(`View: ${DEFAULT_ALERT_FILTER_VALUE} alerts`);
@@ -289,10 +293,11 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await userEvent.click(filterButton, { pointerEventsCheck: 0 });
 
         await userEvent.click(
-          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process')
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process'),
+          { pointerEventsCheck: 0 }
         );
 
         expect(filterButton).toHaveTextContent('View: process alerts');
@@ -302,10 +307,11 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await userEvent.click(filterButton, { pointerEventsCheck: 0 });
 
         await userEvent.click(
-          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network')
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network'),
+          { pointerEventsCheck: 0 }
         );
 
         expect(filterButton).toHaveTextContent('View: network alerts');

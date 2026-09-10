@@ -8,6 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
@@ -21,22 +22,23 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import {
-  CSV_REPORT_TYPE_V2,
+import type {
   JobParamsCsvFromSavedObject,
   TaskPayloadCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
 import {
   ExportType,
   getFieldFormats,
   type BaseExportTypeSetupDeps,
   type BaseExportTypeStartDeps,
-  RunTaskOpts,
 } from '@kbn/reporting-server';
 
-import { ReportingRequestHandlerContext } from './types';
+import type { ReportingRequestHandlerContext } from './types';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
+const spaceProjectRouting = { projectRouting: 'space' } as const;
 
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
@@ -113,7 +115,7 @@ export class CsvV2ExportType extends ExportType<
     const uiSettings = await this.getUiSettingsClient(request, logger);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
     const { data: dataPluginStart, discover: discoverPluginStart } = this.startDeps;
-    const data = dataPluginStart.search.asScoped(request);
+    const data = dataPluginStart.search.asScoped(request, spaceProjectRouting);
 
     const { locatorParams } = job;
     const { params } = locatorParams[0];
@@ -131,16 +133,20 @@ export class CsvV2ExportType extends ExportType<
       // this should be addressed here https://github.com/elastic/kibana/issues/151190
       // const columns = await locatorClient.columnsFromLocator(params);
       const columns = params.columns as string[] | undefined;
+      const esqlVariables = params.esqlVariables as ESQLControlVariable[] | undefined;
+      const timeFieldName = await locatorClient.timeFieldNameFromLocator(params);
       const filters = await locatorClient.filtersFromLocator(params);
-      const es = this.startDeps.esClient.asScoped(request);
+      const es = this.startDeps.esClient.asScoped(request, spaceProjectRouting);
 
       const clients = { uiSettings, data, es };
 
       const csv = new CsvESQLGenerator(
         {
           columns,
+          esqlVariables,
           query,
           filters,
+          timeFieldName,
           ...job,
         },
         csvConfig,
@@ -148,7 +154,8 @@ export class CsvV2ExportType extends ExportType<
         clients,
         cancellationToken,
         logger,
-        stream
+        stream,
+        jobId
       );
       return await csv.generateData();
     }
@@ -156,8 +163,11 @@ export class CsvV2ExportType extends ExportType<
     const columns = await locatorClient.columnsFromLocator(params);
     const searchSource = await locatorClient.searchSourceFromLocator(params);
 
-    const es = this.startDeps.esClient.asScoped(request);
-    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
+    const es = this.startDeps.esClient.asScoped(request, spaceProjectRouting);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(
+      request,
+      spaceProjectRouting
+    );
 
     const clients = { uiSettings, data, es };
     const dependencies = { searchSourceStart, fieldFormatsRegistry };
@@ -174,7 +184,9 @@ export class CsvV2ExportType extends ExportType<
       dependencies,
       cancellationToken,
       logger,
-      stream
+      stream,
+      this.isServerless,
+      jobId
     );
     return await csv.generateData();
   };

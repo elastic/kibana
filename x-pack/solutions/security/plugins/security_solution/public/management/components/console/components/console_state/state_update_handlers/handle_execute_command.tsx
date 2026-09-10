@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
+import { getConditionallyRequiredArgs, getExclusiveOrArgGroups } from '../../../service/utils';
 import { executionTranslations } from './translations';
 import type { ParsedCommandInterface } from '../../../service/types';
 import { ConsoleCodeBlock } from '../../console_code_block';
@@ -50,19 +53,10 @@ const getUnknownArguments = (
   return response;
 };
 
-const getExclusiveOrArgs = (argDefinitions: CommandDefinition['args']): string[] => {
-  if (!argDefinitions) {
-    return [];
-  }
-
-  const exclusiveOrArgs: string[] = [];
-
-  return Object.entries(argDefinitions).reduce((acc, [argName, argDef]) => {
-    if (argDef.exclusiveOr) {
-      acc.push(argName);
-    }
-    return acc;
-  }, exclusiveOrArgs);
+const getExclusiveOrArgNames = (commandDef: CommandDefinition): string[] => {
+  return Object.values(getExclusiveOrArgGroups(commandDef))
+    .flat()
+    .map((argGroup) => argGroup.name);
 };
 
 const updateStateWithNewCommandHistoryItem = (
@@ -74,6 +68,7 @@ const updateStateWithNewCommandHistoryItem = (
     payload: {
       command: newHistoryItem.command.input,
       display: newHistoryItem.command.inputDisplay,
+      argState: newHistoryItem.command.argState ?? {},
     },
   });
 
@@ -161,10 +156,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     input: parsedInput.input,
     inputDisplay: fullInputText,
     args: parsedInput,
+    argState: enteredCommand?.argState,
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
-  const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
+  const exclusiveOrArgs = getExclusiveOrArgNames(commandDefinition);
 
   const exclusiveOrErrorMessage = executionTranslations.onlyOneFromExclusiveOr(
     exclusiveOrArgs.map(toCliArgumentOption).join(', ')
@@ -268,19 +264,73 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       }
     }
 
-    // Validate exclusiveOr arguments, can only have one.
-    const exclusiveArgsUsed = exclusiveOrArgs.filter((arg) => parsedInput.args[arg]);
-    if (exclusiveArgsUsed.length > 1) {
-      return updateStateWithNewCommandHistoryItem(
-        state,
-        createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-          createCommandExecutionState({
-            errorMessage: exclusiveOrErrorMessage,
-          }),
-          false
-        )
-      );
+    // Validate exclusiveOr argument groups - can only use one from each group
+    const exclusiveOrGroups = getExclusiveOrArgGroups(commandDefinition);
+
+    for (const exclusiveGroup of Object.values(exclusiveOrGroups)) {
+      const exclusiveArgsUsed = exclusiveGroup.filter((arg) => parsedInput.args[arg.name]);
+
+      if (exclusiveArgsUsed.length !== 1) {
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            createCommandExecutionState({
+              errorMessage: executionTranslations.onlyOneFromExclusiveOr(
+                exclusiveGroup.map((arg) => toCliArgumentOption(arg.name)).join(', ')
+              ),
+            }),
+            false
+          )
+        );
+      }
+    }
+
+    // Validate conditionally required arguments
+    const conditionallyRequiredArgs = getConditionallyRequiredArgs(commandDefinition);
+
+    for (const [argName, conditionalArgs] of Object.entries(conditionallyRequiredArgs)) {
+      if (parsedInput.hasArg(argName)) {
+        if (!conditionalArgs.allOf.every((requiredArg) => parsedInput.hasArg(requiredArg.name))) {
+          return updateStateWithNewCommandHistoryItem(
+            state,
+            createCommandHistoryEntry(
+              cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+              createCommandExecutionState({
+                errorMessage: executionTranslations.missingConditionallyRequiredArgs(
+                  toCliArgumentOption(argName),
+                  conditionalArgs.allOf.map((arg) => toCliArgumentOption(arg.name)).join(', ')
+                ),
+              }),
+              false
+            )
+          );
+        }
+
+        if (Object.keys(conditionalArgs.oneOf).length > 0) {
+          for (const exclusiveOrGroupArgs of Object.values(conditionalArgs.oneOf)) {
+            if (
+              !exclusiveOrGroupArgs.some((requiredArg) => parsedInput.hasArg(requiredArg.name)) ||
+              exclusiveOrGroupArgs.filter((requiredArg) => parsedInput.hasArg(requiredArg.name))
+                .length > 1
+            ) {
+              return updateStateWithNewCommandHistoryItem(
+                state,
+                createCommandHistoryEntry(
+                  cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+                  createCommandExecutionState({
+                    errorMessage: executionTranslations.missingConditionallyRequiredExclusiveOrArg(
+                      toCliArgumentOption(argName),
+                      exclusiveOrGroupArgs.map((arg) => toCliArgumentOption(arg.name)).join(', ')
+                    ),
+                  }),
+                  false
+                )
+              );
+            }
+          }
+        }
+      }
     }
 
     // Validate each argument given to the command
@@ -337,7 +387,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 } else if (
                   argDefinition.mustHaveValue === 'non-empty-string' &&
-                  argValue.trim().length === 0
+                  (argValue ?? '').trim().length === 0
                 ) {
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 }
@@ -392,10 +442,29 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             )
           );
         }
+      } else if (
+        argDefinition.mustHaveValue === false &&
+        argInput.some((value) => value !== true)
+      ) {
+        // Args defined as `mustHaveValue: false` do not support providing argument value
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            createCommandExecutionState({
+              errorMessage: (
+                <ConsoleCodeBlock>
+                  {executionTranslations.argDoesNotAcceptAnyValue(argName)}
+                </ConsoleCodeBlock>
+              ),
+            }),
+            false
+          )
+        );
       }
 
-      // Call validation callback if one was defined for the argument
       if (argDefinition.validate) {
+        // Call validation callback if one was defined for the argument
         const validationResult = argDefinition.validate(argInput);
 
         if (validationResult !== true) {
@@ -468,7 +537,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandHistoryEntry(
           cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
-            errorMessage: validationResult,
+            errorMessage: <ConsoleCodeBlock>{validationResult}</ConsoleCodeBlock>,
           }),
           false
         )

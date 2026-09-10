@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -111,6 +112,11 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
         onSave={handleSave}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
         onCancel={() => handleCancel(connector[field] || '')}
+        data-test-subj={
+          field === 'description'
+            ? 'contentConnectorsConnectorDescription'
+            : 'contentConnectorsConnectorName'
+        }
       />
     </EuiFlexItem>
   );

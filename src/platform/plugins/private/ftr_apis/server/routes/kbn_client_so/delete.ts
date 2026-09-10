@@ -22,7 +22,9 @@ export const registerDeleteRoute = (router: IRouter) => {
       },
       validate: {
         params: schema.object({
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           type: schema.string(),
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           id: schema.string(),
         }),
       },
@@ -34,7 +36,7 @@ export const registerDeleteRoute = (router: IRouter) => {
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
       const soClient = savedObjects.getClient({ includedHiddenTypes: hiddenTypes });
 
-      const result = await soClient.delete(type, id, { force: true });
+      const result = await soClient.delete(type, id, { force: true, refresh: true });
       return res.ok({ body: result });
     })
   );

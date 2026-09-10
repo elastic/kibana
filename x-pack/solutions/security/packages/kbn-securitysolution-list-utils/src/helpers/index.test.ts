@@ -9,8 +9,29 @@ import {
   getMappingConflictsInfo,
   fieldSupportsMatches,
   hasWrongOperatorWithWildcard,
+  hasEscaping,
   hasPartialCodeSignatureEntry,
+  getMalformedMatchesFields,
+  getOperatorOptions,
+  hasEntryEscaping,
 } from '.';
+import {
+  ALL_OPERATORS,
+  ALL_OPERATORS_SANS_MATCHES,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
+  doesNotExistOperator,
+  doesNotMatchOperator,
+  existsOperator,
+  isInListOperator,
+  isNotInListOperator,
+  isNotOneOfOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isOperator,
+  matchesOperator,
+} from '../autocomplete_operators';
+import type { FormattedBuilderEntry } from '../types';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -265,6 +286,256 @@ describe('Helpers', () => {
     });
   });
 
+  describe('hasEntryEscaping', () => {
+    describe('backslash escaping', () => {
+      describe('windows', () => {
+        test('returns true when a match value contains doubled backslashes', () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: 'a\\\\b',
+                field: 'any.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(true);
+        });
+
+        test.each(['path', 'executable', 'directory'])(
+          'returns false when a match value is a valid network path in field %s',
+          (fieldPart: string) => {
+            expect(
+              hasEntryEscaping(
+                {
+                  type: 'match',
+                  value: '\\\\server\\share\\path',
+                  field: `file.${fieldPart}.caseless`,
+                  operator: 'included',
+                },
+                ['windows']
+              )
+            ).toBe(false);
+          }
+        );
+
+        test('returns true for valid network path if field is not a path field', () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: '\\\\server\\share\\path',
+                field: 'some.random.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(true);
+        });
+      });
+
+      describe('linux and macos', () => {
+        test('returns true when a match value contains doubled backslashes, even at start', () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: '\\\\bcd',
+                field: 'any.field.even.path.field',
+                operator: 'included',
+              },
+              ['linux', 'macos']
+            )
+          ).toBe(true);
+        });
+      });
+    });
+
+    describe.each(['?', '*'])('%s escaping', (wildcard) => {
+      describe('windows', () => {
+        test(`return false on \\${wildcard} if it is a path field`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.path.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(false);
+        });
+
+        test(`return true on \\${wildcard} if it is not a path field`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.random.field',
+                operator: 'included',
+              },
+              ['windows']
+            )
+          ).toBe(true);
+        });
+      });
+
+      describe('linux and macos', () => {
+        test(`return true on \\${wildcard} even if it is a path field`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.path.field',
+                operator: 'included',
+              },
+              ['linux', 'macos']
+            )
+          ).toBe(true);
+        });
+
+        test(`return true on \\${wildcard} even if windows is also amongst the os types`, () => {
+          expect(
+            hasEntryEscaping(
+              {
+                type: 'match',
+                value: `prefix\\${wildcard}suffix`,
+                field: 'some.path.field',
+                operator: 'included',
+              },
+              ['linux', 'macos', 'windows']
+            )
+          ).toBe(true);
+        });
+      });
+    });
+
+    test('returns false when a match value does not contain backslash escapes', () => {
+      expect(
+        hasEntryEscaping({ type: 'match', value: 'normal*?', field: '', operator: 'included' }, [
+          'linux',
+          'macos',
+          'windows',
+        ])
+      ).toBe(false);
+    });
+
+    test('returns false when a match value is a list', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'list',
+          field: '',
+          operator: 'included',
+          list: { id: 'list-id', type: 'keyword' },
+        })
+      ).toBe(false);
+    });
+
+    test('returns false when a match value is not a string', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'match',
+          value: 666 as unknown as string,
+          field: '',
+          operator: 'included',
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('hasEscaping', () => {
+    test('returns false for empty items', () => {
+      expect(hasEscaping([])).toBe(false);
+    });
+
+    test('returns false when no string value contains backslash escapes', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [{ type: 'match', value: 'normal*?', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(false);
+    });
+
+    test('returns true when a match value contains doubled backslashes', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [{ type: 'match', value: 'a\\\\b', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns true when a match value contains backslash followed by asterisk', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [{ type: 'match', value: 'prefix\\*suffix', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns true when a match value contains backslash followed by question mark', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [{ type: 'match', value: 'prefix\\?suffix', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns false for list entries', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [
+              {
+                type: 'list',
+                field: '',
+                operator: 'included',
+                list: { id: 'list-id', type: 'keyword' },
+              },
+            ],
+          },
+        ])
+      ).toBe(false);
+    });
+
+    test('returns true for nested entries when a leaf value has escaping', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [
+              {
+                field: 'parent',
+                type: 'nested',
+                entries: [{ type: 'match', value: '\\*', field: 'child', operator: 'included' }],
+              },
+            ],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns false when value is not a string', () => {
+      expect(
+        hasEscaping([
+          {
+            entries: [{ type: 'match_any', value: ['\\*'], field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(false);
+    });
+  });
+
   describe('hasPartialCodeSignatureEntry', () => {
     it('returns false if the entry has neither code signature subject name nor trusted field', () => {
       expect(
@@ -370,6 +641,345 @@ describe('Helpers', () => {
           },
         ])
       ).toBeFalsy();
+    });
+  });
+
+  describe('getMalformedMatchesFields', () => {
+    test('it returns the field name for a wildcard entry with an escaped asterisk', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'app\\*.exe',
+                field: 'process.name',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual(['process.name']);
+    });
+
+    test('it returns the field name for a wildcard entry with an escaped question mark', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'wildcard', value: 'file\\?.txt', field: 'file.name', operator: 'included' },
+            ],
+          },
+        ])
+      ).toEqual(['file.name']);
+    });
+
+    test('it returns multiple field names when multiple entries have escaped wildcards', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'app\\*.exe',
+                field: 'process.name',
+                operator: 'included',
+              },
+              {
+                type: 'wildcard',
+                value: 'file\\?.txt',
+                field: 'file.name',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual(['process.name', 'file.name']);
+    });
+
+    test('it collects fields across OR conditions (multiple items)', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'app\\*.exe',
+                field: 'process.name',
+                operator: 'included',
+              },
+            ],
+          },
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'file\\?.txt',
+                field: 'file.name',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual(['process.name', 'file.name']);
+    });
+
+    test('it returns empty array when no entries have escaped wildcards', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'chrome*.exe',
+                field: 'process.name',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual([]);
+    });
+
+    test('it returns empty array for an empty entries list', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [],
+          },
+        ])
+      ).toEqual([]);
+    });
+
+    test('it excludes entries with an empty field name', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'wildcard', value: 'app\\*.exe', field: '', operator: 'included' }],
+          },
+        ])
+      ).toEqual([]);
+    });
+
+    test('it does not include match entries even if value contains escape sequences', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'match',
+                value: 'app\\*.exe',
+                field: 'process.name',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual([]);
+    });
+
+    test('it does not flag a double-backslash before a wildcard (Windows path separator)', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'C:\\\\Windows\\\\*.dll',
+                field: 'file.path',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual([]);
+    });
+  });
+
+  describe('getOperatorOptions', () => {
+    const getItem = (overrides?: {
+      nested?: FormattedBuilderEntry['nested'];
+      field?: FormattedBuilderEntry['field'];
+    }): FormattedBuilderEntry => {
+      const item = {
+        nested: null,
+        field: null,
+        ...overrides,
+      } as FormattedBuilderEntry;
+      return item;
+    };
+
+    const fieldNotSupportMatches = {
+      name: '_index',
+      type: 'string',
+      esTypes: ['_index'],
+    };
+    const fieldSupportMatches = {
+      name: 'host.name',
+      type: 'string',
+      esTypes: ['keyword'],
+    };
+
+    it('returns [isOperator] if item.nested is "parent"', () => {
+      const result = getOperatorOptions(getItem({ nested: 'parent' }), 'endpoint', false);
+      expect(result).toEqual([isOperator]);
+    });
+
+    it('returns [isOperator] if item.field is null', () => {
+      const result = getOperatorOptions(getItem(), 'endpoint', false);
+      expect(result).toEqual([isOperator]);
+    });
+
+    it('returns [isOperator] if listType is "endpoint" and isBoolean is true', () => {
+      const result = getOperatorOptions(getItem(), 'endpoint', true);
+      expect(result).toEqual([isOperator]);
+    });
+
+    it('returns match operators if listType is "endpoint", not boolean, and field supports matches', () => {
+      const result = getOperatorOptions(getItem({ field: fieldSupportMatches }), 'endpoint', false);
+      expect(result).toEqual([isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]);
+    });
+
+    it('returns basic operators if listType is "endpoint", not boolean, and field does not support matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint',
+        false
+      );
+      expect(result).toEqual([isOperator, isOneOfOperator]);
+    });
+
+    it('returns detection + boolean operators if nested and listType is "detection" and isBoolean is true', () => {
+      const result = getOperatorOptions(
+        getItem({ nested: 'child', field: fieldNotSupportMatches }),
+        'detection',
+        true
+      );
+      expect(result).toEqual([isOperator, existsOperator]);
+    });
+
+    it('returns detection operators if nested and listType is "detection" and not boolean', () => {
+      const result = getOperatorOptions(
+        getItem({ nested: 'child', field: fieldNotSupportMatches }),
+        'detection',
+        false
+      );
+      expect(result).toEqual([isOperator, isOneOfOperator, existsOperator]);
+    });
+
+    it('returns full boolean operator set if isBoolean is true (fallback path)', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint_trusted_apps',
+        true
+      );
+      expect(result).toEqual([isOperator, isNotOperator, existsOperator, doesNotExistOperator]);
+    });
+
+    it('returns EXCEPTION_OPERATORS_SANS_LISTS if value lists disabled, it should include value list operators and field supports matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldSupportMatches }),
+        'endpoint_trusted_devices',
+        false,
+        false
+      );
+      expect(result).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
+    });
+
+    it('returns basic operators if value lists disabled and field does not support matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint_trusted_devices',
+        false,
+        false
+      );
+      expect(result).toEqual([
+        isOperator,
+        isNotOperator,
+        isOneOfOperator,
+        isNotOneOfOperator,
+        existsOperator,
+        doesNotExistOperator,
+      ]);
+    });
+
+    it('returns DETECTION_ENGINE_EXCEPTION_OPERATORS if detection list, it should include value list operators, and supports matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldSupportMatches }),
+        'detection',
+        false,
+        true
+      );
+      expect(result).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
+    });
+
+    it('returns fallback operators without matches if detection list, it should include value list operators and does not support matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'detection',
+        false,
+        true
+      );
+      expect(result).toEqual([
+        isOperator,
+        isNotOperator,
+        isOneOfOperator,
+        isNotOneOfOperator,
+        existsOperator,
+        doesNotExistOperator,
+        isInListOperator,
+        isNotInListOperator,
+      ]);
+    });
+
+    it('returns ALL_OPERATORS if non-detection, it should include value list operators and supports matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldSupportMatches }),
+        'endpoint_events',
+        false,
+        true
+      );
+      expect(result).toEqual(ALL_OPERATORS);
+    });
+
+    it('returns ALL_OPERATORS without matches if non-detection, it should include value list operators and does not support matches', () => {
+      const result = getOperatorOptions(
+        getItem({ field: fieldNotSupportMatches }),
+        'endpoint_events',
+        false,
+        true
+      );
+      expect(result).toEqual(ALL_OPERATORS_SANS_MATCHES);
     });
   });
 });

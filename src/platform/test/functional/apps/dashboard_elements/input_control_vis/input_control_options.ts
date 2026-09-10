@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
@@ -23,10 +23,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
+  const browser = getService('browser');
   const FIELD_NAME = 'machine.os.raw';
 
-  // Failing: See https://github.com/elastic/kibana/issues/225165
-  describe.skip('input control options', () => {
+  /**
+   * Purpose: Input control options smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
+  describe('input control options', () => {
     before(async () => {
       await visualize.initTests();
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
@@ -41,15 +47,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('filter bar', () => {
+      // Close the Add filter popover in a hook so it can't overlay the next suite's editor tabs.
+      afterEach(async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('addFilterPopover');
+      });
+
       it('should show the default index pattern when clicking "Add filter"', async () => {
         await testSubjects.click('addFilter');
         const fields = await filterBar.getFilterEditorFields();
-        await filterBar.ensureFieldEditorModalIsClosed();
         expect(fields.length).to.be.greaterThan(0);
       });
     });
 
-    describe('updateFiltersOnChange is false', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/225165
+    describe.skip('updateFiltersOnChange is false', () => {
       it('should contain dropdown with terms aggregation results as options', async () => {
         const menu = await comboBox.getOptionsList('listControlSelect0');
         expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
@@ -65,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should stage filter when item selected but not create filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios');
+        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
@@ -83,7 +95,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
         await comboBox.clear('listControlSelect0');
-        await comboBox.set('listControlSelect0', 'osx');
+        await retry.waitFor('input control is clear', async () => {
+          return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
+        });
+        await common.sleep(500); // Wait for DOM to stabilize after clear
+        await comboBox.set('listControlSelect0', 'osx', { retryCount: 3 });
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
 
@@ -102,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios');
+        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
         await visEditor.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
         expect(hasFilterBeforeClearBtnClicked).to.equal(true);
@@ -145,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add filter pill when item selected', async () => {
-        await comboBox.set('listControlSelect0', 'ios');
+        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
@@ -157,6 +173,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('useTimeFilter', () => {
       it('should use global time filter when getting terms', async () => {
+        // Pin the global time filter to a window with no logstash-* data (that index only
+        // spans Sep 2015) so enabling "Use time filter" deterministically disables the control.
+        await timePicker.setAbsoluteRange(
+          'Jan 1, 2020 @ 00:00:00.000',
+          'Jan 1, 2021 @ 00:00:00.000'
+        );
         await visEditor.clickVisEditorTab('options');
         await testSubjects.setCheckbox('inputControlEditorUseTimeFilterCheckbox', 'check');
         await visEditor.clickGo();

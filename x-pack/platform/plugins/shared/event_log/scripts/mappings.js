@@ -23,11 +23,27 @@ exports.EcsCustomPropertyMappings = {
           id: {
             type: 'keyword',
           },
+          type: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           scheduled: {
             type: 'date',
           },
           schedule_delay: {
             type: 'long',
+          },
+          execution: {
+            properties: {
+              uuid: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+          // arbitrary consumer-provided data for the current task run, owned by task manager.
+          data: {
+            type: 'flattened',
           },
         },
       },
@@ -141,6 +157,23 @@ exports.EcsCustomPropertyMappings = {
                   in_progress_duration_ms: {
                     type: 'long',
                   },
+                  deleted: {
+                    type: 'boolean',
+                  },
+                  updated_at: {
+                    type: 'date',
+                  },
+                  failed_auto_fill_attempts: {
+                    type: 'long',
+                  },
+                  reason: {
+                    properties: {
+                      type: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
                 },
               },
               execution: {
@@ -214,6 +247,17 @@ exports.EcsCustomPropertyMappings = {
                         type: 'date_range',
                         format: 'strict_date_optional_time||epoch_millis',
                       },
+                      gap_reason: {
+                        properties: {
+                          type: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      matched_indices_count: {
+                        type: 'long',
+                      },
                       frozen_indices_queried_count: {
                         type: 'long',
                       },
@@ -242,6 +286,15 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       total_enrichment_duration_ms: {
+                        type: 'long',
+                      },
+                      update_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      alerts_candidate_count: {
+                        type: 'long',
+                      },
+                      alerts_suppressed_count: {
                         type: 'long',
                       },
                     },
@@ -289,6 +342,13 @@ exports.EcsCustomPropertyMappings = {
             type: 'boolean',
           },
         },
+      },
+      cps_scope_expression: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+      cps_scope_linked_projects: {
+        type: 'flattened',
       },
       space_ids: {
         type: 'keyword',
@@ -359,6 +419,114 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      gap_auto_fill: {
+        properties: {
+          execution: {
+            properties: {
+              status: {
+                type: 'keyword',
+              },
+              start: {
+                type: 'date',
+              },
+              end: {
+                type: 'date',
+              },
+              duration_ms: {
+                type: 'long',
+              },
+              rule_ids: {
+                type: 'keyword',
+              },
+              task_params: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  num_retries: {
+                    type: 'long',
+                  },
+                  gap_fill_range: {
+                    type: 'keyword',
+                  },
+                  interval: {
+                    type: 'keyword',
+                  },
+                  max_backfills: {
+                    type: 'long',
+                  },
+                },
+              },
+              results: {
+                type: 'nested',
+                properties: {
+                  rule_id: {
+                    type: 'keyword',
+                  },
+                  processed_gaps: {
+                    type: 'long',
+                  },
+                  status: {
+                    type: 'keyword',
+                  },
+                  error: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      alerting_v2: {
+        properties: {
+          dispatcher: {
+            properties: {
+              failure_reason: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              episode_count: {
+                type: 'long',
+              },
+              episode_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              rule_count: {
+                type: 'long',
+              },
+              rule_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              action_group_count: {
+                type: 'long',
+              },
+              action_group_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              workflow_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              workflow_execution_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              execution: {
+                properties: {
+                  uuid: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   },
 };
@@ -395,4 +563,10 @@ exports.EcsEventLogMultiValuedProperties = [
   'kibana.alert.rule.gap.in_progress_intervals',
   'kibana.alert.rule.gap.filled_intervals',
   'kibana.alert.rule.gap.unfilled_intervals',
+  'kibana.gap_auto_fill.execution.rule_ids',
+  'kibana.alerting_v2.dispatcher.episode_ids',
+  'kibana.alerting_v2.dispatcher.rule_ids',
+  'kibana.alerting_v2.dispatcher.action_group_ids',
+  'kibana.alerting_v2.dispatcher.workflow_ids',
+  'kibana.alerting_v2.dispatcher.workflow_execution_ids',
 ];

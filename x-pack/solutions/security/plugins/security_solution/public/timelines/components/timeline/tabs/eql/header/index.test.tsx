@@ -12,6 +12,7 @@ import { TestProviders } from '../../../../../../common/mock/test_providers';
 import type { EqlTabHeaderProps } from '.';
 import { EqlTabHeader } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
+import { DATA_VIEW_PICKER_TEST_ID } from '../../../../../../data_view_manager/components/data_view_picker/constants';
 
 describe('Eql Header', () => {
   const props = {
@@ -19,7 +20,6 @@ describe('Eql Header', () => {
     timelineId: TimelineId.test,
     timelineFullScreen: false,
     setTimelineFullScreen: jest.fn(),
-    newDataViewPickerEnabled: false,
   } as EqlTabHeaderProps;
 
   describe('rendering', () => {
@@ -31,15 +31,9 @@ describe('Eql Header', () => {
       );
     });
 
-    test('should render the eql query bar', async () => {
+    test('should components', async () => {
       expect(screen.getByTestId('EqlQueryBarTimeline')).toBeInTheDocument();
-    });
-
-    test('should render the sourcerer selector', async () => {
-      expect(screen.getByTestId('timeline-sourcerer-popover')).toBeInTheDocument();
-    });
-
-    test('should render the date picker', async () => {
+      expect(screen.getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
       expect(screen.getByTestId('superDatePickerToggleQuickMenuButton')).toBeInTheDocument();
     });
   });

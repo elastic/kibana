@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type {
+  ExpressionsServerStart,
+  ExpressionsServerSetup,
+} from '@kbn/expressions-plugin/server';
 
 export type ExpressionXyPluginSetup = void;
 export type ExpressionXyPluginStart = void;

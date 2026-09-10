@@ -10,23 +10,23 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class KubernetesEAFlowPage {
   page: Page;
 
-  private readonly receivedDataIndicatorKubernetes: Locator;
   private readonly kubernetesAgentExploreDataActionLink: Locator;
   private readonly codeBlock: Locator;
   private readonly copyToClipboardButton: Locator;
+  private readonly exploreLogsButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.receivedDataIndicatorKubernetes = this.page
-      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
-      .getByText('We are monitoring your cluster');
     this.kubernetesAgentExploreDataActionLink = this.page.getByTestId(
       'observabilityOnboardingDataIngestStatusActionLink-kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
     );
     this.codeBlock = this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
     this.copyToClipboardButton = this.page.getByTestId(
       'observabilityOnboardingCopyToClipboardButton'
+    );
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
     );
   }
 
@@ -40,12 +40,16 @@ export class KubernetesEAFlowPage {
 
   public async assertReceivedDataIndicatorKubernetes() {
     await expect(
-      this.receivedDataIndicatorKubernetes,
-      'Received data indicator should be visible'
+      this.exploreLogsButton,
+      'Explore logs action link should be visible after data is detected'
     ).toBeVisible();
   }
 
   public async clickKubernetesAgentCTA() {
     await this.kubernetesAgentExploreDataActionLink.click();
+  }
+
+  public async clickExploreLogsCTA() {
+    await this.exploreLogsButton.click();
   }
 }

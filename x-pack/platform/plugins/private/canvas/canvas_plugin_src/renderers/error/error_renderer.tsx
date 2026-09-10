@@ -8,17 +8,17 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { ErrorRendererConfig } from './types';
+import type { ErrorRendererConfig } from './types';
 import { LazyErrorRenderComponent } from './components';
 
 const errorStrings = {

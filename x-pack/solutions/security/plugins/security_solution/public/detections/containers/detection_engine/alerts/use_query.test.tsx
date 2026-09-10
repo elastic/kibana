@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { waitFor, act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
 import { ALERTS_QUERY_NAMES } from './constants';
 import * as api from './api';
-import { mockAlertsQuery, alertsMock } from './mock';
+import { alertsMock, mockAlertsQuery } from './mock';
 
 jest.mock('./api');
 jest.mock('../../../../common/lib/apm/use_track_http_request');
@@ -46,7 +46,11 @@ describe('useQueryAlerts', () => {
         loading: false,
         data: alertsMock,
         response: JSON.stringify(alertsMock, null, 2),
-        request: JSON.stringify({ index: [indexName] ?? [''], body: mockAlertsQuery }, null, 2),
+        request: JSON.stringify(
+          { index: indexName ? [indexName] : [''], body: mockAlertsQuery },
+          null,
+          2
+        ),
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,
       })
@@ -120,5 +124,35 @@ describe('useQueryAlerts', () => {
     rerender();
     rerender();
     expect(abortSpy).toHaveBeenCalledTimes(2);
+  });
+
+  describe('refetch invariant', () => {
+    test('refetch is null before the first fetch completes', () => {
+      // Synchronous snapshot: fetch is in flight but has not resolved yet.
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      expect(result.current.refetch).toBeNull();
+    });
+
+    test('refetch is a function after a successful fetch', async () => {
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+    });
+
+    test('refetch is a function after a failed fetch', async () => {
+      jest.spyOn(api, 'fetchQueryAlerts').mockImplementation(() => {
+        throw new Error('fetch error');
+      });
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+    });
+
+    test('refetch stays null permanently when skip=true', async () => {
+      const { result } = renderHook(() =>
+        useQueryAlerts<unknown, unknown>({ ...defaultProps, skip: true })
+      );
+      // Allow any pending microtasks / effects to flush before asserting.
+      await act(async () => {});
+      expect(result.current.refetch).toBeNull();
+    });
   });
 });

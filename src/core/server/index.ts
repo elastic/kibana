@@ -29,7 +29,8 @@
  * @packageDocumentation
  */
 
-import { Type } from '@kbn/config-schema';
+import 'reflect-metadata';
+import type { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
 import type {
@@ -130,6 +131,7 @@ export type {
   SecurityServiceStart,
   CoreAuthenticationService,
   CoreAuditService,
+  CoreServiceAccountsService,
   AuditEvent,
   AuditHttp,
   AuditKibana,
@@ -225,6 +227,7 @@ export type {
   IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
   GetAuthState,
@@ -236,6 +239,12 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
@@ -260,6 +269,9 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
+  PluginAppenderConfigType,
+  OtelAppenderPluginConfig,
+  OtelAttributesTransform,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';
@@ -293,7 +305,6 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
@@ -365,6 +376,9 @@ export type {
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
@@ -429,6 +443,7 @@ export {
   SPACES_EXTENSION_ID,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,

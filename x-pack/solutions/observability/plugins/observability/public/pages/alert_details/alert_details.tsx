@@ -5,47 +5,55 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
   EuiLoadingSpinner,
-  EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
   EuiNotificationBadge,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
+import moment from 'moment';
+import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
-import { AlertDetailsSource, TAB_IDS, TabId } from './types';
+import type { AlertDetailsSource, TabId } from './types';
+import { TAB_IDS } from './types';
 import { SourceBar } from './components';
 import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../hooks/use_fetch_alert_detail';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { HeaderActions } from './components/header_actions';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
@@ -53,16 +61,17 @@ import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enable
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
-import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
+import type { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
-import { getAlertTitle } from '../../utils/format_alert_title';
+import { getAlertSubtitle } from '../../utils/format_alert_subtitle';
 import { AlertSubtitle } from './components/alert_subtitle';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
 import { useTabId } from './hooks/use_tab_id';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
+import { useAlertDetailsPageViewEbt } from '../../hooks/use_alert_details_page_view_ebt';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -84,32 +93,68 @@ const isTabId = (value: string): value is TabId => {
 export function AlertDetails() {
   const { services } = useKibana();
   const {
-    cases,
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
+    agentBuilder,
     uiSettings,
     serverless,
+    observabilityAgentBuilder,
   } = services;
+
+  const AlertAskAiAgentButtonRef = useRef(observabilityAgentBuilder?.getAlertAskAiAgentButton());
+  const AlertAskAiAgentButton = AlertAskAiAgentButtonRef.current;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const { getUrlTabId, setUrlTabId } = useTabId();
   const urlTabId = getUrlTabId();
-  const {
-    isLoadingRelatedDashboards,
-    suggestedDashboards,
-    linkedDashboards,
-    refetchRelatedDashboards,
-  } = useRelatedDashboards(alertId);
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
-  const { rule, refetch } = useFetchRule({
+  const ruleName = alertDetail?.formatted.fields[ALERT_RULE_NAME];
+  const ruleTypeBreached = alertDetail
+    ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+    : undefined;
+
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = authorizedToReadRuleType(
+    alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID],
+    alertDetail?.formatted.fields[ALERT_RULE_CONSUMER]
+  );
+
+  // Related dashboards are derived from the rule (a rule-read operation), so
+  // gate the fetch on the same per-rule-type authorization used elsewhere.
+  const {
+    isLoadingRelatedDashboards,
+    suggestedDashboards,
+    linkedDashboards,
+    refetchRelatedDashboards,
+  } = useRelatedDashboards(alertId, { enabled: canReadAlertRule });
+
+  const {
+    rule,
+    isLoading: isLoadingRule,
+    isRuleNotFound,
+    refetch,
+  } = useFetchRule({
     ruleId: ruleId || '',
+    enabled: canReadAlertRule,
   });
+
+  const ruleStatus =
+    !canReadAlertRule || isLoadingRule
+      ? 'unknown'
+      : isRuleNotFound
+      ? 'deleted'
+      : rule?.enabled === false
+      ? 'disabled'
+      : 'ok';
+
+  useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
   const onSuccessAddSuggestedDashboard = useCallback(async () => {
     await Promise.all([refetchRelatedDashboards(), refetch()]);
@@ -162,6 +207,42 @@ export function AlertDetails() {
     }
   }, [alertDetail, ruleTypeRegistry, urlTabId]);
 
+  // Configure agent builder global flyout with the current alert attachment
+  useEffect(() => {
+    if (!agentBuilder) return;
+    const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
+
+    if (!alertUuid) {
+      return;
+    }
+
+    agentBuilder.setChatConfig({
+      newConversation: true,
+      attachments: [
+        {
+          id: alertUuid,
+          type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+          data: {
+            alertId: alertUuid,
+            ...(ruleTypeBreached && {
+              attachmentLabel: i18n.translate(
+                'xpack.observability.alertDetails.alertAttachmentLabel',
+                {
+                  defaultMessage: '{ruleTypeBreached} alert',
+                  values: { ruleTypeBreached },
+                }
+              ),
+            }),
+          },
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearChatConfig();
+    };
+  }, [agentBuilder, alertDetail, ruleTypeBreached]);
+
   useBreadcrumbs(
     [
       {
@@ -172,9 +253,7 @@ export function AlertDetails() {
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        text: alertDetail
-          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
-          : defaultBreadcrumb,
+        text: ruleTypeBreached ?? defaultBreadcrumb,
       },
     ],
     { serverless }
@@ -198,6 +277,15 @@ export function AlertDetails() {
         '[ttfmp_alert_details] The Observability Alert Details overview page has loaded successfully.',
     },
   });
+
+  // This is the time range that will be used to open the dashboards
+  // in the related dashboards tab
+  const dashboardTimeRange = useMemo(() => {
+    return {
+      from: moment(alertDetail?.formatted.start).subtract(30, 'minutes').toISOString(),
+      to: moment(alertDetail?.formatted.start).add(30, 'minutes').toISOString(),
+    };
+  }, [alertDetail]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -231,6 +319,7 @@ export function AlertDetails() {
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
+    canReadAlertRule &&
     /*
     when feature flag is enabled, show alert details page with customized overview tab,
     otherwise show default overview tab
@@ -240,6 +329,7 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <StaleAlert
           alert={alertDetail.formatted}
+          alertIndex={alertDetail.raw._index}
           alertStatus={alertStatus}
           rule={rule}
           onUntrackAlert={onUntrackAlert}
@@ -280,7 +370,11 @@ export function AlertDetails() {
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
+        <AlertOverview
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          ruleStatus={ruleStatus}
+        />
       </EuiPanel>
     )
   ) : (
@@ -302,6 +396,7 @@ export function AlertDetails() {
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
         onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
+        timeRange={dashboardTimeRange}
       />
     ) : (
       <EuiLoadingSpinner />
@@ -334,7 +429,7 @@ export function AlertDetails() {
           />
           {rule?.artifacts?.investigation_guide?.blob && (
             <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-              <EuiIcon type="dot" size="s" />
+              <EuiIcon type="dot" size="s" aria-hidden={true} />
             </EuiNotificationBadge>
           )}
         </>
@@ -384,33 +479,60 @@ export function AlertDetails() {
     },
   ];
 
+  // The investigation guide and related dashboards tabs depend on rule data,
+  // which requires rule read. Hide them when the user cannot read any rules.
+  const ruleReadDependentTabIds: TabId[] = ['investigation_guide', 'related_dashboards'];
+  const visibleTabs = canReadAlertRule
+    ? tabs
+    : tabs.filter((tab) => !ruleReadDependentTabIds.includes(tab.id));
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: alertDetail?.formatted ? (
-          <>
-            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
-            <EuiSpacer size="xs" />
-            <AlertSubtitle alert={alertDetail.formatted} />
-          </>
-        ) : (
-          <EuiLoadingSpinner />
-        ),
-        rightSideItems: cases
-          ? [
-              <ObsCasesContext>
-                <HeaderActions
-                  alert={alertDetail?.formatted ?? null}
-                  alertIndex={alertDetail?.raw._index}
-                  alertStatus={alertStatus}
-                  onUntrackAlert={onUntrackAlert}
-                  onUpdate={onUpdate}
-                  rule={rule}
-                  refetch={refetch}
-                />
-              </ObsCasesContext>,
-            ]
-          : [],
+        pageTitle:
+          alertDetail?.formatted && ruleName ? (
+            <>
+              <EuiToolTip content={ruleName}>
+                <span
+                  tabIndex={0}
+                  data-test-subj="alertDetailsPageTitle"
+                  css={css`
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    word-break: break-word;
+                  `}
+                >
+                  {ruleName}
+                </span>
+              </EuiToolTip>
+              <EuiSpacer size="xs" />
+              <AlertSubtitle alert={alertDetail.formatted} ruleStatus={ruleStatus} />
+            </>
+          ) : (
+            <EuiLoadingSpinner />
+          ),
+        rightSideItems: [
+          <HeaderActions
+            alert={alertDetail?.formatted ?? null}
+            alertIndex={alertDetail?.raw._index}
+            alertStatus={alertStatus}
+            onUntrackAlert={onUntrackAlert}
+            onUpdate={onUpdate}
+            rule={rule}
+            refetch={refetch}
+          />,
+          ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
+            ? [
+                <AlertAskAiAgentButton
+                  alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
+                  alertTitle={ruleTypeBreached}
+                />,
+              ]
+            : []),
+        ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}
@@ -428,8 +550,8 @@ export function AlertDetails() {
         <HeaderMenu />
         <EuiTabbedContent
           data-test-subj="alertDetailsTabbedContent"
-          tabs={tabs}
-          selectedTab={tabs.find((tab) => tab.id === activeTabId)}
+          tabs={visibleTabs}
+          selectedTab={visibleTabs.find((tab) => tab.id === activeTabId)}
           onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
         />
       </ObsCasesContext>
@@ -466,8 +588,8 @@ function getRelevantAlertFields(alertDetail: AlertData) {
     'kibana.alert.rule.uuid',
     'event.action',
     'event.kind',
-    'kibana.alert.rule.tags',
     'kibana.alert.maintenance_window_ids',
+    'kibana.alert.maintenance_window_names',
     'kibana.alert.consecutive_matches',
   ]);
 }

@@ -10,8 +10,8 @@ import { set } from '@kbn/safer-lodash-set';
 import { unset } from 'lodash';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { handleResponse, getNodeInfo } from './get_node_info';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponseHit } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponseHit } from '../../../common/types/es';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 
 interface HitParams {

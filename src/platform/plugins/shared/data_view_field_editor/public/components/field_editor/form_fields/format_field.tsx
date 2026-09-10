@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  UseField,
-  useFormData,
-  ES_FIELD_TYPES,
-  useFormContext,
-  SerializedFieldFormat,
-} from '../../../shared_imports';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { ES_FIELD_TYPES, SerializedFieldFormat } from '../../../shared_imports';
+import { UseField, useFormData, useFormContext } from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
 import { FormatSelectEditor } from '../../field_format_editor';
 import type { FieldFormInternal } from '../field_editor';
 
-export const FormatField = () => {
+interface Props {
+  disabled?: boolean;
+}
+
+export const FormatField = ({ disabled }: Props) => {
   const { uiSettings, fieldFormats, fieldFormatEditors } = useFieldEditorContext();
   const isMounted = useRef(false);
   const [{ type }] = useFormData<FieldFormInternal>({ watch: ['name', 'type'] });
@@ -56,10 +56,9 @@ export const FormatField = () => {
           <>
             {isSubmitted && errors.length > 0 && (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
+                  announceOnMount
                   title={errors.map((err) => err.message)}
-                  color="danger"
-                  iconType="cross"
                   data-test-subj="formFormatError"
                 />
                 <EuiSpacer size="m" />
@@ -75,6 +74,7 @@ export const FormatField = () => {
               onError={setFormatError}
               value={value}
               key={typeValue.join(', ')}
+              disabled={disabled}
             />
           </>
         );

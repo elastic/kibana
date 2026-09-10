@@ -28,7 +28,6 @@ export async function getHealthIndicators(
     ]
       .filter(isStatusNotGreen)
       .flatMap(({ status, symptom, impacts, diagnosis }) => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         return (diagnosis || []).map(({ cause, action, help_url }) => ({
           type: 'health_indicator',
           details: symptom,

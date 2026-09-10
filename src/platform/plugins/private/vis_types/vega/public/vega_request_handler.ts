@@ -9,24 +9,30 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, ProjectRouting } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
-import { VegaVisualizationDependencies } from './plugin';
-import { VisParams } from './vega_fn';
+import type { VegaVisualizationDependencies } from './plugin';
+import type { VisParams } from './vega_fn';
 import { getData, getDataViews } from './services';
-import { VegaInspectorAdapters } from './vega_inspector';
+import type { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
   filters: Filter[];
-  timeRange: TimeRange;
+  timeRange: TimeRange | undefined;
   visParams: VisParams;
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
+  projectRouting?: ProjectRouting;
+  /** Only applies to ES|QL-backed vega data sources */
+  isApproximate: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface VegaRequestHandlerContext {
@@ -53,6 +59,9 @@ export function createVegaRequestHandler(
     visParams,
     searchSessionId,
     executionContext,
+    projectRouting,
+    isApproximate,
+    esqlVariables,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -67,7 +76,9 @@ export function createVegaRequestHandler(
         context.abortSignal,
         context.inspectorAdapters,
         searchSessionId,
-        executionContext
+        executionContext,
+        projectRouting,
+        isApproximate
       );
     }
 
@@ -76,6 +87,7 @@ export function createVegaRequestHandler(
     let dataView: DataView;
     const firstFilterIndex = filters[0]?.meta.index;
     if (firstFilterIndex) {
+      // @ts-expect-error upgrade typescript v5.9.3
       dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
     }
 
@@ -89,7 +101,8 @@ export function createVegaRequestHandler(
       timeCache,
       filtersDsl,
       getServiceSettings,
-      theme.getTheme()
+      theme.getTheme(),
+      esqlVariables
     );
     return await vp.parseAsync();
   };

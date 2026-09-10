@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import classNames from 'classnames';
+import { EuiSpacer } from '@elastic/eui';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-
-import './page_template.scss';
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { Loading } from './loading';
 import { FlashMessages } from './flash_messages';
+import * as Styles from './styles';
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  appHeader?: React.ReactNode;
   customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
   emptyState?: React.ReactNode;
   hideFlashMessages?: boolean;
@@ -28,43 +28,37 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
 };
 
 export const SearchConnectorsPageTemplateWrapper: React.FC<PageTemplateProps> = ({
+  appHeader,
   children,
-  className,
   customPageSections,
   hideFlashMessages,
   isLoading,
   isEmptyState,
   emptyState,
   setPageChrome,
-  ...pageTemplateProps
 }) => {
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
-  return (
-    <KibanaPageTemplate
-      {...pageTemplateProps}
-      className={classNames('searchConnectorsPageTemplate', className)}
-      mainProps={{
-        ...pageTemplateProps.mainProps,
-        className: classNames(
-          'searchConnectorsPageTemplate__content',
-          pageTemplateProps.mainProps?.className
-        ),
-      }}
-      isEmptyState={isEmptyState && !isLoading}
-    >
-      {setPageChrome}
+  const body = isLoading ? (
+    <Loading />
+  ) : showCustomEmptyState ? (
+    emptyState
+  ) : customPageSections ? (
+    children
+  ) : (
+    <>
+      {appHeader}
+      {appHeader && <EuiSpacer size="l" />}
       {!hideFlashMessages && <FlashMessages />}
-      {isLoading ? (
-        <Loading />
-      ) : showCustomEmptyState ? (
-        emptyState
-      ) : customPageSections ? (
-        children
-      ) : (
-        <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
-      )}
-    </KibanaPageTemplate>
+      {children}
+    </>
+  );
+
+  return (
+    <div className={Styles.searchConnectorsPageTemplate}>
+      {setPageChrome}
+      {body}
+    </div>
   );
 };

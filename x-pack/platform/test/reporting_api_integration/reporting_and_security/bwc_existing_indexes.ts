@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 /**
  * This file tests the situation when a reporting index spans releases. By default reporting indexes are created
@@ -15,7 +15,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
  * a major change in a major release, we handle it properly.
  */
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
@@ -36,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         // archive with reporting index mappings v6.2
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/bwc/6_2');
 
         // The index name in the reporting/bwc/6_2 archive.
         const ARCHIVED_REPORTING_INDEX = '.reporting-2018.03.11';
@@ -55,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         await cleanupIndexAlias();
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/bwc/6_2');
       });
 
       it('single job posted can complete in an index created with an older version', async () => {

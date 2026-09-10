@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, common } = getPageObjects(['dashboard', 'header', 'common']);
@@ -168,11 +168,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
-      it('stays on listing page if title matches two dashboards', async function () {
+      it('allows dashboards that differ only by casing', async function () {
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('two words', {
           saveAsNew: true,
-          needsConfirm: true,
+          needsConfirm: false,
         });
         await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
@@ -212,11 +212,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('edit meta data', () => {
+    describe('edit meta data', function () {
+      // FIPS mode upgrades the license to trial which triggers a toast notification when
+      // saving a dashboard, blocking the save button click
+      this.tags('skipFIPS');
       it('saves changes to dashboard metadata', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickCreateDashboardPrompt();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
         await dashboardAddPanel.ensureAddPanelIsClosed();
         await dashboard.saveDashboard(`${dashboardName}-editMetaData`);
@@ -231,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
-        await listingTable.setSearchFilterValue('new description');
+        await listingTable.searchForItemWithName('new description');
         await listingTable.expectItemsCount('dashboard', 1);
         await listingTable.clickItemLink('dashboard', 'new title');
         await dashboard.waitForRenderComplete();

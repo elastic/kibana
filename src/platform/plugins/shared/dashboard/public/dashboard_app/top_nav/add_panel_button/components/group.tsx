@@ -18,41 +18,46 @@ import {
   type EuiListGroupProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MenuItemGroup } from '../types';
+import type { MenuItemGroup } from '../types';
 
 export function Group({ group }: { group: MenuItemGroup }) {
   const listItems: EuiListGroupProps['listItems'] = useMemo(
     () =>
       group.items.map((item) => ({
+        // default values for an item
         key: item.id,
-        size: 's',
         toolTipText: item.description,
         toolTipProps: {
           position: 'right',
         },
         showToolTip: true,
-        label: !item.isDeprecated ? (
-          item.name
-        ) : (
-          <EuiFlexGroup wrap responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{item.name}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">
-                <FormattedMessage
-                  id="dashboard.editorMenu.deprecatedTag"
-                  defaultMessage="Deprecated"
-                />
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        label: item.name,
         onClick: item.onClick,
-        iconType: item.icon,
+        ...(typeof item.icon === 'string' ? { iconType: item.icon } : { icon: <item.icon /> }),
         isDisabled: item.isDisabled,
         'data-test-subj': item['data-test-subj'],
         role: 'menuitem',
+        // handle overrides for an item
+        ...(item.MenuItem && {
+          label: item.MenuItem,
+        }),
+        ...(item.isDeprecated && {
+          label: (
+            <EuiFlexGroup wrap responsive={false} gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{item.MenuItem ? item.MenuItem : item.name}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  <FormattedMessage
+                    id="dashboard.editorMenu.deprecatedTag"
+                    defaultMessage="Deprecated"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }),
       })),
     [group.items]
   );
@@ -64,15 +69,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
       <EuiTitle size="xxs">
         <h3 id={titleId}>{group.title}</h3>
       </EuiTitle>
-      <EuiListGroup
-        aria-labelledby={titleId}
-        size="s"
-        gutterSize="none"
-        maxWidth={false}
-        flush
-        listItems={listItems}
-        role="menu"
-      />
+      <EuiListGroup aria-labelledby={titleId} maxWidth={false} listItems={listItems} role="menu" />
     </>
   );
 }

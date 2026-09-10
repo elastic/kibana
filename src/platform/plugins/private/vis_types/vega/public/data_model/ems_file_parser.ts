@@ -14,7 +14,7 @@ import type {
   IServiceSettings,
   FileLayer,
 } from '../vega_view/vega_map_view/service_settings/service_settings_types';
-import { Data, UrlObject, EmsQueryRequest } from './types';
+import type { Data, UrlObject, EmsQueryRequest } from './types';
 
 /**
  * This class processes all Vega spec customizations,

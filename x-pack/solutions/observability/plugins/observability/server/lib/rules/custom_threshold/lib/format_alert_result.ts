@@ -16,13 +16,14 @@ import {
   DOCUMENT_COUNT_I18N,
   LAST_VALUE_I18N,
   MAX_I18N,
+  MEDIAN_I18N,
   MIN_I18N,
   PERCENTILE_95_I18N,
   PERCENTILE_99_I18N,
   RATE_I18N,
   SUM_I18N,
 } from '../translations';
-import { Evaluation } from './evaluate_rule';
+import type { Evaluation } from './evaluate_rule';
 
 export type FormattedEvaluation = Omit<Evaluation, 'currentValue' | 'threshold'> & {
   currentValue: string;
@@ -52,13 +53,21 @@ export const getLabel = (criterion: Evaluation) => {
         return SUM_I18N(criterion.metrics[0].field!);
       case Aggregators.LAST_VALUE:
         return LAST_VALUE_I18N(criterion.metrics[0].field!);
+      case Aggregators.MED:
+        return MEDIAN_I18N(criterion.metrics[0].field!);
     }
   }
   return criterion.label || CUSTOM_EQUATION_I18N;
 };
 
-export const formatAlertResult = (evaluationResult: Evaluation): FormattedEvaluation => {
-  const { metrics, currentValue, threshold, comparator } = evaluationResult;
+export const formatAlertResult = (
+  evaluationResult: Evaluation,
+  useWarningThreshold?: boolean
+): FormattedEvaluation => {
+  const { metrics, currentValue, threshold, comparator, warningThreshold, warningComparator } =
+    evaluationResult;
+  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
+  const comparatorToUse = useWarningThreshold ? warningComparator! : comparator;
   const noDataValue = i18n.translate(
     'xpack.observability.customThreshold.rule.alerting.threshold.noDataFormattedValue',
     { defaultMessage: '[NO DATA]' }
@@ -82,9 +91,11 @@ export const formatAlertResult = (evaluationResult: Evaluation): FormattedEvalua
         ? metricValueFormatter(currentValue, metrics[0].field) + rateUnitPerSec
         : noDataValue,
     label: label || CUSTOM_EQUATION_I18N,
-    threshold: Array.isArray(threshold)
-      ? threshold.map((v: number) => metricValueFormatter(v, metrics[0].field) + rateUnitPerSec)
+    threshold: Array.isArray(thresholdToFormat)
+      ? thresholdToFormat.map(
+          (v: number) => metricValueFormatter(v, metrics[0].field) + rateUnitPerSec
+        )
       : [metricValueFormatter(currentValue, metrics[0].field) + rateUnitPerSec],
-    comparator,
+    comparator: comparatorToUse,
   };
 };

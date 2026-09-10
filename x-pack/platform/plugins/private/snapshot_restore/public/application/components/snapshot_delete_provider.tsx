@@ -9,11 +9,12 @@ import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiConfirmModal,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { deleteSnapshots } from '../services/http';
@@ -41,6 +42,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteSnapshotPrompt: DeleteSnapshot = (ids, onSuccess = () => undefined) => {
     if (!ids || !ids.length) {
@@ -118,6 +120,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={
           isSingle ? (
             <FormattedMessage
@@ -133,6 +136,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
             />
           )
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={deleteSnapshot}
         cancelButtonText={
@@ -176,8 +180,8 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
         </p>
         {!isSingle && isDeleting ? (
           <Fragment>
-            <EuiCallOut
-              color="warning"
+            <KbnWarningCallout
+              announceOnMount
               title={
                 <Fragment>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -193,14 +197,15 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
                   </EuiFlexGroup>
                 </Fragment>
               }
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
-                  defaultMessage="This may take a few minutes."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deletingCalloutDescription"
+                    defaultMessage="This may take a few minutes."
+                  />
+                </p>
+              }
+            />
           </Fragment>
         ) : null}
       </EuiConfirmModal>

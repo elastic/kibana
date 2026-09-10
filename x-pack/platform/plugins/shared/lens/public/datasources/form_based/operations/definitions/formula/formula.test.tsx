@@ -7,18 +7,17 @@
 
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
-import {
-  formulaOperation,
-  type GenericOperationDefinition,
-  type GenericIndexPatternColumn,
-} from '..';
-import type { FormulaIndexPatternColumn } from './formula';
+import { formulaOperation, type GenericOperationDefinition } from '..';
+import type {
+  FormulaIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  TermsIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { insertOrReplaceFormulaColumn } from './parse';
-import type { FormBasedLayer } from '../../../types';
-import { IndexPattern } from '../../../../../types';
-import { TermsIndexPatternColumn } from '../terms';
-import type { MovingAverageIndexPatternColumn } from '../calculations';
-import { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
@@ -1994,6 +1993,55 @@ invalid: "
           operationDefinitionMap
         ).map((e) => e.message)
       ).toEqual(['Operation operation_not_available not found']);
+    });
+
+    describe('locale-invariant type comparison (regression: #149803)', () => {
+      it('tinymathFunctions stores locale-invariant type constants, not translated strings', () => {
+        const validArgTypes = new Set<string | undefined>([
+          'number',
+          'boolean',
+          'string',
+          undefined,
+        ]);
+        for (const [name, fn] of Object.entries(tinymathFunctions)) {
+          for (const arg of fn.positionalArguments) {
+            expect({
+              fn: name,
+              typeIsInvariant: validArgTypes.has(arg.type),
+            }).toEqual({ fn: name, typeIsInvariant: true });
+          }
+          if (fn.outputType !== undefined) {
+            expect({
+              fn: name,
+              outputTypeIsInvariant: validArgTypes.has(fn.outputType),
+            }).toEqual({ fn: name, outputTypeIsInvariant: true });
+          }
+        }
+      });
+
+      it('produces no errors for math operator formulas (count() / average(bytes))', () => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula('count() / average(bytes)', false),
+            'col1',
+            indexPattern,
+            undefined,
+            operationDefinitionMap
+          )
+        ).toHaveLength(0);
+      });
+
+      it('produces no errors for nested math formulas (ifelse(count() > 1, (count() + average(bytes)) / 2, 5))', () => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula('ifelse(count() > 1, (count() + average(bytes)) / 2, 5)', false),
+            'col1',
+            indexPattern,
+            undefined,
+            operationDefinitionMap
+          )
+        ).toHaveLength(0);
+      });
     });
   });
 });

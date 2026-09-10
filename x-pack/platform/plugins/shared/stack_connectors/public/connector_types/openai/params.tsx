@@ -12,9 +12,9 @@ import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SUB_ACTION } from '../../../common/openai/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/openai/constants';
 import { getDefaultBody } from './constants';
-import { OpenAIActionConnector, ActionParams } from './types';
+import type { OpenAIActionConnector, ActionParams } from './types';
 
 const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = ({
   actionConnector,

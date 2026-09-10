@@ -9,7 +9,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext, type FC, type PropsWithChildren } from 'react';
-import { ReportingAPIClient } from './reporting_api_client';
+import type { ReportingAPIClient } from './reporting_api_client';
 
 interface ContextValue {
   http: HttpSetup;

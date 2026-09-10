@@ -291,5 +291,6 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     enabledInLicense: true,
     category: 'my-category',
     isExportable: true,
+    isInternallyManaged: false,
   };
 }

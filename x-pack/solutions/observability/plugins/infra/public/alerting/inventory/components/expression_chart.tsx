@@ -11,6 +11,7 @@ import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { useTimelineChartTheme } from '../../../hooks/use_timeline_chart_theme';
@@ -19,7 +20,10 @@ import { Color } from '../../../../common/color_palette';
 import type { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
-import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -34,21 +38,23 @@ import { ThresholdAnnotations } from '../../common/criterion_preview_chart/thres
 
 interface Props {
   expression: InventoryMetricConditions;
-  filterQuery?: string | symbol;
+  kuery?: string;
   nodeType: InventoryItemType;
   sourceId: string;
   accountId?: string;
   region?: string;
+  schema?: DataSchemaFormat | null;
 }
 
-export const ExpressionChart: React.FC<Props> = ({
+export const ExpressionChart = ({
   expression,
-  filterQuery,
+  kuery,
   nodeType,
   sourceId,
   accountId = '',
   region = '',
-}) => {
+  schema,
+}: Props) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
     () => ({
@@ -68,7 +74,7 @@ export const ExpressionChart: React.FC<Props> = ({
   });
 
   const { loading, nodes } = useSnapshot({
-    filterQuery,
+    kuery,
     metrics:
       expression.metric === 'custom'
         ? [buildCustomMetric(expression.customMetric)]
@@ -80,6 +86,8 @@ export const ExpressionChart: React.FC<Props> = ({
     accountId,
     region,
     timerange,
+    schema,
+    includeTimeseries: true,
   });
 
   const metric = {
@@ -143,13 +151,14 @@ export const ExpressionChart: React.FC<Props> = ({
   const firstTimestamp = first(firstSeries.rows)!.timestamp;
   const lastTimestamp = last(firstSeries.rows)!.timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
-  const domain = {
-    max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor
+  const domainWithThresholds = {
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min),
+    max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max),
   };
+  let domain = applyHeadroomToDomain(domainWithThresholds, { min: 0.9, max: 1.1 });
 
   if (domain.min === first(convertedThresholds)) {
-    domain.min = domain.min * 0.9;
+    domain = applyHeadroomToDomain(domain, { min: 0.9 });
   }
 
   const { timeSize, timeUnit } = expression;

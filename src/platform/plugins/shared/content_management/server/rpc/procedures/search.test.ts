@@ -26,9 +26,9 @@ jest.mock('@kbn/object-versioning', () => {
   const original = jest.requireActual('@kbn/object-versioning');
   return {
     ...original,
-    getContentManagmentServicesTransforms: (...args: any[]) => {
+    getContentManagementServicesTransforms: (...args: any[]) => {
       spy()(...args);
-      return original.getContentManagmentServicesTransforms(...args);
+      return original.getContentManagementServicesTransforms(...args);
     },
   };
 });
@@ -90,7 +90,8 @@ describe('RPC -> search()', () => {
         },
         {
           input: { ...validInput, unknown: 'foo' },
-          expectedError: '[unknown]: definition for this key is missing',
+          expectedError:
+            "[unknown]: Additional properties are not allowed ('unknown' was unexpected)",
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);

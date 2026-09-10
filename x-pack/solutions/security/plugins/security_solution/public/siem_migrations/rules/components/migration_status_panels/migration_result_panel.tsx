@@ -8,18 +8,19 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
-  EuiBasicTable,
-  EuiHealth,
-  EuiText,
-  EuiAccordion,
-  EuiButtonIcon,
+  EuiPanel,
   EuiSpacer,
-  EuiBadge,
+  EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
   useEuiTheme,
 } from '@elastic/eui';
@@ -30,20 +31,18 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { css } from '@emotion/react';
 import { PanelText } from '../../../../common/components/panel_text';
-import {
-  convertTranslationResultIntoText,
-  useResultVisColors,
-} from '../../utils/translation_results';
+import { convertTranslationResultIntoText, useResultVisColors } from '../../../common/utils';
 import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { RuleMigrationStats } from '../../types';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
-import { RuleMigrationsLastError } from './last_error';
-import { MigrationPanelTitle } from './migration_panel_title';
+import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
+import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
+import { TotalExecutionTime } from '../../../common/components/total_execution_time';
 
 const headerStyle = css`
   &:hover {
@@ -64,13 +63,13 @@ const useCompleteBadgeStyles = () => {
   `;
 };
 
-export interface MigrationResultPanelProps {
+export interface RuleMigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
   isCollapsed: boolean;
   onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
-export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
+export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps>(
   ({ migrationStats, isCollapsed = false, onToggleCollapsed }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
       useGetMigrationTranslationStats(migrationStats.id);
@@ -88,7 +87,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
             <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <MigrationPanelTitle migrationStats={migrationStats} />
+                  <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued>
@@ -98,6 +97,12 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                         moment(migrationStats.last_updated_at).fromNow()
                       )}
                     </p>
+                    {migrationStats.last_execution?.total_execution_time_ms && (
+                      <TotalExecutionTime
+                        migrationType="rule"
+                        milliseconds={migrationStats.last_execution.total_execution_time_ms}
+                      />
+                    )}
                   </PanelText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -106,11 +111,18 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
               <EuiBadge css={completeBadgeStyles}>{i18n.RULE_MIGRATION_COMPLETE_BADGE}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
-                onClick={toggleCollapsed}
-                aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
-              />
+              <EuiToolTip
+                content={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType={isCollapsed ? 'chevronSingleDown' : 'chevronSingleUp'}
+                  onClick={toggleCollapsed}
+                  aria-label={
+                    isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE
+                  }
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -124,7 +136,10 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
             {migrationStats.last_execution?.error && (
               <>
-                <RuleMigrationsLastError message={migrationStats.last_execution.error} />
+                <MigrationsLastError
+                  message={migrationStats.last_execution.error}
+                  migrationType="rule"
+                />
                 <EuiSpacer size="m" />
               </>
             )}
@@ -132,7 +147,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={AssistantIcon} size="m" />
+                    <EuiIcon type={AssistantIcon} size="m" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <PanelText size="s" semiBold>
@@ -182,7 +197,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
     );
   }
 );
-MigrationResultPanel.displayName = 'MigrationResultPanel';
+RuleMigrationResultPanel.displayName = 'MigrationResultPanel';
 
 const TranslationResultsChart = React.memo<{
   translationStats: RuleMigrationTranslationStats;
@@ -192,17 +207,17 @@ const TranslationResultsChart = React.memo<{
   const data = [
     {
       category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: convertTranslationResultIntoText(RuleTranslationResult.FULL),
+      type: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
       value: translationStats.rules.success.result.full,
     },
     {
       category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
+      type: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
       value: translationStats.rules.success.result.partial,
     },
     {
       category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
+      type: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
       value: translationStats.rules.success.result.untranslatable,
     },
     {
@@ -213,9 +228,9 @@ const TranslationResultsChart = React.memo<{
   ];
 
   const colors = [
-    translationResultColors[RuleTranslationResult.FULL],
-    translationResultColors[RuleTranslationResult.PARTIAL],
-    translationResultColors[RuleTranslationResult.UNTRANSLATABLE],
+    translationResultColors[MigrationTranslationResult.FULL],
+    translationResultColors[MigrationTranslationResult.PARTIAL],
+    translationResultColors[MigrationTranslationResult.UNTRANSLATABLE],
     translationResultColors.error,
   ];
 
@@ -274,19 +289,19 @@ const TranslationResultsTable = React.memo<{
   const items = useMemo<TranslationResultsTableItem[]>(
     () => [
       {
-        title: convertTranslationResultIntoText(RuleTranslationResult.FULL),
+        title: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
         value: translationStats.rules.success.result.full,
-        color: translationResultColors[RuleTranslationResult.FULL],
+        color: translationResultColors[MigrationTranslationResult.FULL],
       },
       {
-        title: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
+        title: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
         value: translationStats.rules.success.result.partial,
-        color: translationResultColors[RuleTranslationResult.PARTIAL],
+        color: translationResultColors[MigrationTranslationResult.PARTIAL],
       },
       {
-        title: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
+        title: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
         value: translationStats.rules.success.result.untranslatable,
-        color: translationResultColors[RuleTranslationResult.UNTRANSLATABLE],
+        color: translationResultColors[MigrationTranslationResult.UNTRANSLATABLE],
       },
       {
         title: i18n.RULE_MIGRATION_TRANSLATION_FAILED,
@@ -302,6 +317,7 @@ const TranslationResultsTable = React.memo<{
       data-test-subj="translatedResultsTable"
       items={items}
       columns={columns}
+      tableCaption={i18n.RULE_MIGRATION_SUMMARY_TITLE}
       compressed
     />
   );

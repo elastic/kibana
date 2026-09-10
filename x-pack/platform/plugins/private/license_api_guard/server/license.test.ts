@@ -9,7 +9,8 @@ import { of } from 'rxjs';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { License } from './license';
-import { LicenseCheckState, licensingMock, LicenseType } from './shared_imports';
+import type { LicenseCheckState, LicenseType } from './shared_imports';
+import { licensingMock } from './shared_imports';
 
 describe('License API guard', () => {
   const pluginName = 'testPlugin';
@@ -90,7 +91,7 @@ describe('License API guard', () => {
           minimumLicenseType: 'basic',
           licensing: mockLicensingService({ licenseType: 'gold', licenseState: 'valid' }),
         });
-      }).toThrowError(
+      }).toThrow(
         `Basic licenses don't restrict the use of plugins. Please don't use license_api_guard in the ${pluginName} plugin, or provide a more restrictive minimumLicenseType.`
       );
     });

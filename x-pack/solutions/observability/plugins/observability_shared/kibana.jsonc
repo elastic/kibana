@@ -20,7 +20,7 @@
       "share"
     ],
     "optionalPlugins": [
-      "guidedOnboarding"
+      "agentBuilder"
     ],
     "requiredBundles": [
       "cases",

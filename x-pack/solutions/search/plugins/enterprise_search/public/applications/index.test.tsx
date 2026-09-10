@@ -17,7 +17,6 @@ import { Observable } from 'rxjs';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
@@ -29,7 +28,6 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
 
 import { renderApp, renderHeaderActions } from '.';
@@ -42,7 +40,6 @@ describe('renderApp', () => {
       charts: chartPluginMock.createStartContract(),
       contentConnectors: searchConnectorsMock.createStart(),
       data: dataPluginMock.createStartContract(),
-      guidedOnboarding: guidedOnboardingMock.createStart(),
       indexManagement: {
         getIndexMappingComponent: jest.fn(),
       },
@@ -91,21 +88,6 @@ describe('renderApp', () => {
   const mount = (App: React.FC) => {
     unmount = renderApp(App, kibanaDeps, pluginData);
   };
-
-  describe('Enterprise Search apps', () => {
-    afterEach(() => {
-      act(() => {
-        unmount();
-      });
-    });
-
-    it('renders EnterpriseSearchOverview', () => {
-      act(() => {
-        mount(EnterpriseSearchOverview);
-      });
-      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
-    });
-  });
 
   describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');

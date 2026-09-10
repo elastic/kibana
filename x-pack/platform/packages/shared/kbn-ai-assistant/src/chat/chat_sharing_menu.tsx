@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiBadge,
@@ -13,7 +14,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelectableOption,
   EuiIcon,
   useEuiTheme,
   EuiLoadingSpinner,
@@ -176,6 +176,9 @@ export function ChatSharingMenu({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.popoverAriaLabel', {
+        defaultMessage: 'Sharing options',
+      })}
       button={
         <EuiBadge
           iconType={selectedValue === ConversationAccess.SHARED ? 'users' : 'lock'}
@@ -190,7 +193,12 @@ export function ChatSharingMenu({
           data-test-subj="observabilityAiAssistantChatAccessBadge"
         >
           {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
-          <EuiIcon type="arrowDown" size="m" css={{ paddingLeft: euiTheme.size.xs }} />
+          <EuiIcon
+            type="chevronSingleDown"
+            size="m"
+            css={{ paddingLeft: euiTheme.size.xs }}
+            aria-hidden={true}
+          />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}

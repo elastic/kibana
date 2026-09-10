@@ -15,13 +15,10 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
-import {
-  EnrichedDeprecationInfo,
-  ReindexAction,
-  ReindexStatus,
-} from '../../../../../../common/types';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { EnrichedDeprecationInfo, ReindexAction } from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useIndexContext } from './context';
@@ -304,7 +301,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexCompleteText}</EuiText>
@@ -316,7 +313,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="warningFilled" color="danger" />
+              <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
@@ -329,7 +326,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFilled" color="danger" />
+            <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexFetchFailedText}</EuiText>
@@ -340,7 +337,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFilled" color="danger" />
+            <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexPausedText}</EuiText>
@@ -367,7 +364,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts[`${updateAction}CompleteText`]}</EuiText>
@@ -381,16 +378,13 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       <EuiText size="s" color="subdued">
         <em>
           {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
-          <EuiToolTip
+          <EuiIconTip
             position="top"
             content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-          >
-            <EuiIcon
-              type="info"
-              aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-              size="s"
-            />
-          </EuiToolTip>
+            type="info"
+            aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+            size="s"
+          />
         </em>
       </EuiText>
     );

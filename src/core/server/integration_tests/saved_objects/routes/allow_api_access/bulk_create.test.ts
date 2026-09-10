@@ -8,7 +8,7 @@
  */
 
 import supertest from 'supertest';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
@@ -19,11 +19,8 @@ import {
   registerBulkCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import {
-  createHiddenTypeVariants,
-  setupServer,
-  SetupServerReturn,
-} from '@kbn/core-test-helpers-test-utils';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from '../routes_test_utils';
 
@@ -89,7 +86,7 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
       .expect(200);
 
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkCreate).nthCalledWith(1, expect.anything(), {
+    expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(1, expect.anything(), {
       migrationVersionCompatibility: 'compatible',
       overwrite: true,
     });

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
-import { useChatSend, UseChatSendProps } from './use_chat_send';
+import type { UseChatSendProps } from './use_chat_send';
+import { useChatSend } from './use_chat_send';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
@@ -144,5 +145,35 @@ describe('use chat send', () => {
         isEnabledKnowledgeBase: false,
       });
     });
+  });
+  it('retries getConversation up to 5 times if title is empty, and stops when title is found', async () => {
+    const promptText = 'test prompt';
+    const getConversationMock = jest.fn();
+    // First 3 calls return empty title, 4th returns non-empty
+    getConversationMock
+      .mockResolvedValueOnce({ title: '' })
+      .mockResolvedValueOnce({ title: '' })
+      .mockResolvedValueOnce({ title: '' })
+      .mockResolvedValueOnce({ title: 'Final Title' });
+    (useConversation as jest.Mock).mockReturnValue({
+      removeLastMessage,
+      clearConversation,
+      getConversation: getConversationMock,
+      createConversation: jest.fn(),
+    });
+    const { result } = renderHook(
+      () =>
+        useChatSend({
+          ...testProps,
+          currentConversation: { ...emptyWelcomeConvo, id: 'convo-id', title: '' },
+        }),
+      { wrapper: TestProviders }
+    );
+    await act(async () => {
+      await result.current.handleChatSend(promptText);
+    });
+    // Should call getConversation 4 times (until non-empty title)
+    expect(getConversationMock).toHaveBeenCalledTimes(4);
+    expect(getConversationMock).toHaveBeenLastCalledWith('convo-id');
   });
 });

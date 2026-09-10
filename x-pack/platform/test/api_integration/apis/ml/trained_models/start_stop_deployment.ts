@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { MlGetTrainedModelsStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SUPPORTED_TRAINED_MODELS } from '../../../services/ml/api';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -144,6 +144,18 @@ export default ({ getService }: FtrProviderContext) => {
       expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
+    });
+
+    it('returns an error if the model exists but the deployment does not', async () => {
+      const missingDeploymentId = 'not_existing_deployment';
+      const { body: stopResponseBody, status: stopResponseStatus } = await supertest
+        .post(`/internal/ml/trained_models/${testModel.id}/${missingDeploymentId}/deployment/_stop`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(getCommonRequestHeader('1'));
+      ml.api.assertResponseStatusCode(200, stopResponseStatus, stopResponseBody);
+
+      expect(stopResponseBody[missingDeploymentId].success).to.eql(false);
+      expect(stopResponseBody[missingDeploymentId].error.statusCode).to.eql(404);
     });
 
     it('stops trained model deployment with the default ID', async () => {

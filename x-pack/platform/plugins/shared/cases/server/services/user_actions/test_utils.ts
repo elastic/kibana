@@ -25,6 +25,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import {
+  ATTACHMENT_ID_REF_NAME,
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
@@ -41,7 +42,6 @@ import {
   externalReferenceAttachmentSO,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { transformFindResponseToExternalModel } from './transform';
 
 export const createUserActionFindSO = (
@@ -186,7 +186,7 @@ export const createCaseUserAction = (): SavedObject<CaseUserActionWithoutReferen
         connector: restConnector,
         title: 'a title',
         description: 'a desc',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         status: CaseStatuses.open,
         severity: CaseSeverity.LOW,
         tags: [],
@@ -229,8 +229,36 @@ export const createExternalReferenceUserAction = () => {
   };
 };
 
+export const createUnifiedFileUserAction = () => {
+  return {
+    ...createUserActionSO({
+      action: UserActionActions.create,
+      commentId: 'unified-file-test-id',
+      payload: {
+        comment: {
+          type: 'file',
+          attachmentId: 'file-so-id',
+          owner: 'securitySolution',
+          metadata: {
+            soType: 'file',
+            files: [
+              {
+                name: 'image',
+                extension: 'png',
+                mimeType: 'image/png',
+                created: '2026-05-04T21:33:45.025Z',
+              },
+            ],
+          },
+        },
+      },
+      type: 'comment',
+      references: [{ id: 'file-so-id', name: ATTACHMENT_ID_REF_NAME, type: 'file' }],
+    }),
+  };
+};
+
 export const testConnectorId = (
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry,
   userAction: SavedObject<CaseUserActionWithoutReferenceIds>,
   path: string,
   expectedConnectorId = '1'
@@ -238,8 +266,7 @@ export const testConnectorId = (
   it('does set payload.connector.id to none when it cannot find the reference', () => {
     const userActionWithEmptyRef = { ...userAction, references: [] };
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
-      persistableStateAttachmentTypeRegistry
+      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)])
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
@@ -253,8 +280,7 @@ export const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionWithoutReferenceIds>),
-      ]),
-      persistableStateAttachmentTypeRegistry
+      ])
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -268,8 +294,7 @@ export const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionWithoutReferenceIds>),
-      ]),
-      persistableStateAttachmentTypeRegistry
+      ])
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -277,8 +302,7 @@ export const testConnectorId = (
 
   it('populates the payload.connector.id', () => {
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userAction)]),
-      persistableStateAttachmentTypeRegistry
+      createSOFindResponse([createUserActionFindSO(userAction)])
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);

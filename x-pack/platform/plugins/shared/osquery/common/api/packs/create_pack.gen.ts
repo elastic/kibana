@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -23,17 +23,99 @@ import {
   PolicyIdsOrUndefined,
   Shards,
   ObjectQueries,
+  ScheduleType,
+  PackInterval,
+  RRuleScheduleConfig,
 } from '../model/schema/common_attributes.gen';
 
+export const CreatePacksRequestBody = lazySchema(() =>
+  z.object({
+    name: PackName.optional(),
+    description: PackDescriptionOrUndefined.optional(),
+    enabled: EnabledOrUndefined.optional(),
+    policy_ids: PolicyIdsOrUndefined.optional(),
+    shards: Shards.optional(),
+    queries: ObjectQueries.optional(),
+    schedule_type: ScheduleType.optional(),
+    interval: PackInterval.optional(),
+    rrule_schedule: RRuleScheduleConfig.optional(),
+  })
+);
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
-export const CreatePacksRequestBody = z.object({
-  name: PackName.optional(),
-  description: PackDescriptionOrUndefined.optional(),
-  enabled: EnabledOrUndefined.optional(),
-  policy_ids: PolicyIdsOrUndefined.optional(),
-  shards: Shards.optional(),
-  queries: ObjectQueries.optional(),
-});
 
+/**
+ * The response for creating a pack.
+ */
+export const CreatePacksResponse = lazySchema(() =>
+  z.object({
+    data: z.object({
+      /**
+       * The saved object ID of the pack.
+       */
+      saved_object_id: z.string().describe('The saved object ID of the pack.'),
+      name: PackName,
+      description: PackDescriptionOrUndefined.optional(),
+      queries: ObjectQueries.optional(),
+      /**
+       * The pack version number.
+       */
+      version: z.number().int().optional().describe('The pack version number.'),
+      enabled: EnabledOrUndefined.optional(),
+      /**
+       * The date and time the pack was created.
+       */
+      created_at: z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The date and time the pack was created.'),
+      /**
+       * The user who created the pack.
+       */
+      created_by: z.string().nullable().optional().describe('The user who created the pack.'),
+      /**
+       * The profile UID of the user who created the pack.
+       */
+      created_by_profile_uid: z
+        .string()
+        .optional()
+        .describe('The profile UID of the user who created the pack.'),
+      /**
+       * The date and time the pack was last updated.
+       */
+      updated_at: z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The date and time the pack was last updated.'),
+      /**
+       * The user who last updated the pack.
+       */
+      updated_by: z.string().nullable().optional().describe('The user who last updated the pack.'),
+      /**
+       * The profile UID of the user who last updated the pack.
+       */
+      updated_by_profile_uid: z
+        .string()
+        .optional()
+        .describe('The profile UID of the user who last updated the pack.'),
+      policy_ids: PolicyIdsOrUndefined.optional(),
+      /**
+       * Shard configuration as an array of key-value pairs.
+       */
+      shards: z
+        .array(
+          z.object({
+            key: z.string().optional(),
+            value: z.number().optional(),
+          })
+        )
+        .optional()
+        .describe('Shard configuration as an array of key-value pairs.'),
+      schedule_type: ScheduleType.optional(),
+      interval: PackInterval.optional(),
+      rrule_schedule: RRuleScheduleConfig.optional(),
+    }),
+  })
+);
 export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;
-export const CreatePacksResponse = z.object({});

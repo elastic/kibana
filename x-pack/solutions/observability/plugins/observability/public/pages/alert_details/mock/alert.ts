@@ -9,6 +9,7 @@ import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_FLAPPING,
   ALERT_GROUP,
   ALERT_INSTANCE_ID,
   ALERT_REASON,
@@ -32,7 +33,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { AlertData } from '../../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import type { TopAlert } from '../../../typings/alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
@@ -63,6 +64,7 @@ export const alert: TopAlert = {
     [VERSION]: '8.0.0',
     [EVENT_KIND]: 'signal',
     [ALERT_EVALUATION_THRESHOLD]: 100.25,
+    [ALERT_FLAPPING]: false,
     [ALERT_RULE_TAGS]: [],
   },
   active: true,

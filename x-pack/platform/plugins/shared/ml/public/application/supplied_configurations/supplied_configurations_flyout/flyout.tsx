@@ -19,10 +19,11 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { Module } from '../../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { isLogoObject } from '../supplied_configurations';
 import { OverviewTabContent } from './overview_tab_content';
 import { JobsTabContent } from './jobs_tab_content';
@@ -115,22 +116,26 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
     [tabs, selectedTabId]
   );
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <EuiFlyout
       size="l"
       ownFocus
       onClose={onClose}
-      aria-labelledby={'supplied-configurations-flyout'}
+      aria-labelledby={flyoutTitleId}
       data-test-subj={`mlSuppliedConfigurationsFlyout ${module.id}`}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}>
-            {isLogoObject(module.logo) ? <EuiIcon size="xxl" type={module.logo.icon} /> : null}
+            {isLogoObject(module.logo) ? (
+              <EuiIcon aria-hidden={true} size="xxl" type={module.logo.icon} />
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id={module.id}>{module.title}</h2>
+              <h2 id={flyoutTitleId}>{module.title}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

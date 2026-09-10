@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Unfollow follower index's leader index
@@ -17,7 +17,7 @@ export const registerUnfollowRoute = ({
   license,
   lib: { handleEsError },
 }: RouteDependencies) => {
-  const paramsSchema = schema.object({ id: schema.string() });
+  const paramsSchema = schema.object({ id: schema.string({ maxLength: 1000 }) });
 
   router.put(
     {

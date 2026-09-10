@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { MissingPrivileges } from '../../../../common/entity_analytics/risk_engine';
 import { useKibana } from '../../../common/lib/kibana';
-import { CommaSeparatedValues } from '../../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
+import { CommaSeparatedValues } from '../../../common/components/missing_privileges';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageTitle',
@@ -44,7 +44,7 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.riskEngineRequirementsDocLink"
-                      defaultMessage="Risk Scoring prerequisites"
+                      defaultMessage="Risk score maintainer prerequisites"
                     />
                   </EuiLink>
                 ),
@@ -72,7 +72,7 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               <>
                 <FormattedMessage
                   id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesEnableTitle"
-                  defaultMessage="Missing Elasticsearch cluster privileges to enable Risk Score engine:"
+                  defaultMessage="Missing Elasticsearch cluster privileges to enable the risk score maintainer:"
                 />
                 <ul>
                   {clusterPrivileges.enable.map((privilege) => (
@@ -85,7 +85,7 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               <>
                 <FormattedMessage
                   id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesRunTitle"
-                  defaultMessage="Missing Elasticsearch cluster privileges to run Risk Score engine:"
+                  defaultMessage="Missing Elasticsearch cluster privileges to run the risk score maintainer:"
                 />
                 <ul>
                   {clusterPrivileges.run.map((privilege) => (

@@ -12,7 +12,8 @@ import { shallow } from 'enzyme';
 
 import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { LineOptions, LineOptionsParams } from './line_options';
+import type { LineOptionsParams } from './line_options';
+import { LineOptions } from './line_options';
 import { seriesParam } from './mocks';
 
 const LINE_WIDTH = 'lineWidth';
@@ -41,20 +42,20 @@ describe('LineOptions component', () => {
     const comp = shallow(<LineOptions {...defaultProps} />);
     comp.find(NumberInputOption).prop('setValue')(LINE_WIDTH, '');
 
-    expect(setChart).toBeCalledWith(LINE_WIDTH, undefined);
+    expect(setChart).toHaveBeenCalledWith(LINE_WIDTH, undefined);
   });
 
   it('should set lineWidth value', () => {
     const comp = shallow(<LineOptions {...defaultProps} />);
     comp.find(NumberInputOption).prop('setValue')(LINE_WIDTH, 5);
 
-    expect(setChart).toBeCalledWith(LINE_WIDTH, 5);
+    expect(setChart).toHaveBeenCalledWith(LINE_WIDTH, 5);
   });
 
   it('should set drawLinesBetweenPoints', () => {
     const comp = shallow(<LineOptions {...defaultProps} />);
     comp.find({ paramName: DRAW_LINES }).prop('setValue')(DRAW_LINES, false);
 
-    expect(setChart).toBeCalledWith(DRAW_LINES, false);
+    expect(setChart).toHaveBeenCalledWith(DRAW_LINES, false);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CombinedState } from 'redux';
+import type { CombinedState } from 'redux-v4';
 import type { SecurityPageName } from '../app/types';
 import type { PolicyDetailsState } from './pages/policy/types';
 import type { EndpointState } from './pages/endpoint_hosts/types';
@@ -27,11 +27,14 @@ export type ManagementState = CombinedState<{
 export enum AdministrationSubTab {
   endpoints = 'endpoints',
   policies = 'policy',
+  endpointExceptions = 'endpoint_exceptions',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   eventFilters = 'event_filters',
   hostIsolationExceptions = 'host_isolation_exceptions',
   blocklist = 'blocklist',
   responseActionsHistory = 'response_actions_history',
+  scriptLibrary = 'script_library',
   protectionUpdates = 'protection_updates',
   notes = 'notes',
 }

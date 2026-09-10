@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import type { Transform } from './transform';
 import type { View } from './view';
 import type { Datasource } from './datasource';
@@ -16,7 +16,7 @@ export type ArgDisplayType = 'model' | 'argument';
 
 export type ArgTypeDef = View | Model | Transform | Datasource;
 
-export { Transform, View, Datasource, Model };
+export type { Transform, View, Datasource, Model };
 export type { Arg } from './arg';
 
 export type ExpressionType = View | Model | Transform;

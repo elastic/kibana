@@ -11,24 +11,29 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { GenericOperationDefinition } from '../operations';
+import type { GenericOperationDefinition } from '../operations';
+import type {
+  FieldBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  ReferenceBasedIndexPatternColumn,
+  IndexPattern,
+  VisualizationDimensionGroupConfig,
+} from '@kbn/lens-common';
+import type { FieldInputProps } from '../operations/definitions';
 import {
   averageOperation,
   countOperation,
   derivativeOperation,
-  FieldBasedIndexPatternColumn,
   termsOperation,
   staticValueOperation,
   minOperation,
-  FieldInputProps,
 } from '../operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
-import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
-import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
 import { FieldSelect } from './field_select';
-import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 
 function getStringBasedOperationColumn(field = 'source') {
   return {
@@ -151,6 +156,39 @@ describe('FieldInput', () => {
     expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
+  it('should expose the Lens-committed field display name on the combobox for functional tests', () => {
+    const { unmount } = renderFieldInput({
+      selectedColumn: getStringBasedOperationColumn(),
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'source'
+    );
+    unmount();
+
+    renderFieldInput({ incompleteField: 'dest' });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'dest'
+    );
+  });
+
+  it('should expose displayName on data-selected-field when it differs from the source field id', () => {
+    renderFieldInput({
+      selectedColumn: {
+        label: 'timestamp',
+        dataType: 'date',
+        isBucketed: false,
+        operationType: 'min',
+        sourceField: 'timestamp',
+      },
+    });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'timestampLabel'
+    );
+  });
+
   it('should render an error message when incomplete operation is on', () => {
     const { container } = renderFieldInput({
       incompleteOperation: 'terms',
@@ -255,7 +293,7 @@ describe('FieldInput', () => {
     expect(instance.find(EuiComboBox).first().prop('selectedOptions')).toEqual([
       {
         label: 'dest',
-        value: { type: 'field', field: 'dest' },
+        value: { type: 'field', field: 'dest', operationType: 'terms' },
       },
     ]);
   });

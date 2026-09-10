@@ -77,8 +77,6 @@ export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_Q
 
 export const toggleTimelineLinkTo = actionCreator('TOGGLE_TIMELINE_LINK_TO');
 
-export const toggleSocTrendsLinkTo = actionCreator('TOGGLE_SOC_TRENDS_LINK_TO');
-
 export const removeLinkTo = actionCreator<InputsModelId[]>('REMOVE_LINK_TO');
 export const addLinkTo = actionCreator<InputsModelId[]>('ADD_LINK_TO');
 

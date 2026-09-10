@@ -19,7 +19,7 @@ import type {
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fileds';
+import { unflattenMetadataInfoFields } from './unflatten_metadata_info_fields';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,
@@ -63,7 +63,17 @@ export const getNodeInfo = async (
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,
-      fields: ['host.*', 'cloud.*', 'agent.*', 'container.*', TIMESTAMP_FIELD],
+      fields: [
+        'host.*',
+        'cloud.*',
+        'agent.*',
+        'container.*',
+        'resource.attributes.os.*',
+        'resource.attributes.host.*',
+        'resource.attributes.agent.*',
+        'resource.attributes.cloud.*',
+        TIMESTAMP_FIELD,
+      ],
       sort: [{ [TIMESTAMP_FIELD]: 'desc' }],
       query: {
         bool: {

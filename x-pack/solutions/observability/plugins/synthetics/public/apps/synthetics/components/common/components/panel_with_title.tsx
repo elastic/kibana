@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle, useEuiTheme, EuiPanelProps } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 
 export const PanelWithTitle: React.FC<
-  { title?: string; titleLeftAlign?: boolean; margin?: string } & EuiPanelProps
+  { title?: string; titleLeftAlign?: boolean; margin?: string; helpText?: string } & EuiPanelProps
 > = ({
   title,
   hasBorder = true,
@@ -17,6 +25,7 @@ export const PanelWithTitle: React.FC<
   children,
   titleLeftAlign,
   margin,
+  helpText,
   ...props
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -32,7 +41,16 @@ export const PanelWithTitle: React.FC<
               ...(titleLeftAlign ? { marginLeft: 0 } : {}),
             }}
           >
-            {title}
+            {helpText ? (
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip type="question" content={helpText} position="top" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              title
+            )}
           </h3>
         </EuiTitle>
       )}

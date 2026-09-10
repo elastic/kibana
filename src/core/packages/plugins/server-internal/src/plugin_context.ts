@@ -12,11 +12,16 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { IContextProvider, IRouter } from '@kbn/core-http-server';
-import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
-import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { PluginWrapper } from './plugin';
-import {
+import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
+import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type {
+  CoreRequestHandlerContext,
+  RequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { PluginWrapper } from './plugin';
+import type {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
@@ -27,6 +32,7 @@ import type { IRuntimePluginContractResolver } from './plugin_contract_resolver'
 /** @internal */
 export interface InstanceInfo {
   uuid: string;
+  airgapped: boolean;
 }
 
 /**
@@ -70,6 +76,7 @@ export function createPluginInitializerContext({
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+      airgapped: instanceInfo.airgapped,
     },
 
     /**
@@ -265,8 +272,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
       setSecurityExtension: deps.savedObjects.setSecurityExtension,
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
+      setAccessControlTransforms: deps.savedObjects.setAccessControlTransforms,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      isAccessControlEnabled: deps.savedObjects.isAccessControlEnabled,
     },
     status: {
       core$: deps.status.core$,
@@ -283,7 +292,14 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     userSettings: {},
     getStartServices: () => plugin.startDependencies,
+    createRequestHandlerContext: async (request): Promise<CoreRequestHandlerContext> => {
+      const [coreStart] = await plugin.startDependencies;
+      return new CoreRouteHandlerContext(coreStart as unknown as InternalCoreStart, request);
+    },
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    userActivity: {
+      trackUserAction: deps.userActivity.trackUserAction,
+    },
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
       registerDeprecatedUsageFetch: deps.coreUsageData.registerDeprecatedUsageFetch,
@@ -299,10 +315,20 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
+    },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    dataStreams: {
+      registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
+    },
+    userStorage: {
+      register: deps.userStorage.register,
     },
   };
 }
@@ -358,6 +384,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
@@ -366,6 +393,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      getUnsafeInternalClient: deps.savedObjects.getUnsafeInternalClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
@@ -387,6 +415,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
+    userActivity: {
+      trackUserAction: deps.userActivity.trackUserAction,
+    },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
@@ -394,7 +425,18 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts,
     },
     userProfile: deps.userProfile,
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    dataStreams: {
+      initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    userStorage: {
+      asScoped: deps.userStorage.asScoped,
+    },
   };
 }

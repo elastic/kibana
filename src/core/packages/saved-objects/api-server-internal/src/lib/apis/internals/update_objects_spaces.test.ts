@@ -23,10 +23,8 @@ import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-inte
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import {
-  ISavedObjectsSecurityExtension,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   checkAuthError,
   enforceError,
@@ -269,7 +267,7 @@ describe('#updateObjectsSpaces', () => {
       const params = setup({ objects, spacesToAdd });
       mockMgetResultsNotFound();
 
-      await expect(() => updateObjectsSpaces(params)).rejects.toThrowError(
+      await expect(() => updateObjectsSpaces(params)).rejects.toThrow(
         SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
       );
     });

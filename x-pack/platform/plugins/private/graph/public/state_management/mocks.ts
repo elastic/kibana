@@ -6,14 +6,16 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
+import type { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
-import { createStore, applyMiddleware, AnyAction } from 'redux';
-import { ChromeStart } from '@kbn/core/public';
+import type { Action } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
+import type { ChromeStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
-import { Workspace } from '../types';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { GraphStoreDependencies, GraphStore, GraphState } from './store';
+import { createRootReducer } from './store';
+import type { Workspace } from '../types';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;
@@ -89,10 +91,18 @@ export function createMockGraphStore({
   const sagaMiddleware = createSagaMiddleware();
 
   const rootReducer = createRootReducer(mockedDeps.addBasePath);
-  const initializedRootReducer = (state: GraphState | undefined, action: AnyAction) =>
+  const initializedRootReducer = (state: GraphState | undefined, action: Action<string>) =>
     rootReducer(state || (initialStateOverwrites as GraphState), action);
 
-  const store = createStore(initializedRootReducer, applyMiddleware(sagaMiddleware));
+  const store = configureStore({
+    reducer: initializedRootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        thunk: false,
+        serializableCheck: false,
+        immutableCheck: false,
+      }).concat(sagaMiddleware),
+  });
 
   store.dispatch = jest.fn(store.dispatch);
 

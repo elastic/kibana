@@ -9,7 +9,7 @@ import React from 'react';
 import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -22,6 +22,9 @@ import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_i
 import * as TEST_SUBJECTS from './test_subjects';
 import { SECURITY_FEATURE_ID } from '../../test/constants';
 
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: () => null,
+}));
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');

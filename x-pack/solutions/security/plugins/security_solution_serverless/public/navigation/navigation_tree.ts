@@ -5,97 +5,153 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import {
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SecurityGroupName,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 import { type Services } from '../common/services';
-import { createStackManagementNavigationTree } from './stack_management_navigation';
+import { createManagementFooterItemsTree } from './management_footer_items';
 
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectType.title',
-  { defaultMessage: 'Security' }
-);
+export const createNavigationTree = async (
+  services: Services,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): Promise<NavigationTreeDefinition> => {
+  const showAgentBuilder = chatExperience === AIChatExperience.Agent;
+  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
+    AGENT_BUILDER_NAV_AT_TOP_FLAG,
+    false
+  );
+  const agentBuilderLink = {
+    icon: 'productAgent',
+    link: 'agent_builder' as AppDeepLinkId,
+  };
+  const contextEngineLink = {
+    icon: 'sparkles',
+    link: 'context_engine' as AppDeepLinkId,
+  };
 
-export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
-  body: [
-    {
-      type: 'navGroup',
-      id: 'security_solution_nav',
-      title: SOLUTION_NAME,
-      icon: 'logoSecurity',
-      breadcrumbStatus: 'hidden',
-      isCollapsible: false,
-      defaultIsCollapsed: false,
-      children: [
-        {
-          link: 'discover',
-        },
-        defaultNavigationTree.dashboards(),
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.rules(),
-            {
-              id: SecurityPageName.alerts,
-              link: securityLink(SecurityPageName.alerts),
-            },
-            {
-              id: SecurityPageName.attackDiscovery,
-              link: securityLink(SecurityPageName.attackDiscovery),
-            },
-            {
-              id: SecurityPageName.cloudSecurityPostureFindings,
-              link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
-            },
-            defaultNavigationTree.cases(),
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.investigations(),
-            {
-              id: SecurityPageName.threatIntelligence,
-              link: securityLink(SecurityPageName.threatIntelligence),
-            },
-            defaultNavigationTree.explore(),
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.assetInventory,
-              link: securityLink(SecurityPageName.assetInventory),
-            },
-            defaultNavigationTree.assets(services),
-            defaultNavigationTree.entityAnalytics(),
-          ],
-        },
-        defaultNavigationTree.ml(),
-      ],
-    },
-  ],
-  footer: [
-    {
-      id: 'security_solution_nav_footer',
-      type: 'navGroup',
-      children: [
-        {
-          id: SecurityPageName.landing,
-          link: securityLink(SecurityPageName.landing),
-          icon: 'launch',
-        },
-        {
-          link: 'dev_tools',
-          title: i18nStrings.devTools,
-          icon: 'editorCodeBlock',
-        },
-        createStackManagementNavigationTree(),
-      ],
-    },
-  ],
-});
+  return {
+    body: [
+      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      contextEngineLink,
+      {
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'mail',
+      },
+      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      ...defaultNavigationTree.alertZero(),
+      {
+        link: 'discover',
+        icon: 'productDiscover',
+      },
+      defaultNavigationTree.dashboards(),
+      ...defaultNavigationTree.alertZeroSecondary(),
+      defaultNavigationTree.rules(),
+      services.uiSettings.get(
+        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+        services.experimentalFeatures.enableAlertsAndAttacksAlignment
+      )
+        ? defaultNavigationTree.alertDetections()
+        : {
+            id: SecurityPageName.alerts,
+            icon: 'warning',
+            link: securityLink(SecurityPageName.alerts),
+          },
+      ...getWorkflowsNavPanel(services),
+      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
+      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      {
+        id: SecurityPageName.attackDiscovery,
+        icon: 'bolt',
+        link: securityLink(SecurityPageName.attackDiscovery),
+      },
+      {
+        id: SecurityPageName.cloudSecurityPostureFindings,
+        icon: 'bullseye',
+        link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+      },
+      defaultNavigationTree.cases(),
+      defaultNavigationTree.entityAnalytics(
+        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
+      ),
+      defaultNavigationTree.explore(),
+      defaultNavigationTree.investigations(),
+      {
+        id: SecurityPageName.threatIntelligence,
+        icon: 'processor',
+        link: securityLink(SecurityPageName.threatIntelligence),
+      },
+      {
+        id: SecurityPageName.assetInventory,
+        icon: 'listCheck',
+        link: securityLink(SecurityPageName.assetInventory),
+      },
+      defaultNavigationTree.assets(services),
+      defaultNavigationTree.ml(),
+      {
+        id: SecurityPageName.onboarding,
+        link: 'onboarding' as AppDeepLinkId,
+        sideNavStatus: 'hidden',
+      },
+    ],
+    footer: [
+      {
+        id: SecurityGroupName.launchpad,
+        title: i18nStrings.launchPad.title,
+        renderAs: 'panelOpener',
+        icon: 'rocket',
+        children: [
+          {
+            children: [
+              {
+                id: SecurityPageName.landing,
+                link: securityLink(SecurityPageName.landing),
+              },
+              {
+                id: SecurityPageName.siemReadiness,
+                link: securityLink(SecurityPageName.siemReadiness),
+                badgeType: 'new',
+              },
+              {
+                // value report
+                id: SecurityPageName.aiValue,
+                link: securityLink(SecurityPageName.aiValue),
+              },
+            ],
+          },
+          {
+            title: i18nStrings.launchPad.migrations.title,
+            children: [
+              {
+                id: SecurityPageName.siemMigrationsManage,
+                link: securityLink(SecurityPageName.siemMigrationsManage),
+              },
+              {
+                id: SecurityPageName.siemMigrationsRules,
+                link: securityLink(SecurityPageName.siemMigrationsRules),
+              },
+              {
+                id: SecurityPageName.siemMigrationsDashboards,
+                link: securityLink(SecurityPageName.siemMigrationsDashboards),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        link: 'dev_tools',
+        title: i18nStrings.devTools,
+        icon: 'code',
+      },
+      createManagementFooterItemsTree(services, chatExperience),
+    ],
+  };
+};

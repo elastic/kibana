@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import type { InferenceAdapterChatCompleteOptions } from '../../types';
 
 export type CreateOpenAIRequestOptions = Omit<

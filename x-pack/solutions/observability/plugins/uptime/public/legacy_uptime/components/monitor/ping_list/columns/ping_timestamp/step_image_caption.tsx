@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useEffect } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
+import type { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
 
 import { nextAriaLabel, prevAriaLabel } from './translations';
 
@@ -73,7 +74,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
                   setStepNumber(stepNumber - 1);
                   evt.preventDefault();
                 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 aria-label={prevAriaLabel}
                 isLoading={isLoading}
               >
@@ -92,7 +93,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
                   setStepNumber(stepNumber + 1);
                   evt.stopPropagation();
                 }}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 aria-label={nextAriaLabel}
                 isLoading={isLoading}

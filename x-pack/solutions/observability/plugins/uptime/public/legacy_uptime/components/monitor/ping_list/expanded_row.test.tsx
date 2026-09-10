@@ -8,7 +8,7 @@
 import { mountWithIntl, renderWithI18nProvider, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from './expanded_row';
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 
 describe('PingListExpandedRow', () => {
@@ -97,8 +97,8 @@ describe('PingListExpandedRow', () => {
         direction="column"
       >
         <EuiFlexItem>
-          <EuiCallOut
-            color="primary"
+          <KbnInfoCallout
+            title="Response details"
           >
             <EuiDescriptionList
               listItems={
@@ -126,7 +126,7 @@ describe('PingListExpandedRow', () => {
                 ]
               }
             />
-          </EuiCallOut>
+          </KbnInfoCallout>
         </EuiFlexItem>
       </EuiFlexGroup>
     `);

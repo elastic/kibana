@@ -6,12 +6,14 @@
  */
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import type { SearchHit } from '@kbn/es-types';
+import type { ProcessEvent } from '../../common';
 import {
   ALERTS_ROUTE,
   ALERTS_PER_PAGE,
@@ -23,6 +25,8 @@ import {
 } from '../../common/constants';
 
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
+import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { alertIdSchema, sessionEntityIdSchema, sessionTimestampSchema } from './validation';
 
 export const registerAlertsRoute = (
   router: IRouter,
@@ -45,10 +49,10 @@ export const registerAlertsRoute = (
         validate: {
           request: {
             query: schema.object({
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              investigatedAlertId: schema.maybe(schema.string()),
-              cursor: schema.maybe(schema.string()),
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              investigatedAlertId: schema.maybe(alertIdSchema),
+              cursor: schema.maybe(sessionTimestampSchema),
             }),
           },
         },
@@ -145,11 +149,13 @@ export const searchAlerts = async (
       }
     }
 
-    const events = results.hits.hits.map((hit: any) => {
+    const events = results.hits.hits.map((hit) => {
+      const typedHit = hit as SearchHit<ProcessEvent>;
       // the alert indexes flattens many properties. this util unflattens them as session view expects structured json.
-      hit._source = expandDottedObject(hit._source);
-
-      return hit;
+      typedHit._source = expandDottedObject(typedHit._source);
+      // normalize args fields to ensure consistent array structure
+      typedHit._source = normalizeEventProcessArgs(typedHit._source);
+      return typedHit;
     });
 
     const total =

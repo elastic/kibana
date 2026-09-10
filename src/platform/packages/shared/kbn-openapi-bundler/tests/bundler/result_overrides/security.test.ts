@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { createOASDocument } from '../../create_oas_document';
 import { bundleSpecs } from '../bundle_specs';
 
@@ -36,7 +36,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
             },
           }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         `Prototype document must contain ${chalk.bold(
           'components.securitySchemes'
         )} when security requirements are specified`
@@ -72,7 +72,7 @@ describe('OpenAPI Bundler - with security requirements overrides', () => {
             },
           }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         `Prototype document must have ${chalk.bold('security')} defined ${chalk.bold(
           'components.securitySchemes'
         )} are specified`

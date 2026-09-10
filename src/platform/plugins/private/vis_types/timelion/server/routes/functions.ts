@@ -8,8 +8,8 @@
  */
 
 import _ from 'lodash';
-import { IRouter } from '@kbn/core/server';
-import { LoadFunctions } from '../lib/load_functions';
+import type { IRouter } from '@kbn/core/server';
+import type { LoadFunctions } from '../lib/load_functions';
 
 export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {
   router.get(

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { KibanaFeature } from '@kbn/features-plugin/server';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { INpreClient } from '@kbn/cps/server/npre';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { SpacesClient } from './spaces_client';
@@ -20,15 +23,26 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
-const createMockConfig = (
-  mockConfig: ConfigType = {
+const createMockNpreClient = (): INpreClient => {
+  return {
+    getNpre: jest.fn().mockResolvedValue(undefined),
+    canGetNpre: jest.fn().mockResolvedValue(true),
+    putNpre: jest.fn().mockResolvedValue(undefined),
+    deleteNpre: jest.fn().mockResolvedValue(undefined),
+    canPutNpre: jest.fn().mockResolvedValue(true),
+  } as unknown as INpreClient;
+};
+
+const createMockConfig = (mockConfig: Partial<ConfigType> = {}) => {
+  const config: ConfigType = {
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
-  }
-) => {
-  return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
+    initialSolutionSetup: { enabled: false },
+    ...mockConfig,
+  };
+  return ConfigSchema.validate(config, { serverless: !config.allowFeatureVisibility });
 };
 
 const features = [
@@ -126,7 +140,7 @@ describe('#getAll', () => {
   const savedObjects: Array<SavedObject<unknown>> = [
     {
       // foo has all of the attributes expected by the space interface
-      id: 'foo',
+      id: asSpaceId('foo'),
       type: 'space',
       references: [],
       attributes: {
@@ -143,7 +157,7 @@ describe('#getAll', () => {
     },
     {
       // bar his missing attributes of color and image url
-      id: 'bar',
+      id: asSpaceId('bar'),
       type: 'space',
       references: [],
       attributes: {
@@ -156,7 +170,7 @@ describe('#getAll', () => {
     },
     {
       // baz only has the bare minumum atributes
-      id: 'baz',
+      id: asSpaceId('baz'),
       type: 'space',
       references: [],
       attributes: {
@@ -167,7 +181,7 @@ describe('#getAll', () => {
     },
     {
       // alpha has deprecated disabled features
-      id: 'alpha',
+      id: asSpaceId('alpha'),
       type: 'space',
       references: [],
       attributes: {
@@ -178,7 +192,7 @@ describe('#getAll', () => {
     },
     {
       // beta has deprecated disabled features with specified `replacedBy` on feature level
-      id: 'beta',
+      id: asSpaceId('beta'),
       type: 'space',
       references: [],
       attributes: {
@@ -191,7 +205,7 @@ describe('#getAll', () => {
 
   const expectedSpaces: Space[] = [
     {
-      id: 'foo',
+      id: asSpaceId('foo'),
       name: 'foo-name',
       description: 'foo-description',
       color: '#FFFFFF',
@@ -202,26 +216,26 @@ describe('#getAll', () => {
       _reserved: true,
     },
     {
-      id: 'bar',
+      id: asSpaceId('bar'),
       name: 'bar-name',
       description: 'bar-description',
       initials: 'BA',
       disabledFeatures: [],
     },
     {
-      id: 'baz',
+      id: asSpaceId('baz'),
       name: 'baz-name',
       description: 'baz-description',
       disabledFeatures: [],
     },
     {
-      id: 'alpha',
+      id: asSpaceId('alpha'),
       name: 'alpha-name',
       description: 'alpha-description',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     },
     {
-      id: 'beta',
+      id: asSpaceId('beta'),
       name: 'beta-name',
       description: 'beta-description',
       disabledFeatures: ['feature_1', 'feature_2'],
@@ -242,7 +256,8 @@ describe('#getAll', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const actualSpaces = await client.getAll();
 
@@ -270,7 +285,8 @@ describe('#getAll', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const [actualSpace] = await client.getAll();
     const [{ solution, disabledFeatures, ...expectedSpace }] = expectedSpaces;
@@ -298,7 +314,8 @@ describe('#getAll', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
@@ -308,7 +325,7 @@ describe('#getAll', () => {
 
 describe('#get', () => {
   const savedObject: SavedObject = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     type: 'space',
     references: [],
     attributes: {
@@ -324,7 +341,7 @@ describe('#get', () => {
   };
 
   const expectedSpace: Space = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     name: 'foo-name',
     description: 'foo-description',
     color: '#FFFFFF',
@@ -346,7 +363,8 @@ describe('#get', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -370,7 +388,8 @@ describe('#get', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -394,7 +413,8 @@ describe('#get', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -407,8 +427,198 @@ describe('#get', () => {
   });
 });
 
+describe('#getPersistedFeatureVisibility', () => {
+  test('returns stored disabledFeatures for a space', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: asSpaceId('foo'),
+      type: 'space',
+      references: [],
+      attributes: { name: 'foo', disabledFeatures: ['feature_1', 'feature_2'] },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    const result = await client.getPersistedFeatureVisibility('foo');
+
+    expect(result).toEqual(['feature_1', 'feature_2']);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', 'foo');
+  });
+
+  test('returns empty array when disabledFeatures is not stored', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: asSpaceId('foo'),
+      type: 'space',
+      references: [],
+      attributes: { name: 'foo' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    const result = await client.getPersistedFeatureVisibility('foo');
+
+    expect(result).toEqual([]);
+  });
+
+  test('throws error when space is not found', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockRejectedValue(
+      new Error('Saved object [space/not-found] not found')
+    );
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.getPersistedFeatureVisibility('not-found')).rejects.toThrow(
+      'Saved object [space/not-found] not found'
+    );
+  });
+});
+
+describe('#isInitialSolutionSetupRequired', () => {
+  test('returns true when the marker is set on the default space', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default', solutionSetupRequired: true },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(true);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', 'default');
+  });
+
+  test('returns false when the marker is unset', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(false);
+  });
+});
+
+describe('#completeInitialSolutionSetup', () => {
+  test('persists the selected solution and clears the marker with optimistic concurrency', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      version: 'v42',
+      attributes: { name: 'Default', solutionSetupRequired: true },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await client.completeInitialSolutionSetup('oblt');
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      'default',
+      { solution: 'oblt', solutionSetupRequired: false },
+      { version: 'v42' }
+    );
+  });
+
+  test('rejects when setup is already complete', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default', solutionSetupRequired: false },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.completeInitialSolutionSetup('es')).rejects.toThrow(
+      'Initial solution setup is already complete'
+    );
+    expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+  });
+});
+
 describe('#create', () => {
-  const id = 'foo';
+  const id = asSpaceId('foo');
   const attributes = {
     name: 'foo-name',
     description: 'foo-description',
@@ -465,7 +675,8 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
@@ -489,43 +700,21 @@ describe('#create', () => {
     );
   });
 
-  test(`throws bad request when creating space with disabled features`, async () => {
+  test(`trims whitespace from name when creating a space`, async () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
-    const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
     mockCallWithRequestRepository.find.mockResolvedValue({
       total: maxSpaces - 1,
     } as any);
-    const featuresMock = featuresStart;
 
-    featuresMock.getKibanaFeatures.mockReturnValue([
-      new KibanaFeature({
-        id: 'feature-1',
-        name: 'KibanaFeature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        scope: [KibanaFeatureScope.Security],
-        privileges: {
-          all: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-          read: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-        },
-        subFeatures: [],
-      }),
-    ]);
+    const mockConfig = createMockConfig({
+      enabled: true,
+      maxSpaces,
+      allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
+    });
 
     const client = new SpacesClient(
       mockDebugLogger,
@@ -533,13 +722,16 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresMock
+      featuresStart,
+      undefined
     );
 
-    await expect(
-      client.create({ ...spaceToCreate, disabledFeatures: ['feature-1'] })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to create Space, one or more disabledFeatures do not have the required space scope"`
+    await client.create({ ...spaceToCreate, name: '  foo-name  ' });
+
+    expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith(
+      'space',
+      expect.objectContaining({ name: 'foo-name' }),
+      expect.anything()
     );
   });
 
@@ -565,7 +757,8 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
 
     await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -602,7 +795,8 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresStart
+      featuresStart,
+      undefined
     );
 
     await expect(
@@ -650,12 +844,17 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
 
-    expect(actualSpace).toEqual({ ...expectedReturnedSpace, solution: 'es' });
+    expect(actualSpace).toEqual({
+      ...expectedReturnedSpace,
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es',
+      solution: 'es',
+    });
 
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
@@ -694,7 +893,8 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresStart
+        featuresStart,
+        undefined
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -732,7 +932,8 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresStart
+        featuresStart,
+        undefined
       );
 
       await expect(
@@ -773,7 +974,8 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresStart
+        featuresStart,
+        undefined
       );
 
       await expect(
@@ -803,14 +1005,14 @@ describe('#update', () => {
   };
 
   const spaceToUpdate = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     ...attributes,
     _reserved: false, // will have no affect
     bar: 'foo-bar', // will not make it to the saved object attributes
   };
 
   const savedObject: SavedObject = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     type: 'space',
     references: [],
     attributes: {
@@ -821,7 +1023,7 @@ describe('#update', () => {
   };
 
   const expectedReturnedSpace: Space = {
-    id: 'foo',
+    id: asSpaceId('foo'),
     ...attributes,
     _reserved: true,
   };
@@ -842,7 +1044,8 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -856,42 +1059,32 @@ describe('#update', () => {
       ...attributes,
       solution: 'es',
     });
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.not.objectContaining({ solutionSetupRequired: expect.anything() })
+    );
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 
-  test(`throws bad request when creating space with disabled features`, async () => {
+  test(`clears solutionSetupRequired when updating the default space solution`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
-    const featuresMock = featuresStart;
-
-    featuresMock.getKibanaFeatures.mockReturnValue([
-      new KibanaFeature({
-        id: 'feature-1',
-        name: 'KibanaFeature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        scope: [KibanaFeatureScope.Security],
-        privileges: {
-          all: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-          read: {
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['foo'],
-          },
-        },
-        subFeatures: [],
-      }),
-    ]);
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'Default',
+        description: '',
+        color: '#FFFFFF',
+        initials: 'D',
+        disabledFeatures: [],
+        solutionSetupRequired: true,
+      },
+    });
+    featuresStart.getKibanaFeatures.mockReturnValue([...features]);
 
     const client = new SpacesClient(
       mockDebugLogger,
@@ -899,13 +1092,80 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresMock
+      featuresStart,
+      undefined
     );
 
-    await expect(
-      client.create({ ...spaceToUpdate, disabledFeatures: ['feature-1'] })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot destructure property 'total' of '(intermediate value)' as it is undefined."`
+    await client.update(DEFAULT_SPACE_ID, {
+      id: DEFAULT_SPACE_ID,
+      name: 'Default',
+      description: '',
+      color: '#FFFFFF',
+      initials: 'D',
+      disabledFeatures: [],
+      solution: 'oblt',
+    });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      'default',
+      expect.objectContaining({
+        solution: 'oblt',
+        solutionSetupRequired: false,
+      })
+    );
+  });
+
+  test(`preserves existing leading/trailing whitespace in name when updating a space with the same name`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as object), name: '  foo-name  ' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+    const id = savedObject.id;
+    await client.update(id, { ...spaceToUpdate, name: '  foo-name  ' });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.objectContaining({ name: '  foo-name  ' })
+    );
+  });
+
+  test(`trims leading/trailing whitespace from name when updating a space with a new name`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+    const id = savedObject.id;
+    await client.update(id, { ...spaceToUpdate, name: '  new-name  ' });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.objectContaining({ name: 'new-name' })
     );
   });
 
@@ -921,7 +1181,8 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
 
@@ -954,7 +1215,8 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
 
@@ -981,7 +1243,8 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -991,6 +1254,185 @@ describe('#update', () => {
       solution: 'es',
     });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  describe('disabledFeatures preservation across solution switching', () => {
+    test('preserves stored disabledFeatures when switching from classic to non-classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'classic',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, { ...spaceToUpdate, solution: 'es', disabledFeatures: [] });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'es',
+        disabledFeatures: storedClassicDisabledFeatures,
+      });
+    });
+
+    test('preserves stored disabledFeatures when switching from non-classic to non-classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'es',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, { ...spaceToUpdate, solution: 'es', disabledFeatures: [] });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'es',
+        disabledFeatures: storedClassicDisabledFeatures,
+      });
+    });
+
+    test('preserves stored disabledFeatures when switching from non-classic to classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'es',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, {
+        ...spaceToUpdate,
+        solution: 'classic',
+        disabledFeatures: ['feature_2', 'feature_3'],
+      });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'classic',
+        disabledFeatures: storedClassicDisabledFeatures,
+      });
+    });
+
+    test('does not preserve stored disabledFeatures when switching from non-classic to classic solution if disabledFeatures have changes', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'es',
+          disabledFeatures: storedClassicDisabledFeatures,
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, {
+        ...spaceToUpdate,
+        solution: 'classic',
+        disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+      });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'classic',
+        disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+      });
+    });
+
+    test('does not preserve stored disabledFeatures when switching from classic to classic solution', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const storedClassicDisabledFeatures = ['feature_1'];
+      const existingSavedObject: SavedObject = {
+        ...savedObject,
+        attributes: {
+          ...(savedObject.attributes as object),
+          solution: 'classic',
+          disabledFeatures: storedClassicDisabledFeatures, // should be ignored
+        },
+      };
+      mockCallWithRequestRepository.get.mockResolvedValue(existingSavedObject);
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+      const id = savedObject.id;
+      await client.update(id, {
+        ...spaceToUpdate,
+        solution: 'classic',
+        disabledFeatures: ['feature_2'],
+      });
+
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+        ...attributes,
+        solution: 'classic',
+        disabledFeatures: ['feature_2'],
+      });
+    });
   });
 
   describe('when config.allowFeatureVisibility is disabled', () => {
@@ -1011,7 +1453,8 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresStart
+        featuresStart,
+        undefined
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -1038,7 +1481,8 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresStart
+        featuresStart,
+        undefined
       );
       const id = savedObject.id;
 
@@ -1071,7 +1515,8 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresStart
+        featuresStart,
+        undefined
       );
       const id = savedObject.id;
 
@@ -1088,7 +1533,7 @@ describe('#update', () => {
 });
 
 describe('#delete', () => {
-  const id = 'foo';
+  const id = asSpaceId('foo');
 
   const reservedSavedObject: SavedObject = {
     id,
@@ -1125,7 +1570,8 @@ describe('#delete', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
 
     await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1147,7 +1593,8 @@ describe('#delete', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
 
     await client.delete(id);
@@ -1170,7 +1617,8 @@ describe('#disableLegacyUrlAliases', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresStart
+      featuresStart,
+      undefined
     );
     const aliases = [
       { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
@@ -1183,5 +1631,573 @@ describe('#disableLegacyUrlAliases', () => {
       { type: 'legacy-url-alias', id: 'space1:foo:123', attributes: { disabled: true } },
       { type: 'legacy-url-alias', id: 'space2:bar:456', attributes: { disabled: true } },
     ]);
+  });
+});
+
+describe('projectRouting functionality', () => {
+  describe('#get with projectRouting', () => {
+    test('includes projectRouting when CPS is enabled and npre exists', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const space = await client.get('foo');
+
+      expect(space.projectRouting).toBe('project:test-project');
+      expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+    });
+
+    test('omits projectRouting when user is not authorized to read NPRE', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.canGetNpre as jest.Mock).mockResolvedValue(false);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const space = await client.get('foo');
+
+      expect(space.projectRouting).toBeUndefined();
+      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
+    });
+
+    test('does not include projectRouting when npreClient is undefined', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      const space = await client.get('foo');
+
+      expect(space.projectRouting).toBeUndefined();
+    });
+  });
+
+  describe('#create with projectRouting', () => {
+    test('creates space with projectRouting when CPS is enabled', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
+      mockCallWithRequestRepository.create.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
+      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const spaceToCreate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:test-project',
+      };
+
+      const createdSpace = await client.create(spaceToCreate);
+
+      expect(mockNpreClient.putNpre).toHaveBeenCalledWith(
+        'kibana_space_foo_default',
+        'project:test-project'
+      );
+      expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+      expect(createdSpace.projectRouting).toBe('project:test-project');
+      // Verify projectRouting was removed from saved object attributes
+      expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith(
+        'space',
+        expect.not.objectContaining({ projectRouting: expect.anything() }),
+        { id: 'foo' }
+      );
+    });
+
+    test('throws error when projectRouting is provided but CPS is disabled', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      const spaceToCreate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:test-project',
+      };
+
+      await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to create Space, projectRouting property is only allowed when CPS is enabled"`
+      );
+    });
+
+    test('throws error when user is not authorized to set projectRouting', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(false);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const spaceToCreate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:test-project',
+      };
+
+      await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to create Space, user is not authorized to update projectRouting"`
+      );
+    });
+
+    test('throws error when projectRouting is provided but npreClient is undefined', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      const spaceToCreate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:test-project',
+      };
+
+      await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to create Space, projectRouting property is only allowed when CPS is enabled"`
+      );
+    });
+
+    test('creates space successfully when npreClient is undefined and no projectRouting provided', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
+      mockCallWithRequestRepository.create.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const spaceToCreate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+      };
+
+      const createdSpace = await client.create(spaceToCreate);
+
+      expect(createdSpace.projectRouting).toBeUndefined();
+      expect(mockNpreClient.putNpre).not.toHaveBeenCalled();
+      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
+      expect(mockCallWithRequestRepository.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('#update with projectRouting', () => {
+    test('updates projectRouting when CPS is enabled', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.update.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
+      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:updated-project');
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const spaceToUpdate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:updated-project',
+      };
+
+      const updatedSpace = await client.update('foo', spaceToUpdate);
+
+      expect(mockNpreClient.putNpre).toHaveBeenCalledWith(
+        'kibana_space_foo_default',
+        'project:updated-project'
+      );
+      expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+      expect(updatedSpace.projectRouting).toBe('project:updated-project');
+    });
+
+    test('deletes projectRouting when set to undefined', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.update.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
+      (mockNpreClient.getNpre as jest.Mock).mockResolvedValue(undefined);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      const spaceToUpdate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: undefined,
+      };
+
+      const updatedSpace = await client.update('foo', spaceToUpdate);
+
+      expect(mockNpreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+      expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+      expect(updatedSpace.projectRouting).toBeUndefined();
+    });
+
+    test('throws error when projectRouting update is provided but CPS is disabled', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      const spaceToUpdate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:updated-project',
+      };
+
+      await expect(client.update('foo', spaceToUpdate)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
+      );
+    });
+
+    test('throws error when projectRouting update is provided but npreClient is undefined', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      const spaceToUpdate = {
+        id: asSpaceId('foo'),
+        name: 'foo-name',
+        disabledFeatures: [],
+        projectRouting: 'project:updated-project',
+      };
+
+      await expect(client.update('foo', spaceToUpdate)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
+      );
+    });
+  });
+
+  describe('#delete with projectRouting', () => {
+    test('deletes projectRouting npre when CPS is enabled and npre exists', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      await client.delete('foo');
+
+      expect(mockNpreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+    });
+
+    test('does not error when CPS is enabled and npre exists', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
+      const mockConfig = createMockConfig();
+      const mockNpreClient = createMockNpreClient();
+      (mockNpreClient.deleteNpre as jest.Mock).mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: {
+            error: {
+              root_cause: [
+                {
+                  type: 'resource_not_found_exception',
+                  reason:
+                    'Project routing expression with name [kibana_space_test-space_defaultttt] not found',
+                },
+              ],
+              type: 'resource_not_found_exception',
+              reason:
+                'Project routing expression with name [kibana_space_test-space_defaultttt] not found',
+            },
+            status: 404,
+          },
+          meta: {} as any,
+          warnings: null,
+        })
+      );
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        mockNpreClient
+      );
+
+      await client.delete('foo');
+
+      expect(mockNpreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_foo_default');
+    });
+
+    test('does not delete projectRouting when CPS is disabled', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      await client.delete('foo');
+    });
+
+    test('deletes space successfully when npreClient is undefined', async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue({
+        id: asSpaceId('foo'),
+        type: 'space',
+        references: [],
+        attributes: {
+          name: 'foo-name',
+          disabledFeatures: [],
+        },
+      } as any);
+      mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
+      mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
+      const mockConfig = createMockConfig();
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional',
+        featuresStart,
+        undefined
+      );
+
+      await client.delete('foo');
+
+      expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', 'foo');
+      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith('foo');
+    });
   });
 });

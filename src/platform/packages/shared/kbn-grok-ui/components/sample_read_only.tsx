@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { combineLatest, debounceTime } from 'rxjs';
-import { DraftGrokExpression, FieldDefinition, GrokCollection } from '../models';
+import type { DraftGrokExpression, FieldDefinition, GrokCollection } from '../models';
 import { colourToClassName } from './utils';
 import { semanticNameLabel, patternNameLabel, typeNameLabel } from './constants';
 
@@ -34,8 +35,8 @@ export const Sample = ({
   );
 
   const colourPaletteStyles = useMemo(() => {
-    return grokCollection.getColourPaletteStyles();
-  }, [grokCollection]);
+    return grokCollection.getColourPaletteStyles(eui.euiTheme);
+  }, [eui.euiTheme, grokCollection]);
 
   useEffect(() => {
     const subscription = combineLatest(draftGrokExpressions.map((draft) => draft.getExpression$()))
@@ -45,6 +46,10 @@ export const Sample = ({
       });
     return () => subscription.unsubscribe();
   }, [draftGrokExpressions, sample]);
+
+  if (sample === '') {
+    return <>&nbsp;</>;
+  }
 
   return (
     <>
@@ -152,7 +157,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
     // Add text before the current highlight
     if (startIndex < currentHighlight.startIndex) {
       parts.push(
-        <span key={`${startIndex}-${currentHighlight.startIndex}`}>
+        <span key={`pre-${startIndex}-${currentHighlight.startIndex}`}>
           {text.slice(startIndex, currentHighlight.startIndex)}
         </span>
       );
@@ -160,7 +165,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
 
     const highlightedTextSpan = (
       <span
-        key={`${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
+        key={`hl-${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
         className={currentHighlight.className}
       >
         {processText(
@@ -178,6 +183,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
     parts.push(
       currentHighlight.fieldDefinition ? (
         <EuiToolTip
+          key={`tt-${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
           position="top"
           content={
             <>
@@ -206,7 +212,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
     // Add text after the current highlight
     if (currentHighlight.endIndex < endIndex) {
       parts.push(
-        <span key={`${currentHighlight.endIndex}-${endIndex}`}>
+        <span key={`post-${currentHighlight.endIndex}-${endIndex}`}>
           {processText(
             text,
             currentHighlight.endIndex,

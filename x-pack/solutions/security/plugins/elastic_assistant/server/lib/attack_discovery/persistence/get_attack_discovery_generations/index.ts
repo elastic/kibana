@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { get } from 'lodash/fp';
 
 import { combineGenerationsWithSuccessMetadata } from '../combine_generations_with_success_metadata';
@@ -22,6 +22,7 @@ export const getAttackDiscoveryGenerations = async ({
   eventLogIndex,
   generationsQuery,
   getAttackDiscoveryGenerationsParams,
+  ignoreDismissed = false,
   logger,
   spaceId,
 }: {
@@ -34,6 +35,11 @@ export const getAttackDiscoveryGenerations = async ({
     end?: string;
   };
   generationsQuery: estypes.SearchRequest;
+  /**
+   * When `true`, dismissed generations resolve to their underlying terminal
+   * status instead of `dismissed`. See `getGenerationStatusOrThrow`.
+   */
+  ignoreDismissed?: boolean;
   logger: Logger;
   spaceId: string;
 }): Promise<GetAttackDiscoveryGenerationsResponse> => {
@@ -88,6 +94,7 @@ export const getAttackDiscoveryGenerations = async ({
     aggregations: get('aggregations', generationsResponse),
   };
   const transformedGenerations = transformGetAttackDiscoveryGenerationsSearchResult({
+    ignoreDismissed,
     logger,
     rawResponse: rawGenerationsResponse,
   });

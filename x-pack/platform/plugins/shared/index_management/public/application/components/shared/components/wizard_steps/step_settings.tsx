@@ -16,9 +16,9 @@ import {
   EuiFormRow,
   EuiText,
   EuiCode,
-  EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
@@ -27,7 +27,7 @@ import { Forms, isJSON } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import { IndexMode } from '../../../../../../common/types';
+import type { IndexMode } from '../../../../../../common/types';
 
 interface Props {
   onChange: (content: Forms.Content) => void;
@@ -115,7 +115,8 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
 
         {indexMode && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.title"
@@ -145,8 +146,6 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
                   }}
                 />
               }
-              color="warning"
-              iconType="warning"
               data-test-subj="indexModeCallout"
             />
 

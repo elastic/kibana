@@ -7,36 +7,40 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
+import type { User, AssistantFeatures } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Observable } from 'rxjs';
+import type { AIExperienceSelection } from '@kbn/ai-assistant-management-plugin/public';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import {
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type {
   ChromeStart,
   UnmountCallback,
   ApplicationStart,
   UserProfileService,
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
   RegisterPromptContext,
   UnRegisterPromptContext,
+  PromptContextTemplate,
 } from '../assistant/prompt_context/types';
-import {
+import type {
   AssistantAvailability,
   AssistantTelemetry,
   Conversation,
   GetAssistantMessages,
 } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
-import { PromptContextTemplate } from '../assistant/prompt_context/types';
-import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
+import type { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
   CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -47,7 +51,7 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
-import { ModalSettingsTabs } from '../assistant/settings/types';
+import type { ModalSettingsTabs } from '../assistant/settings/types';
 
 export type SelectedConversation = { id: string } | { title: string };
 
@@ -87,11 +91,14 @@ export interface AssistantProviderProps {
   nameSpace?: string;
   navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
+  settings: SettingsStart;
   toasts?: IToasts;
   currentAppId: string;
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  openChatTrigger$?: Observable<AIExperienceSelection>;
+  completeOpenChat?: () => void;
 }
 
 export interface UserAvatar {
@@ -115,7 +122,7 @@ export interface UseAssistantContext {
   };
   docLinks: DocLinksStart;
   basePath: string;
-  currentUserAvatar?: UserAvatar;
+  currentUser?: User;
   getComments: GetAssistantMessages;
   getUrlForApp: GetUrlForApp;
   http: HttpSetup;
@@ -128,6 +135,7 @@ export interface UseAssistantContext {
   selectedSettingsTab: ModalSettingsTabs | null;
   contentReferencesVisible: boolean;
   showAnonymizedValues: boolean;
+  settings: SettingsStart;
   setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
   setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
@@ -135,6 +143,8 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  isOverlayOpen: boolean;
+  setIsOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -150,6 +160,8 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  openChatTrigger$?: Observable<AIExperienceSelection>;
+  completeOpenChat?: () => void;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -163,6 +175,14 @@ export const useAssistantContext = () => {
 
   return context;
 };
+
+/**
+ * Same context as {@link useAssistantContext}, but returns `undefined` when no provider is present.
+ * Prefer {@link useAssistantContext} for assistant UI; use this only when a hook must degrade
+ * gracefully outside `AssistantProvider` (e.g. embedded previews).
+ */
+export const useMaybeAssistantContext = (): UseAssistantContext | undefined =>
+  React.useContext(AssistantContext);
 
 export const useAssistantContextValue = (props: AssistantProviderProps): UseAssistantContext => {
   const {
@@ -178,6 +198,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     getUrlForApp,
     http,
     inferenceEnabled = false,
+    settings,
     navigateToApp,
     nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
     productDocBase,
@@ -186,6 +207,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     currentAppId,
     userProfileService,
     chrome,
+    openChatTrigger$,
+    completeOpenChat,
   } = props;
 
   const defaultTraceOptions: TraceOptions = {
@@ -272,18 +295,19 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
    * Global Assistant Overlay actions
    */
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   /**
    * Current User Avatar
    */
-  const { data: currentUserAvatar } = useQuery({
-    queryKey: ['currentUserAvatar'],
-    queryFn: async () =>
-      userProfileService.getCurrent<{ avatar: UserAvatar }>({
-        dataPath: 'avatar',
-      }),
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => userProfileService.getCurrent(),
     select: (data) => {
-      return data.data.avatar;
+      return {
+        id: data.uid,
+        name: data.user.username,
+      };
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
@@ -312,11 +336,12 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
       getComments,
       getUrlForApp,
       http,
+      settings,
       inferenceEnabled,
       knowledgeBase: {
         ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
@@ -330,6 +355,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       selectedSettingsTab,
       // can be undefined from localStorage, if not defined, default to true
       assistantStreamingEnabled: localStorageStreaming ?? true,
+
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       contentReferencesVisible: contentReferencesVisible ?? true,
@@ -342,6 +368,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      isOverlayOpen,
+      setIsOverlayOpen,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
@@ -352,6 +380,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      openChatTrigger$,
+      completeOpenChat,
     }),
     [
       actionTypeRegistry,
@@ -362,8 +392,9 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
-      currentUserAvatar,
+      currentUser,
       docLinks,
+      settings,
       getComments,
       getUrlForApp,
       http,
@@ -382,6 +413,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       setShowAnonymizedValues,
       contentReferencesVisible,
       setContentReferencesVisible,
+      isOverlayOpen,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
@@ -392,6 +424,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      openChatTrigger$,
+      completeOpenChat,
     ]
   );
 

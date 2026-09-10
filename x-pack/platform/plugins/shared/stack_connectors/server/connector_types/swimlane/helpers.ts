@@ -7,10 +7,10 @@
 
 import type {
   CreateRecordParams,
-  Incident,
-  SwimlaneRecordPayload,
   MappingConfigType,
-} from './types';
+  Incident,
+} from '@kbn/connector-schemas/swimlane';
+import type { SwimlaneRecordPayload } from './types';
 
 type ConfigMapping = Omit<MappingConfigType, 'commentsConfig'>;
 

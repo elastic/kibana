@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
@@ -17,22 +17,26 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiScreenReaderLive,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import {
+  ADD_PARAM_SUCCESS_MESSAGE,
+  EDIT_PARAM_SUCCESS_MESSAGE,
   addNewGlobalParamAction,
   editGlobalParamAction,
   getGlobalParamAction,
   selectGlobalParamState,
 } from '../../../state/global_params';
-import { ClientPluginsStart } from '../../../../../plugin';
-import { ListParamItem } from './params_list';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
+import type { ListParamItem } from './params_list';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 
@@ -46,6 +50,10 @@ export const AddParamFlyout = ({
   setIsEditingItem: React.Dispatch<React.SetStateAction<ListParamItem | null>>;
 }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  // Announced by screen readers when a param is saved, since the toast that carries the
+  // success message is not reliably announced once the flyout closes and focus moves.
+  const [announcement, setAnnouncement] = useState('');
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
@@ -76,6 +84,7 @@ export const AddParamFlyout = ({
   const dispatch = useDispatch();
 
   const { isSaving, savedData } = useSelector(selectGlobalParamState);
+  const wasSavingRef = useRef(false);
 
   const onSubmit = (formData: SyntheticsParams) => {
     const { namespaces, ...paramRequest } = formData;
@@ -110,10 +119,28 @@ export const AddParamFlyout = ({
   };
 
   useEffect(() => {
-    if (savedData && !isSaving) {
+    if (isSaving) {
+      // Clear so an identical follow-up message still re-announces.
+      setAnnouncement('');
+      wasSavingRef.current = true;
+      return;
+    }
+
+    // savedData stays in the reducer after success, so only announce for a save
+    // that started during this mount — not when remounting with stale state.
+    if (!wasSavingRef.current) {
+      return;
+    }
+
+    wasSavingRef.current = false;
+
+    if (savedData) {
+      setAnnouncement(isEditingItem ? EDIT_PARAM_SUCCESS_MESSAGE : ADD_PARAM_SUCCESS_MESSAGE);
       closeFlyout();
       dispatch(getGlobalParamAction.get());
     }
+    // isEditingItem is intentionally read at success time and reset by closeFlyout
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedData, isSaving, closeFlyout, dispatch]);
 
   useEffect(() => {
@@ -128,15 +155,23 @@ export const AddParamFlyout = ({
 
   const { handleSubmit } = form;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   let flyout;
 
   if (isFlyoutVisible) {
     flyout = (
       <FormProvider {...form}>
-        <EuiFlyout ownFocus onClose={closeFlyout} size="m" style={{ minWidth: 500 }}>
+        <EuiFlyout
+          ownFocus
+          onClose={closeFlyout}
+          size="m"
+          style={{ minWidth: 500 }}
+          aria-labelledby={flyoutTitleId}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>{isEditingItem ? EDIT_PARAM : CREATE_PARAM}</h2>
+              <h2 id={flyoutTitleId}>{isEditingItem ? EDIT_PARAM : CREATE_PARAM}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -178,7 +213,7 @@ export const AddParamFlyout = ({
         <EuiButton
           data-test-subj="syntheticsAddParamFlyoutButton"
           fill
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           iconSide="left"
           onClick={() => setIsFlyoutVisible(true)}
           isDisabled={!canSave}
@@ -187,6 +222,7 @@ export const AddParamFlyout = ({
         </EuiButton>
       </NoPermissionsTooltip>
       {flyout}
+      <EuiScreenReaderLive>{announcement}</EuiScreenReaderLive>
     </div>
   );
 };

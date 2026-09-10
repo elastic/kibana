@@ -51,6 +51,7 @@ export const TEST_DIR = new Set([
   '__stories__',
   '__fixtures__',
   '__snapshots__',
+  '__storybook_mocks__',
   'stub',
   'e2e',
   'ftr_e2e',
@@ -58,6 +59,5 @@ export const TEST_DIR = new Set([
   'storybook',
   '.storybook',
   'integration_tests',
-  'ui_tests',
   ...RANDOM_TEST_FILE_NAMES,
 ]);

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
@@ -15,26 +16,48 @@ import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabili
 import { MetricHostsModuleProvider } from '../../../containers/ml/modules/metrics_hosts/module';
 import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_k8s/module';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { canRenderAnomalyDetectionFlyout } from './can_render_anomaly_detection_flyout';
+
+interface AnomalyJobSetupParams {
+  jobType: 'hosts' | 'kubernetes';
+}
 
 export const AnomalyDetectionFlyout = ({
   hideJobType = false,
   hideSelectGroup = false,
+  trigger = 'headerLink',
+  isOpen,
+  onClose,
 }: {
   hideJobType?: boolean;
   hideSelectGroup?: boolean;
-}) => {
+  trigger?: 'headerLink' | 'none';
+  isOpen?: boolean;
+  onClose?: () => void;
+}): React.ReactElement | null => {
   const { hasInfraMLSetupCapabilities } = useInfraMLCapabilities();
-  const [showFlyout, setShowFlyout] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [screenName, setScreenName] = useState<'home' | 'setup'>('home');
-  const [screenParams, setScreenParams] = useState<any | null>(null);
+  const [screenParams, setScreenParams] = useState<AnomalyJobSetupParams | null>(null);
   const { metricsView } = useMetricsDataViewContext();
+  const isControlled = isOpen !== undefined;
+  const showFlyout = isControlled ? isOpen : internalOpen;
 
   const { space } = useActiveKibanaSpace();
+  const canRender = canRenderAnomalyDetectionFlyout(metricsView, space);
+
+  useEffect(() => {
+    if (isControlled && isOpen && !canRender) {
+      onClose?.();
+    }
+  }, [canRender, isControlled, isOpen, onClose]);
 
   const openFlyout = useCallback(() => {
     setScreenName('home');
-    setShowFlyout(true);
-  }, []);
+    if (!isControlled) {
+      setInternalOpen(true);
+    }
+  }, [isControlled]);
 
   const openJobSetup = useCallback(
     (jobType: 'hosts' | 'kubernetes') => {
@@ -45,38 +68,50 @@ export const AnomalyDetectionFlyout = ({
   );
 
   const closeFlyout = useCallback(() => {
-    setShowFlyout(false);
-  }, []);
+    setScreenName('home');
+    setScreenParams(null);
+    if (!isControlled) {
+      setInternalOpen(false);
+    }
+    onClose?.();
+  }, [isControlled, onClose]);
 
-  if (!metricsView?.indices || !space) {
+  if (!canRender || !metricsView?.indices || !space) {
     return null;
   }
 
   return (
     <>
-      <EuiHeaderLink
-        color="primary"
-        iconType="machineLearningApp"
-        onClick={openFlyout}
-        data-test-subj="openAnomalyFlyoutButton"
-      >
-        <FormattedMessage
-          id="xpack.infra.ml.anomalyDetectionButton"
-          defaultMessage="Anomaly detection"
-        />
-      </EuiHeaderLink>
+      {trigger === 'headerLink' && (
+        <EuiHeaderLink
+          color="primary"
+          onClick={openFlyout}
+          data-test-subj="openAnomalyFlyoutButton"
+        >
+          <FormattedMessage
+            id="xpack.infra.ml.anomalyDetectionButton"
+            defaultMessage="Anomaly detection"
+          />
+        </EuiHeaderLink>
+      )}
       {showFlyout && (
         <MetricHostsModuleProvider
           indexPattern={metricsView?.indices ?? ''}
-          sourceId={'default'}
+          sourceId="default"
           spaceId={space.id}
         >
           <MetricK8sModuleProvider
             indexPattern={metricsView?.indices ?? ''}
-            sourceId={'default'}
+            sourceId="default"
             spaceId={space.id}
           >
-            <EuiFlyout onClose={closeFlyout} data-test-subj="loadMLFlyout">
+            <EuiFlyout
+              onClose={closeFlyout}
+              data-test-subj="loadMLFlyout"
+              aria-label={i18n.translate('xpack.infra.ml.anomalyDetectionFlyoutAriaLabel', {
+                defaultMessage: 'Anomaly detection flyout',
+              })}
+            >
               {screenName === 'home' && (
                 <FlyoutHome
                   hasSetupCapabilities={hasInfraMLSetupCapabilities}
@@ -86,7 +121,7 @@ export const AnomalyDetectionFlyout = ({
                   hideSelectGroup={hideSelectGroup}
                 />
               )}
-              {screenName === 'setup' && (
+              {screenName === 'setup' && screenParams && (
                 <JobSetupScreen
                   goHome={openFlyout}
                   closeFlyout={closeFlyout}

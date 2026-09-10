@@ -7,7 +7,7 @@
 import type { EuiDataGridProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -185,7 +185,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     ]
   );
 
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [, setMainContainer] = useState<HTMLDivElement | null>(null);
 
   const columnIds = useMemo(() => {
@@ -345,9 +344,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [onFieldEdited]);
 
   return (
-    <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
+    <TimelineBodyContainer className="timelineBodyContainer">
       <TimelineResizableLayout
-        container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
         sidebarPanel={
           <SidebarPanelFlexGroup gutterSize="none">

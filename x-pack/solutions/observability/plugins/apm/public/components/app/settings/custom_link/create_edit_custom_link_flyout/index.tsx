@@ -12,17 +12,18 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { Documentation } from './documentation';
 import { FiltersSection } from './filters_section';
 import { FlyoutFooter } from './flyout_footer';
+import { LinkPreview } from './link_preview';
 import { LinkSection } from './link_section';
 import { saveCustomLink } from './save_custom_link';
-import { LinkPreview } from './link_preview';
-import { Documentation } from './documentation';
 
 interface Props {
   onClose: () => void;
@@ -45,6 +46,7 @@ export function CreateEditCustomLinkFlyout({
   defaults,
   customLinkId,
 }: Props) {
+  const modalTitleId = useGeneratedHtmlId();
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
@@ -74,10 +76,10 @@ export function CreateEditCustomLinkFlyout({
 
   return (
     <form onSubmit={onSubmit} id="customLink_form">
-      <EuiFlyout ownFocus onClose={onClose} size="m">
+      <EuiFlyout ownFocus onClose={onClose} size="m" aria-labelledby={modalTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2>
+            <h2 id={modalTitleId}>
               {i18n.translate('xpack.apm.settings.customLink.flyout.title', {
                 defaultMessage: 'Create link',
               })}
@@ -105,7 +107,7 @@ export function CreateEditCustomLinkFlyout({
 
           <EuiSpacer size="l" />
 
-          <FiltersSection filters={filters} onChangeFilters={setFilters} />
+          <FiltersSection filters={filters} setFilters={setFilters} />
 
           <EuiSpacer size="l" />
 

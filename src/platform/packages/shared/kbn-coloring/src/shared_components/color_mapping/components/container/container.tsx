@@ -8,17 +8,17 @@
  */
 
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { PaletteSelector } from '../palette_selector/palette_selector';
 
 import { changeGradientSortOrder } from '../../state/color_mapping';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
 import { ScaleMode } from '../palette_selector/scale';
 import { UnassignedTermsConfig } from './unassigned_terms_config';

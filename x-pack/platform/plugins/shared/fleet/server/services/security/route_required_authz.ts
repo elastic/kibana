@@ -63,6 +63,15 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readBlocklist: {
               executePackageAction: true,
             },
+            readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
+            readCustomYaraSignatures: {
+              executePackageAction: true,
+            },
           },
         },
       },
@@ -93,6 +102,15 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readBlocklist: {
               executePackageAction: true,
             },
+            readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
+            readCustomYaraSignatures: {
+              executePackageAction: true,
+            },
           },
         },
       },
@@ -121,6 +139,15 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
               executePackageAction: true,
             },
             readBlocklist: {
+              executePackageAction: true,
+            },
+            readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
+            readCustomYaraSignatures: {
               executePackageAction: true,
             },
           },
@@ -165,6 +192,24 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
     },
   },
   [`get:${EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN}`]: {
+    any: {
+      integrations: {
+        readPackageInfo: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readSecuritySolution: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // EPM Package Knowledge Base API
+  [`get:${EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN}`]: {
     any: {
       integrations: {
         readPackageInfo: true,

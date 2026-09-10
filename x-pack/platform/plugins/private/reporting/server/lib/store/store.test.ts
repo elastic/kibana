@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { ReportDocument } from '@kbn/reporting-common/types';
+import type { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { Report, ReportingStore, SavedReport } from '.';
-import { ReportingCore } from '../..';
+import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 
 describe('ReportingStore', () => {
@@ -473,7 +474,7 @@ describe('ReportingStore', () => {
           },
         }
       `);
-      expect(createIlmPolicySpy).toBeCalled();
+      expect(createIlmPolicySpy).toHaveBeenCalled();
     });
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
@@ -485,7 +486,7 @@ describe('ReportingStore', () => {
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
-      expect(createIlmPolicySpy).toBeCalled();
+      expect(createIlmPolicySpy).toHaveBeenCalled();
     });
 
     it('does not call ILM APIs in serverless', async () => {
@@ -498,7 +499,7 @@ describe('ReportingStore', () => {
       const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
       await store.start();
 
-      expect(createIlmPolicySpy).not.toBeCalled();
+      expect(createIlmPolicySpy).not.toHaveBeenCalled();
     });
   });
 });

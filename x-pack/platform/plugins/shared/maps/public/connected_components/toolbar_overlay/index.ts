@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { ToolbarOverlay } from './toolbar_overlay';
-import { MapStoreState } from '../../reducers/store';
+import type { MapStoreState } from '../../reducers/store';
 import { getDrawMode } from '../../selectors/ui_selectors';
 import { getGeoFieldNames } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common/constants';

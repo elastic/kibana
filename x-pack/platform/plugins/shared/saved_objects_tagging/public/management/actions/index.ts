@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
-import { StartServices } from '../../types';
-import { TagAction } from './types';
+import type { Observable } from 'rxjs';
+import type { TagsCapabilities } from '../../../common';
+import type { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import type { StartServices } from '../../types';
+import type { TagAction } from './types';
 import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
 import { getAssignAction } from './assign';

@@ -15,21 +15,21 @@ import {
   EuiSpacer,
   EuiExpression,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { range, first, xor, debounce } from 'lodash';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { convertToApiThreshold } from '../../helpers/threshold_unit';
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 
-import { MetricExpression } from '../../types';
-import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
+import type { MetricExpression } from '../../types';
+import type { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
 import { ClosablePopoverTitle } from '../closable_popover_title';
 import { EQUATION_HELP_MESSAGE } from '../../i18n_strings';
@@ -41,6 +41,7 @@ export interface CustomEquationEditorProps {
   aggregationTypes: AggregationTypes;
   errors: IErrorObject;
   dataView: DataViewBase;
+  kql: KqlPluginStart;
 }
 
 const NEW_METRIC = {
@@ -59,13 +60,19 @@ export function CustomEquationEditor({
   aggregationTypes,
   errors,
   dataView,
+  kql,
 }: CustomEquationEditorProps) {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.metrics ?? [NEW_METRIC]
   );
   const [customEqPopoverOpen, setCustomEqPopoverOpen] = useState(false);
+  const customEquationPopoverTitleId = useGeneratedHtmlId();
   const [equation, setEquation] = useState<string | undefined>(expression?.equation);
   const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
+
+  // Always-current ref so debounced callbacks never spread a stale expression snapshot.
+  const expressionRef = useRef(expression);
+  expressionRef.current = expression;
 
   useEffect(() => {
     setCustomMetrics(expression?.metrics ?? [NEW_METRIC]);
@@ -78,14 +85,14 @@ export function CustomEquationEditor({
       const name = first(xor(VAR_NAMES, currentVars))!;
       const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
       debouncedOnChange({
-        ...expression,
+        ...expressionRef.current,
         metrics: nextMetrics,
         equation,
-        threshold: convertToApiThreshold(previous, nextMetrics, expression.threshold),
+        threshold: convertToApiThreshold(previous, nextMetrics, expressionRef.current.threshold),
       });
       return nextMetrics;
     });
-  }, [debouncedOnChange, equation, expression]);
+  }, [debouncedOnChange, equation]);
 
   const handleDelete = useCallback(
     (name: string) => {
@@ -93,15 +100,15 @@ export function CustomEquationEditor({
         const nextMetrics = previous?.filter((row) => row.name !== name) ?? [NEW_METRIC];
         const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_METRIC];
         debouncedOnChange({
-          ...expression,
+          ...expressionRef.current,
           metrics: finalMetrics,
           equation,
-          threshold: convertToApiThreshold(previous, nextMetrics, expression.threshold),
+          threshold: convertToApiThreshold(previous, nextMetrics, expressionRef.current.threshold),
         });
         return finalMetrics;
       });
     },
-    [equation, expression, debouncedOnChange]
+    [equation, debouncedOnChange]
   );
 
   const handleChange = useCallback(
@@ -109,23 +116,27 @@ export function CustomEquationEditor({
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
         debouncedOnChange({
-          ...expression,
+          ...expressionRef.current,
           metrics: nextMetrics,
           equation,
-          threshold: convertToApiThreshold(previous, nextMetrics, expression.threshold),
+          threshold: convertToApiThreshold(previous, nextMetrics, expressionRef.current.threshold),
         });
         return nextMetrics;
       });
     },
-    [equation, expression, debouncedOnChange]
+    [equation, debouncedOnChange]
   );
 
   const handleEquationChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setEquation(e.target.value);
-      debouncedOnChange({ ...expression, metrics: customMetrics, equation: e.target.value });
+      debouncedOnChange({
+        ...expressionRef.current,
+        metrics: customMetrics,
+        equation: e.target.value,
+      });
     },
-    [debouncedOnChange, expression, customMetrics]
+    [debouncedOnChange, customMetrics]
   );
 
   const disableAdd = customMetrics?.length === MAX_VARIABLES;
@@ -147,6 +158,7 @@ export function CustomEquationEditor({
       onChange={handleChange}
       errors={errors}
       dataView={dataView}
+      kql={kql}
     />
   ));
 
@@ -164,7 +176,7 @@ export function CustomEquationEditor({
           color={'primary'}
           flush={'left'}
           size="xs"
-          iconType={'plusInCircleFilled'}
+          iconType={'plusCircle'}
           onClick={handleAddNewRow}
           isDisabled={disableAdd}
         >
@@ -213,9 +225,13 @@ export function CustomEquationEditor({
           ownFocus
           anchorPosition={'downLeft'}
           repositionOnScroll
+          aria-labelledby={customEquationPopoverTitleId}
         >
           <div>
-            <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
+            <ClosablePopoverTitle
+              id={customEquationPopoverTitleId}
+              onClose={() => setCustomEqPopoverOpen(false)}
+            >
               <span>
                 <FormattedMessage
                   id="xpack.observability.customThreshold.rule.alertFlyout.customEquationLabel"

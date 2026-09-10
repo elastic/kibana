@@ -26,6 +26,17 @@ import {
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
 import type { MlClient } from '../lib/ml_client';
+import { getTopInfluencers } from '../models/results_service/top_influencers';
+import {
+  getScoresByBucket,
+  getInfluencerValueMaxScoreByTime,
+} from '../models/results_service/view_by';
+import {
+  getTopInfluencersSchema,
+  getScoresByBucketSchema,
+  getInfluencerValueMaxScoreByTimeSchema,
+} from './schemas/results_service_schema';
+import { anomalyChartsDataProvider } from '../models/results_service/anomaly_charts';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);
@@ -106,6 +117,33 @@ function getCategoryStoppedPartitions(mlClient: MlClient, payload: any) {
  * Routes for results service
  */
 export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization) {
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/results/top_influencers`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
+      },
+      summary: 'Get top influencers',
+      description: 'Returns top influencers for requested jobs and time range.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: getTopInfluencersSchema } },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const resp = await getTopInfluencers(mlClient, request.body);
+          return response.ok({ body: resp });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomalies_table_data`,
@@ -404,18 +442,24 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
-          const resp = await getDatafeedResultsChartData(request.body);
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, serverless }) => {
+          try {
+            const { getDatafeedResultsChartData } = resultsServiceProvider(
+              mlClient,
+              client,
+              serverless
+            );
+            const resp = await getDatafeedResultsChartData(request.body);
 
-          return response.ok({
-            body: resp,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({
+              body: resp,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   router.versioned
@@ -441,7 +485,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getAnomalyChartsData } = resultsServiceProvider(mlClient, client);
+          const { getAnomalyChartsData } = anomalyChartsDataProvider(mlClient, client);
           const resp = await getAnomalyChartsData(request.body);
 
           return response.ok({
@@ -476,7 +520,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getRecordsForCriteria } = resultsServiceProvider(mlClient, client);
+          const { getRecordsForCriteria } = anomalyChartsDataProvider(mlClient, client);
 
           const { jobIds, criteriaFields, earliestMs, latestMs, threshold, interval } =
             request.body;
@@ -493,6 +537,52 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
           return response.ok({
             body: resp,
           });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
+      access: 'internal',
+      security: { authz: { requiredPrivileges: ['ml:canGetJobs'] } },
+      summary: 'Get job scores by bucket',
+      description: 'Returns max bucket scores per job over time for swimlane.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: getScoresByBucketSchema } },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const result = await getScoresByBucket(mlClient, request.body);
+          return response.ok({ body: result });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
+      access: 'internal',
+      security: { authz: { requiredPrivileges: ['ml:canGetJobs'] } },
+      summary: 'Get influencer field value max score by time',
+      description: 'Returns per-value max influencer scores over time for swimlane.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: getInfluencerValueMaxScoreByTimeSchema } },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const result = await getInfluencerValueMaxScoreByTime(mlClient, request.body);
+          return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));
         }

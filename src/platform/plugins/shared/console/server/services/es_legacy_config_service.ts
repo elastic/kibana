@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { ElasticsearchConfig } from '@kbn/core/server';
+import type { Observable, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import type { IElasticsearchConfig } from '@kbn/core-elasticsearch-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export class EsLegacyConfigService {
   /**
    * The elasticsearch config value at a given point in time.
    */
-  private config?: ElasticsearchConfig;
+  private config?: IElasticsearchConfig;
 
   /**
    * An observable that emits elasticsearch config.
    */
-  private config$?: Observable<ElasticsearchConfig>;
+  private config$?: Observable<IElasticsearchConfig>;
 
   /**
    * A reference to the subscription to the elasticsearch observable
@@ -32,7 +33,7 @@ export class EsLegacyConfigService {
    */
   private cloudUrl?: string;
 
-  setup(config$: Observable<ElasticsearchConfig>, cloud?: CloudSetup) {
+  setup(config$: Observable<IElasticsearchConfig>, cloud?: CloudSetup) {
     this.config$ = config$;
     this.configSub = this.config$.subscribe((config) => {
       this.config = config;
@@ -46,7 +47,7 @@ export class EsLegacyConfigService {
     }
   }
 
-  async readConfig(): Promise<ElasticsearchConfig> {
+  async readConfig(): Promise<IElasticsearchConfig> {
     if (!this.config$) {
       throw new Error('Could not read elasticsearch config, this service has not been setup!');
     }

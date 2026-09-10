@@ -8,22 +8,24 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 
 export type EnrichmentType = estypes.SearchHit<unknown>;
 
-export type EventsForEnrichment<T extends BaseFieldsLatest> = Pick<
-  WrappedFieldsLatest<T>,
+export type EventsForEnrichment<T extends DetectionAlertLatest> = Pick<
+  WrappedAlert<T>,
   '_id' | '_source'
 >;
 
-export type EnrichmentFunction = <T extends BaseFieldsLatest>(
+export type EnrichmentFunction = <T extends DetectionAlertLatest>(
   e: EventsForEnrichment<T>
 ) => EventsForEnrichment<T>;
 
@@ -31,23 +33,28 @@ export interface EventsMapByEnrichments {
   [id: string]: EnrichmentFunction[];
 }
 
-export type MergeEnrichments = <T extends BaseFieldsLatest>(
+export type MergeEnrichments = <T extends DetectionAlertLatest>(
   allEnrichmentsResults: EventsMapByEnrichments[]
 ) => EventsMapByEnrichments;
 
-export type ApplyEnrichmentsToEvents = <T extends BaseFieldsLatest>(params: {
+export type ApplyEnrichmentsToEvents = <T extends DetectionAlertLatest>(params: {
   events: Array<EventsForEnrichment<T>>;
   enrichmentsList: EventsMapByEnrichments[];
   logger: IRuleExecutionLogForExecutors;
 }) => Array<EventsForEnrichment<T>>;
 
-interface BasedEnrichParameters<T extends BaseFieldsLatest> {
+export interface BasedEnrichParameters<T extends DetectionAlertLatest> {
   services: SecurityRuleServices;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
+  entityStoreCrudClient?: EntityStoreCRUDClient;
 }
 
-export type GetEventValue = <T extends BaseFieldsLatest>(
+export type EnrichmentOptions<T extends DetectionAlertLatest> = BasedEnrichParameters<T> & {
+  spaceId: string;
+};
+
+export type GetEventValue = <T extends DetectionAlertLatest>(
   events: EventsForEnrichment<T>,
   path: string
 ) => string | undefined;
@@ -78,21 +85,22 @@ export type IsIndexExist = (params: {
   index: string;
 }) => Promise<boolean>;
 
-export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
+export type CreateRiskEnrichment = <T extends DetectionAlertLatest>(
   params: BasedEnrichParameters<T> & {
     spaceId: string;
   }
 ) => Promise<EventsMapByEnrichments>;
 
-export type CreateCriticalityEnrichment = <T extends BaseFieldsLatest>(
+export type CreateCriticalityEnrichment = <T extends DetectionAlertLatest>(
   params: BasedEnrichParameters<T> & {
     spaceId: string;
   }
 ) => Promise<EventsMapByEnrichments>;
 
 export type CreateEnrichmentFunction = (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+export type CreateV2EnrichmentFunction = (fields: Record<string, unknown[]>) => EnrichmentFunction;
 
-export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
+export type CreateFieldsMatchEnrichment = <T extends DetectionAlertLatest>(
   params: BasedEnrichParameters<T> & {
     name: string;
     index: string[];
@@ -109,13 +117,16 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   }
 ) => Promise<EventsMapByEnrichments>;
 
-export type EnrichEvents = <T extends BaseFieldsLatest>(
-  params: BasedEnrichParameters<T> & {
-    spaceId: string;
-  }
+export type EnrichEventsParams<T extends DetectionAlertLatest> = BasedEnrichParameters<T> & {
+  spaceId: string;
+  experimentalFeatures: ExperimentalFeatures;
+};
+
+export type EnrichEvents = <T extends DetectionAlertLatest>(
+  params: EnrichEventsParams<T>
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
-export type EnrichEventsWrapper = <T extends BaseFieldsLatest>(
+export type EnrichEventsWrapper = <T extends DetectionAlertLatest>(
   alerts: Array<EventsForEnrichment<T>>,
   params: { spaceId: string }
 ) => Promise<Array<EventsForEnrichment<T>>>;

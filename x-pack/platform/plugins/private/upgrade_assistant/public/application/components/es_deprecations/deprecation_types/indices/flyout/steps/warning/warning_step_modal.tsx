@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
@@ -21,22 +20,26 @@ import {
   EuiText,
   EuiCode,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EnrichedDeprecationInfo,
+import type {
   IndexWarning,
   IndexWarningType,
-  ReindexAction,
-  ReindexStatus,
   ReindexStatusResponse,
+} from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type {
+  EnrichedDeprecationInfo,
+  ReindexAction,
 } from '../../../../../../../../../common/types';
+
 import { useAppContext } from '../../../../../../../app_context';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
 import {
   DeprecatedSettingWarningCheckbox,
   ReplaceIndexWithAliasWarningCheckbox,
   MakeIndexReadonlyWarningCheckbox,
-  WarningCheckboxProps,
 } from './warning_step_checkbox';
 import {
   FollowerIndexCallout,
@@ -45,7 +48,7 @@ import {
   FetchFailedCallOut,
 } from '../callouts';
 import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
-import { ReindexState } from '../../../use_reindex';
+import type { ReindexState } from '../../../use_reindex';
 
 const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
@@ -224,23 +227,23 @@ const WarningReadOnlyModalStep: React.FunctionComponent<WarningModalStepProps> =
         {isMLAnomalyIndex && <MlAnomalyCallout />}
         {warnings.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutTitle"
                   defaultMessage="Enable compatibility by setting this index to read-only"
                 />
               }
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutDetail"
-                  defaultMessage="Note that any attempts to insert new documents or update existing ones will fail. You can choose to reindex after upgrading if needed, to convert the index into a writable one."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutDetail"
+                    defaultMessage="Note that any attempts to insert new documents or update existing ones will fail. You can choose to reindex after upgrading if needed, to convert the index into a writable one."
+                  />
+                </p>
+              }
+            />
 
             <EuiSpacer />
 

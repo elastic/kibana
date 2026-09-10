@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../helpers';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', () => {
     before(async () => await buildUp(getService));
@@ -19,6 +18,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./mustache_templates.ts'));
     loadTestFile(require.resolve('./notify_when'));
     loadTestFile(require.resolve('./muted_alerts'));
+    loadTestFile(require.resolve('./bulk_mute_unmute'));
     loadTestFile(require.resolve('./event_log_alerts'));
     loadTestFile(require.resolve('./snooze_internal'));
     loadTestFile(require.resolve('./snooze'));
@@ -26,6 +26,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./unsnooze_internal'));
     loadTestFile(require.resolve('./bulk_edit'));
     loadTestFile(require.resolve('./bulk_disable'));
+    loadTestFile(require.resolve('./last_run_outcome_msg_migration'));
     loadTestFile(require.resolve('./capped_action_type'));
     loadTestFile(require.resolve('./scheduled_task_id'));
     loadTestFile(require.resolve('./run_soon'));

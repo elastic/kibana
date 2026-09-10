@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { Walker } from '@kbn/esql-ast';
-import { parse } from '@kbn/esql-ast';
+import { Walker, Parser } from '@elastic/esql';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
 /**
@@ -22,7 +21,7 @@ export const queryContainsFunction = (
   functions: string[]
 ): boolean => {
   if (query && isOfAggregateQueryType(query)) {
-    const { root } = parse(query.esql);
+    const { root } = Parser.parse(query.esql);
     return functions.some(
       (f) =>
         Walker.hasFunction(root, f) ||

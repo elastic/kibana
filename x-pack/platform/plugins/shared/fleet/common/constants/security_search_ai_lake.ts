@@ -12,8 +12,10 @@
  */
 export const SEARCH_AI_LAKE_PACKAGES = [
   'crowdstrike',
+  'elastic_security',
   'google_secops',
   'microsoft_sentinel',
+  'ibm_qradar',
   'sentinel_one',
   'splunk',
 ];
@@ -26,6 +28,7 @@ export const SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES = [
   'elastic_agent',
   'elastic_connectors',
   'fleet_server',
+  'security_ai_prompts',
   'security_detection_engine',
   'system',
 ];

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ElasticModelDictionary } from './types';
+import type { ElasticModelDictionary } from './types';
+import { elasticModelIds } from './inference_endpoints';
+
+/** Caps hung inference streams so Kibana terminates them with a typed error. */
+export const MAX_STREAM_DURATION_MS = 5 * 60 * 1000;
 
 export const elasticModelDictionary: ElasticModelDictionary = {
-  'rainbow-sprinkles': {
+  [elasticModelIds.RainbowSprinkles]: {
     provider: 'bedrock',
-    model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
+    model: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
   },
 };

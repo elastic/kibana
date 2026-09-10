@@ -13,6 +13,7 @@ import {
   SnapshotGroupByRT,
   SnapshotMetricInputRT,
 } from '../http_api/snapshot_api';
+import { DataSchemaFormatRT } from '../http_api/shared';
 
 export const inventoryColorPaletteRT = rt.keyof({
   status: null,
@@ -23,11 +24,28 @@ export const inventoryColorPaletteRT = rt.keyof({
   negative: null,
 });
 
-const inventoryLegendOptionsRT = rt.type({
-  palette: inventoryColorPaletteRT,
-  steps: inRangeRt(2, 18),
-  reverseColors: rt.boolean,
+const inventoryLegendTypeRT = rt.keyof({
+  gradient: null,
+  steps: null,
 });
+
+const inventoryLegendStepRT = rt.type({
+  color: rt.string,
+  value: rt.number,
+  label: rt.string,
+});
+
+const inventoryLegendOptionsRT = rt.intersection([
+  rt.type({
+    palette: inventoryColorPaletteRT,
+    steps: inRangeRt(2, 18),
+    reverseColors: rt.boolean,
+  }),
+  rt.partial({
+    type: inventoryLegendTypeRT,
+    rules: rt.array(inventoryLegendStepRT),
+  }),
+]);
 
 export const inventorySortOptionRT = rt.type({
   by: rt.keyof({ name: null, value: null }),
@@ -42,8 +60,8 @@ export const inventoryMapBoundsRT = rt.type({
 });
 
 export const inventoryFiltersStateRT = rt.type({
-  kind: rt.literal('kuery'),
-  expression: rt.string,
+  language: rt.string,
+  query: rt.string,
 });
 
 export const inventoryOptionsStateRT = rt.intersection([
@@ -65,7 +83,12 @@ export const inventoryOptionsStateRT = rt.intersection([
     sort: inventorySortOptionRT,
     view: inventoryViewOptionsRT,
   }),
-  rt.partial({ legend: inventoryLegendOptionsRT, source: rt.string, timelineOpen: rt.boolean }),
+  rt.partial({
+    legend: inventoryLegendOptionsRT,
+    source: rt.string,
+    timelineOpen: rt.boolean,
+    preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
+  }),
 ]);
 
 export const inventoryViewBasicAttributesRT = rt.type({
@@ -74,13 +97,17 @@ export const inventoryViewBasicAttributesRT = rt.type({
 
 const inventoryViewFlagsRT = rt.partial({ isDefault: rt.boolean, isStatic: rt.boolean });
 
+export const inventoryViewAttributesFilterStateRT = rt.type({
+  kind: rt.literal('kuery'),
+  expression: rt.string,
+});
 export const inventoryViewAttributesRT = rt.intersection([
   inventoryOptionsStateRT,
   inventoryViewBasicAttributesRT,
   inventoryViewFlagsRT,
   rt.type({
     autoReload: rt.boolean,
-    filterQuery: inventoryFiltersStateRT,
+    filterQuery: inventoryViewAttributesFilterStateRT,
   }),
   rt.partial({ time: rt.number }),
 ]);

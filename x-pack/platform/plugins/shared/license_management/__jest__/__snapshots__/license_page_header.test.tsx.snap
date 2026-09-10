@@ -1,0 +1,197 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LicenseStatus component should display display warning is expired 1`] = `
+<DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ww9q0e-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <div
+              class="css-1hi0jzn-titleWrapper-titleOffsetStyle-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Your Platinum license has expired
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Your Platinum license has expired
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row-badgesContainer"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <span
+                class="euiBadge emotion-euiBadge-danger-badge"
+                data-test-subj="appHeaderBadge"
+                title="Inactive"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Inactive
+                  </span>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+    <div
+      class="css-1fe2fv4-secondaryContentRow"
+      data-test-subj="appHeaderDescription"
+    >
+      <div
+        class="euiText emotion-euiText-xs-euiTextColor-subdued-AppHeaderDescription"
+      >
+        <p>
+          Your license expired on 
+        </p>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />
+</DocumentFragment>
+`;
+
+exports[`LicenseStatus component should display normally when license is active 1`] = `
+<DocumentFragment>
+  <div
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-1ww9q0e-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <div
+              class="css-1hi0jzn-titleWrapper-titleOffsetStyle-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Your Gold license is active
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Your Gold license is active
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row-badgesContainer"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <span
+                class="euiBadge emotion-euiBadge-success-badge"
+                data-test-subj="appHeaderBadge"
+                title="Active"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    Active
+                  </span>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+    <div
+      class="css-1fe2fv4-secondaryContentRow"
+      data-test-subj="appHeaderDescription"
+    >
+      <div
+        class="euiText emotion-euiText-xs-euiTextColor-subdued-AppHeaderDescription"
+      >
+        <p>
+          Your license will expire on October 12, 2099 8:00 PM EDT
+        </p>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />
+</DocumentFragment>
+`;

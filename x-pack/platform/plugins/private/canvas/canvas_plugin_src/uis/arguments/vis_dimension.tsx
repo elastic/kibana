@@ -6,11 +6,13 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectProps } from '@elastic/eui';
-import { DatatableColumn, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { DatatableColumn, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
-import { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_types/arg';
+import type { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_types/arg';
 
 const { VisDimension: strings } = ArgumentStrings;
 
@@ -76,7 +78,18 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <EuiSelect compressed options={options} value={columnId} onChange={onChange} />
+        <EuiSelect
+          compressed
+          options={options}
+          value={columnId}
+          onChange={onChange}
+          aria-label={i18n.translate(
+            'xpack.canvas.visDimensionArgInput.dimensionSelect.ariaLabel',
+            {
+              defaultMessage: 'Dimension',
+            }
+          )}
+        />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false}>

@@ -9,8 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { extractAuthzDescription } from './extract_authz_description';
-import { InternalRouterRoute } from './type';
-import { RouteSecurity } from '@kbn/core-http-server';
+import type { InternalRouterRoute } from './type';
+import type { RouteSecurity } from '@kbn/core-http-server';
 
 describe('extractAuthzDescription', () => {
   it('should return empty if route does not require privileges', () => {
@@ -95,5 +95,18 @@ describe('extractAuthzDescription', () => {
         '[Required authorization] Route required privileges: (manage_spaces AND taskmanager) OR (console AND filesManagement).'
       );
     }
+  });
+
+  it('should return route authz description including extended privileges', () => {
+    const routeSecurity: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['manage_spaces'],
+        extendedPrivileges: ['readExecution', 'readManaged'],
+      },
+    };
+    const description = extractAuthzDescription(routeSecurity);
+    expect(description).toBe(
+      '[Required authorization] Route required privileges: manage_spaces. Extended privileges (optional, expand functionality when granted): readExecution, readManaged.'
+    );
   });
 });

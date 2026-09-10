@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { Cert } from '../../../../common/runtime_types';
+import type { Cert } from '../../../../common/runtime_types';
 import { COPY_FINGERPRINT } from './translations';
 
 const StyledSpan = styled.span`
@@ -30,13 +30,14 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
         </EuiToolTip>
         <EuiCopy textToCopy={val ?? ''}>
           {(copy) => (
-            <EuiButtonIcon
-              data-test-subj="observabilitySolutionShaComponentButton"
-              aria-label={COPY_FINGERPRINT}
-              onClick={copy}
-              iconType="copy"
-              title={COPY_FINGERPRINT}
-            />
+            <EuiToolTip content={COPY_FINGERPRINT} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="observabilitySolutionShaComponentButton"
+                aria-label={COPY_FINGERPRINT}
+                onClick={copy}
+                iconType="copy"
+              />
+            </EuiToolTip>
           )}
         </EuiCopy>
       </StyledSpan>

@@ -6,9 +6,9 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
-import { TileMapExpressionFunctionDefinition } from './tile_map_fn';
-import { TileMapVisParams } from './types';
+import type { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import type { TileMapExpressionFunctionDefinition } from './tile_map_fn';
+import type { TileMapVisParams } from './types';
 import { extractLayerDescriptorParams } from './utils';
 
 export const toExpressionAst: VisToExpressionAst<TileMapVisParams> = (vis) => {

@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
+import type { ThreatMapping } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
 import { threatMatchMappingValidatorFactory } from './validators/threat_match_mapping_validator_factory';
@@ -25,7 +25,7 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
   indexPatterns,
   threatIndexPatterns,
 }: ThreatMatchMappingEditProps): JSX.Element {
-  const fieldConfig: FieldConfig<ThreatMapEntries[]> = useMemo(
+  const fieldConfig: FieldConfig<ThreatMapping> = useMemo(
     () => ({
       label: i18n.THREAT_MATCH_MAPPING_FIELD_LABEL,
       validations: [

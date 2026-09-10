@@ -9,7 +9,7 @@
 
 import { useRef } from 'react';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 /**
  * Hook that returns functions for setting up and destroying a {@link ResizeChecker}

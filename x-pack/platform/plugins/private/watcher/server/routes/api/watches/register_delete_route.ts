@@ -7,11 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
-  watchIds: schema.arrayOf(schema.string()),
+  watchIds: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
 });
 
 type DeleteWatchPromiseArray = Promise<{

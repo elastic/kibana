@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const DASHBOARD_TITLE = 'Ecom Dashboard';
 const SAVEDSEARCH_TITLE = 'Ecommerce Data';
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not allow user that does not have reporting privileges', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
-        await reportingFunctional.tryDiscoverCsvNotAvailable();
+        await reportingFunctional.tryReportsNotAvailable();
       });
 
       it('does allow user with reporting privileges', async () => {

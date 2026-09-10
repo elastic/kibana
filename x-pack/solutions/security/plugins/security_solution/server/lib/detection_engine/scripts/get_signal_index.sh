@@ -12,5 +12,6 @@ set -e
 
 # Example: ./get_signal_index.sh
 curl -s -k \
+ -H 'elastic-api-version: 2023-10-31' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index | jq .

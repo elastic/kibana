@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ConnectorTokenClient } from './connector_token_client';
+import type { ConnectorTokenClientContract } from '../types';
 
-const createConnectorTokenClientMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<ConnectorTokenClient>> = {
-    create: jest.fn(),
-    get: jest.fn(),
+const createConnectorTokenClientMock = (): jest.Mocked<ConnectorTokenClientContract> => {
+  const mocked = {
+    create: jest.fn() as jest.MockedFunction<ConnectorTokenClientContract['create']>,
+    get: jest.fn() as jest.MockedFunction<ConnectorTokenClientContract['get']>,
     update: jest.fn(),
     deleteConnectorTokens: jest.fn(),
     updateOrReplace: jest.fn(),
-  };
+    createWithRefreshToken: jest.fn(),
+    updateWithRefreshToken: jest.fn(),
+  } satisfies jest.Mocked<ConnectorTokenClientContract>;
+
   return mocked;
 };
 

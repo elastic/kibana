@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function UserMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -36,12 +36,14 @@ export function UserMenuProvider({ getService }: FtrProviderContext) {
     }
 
     async closeMenu() {
-      if (!(await testSubjects.exists('userMenu'))) {
-        return;
-      }
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('userMenu'))) {
+          return;
+        }
 
-      await testSubjects.click('userMenuButton');
-      await testSubjects.missingOrFail('userMenu');
+        await testSubjects.click('userMenuButton');
+        await testSubjects.missingOrFail('userMenu', { timeout: 2500 });
+      });
     }
 
     async _ensureMenuOpen() {

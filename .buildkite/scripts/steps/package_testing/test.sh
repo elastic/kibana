@@ -9,6 +9,9 @@ source "$(dirname "$0")/../../common/util.sh"
 #
 #is_test_execution_step
 
+echo "--- Clean up cached images"
+clean_cached_images
+
 echo "--- Package Testing for $TEST_PACKAGE"
 
 mkdir -p target
@@ -20,7 +23,7 @@ elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
   download_artifact 'kibana-*-x86_64.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image-amd64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 fi
 cd ..

@@ -11,27 +11,28 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
-import { EuiIconTip, EuiResizeObserver, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import {
-  Chart,
-  Settings,
-  Wordcloud,
+import type {
   RenderChangeListener,
   ElementClickListener,
   WordCloudElementEvent,
 } from '@elastic/charts';
+import { Chart, Settings, Wordcloud } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { PaletteRegistry, PaletteOutput, getColorFactory, ColorHandlingFn } from '@kbn/coloring';
-import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
+import type { PaletteRegistry, PaletteOutput, ColorHandlingFn } from '@kbn/coloring';
+import { getColorFactory } from '@kbn/coloring';
+import type { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import type { KbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes';
 import { css } from '@emotion/react';
 import { getFormatService } from '../format_service';
-import { TagcloudRendererConfig } from '../../common/types';
+import type { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
 const MAX_TAG_COUNT = 200;
@@ -134,7 +135,7 @@ export const TagCloudChart = ({
           : { value: row[tagColumn], tag: row[tagColumn] };
 
       return {
-        text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
+        text: bucketFormatter ? bucketFormatter.convertToText(tag) : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
@@ -206,7 +207,7 @@ export const TagCloudChart = ({
 
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter
-          ? bucketFormatter.convert(row[termsBucketId], 'text')
+          ? bucketFormatter.convertToText(row[termsBucketId])
           : row[termsBucketId];
         return formattedValue === clickedValue;
       });
@@ -256,7 +257,7 @@ export const TagCloudChart = ({
               angleCount={ORIENTATIONS[orientation].angleCount}
               padding={5}
               fontWeight={400}
-              fontFamily="Inter UI, sans-serif"
+              fontFamily="'Elastic UI Numeric', 'Inter UI', sans-serif"
               fontStyle="normal"
               minFontSize={visParams.minFontSize}
               maxFontSize={visParams.maxFontSize}
@@ -327,7 +328,7 @@ function getColorFromMappingFactory(
   }
   return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
     type: 'categories',
-    categories: getColorCategories(rows, tagColumn),
+    categories: getColorCategories(rows, tagColumn ? [tagColumn] : undefined),
   });
 }
 

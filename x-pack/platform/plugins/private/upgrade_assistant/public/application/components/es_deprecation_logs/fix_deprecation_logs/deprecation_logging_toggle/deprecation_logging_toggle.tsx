@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -23,8 +24,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError } from '../../../../../../common/types';
-import { DeprecationLoggingPreviewProps } from '../../../types';
+import type { ResponseError } from '../../../../../../common/types';
+import type { DeprecationLoggingPreviewProps } from '../../../types';
 
 const i18nTexts = {
   fetchErrorMessage: i18n.translate(
@@ -72,7 +73,15 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.overview.deprecationLogs.errorDetailsPopoverAriaLabel',
+        { defaultMessage: 'Error details' }
+      )}
+    >
       <EuiText style={{ width: 300 }}>
         <p>{error.message as string}</p>
       </EuiText>

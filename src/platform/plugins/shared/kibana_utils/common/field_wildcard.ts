@@ -17,12 +17,18 @@ export const makeRegEx = memoize(function makeRegEx(glob: string) {
 
 // Note that this will return an essentially noop function if globs is undefined.
 export function fieldWildcardMatcher(globs: string[] = [], metaFields: unknown[] = []) {
-  return function matcher(val: unknown) {
+  return function matcher(val: unknown): boolean {
     // do not test metaFields or keyword
     if (metaFields.indexOf(val) !== -1) {
       return false;
     }
-    return globs.some((p) => makeRegEx(p).test(`${val}`));
+    try {
+      return globs.some((p) => makeRegEx(p).test(String(val)));
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e.toString());
+      return false;
+    }
   };
 }
 

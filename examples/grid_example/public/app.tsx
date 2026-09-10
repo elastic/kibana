@@ -14,28 +14,29 @@ import ReactDOM from 'react-dom';
 import { Subject, combineLatest, debounceTime, map, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
   EuiSpacer,
-  UseEuiTheme,
   transparentize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AppMountParameters } from '@kbn/core-application-browser';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { AppMountParameters } from '@kbn/core-application-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GridLayout, GridLayoutData, GridSettings } from '@kbn/grid-layout';
+import type { GridLayoutData, GridSettings } from '@kbn/grid-layout';
+import { GridLayout } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { GridLayoutOptions } from './grid_layout_options';
 import {
@@ -43,7 +44,7 @@ import {
   getSerializedDashboardState,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
-import { MockSerializedDashboardState } from './types';
+import type { MockSerializedDashboardState } from './types';
 import { useLayoutStyles } from './use_layout_styles';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
@@ -125,7 +126,6 @@ export const GridExample = ({
           panelProps={{
             showBadges: true,
             showBorder: true,
-            showNotifications: true,
             showShadow: false,
             setDragHandles,
           }}
@@ -194,25 +194,23 @@ export const GridExample = ({
             css: { flexGrow: 1, display: 'flex', flexDirection: 'column' },
           }}
         >
-          <EuiCallOut
+          <KbnInfoCallout
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:
                 'This example uses session storage to persist saved state and unsaved changes',
             })}
-          >
-            <EuiButton
-              color="accent"
-              size="s"
-              onClick={() => {
-                clearSerializedDashboardState();
-                window.location.reload();
-              }}
-            >
-              {i18n.translate('examples.gridExample.resetExampleButton', {
-                defaultMessage: 'Reset example',
-              })}
-            </EuiButton>
-          </EuiCallOut>
+            actionProps={{
+              primary: {
+                children: i18n.translate('examples.gridExample.resetExampleButton', {
+                  defaultMessage: 'Reset example',
+                }),
+                onClick: () => {
+                  clearSerializedDashboardState();
+                  window.location.reload();
+                },
+              },
+            }}
+          />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>

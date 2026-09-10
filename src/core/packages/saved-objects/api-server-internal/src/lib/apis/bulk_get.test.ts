@@ -24,10 +24,8 @@ import { type SavedObjectsRawDocSource, type SavedObject } from '@kbn/core-saved
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
@@ -241,7 +239,7 @@ describe('#bulkGet', () => {
         const obj = { type: 'dashboard', id: 'three' };
         await expect(
           repository.bulkGet([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`returns error when namespaces is used with a space-agnostic object`, async () => {

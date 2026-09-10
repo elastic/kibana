@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { AlertConfigsCodec } from './alert_config';
-import { secretKeys } from '../../constants/monitor_management';
+import type { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
@@ -282,6 +282,7 @@ export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: t.array(t.string),
   [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfigCodec,
 });
 
@@ -345,6 +346,7 @@ export const EncryptedSyntheticsMonitorCodec = t.union([
 export const SyntheticsMonitorWithIdCodec = t.intersection([
   SyntheticsMonitorCodec,
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
+  t.partial({ spaces: t.array(t.string), spaceId: t.string, revision: t.number }),
 ]);
 
 const HeartbeatFieldsCodec = t.intersection([
@@ -358,7 +360,9 @@ const HeartbeatFieldsCodec = t.intersection([
     'monitor.id': t.string,
     'monitor.project.id': t.string,
     'monitor.fleet_managed': t.boolean,
+    'monitor.interval': t.number,
     meta: t.record(t.string, t.union([t.string, t.array(t.string)])),
+    kibanaUrl: t.string,
   }),
 ]);
 

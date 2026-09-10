@@ -10,9 +10,10 @@
 import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Update, allValuesFrom } from '../common';
+import type { Update } from '../common';
+import { allValuesFrom } from '../common';
 
-import { OptimizerState } from './optimizer_state';
+import type { OptimizerState } from './optimizer_state';
 import { OptimizerConfig } from './optimizer_config';
 import { handleOptimizerCompletion } from './handle_optimizer_completion';
 
@@ -86,7 +87,7 @@ it('passes through errors on the source stream', async () => {
   const error = new Error('foo');
   const update$ = Rx.throwError(error);
 
-  await expect(
-    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowError(error);
+  await expect(allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))).rejects.toThrow(
+    error
+  );
 });

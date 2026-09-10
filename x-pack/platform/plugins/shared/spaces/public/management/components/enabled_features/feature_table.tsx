@@ -27,13 +27,13 @@ import type { AppCategory } from '@kbn/core/public';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import type { Space } from '../../../../common';
 import { getEnabledFeatures } from '../../lib/feature_utils';
+import type { CustomizeSpaceFormValues } from '../../types';
 
 interface Props {
-  space: Partial<Space>;
+  space: CustomizeSpaceFormValues;
   features: KibanaFeatureConfig[];
-  onChange: (space: Partial<Space>) => void;
+  onChange: (space: CustomizeSpaceFormValues) => void;
 }
 
 export class FeatureTable extends Component<Props, {}> {
@@ -43,6 +43,7 @@ export class FeatureTable extends Component<Props, {}> {
     super(props);
     // features are static for the lifetime of the page, so this is safe to do here in a non-reactive manner
     props.features.forEach((feature) => {
+      if (feature.hidden === true) return;
       if (!this.featureCategories.has(feature.category.id)) {
         this.featureCategories.set(feature.category.id, []);
       }
@@ -101,7 +102,7 @@ export class FeatureTable extends Component<Props, {}> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} />
+              <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
@@ -147,7 +148,7 @@ export class FeatureTable extends Component<Props, {}> {
               <EuiSpacer size="m" />
               {helpText && (
                 <>
-                  <EuiCallOut iconType="info" size="s">
+                  <EuiCallOut announceOnMount iconType="info" size="s">
                     {helpText}
                   </EuiCallOut>
                   <EuiSpacer size="m" />
@@ -185,8 +186,9 @@ export class FeatureTable extends Component<Props, {}> {
 
     accordions.sort((a1, a2) => a1.order - a2.order);
 
-    const featureCount = this.props.features.length;
-    const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
+    const visibleFeatures = this.props.features.filter((f) => !f.hidden);
+    const featureCount = visibleFeatures.length;
+    const enabledCount = getEnabledFeatures(visibleFeatures, this.props.space).length;
     const controls = [];
     if (enabledCount < featureCount) {
       controls.push(
@@ -243,7 +245,7 @@ export class FeatureTable extends Component<Props, {}> {
   }
 
   public onChange = (featureId: string) => (e: ChangeEvent<HTMLInputElement>) => {
-    const updatedSpace: Partial<Space> = {
+    const updatedSpace: CustomizeSpaceFormValues = {
       ...this.props.space,
     };
 
@@ -272,7 +274,7 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   private setFeaturesVisibility = (features: string[], visible: boolean) => {
-    const updatedSpace: Partial<Space> = {
+    const updatedSpace: CustomizeSpaceFormValues = {
       ...this.props.space,
     };
 

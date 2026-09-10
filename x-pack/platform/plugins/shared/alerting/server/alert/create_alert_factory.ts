@@ -11,6 +11,8 @@ import type { AlertInstanceContext, AlertInstanceState } from '../types';
 import type { PublicAlert } from './alert';
 import { Alert } from './alert';
 import { processAlerts } from '../lib';
+import { ALLOWED_MAX_ALERTS, getMaxAlertLimit } from '../../common';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -53,9 +55,10 @@ export interface CreateAlertFactoryOpts<
 > {
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
-  maxAlerts: number;
+  configuredMaxAlerts: number;
   autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
+  snoozedInstancesMap?: Map<string, RawRuleSnoozedInstance>;
 }
 
 export function createAlertFactory<
@@ -65,9 +68,10 @@ export function createAlertFactory<
 >({
   alerts,
   logger,
-  maxAlerts,
+  configuredMaxAlerts,
   autoRecoverAlerts,
   canSetRecoveryContext = false,
+  snoozedInstancesMap,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
@@ -84,6 +88,8 @@ export function createAlertFactory<
   // Whether rule type has reported back if alert limit was reached
   let hasReportedLimitReached = false;
 
+  const maxAlerts = getMaxAlertLimit(configuredMaxAlerts);
+
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
@@ -93,11 +99,20 @@ export function createAlertFactory<
 
       if (numAlertsCreated++ >= maxAlerts) {
         hasReachedAlertLimit = true;
+        if (configuredMaxAlerts > ALLOWED_MAX_ALERTS) {
+          logger.warn(
+            `The configured maximum alert limit exceeds the allowed threshold. Only ${ALLOWED_MAX_ALERTS} alerts are being returned. Please consider adjusting xpack.alerting.rules.run.alerts.max.`
+          );
+        }
         throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
       }
 
       if (!alerts[id]) {
         alerts[id] = new Alert<State, Context>(id);
+        const snoozeConfig = snoozedInstancesMap?.get(id);
+        if (snoozeConfig) {
+          alerts[id].setSnoozeConfig(snoozeConfig);
+        }
       }
 
       return alerts[id];

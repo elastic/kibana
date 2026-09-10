@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TooltipTableColumn } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -17,10 +18,8 @@ import {
   Settings,
   Tooltip,
   TooltipTable,
-  TooltipTableColumn,
 } from '@elastic/charts';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -29,10 +28,11 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import type { GetPreviewDataResponse } from '@kbn/slo-schema';
 import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
@@ -40,7 +40,7 @@ import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 
 interface DataPreviewChartProps {
   formatPattern?: string;
@@ -76,13 +76,20 @@ export function DataPreviewChart({
 
   const indicator = watch('indicator');
   const groupBy = watch('groupBy');
+  const projectRoutings = watch('settings.projectRoutings');
 
   const {
     data: previewData,
     isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range, groupBy);
+  } = useDebouncedGetPreviewData({
+    isIndicatorValid: isIndicatorSectionValid,
+    indicator,
+    range,
+    groupBy,
+    projectRoutings,
+  });
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&
@@ -223,14 +230,13 @@ export function DataPreviewChart({
       {isMoreThan100 && (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             size="s"
-            color="warning"
             title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {
               defaultMessage:
                 'Some of the SLI values are more than 100%. That means good query is returning more results than total query.',
             })}
-            iconType="warning"
           />
           <EuiSpacer size="xs" />
         </>
@@ -299,7 +305,7 @@ export function DataPreviewChart({
                 yAccessors={['value']}
                 data={(previewData?.results ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
-                  value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                  value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
                   events: datum.events,
                 }))}
               />
@@ -315,7 +321,7 @@ export function DataPreviewChart({
                   yAccessors={['value']}
                   data={data.map((datum) => ({
                     date: new Date(datum.date).getTime(),
-                    value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                    value: datum.sliValue != null && datum.sliValue >= 0 ? datum.sliValue : null,
                     events: datum.events,
                   }))}
                 />

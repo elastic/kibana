@@ -8,9 +8,10 @@
  */
 
 import { CommonTokenStream, CharStreams } from 'antlr4';
-import { default as PainlessParser, SourceContext } from '../../antlr/painless_parser';
+import type { SourceContext } from '../../antlr/painless_parser';
+import { default as PainlessParser } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
-import { MonacoEditorError } from '../../../../types';
+import type { MonacoEditorError } from '../../../../types';
 import { ANTLRErrorListener } from '../../../../common/error_listener';
 
 const parse = (

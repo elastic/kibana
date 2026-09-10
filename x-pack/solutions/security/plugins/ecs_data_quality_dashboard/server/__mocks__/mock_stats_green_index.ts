@@ -23,6 +23,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 4,
         deleted: 0,
+        total_size_in_bytes: 2,
       },
       shard_stats: {
         total_count: 1,
@@ -37,6 +38,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
         index_time_in_millis: 2,
         index_current: 0,
         index_failed: 0,
+        index_failed_due_to_version_conflict: 0,
         delete_total: 0,
         delete_time_in_millis: 0,
         delete_current: 0,
@@ -58,9 +60,11 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
         query_total: 2,
         query_time_in_millis: 1,
         query_current: 0,
+        query_failure: 0,
         fetch_total: 2,
         fetch_time_in_millis: 0,
         fetch_current: 0,
+        fetch_failure: 0,
         scroll_total: 0,
         scroll_time_in_millis: 0,
         scroll_current: 0,
@@ -91,6 +95,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
         total: 1,
         periodic: 1,
         total_time_in_millis: 4,
+        total_time_excluding_waiting_on_lock_in_millis: 0,
       },
       warmer: {
         current: 0,
@@ -109,6 +114,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 608,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 2 },
       },
       completion: {
         size_in_bytes: 0,
@@ -158,6 +164,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 8,
         deleted: 0,
+        total_size_in_bytes: 2,
       },
       shard_stats: {
         total_count: 2,
@@ -172,6 +179,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
         index_time_in_millis: 4,
         index_current: 0,
         index_failed: 0,
+        index_failed_due_to_version_conflict: 0,
         delete_total: 0,
         delete_time_in_millis: 0,
         delete_current: 0,
@@ -193,9 +201,11 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
         query_total: 4,
         query_time_in_millis: 1,
         query_current: 0,
+        query_failure: 0,
         fetch_total: 4,
         fetch_time_in_millis: 0,
         fetch_current: 0,
+        fetch_failure: 0,
         scroll_total: 0,
         scroll_time_in_millis: 0,
         scroll_current: 0,
@@ -226,6 +236,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
         total: 2,
         periodic: 2,
         total_time_in_millis: 9,
+        total_time_excluding_waiting_on_lock_in_millis: 0,
       },
       warmer: {
         current: 0,
@@ -244,6 +255,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 608,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 2 },
       },
       completion: {
         size_in_bytes: 0,

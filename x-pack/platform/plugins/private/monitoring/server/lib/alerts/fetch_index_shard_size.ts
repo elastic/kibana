@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
-import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
-import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
+import type { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
+import type { RegExPatterns } from '../../../common/es_glob_patterns';
+import { ESGlobPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';

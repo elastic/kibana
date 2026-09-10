@@ -8,8 +8,18 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { ExpressionRendererEvent, ExpressionRendererParams } from '@kbn/expressions-plugin/public';
+import type {
+  AggregateQuery,
+  ExecutionContextSearch,
+  Filter,
+  ProjectRouting,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
+import type {
+  ExpressionRendererEvent,
+  ExpressionRendererParams,
+} from '@kbn/expressions-plugin/public';
 import { toExpressionAst } from './to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';
@@ -20,6 +30,9 @@ interface GetExpressionRendererPropsParams {
     filters?: Filter[];
     query?: Query | AggregateQuery;
   };
+  projectRouting?: ProjectRouting;
+  isApproximate: boolean;
+  esqlVariables?: ExecutionContextSearch['esqlVariables'];
   timeRange?: TimeRange;
   disableTriggers?: boolean;
   settings: {
@@ -42,6 +55,9 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   params: ExpressionRendererParams | null;
 }> = async ({
   unifiedSearch: { query, filters },
+  projectRouting,
+  isApproximate,
+  esqlVariables,
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
   parentExecutionContext,
@@ -79,6 +95,9 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
       query,
       filters,
       disableWarningToasts: true,
+      projectRouting,
+      isApproximate,
+      esqlVariables,
     },
     variables: {
       embeddableTitle: vis.title,

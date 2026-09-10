@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
-import { useSelector } from 'react-redux';
+import type { UrlFilter } from '@kbn/exploratory-view-plugin/public';
+import { useSelector } from 'react-redux-v7';
 import { isEmpty, uniqueId } from 'lodash';
 import { useGetUrlParams } from '../../../hooks/use_url_params';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';

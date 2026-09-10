@@ -11,7 +11,10 @@
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
-import type { HostVmTransferResponse } from '../../../scripts/endpoint/common/types';
+import type {
+  HostVmExecResponse,
+  HostVmTransferResponse,
+} from '../../../scripts/endpoint/common/types';
 import type {
   DeletedEndpointHeartbeats,
   IndexedEndpointHeartbeats,
@@ -32,6 +35,7 @@ import type {
   IsAgentAndEndpointUninstalledFromHostTaskOptions,
   LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
+  ExecuteCommandOnHostOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -275,6 +279,12 @@ declare global {
         arg: CaptureHostVmAgentDiagnosticsOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<Omit<HostVmTransferResponse, 'delete'>>;
+
+      task(
+        name: 'executeCommandOnHost',
+        arg: ExecuteCommandOnHostOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<HostVmExecResponse>;
     }
   }
 }

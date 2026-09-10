@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
+import type {
   CustomMetricExpressionParams,
   CustomThresholdSearchSourceFields,
 } from '../../../../common/custom_threshold_rule/types';
@@ -34,6 +34,10 @@ export function validateCustomThreshold({
       timeSizeUnit: string[];
       timeWindowSize: string[];
       critical: {
+        threshold0: string[];
+        threshold1: string[];
+      };
+      warning: {
         threshold0: string[];
         threshold1: string[];
       };
@@ -93,6 +97,10 @@ export function validateCustomThreshold({
         threshold0: [],
         threshold1: [],
       },
+      warning: {
+        threshold0: [],
+        threshold1: [],
+      },
       metric: [],
       metrics: {},
     };
@@ -108,30 +116,8 @@ export function validateCustomThreshold({
       );
     }
 
-    // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
-    // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
-    const { comparator, threshold } = { comparator: c.comparator, threshold: c.threshold } as {
-      comparator?: COMPARATORS;
-      threshold?: number[];
-    };
-    if (threshold && threshold.length && ![...threshold].every(isNumber)) {
-      [...threshold].forEach((v, i) => {
-        if (!isNumber(v)) {
-          const key = i === 0 ? 'threshold0' : 'threshold1';
-          errors[id].critical[key].push(
-            i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdTypeRequired',
-              {
-                defaultMessage: 'Thresholds must contain a valid number.',
-              }
-            )
-          );
-        }
-      });
-    }
-
-    if (comparator === COMPARATORS.BETWEEN && (!threshold || threshold.length < 2)) {
-      errors[id].critical.threshold1.push(
+    if (c.warningThreshold && !c.warningThreshold.length) {
+      errors[id].warning.threshold0.push(
         i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',
           {
@@ -139,6 +125,48 @@ export function validateCustomThreshold({
           }
         )
       );
+    }
+
+    for (const props of [
+      { comparator: c.comparator, threshold: c.threshold, type: 'critical' },
+      { comparator: c.warningComparator, threshold: c.warningThreshold, type: 'warning' },
+    ]) {
+      // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
+      // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
+      const { comparator, threshold, type } = props as {
+        comparator?: COMPARATORS;
+        threshold?: number[];
+        type: 'critical' | 'warning';
+      };
+      if (threshold && threshold.length && ![...threshold].every(isNumber)) {
+        [...threshold].forEach((v, i) => {
+          if (!isNumber(v)) {
+            const key = i === 0 ? 'threshold0' : 'threshold1';
+            errors[id][type][key].push(
+              i18n.translate(
+                'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdTypeRequired',
+                {
+                  defaultMessage: 'Thresholds must contain a valid number.',
+                }
+              )
+            );
+          }
+        });
+      }
+
+      if (
+        (comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE) &&
+        (!threshold || threshold.length < 2)
+      ) {
+        errors[id][type].threshold1.push(
+          i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.thresholdRequired',
+            {
+              defaultMessage: 'Threshold is required.',
+            }
+          )
+        );
+      }
     }
 
     if (!c.timeSize) {

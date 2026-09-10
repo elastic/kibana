@@ -23,14 +23,14 @@ export function Threads({ kuery }: Props) {
   const { services } = useKibanaContextForPlugin();
   const { getDateRangeInTimestamp, dateRange, setDateRange } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const stacktracesProfilingLinkLocator =
     services.observabilityShared.locators.profiling.stacktracesLocator;
 
   return (
     <>
       <ProfilingLinks
-        hostname={asset.name}
+        hostname={entity.name}
         from={dateRange.from}
         to={dateRange.to}
         profilingLinkLocator={stacktracesProfilingLinkLocator}

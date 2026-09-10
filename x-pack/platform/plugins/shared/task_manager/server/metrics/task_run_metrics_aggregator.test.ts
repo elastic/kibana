@@ -8,7 +8,7 @@
 import * as uuid from 'uuid';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskStatus } from '../task';
+import { TaskStatus, TaskTypeGroup } from '../task';
 import type { TaskManagerStats } from '../task_events';
 import { asTaskManagerStatEvent, asTaskRunEvent, TaskPersistence } from '../task_events';
 import { TaskRunResult } from '../task_running';
@@ -16,7 +16,11 @@ import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
 const logger = loggingSystemMock.createLogger();
 
-export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false) => {
+export const getTaskRunSuccessEvent = (
+  type: string,
+  isExpired: boolean = false,
+  taskTypeGroup?: TaskTypeGroup
+) => {
   const id = uuid.v4();
   return asTaskRunEvent(
     id,
@@ -38,6 +42,7 @@ export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false)
       persistence: TaskPersistence.Recurring,
       result: TaskRunResult.Success,
       isExpired,
+      taskTypeGroup,
     }),
     {
       start: 1689698780490,
@@ -46,7 +51,12 @@ export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false)
   );
 };
 
-export const getTaskRunFailedEvent = (type: string, isExpired: boolean = false) => {
+export const getTaskRunFailedEvent = (
+  type: string,
+  isExpired: boolean = false,
+  result: TaskRunResult = TaskRunResult.Failed,
+  taskTypeGroup?: TaskTypeGroup
+) => {
   const id = uuid.v4();
   return asTaskRunEvent(
     id,
@@ -67,8 +77,9 @@ export const getTaskRunFailedEvent = (type: string, isExpired: boolean = false) 
         ownerId: null,
       },
       persistence: TaskPersistence.Recurring,
-      result: TaskRunResult.Failed,
+      result,
       isExpired,
+      taskTypeGroup,
     })
   );
 };
@@ -94,6 +105,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 0,
         delay_values: [],
+        rescheduled_failures: 0,
       },
     });
   });
@@ -109,6 +121,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 0,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {},
     });
@@ -127,6 +140,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 0,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         telemetry: {
@@ -136,6 +150,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
       },
     });
@@ -153,6 +168,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [1], values: [10] },
         total_errors: 0,
         delay_values: [3],
+        rescheduled_failures: 0,
       },
     });
   });
@@ -171,6 +187,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 0,
         delay_values: [],
+        rescheduled_failures: 0,
       },
     });
   });
@@ -188,6 +205,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 0,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         telemetry: {
@@ -197,6 +215,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
       },
     });
@@ -215,6 +234,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 2,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         telemetry: {
@@ -224,6 +244,40 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 2,
           user_errors: 0,
           total_errors: 2,
+          rescheduled_failures: 0,
+        },
+      },
+    });
+  });
+
+  test('should correctly process task run rescheduled failure event', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('telemetry', false, TaskRunResult.RetryScheduled)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('telemetry', false, TaskRunResult.RetryScheduled)
+    );
+    expect(taskRunMetricsAggregator.collect()).toEqual({
+      overall: {
+        success: 0,
+        not_timed_out: 2,
+        total: 2,
+        framework_errors: 2,
+        user_errors: 0,
+        delay: { counts: [], values: [] },
+        total_errors: 2,
+        delay_values: [],
+        rescheduled_failures: 2,
+      },
+      by_type: {
+        telemetry: {
+          success: 0,
+          not_timed_out: 2,
+          total: 2,
+          framework_errors: 2,
+          user_errors: 0,
+          total_errors: 2,
+          rescheduled_failures: 2,
         },
       },
     });
@@ -242,6 +296,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 2,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         telemetry: {
@@ -251,6 +306,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 2,
           user_errors: 0,
           total_errors: 2,
+          rescheduled_failures: 0,
         },
       },
     });
@@ -271,6 +327,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 1,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         report: {
@@ -280,6 +337,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         telemetry: {
           success: 1,
@@ -288,6 +346,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 1,
           user_errors: 0,
           total_errors: 1,
+          rescheduled_failures: 0,
         },
       },
     });
@@ -299,20 +358,34 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true)
+      getTaskRunSuccessEvent('alerting:example', true, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', true)
+      getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:.email', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:.index-threshold', true, TaskTypeGroup.Alerting)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {
@@ -324,6 +397,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 3,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         actions: {
@@ -333,6 +407,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'actions:__email': {
           success: 1,
@@ -341,6 +416,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'actions:webhook': {
           success: 2,
@@ -349,6 +425,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         alerting: {
           success: 5,
@@ -357,6 +434,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 2,
           user_errors: 0,
           total_errors: 2,
+          rescheduled_failures: 0,
         },
         'alerting:example': {
           success: 3,
@@ -365,6 +443,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 2,
           user_errors: 0,
           total_errors: 2,
+          rescheduled_failures: 0,
         },
         'alerting:__index-threshold': {
           success: 2,
@@ -373,6 +452,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         report: {
           success: 2,
@@ -381,6 +461,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         telemetry: {
           success: 1,
@@ -389,6 +470,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 1,
           user_errors: 0,
           total_errors: 1,
+          rescheduled_failures: 0,
         },
       },
     });
@@ -405,20 +487,34 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true)
+      getTaskRunSuccessEvent('alerting:example', true, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', true)
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
+      getTaskRunSuccessEvent('alerting:.index-threshold', true, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('actions:.email', false, TaskTypeGroup.Actions)
+    );
+    taskRunMetricsAggregator.processTaskLifecycleEvent(
+      getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {
@@ -430,6 +526,7 @@ describe('TaskRunMetricsAggregator', () => {
         framework_errors: 3,
         user_errors: 0,
         total_errors: 3,
+        rescheduled_failures: 0,
       },
       by_type: {
         actions: {
@@ -439,6 +536,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'actions:__email': {
           success: 1,
@@ -447,6 +545,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'actions:webhook': {
           success: 2,
@@ -455,6 +554,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         alerting: {
           success: 5,
@@ -463,6 +563,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 2,
           user_errors: 0,
           total_errors: 2,
+          rescheduled_failures: 0,
         },
         'alerting:example': {
           success: 3,
@@ -471,6 +572,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 2,
           user_errors: 0,
           total_errors: 2,
+          rescheduled_failures: 0,
         },
         'alerting:__index-threshold': {
           success: 2,
@@ -479,6 +581,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         report: {
           success: 2,
@@ -487,6 +590,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         telemetry: {
           success: 1,
@@ -495,6 +599,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 1,
           user_errors: 0,
           total_errors: 1,
+          rescheduled_failures: 0,
         },
       },
     });
@@ -510,6 +615,7 @@ describe('TaskRunMetricsAggregator', () => {
         delay: { counts: [], values: [] },
         total_errors: 0,
         delay_values: [],
+        rescheduled_failures: 0,
       },
       by_type: {
         actions: {
@@ -519,6 +625,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'actions:__email': {
           success: 0,
@@ -527,6 +634,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'actions:webhook': {
           success: 0,
@@ -535,6 +643,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         alerting: {
           success: 0,
@@ -543,6 +652,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'alerting:example': {
           success: 0,
@@ -551,6 +661,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         'alerting:__index-threshold': {
           success: 0,
@@ -559,6 +670,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         report: {
           success: 0,
@@ -567,6 +679,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
         telemetry: {
           success: 0,
@@ -575,6 +688,7 @@ describe('TaskRunMetricsAggregator', () => {
           framework_errors: 0,
           user_errors: 0,
           total_errors: 0,
+          rescheduled_failures: 0,
         },
       },
     });

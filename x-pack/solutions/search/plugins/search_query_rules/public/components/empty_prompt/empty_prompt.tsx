@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_TITLE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 
 import { CREATE_QUERY_RULE_SET_API_SNIPPET } from '../../../common/constants';
@@ -126,7 +127,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <EuiFlexGroup gutterSize="m" direction="column">
                   <EuiFlexGroup responsive={false} gutterSize="s" direction="row">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="check" />
+                      <EuiIcon type="check" aria-hidden />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
@@ -155,7 +156,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                   </EuiFlexGroup>
                   <EuiFlexGroup responsive={false} gutterSize="s" direction="row">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="check" />
+                      <EuiIcon type="check" aria-hidden />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
@@ -184,7 +185,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                   </EuiFlexGroup>
                   <EuiFlexGroup responsive={false} gutterSize="s" direction="row">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="check" />
+                      <EuiIcon type="check" aria-hidden />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
@@ -218,7 +219,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
             <EuiFlexItem grow css={positionRelative}>
               <img
                 src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
-                alt="Query Rules"
+                alt={PLUGIN_TITLE}
                 css={imgProps}
               />
               <div css={gradientOverlay}>&nbsp;</div>

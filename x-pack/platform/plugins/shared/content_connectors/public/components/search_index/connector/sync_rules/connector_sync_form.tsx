@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -45,6 +46,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
           {isEditing && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="contentConnectorsConnectorSyncRulesFormCancelButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-cancelEditing"
                 onClick={() => {
                   setIsEditing(!isEditing);
@@ -61,6 +63,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="contentConnectorsConnectorSyncRulesFormSaveAndValidateDraftButton"
               data-telemetry-id="entSearchContent-connector-syncRules-editRules-saveAndValidate"
               disabled={hasJsonValidationError}
               isLoading={isLoading}

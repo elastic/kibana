@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { EvaluatorT } from 'langsmith/evaluation';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { EvaluatorT } from 'langsmith/evaluation';
+
+import { InvalidDefendInsightTypeError } from '../../../errors';
 import { customIncompatibleAntivirusEvaluator } from './customIncompatibleAntivirusEvaluator';
+import { customPolicyResponseFailureEvaluator } from './customPolicyResponseFailureEvaluator';
 
 export const getDefendInsightsCustomEvaluator = ({
   insightType,
@@ -15,8 +18,11 @@ export const getDefendInsightsCustomEvaluator = ({
   insightType: DefendInsightType;
 }): EvaluatorT => {
   switch (insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
-    default:
+    case DefendInsightType.enum.incompatible_antivirus:
       return customIncompatibleAntivirusEvaluator;
+    case DefendInsightType.enum.policy_response_failure:
+      return customPolicyResponseFailureEvaluator;
+    default:
+      throw new InvalidDefendInsightTypeError();
   }
 };

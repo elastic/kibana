@@ -9,7 +9,7 @@
 
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
-import { SavedObjectsManagementColumn } from './types';
+import type { SavedObjectsManagementColumn } from './types';
 
 export interface SavedObjectsManagementColumnServiceSetup {
   /**

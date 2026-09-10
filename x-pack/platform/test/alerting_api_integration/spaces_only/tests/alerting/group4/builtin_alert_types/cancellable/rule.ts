@@ -18,7 +18,6 @@ const RULE_INTERVALS_TO_WRITE = 5;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 const ES_GROUPS_TO_WRITE = 3;
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -31,9 +30,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
-      await esTestIndexTool.destroy();
-      await esTestIndexTool.setup();
-
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
@@ -43,6 +39,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await objectRemover.removeAll();
     });
 
+    after(async () => {
+      await esTestIndexTool.destroy();
+    });
+
     before(async function () {
       const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
@@ -50,6 +50,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         this.skip();
         return;
       }
+      await esTestIndexTool.setup();
     });
 
     it('runs successfully if it does not timeout', async () => {

@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -42,7 +43,7 @@ const LayerChartSwitchLabel = function ({ label, icon }: { label: string; icon?:
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
         </EuiFlexItem>
       )}
 

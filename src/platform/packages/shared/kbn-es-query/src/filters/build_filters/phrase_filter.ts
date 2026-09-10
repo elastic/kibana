@@ -30,8 +30,8 @@ export type PhraseFilterMeta = FilterMeta & {
 export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
   query: {
-    match_phrase?: estypes.QueryDslQueryContainer['match_phrase'];
-    match?: estypes.QueryDslQueryContainer['match'];
+    match_phrase?: NonNullable<estypes.QueryDslQueryContainer>['match_phrase'];
+    match?: NonNullable<estypes.QueryDslQueryContainer>['match'];
   };
 };
 

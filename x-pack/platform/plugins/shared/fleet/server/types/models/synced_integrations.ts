@@ -49,10 +49,16 @@ export const CustomAssetsDataSchema = schema.object({
   ]),
   error: schema.maybe(schema.string()),
   is_deleted: schema.maybe(schema.boolean()),
+  warning: schema.maybe(
+    schema.object({
+      title: schema.string(),
+      message: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
-  integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
+  integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema, { maxSize: 10000 }),
   custom_assets: schema.maybe(schema.recordOf(schema.string(), CustomAssetsDataSchema)),
   error: schema.maybe(schema.string()),
   warning: schema.maybe(

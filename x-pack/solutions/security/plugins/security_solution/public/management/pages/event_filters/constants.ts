@@ -13,17 +13,15 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_NAME,
-  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
+  ENDPOINT_ARTIFACT_LISTS,
 } from '@kbn/securitysolution-list-constants';
 
 export const EVENT_FILTER_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_EVENTS;
 export const EVENT_FILTER_LIST_DEFINITION: CreateExceptionListSchema = {
-  name: ENDPOINT_EVENT_FILTERS_LIST_NAME,
+  name: ENDPOINT_ARTIFACT_LISTS.eventFilters.name,
   namespace_type: 'agnostic',
-  description: ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
-  list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+  description: ENDPOINT_ARTIFACT_LISTS.eventFilters.description,
+  list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
   type: EVENT_FILTER_LIST_TYPE,
 };
 
@@ -36,4 +34,5 @@ export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `item_id`,
 ];
 
-export { ENDPOINT_EVENT_FILTERS_LIST_ID, EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL };
+export const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
+export { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL };

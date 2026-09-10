@@ -14,15 +14,15 @@ import { createParentApiMock, makeEmbeddableServices } from '@kbn/lens-plugin/pu
 import { ESQLVariableType } from '@kbn/esql-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { getRuleFlyoutComponent } from './rule_flyout_component';
-import { RuleFormData } from '@kbn/response-ops-rule-form';
-import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { RuleFormData } from '@kbn/response-ops-rule-form';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TypeRegistry } from '../../application/type_registry';
 
 const mockRuleFormFlyout = jest.fn((props) => <div data-test-subj={props['data-test-subj']} />);
 
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
+  RuleForm: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
 }));
 
 function createRegistryMock<
@@ -61,13 +61,14 @@ async function renderFlyout(
     ruleTypeRegistry,
     actionTypeRegistry,
     parentApi,
+    jest.fn(),
     {
       ...initialValues,
       params: defaultParams,
     } as RuleFormData<EsQueryRuleParams>
   );
 
-  return render(<Component />);
+  return render(Component);
 }
 
 describe('Alert rules API', () => {

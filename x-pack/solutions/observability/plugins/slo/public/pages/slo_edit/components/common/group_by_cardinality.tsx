@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
+import type { QuerySchema } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useFetchGroupByCardinality } from '../../../../hooks/use_fetch_group_by_cardinality';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 
 export function GroupByCardinality({
@@ -38,7 +40,7 @@ export function GroupByCardinality({
   }
 
   if (isGroupByCardinalityLoading && !groupByCardinality) {
-    return <EuiCallOut size="s" title={<EuiLoadingSpinner />} />;
+    return <KbnInfoCallout announceOnMount size="s" title={<EuiLoadingSpinner />} />;
   }
 
   if (!groupByCardinality) {
@@ -54,11 +56,11 @@ export function GroupByCardinality({
     },
   });
 
+  const Callout = groupByCardinality.isHighCardinality ? KbnWarningCallout : KbnInfoCallout;
+
   return (
-    <EuiCallOut
+    <Callout
       size="s"
-      iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}
-      color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
       title={
         titleAppend ? (
           <>

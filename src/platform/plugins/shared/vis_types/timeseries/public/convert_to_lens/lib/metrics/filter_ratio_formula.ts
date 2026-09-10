@@ -9,9 +9,10 @@
 
 import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../../../common/types';
-import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
+import type { SupportedMetric } from './supported_metrics';
+import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { addAdditionalArgs } from '.';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -30,7 +31,6 @@ const constructFilterRationFormula = (
 };
 
 export const getFilterRatioFormula = (currentMetric: Metric, additionalArgs: AdditionalArgs) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;
   let aggregation: SupportedMetric | null | undefined = SUPPORTED_METRICS.count;
   if (metric_agg) {

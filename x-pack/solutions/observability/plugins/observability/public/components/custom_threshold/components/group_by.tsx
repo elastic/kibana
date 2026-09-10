@@ -6,7 +6,7 @@
  */
 
 import { EuiComboBox } from '@elastic/eui';
-import { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';

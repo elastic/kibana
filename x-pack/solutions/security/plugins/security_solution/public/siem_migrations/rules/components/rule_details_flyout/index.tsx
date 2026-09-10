@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   EuiButtonEmpty,
   EuiTitle,
@@ -16,7 +13,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiTabbedContent,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,9 +21,9 @@ import {
   EuiSkeletonTitle,
   EuiSkeletonText,
 } from '@elastic/eui';
-import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiFlyoutProps } from '@elastic/eui';
 
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -45,29 +41,141 @@ import {
 import { SummaryTab, TranslationTab } from './tabs';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
+  getTranslationFieldsFromAnnotations,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
 import { useUpdateMigrationRule } from '../../logic/use_update_migration_rule';
-import { UpdatedByLabel } from './updated_by';
+import {
+  ScrollableFlyoutTabbedContent,
+  TabContentPadding,
+} from '../../../common/components/details_flyout/utils';
+import {
+  CLOSE_BUTTON_LABEL,
+  SUMMARY_TAB_LABEL,
+} from '../../../common/components/details_flyout/translation';
+import { UpdatedByLabel } from '../../../common/components/updated_by_label';
+import { FlyoutPrevNextNav } from '../../../../common/flyout_prev_next_nav';
 
-/*
- * Fixes tabs to the top and allows the content to scroll.
+import type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
+export type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
+
+interface MigrationRuleDetailsFlyoutContentProps {
+  migrationRule: RuleMigrationRule;
+  // Partial<RuleResponse>, NOT RuleResponse: the outer memo can hold the custom-rule
+  // convert payload (convertMigrationCustomRuleToSecurityRulePayload), which is not a
+  // full RuleResponse. Matches RuleOverviewTabProps['rule'].
+  ruleDetailsToOverview?: Partial<RuleResponse>;
+  matchedPrebuiltRule?: RuleResponse;
+  size?: EuiFlyoutProps['size'];
+  extraTabs: EuiTabbedContentTab[];
+  onTranslationUpdate: (ruleName: string, ruleQuery: string) => Promise<void>;
+}
+
+/**
+ * Holds all per-rule state (selected tab, overview section expansion). Remounted via
+ * `key={migrationRule.id}` by the outer component so navigating between rules behaves
+ * like a fresh load: first enabled tab, reset drafts and expanded sections.
  */
-const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
-  <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiFlexItem grow={true}>
-      <EuiTabbedContent {...props} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const MigrationRuleDetailsFlyoutContent: React.FC<MigrationRuleDetailsFlyoutContentProps> = ({
+  migrationRule,
+  ruleDetailsToOverview,
+  matchedPrebuiltRule,
+  size = 'm',
+  extraTabs,
+  onTranslationUpdate,
+}) => {
+  const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-const tabPaddingClassName = css`
-  padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
-`;
+  const translationTab: EuiTabbedContentTab = useMemo(
+    () => ({
+      id: 'translation',
+      name: i18n.TRANSLATION_TAB_LABEL,
+      'data-test-subj': 'tabTranslation',
+      content: (
+        <TabContentPadding>
+          <TranslationTab
+            migrationRule={migrationRule}
+            matchedPrebuiltRule={matchedPrebuiltRule}
+            onTranslationUpdate={onTranslationUpdate}
+          />
+        </TabContentPadding>
+      ),
+    }),
+    [migrationRule, onTranslationUpdate, matchedPrebuiltRule]
+  );
 
-export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <div className={tabPaddingClassName}>{children}</div>
-);
+  const overviewTab: EuiTabbedContentTab = useMemo(
+    () => ({
+      id: 'overview',
+      name: i18n.OVERVIEW_TAB_LABEL,
+      'data-test-subj': 'tabOverview',
+      content: (
+        <TabContentPadding>
+          {ruleDetailsToOverview && (
+            <RuleOverviewTab
+              rule={ruleDetailsToOverview}
+              columnWidths={
+                size === 'l'
+                  ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
+                  : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
+              }
+              expandedOverviewSections={expandedOverviewSections}
+              toggleOverviewSection={toggleOverviewSection}
+            />
+          )}
+        </TabContentPadding>
+      ),
+      disabled: migrationRule.translation_result === MigrationTranslationResult.UNTRANSLATABLE,
+    }),
+    [
+      ruleDetailsToOverview,
+      size,
+      expandedOverviewSections,
+      toggleOverviewSection,
+      migrationRule.translation_result,
+    ]
+  );
+
+  const summaryTab: EuiTabbedContentTab = useMemo(
+    () => ({
+      id: 'summary',
+      name: SUMMARY_TAB_LABEL,
+      'data-test-subj': 'tabSummary',
+      content: (
+        <TabContentPadding>
+          <SummaryTab migrationRule={migrationRule} />
+        </TabContentPadding>
+      ),
+    }),
+    [migrationRule]
+  );
+
+  const tabs = useMemo(() => {
+    return [...extraTabs, translationTab, overviewTab, summaryTab];
+  }, [extraTabs, translationTab, overviewTab, summaryTab]);
+
+  const [selectedTabId, setSelectedTabId] = useState<string>(
+    () => (tabs.find((tab) => !tab.disabled) ?? tabs[0]).id
+  );
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+
+  useEffect(() => {
+    const currentTab = tabs.find((tab) => tab.id === selectedTabId);
+    if (!currentTab || currentTab.disabled) {
+      // Switch to the first usable tab if the current selection is missing or disabled for this rule
+      setSelectedTabId((tabs.find((tab) => !tab.disabled) ?? tabs[0]).id);
+    }
+  }, [tabs, selectedTabId]);
+
+  const onTabClick = useCallback((tab: EuiTabbedContentTab) => {
+    setSelectedTabId(tab.id);
+  }, []);
+
+  return (
+    <ScrollableFlyoutTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+  );
+};
+MigrationRuleDetailsFlyoutContent.displayName = 'MigrationRuleDetailsFlyoutContent';
 
 interface MigrationRuleDetailsFlyoutProps {
   migrationRule: RuleMigrationRule;
@@ -77,6 +185,7 @@ interface MigrationRuleDetailsFlyoutProps {
   extraTabs?: EuiTabbedContentTab[];
   isDataLoading?: boolean;
   closeFlyout: () => void;
+  navigation: FlyoutPrevNextNavigation;
 }
 
 export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProps> = React.memo(
@@ -88,10 +197,9 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     extraTabs = [],
     isDataLoading,
     closeFlyout,
+    navigation,
   }: MigrationRuleDetailsFlyoutProps) => {
     const { addError } = useAppToasts();
-
-    const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
     const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(migrationRule);
 
@@ -125,99 +233,15 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const ruleDetailsToOverview = useMemo(() => {
       const elasticRule = migrationRule?.elastic_rule;
       if (isMigrationCustomRule(elasticRule)) {
-        return convertMigrationCustomRuleToSecurityRulePayload(elasticRule, false);
+        const translationFields = getTranslationFieldsFromAnnotations(migrationRule.original_rule);
+        return convertMigrationCustomRuleToSecurityRulePayload(
+          elasticRule,
+          false,
+          translationFields
+        );
       }
       return matchedPrebuiltRule;
     }, [migrationRule, matchedPrebuiltRule]);
-
-    const translationTab: EuiTabbedContentTab = useMemo(
-      () => ({
-        id: 'translation',
-        name: i18n.TRANSLATION_TAB_LABEL,
-        content: (
-          <TabContentPadding>
-            <TranslationTab
-              migrationRule={migrationRule}
-              matchedPrebuiltRule={matchedPrebuiltRule}
-              onTranslationUpdate={handleTranslationUpdate}
-            />
-          </TabContentPadding>
-        ),
-      }),
-      [migrationRule, handleTranslationUpdate, matchedPrebuiltRule]
-    );
-
-    const overviewTab: EuiTabbedContentTab = useMemo(
-      () => ({
-        id: 'overview',
-        name: i18n.OVERVIEW_TAB_LABEL,
-        content: (
-          <TabContentPadding>
-            {ruleDetailsToOverview && (
-              <RuleOverviewTab
-                rule={ruleDetailsToOverview}
-                columnWidths={
-                  size === 'l'
-                    ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
-                    : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
-                }
-                expandedOverviewSections={expandedOverviewSections}
-                toggleOverviewSection={toggleOverviewSection}
-              />
-            )}
-          </TabContentPadding>
-        ),
-        disabled: migrationRule.translation_result === RuleTranslationResult.UNTRANSLATABLE,
-      }),
-      [
-        ruleDetailsToOverview,
-        size,
-        expandedOverviewSections,
-        toggleOverviewSection,
-        migrationRule.translation_result,
-      ]
-    );
-
-    const summaryTab: EuiTabbedContentTab = useMemo(
-      () => ({
-        id: 'summary',
-        name: i18n.SUMMARY_TAB_LABEL,
-        content: (
-          <TabContentPadding>
-            <SummaryTab migrationRule={migrationRule} />
-          </TabContentPadding>
-        ),
-      }),
-      [migrationRule]
-    );
-
-    const tabs = useMemo(() => {
-      return [...extraTabs, translationTab, overviewTab, summaryTab];
-    }, [extraTabs, translationTab, overviewTab, summaryTab]);
-
-    const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
-    const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
-
-    useEffect(() => {
-      if (!tabs.find((tab) => tab.id === selectedTabId)) {
-        // Switch to first tab if currently selected tab is not available for this rule
-        setSelectedTabId(tabs[0].id);
-      }
-    }, [tabs, selectedTabId]);
-
-    const onTabClick = (tab: EuiTabbedContentTab) => {
-      setSelectedTabId(tab.id);
-    };
-
-    const tabsContent = useMemo(() => {
-      return (
-        <ScrollableFlyoutTabbedContent
-          tabs={tabs}
-          selectedTab={selectedTab}
-          onTabClick={onTabClick}
-        />
-      );
-    }, [selectedTab, tabs]);
 
     const migrationsRulesFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'migrationRulesFlyoutTitle',
@@ -234,15 +258,26 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         ownFocus
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m">
-            <h2 id={migrationsRulesFlyoutTitleId}>
-              {ruleDetailsToOverview?.name ??
-                migrationRule.original_rule.title ??
-                i18n.UNKNOWN_MIGRATION_RULE_TITLE}
-            </h2>
-          </EuiTitle>
           <EuiSpacer size="s" />
-          <UpdatedByLabel migrationRule={migrationRule} />
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
+            <EuiFlexItem grow={false}>
+              <FlyoutPrevNextNav navigation={navigation} isDisabled={!!isLoading} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
+                <h2 id={migrationsRulesFlyoutTitleId}>
+                  {ruleDetailsToOverview?.name ??
+                    migrationRule.original_rule.title ??
+                    i18n.UNKNOWN_MIGRATION_RULE_TITLE}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <UpdatedByLabel
+            updatedBy={migrationRule.updated_by ?? migrationRule.created_by}
+            updatedAt={migrationRule.updated_at ?? migrationRule['@timestamp']}
+          />
         </EuiFlyoutHeader>
         <EuiFlyoutBody
           // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
@@ -260,14 +295,29 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
                 <EuiSkeletonText />
               </>
             }
-            loadedContent={tabsContent}
+            loadedContent={
+              <MigrationRuleDetailsFlyoutContent
+                key={migrationRule.id}
+                migrationRule={migrationRule}
+                ruleDetailsToOverview={ruleDetailsToOverview}
+                matchedPrebuiltRule={matchedPrebuiltRule}
+                size={size}
+                extraTabs={extraTabs}
+                onTranslationUpdate={handleTranslationUpdate}
+              />
+            }
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={closeFlyout} flush="left">
-                {i18n.CLOSE_BUTTON_LABEL}
+              <EuiButtonEmpty
+                onClick={closeFlyout}
+                flush="left"
+                data-test-subj="detailsFlyoutCloseButton"
+                aria-label={CLOSE_BUTTON_LABEL}
+              >
+                {CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>

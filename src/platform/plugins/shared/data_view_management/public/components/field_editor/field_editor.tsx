@@ -15,7 +15,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiConfirmModal,
   EuiFieldNumber,
@@ -29,6 +28,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -41,8 +41,8 @@ import type {
   FieldFormatParams,
 } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
-import {
+import type { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
+import type {
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
@@ -50,6 +50,7 @@ import {
 } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -62,7 +63,7 @@ import {
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
-import { IndexPatternManagmentContextValue } from '../../types';
+import type { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
@@ -283,7 +284,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           this.isDuplicateName() ? (
             <span>
-              <EuiIcon type="warning" color="warning" size="s" />
+              <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
               &nbsp;
               <FormattedMessage
                 id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
@@ -345,7 +346,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           isDeprecatedLang ? (
             <span>
-              <EuiIcon type="warning" color="warning" size="s" />
+              <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
               &nbsp;
               <strong>
                 <FormattedMessage
@@ -472,25 +473,30 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return (
       <div>
         <EuiSpacer size="m" />
-        <EuiCallOut
-          color="warning"
-          iconType="warning"
+        <KbnWarningCallout
           title={
             <FormattedMessage
               id="indexPatternManagement.fieldTypeConflict"
               defaultMessage="Field type conflict"
             />
           }
-          size="s"
-        >
-          <FormattedMessage
-            id="indexPatternManagement.multiTypeLabelDesc"
-            defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
+          text={
+            <FormattedMessage
+              id="indexPatternManagement.multiTypeLabelDesc"
+              defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
           The indices per type are as follows:"
-          />
-        </EuiCallOut>
+            />
+          }
+          size="s"
+        />
         <EuiSpacer size="m" />
-        <EuiBasicTable items={items} columns={columns} />
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+          tableCaption={i18n.translate('indexPatternManagement.fieldTypeConflictTableCaption', {
+            defaultMessage: 'Indices listed by conflicting field type',
+          })}
+        />
         <EuiSpacer size="m" />
       </div>
     );
@@ -654,12 +660,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   renderDeleteModal = () => {
     const { spec } = this.state;
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return this.state.showDeleteModal ? (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
           defaultMessage: "Delete field ''{fieldName}''",
           values: { fieldName: spec.name },
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.hideDeleteModal}
         onConfirm={() => {
           this.hideDeleteModal();
@@ -826,7 +836,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     const { redirectAway, indexPatternService } = this.props.services;
 
-    let oldField: DataViewField['spec'];
     indexPattern.upsertScriptedField(field);
 
     if (fieldFormatId) {
@@ -851,11 +860,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         redirectAway();
       })
       .catch(() => {
-        if (oldField) {
-          indexPattern.fields.update(oldField);
-        } else {
-          indexPattern.fields.remove(field);
-        }
+        indexPattern.fields.remove(field);
       });
   };
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ClassDeclaration, Project } from 'ts-morph';
-import {
+import type { ClassDeclaration, Project } from 'ts-morph';
+import type {
   PLUGIN_LAYERS,
   PLUGIN_LIFECYCLES,
   PLUGIN_REQUIREMENTS,

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { QueryInputServices } from '@kbn/visualization-ui-components';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import React, { useCallback, useMemo } from 'react';
 import type {
   EventAnnotationConfig,

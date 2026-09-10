@@ -12,7 +12,7 @@ import type {
   FieldFormatsStartCommon,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { cloneDeep } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
@@ -127,6 +127,10 @@ export abstract class AbstractDataView {
    * list of indices that the index pattern matched
    */
   public matchedIndices: string[] = [];
+  /**
+   * Whether the data view is managed by the application.
+   */
+  public managed: boolean = false;
 
   protected scriptedFieldsMap: DataViewFieldBaseSpecMap;
 
@@ -196,6 +200,7 @@ export abstract class AbstractDataView {
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
     this.allowHidden = spec.allowHidden || false;
+    this.managed = spec.managed || false;
   }
 
   getAllowHidden = () => this.allowHidden;
@@ -419,6 +424,7 @@ export abstract class AbstractDataView {
       allowNoIndex: this.allowNoIndex,
       name: this.name,
       allowHidden: this.getAllowHidden(),
+      managed: this.managed,
     };
 
     // Filter undefined values from the spec
@@ -560,4 +566,12 @@ export abstract class AbstractDataView {
     const clonedFieldAttrs = cloneDeep(Object.fromEntries(this.fieldAttrs.entries()));
     return new Map(Object.entries(clonedFieldAttrs));
   };
+
+  /**
+   * Checks if there are any matched indices.
+   * @returns True if there are matched indices, false otherwise.
+   */
+  hasMatchedIndices() {
+    return !!this.matchedIndices.length;
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -19,11 +19,10 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/dev-cli-runner",
     "@kbn/expect",
     "@kbn/tooling-log",
@@ -39,9 +38,15 @@
     "@kbn/inference-langchain",
     "@kbn/sse-utils-server",
     "@kbn/ml-is-populated-object",
-    "@kbn/ml-is-defined",
     "@kbn/sse-utils-client",
     "@kbn/zod",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/core-ui-settings-common",
+    "@kbn/setup-node-env",
+    "@kbn/es-errors",
+    "@kbn/anonymization-plugin",
+    "@kbn/anonymization-common",
+    "@kbn/utility-types",
+    "@kbn/management-settings-ids",
   ]
 }

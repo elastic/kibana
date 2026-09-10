@@ -5,63 +5,49 @@
  * 2.0.
  */
 
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
-  EuiAccordion,
-  EuiButtonGroup,
   EuiButtonIcon,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
   EuiSkeletonRectangle,
   EuiSpacer,
-  EuiTitle,
   EuiToolTip,
-  OnTimeChangeProps,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   discoverAriaText,
   openInDiscoverText,
-  overviewPanelDatasetQualityIndicatorDegradedDocs,
-  overviewTrendsDocsText,
+  createAlertText,
+  editFailureStoreText,
 } from '../../../../../common/translations';
-import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import {
+  useDatasetDetailsTelemetry,
+  useDatasetQualityDetailsState,
+  useFailureStoreModal,
+  useQualityIssuesDocsChart,
+} from '../../../../hooks';
 import { TrendDocsChart } from './trend_docs_chart';
-
-const trendDocsTooltip = (
-  <FormattedMessage
-    id="xpack.datasetQuality.details.trendDocsTooltip"
-    defaultMessage="The percentage of ignored fields or failed docs over the selected timeframe."
-  />
-);
-
-const degradedDocsTooltip = (
-  <FormattedMessage
-    id="xpack.datasetQuality.details.degradedDocsTooltip"
-    defaultMessage="The number of degraded documents —documents with the {ignoredProperty} property— in your data set."
-    values={{
-      ignoredProperty: (
-        <EuiCode language="json" transparentBackground>
-          _ignored
-        </EuiCode>
-      ),
-    }}
-  />
-);
+import { useKibanaContextForPlugin } from '../../../../utils/use_kibana';
+import { getAlertingCapabilities } from '../../../../alerts/get_alerting_capabilities';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const { timeRange, updateTimeRange, docsTrendChart, canShowFailureStoreInfo } =
-    useDatasetQualityDetailsState();
+export default function DocumentTrends({
+  lastReloadTime,
+  openAlertFlyout,
+  displayActions: { displayCreateRuleButton, displayEditFailureStore },
+}: {
+  lastReloadTime: number;
+  openAlertFlyout: () => void;
+  displayActions: {
+    displayCreateRuleButton: boolean;
+    displayEditFailureStore: boolean;
+  };
+}) {
+  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
   const {
     dataView,
     breakdown,
@@ -70,88 +56,39 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
     ...qualityIssuesChartProps
   } = useQualityIssuesDocsChart();
 
-  const accordionId = useGeneratedHtmlId({
-    prefix: overviewTrendsDocsText,
-  });
+  const { trackDatasetDetailsBreakdownFieldChanged } = useDatasetDetailsTelemetry();
+
+  const {
+    services: { application, alerting },
+  } = useKibanaContextForPlugin();
+  const { capabilities } = application;
+  const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
 
   const onTimeRangeChange = useCallback(
     ({ start, end }: Pick<OnTimeChangeProps, 'start' | 'end'>) => {
-      updateTimeRange({ start, end, refreshInterval: timeRange.refresh.value });
+      updateTimeRange({ start, end });
     },
-    [updateTimeRange, timeRange.refresh]
+    [updateTimeRange]
   );
 
-  const accordionTitle = !canShowFailureStoreInfo ? (
-    <EuiFlexItem
-      css={css`
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: flex-start;
-        gap: 4px;
-      `}
-    >
-      <EuiTitle size={'xxs'}>
-        <h5>{overviewPanelDatasetQualityIndicatorDegradedDocs}</h5>
-      </EuiTitle>
-      <EuiToolTip content={degradedDocsTooltip}>
-        <EuiIcon size="m" color="subdued" type="question" className="eui-alignTop" />
-      </EuiToolTip>
-    </EuiFlexItem>
-  ) : (
-    <EuiFlexItem
-      css={css`
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: flex-start;
-        gap: 4px;
-      `}
-    >
-      <EuiTitle size={'xxs'}>
-        <h5>{overviewTrendsDocsText}</h5>
-      </EuiTitle>
-      <EuiToolTip content={trendDocsTooltip}>
-        <EuiIcon size="m" color="subdued" type="question" className="eui-alignTop" />
-      </EuiToolTip>
-    </EuiFlexItem>
+  const onBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      trackDatasetDetailsBreakdownFieldChanged();
+      breakdown.onChange(breakdownField);
+    },
+    [breakdown, trackDatasetDetailsBreakdownFieldChanged]
   );
+
+  const {
+    openModal: openFailureStoreModal,
+    canUserManageFailureStore,
+    renderModal: renderFailureStoreModal,
+  } = useFailureStoreModal();
 
   return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={accordionTitle}
-        paddingSize="none"
-        initialIsOpen={true}
-        data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
-      >
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem>
-            {canShowFailureStoreInfo && (
-              <EuiButtonGroup
-                data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
-                legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
-                  defaultMessage: 'Quality chart type',
-                })}
-                onChange={(id) => handleDocsTrendChartChange(id as QualityIssueType)}
-                options={[
-                  {
-                    id: 'degraded',
-                    label: i18n.translate('xpack.datasetQuality.details.chartType.degradedDocs', {
-                      defaultMessage: 'Ignored fields',
-                    }),
-                  },
-                  {
-                    id: 'failed',
-                    label: i18n.translate('xpack.datasetQuality.details.chartType.failedDocs', {
-                      defaultMessage: 'Failed docs',
-                    }),
-                  },
-                ]}
-                idSelected={docsTrendChart}
-              />
-            )}
-          </EuiFlexItem>
+    <>
+      <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
             <UnifiedBreakdownFieldSelector
               dataView={dataView!}
@@ -161,28 +98,60 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
                     ? breakdown.dataViewField
                     : undefined,
               }}
-              onBreakdownFieldChange={breakdown.onChange}
+              onBreakdownFieldChange={onBreakdownFieldChange}
             />
           </EuiSkeletonRectangle>
-          <EuiToolTip content={openInDiscoverText}>
-            <EuiButtonIcon
-              display="base"
-              iconType="discoverApp"
-              aria-label={discoverAriaText}
-              size="s"
-              data-test-subj="datasetQualityDetailsLinkToDiscover"
-              {...redirectLinkProps.linkProps}
-            />
-          </EuiToolTip>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <TrendDocsChart
-          {...qualityIssuesChartProps}
-          timeRange={timeRange}
-          lastReloadTime={lastReloadTime}
-          onTimeRangeChange={onTimeRangeChange}
-        />
-      </EuiAccordion>
-    </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiToolTip content={openInDiscoverText}>
+              <EuiButtonIcon
+                display="base"
+                iconType="discoverApp"
+                aria-label={discoverAriaText}
+                size="s"
+                data-test-subj="datasetQualityDetailsLinkToDiscover"
+                {...redirectLinkProps.linkProps}
+                color="text"
+              />
+            </EuiToolTip>
+            {displayCreateRuleButton && isAlertingAvailable && (
+              <EuiToolTip content={createAlertText} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="bell"
+                  aria-label={createAlertText}
+                  size="s"
+                  data-test-subj="datasetQualityDetailsCreateRule"
+                  onClick={openAlertFlyout}
+                  color="text"
+                />
+              </EuiToolTip>
+            )}
+            {displayEditFailureStore && canUserManageFailureStore && (
+              <EuiToolTip content={editFailureStoreText} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="pencil"
+                  aria-label={editFailureStoreText}
+                  size="s"
+                  data-test-subj="datasetQualityDetailsEditFailureStore"
+                  onClick={openFailureStoreModal}
+                  color="text"
+                />
+              </EuiToolTip>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <TrendDocsChart
+        {...qualityIssuesChartProps}
+        timeRange={timeRange}
+        lastReloadTime={lastReloadTime}
+        onTimeRangeChange={onTimeRangeChange}
+      />
+      {renderFailureStoreModal()}
+    </>
   );
 }

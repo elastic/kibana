@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LocatorDefinition } from '@kbn/share-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { type SerializableRecord } from '@kbn/utility-types';
 import { casesDetailLocatorID, casesOverviewLocatorID } from '..';
 

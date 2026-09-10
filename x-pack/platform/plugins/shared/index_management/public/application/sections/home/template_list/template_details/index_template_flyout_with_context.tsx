@@ -13,16 +13,18 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
-import { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
+import { i18n } from '@kbn/i18n';
+import type { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
 import { httpService } from '../../../../services/http';
-import { notificationService } from '../../../../services/notification';
+import { NotificationService } from '../../../../services/notification';
 import { UiMetricService } from '../../../../services/ui_metric';
 import { documentationService } from '../../../../services';
 import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
 import { setUiMetricService } from '../../../../services/api';
-import { AppDependencies, IndexManagementAppContext } from '../../../..';
+import type { AppDependencies } from '../../../..';
+import { IndexManagementAppContext } from '../../../..';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../../locator';
 import { TemplateDetailsContent } from './template_details_content';
 
@@ -40,8 +42,8 @@ export const IndexTemplateFlyoutWithContext: React.FC<IndexTemplateFlyoutWithCon
   // can't do it in an effect because then the first http call fails as the instantiation happens after first render
   if (!httpService.httpClient) {
     httpService.setup(core.http);
-    notificationService.setup(core.notifications);
   }
+  const notificationService = new NotificationService(core.notifications.toasts);
   documentationService.setup(core.docLinks);
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);
@@ -84,7 +86,12 @@ export const IndexTemplateFlyoutWithContext: React.FC<IndexTemplateFlyoutWithCon
   );
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout
+        onClose={onClose}
+        aria-label={i18n.translate('xpack.idxMgmt.indexTemplateDetails.flyoutAriaLabel', {
+          defaultMessage: 'Index template details',
+        })}
+      >
         <TemplateDetailsContent
           template={indexTemplate}
           onClose={onClose}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
-import { Index } from '../../../../types';
+import { produce } from 'immer-v9';
+import type { Index } from '../../../../types';
 
 const shard1 = {
   id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_1', '0'],

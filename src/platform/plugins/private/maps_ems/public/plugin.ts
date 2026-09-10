@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   setKibanaVersion,

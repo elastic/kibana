@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React from 'react';
 import { ClearablePalettePicker } from './clearable_palette_picker';
 import { palettes as defaultPalettes } from '../../../../common/lib/palettes';
-import { PalettePickerProps } from '../types';
+import type { PalettePickerProps } from '../types';
 import { DefaultPalettePicker } from './default_palette_picker';
 
 export const PalettePicker: FC<PalettePickerProps> = (props) => {
@@ -29,11 +29,4 @@ export const PalettePicker: FC<PalettePickerProps> = (props) => {
   return (
     <DefaultPalettePicker palettes={palettes} palette={props.palette} onChange={props.onChange} />
   );
-};
-
-PalettePicker.propTypes = {
-  id: PropTypes.string,
-  palette: PropTypes.object,
-  onChange: PropTypes.func,
-  clearable: PropTypes.bool,
 };

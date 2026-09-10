@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { useMlApi } from '../../../../../../../contexts/kibana';
@@ -97,7 +98,16 @@ export const TopCategories: FC = () => {
               values={{ totalCategories }}
             />
           </div>
-          <EuiBasicTable columns={columns} items={tableRow} />
+          <EuiBasicTable
+            columns={columns}
+            items={tableRow}
+            tableCaption={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.topCategoriesTableCaption',
+              {
+                defaultMessage: 'Top categories examples',
+              }
+            )}
+          />
         </>
       )}
     </>

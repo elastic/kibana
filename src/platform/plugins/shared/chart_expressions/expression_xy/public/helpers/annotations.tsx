@@ -9,16 +9,11 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiIcon,
-  EuiIconProps,
-  EuiText,
-  useEuiFontSize,
-  UseEuiTheme,
-  euiTextTruncate,
-} from '@elastic/eui';
+import type { EuiIconProps, UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiText, useEuiFontSize, euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
+import chroma from 'chroma-js';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -26,7 +21,8 @@ import type {
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
-import { AxesMap, getOriginalAxisPosition } from './axes_configuration';
+import type { AxesMap } from './axes_configuration';
+import { getOriginalAxisPosition } from './axes_configuration';
 
 export const LINES_MARKER_SIZE = 20;
 
@@ -39,7 +35,7 @@ type PartialReferenceLineDecorationConfig = Pick<
 
 type PartialMergedAnnotation = Pick<
   MergedAnnotation,
-  'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped'
+  'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped' | 'color'
 >;
 
 const isExtendedDecorationConfig = (
@@ -133,16 +129,36 @@ export function MarkerBody({
   );
 }
 
-function NumberIcon({ number }: { number: number }) {
+export const getGroupedAnnotationTextColor = (backgroundColor: string) => {
+  // Defensive: chroma.contrast can throw on invalid color values, though
+  // our code resolves colors before reaching here so this shouldn't happen.
+  try {
+    return chroma.contrast(backgroundColor, euiDarkVars.euiColorTextParagraph) >=
+      chroma.contrast(backgroundColor, euiLightVars.euiColorTextParagraph)
+      ? euiDarkVars.euiColorTextParagraph
+      : euiLightVars.euiColorTextParagraph;
+  } catch {
+    return euiLightVars.euiColorTextParagraph;
+  }
+};
+
+function NumberIcon({ number, color }: { number: number; color?: string }) {
+  const textColor = color
+    ? getGroupedAnnotationTextColor(color)
+    : euiLightVars.euiColorTextParagraph;
+
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      css={styles.numberIcon}
+      css={styles.numberIcon(color)}
       data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" css={[css(useEuiFontSize('xxxs')), styles.numberIconText]}>
+      <EuiText
+        css={[css(useEuiFontSize('xxxs')), styles.numberIconText(textColor)]}
+        data-test-subj="xyVisGroupedAnnotationCount"
+      >
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
@@ -156,6 +172,7 @@ export const AnnotationIcon = ({
   rotateClassName = '',
   isHorizontal,
   renderedInChart,
+  color,
   ...rest
 }: {
   type: string;
@@ -164,7 +181,7 @@ export const AnnotationIcon = ({
   renderedInChart?: boolean;
 } & EuiIconProps) => {
   if (isNumericalString(type)) {
-    return <NumberIcon number={Number(type)} />;
+    return <NumberIcon number={Number(type)} color={color} />;
   }
   const iconConfig = iconSet.find((i) => i.value === type);
   if (!iconConfig) {
@@ -176,6 +193,7 @@ export const AnnotationIcon = ({
   return (
     <EuiIcon
       {...rest}
+      color={color}
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
       className={iconConfig.shouldRotate ? rotateClassName : undefined}
@@ -189,6 +207,7 @@ interface MarkerConfig {
   icon?: string;
   textVisibility?: boolean;
   iconPosition?: IconPosition;
+  color?: string;
 }
 
 export function Marker({
@@ -208,6 +227,7 @@ export function Marker({
     return (
       <AnnotationIcon
         type={config.icon}
+        color={config.color}
         rotateClassName={rotateClassName}
         renderedInChart={true}
         isHorizontal={isHorizontal}
@@ -220,25 +240,30 @@ export function Marker({
     if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
-    return <EuiIcon type="empty" />;
+    return <EuiIcon type="empty" aria-hidden={true} />;
   }
   return null;
 }
 
 const styles = {
-  numberIcon: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderRadius: euiTheme.size.base,
-      minWidth: euiTheme.size.base,
-      height: euiTheme.size.base,
-      backgroundColor: 'currentColor',
-    }),
+  numberIcon:
+    (backgroundColor?: string) =>
+    ({ euiTheme }: UseEuiTheme) =>
+      css({
+        borderRadius: euiTheme.size.base,
+        minWidth: euiTheme.size.base,
+        height: euiTheme.size.base,
+        backgroundColor: backgroundColor ?? 'currentColor',
+      }),
 
-  numberIconText: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontWeight: euiTheme.font.weight.medium,
-      letterSpacing: '-.5px',
-    }),
+  numberIconText:
+    (color: string) =>
+    ({ euiTheme }: UseEuiTheme) =>
+      css({
+        color,
+        fontWeight: euiTheme.font.weight.medium,
+        letterSpacing: '-.5px',
+      }),
 
   rotatedIcon: css({
     transform: 'rotate(90deg) !important',

@@ -9,8 +9,7 @@
 
 import _ from 'lodash';
 
-import {
-  functions,
+import type {
   KQL_FUNCTION_AND,
   KQL_FUNCTION_EXISTS,
   KQL_FUNCTION_NESTED,
@@ -19,6 +18,7 @@ import {
   KQL_FUNCTION_OR,
   KQL_FUNCTION_RANGE,
 } from '../functions';
+import { functions } from '../functions';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
 

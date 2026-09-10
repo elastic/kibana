@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { getAllIntegrationsRoute } from './get_all_integrations/route';
 import { getInstalledIntegrationsRoute } from './get_installed_integrations/route';
 
-export const registerFleetIntegrationsRoutes = (router: SecuritySolutionPluginRouter) => {
-  getAllIntegrationsRoute(router);
-  getInstalledIntegrationsRoute(router);
+export const registerFleetIntegrationsRoutes = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
+  getAllIntegrationsRoute(router, logger);
+  getInstalledIntegrationsRoute(router, logger);
 };

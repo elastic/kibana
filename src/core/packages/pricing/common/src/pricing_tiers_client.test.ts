@@ -111,4 +111,72 @@ describe('PricingTiersClient', () => {
       });
     });
   });
+  describe('product', () => {
+    describe('when tiers are disabled', () => {
+      it('returns undefined when no products are configured', () => {
+        tiersConfig = {
+          enabled: false,
+          products: undefined,
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.getActiveProduct()).toBeUndefined();
+      });
+      it('returns undefined when products are an empty array', () => {
+        tiersConfig = {
+          enabled: false,
+          products: [],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.getActiveProduct()).toBeUndefined();
+      });
+      it('returns undefined when products are configured but pricing tiers are disabled', () => {
+        tiersConfig = {
+          enabled: false,
+          products: [{ name: 'observability', tier: 'complete' }],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.getActiveProduct()).toBeUndefined();
+      });
+    });
+    describe('when tiers are enabled', () => {
+      it('returns the current active product for observability', () => {
+        tiersConfig = {
+          enabled: true,
+          products: [{ name: 'observability', tier: 'complete' }],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.getActiveProduct()).toEqual({ type: 'observability', tier: 'complete' });
+      });
+      it('returns the current active product for security with product lines', () => {
+        tiersConfig = {
+          enabled: true,
+          products: [
+            { name: 'security', tier: 'complete' },
+            { name: 'endpoint', tier: 'complete' },
+            { name: 'cloud', tier: 'complete' },
+          ],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.getActiveProduct()).toEqual({
+          type: 'security',
+          tier: 'complete',
+          product_lines: ['endpoint', 'cloud'],
+        });
+      });
+      it('returns the current active product for security without product lines', () => {
+        tiersConfig = {
+          enabled: true,
+          products: [
+            { name: 'security', tier: 'essentials' }, // 'security' is not a real product line, it's used to define the tier when no addons are active
+          ],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.getActiveProduct()).toEqual({
+          type: 'security',
+          tier: 'essentials',
+          product_lines: [],
+        });
+      });
+    });
+  });
 });

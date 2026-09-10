@@ -14,4 +14,9 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new AutomaticImportPlugin(initializerContext);
 }
 
-export type { AutomaticImportPluginSetup, AutomaticImportPluginStart } from './types';
+export type {
+  AutomaticImportPluginSetup,
+  AutomaticImportPluginStart,
+  AutomaticImportPluginSetupDependencies,
+  AutomaticImportPluginStartDependencies,
+} from './types';

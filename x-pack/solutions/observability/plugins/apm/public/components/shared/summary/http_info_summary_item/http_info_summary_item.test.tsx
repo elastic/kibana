@@ -16,6 +16,7 @@ describe('HttpInfoSummaryItem', () => {
   const url = 'https://example.com';
   const method = 'get';
   const baseProps = { transaction, url, method };
+  const httpStatusCodeBadgeTestId = 'apmUiSharedHttpStatusCodeBadge';
 
   it('renders with base props', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={100} />);
@@ -29,37 +30,39 @@ describe('HttpInfoSummaryItem', () => {
 
   it('renders status code 100', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={100} />);
-    const badge = screen.getByTestId('httpStatusBadge');
+    const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('100');
   });
 
   it('renders status code 200', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={200} />);
-    const badge = screen.getByTestId('httpStatusBadge');
+    const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('200');
   });
 
   it('renders status code 301', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={301} />);
-    const badge = screen.getByTestId('httpStatusBadge');
+    const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('301');
   });
 
   it('renders status code 404', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={404} />);
-    const badge = screen.getByTestId('httpStatusBadge');
+    const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('404');
   });
 
   it('renders status code 502', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={502} />);
-    const badge = screen.getByTestId('httpStatusBadge');
+    const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('502');
   });
 
   it('renders unknown status code', () => {
     renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={700} />);
-    const badge = screen.getByTestId('httpStatusBadge');
+    const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('700');
   });
 });
+
+// apmUiSharedHttpStatusCodeBadge

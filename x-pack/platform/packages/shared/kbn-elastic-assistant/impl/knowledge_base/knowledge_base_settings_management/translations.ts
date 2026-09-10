@@ -14,6 +14,13 @@ export const NEW = i18n.translate(
   }
 );
 
+export const NEW_ENTRY_OPTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newEntryOptionsAriaLabel',
+  {
+    defaultMessage: 'New knowledge base entry options',
+  }
+);
+
 export const INDEX = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.indexLabel',
   {
@@ -191,11 +198,16 @@ export const ENTRY_INDEX_NAME_INPUT_LABEL = i18n.translate(
   }
 );
 
-export const ENTRY_INDEX_NAME_INPUT_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryIndexNameInputDescription',
+export const ENTRY_INDEX_NAME_INPUT_DESCRIPTION = {
+  id: 'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryIndexNameInputDescription',
+  defaultMessage:
+    'Please refer to {docLink} for more information on configuring an index for use as a custom knowledge source. ',
+};
+
+export const KNOWLEDGE_BASE_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryIndexNameInputDocumentation',
   {
-    defaultMessage:
-      'Indices will only be available to select from this drop down list if they contain a semantic_text field. Please refer to the documentation for more information on configuring an index for use as a custom knowledge source.',
+    defaultMessage: 'the documentation',
   }
 );
 
@@ -277,6 +289,13 @@ export const KNOWLEDGE_BASE_DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseDocumentation',
   {
     defaultMessage: 'Learn more',
+  }
+);
+
+export const KNOWLEDGE_BASE_TABLE_CAPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseTableCaption',
+  {
+    defaultMessage: 'Knowledge base entries',
   }
 );
 

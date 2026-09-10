@@ -13,8 +13,10 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
 import { login, ROLE } from '../../tasks/login';
+import { disableNewFlyout } from '../../tasks/kibana_advanced_settings';
 
-describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/279609
+describe.skip('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
   let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
@@ -49,7 +51,8 @@ describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, (
     }
   });
 
-  describe('see results when has RBAC', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/244642
+  describe.skip('see results when has RBAC', () => {
     before(() => {
       login(ROLE.soc_manager);
     });
@@ -65,6 +68,7 @@ describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, (
   });
   describe('do not see results results when does not have RBAC', () => {
     before(() => {
+      disableNewFlyout();
       login(ROLE.t1_analyst);
     });
 

@@ -8,14 +8,13 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
@@ -23,7 +22,6 @@ import type { BuildFlavor } from '@kbn/config';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { StartServices } from '../../../..';
@@ -54,6 +52,7 @@ export class ConfirmDelete extends Component<Props, State> {
   public render() {
     const { rolesToDelete, buildFlavor } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
+    const modalTitleId = htmlIdGenerator()('confirmDeleteModalTitle');
     const title = i18n.translate('xpack.security.management.roles.deleteRoleTitle', {
       defaultMessage: `Delete role{value, plural, one {{roleName}} other {s}}?`,
       values: { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` },
@@ -63,9 +62,11 @@ export class ConfirmDelete extends Component<Props, State> {
     // to disable the buttons since this could be a long-running operation
 
     return (
-      <EuiModal onClose={this.props.onCancel}>
+      <EuiModal onClose={this.props.onCancel} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
+            {title}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText>
@@ -194,25 +195,19 @@ export class ConfirmDelete extends Component<Props, State> {
             '{numberOfCustomRoles, plural, one {# custom role} other {# custom roles}} deleted',
           values: { numberOfCustomRoles: deleteOperations.length },
         }),
-        text: toMountPoint(
-          <>
-            <p>
-              {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
-                defaultMessage: `The deleted role will still appear listed on the user profile in Organization
-                  Management and on the User Profile for those that don't have admin access.`,
-              })}
-            </p>
-
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={this.props.cloudOrgUrl}>
-                  Manage Members
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>,
-          this.props
-        ),
+        text: i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+          defaultMessage:
+            "The deleted role will still appear listed on the user profile in Organization Management and on the User Profile for those that don't have admin access.",
+        }),
+        actionProps: {
+          primary: {
+            href: this.props.cloudOrgUrl,
+            children: i18n.translate(
+              'xpack.security.management.roles.deleteRolesManageMembersButton',
+              { defaultMessage: 'Manage Members' }
+            ),
+          },
+        },
       });
     }
 

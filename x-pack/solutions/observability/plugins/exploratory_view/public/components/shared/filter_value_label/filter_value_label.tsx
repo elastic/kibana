@@ -7,11 +7,14 @@
 
 import React from 'react';
 import { injectI18n } from '@kbn/i18n-react';
-import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAppServices } from '../../../application/types';
+import type { ObservabilityAppServices } from '../../../application/types';
+
+const FilterItemI18n = injectI18n(FilterItem);
 
 export function buildFilterLabel({
   field,
@@ -72,8 +75,6 @@ export function FilterValueLabel({
   removeFilter,
   allowExclusion = true,
 }: FilterValueLabelProps) {
-  const FilterItemI18n = injectI18n(FilterItem);
-
   const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {

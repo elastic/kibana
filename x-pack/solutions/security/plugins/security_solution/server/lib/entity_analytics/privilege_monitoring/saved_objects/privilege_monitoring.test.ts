@@ -52,7 +52,7 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
     expect(soClient.create).toHaveBeenCalledWith(
       privilegeMonitoringTypeName,
       { status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED },
-      { id: `privilege-monitoring-${namespace}` }
+      { id: `privilege-monitoring-${namespace}`, refresh: 'wait_for' }
     );
     expect(result).toEqual({ status: 'installing' });
   });
@@ -134,6 +134,7 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
     expect(soClient.find).toHaveBeenCalledWith({
       type: privilegeMonitoringTypeName,
       namespaces: [namespace],
+      perPage: 10000,
     });
     expect(result).toEqual(findResponse);
   });
@@ -161,7 +162,8 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
 
     expect(soClient.delete).toHaveBeenCalledWith(
       privilegeMonitoringTypeName,
-      `privilege-monitoring-${namespace}`
+      `privilege-monitoring-${namespace}`,
+      { refresh: 'wait_for' }
     );
   });
 });

@@ -13,6 +13,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import type {
   UserCommentAttachmentAttributes,
@@ -43,7 +44,6 @@ import {
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertestService = getService('supertest');
   const es = getService('es');
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expectExportToHaveCaseSavedObject(objects, expectedCaseRequest);
       expectExportToHaveUserActions(objects, expectedCaseRequest);
-      expectExportToHaveAComment(objects);
+      expectExportToHaveOneAttachment(objects);
     });
 
     it('imports a case with a comment and user actions', async () => {
@@ -266,17 +266,18 @@ const expectCreateCommentUserAction = (
   expect(createCommentUserAction.payload.comment).to.eql(postCommentUserReq);
 };
 
-const expectExportToHaveAComment = (objects: SavedObject[]) => {
-  const commentSOs = findSavedObjectsByType<UserCommentAttachmentAttributes>(
-    objects,
-    CASE_COMMENT_SAVED_OBJECT
-  );
+const expectExportToHaveOneAttachment = (objects: SavedObject[]) => {
+  // The attachment SO type depends on `xpack.cases.attachments.enabled`: legacy
+  // `cases-comments` when OFF, unified `cases-attachments` when ON. This test
+  // only asserts that the case's single attachment round-trips through export;
+  // the per-flag on-disk shape is covered by the attachments-framework suites,
+  // and the comment text is asserted via the create-comment user action above.
+  const attachmentSOs = [
+    ...findSavedObjectsByType(objects, CASE_COMMENT_SAVED_OBJECT),
+    ...findSavedObjectsByType(objects, CASE_ATTACHMENT_SAVED_OBJECT),
+  ];
 
-  expect(commentSOs.length).to.eql(1);
-
-  const commentSO = commentSOs[0];
-  expect(commentSO.attributes.comment).to.eql(postCommentUserReq.comment);
-  expect(commentSO.attributes.type).to.eql(postCommentUserReq.type);
+  expect(attachmentSOs.length).to.eql(1);
 };
 
 const findSavedObjectsByType = <ReturnType>(

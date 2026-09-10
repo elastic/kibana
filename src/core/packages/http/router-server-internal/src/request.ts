@@ -14,9 +14,9 @@ import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs';
 import { isNil, omitBy } from 'lodash';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import {
+import type {
   KibanaRequest,
   Headers,
   RouteMethod,
@@ -34,15 +34,22 @@ import {
   HttpProtocol,
   RouteSecurityGetter,
   RouteSecurity,
+  RequestTiming,
 } from '@kbn/core-http-server';
+import { type SpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
+import {
+  RequestValidationFailure,
+  type RequestValidationSource,
+} from './request_validation_failure';
 import { isSafeMethod } from './route';
-import { KibanaSocket } from './socket';
+import { KibanaSocket, resolveRawSocket } from './socket';
 import { patchRequest } from './patch_requests';
+import { RequestTimingImpl } from './timing';
 
 // patching at module load
 patchRequest();
@@ -112,9 +119,18 @@ export class CoreKibanaRequest<
     query: Q;
     body: B;
   } {
-    const params = routeValidator.getParams(raw.params, 'request params');
-    const query = routeValidator.getQuery(raw.query, 'request query');
-    const body = routeValidator.getBody(raw.body, 'request body');
+    const params = validateRequestPart(
+      () => routeValidator.getParams(raw.params, 'request params'),
+      'params'
+    );
+    const query = validateRequestPart(
+      () => routeValidator.getQuery(raw.query, 'request query'),
+      'query'
+    );
+    const body = validateRequestPart(
+      () => routeValidator.getBody(raw.body, 'request body'),
+      'body'
+    );
     return { query, params, body };
   }
 
@@ -150,6 +166,12 @@ export class CoreKibanaRequest<
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
+  /** {@inheritDoc KibanaRequest.spaceId} */
+  public readonly spaceId: SpaceId;
+  /** {@inheritDoc KibanaRequest.basePath} */
+  public readonly basePath: string;
+  /** {@inheritDoc KibanaRequest.timing} */
+  public readonly serverTiming: RequestTiming;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -169,13 +191,26 @@ export class CoreKibanaRequest<
     const appState = request.app as KibanaRequestState | undefined;
     const isRealReq = isRealRawRequest(request);
 
+    // Initialize timing state if not present
+    if (appState && !appState.timingState) {
+      appState.timingState = { events: [] };
+    }
+
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
+    // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
+    // FakeRawRequests carry it as a top-level field.
+    this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
+    this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
+    this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
+    this.injectHostInfo(request);
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
+    this.headers = isRealReq
+      ? (deepFreeze({ ...request.headers }) as unknown as Headers)
+      : (request.headers as unknown as Headers);
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = !isRealReq;
     // set to false if elasticInternalOrigin is explicitly set to false
@@ -198,7 +233,7 @@ export class CoreKibanaRequest<
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq
-      ? new KibanaSocket(request.raw.req.socket)
+      ? new KibanaSocket(resolveRawSocket(request.raw.req))
       : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
 
@@ -206,6 +241,32 @@ export class CoreKibanaRequest<
       // missing in fakeRequests, so we cast to false
       isAuthenticated: request.auth?.isAuthenticated ?? false,
     };
+  }
+
+  /**
+   * Hapi does not officially support HTTP2 at the moment.
+   * - On HTTP/2 the 'Host:' header is replaced by ':authority:'.
+   * - Thus, for HTTP/2 requests, Hapi's request.url getter defaults to using
+   *   the server host information to build the full URL.
+   * - If we configure Kibana to use a "bare" IPv6 host (without square brackets),
+   *   this causes Hapi's request.url getter to try to build ambiguous invalid URLs.
+   *
+   * Note that an IPv6 address like 2001:db8::1:8080 would be ambiguous,
+   * as 8080 could be interpreted as the last segment of the IP address rather than the port.
+   *
+   * This method alters the original Hapi Request object,
+   * injecting the missing 'Host:' header if the ':authority:' information is present (i.e. HTTP/2 request).
+   * This way, the URL is no longer built using server host information,
+   * which causes https://github.com/elastic/kibana/issues/236380 when using IPv6 server.host
+   *
+   * TODO remove this when https://github.com/hapijs/hapi/issues/4560 is addressed
+   * @param request the request to 'decorate'
+   */
+  injectHostInfo(request: RawRequest) {
+    const r = request as RawRequest & { info: Record<string, any> };
+    if (typeof r.info === 'object' && !r.info.host && r.headers[':authority']) {
+      r.info.host = r.headers[':authority'];
+    }
   }
 
   toString() {
@@ -271,7 +332,13 @@ export class CoreKibanaRequest<
     }
 
     const options = {
-      ...omitBy({ excludeFromRateLimiter: this.isExcludedFromRateLimiter(request) }, isNil),
+      ...omitBy(
+        {
+          excludeFromRateLimiter: this.isExcludedFromRateLimiter(request),
+          httpResponseLogLevel: this.getHttpResponseLogLevel(request),
+        },
+        isNil
+      ),
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -361,6 +428,35 @@ export class CoreKibanaRequest<
     return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.excludeFromRateLimiter;
   }
+
+  private getHttpResponseLogLevel(request: RawRequest): 'info' | undefined {
+    return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.httpResponseLogLevel;
+  }
+}
+
+function validateRequestPart<T>(validate: () => T, source: RequestValidationSource): T {
+  try {
+    return validate();
+  } catch (error) {
+    throw new RequestValidationFailure(
+      error instanceof Error ? error.message : String(error),
+      source,
+      getRawValidationError(error)
+    );
+  }
+}
+
+function getRawValidationError(error: unknown): unknown {
+  if (
+    error instanceof Error &&
+    'cause' in error &&
+    error.cause instanceof Error &&
+    'rawError' in error.cause
+  ) {
+    return error.cause.rawError;
+  }
+  return error;
 }
 
 /**
@@ -400,11 +496,16 @@ function isFakeRawRequest(request: RawRequest): request is FakeRawRequest {
  * @internal
  */
 export function isRealRequest(request: unknown): request is KibanaRequest | Request {
-  return isKibanaRequest(request) || isRealRawRequest(request);
+  return (isKibanaRequest(request) && !request.isFakeRequest) || isRealRawRequest(request);
 }
 
 function isCompleted(request: Request) {
-  return request.raw.res.writableFinished;
+  const { res } = request.raw;
+  // For http/1, it is sufficient to check `writableFinished` because `writableEnded` is always true when the response is finished.
+  // For http/2, we need to check both `writableFinished` and `writableEnded` to be true to be sure the response is finished.
+  // This allows Kibana's aborted$ event to be emitted when the client cancels the request, regardless of the protocol.
+  // The addition of `writableEnded` works around inconsistencies in Node.js, which are resolved in Node.js 27+: https://github.com/nodejs/node/pull/63249
+  return res.writableFinished && res.writableEnded;
 }
 
 /**

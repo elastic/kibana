@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
-import type { ServerError } from '@kbn/cases-plugin/public/types';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody, HttpSetup } from '@kbn/core-http-browser';
 
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import * as i18n from '../translations';
 
@@ -52,7 +50,7 @@ export const useLoadActionTypes = ({
       retry: false,
       keepPreviousData: true,
       staleTime: STALE_TIME,
-      onError: (error: ServerError) => {
+      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(
             error.body && error.body.message ? new Error(error.body.message) : error,

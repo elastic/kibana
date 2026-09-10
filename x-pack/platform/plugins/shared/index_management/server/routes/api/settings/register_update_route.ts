@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const bodySchema = schema.any();
 
 const paramsSchema = schema.object({
-  indexName: schema.string(),
+  indexName: schema.string({ maxLength: 1000 }),
 });
 
 export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {

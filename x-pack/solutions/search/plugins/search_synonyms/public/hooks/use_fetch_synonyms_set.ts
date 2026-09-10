@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@kbn/react-query';
 import { SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
-import { DEFAULT_PAGE_VALUE, Page, Paginate } from '../../common/pagination';
+import type { Page, Paginate } from '../../common/pagination';
+import { DEFAULT_PAGE_VALUE } from '../../common/pagination';
 import { useKibana } from './use_kibana';
 
 export const useFetchSynonymsSet = (synonymsSetId: string, page: Page = DEFAULT_PAGE_VALUE) => {
@@ -19,7 +20,7 @@ export const useFetchSynonymsSet = (synonymsSetId: string, page: Page = DEFAULT_
     queryKey: [SYNONYMS_SETS_QUERY_KEY, synonymsSetId, page.from, page.size],
     queryFn: async () => {
       return await http.get<Paginate<SynonymsSynonymRule> & { id: string }>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}`,
         {
           query: { from: page.from, size: page.size },
         }

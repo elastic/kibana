@@ -10,9 +10,10 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 export const createDataViews = async (dataViewsService: DataViewsService) => {
   const dataView = (await dataViewsService.find('logs-osquery_manager.result*', 1))[0];
   if (!dataView) {
+    // Use event.ingested as time field to avoid issues with skewed agent clocks
     await dataViewsService.createAndSave({
       title: 'logs-osquery_manager.result*',
-      timeFieldName: '@timestamp',
+      timeFieldName: 'event.ingested',
       namespaces: ['*'],
     });
   }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -21,6 +21,7 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server-mocks",
+    "@kbn/core-pricing-server",
   ],
   "exclude": [
     "target/**/*",

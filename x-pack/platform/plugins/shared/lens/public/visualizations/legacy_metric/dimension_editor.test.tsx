@@ -7,23 +7,22 @@
 
 import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import type {
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+  LegacyMetricState,
+} from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/public';
-import {
-  CustomizablePalette,
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
-} from '@kbn/coloring';
+import type { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring';
 import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LegacyMetricState } from '../../../common/types';
-import { DatasourcePublicAPI } from '../..';
+import type { DatasourcePublicAPI } from '../..';
 import { mountWithProviders } from '../../test_utils/test_utils';
 
 function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
@@ -184,7 +183,7 @@ describe('metric dimension editor', () => {
     expect(instance.find(CustomizablePalette).prop('dataBounds')).toEqual({ min: -2, max: 0 });
   });
 
-  it('should apply an initial range with shifted stops (first stop === rangeMin)', () => {
+  it('should apply the default named palette with open bounds', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.activeData!.first.rows[0].foo = 5;
     state.colorMode = ColorMode.None;
@@ -200,6 +199,10 @@ describe('metric dimension editor', () => {
 
     expect(setState).toHaveBeenCalledWith(
       paletteParamsContaining({
+        name: 'status',
+        continuity: 'all',
+        rangeMin: -Infinity,
+        rangeMax: Infinity,
         stops: expect.arrayContaining([]),
       })
     );

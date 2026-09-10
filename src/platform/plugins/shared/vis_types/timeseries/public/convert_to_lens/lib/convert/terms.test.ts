@@ -8,14 +8,11 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import {
-  Operations,
-  TermsColumn,
-  TermsParams,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { TermsColumn, TermsParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { createSeries } from '../__mocks__';
 import { convertToTermsColumn, convertToTermsParams } from './terms';
-import { Column } from './types';
+import type { Column } from './types';
 
 describe('convertToTermsParams', () => {
   const dataView = stubLogstashDataView;
@@ -23,6 +20,7 @@ describe('convertToTermsParams', () => {
 
   const metricId1 = 'metric-id-1';
   const metricId2 = 'metric-id-2';
+  const bucketId1 = 'bucket-id-1';
   const columns: Column[] = [
     {
       operationType: Operations.AVERAGE,
@@ -32,7 +30,7 @@ describe('convertToTermsParams', () => {
       params: {},
       meta: { metricId: metricId1 },
       isSplit: false,
-      isBucketed: true,
+      isBucketed: false,
     },
     {
       operationType: Operations.SUM,
@@ -41,6 +39,16 @@ describe('convertToTermsParams', () => {
       dataType: 'number',
       params: {},
       meta: { metricId: metricId2 },
+      isSplit: false,
+      isBucketed: false,
+    },
+    {
+      operationType: Operations.RANGE,
+      sourceField: dataView.fields[0].name,
+      columnId: 'some-id-3',
+      dataType: 'number',
+      params: { type: 'histogram', ranges: [], maxBars: 10 },
+      meta: { metricId: bucketId1 },
       isSplit: false,
       isBucketed: true,
     },
@@ -117,6 +125,11 @@ describe('convertToTermsParams', () => {
       },
     ],
     [
+      'should remove the orderAgg if the referenced metric is a bucketed column',
+      [createSeries({ terms_order_by: bucketId1 }), columns, []],
+      null,
+    ],
+    [
       'null if terms_order_by is set not set to valid metric id',
       [createSeries({ terms_order_by: 'some-invalid-id' }), columns, []],
       null,
@@ -142,7 +155,7 @@ describe('convertToTermsParams', () => {
         orderAgg: {
           columnId: 'some-id-0',
           dataType: 'number',
-          isBucketed: true,
+          isBucketed: false,
           isSplit: false,
           operationType: 'average',
           params: {},
@@ -186,7 +199,7 @@ describe('converToTermsColumn', () => {
       params: {},
       meta: { metricId: metricId1 },
       isSplit: false,
-      isBucketed: true,
+      isBucketed: false,
     },
     {
       operationType: Operations.SUM,
@@ -196,7 +209,7 @@ describe('converToTermsColumn', () => {
       params: {},
       meta: { metricId: metricId2 },
       isSplit: false,
-      isBucketed: true,
+      isBucketed: false,
     },
   ];
 
@@ -258,7 +271,7 @@ describe('converToTermsColumn', () => {
           orderAgg: {
             columnId: 'some-id-0',
             dataType: 'number',
-            isBucketed: true,
+            isBucketed: false,
             isSplit: false,
             operationType: 'average',
             params: {},

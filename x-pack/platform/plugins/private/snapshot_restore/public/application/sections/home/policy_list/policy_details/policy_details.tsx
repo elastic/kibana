@@ -8,29 +8,31 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
-  EuiButton,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonIcon,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { SlmPolicy } from '../../../../../../common/types';
+import type { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
-import { SectionError, Error } from '../../../../../shared_imports';
+import type { Error } from '../../../../../shared_imports';
+import { SectionError } from '../../../../../shared_imports';
 import {
   UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
@@ -200,12 +202,16 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                       return (
                         <EuiPopover
                           id="policyActionMenu"
+                          aria-label={i18n.translate(
+                            'xpack.snapshotRestore.policyDetails.policyActionMenuAriaLabel',
+                            { defaultMessage: 'Policy options' }
+                          )}
                           button={
                             <EuiButton
                               data-test-subj="policyActionMenuButton"
                               iconSide="right"
                               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                              iconType="arrowDown"
+                              iconType="chevronSingleDown"
                               fill
                             >
                               <FormattedMessage
@@ -306,15 +312,22 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
         <EuiTitle size="m">
           <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
             {policyName}{' '}
-            <EuiButtonIcon
-              iconType="refresh"
-              color="text"
-              aria-label={i18n.translate(
-                'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
-                { defaultMessage: 'Reload' }
-              )}
-              onClick={() => reload()}
-            />
+            <EuiToolTip
+              content={i18n.translate('xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel', {
+                defaultMessage: 'Reload',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="refresh"
+                color="text"
+                aria-label={i18n.translate(
+                  'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
+                  { defaultMessage: 'Reload' }
+                )}
+                onClick={() => reload()}
+              />
+            </EuiToolTip>
           </h2>
         </EuiTitle>
         {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (

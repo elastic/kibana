@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlInferenceError } from '../../../../../common/types/pipelines';
+import type { MlInferenceError } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 

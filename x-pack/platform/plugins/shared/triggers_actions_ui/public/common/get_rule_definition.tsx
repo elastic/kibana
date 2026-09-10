@@ -6,5 +6,5 @@
  */
 import React from 'react';
 import { RuleDefinition } from '../application/sections';
-import { RuleDefinitionProps } from '../types';
+import type { RuleDefinitionProps } from '../types';
 export const getRuleDefinitionLazy = (props: RuleDefinitionProps) => <RuleDefinition {...props} />;

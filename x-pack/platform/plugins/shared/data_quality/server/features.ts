@@ -6,9 +6,8 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import {
+import type {
   KibanaFeatureConfig,
-  KibanaFeatureScope,
   ElasticsearchFeatureConfig,
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
@@ -34,6 +33,9 @@ const canManageRules: SubFeaturePrivilegeGroupConfig = {
       alerting: {
         rule: {
           all: [degradedDocsAlertingFeatures],
+          enable: [degradedDocsAlertingFeatures],
+          manual_run: [degradedDocsAlertingFeatures],
+          manage_rule_settings: [degradedDocsAlertingFeatures],
         },
       },
       savedObject: {
@@ -63,7 +65,7 @@ const canManageAlerts: SubFeaturePrivilegeGroupConfig = {
         all: [],
         read: [],
       },
-      ui: ['alerting:save'],
+      ui: [],
     },
   ],
 };
@@ -72,11 +74,10 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   id: PLUGIN_FEATURE_ID,
   name: PLUGIN_NAME,
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
   alerting: [degradedDocsAlertingFeatures],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   privileges: {
     all: {
@@ -91,11 +92,11 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
           read: [degradedDocsAlertingFeatures],
         },
         alert: {
-          all: [degradedDocsAlertingFeatures],
+          read: [degradedDocsAlertingFeatures],
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
     },
     read: {

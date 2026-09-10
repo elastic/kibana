@@ -1,0 +1,121 @@
+summary: List change history for an entity
+description: Returns paginated change history rows for a single entity instance.
+operationId: listEntityChangeHistory
+tags:
+  - change history
+parameters:
+  - name: objectId
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: page
+    in: query
+    required: false
+    schema:
+      type: integer
+      minimum: 0
+      default: 0
+    description: Zero-based page index
+  - name: per_page
+    in: query
+    required: false
+    schema:
+      type: integer
+      minimum: 1
+      default: 20
+responses:
+  '200':
+    description: Paginated change history list
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - items
+            - total
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChangeHistoryListItem'
+            total:
+              type: integer
+        examples:
+          default:
+            value:
+              total: 2
+              items:
+                - id: 018f0000-0000-7000-8000-000000000003
+                  timestamp: '2026-06-16T12:00:00.000Z'
+                  actor:
+                    name: alice
+                    profileId: u1
+                  action: entity_update
+                  isCurrent: true
+                  metadata:
+                    version: 3
+                - id: 018f0000-0000-7000-8000-000000000002
+                  timestamp: '2026-06-15T10:30:00.000Z'
+                  actor:
+                    name: bob
+                  action: entity_update
+                  changes:
+                    count: 2
+                    summary:
+                      - label: Settings
+                        count: 1
+                  metadata:
+                    version: 2
+components:
+  schemas:
+    ChangeHistoryListItem:
+      type: object
+      required:
+        - id
+        - timestamp
+        - actor
+        - action
+      properties:
+        id:
+          type: string
+          description: Stable change id (maps to change-history event.id)
+        timestamp:
+          type: string
+          format: date-time
+        actor:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+            profileId:
+              type: string
+        action:
+          type: string
+        comment:
+          type: string
+        isCurrent:
+          type: boolean
+        changes:
+          type: object
+          properties:
+            count:
+              type: integer
+            summary:
+              type: array
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                  count:
+                    type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties: true

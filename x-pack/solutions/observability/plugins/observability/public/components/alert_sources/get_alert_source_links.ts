@@ -11,10 +11,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { getApmAppLocator } from './get_apm_app_url';
-import { Group, TimeRange } from '../../../common/typings';
+import type { Group, TimeRange } from '../../../common/typings';
 
 const HOST_NAME = 'host.name';
 const CONTAINER_ID = 'container.id';

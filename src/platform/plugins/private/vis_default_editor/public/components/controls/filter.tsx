@@ -8,11 +8,18 @@
  */
 
 import React, { useState } from 'react';
-import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { Query } from '@kbn/es-query';
-import { IAggConfig } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -45,9 +52,7 @@ function FilterRow({
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
   const {
     data,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
     appName,
   } = services;
 
@@ -68,30 +73,44 @@ function FilterRow({
 
   const FilterControl = (
     <div>
-      <EuiButtonIcon
-        iconType="tag"
-        aria-label={i18n.translate(
-          'visDefaultEditor.controls.filters.toggleFilterButtonAriaLabel',
-          {
-            defaultMessage: 'Toggle filter label',
-          }
-        )}
-        aria-expanded={showCustomLabel}
-        aria-controls={`visEditorFilterLabel${arrayIndex}`}
-        onClick={() => setShowCustomLabel(!showCustomLabel)}
-      />
-      <EuiButtonIcon
-        iconType="trash"
-        color="danger"
-        disabled={disableRemove}
-        aria-label={i18n.translate(
-          'visDefaultEditor.controls.filters.removeFilterButtonAriaLabel',
-          {
-            defaultMessage: 'Remove this filter',
-          }
-        )}
-        onClick={() => onRemoveFilter(id)}
-      />
+      <EuiToolTip
+        content={i18n.translate('visDefaultEditor.controls.filters.toggleFilterButtonAriaLabel', {
+          defaultMessage: 'Toggle filter label',
+        })}
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="tag"
+          aria-label={i18n.translate(
+            'visDefaultEditor.controls.filters.toggleFilterButtonAriaLabel',
+            {
+              defaultMessage: 'Toggle filter label',
+            }
+          )}
+          aria-expanded={showCustomLabel}
+          aria-controls={`visEditorFilterLabel${arrayIndex}`}
+          onClick={() => setShowCustomLabel(!showCustomLabel)}
+        />
+      </EuiToolTip>
+      <EuiToolTip
+        content={i18n.translate('visDefaultEditor.controls.filters.removeFilterButtonAriaLabel', {
+          defaultMessage: 'Remove this filter',
+        })}
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          disabled={disableRemove}
+          aria-label={i18n.translate(
+            'visDefaultEditor.controls.filters.removeFilterButtonAriaLabel',
+            {
+              defaultMessage: 'Remove this filter',
+            }
+          )}
+          onClick={() => onRemoveFilter(id)}
+        />
+      </EuiToolTip>
     </div>
   );
 

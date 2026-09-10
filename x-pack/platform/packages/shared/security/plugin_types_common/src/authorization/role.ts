@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { FeaturesPrivileges } from './features_privileges';
 
@@ -23,6 +23,8 @@ export interface RoleRemoteIndexPrivilege extends RoleIndexPrivilege {
   clusters: string[];
 }
 
+export type RoleDataSourcePrivilege = estypes.SecurityDataSourcePrivileges;
+
 export interface RoleKibanaPrivilege {
   spaces: string[];
   base: string[];
@@ -37,6 +39,17 @@ export interface RoleRemoteClusterPrivilege {
   privileges: RemoteClusterPrivilege[];
 }
 
+export interface RoleKibanaApplication {
+  application: string;
+  privileges: string[];
+  resources: string[];
+}
+
+export interface RoleTransformError {
+  reason: string;
+  state?: RoleKibanaApplication[];
+}
+
 export interface Role {
   name: string;
   description?: string;
@@ -46,6 +59,7 @@ export interface Role {
     indices: RoleIndexPrivilege[];
     remote_indices?: RoleRemoteIndexPrivilege[];
     run_as: string[];
+    global?: estypes.SecurityGlobalPrivilege;
   };
   kibana: RoleKibanaPrivilege[];
   metadata?: {
@@ -54,7 +68,7 @@ export interface Role {
   transient_metadata?: {
     [anyKey: string]: any;
   };
-  _transform_error?: string[];
+  _transform_error?: RoleTransformError[];
   _unrecognized_applications?: string[];
 }
 

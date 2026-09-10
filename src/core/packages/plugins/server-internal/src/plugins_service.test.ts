@@ -14,7 +14,8 @@ import { BehaviorSubject, from } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
-import { ConfigPath, ConfigService, Env } from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
 
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -25,10 +26,12 @@ import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
-import { config, PluginsConfigType } from './plugins_config';
+import type { PluginsConfigType } from './plugins_config';
+import { config } from './plugins_config';
 import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
@@ -755,7 +758,7 @@ describe('PluginsService', () => {
           shouldEnableAllPlugins: false,
         },
         coreContext: { coreId, env, logger, configService },
-        instanceInfo: { uuid: 'uuid' },
+        instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
       });
 
@@ -793,8 +796,8 @@ describe('PluginsService', () => {
         ]),
       });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      expect(configService.setSchema).toBeCalledWith('path-preboot', configSchema);
-      expect(configService.setSchema).toBeCalledWith('path-standard', configSchema);
+      expect(configService.setSchema).toHaveBeenCalledWith('path-preboot', configSchema);
+      expect(configService.setSchema).toHaveBeenCalledWith('path-standard', configSchema);
     });
 
     it('registers plugin config deprecation provider in config service', async () => {
@@ -831,11 +834,11 @@ describe('PluginsService', () => {
         ]),
       });
       await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
-      expect(configService.addDeprecationProvider).toBeCalledWith(
+      expect(configService.addDeprecationProvider).toHaveBeenCalledWith(
         'config-path-preboot',
         prebootDeprecationProvider
       );
-      expect(configService.addDeprecationProvider).toBeCalledWith(
+      expect(configService.addDeprecationProvider).toHaveBeenCalledWith(
         'config-path-standard',
         standardDeprecationProvider
       );

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEsdslFn } from '../../../common/search/expressions/esdsl';
-import { UiSettingsCommon } from '../../../common';
+import type { UiSettingsCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -36,7 +36,7 @@ export function getEsdsl({
       const [core, , { search }] = await getStartServices();
       return {
         uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
-        search: search.search,
+        searchService: search,
       };
     },
   });

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { OverviewStatusState } from '../../../../../../../common/runtime_types';
+import type { OverviewStatusState } from '../../../../../../../common/runtime_types';
 
 import * as labels from '../labels';
 import { MonitorTestRunsCount } from './monitor_test_runs';
@@ -73,7 +73,9 @@ export const MonitorStats = ({
           <EuiFlexItem
             css={{ display: 'flex', flexDirection: 'row', gap: euiTheme.size.l, height: '200px' }}
           >
-            <MonitorTestRunsCount />
+            <EuiFlexItem grow={false} css={{ minWidth: 210 }}>
+              <MonitorTestRunsCount />
+            </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <MonitorTestRunsSparkline />
             </EuiFlexItem>

@@ -12,27 +12,25 @@ import React, { useMemo, useCallback } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { FilesClient, ScopedFilesClient } from '@kbn/files-plugin/public';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import type { CasesFeatures, CasesPermissions, CasesSettings } from '../../../common/ui/types';
+import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CasesContextProps } from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
 import type { CasesPublicStartDependencies } from '../../types';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -40,17 +38,15 @@ interface TestProviderProps {
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
-  externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry?: UnifiedAttachmentTypeRegistry;
   license?: ILicense;
   services?: CasesPublicStartDependencies;
   queryClient?: QueryClient;
   coreStart?: CoreStart;
   filesClient?: BaseFilesClient;
-  settings?: CasesSettings;
 }
 
-window.scrollTo = jest.fn();
+jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
 const getMockedFilesClient = (): BaseFilesClient => {
   const mockedFilesClient = createMockFilesClient();
@@ -86,20 +82,48 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   owner,
   permissions,
   releasePhase,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   license,
   coreStart,
   services,
   queryClient,
   filesClient,
-  settings,
 }) => {
-  const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
-  const finalServices = useMemo(
-    () => ({ ...createStartServicesMock({ license }), ...coreStart, ...services }),
-    [coreStart, license, services]
-  );
+  const finalCoreStart = useMemo(() => {
+    const baseServices = createStartServicesMock({ license });
+    const nextCoreStart = coreStart ?? (baseServices as unknown as CoreStart);
+    if (
+      jest.isMockFunction(nextCoreStart.uiSettings.get) &&
+      nextCoreStart.uiSettings.get.getMockImplementation() == null
+    ) {
+      (nextCoreStart.uiSettings.get as jest.Mock).mockImplementation(
+        (_key: string, defaultValue: unknown) => defaultValue
+      );
+    }
+    return nextCoreStart;
+  }, [coreStart, license]);
+  const finalServices = useMemo(() => {
+    const baseServices = createStartServicesMock({ license });
+    const mergedServices = { ...baseServices, ...finalCoreStart, ...services };
+
+    const baseCapabilities = baseServices.application.capabilities ?? {};
+    const coreCapabilities = finalCoreStart.application?.capabilities ?? {};
+
+    mergedServices.application = {
+      ...baseServices.application,
+      ...finalCoreStart.application,
+      capabilities: {
+        ...baseCapabilities,
+        ...coreCapabilities,
+        actions: {
+          ...(baseCapabilities.actions ?? {}),
+          ...(coreCapabilities.actions ?? {}),
+        },
+      },
+    };
+
+    return mergedServices;
+  }, [finalCoreStart, license, services]);
 
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
@@ -119,62 +143,51 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     [finalFilesClient]
   );
 
-  const defaultExternalReferenceAttachmentTypeRegistry = useMemo(
-    () => new ExternalReferenceAttachmentTypeRegistry(),
-    []
-  );
-
-  const defaultPersistableStateAttachmentTypeRegistry = useMemo(
-    () => new PersistableStateAttachmentTypeRegistry(),
+  const defaultUnifiedAttachmentTypeRegistry = useMemo(
+    () => new UnifiedAttachmentTypeRegistry(),
     []
   );
 
   const casesProviderValue: CasesContextProps = useMemo(
     () => ({
-      externalReferenceAttachmentTypeRegistry:
-        externalReferenceAttachmentTypeRegistry ?? defaultExternalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry:
-        persistableStateAttachmentTypeRegistry ?? defaultPersistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry:
+        unifiedAttachmentTypeRegistry ?? defaultUnifiedAttachmentTypeRegistry,
       features,
       owner: owner ?? mockedTestProvidersOwner,
       permissions: permissions ?? defaultPermissions,
       releasePhase: releasePhase ?? 'ga',
       getFilesClient: getFilesClientFinal,
-      settings: settings ?? {
-        displayIncrementalCaseId: false,
-      },
     }),
     [
-      defaultExternalReferenceAttachmentTypeRegistry,
       defaultPermissions,
-      defaultPersistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
+      defaultUnifiedAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       features,
       getFilesClientFinal,
       owner,
       permissions,
-      persistableStateAttachmentTypeRegistry,
       releasePhase,
-      settings,
     ]
   );
 
   return (
     <KibanaRenderContextProvider {...finalCoreStart}>
-      <KibanaContextProvider services={finalServices}>
-        <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
-            <FilesContext client={finalFilesClient}>{children}</FilesContext>
-          </CasesProvider>
-        </MemoryRouter>
-      </KibanaContextProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={finalServices}>
+          <MemoryRouter>
+            <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
+              <FilesContext client={finalFilesClient}>{children}</FilesContext>
+            </CasesProvider>
+          </MemoryRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
     </KibanaRenderContextProvider>
   );
 };
 
 TestProvidersComponent.displayName = 'TestProviders';
 
-export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProviders = TestProvidersComponent;
 
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
   wrapperProps?: Omit<TestProviderProps, 'children'>;

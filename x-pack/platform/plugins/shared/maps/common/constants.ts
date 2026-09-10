@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
@@ -340,10 +340,6 @@ export enum MASK_OPERATOR {
   ABOVE = 'ABOVE',
   BELOW = 'BELOW',
 }
-
-// Maplibre does not provide any feedback when rendering is complete.
-// Workaround is hard-coded timeout period.
-export const RENDER_TIMEOUT = 1000;
 
 export const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
 export const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };

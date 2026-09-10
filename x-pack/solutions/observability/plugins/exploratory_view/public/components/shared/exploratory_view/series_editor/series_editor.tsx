@@ -10,14 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled from '@emotion/styled';
-import { AppDataType, ReportViewType, BuilderItem } from '../types';
-import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
-import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
+import type { AppDataType, ReportViewType, BuilderItem } from '../types';
+import type { SeriesContextValue } from '../hooks/use_series_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
+import type { DataViewState } from '../hooks/use_app_data_view';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { Series } from './series';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import type { ReportConfigMap } from '../contexts/exploratory_view_config';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
 
 export interface ReportTypeItem {
   id: string;

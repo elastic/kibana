@@ -8,25 +8,28 @@
  */
 
 import { debounce } from 'lodash';
-import PropTypes from 'prop-types';
-import React, { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React from 'react';
 import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
+import type {
+  EuiSearchBarProps,
+  EuiTableFieldDataColumnType,
+  IconType,
+  SearchFilterConfig,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiSearchBarProps,
-  EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
   EuiIconTip,
-  IconType,
   Query,
-  SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -36,7 +39,8 @@ import {
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
 
-import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
+import type { FinderAttributes, SavedObjectCommon } from '../../common';
+import { LISTING_LIMIT_SETTING } from '../../common';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
@@ -78,12 +82,14 @@ interface BaseSavedObjectFinder {
     name: string,
     savedObject: SavedObjectCommon
   ) => void;
+  getHref?: (id: SavedObjectCommon['id'], type: SavedObjectCommon['type']) => string | undefined;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
+  tableCaption?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
@@ -103,14 +109,6 @@ class SavedObjectFinderUiClass extends React.Component<
   SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>,
   SavedObjectFinderState
 > {
-  public static propTypes = {
-    onChoose: PropTypes.func,
-    noItemsMessage: PropTypes.node,
-    savedObjectMetaData: PropTypes.array.isRequired,
-    initialPageSize: PropTypes.oneOf([5, 10, 15, 25]),
-    fixedPageSize: PropTypes.number,
-    showFilter: PropTypes.bool,
-  };
   private isComponentMounted: boolean = false;
 
   private debouncedFetch = debounce(async (query: Query) => {
@@ -219,6 +217,7 @@ class SavedObjectFinderUiClass extends React.Component<
   public render() {
     const {
       onChoose,
+      getHref,
       savedObjectMetaData,
       euiTablePersist: { pageSize, sorting, onTableChange },
     } = this.props;
@@ -302,9 +301,14 @@ class SavedObjectFinderUiClass extends React.Component<
 
           const link = (
             <EuiLink
+              href={getHref?.(item.id, item.type)}
               onClick={
                 onChoose
-                  ? () => {
+                  ? (e: React.MouseEvent) => {
+                      if (getHref && hasActiveModifierKey(e)) {
+                        return;
+                      }
+                      e.preventDefault();
                       onChoose(item.id, item.type, fullName, item.simple);
                     }
                   : undefined
@@ -402,7 +406,13 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
-            message={this.props.noItemsMessage}
+            tableCaption={
+              this.props.tableCaption ??
+              i18n.translate('savedObjectsFinder.tableCaption', {
+                defaultMessage: 'Saved objects search results',
+              })
+            }
+            noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}
             sorting={!!this.state.query?.text ? undefined : sorting}

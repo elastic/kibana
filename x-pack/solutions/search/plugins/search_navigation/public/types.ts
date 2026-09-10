@@ -8,8 +8,12 @@
 import type { ReactNode } from 'react';
 import type { AppDeepLinkId, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { ScopedHistory } from '@kbn/core/public';
-import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNavigationPluginSetup {}
@@ -29,11 +33,14 @@ export interface SearchNavigationPluginStart {
 }
 
 export interface AppPluginSetupDependencies {
-  serverless?: ServerlessPluginSetup;
+  share: SharePluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface AppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
+  share: SharePluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ClassicNavItemDeepLink {
@@ -56,3 +63,8 @@ export interface SearchNavigationSetBreadcrumbsOptions {
   // need to explicitly set the page breadcrumbs for classic solution view.
   forClassicChromeStyle?: boolean;
 }
+
+/** Subset of IndexManagementLocatorParams used by the Search solution's index management locator */
+export type SearchIndexManagementLocatorParams =
+  | Extract<IndexManagementLocatorParams, { page: 'index_list' }>
+  | Extract<IndexManagementLocatorParams, { page: 'index_details'; indexName: string }>;

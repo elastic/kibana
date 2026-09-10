@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthType } from './constants';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import { buildConnectorAuth, isBasicAuth, validateConnectorAuthConfiguration } from './utils';
 
 describe('utils', () => {
@@ -138,7 +138,15 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: false,
           authType: AuthType.SSL,
-          secrets: { user: 'foo', password: 'bar', crt: null, key: null, pfx: null },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: null,
+            key: null,
+            pfx: null,
+            clientSecret: null,
+            secretHeaders: null,
+          },
           verificationMode: undefined,
           ca: undefined,
         })
@@ -150,7 +158,15 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: true,
           authType: AuthType.Basic,
-          secrets: { user: 'foo', password: 'bar', crt: null, key: null, pfx: null },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: null,
+            key: null,
+            pfx: null,
+            clientSecret: null,
+            secretHeaders: null,
+          },
           verificationMode: undefined,
           ca: undefined,
         })
@@ -162,7 +178,15 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: true,
           authType: undefined,
-          secrets: { user: 'foo', password: 'bar', crt: null, key: null, pfx: null },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: null,
+            key: null,
+            pfx: null,
+            clientSecret: null,
+            secretHeaders: null,
+          },
           verificationMode: undefined,
           ca: undefined,
         })
@@ -174,7 +198,15 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: true,
           authType: AuthType.SSL,
-          secrets: { user: 'foo', password: 'bar', crt: 'null', key: 'null', pfx: 'null' },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: 'null',
+            key: 'null',
+            pfx: 'null',
+            clientSecret: null,
+            secretHeaders: null,
+          },
           verificationMode: 'certificate',
           ca: 'foobar?',
         })

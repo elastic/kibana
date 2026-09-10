@@ -8,30 +8,30 @@
 import _ from 'lodash';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject, map, merge } from 'rxjs';
-import { getTitle, StateComparators } from '@kbn/presentation-publishing';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
-import { SavedMap } from '../routes/map_page';
+import type { SavedMap } from '../routes/map_page';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
 import {
   getGeoFieldNames,
-  getGoto,
   getMapCenter,
   getMapExtent,
-  getMapReady,
   getMapSettings,
   getMapZoom,
 } from '../selectors/map_selectors';
-import { setGotoWithCenter, setMapSettings } from '../actions';
-import { MapExtent } from '../../common/descriptor_types';
+import { setMapSettings } from '../actions';
+import type { MapExtent } from '../../common/descriptor_types';
 import { getUiActions } from '../kibana_services';
 import { getGeoFieldsLabel } from './get_geo_fields_label';
-import { MapApi, MapSerializedState } from './types';
-import { setOnMapMove } from '../reducers/non_serializable_instances';
+import type { MapApi } from './types';
+import { getMapReady, jumpTo, setOnMapMove } from '../reducers/non_serializable_instances';
+import type { MapEmbeddableState } from '../../common';
 
 export const crossPanelActionsComparators: StateComparators<
-  Pick<MapSerializedState, 'isMovementSynchronized' | 'filterByMapExtent'>
+  Pick<MapEmbeddableState, 'isMovementSynchronized' | 'filterByMapExtent'>
 > = {
   isMovementSynchronized: 'referenceEquality',
   filterByMapExtent: 'referenceEquality',
@@ -49,7 +49,7 @@ export function initializeCrossPanelActions({
   getActionContext: () => ActionExecutionContext;
   getApi: () => MapApi | undefined;
   savedMap: SavedMap;
-  state: MapSerializedState;
+  state: MapEmbeddableState;
   uuid: string;
 }) {
   const isMovementSynchronized$ = new BehaviorSubject<boolean | undefined>(
@@ -78,7 +78,7 @@ export function initializeCrossPanelActions({
     if (getMapSettings(savedMap.getStore().getState()).autoFitToDataBounds) {
       savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: false }));
     }
-    savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
+    savedMap.getStore().dispatch<any>(jumpTo({ lat, lon, zoom }));
   }
 
   function gotoSynchronizedLocation() {
@@ -87,21 +87,6 @@ export function initializeCrossPanelActions({
       // set map to synchronized view
       mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
       return;
-    }
-
-    if (!getMapReady(savedMap.getStore().getState())) {
-      // Initialize synchronized view to map's goto
-      // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
-      const goto = getGoto(savedMap.getStore().getState());
-      if (goto && goto.center) {
-        mapEmbeddablesSingleton.setLocation(
-          uuid,
-          goto.center.lat,
-          goto.center.lon,
-          goto.center.zoom
-        );
-        return;
-      }
     }
 
     // Initialize synchronized view to map's view
@@ -221,10 +206,17 @@ export function initializeCrossPanelActions({
       unsubscribeFromStore();
     },
     getIsFilterByMapExtent,
-    anyStateChange$: merge(isMovementSynchronized$, isFilterByMapExtent$).pipe(
-      map(() => undefined)
+    anyStateChange$: merge(
+      isMovementSynchronized$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      isFilterByMapExtent$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
     ),
-    reinitializeState: (lastSaved: MapSerializedState) => {
+    reinitializeState: (lastSaved: MapEmbeddableState) => {
       setIsMovementSynchronized(lastSaved.isMovementSynchronized);
       setIsFilterByMapExtent(lastSaved.filterByMapExtent);
     },

@@ -11,7 +11,7 @@ import { EuiCard, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
-import { DeprecationSource } from '../../../../../../common/types';
+import type { DeprecationSource } from '../../../../../../common/types';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
 import { LoadingIssuesError } from './loading_issues_error';
 import { NoDeprecationIssues } from './no_deprecation_issues';
@@ -78,7 +78,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
             <DeprecationIssue
               type="critical"
               color="danger"
-              iconType="errorFilled"
+              iconType="errorFill"
               message={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.deprecationStats.criticalDeprecationsTitle"
@@ -97,7 +97,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
             <DeprecationIssue
               type="warning"
               color="warning"
-              iconType="warningFilled"
+              iconType="warningFill"
               message={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.deprecationStats.warningDeprecationsTitle"

@@ -11,7 +11,7 @@ import path from 'path';
 import os from 'os';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { createCliError } from '../errors';
 import { findMostRecentlyChanged } from './find_most_recently_changed';

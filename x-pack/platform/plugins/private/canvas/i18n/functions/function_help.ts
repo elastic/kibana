@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { UnionToIntersection } from '@kbn/utility-types';
-import { CanvasFunction, FunctionFactory } from '../../types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { UnionToIntersection } from '@kbn/utility-types';
+import type { CanvasFunction, FunctionFactory } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';
@@ -60,10 +60,6 @@ import { help as replace } from './dict/replace';
 import { help as revealImage } from './dict/reveal_image';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
-import { help as savedLens } from './dict/saved_lens';
-import { help as savedMap } from './dict/saved_map';
-import { help as savedSearch } from './dict/saved_search';
-import { help as savedVisualization } from './dict/saved_visualization';
 import { help as seriesStyle } from './dict/series_style';
 import { help as shape } from './dict/shape';
 import { help as sort } from './dict/sort';
@@ -221,10 +217,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   revealImage,
   rounddate,
   rowCount,
-  savedLens,
-  savedMap,
-  savedSearch,
-  savedVisualization,
   seriesStyle,
   shape,
   sort,

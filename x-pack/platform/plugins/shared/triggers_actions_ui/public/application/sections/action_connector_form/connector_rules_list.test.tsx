@@ -8,15 +8,15 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { IToasts } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { ConnectorRulesList } from './connector_rules_list';
 import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../types';
-import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
+import type { ActionConnector } from '../../../types';
+import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helper';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/rules_kuery_filter', () => ({

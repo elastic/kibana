@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;
 
 export const acceptedHttpVerb = schema.string({
+  maxLength: 64,
   validate: (method) => {
     return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'].some(
       (verb) => verb.toLowerCase() === method.toLowerCase()
@@ -23,6 +25,7 @@ export const acceptedHttpVerb = schema.string({
 });
 
 export const nonEmptyString = schema.string({
+  maxLength: 4096,
   validate: (s) => (s === '' ? 'Expected non-empty string' : undefined),
 });
 
@@ -31,6 +34,7 @@ export const routeValidationConfig = {
     method: acceptedHttpVerb,
     path: nonEmptyString,
     withProductOrigin: schema.maybe(schema.boolean()),
+    host: schema.maybe(schema.string({ maxLength: 4096 })),
   }),
   body: schema.stream(),
 };

@@ -9,8 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
+import { MAX_PIPELINE_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { Pipeline } from '../../models/pipeline';
 import { checkLicense } from '../../lib/check_license';
+import { validatePipelineId } from '../../lib/validate_pipeline_id';
 import type { LogstashPluginRouter } from '../../types';
 
 export function registerPipelineSaveRoute(router: LogstashPluginRouter) {
@@ -29,10 +31,12 @@ export function registerPipelineSaveRoute(router: LogstashPluginRouter) {
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({
+            validate: validatePipelineId,
+          }),
         }),
         body: schema.object({
-          description: schema.maybe(schema.string()),
+          description: schema.maybe(schema.string({ maxLength: MAX_PIPELINE_DESCRIPTION_LENGTH })),
           pipeline: schema.string(),
           settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),

@@ -12,7 +12,6 @@ import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -56,7 +55,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       expect(executeEvent?.event?.reason).to.eql('maxAlerts');
       expect(executeEvent?.kibana?.alerting?.status).to.eql('warning');
       expect(executeEvent?.message).to.eql(
-        'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed'
+        "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed"
       );
 
       // check there are no docs written out in the ES_TEST_INDEX
@@ -135,7 +134,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       expect(executeEvent?.event?.reason).to.eql('maxAlerts');
       expect(executeEvent?.kibana?.alerting?.status).to.eql('warning');
       expect(executeEvent?.message).to.eql(
-        'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed'
+        "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed"
       );
 
       // check there are docs written out in the ES_TEST_INDEX

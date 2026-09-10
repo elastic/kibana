@@ -80,6 +80,10 @@ describe('Metrics UI Observability Homepage Functions', () => {
         intervalString,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
+      // `/api/metrics/overview/top` (TopNodesRequestRT) does not accept a `schema`
+      // field in its request body; the schema is resolved server-side from the
+      // source configuration (see get_preferred_schema.ts). The body intentionally
+      // omits `schema` to match the io-ts contract.
       expect(core.http.post).toHaveBeenCalledWith('/api/metrics/overview/top', {
         body: JSON.stringify({
           sourceId: 'default',

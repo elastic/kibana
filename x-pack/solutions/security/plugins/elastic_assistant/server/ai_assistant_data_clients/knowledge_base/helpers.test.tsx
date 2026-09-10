@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import {
   isModelAlreadyExistsError,
@@ -15,7 +15,7 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import type { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { isString } from 'lodash';
 
@@ -98,6 +98,25 @@ describe('getKBVectorSearchQuery', () => {
         minimum_should_match: 1,
       },
     });
+  });
+
+  it('filters private entries exclusively by profile UID', () => {
+    const query = getKBVectorSearchQuery({ user: mockUser });
+    const serializedQuery = JSON.stringify(query);
+
+    expect(serializedQuery).toContain(`"users.id":"${mockUser.profile_uid}"`);
+    expect(serializedQuery).not.toContain('users.name');
+    expect(serializedQuery).not.toContain(mockUser.username);
+  });
+
+  it('only searches global entries when the user has no profile UID', () => {
+    const query = getKBVectorSearchQuery({
+      user: { ...mockUser, profile_uid: undefined },
+    });
+    const serializedQuery = JSON.stringify(query);
+
+    expect(serializedQuery).not.toContain('users.id');
+    expect(serializedQuery).not.toContain('users.name');
   });
 
   it('should include kbResource in the query if provided', () => {

@@ -7,6 +7,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEqual } from 'lodash';
 import type { BulkEditOperation, BulkEditFields } from '../types';
+import type { BulkEditRuleParamsOperation } from '../../application/rule/methods/bulk_edit_params/types';
 
 // defining an union type that will passed directly to generic function as a workaround for the issue similar to
 // https://github.com/microsoft/TypeScript/issues/29479
@@ -20,7 +21,10 @@ type AddItemToArray =
  * @param rule object rule to update
  * @returns modified rule
  */
-export const applyBulkEditOperation = <R extends object>(operation: BulkEditOperation, rule: R) => {
+export const applyBulkEditOperation = <R extends object>(
+  operation: BulkEditOperation | BulkEditRuleParamsOperation,
+  rule: R
+) => {
   const addItemsToArray = <T>(arr: T[], items: T[]): T[] => Array.from(new Set([...arr, ...items]));
 
   const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {

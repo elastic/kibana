@@ -23,9 +23,8 @@ export {
   type FromToolSchema,
   type ToolSchema,
   type UnvalidatedToolCall,
-  type ToolCallsOf,
-  type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
@@ -34,6 +33,8 @@ export {
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
   type ChatCompleteCompositeResponse,
+  type ChatCompletionReasoning,
+  type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
@@ -42,6 +43,7 @@ export {
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
   type ChatCompleteRetryConfiguration,
+  type ChatCompleteCacheControl,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
   type UnboundChatCompleteOptions,
@@ -56,10 +58,36 @@ export {
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type ChatCompleteAnonymizationMetadata,
+  type ChatCompleteAnonymizationTarget,
+  type AnonymizationRule,
+  type RegexAnonymizationRule,
+  type NamedEntityRecognitionRule,
+  type AnonymizationEntity,
+  type Anonymization,
+  type Deanonymization,
+  type AnonymizationOutput,
+  type DeanonymizationOutput,
+  type DeanonymizedMessage,
+  type AnonymizationSettings,
+  type AnonymizationEntityClass,
+  type AnonymizationResponseMetadata,
+  type DeanonymizedMessageData,
+  type CustomToolChoice,
+  type ToolCallArgumentsOfToolDefinition,
+  type ToolCallOfToolDefinitions,
+  type ToolCallOfToolOptions,
+  type ToolCallbacksOfToolOptions,
+  type ToolNamesOf,
+  type ToolsOfChoice,
+  type ToolCallArguments,
+  type ToolCallbackResult,
+  type InferenceCallbacks,
+  type InferenceEventEmitter,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
@@ -107,7 +135,7 @@ export {
 
 export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
 
-export { elasticModelDictionary } from './src/const';
+export { elasticModelDictionary, MAX_STREAM_DURATION_MS } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
@@ -120,13 +148,27 @@ export {
   getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
+  getModelDefinition,
+  getContextWindowSize,
+  contextWindowFromModelName,
   type InferenceConnector,
+  type InferenceConnectorCapabilities,
+  type RawConnector,
+  type RawInferenceConnector,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
   InferenceEndpointProvider,
   elasticModelIds,
+  type EisInferenceEndpointMetadata,
+  type CspRegion,
 } from './src/inference_endpoints';
+
+export {
+  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  type ApiInferenceConnector,
+  type InferenceConnectorsApiResponseBody,
+} from './src/inference_connectors_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 
@@ -146,3 +188,5 @@ export {
 } from './src/prompt';
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
+
+export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';

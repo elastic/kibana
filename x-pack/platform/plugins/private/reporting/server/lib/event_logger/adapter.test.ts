@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogMeta } from '@kbn/core/server';
+import type { LogMeta } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EcsLogAdapter } from './adapter';
 
@@ -28,7 +28,7 @@ describe('EcsLogAdapter', () => {
     const event = { kibana: { reporting: { wins: 5000 } } } as object & LogMeta; // an object that extends LogMeta
     eventLogger.logEvent('hello world', event);
 
-    expect(logger.debug).toBeCalledWith('hello world', {
+    expect(logger.debug).toHaveBeenCalledWith('hello world', {
       event: {
         duration: undefined,
         end: undefined,
@@ -50,7 +50,7 @@ describe('EcsLogAdapter', () => {
     const event = { kibana: { reporting: { wins: 9000 } } } as object & LogMeta; // an object that extends LogMeta
     eventLogger.logEvent('hello duration', event);
 
-    expect(logger.debug).toBeCalledWith('hello duration', {
+    expect(logger.debug).toHaveBeenCalledWith('hello duration', {
       event: {
         duration: 120000000000,
         end: '2021-04-12T16:02:00.000Z',

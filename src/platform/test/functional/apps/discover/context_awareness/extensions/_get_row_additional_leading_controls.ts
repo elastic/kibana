@@ -7,11 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_row_additional_leading_controls.ts
+
+/**
+ * Scout audit: MIGRATE TO SCOUT UI. Row controls are asserted in the grid and again after
+ * navigating to the Surrounding Docs page, so the cross-page navigation is the point.
+ * The logs accessor is unit tested
+ * (observability/logs_data_source_profile/accessors/get_row_additional_leading_controls.test.ts),
+ * but that does not cover rendering in either location.
+ */
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
+  const { common, discover, header, unifiedTabs } = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'unifiedTabs',
+  ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
@@ -26,9 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          // Discover rewrites the compact `_a` hash, so navigateToApp's startsWith URL check never matches.
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
@@ -39,9 +55,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });
@@ -49,9 +66,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       it('should render logs controls for logs data source', async () => {
         await common.navigateToApp('discover');
+        await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
@@ -62,15 +80,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.existOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
 
       it('should not render logs controls for non-logs data source', async () => {
         await common.navigateToApp('discover');
+        await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
 
         // check Surrounding docs page
@@ -81,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
+        await testSubjects.missingOrFail('exampleLogsControl_chartBarVerticalStack');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_actionsMenu');
       });
     });

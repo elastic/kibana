@@ -11,11 +11,14 @@ import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum'
 import { modifyUrl } from '@kbn/std';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { ebtSpanFilter } from './filters/ebt_span_filter';
 import { CachedResourceObserver } from './apm_resource_counter';
+import { getPageLoadTransactionName, isAppPath } from './get_page_load_transaction_name';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
   /^(GET|POST|PUT|HEAD|PATCH|DELETE|OPTIONS|CONNECT|TRACE)\s(.*)$/;
+const USER_INTERACTION_ATTR_NAME = 'data-test-subj';
 
 /**
  * This is the entry point used to boot the frontend when serving a application
@@ -56,6 +59,27 @@ export class ApmSystem {
     if (globalLabels) {
       apm.addLabels(globalLabels);
     }
+    apm.addLabels({
+      user_agent: navigator.userAgent,
+    });
+
+    apm.addFilter(ebtSpanFilter);
+
+    // Remove the query params from the URLs (page's URL and refererer)
+    apm.addFilter((payload) => {
+      payload.transactions.forEach((transaction) => {
+        if (transaction.context && transaction.context.page) {
+          const { url, referer } = transaction.context.page;
+          if (url) {
+            transaction.context.page.url = url.split('?')[0];
+          }
+          if (referer) {
+            transaction.context.page.referer = referer.split('?')[0];
+          }
+        }
+      });
+      return payload;
+    });
 
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
@@ -63,6 +87,31 @@ export class ApmSystem {
     init(apmConfig);
     // hold page load transaction blocks a transaction implicitly created by init.
     this.holdPageLoadTransaction(apm);
+
+    // Registering an event handler to improve user-interaction transaction names based on data-test-subj attribute
+    // Context: https://github.com/elastic/observability-dev/issues/4528
+    window.addEventListener(
+      'click',
+      function (event) {
+        const tr = apm.getCurrentTransaction();
+        if (!tr) {
+          // In some cases agent decides not to create a transaction
+          return;
+        }
+        const { target } = event;
+        if (target instanceof Element) {
+          const element = target?.closest(
+            `a[${USER_INTERACTION_ATTR_NAME}], button[${USER_INTERACTION_ATTR_NAME}]`
+          );
+          if (element) {
+            tr.name = `Click - ${element.getAttribute(USER_INTERACTION_ATTR_NAME)}`;
+          } else if (target.getAttribute(USER_INTERACTION_ATTR_NAME)) {
+            tr.name = `Click - ${target.getAttribute(USER_INTERACTION_ATTR_NAME)}`;
+          }
+        }
+      },
+      true
+    );
   }
 
   async start(start?: StartDeps) {
@@ -86,13 +135,25 @@ export class ApmSystem {
      */
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
-        this.closePageLoadTransaction();
+        this.closePageLoadTransaction(`/app/${appId}`);
         this.apm.startTransaction(appId, 'app-change', {
           managed: true,
           canReuse: true,
         });
       }
     });
+
+    // Non-app pages (e.g. /login) never emit currentAppId$, so close the page-load
+    // transaction with a stable pathname-based name instead of leaving it open.
+    if (this.pageLoadTransaction && !isAppPath(window.location.pathname, this.basePath)) {
+      queueMicrotask(() => {
+        if (this.pageLoadTransaction) {
+          this.closePageLoadTransaction(
+            getPageLoadTransactionName(window.location.pathname, this.basePath)
+          );
+        }
+      });
+    }
   }
 
   /* Hold the page load transaction open, until all resources actually finish loading */
@@ -109,7 +170,7 @@ export class ApmSystem {
   }
 
   /* Close and clear the page load transaction */
-  private closePageLoadTransaction() {
+  private closePageLoadTransaction(name: string) {
     if (this.pageLoadTransaction) {
       const loadCounts = this.resourceObserver.getCounts();
       this.pageLoadTransaction.addLabels({
@@ -117,6 +178,7 @@ export class ApmSystem {
         'cached-resources': loadCounts.memory,
       });
       this.resourceObserver.destroy();
+      this.pageLoadTransaction.name = name;
       this.pageLoadTransaction.end();
       this.pageLoadTransaction = undefined;
     }

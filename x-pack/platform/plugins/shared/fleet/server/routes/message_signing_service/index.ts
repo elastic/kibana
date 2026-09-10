@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -31,6 +33,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Rotate a Fleet message signing key pair',
+      description:
+        'Rotate the key pair used by Fleet to sign messages sent to Elastic Agents. This operation is irreversible and requires all agents in the Fleet to be re-enrolled after rotation. You must explicitly acknowledge the risk by passing `acknowledge=true` as a query parameter.',
       options: {
         tags: ['oas-tag:Message Signing Service'],
       },
@@ -38,19 +42,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_rotate_key_pair.yaml'),
+        },
         validate: {
           request: RotateKeyPairSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   message: schema.string(),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             500: {
+              description: 'An internal server error.',
               body: genericErrorResponse,
             },
           },

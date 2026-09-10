@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import {
+import type {
   OTLPExporterNodeConfigBase,
   createOtlpNetworkExportDelegate,
 } from '@opentelemetry/otlp-exporter-base';

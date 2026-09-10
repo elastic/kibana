@@ -11,7 +11,7 @@ import { useKibana, useNavigateTo } from '../../../common/lib/kibana';
 export const INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
 
 /**
- * Hook that returns a callback event to navigate to the AI4DSOC integrations page
+ * Hook that returns a callback event to navigate to the EASE integrations page
  */
 export const useNavigateToIntegrationsPage = (): (() => void) => {
   const {

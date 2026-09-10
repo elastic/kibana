@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
-import { NormalizedRuntimeField } from '../../types';
+import type { NormalizedRuntimeField } from '../../types';
 import { RuntimeFieldsListItem } from './runtimefields_list_item';
 
 interface Props {

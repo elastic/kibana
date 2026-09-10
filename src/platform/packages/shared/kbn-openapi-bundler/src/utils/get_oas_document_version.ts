@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { ResolvedDocument } from '../bundler/ref_resolver/resolved_document';
+import type { ResolvedDocument } from '../bundler/ref_resolver/resolved_document';
 import { isPlainObjectType } from './is_plain_object_type';
 
 export function getOasDocumentVersion(resolvedDocument: ResolvedDocument): string {

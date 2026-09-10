@@ -14,7 +14,7 @@ import { useLogViewReference } from '../../../hooks/use_log_view_reference';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 
 const useDataViews = () => {
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { metricsView, loading: metricsDataViewLoading } = useMetricsDataViewContext();
 
   const {
@@ -26,8 +26,8 @@ const useDataViews = () => {
     name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.assetLogsWidgetName', {
       defaultMessage: 'Logs from {type} "{name}"',
       values: {
-        name: asset.name,
-        type: findInventoryModel(asset.type).singularDisplayName,
+        name: entity.name,
+        type: findInventoryModel(entity.type).singularDisplayName,
       },
     }),
   });

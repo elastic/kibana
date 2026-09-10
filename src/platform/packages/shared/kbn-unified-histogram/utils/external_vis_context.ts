@@ -10,11 +10,21 @@
 import { isEqual, cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type {
+  TextBasedLayerColumn,
+  LensPartitionVisualizationState as PieVisualizationState,
+  Suggestion,
+  XYVisualizationState,
+} from '@kbn/lens-common';
 import { getDatasourceId } from '@kbn/visualization-utils';
+import {
+  getRepresentativeQuery,
+  getTextBasedLayerQueries,
+  isTextBasedAttributes,
+} from '@kbn/lens-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';
-import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
+import type { UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramSuggestionType } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 
 export const TIMESTAMP_COLUMN = 'timestamp';
@@ -96,8 +106,9 @@ export const isSuggestionShapeAndVisContextCompatible = (
 
   if (suggestion?.visualizationId === 'lnsXY') {
     return (
-      (suggestion?.visualizationState as XYState)?.preferredSeriesType ===
-      (externalVisContext?.attributes?.state?.visualization as XYState)?.preferredSeriesType
+      (suggestion?.visualizationState as XYVisualizationState)?.preferredSeriesType ===
+      (externalVisContext?.attributes?.state?.visualization as XYVisualizationState)
+        ?.preferredSeriesType
     );
   }
 
@@ -175,8 +186,19 @@ export function deriveLensSuggestionFromLensAttributes({
   try {
     if (externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion) {
       // should be based on same query
-      if (queryParams && !isEqual(externalVisContext.attributes?.state?.query, queryParams.query)) {
-        return undefined;
+      // For text-based (ES|QL) Lens attributes the authoritative queries live
+      // on the layers (`datasourceStates.textBased.layers[id].query`); the
+      // vis context is stale when none of them matches the current query.
+      if (queryParams) {
+        const attributes = externalVisContext.attributes;
+        const isStale = isTextBasedAttributes(attributes)
+          ? !getTextBasedLayerQueries(attributes).some((layerQuery) =>
+              isEqual(layerQuery, queryParams.query)
+            )
+          : !isEqual(getRepresentativeQuery(attributes), queryParams.query);
+        if (isStale) {
+          return undefined;
+        }
       }
 
       // it should be one of 'formBased'/'textBased' and have value

@@ -9,9 +9,9 @@
 
 import { useRef } from 'react';
 
-import { Props as UseFieldProps } from './use_field';
+import type { Props as UseFieldProps } from './use_field';
 import { useFieldFromProps } from '../hooks';
-import { FieldHook } from '../types';
+import type { FieldHook } from '../types';
 
 interface Props<T> {
   fields: { [K in keyof T]: Exclude<UseFieldProps<T[K]>, 'children'> };
@@ -20,7 +20,10 @@ interface Props<T> {
 
 /**
  * Use this component to avoid nesting multiple <UseField />
-  @example
+ *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ * @example
 ```
 // before
 <UseField path="maxValue">

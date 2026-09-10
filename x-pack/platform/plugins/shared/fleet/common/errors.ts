@@ -6,10 +6,10 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import type { FleetErrorType } from './types';
+import type { FleetErrorResponse } from './types';
 
 export class FleetError<TMeta = unknown> extends Error {
-  attributes?: { type: FleetErrorType };
+  attributes?: FleetErrorResponse['attributes'];
   constructor(message?: string, public readonly meta?: TMeta) {
     super(message);
     this.name = this.constructor.name; // for stack traces
@@ -19,6 +19,8 @@ export class FleetError<TMeta = unknown> extends Error {
     }
   }
 }
+
+export class FleetVersionConflictError extends FleetError {}
 
 export class PolicyNamespaceValidationError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
@@ -32,8 +34,16 @@ export class UninstallTokenError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
 export class OutputInvalidError extends FleetError {}
 
+export class AgentlessAgentCreateFleetUnreachableError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating agentless agent in Fleet, ${message}`);
+  }
+}
+
 export class AgentlessAgentCreateOverProvisionedError extends FleetError<{ limit?: number }> {
   constructor(message: string, limit?: number) {
     super(`Error creating agentless agent in Fleet, ${message}`, { limit });
   }
 }
+
+export class PackageDependencyError extends FleetError {}

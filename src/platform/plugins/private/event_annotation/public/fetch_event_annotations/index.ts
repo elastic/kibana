@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
-import { EventAnnotationPluginStart, EventAnnotationStartDependencies } from '../plugin';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { EventAnnotationPluginStart, EventAnnotationStartDependencies } from '../plugin';
 
-import {
+import type {
   FetchEventAnnotationsExpressionFunctionDefinition,
   FetchEventAnnotationsStartDependencies,
+} from '../../common/fetch_event_annotations';
+import {
   getFetchEventAnnotationsMeta,
   requestEventAnnotations,
 } from '../../common/fetch_event_annotations';

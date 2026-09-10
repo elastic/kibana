@@ -78,7 +78,7 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 Email actions have the following configuration properties.
 
 To, CC, BCC
-:   Each item is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
+:   Each item is a list of addresses. Addresses can be specified in `user@host-name` format, in `name <user@host-name>` format, or using [Mustache templates](docs-content://explore-analyze/alerts-cases/watcher/how-watcher-works.md#templates). One of To, CC, or BCC must contain an entry.
 
 Subject
 :   The subject line of the email.
@@ -101,7 +101,7 @@ For other email servers, you can check the list of well-known services that Node
 Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from {{ecloud}}.
 
 ::::{note}
-For more information on the preconfigured email connector, see [{{ecloud}} email service limits](docs-content://explore-analyze/alerts-cases/watcher/enable-watcher.md#cloud-email-service-limits).
+For more information on the preconfigured email connector, see [{{ecloud}} email service limits](docs-content://deploy-manage/deploy/elastic-cloud/tools-apis.md#email-service-limits).
 ::::
 
 ### Gmail [gmail]

@@ -25,7 +25,7 @@ export const LegacyAlertMetricCallout = ({
   metric: SnapshotMetricType;
 }) => {
   const { activeTabId } = useTabSwitcherContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const [isDismissed, setDismissed] = useLocalStorage<boolean>(
     `${DISMISSAL_LEGACY_ALERT_METRIC_STORAGE_KEY}_${metric}`,
     false
@@ -35,7 +35,7 @@ export const LegacyAlertMetricCallout = ({
     setDismissed(true);
   };
 
-  const metricLabel = toMetricOpt(metric, asset.id as InventoryItemType);
+  const metricLabel = toMetricOpt(metric, entity.id as InventoryItemType);
   const hideCallout = isDismissed || !visibleFor.includes(activeTabId as ContentTabIds);
 
   if (hideCallout || !metricLabel) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -23,19 +23,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     );
   }
 
-  async function unloadCurrentData() {
-    await esArchiver.unload(
-      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-    );
-  }
-
   describe('dashboard app - group 2', function () {
     before(loadCurrentData);
-    after(unloadCurrentData);
 
     loadTestFile(require.resolve('./full_screen_mode'));
     loadTestFile(require.resolve('./dashboard_filter_bar'));
     loadTestFile(require.resolve('./dashboard_filtering'));
-    loadTestFile(require.resolve('./panel_expand_toggle'));
   });
 }

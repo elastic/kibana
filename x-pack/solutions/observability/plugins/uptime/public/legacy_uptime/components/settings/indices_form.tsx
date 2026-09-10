@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { SettingsFormProps } from '../../pages/settings';
+import type { SettingsFormProps } from '../../pages/settings';
 
 export const IndicesForm: React.FC<SettingsFormProps> = ({
   onChange,
@@ -73,6 +73,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
         }
       >
         <EuiFieldText
+          isInvalid={!!fieldErrors?.heartbeatIndices}
           data-test-subj={`heartbeat-indices-input-${loading ? 'loading' : 'loaded'}`}
           fullWidth
           disabled={isDisabled}

@@ -6,16 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import moment from 'moment';
-import { OverviewStatusMetaData } from '../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 import { selectOverviewState } from '../state/overview';
 import { useGetUrlParams } from './use_url_params';
 
 export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
   const { statusFilter } = useGetUrlParams();
-  const { status, disabledConfigs } = useSelector(selectOverviewStatus);
+  const { status, disabledConfigs, allConfigs } = useSelector(selectOverviewStatus);
 
   const {
     pageState: { sortOrder, sortField },
@@ -26,9 +26,16 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
       return [];
     }
 
+    // When the server returns a paginated response (configs array), the data
+    // is already sorted, filtered by status, and sliced to the requested page.
+    if (status.configs) {
+      return allConfigs ?? [];
+    }
+
+    // Legacy non-paginated path: sort and filter client-side.
     let result: OverviewStatusMetaData[] = [];
 
-    const { downConfigs, pendingConfigs, upConfigs } = status;
+    const { downConfigs, pendingConfigs, staleConfigs, upConfigs } = status;
 
     if (statusFilter) {
       switch (statusFilter) {
@@ -44,6 +51,9 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         case 'pending':
           result = Object.values(pendingConfigs) as OverviewStatusMetaData[];
           break;
+        case 'stale':
+          result = Object.values(staleConfigs ?? {}) as OverviewStatusMetaData[];
+          break;
         default:
           break;
       }
@@ -57,8 +67,10 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         ...upAndDownMonitors,
         ...Object.values(disabledConfigs ?? {}),
         ...Object.values(pendingConfigs),
+        ...Object.values(staleConfigs ?? {}),
       ] as OverviewStatusMetaData[];
     }
+
     switch (sortField) {
       case 'name.keyword':
         result = result.sort((a, b) => a.name.localeCompare(b.name));
@@ -70,7 +82,16 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
           return moment(a.updated_at).diff(moment(b.updated_at));
         });
         return sortOrder === 'asc' ? result : result.reverse();
+      case 'urls': {
+        const withUrl = result.filter((m) => m.urls);
+        const withoutUrl = result.filter((m) => !m.urls);
+        withUrl.sort((a, b) => (a.urls ?? '').localeCompare(b.urls ?? ''));
+        return [...(sortOrder === 'asc' ? withUrl : withUrl.reverse()), ...withoutUrl];
+      }
+      case 'type.keyword':
+        result = result.sort((a, b) => (a.type ?? '').localeCompare(b.type ?? ''));
+        return sortOrder === 'asc' ? result : result.reverse();
     }
     return result;
-  }, [disabledConfigs, sortField, sortOrder, status, statusFilter]);
+  }, [allConfigs, disabledConfigs, sortField, sortOrder, status, statusFilter]);
 }

@@ -5,56 +5,47 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
-import { PhaseWithAllocation } from '../../../../../../../../../common/types';
+import { useKibana } from '../../../../../../../../shared_imports';
+import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-const i18nTexts = {
-  body: {
-    warm: (
-      <>
-        <p>
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableDescription',
-            { defaultMessage: 'Data will be allocated to the warm tier.' }
-          )}
-        </p>
-
-        {nodeAllocationMigrationGuidance}
-      </>
-    ),
-    cold: (
-      <>
-        <p>
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableDescription',
-            { defaultMessage: 'Data will be allocated to the cold tier.' }
-          )}
-        </p>
-
-        {nodeAllocationMigrationGuidance}
-      </>
-    ),
-  },
-};
-
 export const DefaultToDataTiersNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
   phase,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
+  const phaseTexts = {
+    warm: i18n.translate(
+      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableDescription',
+      { defaultMessage: 'Data will be allocated to the warm tier.' }
+    ),
+    cold: i18n.translate(
+      'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableDescription',
+      { defaultMessage: 'Data will be allocated to the cold tier.' }
+    ),
+  };
+
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       data-test-subj="defaultToDataTiersNotice"
       style={{ maxWidth: 400 }}
       title={noCustomAttributesTitle}
-      color="primary"
-    >
-      {i18nTexts.body[phase]}
-    </EuiCallOut>
+      text={
+        <>
+          <p>{phaseTexts[phase]}</p>
+          {nodeAllocationMigrationGuidance({ docLinks })}
+        </>
+      }
+    />
   );
 };

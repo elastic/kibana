@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('trained models', function () {
@@ -17,5 +17,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./put_model'));
     loadTestFile(require.resolve('./start_stop_deployment'));
     loadTestFile(require.resolve('./model_downloads'));
+    loadTestFile(require.resolve('./get_all_pipelines'));
+    loadTestFile(require.resolve('./create_inference_pipeline'));
   });
 }

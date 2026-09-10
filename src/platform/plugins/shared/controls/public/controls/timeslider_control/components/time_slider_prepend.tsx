@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
-import React, { FC, useCallback, useState } from 'react';
-import { first, Observable, Subscription } from 'rxjs';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs';
 import { PlayButton } from './play_button';
 import { TimeSliderStrings } from './time_slider_strings';
 
@@ -68,16 +70,21 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onPrevious();
-          }}
-          iconType="framePrevious"
-          color="text"
-          aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
-          data-test-subj="timeSlider-previousTimeWindow"
-        />
+        <EuiToolTip
+          content={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              onPause();
+              props.onPrevious();
+            }}
+            iconType="chevronLimitLeft"
+            color="text"
+            aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
+            data-test-subj="timeSlider-previousTimeWindow"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <PlayButton
@@ -90,16 +97,21 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onNext();
-          }}
-          iconType="frameNext"
-          color="text"
-          aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
-          data-test-subj="timeSlider-nextTimeWindow"
-        />
+        <EuiToolTip
+          content={TimeSliderStrings.control.getNextButtonAriaLabel()}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              onPause();
+              props.onNext();
+            }}
+            iconType="chevronLimitRight"
+            color="text"
+            aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
+            data-test-subj="timeSlider-nextTimeWindow"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </>
   );

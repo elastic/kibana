@@ -10,7 +10,7 @@
 import { deleteRuntimeField } from './delete_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataViewLazy } from '../../../../common';
+import type { DataViewLazy } from '../../../../common';
 
 describe('delete runtime field', () => {
   it('call usageCollection', async () => {
@@ -31,6 +31,6 @@ describe('delete runtime field', () => {
       id: 'dataViewId',
       name: 'fieldName',
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

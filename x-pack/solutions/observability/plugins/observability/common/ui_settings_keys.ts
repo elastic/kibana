@@ -12,9 +12,12 @@ export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvi
 export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
+export const enableInfrastructureAssetCustomDashboards =
+  'observability:enableInfrastructureAssetCustomDashboards';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
+export const apmTraceLogsDefaultColumns = 'observability:apmTraceLogsDefaultColumns';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
@@ -29,4 +32,4 @@ export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPe
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
-export const apmEnableServiceMapApiV2 = 'observability:apmEnableServiceMapApiV2';
+export const enableDiagnosticMode = 'observability:enableDiagnosticMode';

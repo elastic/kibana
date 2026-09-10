@@ -30,6 +30,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     truncate,
     values,
     linkValues,
+    data,
   }: {
     asPlainText?: boolean;
     columnName: string;
@@ -40,6 +41,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
+    data?: TimelineNonEcsData[];
   }) => {
     if (!Array.isArray(values) || values.length === 0) {
       return getEmptyTagValue();
@@ -61,6 +63,7 @@ export const plainColumnRenderer: ColumnRenderer = {
         linkValue={head(linkValues)}
         truncate={truncate}
         value={joinValues(values)}
+        data={data}
       />
     );
   },

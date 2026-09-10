@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiSpacer, EuiText, EuiTitle, HorizontalAlignment } from '@elastic/eui';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { WindowSchema } from '../../typings';
+import type { WindowSchema } from '../../typings';
 import { toDuration, toMinutes } from '../../utils/slo/duration';
 
 interface AlertTimeTableProps {

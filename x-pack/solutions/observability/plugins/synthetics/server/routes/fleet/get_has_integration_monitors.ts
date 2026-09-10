@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getHasIntegrationMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -16,6 +16,7 @@ export const getHasIntegrationMonitorsRoute: SyntheticsRestApiRouteFactory = () 
       kuery:
         'ingest-package-policies.package.name:synthetics and not ingest-package-policies.is_managed:true',
       perPage: 1,
+      fields: ['name'],
     });
     return {
       hasIntegrationMonitors: monitors.total > 0,

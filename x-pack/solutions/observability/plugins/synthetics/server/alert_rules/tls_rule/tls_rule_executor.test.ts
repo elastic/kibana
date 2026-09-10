@@ -14,10 +14,10 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { randomUUID } from 'node:crypto';
-import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -124,6 +124,20 @@ describe('tlsRuleExecutor', () => {
 
       expect(getAllMock).toHaveBeenCalledWith({
         filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.tags:(\"${tag}\")`,
+      });
+    });
+
+    it('should include browser monitors when includeBrowserCerts is true', async () => {
+      const tlsRule = new TLSRuleExecutor(
+        ...getTLSRuleExecutorParams({ includeBrowserCerts: true })
+      );
+      const configRepo = tlsRule.monitorConfigRepository;
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `(${commonFilter}) or (synthetics-monitor-multi-space.attributes.type: browser)`,
       });
     });
 

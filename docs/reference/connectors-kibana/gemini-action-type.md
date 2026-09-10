@@ -3,13 +3,20 @@ navigation_title: "{{gemini}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: deprecated 9.5
+  serverless: deprecated
 ---
 
 # {{gemini}} connector and action [gemini-action-type]
 
 The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
+
+::::{important}
+:applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
+This connector is deprecated and is being progressively removed from the create connector UI. Existing connectors and their rule actions continue to work.
+
+For new AI integrations, use {{es}} {{infer}} endpoints. Migrate existing LLM connectors and related rule actions before the future removal.
+::::
 
 ## Create connectors in {{kib}} [define-gemini-ui]
 
@@ -37,7 +44,11 @@ Region
 :   The GCP region where the Vertex AI endpoint enabled.
 
 Default model
-:   The GAI model for {{gemini}} to use. Current support is for the Google Gemini models, defaulting to gemini-2.5-pro. The model can be set on a per request basis by including a "model" parameter alongside the request body.
+:   The GAI model for {{gemini}} to use. Current support is for the Google Gemini models.
+    * {applies_to}`serverless: ga` Defaults to `gemini-2.5-pro`.
+    * {applies_to}`stack: ga 9.1` Defaults to `gemini-2.5-pro`.
+    * {applies_to}`stack: ga 9.0` Defaults to `gemini-1.5-pro-002`. 
+    The model can be set on a per request basis by including a "model" parameter alongside the request body.
 
 Credentials JSON
 :   The GCP service account JSON file for authentication.

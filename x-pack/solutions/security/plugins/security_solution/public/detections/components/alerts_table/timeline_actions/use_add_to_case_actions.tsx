@@ -5,31 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { useCallback, useMemo } from 'react';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { APP_ID } from '../../../../../common';
-import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
-import {
-  AlertsCasesTourSteps,
-  sampleCase,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
+import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
-  ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
-  isActiveTimelines: boolean;
-  isInDetections: boolean;
   refetch?: (() => void) | undefined;
 }
 
@@ -39,8 +31,6 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
-  isActiveTimelines,
-  isInDetections,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -51,19 +41,27 @@ export const useAddToCaseActions = ({
   }, [ecsData]);
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
+    if (!isAlert) {
+      const eventAttachment = generateEventAttachmentWithoutOwner({
+        attachmentId: ecsData?._id,
+        index: ecsData?._index,
+      });
+      return eventAttachment ? [eventAttachment] : [];
+    }
+
     return ecsData?._id
       ? [
           {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ecsData._id,
+            metadata: {
+              index: ecsData._index ?? '',
+              rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            },
           },
         ]
       : [];
-  }, [casesUi.helpers, ecsData, nonEcsData]);
-
-  const { activeStep, endTourStep, incrementStep, isTourShown } = useTourContext();
+  }, [casesUi.helpers, ecsData, isAlert, nonEcsData]);
 
   const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
@@ -75,31 +73,12 @@ export const useAddToCaseActions = ({
     }
   }, [onSuccess, refetch]);
 
-  const afterCaseCreated = useCallback(async () => {
-    if (isTourShown(SecurityStepId.alertsCases)) {
-      endTourStep(SecurityStepId.alertsCases);
-    }
-  }, [endTourStep, isTourShown]);
-
-  const prefillCasesValue = useMemo(
-    () =>
-      isTourShown(SecurityStepId.alertsCases) &&
-      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
-        activeStep === AlertsCasesTourSteps.createCase ||
-        activeStep === AlertsCasesTourSteps.submitCase)
-        ? { initialValue: sampleCase }
-        : {},
-    [activeStep, isTourShown]
-  );
-
   const createCaseArgs = useMemo(() => {
     return {
       onClose: onMenuItemClick,
       onSuccess: onCaseSuccess,
-      afterCaseCreated,
-      ...prefillCasesValue,
     };
-  }, [onMenuItemClick, onCaseSuccess, afterCaseCreated, prefillCasesValue]);
+  }, [onMenuItemClick, onCaseSuccess]);
 
   const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout(createCaseArgs);
 
@@ -117,35 +96,19 @@ export const useAddToCaseActions = ({
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      // activeStep will be AlertsCasesTourSteps.addAlertToCase on first render because not yet incremented
-      // if the user closes the flyout without completing the form and comes back, we will be at step AlertsCasesTourSteps.createCase
-      ...(isTourShown(SecurityStepId.alertsCases)
-        ? {
-            headerContent: <CasesTourSteps />,
-          }
-        : {}),
     });
-    if (
-      isTourShown(SecurityStepId.alertsCases) &&
-      activeStep === AlertsCasesTourSteps.addAlertToCase
-    ) {
-      incrementStep(SecurityStepId.alertsCases);
-    }
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
+    selectCaseModal.open({
+      getAttachments: () => caseAttachments,
+    });
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (
-      (isActiveTimelines || isInDetections) &&
-      userCasesPermissions.createComment &&
-      userCasesPermissions.read &&
-      isAlert
-    ) {
+    if (userCasesPermissions.createComment && userCasesPermissions.read) {
       return [
         // add to existing case menu item
         {
@@ -153,7 +116,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-existing-case-action',
           key: 'add-to-existing-case-action',
           onClick: handleAddToExistingCaseClick,
-          size: 's',
           name: ADD_TO_EXISTING_CASE,
         },
         // add to new case menu item
@@ -162,18 +124,14 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-new-case-action',
           key: 'add-to-new-case-action',
           onClick: handleAddToNewCaseClick,
-          size: 's',
           name: ADD_TO_NEW_CASE,
         },
       ];
     }
     return [];
   }, [
-    isActiveTimelines,
-    isInDetections,
     userCasesPermissions.createComment,
     userCasesPermissions.read,
-    isAlert,
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,

@@ -26,16 +26,6 @@ jest.mock('../../../hooks', () => {
         navigateToUrl: jest.fn(),
       },
     }),
-    useIsGuidedOnboardingActive: jest.fn().mockReturnValue(false),
-  };
-});
-
-jest.mock('../../../components', () => {
-  return {
-    ...jest.requireActual('../../../components'),
-    WithGuidedOnboardingTour: ({ children }: { children: React.ReactNode }) => {
-      return <>{children}</>;
-    },
   };
 });
 
@@ -142,17 +132,6 @@ describe.skip('package card', () => {
     }
   );
 
-  it.each([true, false])(
-    'determines whether to render card with collection button when `isCollectionCard` is %s`',
-    async (isCollectionCard) => {
-      const {
-        utils: { queryByText },
-      } = renderPackageCard(cardProps({ isCollectionCard }));
-      const collectionButton = queryByText('View collection');
-      expect(!!collectionButton).toEqual(isCollectionCard);
-    }
-  );
-
   describe('Installation status', () => {
     it('should render installation status when showInstallationStatus is true', async () => {
       const {
@@ -230,5 +209,26 @@ describe.skip('package card', () => {
       );
       expect(mockGetLineClamp).toHaveBeenCalledWith(1);
     });
+  });
+});
+
+describe('package card — collection variant badge', () => {
+  it('renders a variant count badge when isCollectionCard and groupMembers are present', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(
+      cardProps({
+        isCollectionCard: true,
+        groupMembers: [cardProps({ id: 'member-1' }) as any, cardProps({ id: 'member-2' }) as any],
+      })
+    );
+    expect(queryByText('2 variants')).toBeInTheDocument();
+  });
+
+  it('does not render a variant count badge when isCollectionCard is false', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(cardProps({ isCollectionCard: false }));
+    expect(queryByText(/variant/)).not.toBeInTheDocument();
   });
 });

@@ -8,10 +8,15 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { LIGHT_THEME, PartialTheme, Theme, getChartsTheme } from '@elastic/charts';
+import type { CoreSetup, CoreTheme } from '@kbn/core/public';
+import type { PartialTheme, Theme } from '@elastic/charts';
+import { LIGHT_THEME, getChartsTheme } from '@elastic/charts';
+
+import { applyNumericFontFamily } from './helpers';
 
 export class ThemeService {
   /** Returns default charts theme */
@@ -19,6 +24,7 @@ export class ThemeService {
 
   private theme$?: Observable<CoreTheme>;
   private _chartsBaseTheme$ = new BehaviorSubject(this.chartsDefaultBaseTheme);
+  private readonly baseThemeCache = new Map<string, Theme>();
 
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
@@ -111,7 +117,30 @@ export class ThemeService {
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe((newTheme) => {
-      this._chartsBaseTheme$.next(getChartsTheme(newTheme));
+      this._chartsBaseTheme$.next(this.getChartsBaseTheme(newTheme));
     });
+  }
+
+  private getChartsBaseTheme(coreTheme: CoreTheme): Theme {
+    const cacheKey = `${coreTheme.name}:${coreTheme.darkMode ? 'dark' : 'light'}`;
+    const cached = this.baseThemeCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // `getChartsTheme` returns a frozen base theme singleton from @elastic/charts.
+    // Clone it before applying our overrides, otherwise mutating read-only
+    // properties throws and aborts the theme subscription before the updated theme
+    // is emitted, leaving charts stuck on the previous theme (e.g. on dark -> light).
+    const chartsTheme = cloneDeep(getChartsTheme(coreTheme));
+    applyNumericFontFamily(chartsTheme);
+    const { fill } = chartsTheme.axes.tickLabel;
+    chartsTheme.axes.axisTitle.fill = fill;
+    chartsTheme.axes.axisTitle.fontWeight = 500;
+    chartsTheme.axes.axisPanelTitle.fill = fill;
+    chartsTheme.axes.axisPanelTitle.fontWeight = 500;
+
+    this.baseThemeCache.set(cacheKey, chartsTheme);
+    return chartsTheme;
   }
 }

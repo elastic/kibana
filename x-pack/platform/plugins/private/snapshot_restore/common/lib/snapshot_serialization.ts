@@ -9,7 +9,7 @@ import { sortBy } from 'lodash';
 import { flow, map, flatten, uniq } from 'lodash/fp';
 
 import type { SlmRetention } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   SnapshotDetails,
   SnapshotDetailsEs,
   SnapshotConfig,

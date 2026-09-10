@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+
 import {
   ADD_INTEGRATION_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
@@ -17,10 +19,15 @@ import { CONFIRM_MODAL } from '../screens/navigation';
 
 import { request } from './common';
 
-export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
+export const addIntegration = ({
+  useExistingPolicy,
+  skipButtonClick,
+}: { useExistingPolicy?: boolean; skipButtonClick?: boolean } = {}) => {
   cy.intercept('/api/fleet/agent_status?*').as('agentStatus');
 
-  cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+  if (!skipButtonClick) {
+    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+  }
   if (useExistingPolicy) {
     cy.getBySel(EXISTING_HOSTS_TAB).click();
     cy.wait('@agentStatus');
@@ -85,14 +92,46 @@ export function scrollToIntegration(selector: string) {
   cy.getBySel(INTEGRATION_LIST);
 
   return cy.window().then(async (win) => {
+    const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+    const integrationSelector = `[data-test-subj="${selector}"]`;
     let found = false;
     let i = 0;
     while (!found && i < 20) {
-      win.scroll(0, i++ * 250);
+      if (scrollContainer) {
+        scrollContainer.scrollTop = i++ * 250;
+      } else {
+        win.scroll(0, i++ * 250);
+      }
       await new Promise((resolve) => setTimeout(resolve, 200));
-      if (win.document.querySelector(`[data-test-subj="${selector}"]`)) {
+      if (
+        (scrollContainer && scrollContainer.querySelector(integrationSelector)) ||
+        (!scrollContainer && win.document.querySelector(integrationSelector))
+      ) {
         found = true;
       }
     }
   });
+}
+
+export function calculateAssetCount(
+  packageInfo: any,
+  { includeKnowledgeBase = true }: { includeKnowledgeBase?: boolean } = {}
+): number {
+  const packageAssets = packageInfo?.assets || {};
+
+  // Calculate total asset count from all services and types
+  const assetCount = Object.values(packageAssets).reduce((total: number, serviceAssets: any) => {
+    return (
+      total +
+      Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
+        return serviceTotal + (Array.isArray(typeAssets) ? typeAssets.length : 0);
+      }, 0)
+    );
+  }, 0);
+
+  const knowledgeBaseAssetCount = includeKnowledgeBase
+    ? 0
+    : packageAssets.elasticsearch?.knowledge_base?.length ?? 0;
+
+  return assetCount - knowledgeBaseAssetCount;
 }

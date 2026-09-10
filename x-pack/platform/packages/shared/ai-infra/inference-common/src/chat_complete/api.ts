@@ -7,10 +7,13 @@
 
 import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
-import type { ToolCallsOf, ToolChoiceType, ToolOptions } from './tools';
+import type { ToolChoiceType, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
+import type { ToolCallOfToolOptions } from './tools_of';
+import type { AnonymizationResponseMetadata } from './anonymization';
+import type { ChatCompletionReasoning } from './reasoning';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -78,12 +81,16 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
- * Options used to call the {@link ChatCompleteAPI}
+ * Options used to call the {@link ChatCompleteAPI}.
+ *
+ * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
+ * and Elasticsearch inference endpoint IDs. The system automatically resolves which
+ * pipeline to use based on the provided identifier.
  */
 export type ChatCompleteOptions = {
   /**
-   * The ID of the connector to use.
-   * Must be an inference connector, or an error will be thrown.
+   * The ID of the connector or inference endpoint to use.
+   * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
    */
   connectorId: string;
   /**
@@ -99,6 +106,14 @@ export type ChatCompleteOptions = {
    * Defaults to 0;
    */
   temperature?: number;
+  /**
+   * Optional reasoning configuration for the Elasticsearch unified chat completion API.
+   *
+   * When native function tools are present and this is omitted, the Inference adapter
+   * defaults to `{ effort: 'none' }` so OpenAI Chat Completions accepts tool-calling
+   * requests on newer reasoning models.
+   */
+  reasoning?: ChatCompletionReasoning;
   /**
    * The model name identifier to use. Can be defined to use another model than the
    * default one, when using connectors / providers exposing multiple models.
@@ -138,7 +153,39 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
+  /**
+   * Optional response content length override for connectors that support it.
+   */
+  maxContentLength?: number;
+  /**
+   * Optional prompt-cache directive. Only honored by Elastic-managed (EIS) inference
+   * endpoints;
+   */
+  cacheControl?: ChatCompleteCacheControl;
+  /**
+   * Optional session identifier used by EIS to scope prompt caching across calls.
+   */
+  sessionId?: string;
 } & ToolOptions;
+
+/**
+ * Cache-control directive for EIS prompt caching.
+ */
+export interface ChatCompleteCacheControl {
+  /**
+   * Cache entry type. Currently only `'ephemeral'` is supported.
+   */
+  type: 'ephemeral';
+  /**
+   * Optional time-to-live as an Elasticsearch TimeValue string.
+   * EIS currently supports `'5m'` and `'1h'`.
+   */
+  ttl?: '5m' | '1h';
+}
 
 export interface ChatCompleteRetryConfiguration {
   /**
@@ -197,13 +244,25 @@ export interface ChatCompleteResponse<
    */
   content: string;
   /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
+  /**
    * The eventual tool calls performed by the LLM.
    */
-  toolCalls: ToolCallsOf<TOptions>['toolCalls'];
+  toolCalls: ToolCallOfToolOptions<TOptions>[];
   /**
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
+  /**
+   * Optional metadata attached by inference runtime.
+   */
+  metadata?: AnonymizationResponseMetadata;
 }
 
 /**

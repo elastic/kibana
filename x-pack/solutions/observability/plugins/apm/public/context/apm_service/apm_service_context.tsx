@@ -31,6 +31,7 @@ export interface APMServiceContextValue {
   transactionTypeStatus: FETCH_STATUS;
   transactionTypes: string[];
   runtimeName?: string;
+  runtimeVersion?: string;
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
 }
@@ -45,11 +46,10 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
 
 export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
-
   const {
     path: { serviceName },
     query,
-    query: { kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -57,12 +57,14 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   const {
     agentName,
     runtimeName,
+    runtimeVersion,
     serverlessType,
     telemetrySdkName,
     telemetrySdkLanguage,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
+    environment,
     start,
     end,
   });
@@ -106,6 +108,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         transactionTypeStatus,
         transactionTypes,
         runtimeName,
+        runtimeVersion,
         fallbackToTransactions,
         serviceAgentStatus,
       }}

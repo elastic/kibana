@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
-import { CanvasSetup } from '../public';
+import type { CanvasSetup } from '../public';
 
 import { functions } from './functions/browser';
 import { initFunctions } from './functions/external';
@@ -29,7 +28,6 @@ export interface StartDeps {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   charts: ChartsPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
 }
 
 export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;

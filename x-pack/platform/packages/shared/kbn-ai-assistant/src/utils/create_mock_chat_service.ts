@@ -6,7 +6,7 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import {
+import type {
   FunctionDefinition,
   ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';

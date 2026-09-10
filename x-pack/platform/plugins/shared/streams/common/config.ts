@@ -5,11 +5,29 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-export const configSchema = schema.object({});
+export const configSchema = schema.object({
+  preconfigured: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
+  }),
+  workers: schema.object({
+    patternExtraction: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      minThreads: schema.number({ defaultValue: 0, min: 0 }),
+      maxThreads: schema.number({ defaultValue: 2, min: 1 }),
+      maxQueue: schema.number({ defaultValue: 10, min: 1 }),
+      idleTimeout: schema.duration({ defaultValue: '30s' }),
+      taskTimeout: schema.duration({ defaultValue: '30s' }),
+    }),
+  }),
+});
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
+
+export type PatternExtractionWorkerConfig = StreamsConfig['workers']['patternExtraction'];
 
 /**
  * The following map is passed to the server plugin setup under the
@@ -21,10 +39,5 @@ export type StreamsConfig = TypeOf<typeof configSchema>;
  */
 export const exposeToBrowserConfig = {} as const;
 
-type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
-    ? K
-    : never]: true;
-};
-
-export type StreamsPublicConfig = Pick<StreamsConfig, ValidKeys>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPublicConfig {}

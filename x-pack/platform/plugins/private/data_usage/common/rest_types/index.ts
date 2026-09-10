@@ -6,4 +6,3 @@
  */
 
 export * from './usage_metrics';
-export * from './data_streams';

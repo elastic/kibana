@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { Pipeline } from '../../../common/types';
+import type { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object({
@@ -39,8 +39,8 @@ export const registerCreateRoute = ({
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const pipeline = req.body as Pipeline;
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, processors, version, on_failure, _meta } = pipeline;
+      const { name, description, processors, version, on_failure, _meta, field_access_pattern } =
+        pipeline;
 
       try {
         // Check that a pipeline with the same name doesn't already exist
@@ -72,6 +72,7 @@ export const registerCreateRoute = ({
           version,
           on_failure,
           _meta,
+          field_access_pattern,
         });
 
         return res.ok({ body: response });

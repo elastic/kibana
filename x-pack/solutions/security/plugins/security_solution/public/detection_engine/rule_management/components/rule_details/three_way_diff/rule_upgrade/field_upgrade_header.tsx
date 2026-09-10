@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { camelCase, startCase } from 'lodash';
 import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
-import { fieldToDisplayNameMap } from '../../diff_components/translations';
 import type { FieldUpgradeStateEnum } from '../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeStateInfo } from './field_upgrade_state_info';
 import { ModifiedBadge } from '../badges/modified_badge';
 import { FIELD_MODIFIED_BADGE_DESCRIPTION } from './translations';
+import { convertFieldToDisplayName } from '../../helpers';
 
 interface FieldUpgradeHeaderProps {
   fieldName: string;
@@ -28,7 +27,7 @@ export function FieldUpgradeHeader({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiTitle data-test-subj="ruleUpgradeFieldDiffLabel" size="xs">
-        <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
+        <h5>{convertFieldToDisplayName(fieldName)}</h5>
       </EuiTitle>
 
       {isCustomized && <ModifiedBadge tooltip={FIELD_MODIFIED_BADGE_DESCRIPTION} />}

@@ -13,7 +13,6 @@ import { getEventLog } from '../../../../../common/lib';
 
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
-// eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
   const es: Client = getService('es');
   const supertest = getService('supertest');
@@ -49,6 +48,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -68,9 +68,11 @@ export default function indexTest({ getService }: FtrProviderContext) {
         is_system_action: false,
         is_deprecated: false,
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         name: 'An index action',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
+        auth_mode: 'shared',
       });
 
       // create action with all config props
@@ -96,6 +98,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
@@ -117,11 +120,13 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: true,
           executionTimeField: 'test',
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -139,8 +144,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type config: [index]: expected value of type [string] but got [number]',
+            message: `error validating connector type config: ✖ Invalid input: expected string, received number\n  → at index`,
           });
         });
     });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { DocumentsTransformFailed, DocumentsTransformSuccess } from './core';
 

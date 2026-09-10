@@ -6,9 +6,9 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import { DataViewsCommonService } from '@kbn/data-plugin/server';
-import { CreateDocSourceResp } from '../../common/types';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { DataViewsCommonService } from '@kbn/data-plugin/server';
+import type { CreateDocSourceResp } from '../../common/types';
 import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 
 const DEFAULT_META = {

@@ -54,6 +54,7 @@ exports[`should render 1`] = `
   >
     <EuiRadioGroup
       idSelected="LAST_SAVED_LOCATION"
+      name="initialMapLocation"
       onChange={[Function]}
       options={
         Array [
@@ -134,6 +135,7 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
   >
     <EuiRadioGroup
       idSelected="BROWSER_LOCATION"
+      name="initialMapLocation"
       onChange={[Function]}
       options={
         Array [
@@ -229,6 +231,7 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   >
     <EuiRadioGroup
       idSelected="FIXED_LOCATION"
+      name="initialMapLocation"
       onChange={[Function]}
       options={
         Array [

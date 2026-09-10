@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
-import type { MessageDescriptor, Formatters } from '@formatjs/intl';
+import { createIntl, createIntlCache } from '@formatjs/intl';
+import type { MessageDescriptor, Formatters, IntlConfig, IntlShape } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
-import { Translation, TranslationInput } from '../translation';
+import type { Translation, TranslationInput } from '../translation';
 import { defaultEnFormats } from './formats';
-import { FormatXMLElementFn, PrimitiveType } from './types';
+import type { FormatXMLElementFn, PrimitiveType } from './types';
 
-const EN_LOCALE = 'en';
+export const EN_LOCALE = 'en';
 const defaultLocale = EN_LOCALE;
 
 /**
@@ -171,6 +171,20 @@ export function translate(
 }
 
 /**
+ * Formats a list of values using the current locale.
+ * @param type - The type of list formatting (e.g., 'conjunction', 'disjunction', 'unit').
+ * @param value - The array of string values to format.
+ * @returns The formatted list string.
+ */
+export function formatList(type: 'conjunction' | 'disjunction' | 'unit', value: string[]): string {
+  try {
+    return intl.formatList(value, { type });
+  } catch (e) {
+    throw new Error(`[I18n] Error formatting list ${JSON.stringify(value)}: ${e}`);
+  }
+}
+
+/**
  * Initializes the engine
  * @param newTranslation
  */
@@ -180,6 +194,16 @@ export function init(newTranslation?: TranslationInput) {
   }
 
   activateTranslation(newTranslation);
+  isInitialized = true;
+}
+
+/**
+ * Marks the engine as initialized without loading any translation file.
+ * Call this when the effective locale is English so the pre-allocated default
+ * `intl` instance (which is already wired to English) is used directly,
+ * avoiding an unnecessary network round-trip and React context re-render.
+ */
+export function initDefault() {
   isInitialized = true;
 }
 

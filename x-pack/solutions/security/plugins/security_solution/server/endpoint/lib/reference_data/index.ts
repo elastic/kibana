@@ -8,4 +8,5 @@
 export * from './saved_objects';
 export * from './constants';
 export * from './reference_data_client';
-export * from './types';
+export type * from './types';
+export * from './helpers';

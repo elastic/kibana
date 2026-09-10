@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { attributesToIncludeInAAD } from './synthetics_monitor_config';
 import { monitorConfigMappings } from './monitor_mappings';
@@ -35,6 +35,7 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
     name: legacySyntheticsMonitorTypeSingle,
     hidden: false,
     namespaceType: 'single',
+    hiddenFromHttpApis: true,
     migrations: {
       '8.6.0': monitorMigrations['8.6.0'](encryptedSavedObjects),
       '8.8.0': monitorMigrations['8.8.0'](encryptedSavedObjects),

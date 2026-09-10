@@ -9,7 +9,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { KeyValuePairsField, Pair } from './key_value_field';
+import type { Pair } from './key_value_field';
+import { KeyValuePairsField } from './key_value_field';
 
 describe('<KeyValuePairsField />', () => {
   const onChange = jest.fn();
@@ -39,6 +40,45 @@ describe('<KeyValuePairsField />', () => {
     expect(getByText('Value')).toBeInTheDocument();
 
     expect(getByText('Add pair')).toBeInTheDocument();
+  });
+
+  it('uses the default labels as the accessible names of the inputs', () => {
+    const { getByTestId } = render(<WrappedComponent />);
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Key');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Value');
+  });
+
+  it('uses the custom labels as the accessible names of the inputs', () => {
+    const { getByTestId, getByText } = render(
+      <KeyValuePairsField
+        defaultPairs={defaultDefaultValue}
+        onChange={onChange}
+        addPairControlLabel="Add pair"
+        keyLabel="Field"
+        valueLabel="Expression"
+      />
+    );
+
+    expect(getByText('Field')).toBeInTheDocument();
+    expect(getByText('Expression')).toBeInTheDocument();
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Field');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Expression');
+  });
+
+  it('uses element labels as the accessible names of the inputs', () => {
+    const { getByTestId } = render(
+      <KeyValuePairsField
+        defaultPairs={defaultDefaultValue}
+        onChange={onChange}
+        addPairControlLabel="Add pair"
+        keyLabel={<span>Field</span>}
+        valueLabel={<span>Expression</span>}
+      />
+    );
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Field');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Expression');
   });
 
   it('calls onBlur', async () => {
@@ -74,7 +114,7 @@ describe('<KeyValuePairsField />', () => {
     await waitFor(() => {
       expect(newRowKey.value).toEqual('');
       expect(newRowValue.value).toEqual('');
-      expect(onChange).toBeCalledWith([[newRowKey.value, newRowValue.value]]);
+      expect(onChange).toHaveBeenCalledWith([[newRowKey.value, newRowValue.value]]);
     });
 
     fireEvent.change(newRowKey, { target: { value: 'newKey' } });
@@ -83,7 +123,7 @@ describe('<KeyValuePairsField />', () => {
     await waitFor(() => {
       expect(newRowKey.value).toEqual('newKey');
       expect(newRowValue.value).toEqual('newValue');
-      expect(onChange).toBeCalledWith([[newRowKey.value, newRowValue.value]]);
+      expect(onChange).toHaveBeenCalledWith([[newRowKey.value, newRowValue.value]]);
     });
   });
 });

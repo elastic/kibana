@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 export const createApiKey = async (client: IScopedClusterClient, name: string, keyName: string) => {
   return await client.asCurrentUser.security.createApiKey({

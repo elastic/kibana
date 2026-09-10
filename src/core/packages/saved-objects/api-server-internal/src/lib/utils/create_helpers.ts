@@ -16,8 +16,8 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
+import type { RepositoryHelpers } from '../apis/helpers';
 import {
-  RepositoryHelpers,
   CommonHelper,
   EncryptionHelper,
   ValidationHelper,
@@ -27,7 +27,7 @@ import {
   UserHelper,
 } from '../apis/helpers';
 import type { RepositoryEsClient } from '../repository_es_client';
-import { CreatePointInTimeFinderFn } from '../point_in_time_finder';
+import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 
 interface CreateRepositoryHelpersOptions {
   index: string;

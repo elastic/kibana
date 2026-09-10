@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValidationFuncArg } from '@kbn/console-plugin/public/shared_imports';
+import type { ValidationFuncArg } from '@kbn/console-plugin/public/shared_imports';
 import { from, isXJsonField, to } from './shared';
 
 describe('shared', () => {

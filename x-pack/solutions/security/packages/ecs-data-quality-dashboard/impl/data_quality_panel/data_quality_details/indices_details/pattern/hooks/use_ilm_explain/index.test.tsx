@@ -13,7 +13,7 @@ import { mockIlmExplain } from '../../../../../mock/ilm_explain/mock_ilm_explain
 import { ERROR_LOADING_ILM_EXPLAIN } from '../../../../../translations';
 import { useIlmExplain } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { Theme } from '@elastic/charts';
+import type { Theme } from '@elastic/charts';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();

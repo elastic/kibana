@@ -9,7 +9,6 @@ import { createTestConfig } from '../../../../common/config';
 
 export const EmailDomainsAllowed = ['example.org', 'test.com'];
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
   license: 'trial',
@@ -21,4 +20,5 @@ export default createTestConfig('spaces_only', {
   useDedicatedTaskRunner: true,
   testFiles: [require.resolve('.')],
   reportName: 'X-Pack Alerting API Integration Tests - Alerting - group1',
+  indexRefreshInterval: '1s',
 });

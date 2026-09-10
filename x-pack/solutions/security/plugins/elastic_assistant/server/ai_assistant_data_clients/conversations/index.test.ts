@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AIAssistantConversationsDataClient } from '.';
 import { getUpdateConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
-import { AIAssistantDataClientParams } from '..';
+import type { AIAssistantDataClientParams } from '..';
 
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
@@ -146,6 +146,20 @@ describe('AIAssistantConversationsDataClient', () => {
   });
 
   test('should update conversation with new messages', async () => {
+    clusterClient.search.mockReturnValue({
+      // @ts-ignore
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            _index: 'test-index',
+            _source: {},
+          },
+        ],
+      },
+    });
+
     const assistantConversationsDataClient = new AIAssistantConversationsDataClient(
       assistantConversationsDataClientParams
     );
@@ -156,45 +170,44 @@ describe('AIAssistantConversationsDataClient', () => {
       ),
     });
 
-    const params = clusterClient.updateByQuery.mock.calls[0][0] as UpdateByQueryRequest;
+    const params = clusterClient.bulk.mock.calls[0][0] as BulkRequest;
 
-    expect(params.query).toEqual({
-      ids: {
-        values: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'],
-      },
-    });
-
-    expect(params.script).toEqual({
-      source: expect.anything(),
-      lang: 'painless',
-      params: {
-        api_config: {
-          action_type_id: '.gen-ai',
-          connector_id: '2',
-          default_system_prompt_id: 'Default',
-          model: 'model',
-          provider: undefined,
+    expect(params.refresh).toEqual('wait_for');
+    expect(params.body).toEqual([
+      {
+        update: {
+          _id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          _index: 'test-index',
+          _source: true,
+          retry_on_conflict: 3,
         },
-        assignEmpty: false,
-        exclude_from_last_conversation_storage: false,
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        messages: [
-          {
-            '@timestamp': '2019-12-13T16:40:33.400Z',
-            content: 'test content',
-            is_error: undefined,
-            reader: undefined,
-            role: 'user',
-            trace_data: {
-              trace_id: '1',
-              transaction_id: '2',
-            },
-          },
-        ],
-        replacements: undefined,
-        title: 'Welcome 2',
-        updated_at: '2023-03-28T22:27:28.159Z',
       },
-    });
+      {
+        doc: {
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          updated_at: '2023-03-28T22:27:28.159Z',
+          title: 'Welcome 2',
+          api_config: {
+            action_type_id: '.gen-ai',
+            connector_id: '2',
+            default_system_prompt_id: 'Default',
+            model: 'model',
+          },
+          exclude_from_last_conversation_storage: false,
+          messages: [
+            {
+              '@timestamp': '2019-12-13T16:40:33.400Z',
+              id: expect.any(String),
+              content: 'test content',
+              role: 'user',
+              trace_data: {
+                trace_id: '1',
+                transaction_id: '2',
+              },
+            },
+          ],
+        },
+      },
+    ]);
   });
 });

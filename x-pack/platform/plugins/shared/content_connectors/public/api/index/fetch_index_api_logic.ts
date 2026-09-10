@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { ElasticsearchIndexWithIngestion } from '@kbn/search-connectors';
-import { Actions, createApiLogic } from '../api_logic/create_api_logic';
+import type { Actions } from '../api_logic/create_api_logic';
+import { createApiLogic } from '../api_logic/create_api_logic';
 
 export interface FetchIndexApiParams {
   indexName: string;

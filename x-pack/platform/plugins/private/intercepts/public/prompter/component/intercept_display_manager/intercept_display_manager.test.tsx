@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { InterceptDisplayManager, type Intercept } from './intercept_display_manager';
+import { InterceptDisplayManagerMemoized, type Intercept } from './intercept_display_manager';
 
 const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
@@ -52,7 +52,7 @@ describe('InterceptDisplayManager', () => {
     const ackProductIntercept = jest.fn();
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={Rx.EMPTY}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -83,7 +83,7 @@ describe('InterceptDisplayManager', () => {
     });
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -118,7 +118,7 @@ describe('InterceptDisplayManager', () => {
     });
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -127,7 +127,7 @@ describe('InterceptDisplayManager', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeNull();
 
-    await user.click(screen.getByTestId('productInterceptDismiss'));
+    await user.click(screen.getByTestId('productInterceptDismissButton'));
 
     expect(ackProductIntercept).toHaveBeenCalledWith({
       ackType: 'dismissed',
@@ -198,7 +198,7 @@ describe('InterceptDisplayManager', () => {
     const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
 
     render(
-      <InterceptDisplayManager
+      <InterceptDisplayManagerMemoized
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
         staticAssetsHelper={staticAssetsHelperMock}
@@ -221,7 +221,153 @@ describe('InterceptDisplayManager', () => {
         runId: 1,
         stepId: 'hello',
         stepResponse: 'louie',
+        interceptId: '1',
       })
     );
+  });
+
+  it('provides each step content with a responseMap containing only responses from previous steps', async () => {
+    const user = userEvent.setup();
+    const ackProductIntercept = jest.fn();
+
+    const capturedResponseMaps: Record<string, Record<string, unknown>> = {};
+
+    const productIntercept: Intercept = {
+      id: '1',
+      runId: 1,
+      steps: [
+        {
+          id: 'start',
+          title: 'Welcome',
+          content: ({ responseMap }) => {
+            capturedResponseMaps.start = { ...responseMap };
+            return <p>{'Welcome screen'}</p>;
+          },
+        },
+        {
+          id: 'step-1',
+          title: 'Step 1',
+          content: ({ onValue, responseMap }) => {
+            capturedResponseMaps['step-1'] = { ...responseMap };
+            return <button onClick={() => onValue('answer-1')}>{'Submit Step 1'}</button>;
+          },
+        },
+        {
+          id: 'step-2',
+          title: 'Step 2',
+          content: ({ onValue, responseMap }) => {
+            capturedResponseMaps['step-2'] = { ...responseMap };
+            return <button onClick={() => onValue('answer-2')}>{'Submit Step 2'}</button>;
+          },
+        },
+        {
+          id: 'completion',
+          title: 'Thank you',
+          content: ({ responseMap }) => {
+            capturedResponseMaps.completion = { ...responseMap };
+            return <p>{'All done'}</p>;
+          },
+        },
+      ],
+      onProgress: jest.fn(),
+      onFinish: jest.fn(),
+    };
+
+    const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
+
+    render(
+      <InterceptDisplayManagerMemoized
+        ackIntercept={ackProductIntercept}
+        intercept$={intercept$.asObservable()}
+        staticAssetsHelper={staticAssetsHelperMock}
+      />
+    );
+
+    expect(capturedResponseMaps.start).toEqual({});
+
+    await user.click(screen.getByTestId('productInterceptProgressionButton'));
+
+    expect(capturedResponseMaps['step-1']).toEqual({});
+
+    await user.click(screen.getByText('Submit Step 1'));
+
+    await waitFor(() => {
+      expect(capturedResponseMaps['step-2']).toEqual({
+        'step-1': 'answer-1',
+      });
+    });
+
+    await user.click(screen.getByText('Submit Step 2'));
+
+    await waitFor(() => {
+      expect(capturedResponseMaps.completion).toEqual({
+        'step-1': 'answer-1',
+        'step-2': 'answer-2',
+      });
+    });
+  });
+
+  it('completes the intercept when onValue is called on the last step', async () => {
+    const user = userEvent.setup();
+    const ackProductIntercept = jest.fn();
+    const onFinish = jest.fn();
+    const onProgress = jest.fn();
+
+    const productIntercept: Intercept = {
+      id: '1',
+      runId: 1,
+      steps: [
+        {
+          id: 'start',
+          title: 'Welcome',
+          content: () => <p>{'Welcome screen'}</p>,
+        },
+        {
+          id: 'step-1',
+          title: 'Step 1',
+          content: ({ onValue }) => (
+            <button onClick={() => onValue('answer-1')}>{'Submit Step 1'}</button>
+          ),
+        },
+        {
+          id: 'completion',
+          title: 'Thank you',
+          content: ({ onValue }) => <button onClick={() => onValue(null)}>{'Maybe later'}</button>,
+        },
+      ],
+      onProgress,
+      onFinish,
+    };
+
+    const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
+
+    render(
+      <InterceptDisplayManagerMemoized
+        ackIntercept={ackProductIntercept}
+        intercept$={intercept$.asObservable()}
+        staticAssetsHelper={staticAssetsHelperMock}
+      />
+    );
+
+    await user.click(screen.getByTestId('productInterceptProgressionButton'));
+    await user.click(screen.getByText('Submit Step 1'));
+    await user.click(screen.getByText('Maybe later'));
+
+    await waitFor(() => {
+      expect(onFinish).toHaveBeenCalledWith({
+        runId: 1,
+        interceptId: '1',
+        response: { 'step-1': 'answer-1' },
+      });
+    });
+
+    expect(onProgress).toHaveBeenCalledTimes(1);
+    expect(ackProductIntercept).toHaveBeenCalledWith({
+      ackType: 'completed',
+      interceptId: '1',
+      runId: 1,
+      interactionDuration: expect.any(Number),
+    });
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AppPluginSetupDependencies } from './types';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AppPluginSetupDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 
 export class FeatureFlagsExamplePlugin implements Plugin {

@@ -10,6 +10,8 @@ import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugi
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server';
 import { getReplacedByForPrivilege } from '@kbn/security-authorization-core';
 import { getMinimalPrivilegeId } from '@kbn/security-authorization-core-common';
+import type { RoleKibanaApplication } from '@kbn/security-plugin-types-common';
+import { RoleTransformErrorReason } from '@kbn/security-plugin-types-common';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { FeaturesPrivileges, Role } from '../../../common';
@@ -25,16 +27,13 @@ export type ElasticsearchRole = Pick<
   Role,
   'name' | 'description' | 'metadata' | 'transient_metadata'
 > & {
-  applications: Array<{
-    application: string;
-    privileges: string[];
-    resources: string[];
-  }>;
+  applications: RoleKibanaApplication[];
   cluster: Role['elasticsearch']['cluster'];
   remote_cluster: Role['elasticsearch']['remote_cluster'];
   indices: Role['elasticsearch']['indices'];
   remote_indices?: Role['elasticsearch']['remote_indices'];
   run_as: Role['elasticsearch']['run_as'];
+  global?: Role['elasticsearch']['global'];
 };
 
 const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
@@ -78,9 +77,19 @@ export function transformElasticsearchRoleToRole({
       indices: elasticsearchRole.indices,
       remote_indices: elasticsearchRole.remote_indices,
       run_as: elasticsearchRole.run_as,
+      ...(elasticsearchRole.global ? { global: elasticsearchRole.global } : {}),
     },
     kibana: kibanaTransformResult.success ? (kibanaTransformResult.value as Role['kibana']) : [],
-    _transform_error: [...(kibanaTransformResult.success ? [] : ['kibana'])],
+    _transform_error: [
+      ...(kibanaTransformResult.success
+        ? []
+        : [
+            {
+              reason: `kibana:${kibanaTransformResult.errorReason}`,
+              state: kibanaTransformResult.applications,
+            },
+          ]),
+    ],
     _unrecognized_applications: extractUnrecognizedApplicationNames(
       elasticsearchRole.applications,
       application
@@ -132,6 +141,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.RESERVED_PRIVILEGES_MIXED,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -148,6 +159,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.RESERVED_PRIVILEGES_WRONG_APP,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -163,6 +176,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.SPACE_PRIVILEGES_GLOBAL,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -180,6 +195,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.GLOBAL_PRIVILEGES_SPACE,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -200,6 +217,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.BASE_FEATURE_PRIVILEGES_MIXED,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -211,6 +230,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.GLOBAL_RESOURCE_MIXED,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -229,6 +250,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.INVALID_RESOURCE_FORMAT,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -236,6 +259,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   if (allResources.length !== getUniqueList(allResources).length) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.DUPLICATED_RESOURCES,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -257,6 +282,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.FEATURE_REQUIRES_ALL_SPACES,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -274,6 +301,8 @@ function transformRoleApplicationsToKibanaPrivileges({
   ) {
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.DISABLED_FEATURE_PRIVILEGES,
+      applications: roleKibanaApplications,
     };
   }
 
@@ -331,6 +360,8 @@ function transformRoleApplicationsToKibanaPrivileges({
     logger.error(`Error transforming Elasticsearch role: ${getDetailedErrorMessage(e)}`);
     return {
       success: false,
+      errorReason: RoleTransformErrorReason.TRANSFORMATION_EXCEPTION,
+      applications: roleKibanaApplications,
     };
   }
 }

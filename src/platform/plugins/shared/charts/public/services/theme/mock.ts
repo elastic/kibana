@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LIGHT_THEME, PartialTheme } from '@elastic/charts';
-import { ThemeService } from './theme';
+import type { PartialTheme } from '@elastic/charts';
+import { LIGHT_THEME } from '@elastic/charts';
+import type { ThemeService } from './theme';
 
 export const MOCK_SPARKLINE_THEME: PartialTheme = {
   lineSeriesStyle: {

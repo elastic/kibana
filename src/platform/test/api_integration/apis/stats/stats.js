@@ -25,6 +25,7 @@ const processSchema = schema.object({
     percentiles: schema.object({
       50: schema.number(),
       75: schema.number(),
+      90: schema.number(),
       95: schema.number(),
       99: schema.number(),
     }),
@@ -99,8 +100,8 @@ const baseResponseSchema = schema.object({
     ),
     cgroup_memory: schema.maybe(
       schema.object({
-        current_in_bytes: schema.number(),
-        swap_current_in_bytes: schema.number(),
+        current_bytes: schema.number(),
+        swap_current_bytes: schema.number(),
       })
     ),
   }),

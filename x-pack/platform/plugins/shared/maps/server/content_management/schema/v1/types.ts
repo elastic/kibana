@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  mapAttributesSchema,
+import type { z } from '@kbn/zod';
+import type {
   mapsGetResultSchema,
   mapsCreateOptionsSchema,
   mapsCreateResultSchema,
@@ -15,12 +14,10 @@ import {
   mapsUpdateOptionsSchema,
 } from './cm_services';
 
-export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
+export type MapsCreateOptions = z.output<typeof mapsCreateOptionsSchema>;
+export type MapsUpdateOptions = z.output<typeof mapsUpdateOptionsSchema>;
+export type MapsSearchOptions = z.output<typeof mapsSearchOptionsSchema>;
 
-export type MapsCreateOptions = TypeOf<typeof mapsCreateOptionsSchema>;
-export type MapsUpdateOptions = TypeOf<typeof mapsUpdateOptionsSchema>;
-export type MapsSearchOptions = TypeOf<typeof mapsSearchOptionsSchema>;
-
-export type MapsGetOut = TypeOf<typeof mapsGetResultSchema>;
-export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
-export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
+export type MapsGetOut = z.output<typeof mapsGetResultSchema>;
+export type MapsCreateOut = z.output<typeof mapsCreateResultSchema>;
+export type MapsUpdateOut = z.output<typeof mapsCreateResultSchema>;

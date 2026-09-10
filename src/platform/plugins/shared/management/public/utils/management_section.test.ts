@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ManagementSection, RegisterManagementSectionArgs } from './management_section';
+import type { RegisterManagementSectionArgs } from './management_section';
+import { ManagementSection } from './management_section';
 
 describe('ManagementSection', () => {
   const createSection = (
@@ -41,5 +42,28 @@ describe('ManagementSection', () => {
     app.disable();
 
     expect(section.getAppsEnabled().length).toEqual(0);
+  });
+
+  test('registerApp stores mainPaddingSize on ManagementApp', () => {
+    const section = createSection();
+    const app = section.registerApp({
+      id: 'no-padding-app',
+      title: 'No Padding',
+      mount: () => () => {},
+      mainPaddingSize: 'none',
+    });
+
+    expect(app.mainPaddingSize).toBe('none');
+  });
+
+  test('registerApp leaves mainPaddingSize undefined by default', () => {
+    const section = createSection();
+    const app = section.registerApp({
+      id: 'default-padding-app',
+      title: 'Default Padding',
+      mount: () => () => {},
+    });
+
+    expect(app.mainPaddingSize).toBeUndefined();
   });
 });

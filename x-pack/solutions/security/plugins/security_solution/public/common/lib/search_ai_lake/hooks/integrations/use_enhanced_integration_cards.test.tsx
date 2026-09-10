@@ -20,6 +20,7 @@ const mockCard = (name: string, categories?: string[]) =>
     description: 'description',
     icons: [],
     title: name,
+    titleLineClamp: 1,
     url: `/app/integrations/detail/${name}-1.0.0/overview`,
     integration: '',
     name,
@@ -117,6 +118,13 @@ describe('useEnhancedIntegrationCards', () => {
 
     expect(result.current.available).toHaveLength(0);
     expect(result.current.installed).toHaveLength(0);
+  });
+
+  it('should apply title line clamp', () => {
+    const mockIntegrationsList = [intA];
+    const { result } = renderHook(() => useEnhancedIntegrationCards(mockIntegrationsList));
+
+    expect(result.current.available[0].titleLineClamp).toBe(1);
   });
 
   it('should correctly apply custom display order', () => {

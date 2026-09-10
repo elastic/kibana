@@ -77,7 +77,7 @@ describe('SearchApplicationsList', () => {
     expect(wrapper.find(CreateSearchApplicationButton).prop('disabled')).toBeFalsy();
   });
 
-  it('renders with Search Applications data ', async () => {
+  it('renders with search applications data ', async () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 

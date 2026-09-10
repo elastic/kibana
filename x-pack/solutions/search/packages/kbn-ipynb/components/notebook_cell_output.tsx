@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 
-import { NotebookOutputType } from '../types';
+import type { NotebookOutputType } from '../types';
 import { isDefined, isDefinedAndHasValue, combineSource } from '../utils';
 
 export const NotebookCellOutput = ({ output }: { output: NotebookOutputType }) => {

@@ -14,11 +14,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AIForSOCConnectorSettingsManagement } from '../../connectorland/ai_for_soc_connector_settings_management';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
@@ -35,7 +35,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
-import { ManagementSettingsTabs } from './types';
+import type { ManagementSettingsTabs } from './types';
 import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 
 interface Props {
@@ -55,6 +55,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -66,8 +67,13 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
 
     const { data: connectors } = useLoadConnectors({
       http,
+      featureId: 'elastic_assistant',
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
 
@@ -163,7 +169,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
         `}
       >
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
-          <EuiListGroup flush>
+          <EuiListGroup>
             {tabs.map(({ id, label, onClick, isSelected }) => (
               <EuiListGroupItem
                 key={id}
@@ -171,7 +177,6 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
                 onClick={onClick}
                 data-test-subj={`settingsPageTab-${id}`}
                 isActive={isSelected}
-                size="s"
               />
             ))}
           </EuiListGroup>

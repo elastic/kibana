@@ -9,8 +9,9 @@
 
 import { format as formatUrl } from 'url';
 
-import supertest, { AgentOptions } from 'supertest';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { AgentOptions } from 'supertest';
+import supertest from 'supertest';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');

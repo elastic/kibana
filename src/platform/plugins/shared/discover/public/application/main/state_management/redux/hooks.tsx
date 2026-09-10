@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy } from 'lodash';
 import {
   type TypedUseSelectorHook,
   type ReactReduxContextValue,
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
+  createStoreHook,
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
-import React, { useMemo, createContext } from 'react';
+import React, { useMemo, createContext, useContext } from 'react';
+import defaultComparator from 'fast-deep-equal';
 import { useAdHocDataViews } from './runtime_state';
-import type { DiscoverInternalState, TabState } from './types';
+import type { DiscoverAppState, DiscoverInternalState, TabState } from './types';
 import {
   type TabActionPayload,
   type InternalStateDispatch,
@@ -28,11 +29,11 @@ import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
 
-const internalStateContext = createContext<ReactReduxContextValue>(
-  // Recommended approach for versions of Redux prior to v9:
-  // https://github.com/reduxjs/react-redux/issues/1565#issuecomment-867143221
-  null as unknown as ReactReduxContextValue
+const internalStateContext = createContext<ReactReduxContextValue<DiscoverInternalState> | null>(
+  null
 );
+
+const useInternalStateStore = createStoreHook(internalStateContext).withTypes<InternalStateStore>();
 
 export const InternalStateProvider = ({
   store,
@@ -43,11 +44,21 @@ export const InternalStateProvider = ({
   </ReduxProvider>
 );
 
-export const useInternalStateDispatch: () => InternalStateDispatch =
-  createDispatchHook(internalStateContext);
+export const useInternalStateDispatch =
+  createDispatchHook(internalStateContext).withTypes<InternalStateDispatch>();
 
-export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
-  createSelectorHook(internalStateContext);
+export const useInternalStateGetState = (): InternalStateStore['getState'] => {
+  const store = useInternalStateStore();
+  return store.getState;
+};
+
+export const useInternalStateSubscribe = (): InternalStateStore['subscribe'] => {
+  const store = useInternalStateStore();
+  return store.subscribe;
+};
+
+export const useInternalStateSelector =
+  createSelectorHook(internalStateContext).withTypes<DiscoverInternalState>();
 
 interface CurrentTabContextValue {
   currentTabId: string;
@@ -75,7 +86,7 @@ export const CurrentTabProvider = ({
 };
 
 export const useCurrentTabContext = () => {
-  const context = React.useContext(currentTabContext);
+  const context = useContext(currentTabContext);
 
   if (!context) {
     throw new Error('useCurrentTabContext must be used within a CurrentTabProvider');
@@ -84,10 +95,13 @@ export const useCurrentTabContext = () => {
   return context;
 };
 
-export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) => {
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, equalityFn) => {
   const { currentTabId } = useCurrentTabContext();
-  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)));
+  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)), equalityFn);
 };
+
+export const useAppStateSelector = <T,>(selector: (state: DiscoverAppState) => T): T =>
+  useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
 export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
   actionCreator: (params: TPayload) => TReturn
@@ -99,18 +113,9 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
-  const originalAdHocDataViews = useAdHocDataViews();
+  const adHocDataViews = useAdHocDataViews();
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
-    (state) => state.defaultProfileAdHocDataViewIds
-  );
-
   return useMemo(() => {
-    const managedDataViews = originalAdHocDataViews.filter(
-      ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
-    );
-    const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
-
-    return { savedDataViews, managedDataViews, adHocDataViews };
-  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews, savedDataViews]);
+    return { savedDataViews, adHocDataViews };
+  }, [adHocDataViews, savedDataViews]);
 };

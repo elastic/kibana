@@ -44,6 +44,14 @@ export interface CollectTelemetryDataParams {
   logger: Logger;
 }
 
+/**
+ * Params for the collection boundary only. Deliberately separate from
+ * `CollectTelemetryDataParams` so the individual query modules stay unaware of the flag.
+ */
+export interface CollectCasesTelemetryParams extends CollectTelemetryDataParams {
+  templatesEnabled: boolean;
+}
+
 export interface TypeLong {
   type: 'long';
 }
@@ -66,6 +74,29 @@ export interface AssigneesFilters {
   };
 }
 
+export interface ObservablesAggregationResult {
+  doc_count: number;
+  byDescription: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      byType: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+        }>;
+      };
+    }>;
+  };
+}
+
+export interface TotalWithMaxObservablesAggregationResult {
+  buckets: Array<{
+    key: number;
+    doc_count: number;
+  }>;
+}
+
 export interface FileAttachmentAggsResult {
   averageSize: {
     value: number;
@@ -73,26 +104,35 @@ export interface FileAttachmentAggsResult {
   topMimeTypes: Buckets<string>;
 }
 
+export interface CasesWithAlertsAggs {
+  withAlerts: {
+    doc_count: number;
+    byOwner: { buckets: Array<{ key: string; doc_count: number }> };
+  };
+}
+
+export interface CountsAndMaxAlertsAggRes {
+  by_owner: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      counts: AlertBuckets;
+      uniqueAlertCommentsCount: {
+        value: number;
+      };
+    }>;
+  };
+}
+
+export interface AlertCounts {
+  total: number;
+  daily: number;
+  weekly: number;
+  monthly: number;
+}
+
 export type FileAttachmentAggregationResults = Record<Owner, FileAttachmentAggsResult> &
   FileAttachmentAggsResult;
-
-export interface BucketsWithMaxOnCase {
-  buckets: Array<
-    {
-      doc_count: number;
-      key: string;
-    } & MaxBucketOnCaseAggregation
-  >;
-}
-
-export interface AttachmentFrameworkAggsResult {
-  externalReferenceTypes: BucketsWithMaxOnCase;
-  persistableReferenceTypes: BucketsWithMaxOnCase;
-}
-
-export type AttachmentAggregationResult = Record<Owner, AttachmentFrameworkAggsResult> & {
-  participants: Cardinality;
-} & AttachmentFrameworkAggsResult;
 
 export type CaseAggregationResult = Record<
   Owner,
@@ -100,16 +140,21 @@ export type CaseAggregationResult = Record<
     counts: Buckets;
     totalAssignees: ValueCount;
     assigneeFilters: AssigneesFilters;
+    observables: ObservablesAggregationResult;
+    totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
   }
 > & {
   assigneeFilters: AssigneesFilters;
   counts: Buckets;
   syncAlerts: Buckets;
+  extractObservables: Buckets;
+  observables: ObservablesAggregationResult;
   status: Buckets;
   users: Cardinality;
   tags: Cardinality;
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
+  totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
 };
 
 export interface Assignees {
@@ -118,17 +163,31 @@ export interface Assignees {
   totalWithAtLeastOne: number;
 }
 
-interface CommonAttachmentStats {
-  average: number;
-  maxOnACase: number;
+/**
+ * Per-type usage counts inside the unified attachment framework. Keyed by the
+ * sanitized unified attachment type name (dots replaced with underscores, e.g.
+ * `security_alert`). Replaces the legacy `persistableAttachments`/
+ * `externalAttachments` arrays and merges both attachment saved objects.
+ */
+export interface AttachmentTypeStats {
   total: number;
+  average: number;
 }
 
-export interface AttachmentStats extends CommonAttachmentStats {
-  type: string;
+export type AttachmentsByType = Record<string, AttachmentTypeStats>;
+
+/**
+ * Legacy (`cases-comments`) vs unified (`cases-attachments`) attachment
+ * counts. Counts are entity-aware (bulk alert/event
+ * attachments count by referenced id, not by document), matching how
+ * `attachmentsByType` totals are computed.
+ */
+export interface BySavedObjectStats {
+  legacy: { total: number };
+  unified: { total: number };
 }
 
-export interface FileAttachmentStats extends CommonAttachmentStats {
+export interface FileAttachmentStats {
   averageSize: number;
   topMimeTypes: Array<{
     name: string;
@@ -138,14 +197,18 @@ export interface FileAttachmentStats extends CommonAttachmentStats {
 
 export interface AttachmentFramework {
   attachmentFramework: {
-    externalAttachments: AttachmentStats[];
-    persistableAttachments: AttachmentStats[];
+    attachmentsByType: AttachmentsByType;
+    bySavedObject: BySavedObjectStats;
     files: FileAttachmentStats;
   };
 }
 
 export interface SolutionTelemetry extends Count, AttachmentFramework {
   assignees: Assignees;
+  totalWithAlerts: number;
+  status: Status;
+  observables: ObservablesTelemetry;
+  totalWithMaxObservables: number;
 }
 
 export interface Status {
@@ -160,6 +223,12 @@ export interface LatestDates {
   closedAt: string;
 }
 
+export interface ObservablesTelemetry {
+  manual: { default: number; custom: number };
+  auto: { default: number; custom: number };
+  total: number;
+}
+
 export interface CustomFieldsTelemetry {
   totalsByType: Record<string, number>;
   totals: number;
@@ -170,6 +239,70 @@ export interface CustomFieldsSolutionTelemetry {
   customFields: CustomFieldsTelemetry;
 }
 
+export interface TemplatesVersionPercentiles {
+  p50: number;
+  p90: number;
+  p99: number;
+}
+
+/**
+ * Sourced from `fieldCount`, counted before `$ref` resolution. Not comparable with the
+ * `fieldDefinitions` totals, which drop unresolvable refs.
+ */
+export interface TemplatesFieldCountTelemetry {
+  total: number;
+  max: number;
+  average: number;
+}
+
+/** Read from the indexed `fieldDefinitions` nested field, never from the YAML definition. */
+export interface TemplatesFieldTypesTelemetry {
+  totalsByControl: Record<string, number>;
+  totalsByType: Record<string, number>;
+}
+
+/**
+ * A case's template reference is mutable after creation, so these are current-state
+ * counts rather than created-from-a-template counts.
+ */
+export interface TemplatesCasesTelemetry {
+  withTemplate: Count;
+  withoutTemplate: Count;
+}
+
+/**
+ * Scoped to the latest version of each template, so version history cannot inflate it.
+ * `totalSoftDeleted` inverts the `deletedAt` condition; every other count excludes deleted.
+ */
+export interface TemplatesSolutionTelemetry {
+  total: number;
+  totalEnabled: number;
+  totalDisabled: number;
+  totalSoftDeleted: number;
+  totalMigratedFromV1: number;
+  versionPercentiles: TemplatesVersionPercentiles;
+  fieldCount: TemplatesFieldCountTelemetry;
+  fieldDefinitions: TemplatesFieldTypesTelemetry;
+  cases: TemplatesCasesTelemetry;
+}
+
+export interface TemplatesTelemetry {
+  featureEnabled: boolean;
+  all: TemplatesSolutionTelemetry;
+  sec: TemplatesSolutionTelemetry;
+  obs: TemplatesSolutionTelemetry;
+  main: TemplatesSolutionTelemetry;
+}
+
+export type CasesTelemetryConnectorKeys =
+  | 'itsm'
+  | 'sir'
+  | 'jira'
+  | 'resilient'
+  | 'swimlane'
+  | 'thehive'
+  | 'caseswebhook';
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -178,6 +311,10 @@ export interface CasesTelemetry {
         status: Status;
         syncAlertsOn: number;
         syncAlertsOff: number;
+        extractObservablesOn: number;
+        extractObservablesOff: number;
+        observables: ObservablesTelemetry;
+        totalWithMaxObservables: number;
         totalUsers: number;
         totalParticipants: number;
         totalTags: number;
@@ -191,15 +328,15 @@ export interface CasesTelemetry {
   };
   userActions: { all: Count & { maxOnACase: number } };
   comments: { all: Count & { maxOnACase: number } };
-  alerts: { all: Count & { maxOnACase: number } };
+  alerts: {
+    all: Count & { maxOnACase: number };
+    obs: Count & { maxOnACase: number };
+    sec: Count & { maxOnACase: number };
+    main: Count & { maxOnACase: number };
+  };
   connectors: {
-    all: {
+    all: Record<CasesTelemetryConnectorKeys, { totalAttached: number }> & {
       all: { totalAttached: number };
-      itsm: { totalAttached: number };
-      sir: { totalAttached: number };
-      jira: { totalAttached: number };
-      resilient: { totalAttached: number };
-      swimlane: { totalAttached: number };
       maxAttachedToACase: number;
     };
   };
@@ -222,14 +359,17 @@ export interface CasesTelemetry {
     totalCasesCreated: number;
     totalRules: number;
   };
+  templates: TemplatesTelemetry;
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
 export type StatusSchema = MakeSchemaFrom<Status>;
+export type ObservablesSchema = MakeSchemaFrom<ObservablesTelemetry>;
 export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;
 export type AssigneesSchema = MakeSchemaFrom<Assignees>;
 export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['attachmentFramework']>;
-export type AttachmentItemsSchema = MakeSchemaFrom<AttachmentStats>;
+export type AttachmentTypeStatsSchema = MakeSchemaFrom<AttachmentTypeStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
+export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;

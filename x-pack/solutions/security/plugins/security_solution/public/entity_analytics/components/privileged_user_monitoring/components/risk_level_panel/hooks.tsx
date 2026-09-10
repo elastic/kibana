@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -89,13 +89,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
 
   const inspect = useMemo(() => {
     return {
-      dsl: [
-        JSON.stringify(
-          { index: index ? [index] : [''], body: prettifyQuery(query, false) },
-          null,
-          2
-        ),
-      ],
+      dsl: [JSON.stringify({ index: index ? [index] : [''], body: prettifyQuery(query) }, null, 2)],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
   }, [index, query, response]);

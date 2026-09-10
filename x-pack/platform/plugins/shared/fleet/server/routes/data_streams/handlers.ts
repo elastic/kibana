@@ -6,9 +6,14 @@
  */
 import type { Dictionary } from 'lodash';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
-import type { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  MsearchRequestItem,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
@@ -18,7 +23,10 @@ import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import type { MeteringStats } from '../../services/data_streams';
 import { dataStreamService } from '../../services/data_streams';
-import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../constants';
+import {
+  DATA_STREAM_INDEX_PATTERN_REGEX,
+  MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+} from '../../constants';
 import { appContextService } from '../../services';
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -104,8 +112,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       dataStreamsStatsByName,
       dataStreamsMeteringStatsByName
     );
-    const dataStreamNames = keys(dataStreams);
-
+    // filter out data streams starting with ".", e.g. ".workflows-events"
+    const dataStreamNames = keys(dataStreams).filter((name) => !name.startsWith('.'));
     // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
@@ -135,15 +143,17 @@ export const getListHandler: RequestHandler = async (context, request, response)
       )
     );
     // Ignore dashboards not found
-    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
-      if (so.error) {
-        if (so.error.statusCode === 404) {
-          return false;
+    const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter(
+      (so): so is SavedObject<{ title?: string }> => {
+        if (isSavedObjectErrorResult(so)) {
+          if (so.error.statusCode === 404) {
+            return false;
+          }
+          throw so.error;
         }
-        throw so.error;
+        return true;
       }
-      return true;
-    });
+    );
 
     const allDashboardSavedObjectsById = keyBy(
       allDashboardSavedObjects,
@@ -254,6 +264,203 @@ export const getListHandler: RequestHandler = async (context, request, response)
         `Not enough permissions to query datastreams: ${err.message}`
       );
     }
+    throw err;
+  }
+};
+
+export const getDeprecatedILMCheckHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const { elasticsearch } = await context.core;
+    const esClient = elasticsearch.client.asCurrentUser;
+
+    //  Before doing anything, check if the ILM policies are disabled and return early if they are
+    const isILMPolicyDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+
+    if (isILMPolicyDisabled) {
+      return response.ok({
+        body: {
+          deprecatedILMPolicies: [],
+        },
+      });
+    }
+
+    const DEPRECATED_ILM_POLICY_TYPES = ['logs', 'metrics', 'synthetics'];
+
+    // Fetch all ILM policies
+    const ilmResponse = await esClient.ilm.getLifecycle();
+
+    // Check each deprecated policy type to see if we should show a callout
+    const deprecatedILMPolicies: Array<{
+      policyName: string;
+      version: number;
+      componentTemplates: string[];
+    }> = [];
+
+    for (const policyType of DEPRECATED_ILM_POLICY_TYPES) {
+      const deprecatedPolicyName = policyType;
+      const lifecyclePolicyName = `${policyType}@lifecycle`;
+
+      const deprecatedPolicy = ilmResponse[deprecatedPolicyName];
+      const lifecyclePolicy = ilmResponse[lifecyclePolicyName];
+
+      // Skip if deprecated policy doesn't exist
+      if (!deprecatedPolicy) {
+        continue;
+      }
+
+      // Fetch Fleet-managed component templates for this policy type
+      const componentTemplateResponse = await esClient.cluster.getComponentTemplate(
+        {
+          name: `${policyType}-*@package`,
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      // Filter component templates that actually use the deprecated policy
+      const fleetManagedTemplates = (componentTemplateResponse.component_templates || [])
+        .filter((template) => {
+          const ilmPolicyName =
+            template.component_template?.template?.settings?.index?.lifecycle?.name;
+          return ilmPolicyName === deprecatedPolicyName;
+        })
+        .map((template) => template.name);
+
+      // If no Fleet-managed component templates are using this deprecated policy, skip
+      if (fleetManagedTemplates.length === 0) {
+        continue;
+      }
+
+      if (!lifecyclePolicy) {
+        deprecatedILMPolicies.push({
+          policyName: deprecatedPolicyName,
+          version: deprecatedPolicy.version,
+          componentTemplates: fleetManagedTemplates,
+        });
+        continue;
+      }
+
+      // Don't show callout if both are unmodified (version 1) - auto-migration will happen
+      if (deprecatedPolicy.version === 1 && lifecyclePolicy.version === 1) {
+        // Both unmodified, auto-migration will handle this, skip
+        continue;
+      }
+
+      if (deprecatedPolicy.version > 1 || lifecyclePolicy.version > 1) {
+        deprecatedILMPolicies.push({
+          policyName: deprecatedPolicyName,
+          version: deprecatedPolicy.version,
+          componentTemplates: fleetManagedTemplates,
+        });
+      }
+    }
+
+    return response.ok({
+      body: {
+        deprecatedILMPolicies,
+      },
+    });
+  } catch (err) {
+    const isResponseError = err instanceof errors.ResponseError;
+    if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      throw new FleetUnauthorizedError(
+        `Not enough permissions to query ILM policies: ${err.message}`
+      );
+    }
+    throw err;
+  }
+};
+
+/**
+ * True when an ES error is (or wraps) a `security_exception`. The type can sit at the top level or
+ * be nested under `root_cause` when the failure is wrapped by a search phase exception.
+ */
+function isSecurityException(error: any): boolean {
+  if (!error) return false;
+  if (error.type === 'security_exception') return true;
+  return (error.root_cause ?? []).some((c: { type?: string }) => c.type === 'security_exception');
+}
+
+export const getHasDataHandler: RequestHandler = async (context, request, response) => {
+  const { dataStreams: dataStreamsParam, start } = request.query as {
+    dataStreams: string;
+    start: string;
+  };
+  const patterns = dataStreamsParam.split(',').map((p: string) => p.trim());
+
+  const invalidPattern = patterns.find((p: string) => !DATA_STREAM_INDEX_PATTERN_REGEX.test(p));
+  if (invalidPattern) {
+    return response.badRequest({
+      body: { message: `Invalid index pattern: "${invalidPattern}"` },
+    });
+  }
+
+  const { elasticsearch } = await context.core;
+  const esClient = elasticsearch.client.asCurrentUser;
+
+  const searches: MsearchRequestItem[] = patterns.flatMap((pattern: string) => [
+    { index: pattern, ignore_unavailable: true, allow_partial_search_results: true },
+    {
+      size: 0,
+      terminate_after: 1,
+      track_total_hits: 1,
+      query: { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } },
+    },
+  ]);
+
+  try {
+    const msearchResponse = await esClient.msearch({ searches });
+    const results: Record<string, boolean> = {};
+
+    patterns.forEach((pattern: string, i: number) => {
+      const hit = msearchResponse.responses[i];
+      if ('error' in hit) {
+        // msearch reports a per-index failure on the response item rather than throwing, so an
+        // access denial arrives here. Surface it as 403 instead of reporting "no data" — a
+        // silent `false` would leave callers polling forever with no sign of the real problem.
+        if (isSecurityException(hit.error)) {
+          throw new FleetUnauthorizedError(
+            `Not enough permissions to query data stream "${pattern}"`
+          );
+        }
+        results[pattern] = false;
+      } else {
+        results[pattern] = ((hit.hits.total as SearchTotalHits)?.value ?? 0) > 0;
+      }
+    });
+
+    return response.ok({ body: { results } });
+  } catch (err) {
+    if (err instanceof FleetUnauthorizedError) {
+      throw err;
+    }
+
+    const isResponseError = err instanceof errors.ResponseError;
+
+    if (isResponseError && isSecurityException(err?.body?.error)) {
+      throw new FleetUnauthorizedError(
+        `Not enough permissions to query data streams: ${err.message}`
+      );
+    }
+
+    // "No shards available" and "no data yet" are the same answer for the caller — a data stream
+    // that exists but has not been written to yet can report this.
+    const isNoShards =
+      isResponseError &&
+      err?.body?.error?.type === 'search_phase_execution_exception' &&
+      (err?.body?.error?.root_cause ?? []).some(
+        (c: { type?: string }) => c.type === 'no_shard_available_action_exception'
+      );
+    if (isNoShards) {
+      const results: Record<string, boolean> = {};
+      patterns.forEach((p: string) => {
+        results[p] = false;
+      });
+      return response.ok({ body: { results } });
+    }
+
     throw err;
   }
 };

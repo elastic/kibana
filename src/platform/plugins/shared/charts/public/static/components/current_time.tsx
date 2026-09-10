@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment, { Moment } from 'moment';
-import React, { FC } from 'react';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { FC } from 'react';
+import React from 'react';
 
-import { LineAnnotation, AnnotationDomainType, LineAnnotationStyle } from '@elastic/charts';
+import type { LineAnnotationStyle } from '@elastic/charts';
+import { LineAnnotation, AnnotationDomainType } from '@elastic/charts';
 import { euiLightVars as lightEuiTheme, euiDarkVars as darkEuiTheme } from '@kbn/ui-theme';
 
 interface CurrentTimeProps {

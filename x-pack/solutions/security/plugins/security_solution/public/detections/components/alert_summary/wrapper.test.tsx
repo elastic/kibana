@@ -17,28 +17,49 @@ import {
   Wrapper,
 } from './wrapper';
 import { TestProviders } from '../../../common/mock';
-import { useIntegrationsLastActivity } from '../../hooks/alert_summary/use_integrations_last_activity';
+import { useIntegrationLastAlertIngested } from '../../hooks/alert_summary/use_integration_last_alert_ingested';
 import { ADD_INTEGRATIONS_BUTTON_TEST_ID } from './integrations/integration_section';
 import { SEARCH_BAR_TEST_ID } from './search_bar/search_bar_section';
 import { KPIS_SECTION } from './kpis/kpis_section';
 import { GROUPED_TABLE_TEST_ID } from './table/table_section';
 import { useNavigateToIntegrationsPage } from '../../hooks/alert_summary/use_navigate_to_integrations_page';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useKibana } from '../../../common/lib/kibana';
+import { useCreateEaseAlertsDataView } from '../../hooks/alert_summary/use_create_data_view';
 
-jest.mock('../../../common/components/search_bar', () => ({
-  // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-  SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
-}));
-jest.mock('../alerts_table/alerts_grouping', () => ({
-  GroupedAlertsTable: () => <div />,
-}));
+// The child sections render heavy chart/table trees whose async data hooks never settle within
+// the per-test timeout, so we stub them and exercise only the Wrapper's loading/error/content branching.
+jest.mock('./integrations/integration_section', () => {
+  const actual = jest.requireActual('./integrations/integration_section');
+  return {
+    ...actual,
+    IntegrationSection: () => <div data-test-subj={actual.ADD_INTEGRATIONS_BUTTON_TEST_ID} />,
+  };
+});
+jest.mock('./search_bar/search_bar_section', () => {
+  const actual = jest.requireActual('./search_bar/search_bar_section');
+  return {
+    ...actual,
+    SearchBarSection: () => <div data-test-subj={actual.SEARCH_BAR_TEST_ID} />,
+  };
+});
+jest.mock('./kpis/kpis_section', () => {
+  const actual = jest.requireActual('./kpis/kpis_section');
+  return {
+    ...actual,
+    KPIsSection: () => <div data-test-subj={actual.KPIS_SECTION} />,
+  };
+});
+jest.mock('./table/table_section', () => {
+  const actual = jest.requireActual('./table/table_section');
+  return {
+    ...actual,
+    TableSection: () => <div data-test-subj={actual.GROUPED_TABLE_TEST_ID} />,
+  };
+});
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../hooks/alert_summary/use_navigate_to_integrations_page');
-jest.mock('../../hooks/alert_summary/use_integrations_last_activity');
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../common/hooks/use_create_data_view');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../hooks/alert_summary/use_integration_last_alert_ingested');
+jest.mock('../../hooks/alert_summary/use_create_data_view');
 
 const packages: PackageListItem[] = [
   {
@@ -49,147 +70,63 @@ const packages: PackageListItem[] = [
     version: '',
   },
 ];
-const ruleResponse = {
-  rules: [],
-  isLoading: false,
-};
 
 describe('<Wrapper />', () => {
-  describe('when the newDataViewPickerEnabled feature flag is not enabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+  it('should render a loading skeleton while creating the dataView', async () => {
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: true,
     });
 
-    it('should render a loading skeleton while creating the dataView', async () => {
-      (useCreateDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        loading: true,
-      });
+    render(<Wrapper packages={packages} />);
 
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-      });
-    });
-
-    it('should render an error if the dataView fail to be created correctly', async () => {
-      (useCreateDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        loading: false,
-      });
-
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to create data view'
-      );
-    });
-
-    it('should render the content if the dataView is created correctly', async () => {
-      (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
-      (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
-        isLoading: true,
-        lastActivities: {},
-      });
-      (useCreateDataView as jest.Mock).mockReturnValue({
-        dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
-        loading: false,
-      });
-
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(
-        <TestProviders>
-          <Wrapper packages={packages} ruleResponse={ruleResponse} />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(KPIS_SECTION)).toBeInTheDocument();
-      expect(await screen.findByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
     });
   });
 
-  describe('when the newDataViewPickerEnabled feature flag is enabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('should render an error if the dataView fail to be created correctly', async () => {
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: false,
     });
 
-    it('should render a loading skeleton while creating the dataView', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        status: 'loading',
-      });
+    render(<Wrapper packages={packages} />);
 
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to create data view'
+    );
+  });
 
-      await waitFor(() => {
-        expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-      });
+  it('should render the content if the dataView is created correctly', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+      },
+    });
+    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
+      isLoading: true,
+      lastAlertIngested: {},
+    });
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
+      loading: false,
     });
 
-    it('should render an error if the dataView fail to be created correctly', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        status: 'ready',
-      });
+    render(
+      <TestProviders>
+        <Wrapper packages={packages} />
+      </TestProviders>
+    );
 
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to create data view'
-      );
-    });
-
-    it('should render the content if the dataView is created correctly', async () => {
-      (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
-      (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
-        isLoading: true,
-        lastActivities: {},
-      });
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
-        status: 'ready',
-      });
-
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(
-        <TestProviders>
-          <Wrapper packages={packages} ruleResponse={ruleResponse} />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(KPIS_SECTION)).toBeInTheDocument();
-      expect(await screen.findByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(KPIS_SECTION)).toBeInTheDocument();
+    expect(await screen.findByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
   });
 });

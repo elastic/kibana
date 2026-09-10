@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ColorMapping, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
+import type { ColorMapping } from '@kbn/coloring';
 import { isEqual } from 'lodash';
 import { KbnPalette } from '@kbn/palettes';
+import { getOtherAssignmentColor } from '@kbn/coloring/src/shared_components/color_mapping/config/utils';
 import { nonNullable } from '../utils';
 
 const COLOR_MAPPING_PREFIX = 'color_mapping_';
@@ -33,7 +34,11 @@ export const getColorMappingTelemetryEvents = (
   const gradientData =
     colorMode.type === 'gradient' && prevColorMode?.type !== 'gradient' ? `gradient` : undefined;
 
-  const unassignedTermsType = getUnassignedTermsType(specialAssignments, prevSpecialAssignments);
+  const unassignedTermsType = getUnassignedTermsType(
+    assignments,
+    specialAssignments,
+    prevSpecialAssignments
+  );
 
   const diffData = [gradientData, paletteData, unassignedTermsType].filter(nonNullable);
 
@@ -74,17 +79,18 @@ function getRangeText(n: number, min = 2, max = 16) {
 }
 
 const getUnassignedTermsType = (
+  assignments: ColorMapping.Config['assignments'],
   specialAssignments: ColorMapping.Config['specialAssignments'],
   prevSpecialAssignments?: ColorMapping.Config['specialAssignments']
 ) => {
+  const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
   return !isEqual(prevSpecialAssignments, specialAssignments)
     ? `unassigned_terms_${
-        specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'colorCode'
-          ? 'custom'
-          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'loop'
+        otherColor.isLoop
           ? 'loop'
-          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
-            KbnPalette.Neutral
+          : otherColor.color.type === 'colorCode'
+          ? 'custom'
+          : otherColor.color.paletteId === KbnPalette.Neutral
           ? KbnPalette.Neutral
           : 'palette'
       }`

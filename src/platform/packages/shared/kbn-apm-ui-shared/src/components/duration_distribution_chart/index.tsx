@@ -40,12 +40,12 @@ import { useChartThemes } from '../../hooks/use_chart_theme';
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
 const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
-  'kbnApmUiShared.durationDistributionChart.numberOfTransactionsLabel',
+  'apmUiShared.durationDistributionChart.numberOfTransactionsLabel',
   { defaultMessage: 'Transactions' }
 );
 
 const NUMBER_OF_SPANS_LABEL = i18n.translate(
-  'kbnApmUiShared.durationDistributionChart.numberOfSpansLabel',
+  'apmUiShared.durationDistributionChart.numberOfSpansLabel',
   { defaultMessage: 'Spans' }
 );
 
@@ -69,6 +69,7 @@ interface DurationDistributionChartProps {
   showAxisTitle?: boolean;
   showLegend?: boolean;
   isOtelData?: boolean;
+  'data-test-subj'?: string;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -112,7 +113,7 @@ export function DurationDistributionChart({
   loading,
   hasError,
   eventType,
-  dataTestSubPrefix,
+  'data-test-subj': dataTestSubj,
   showAxisTitle = true,
   showLegend = true,
   isOtelData = false,
@@ -125,7 +126,7 @@ export function DurationDistributionChart({
     () => [
       {
         dataValue: markerValue,
-        details: i18n.translate('kbnApmUiShared.durationDistributionChart.percentileMarkerLabel', {
+        details: i18n.translate('apmUiShared.durationDistributionChart.percentileMarkerLabel', {
           defaultMessage: '{markerPercentile}th percentile',
           values: {
             markerPercentile,
@@ -184,10 +185,7 @@ export function DurationDistributionChart({
   );
 
   return (
-    <div
-      data-test-subj={dataTestSubPrefix + 'CorrelationsChart'}
-      style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-    >
+    <div data-test-subj={dataTestSubj} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
       <ChartContainer height={250} hasData={hasData} loading={loading} hasError={hasError}>
         <Chart>
           <Settings
@@ -248,7 +246,7 @@ export function DurationDistributionChart({
                 {
                   dataValue: markerCurrentEvent,
                   details: i18n.translate(
-                    'kbnApmUiShared.durationDistributionChart.currentEventMarkerLabel',
+                    'apmUiShared.durationDistributionChart.currentEventMarkerLabel',
                     {
                       defaultMessage: 'Current sample',
                     }
@@ -257,7 +255,7 @@ export function DurationDistributionChart({
               ]}
               style={getAnnotationsStyle(euiPaletteColorBlind()[0])}
               marker={i18n.translate(
-                'kbnApmUiShared.durationDistributionChart.currentEventMarkerLabel',
+                'apmUiShared.durationDistributionChart.currentEventMarkerLabel',
                 {
                   defaultMessage: 'Current sample',
                 }
@@ -277,7 +275,7 @@ export function DurationDistributionChart({
             id="x-axis"
             title={
               showAxisTitle
-                ? i18n.translate('kbnApmUiShared.durationDistributionChart.latencyLabel', {
+                ? i18n.translate('apmUiShared.durationDistributionChart.latencyLabel', {
                     defaultMessage: 'Latency',
                   })
                 : ''

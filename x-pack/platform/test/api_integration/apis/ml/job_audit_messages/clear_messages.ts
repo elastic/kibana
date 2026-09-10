@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getJobConfig } from '.';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('clear_messages', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       for (const jobConfig of getJobConfig(2)) {
@@ -122,6 +122,21 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(200, getStatus, getBody);
 
       expect(getBody.messages[0].cleared).to.not.eql(true);
+    });
+
+    it('should reject invalid notification indices', async () => {
+      const { body, status } = await supertest
+        .put(`/internal/ml/job_audit_messages/clear_messages`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(getCommonRequestHeader('1'))
+        .send({
+          jobId: 'test_get_job_audit_messages_1',
+          notificationIndices: ['not-a-notification-index'],
+        });
+      ml.api.assertResponseStatusCode(400, status, body);
+
+      expect(body.error).to.eql('Bad Request');
+      expect(body.message).to.eql('Invalid notification index: not-a-notification-index');
     });
   });
 };

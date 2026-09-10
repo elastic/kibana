@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   MappingTypeMapping,
   MappingProperty,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
-import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
+import type { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 export interface DataStreamMappingResponse {
   fieldCount: number;
@@ -46,7 +46,7 @@ export async function getDataStreamMapping({
   const fieldMapping = fieldPresent
     ? {
         type: mapping?.type,
-        ignore_above: (mapping as any)?.ignore_above,
+        ...('ignore_above' in mapping ? { ignore_above: mapping.ignore_above } : {}),
       }
     : undefined;
 
@@ -69,7 +69,7 @@ function countFields(
   mappings: Record<PropertyName, MappingProperty>,
   captureField?: string,
   prefix = ''
-): { count: number; capturedMapping?: any } {
+): { count: number; capturedMapping?: MappingProperty } {
   let fieldCount = 0;
   let capturedMapping;
 

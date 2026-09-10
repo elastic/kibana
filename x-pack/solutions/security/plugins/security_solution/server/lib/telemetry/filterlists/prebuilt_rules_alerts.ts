@@ -49,6 +49,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.rule.updated_at': true,
   'kibana.alert.rule.uuid': true,
   'kibana.alert.rule.version': true,
+  'kibana.alert.rule.parameters': {
+    rule_source: true,
+  },
   'kibana.alert.severity': true,
   'kibana.alert.status': true,
   'kibana.alert.uuid': true,

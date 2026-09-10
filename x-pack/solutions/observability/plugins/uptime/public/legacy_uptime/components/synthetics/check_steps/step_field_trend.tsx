@@ -9,11 +9,12 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
-import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
+import { useSelector } from 'react-redux-v7';
+import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 import { selectDynamicSettings } from '../../../state/selectors';
 
@@ -74,7 +75,7 @@ export function StepFieldTrend({
         appendTitle={
           <EuiButton
             data-test-subj="syntheticsStepFieldTrendButton"
-            iconType={'visArea'}
+            iconType={'chartArea'}
             href={href}
             target="_blank"
             size="s"

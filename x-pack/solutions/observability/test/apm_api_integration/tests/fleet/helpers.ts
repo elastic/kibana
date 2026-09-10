@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PackagePolicy, NewPackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
-import { BetterTest } from '../../common/bettertest';
+import type { PackagePolicy, NewPackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { BetterTest } from '../../common/bettertest';
 
 export function setupFleet(bettertest: BetterTest) {
   return bettertest({ pathname: '/api/fleet/setup', method: 'post' });
@@ -51,7 +51,7 @@ export async function createPackagePolicy({
   const apmPackageResponse = await bettertest<{ item: any }>({
     pathname: `/api/fleet/epm/packages/apm`,
   });
-  const apmPackageVersion = apmPackageResponse.body.item.version;
+  const apmPackageVersion = apmPackageResponse?.body?.item?.version ?? 'latest';
 
   // Create package policy for APM attached to given agent policy id
   const packagePolicyResponse = await bettertest<{ item: NewPackagePolicy }>({
@@ -97,6 +97,38 @@ export async function getPackagePolicy(
   return res.body.item;
 }
 
+export async function updatePackagePolicy(
+  bettertest: BetterTest,
+  packagePolicyId: string,
+  body: Partial<NewPackagePolicy>
+) {
+  const current = await getPackagePolicy(bettertest, packagePolicyId);
+
+  // Strip PackagePolicy-only fields that the PUT endpoint rejects.
+  const {
+    id: _id,
+    revision: _revision,
+    updated_at: _updatedAt,
+    updated_by: _updatedBy,
+    created_at: _createdAt,
+    created_by: _createdBy,
+    elasticsearch: _elasticsearch,
+    ...base
+  } = current as any;
+
+  // Strip compiled_input / compiled_stream from inputs.
+  const cleanInputs = base.inputs.map(({ compiled_input: _ci, ...input }: any) => ({
+    ...input,
+    streams: (input.streams ?? []).map(({ compiled_stream: _cs, ...stream }: any) => stream),
+  }));
+
+  return bettertest({
+    pathname: `/api/fleet/package_policies/${packagePolicyId}`,
+    method: 'put',
+    body: { ...base, inputs: cleanInputs, ...body },
+  });
+}
+
 async function getAgentPolicyByName(bettertest: BetterTest, name: string): Promise<PackagePolicy> {
   const res = await bettertest<{ items: PackagePolicy[] }>({
     pathname: `/api/fleet/agent_policies`,
@@ -122,10 +154,12 @@ export async function deleteAgentPolicyAndPackagePolicyByName({
   const agentPolicyId = agentPolicy.id;
   // @ts-expect-error
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
-  const packagePolicyId = packagePolicies.find(
-    (packagePolicy) => packagePolicy.name === packagePolicyName
-  )!.id;
+  const packagePolicyId = packagePolicies.find((packagePolicy) => {
+    return packagePolicy.name === packagePolicyName;
+  })?.id;
 
   await deleteAgentPolicy(bettertest, agentPolicyId);
-  await deletePackagePolicy(bettertest, packagePolicyId);
+  if (packagePolicyId) {
+    await deletePackagePolicy(bettertest, packagePolicyId);
+  }
 }

@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { Subject } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ServiceStatusLevels, ServiceStatus } from '@kbn/core-status-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { logOverallStatusChanges } from './log_overall_status';
-
-const delay = async (millis: number = 10) =>
-  await new Promise((resolve) => setTimeout(resolve, millis));
 
 describe('logOverallStatusChanges', () => {
   let overall$: Subject<ServiceStatus>;
@@ -45,13 +44,13 @@ describe('logOverallStatusChanges', () => {
 
     overall$.next({ level: ServiceStatusLevels.unavailable, summary: 'Initializing . . .' });
 
-    await delay();
+    await timer(10);
 
-    expect(l.get).not.toBeCalled();
-    expect(l.info).not.toBeCalled();
-    expect(l.warn).not.toBeCalled();
-    expect(l.error).toBeCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.get).not.toHaveBeenCalled();
+    expect(l.info).not.toHaveBeenCalled();
+    expect(l.warn).not.toHaveBeenCalled();
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
   });
 
   it('emits a new message every time the status level changes', async () => {
@@ -65,18 +64,18 @@ describe('logOverallStatusChanges', () => {
     overall$.next({ level: ServiceStatusLevels.degraded, summary: 'Waiting for ES indices' });
     overall$.next({ level: ServiceStatusLevels.available, summary: 'Ready!' });
 
-    await delay();
+    await timer(10);
 
-    expect(l.get).not.toBeCalled();
-    expect(l.error).toBeCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
-    expect(l.warn).toBeCalledTimes(1);
-    expect(l.warn).nthCalledWith(
+    expect(l.get).not.toHaveBeenCalled();
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.warn).toHaveBeenCalledTimes(1);
+    expect(l.warn).toHaveBeenNthCalledWith(
       1,
       'Kibana is now degraded (was unavailable): Waiting for ES indices'
     );
-    expect(l.info).toBeCalledTimes(1);
-    expect(l.info).nthCalledWith(1, 'Kibana is now available (was degraded)');
+    expect(l.info).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenNthCalledWith(1, 'Kibana is now available (was degraded)');
   });
 
   it('does not emit when the status stays the same', async () => {
@@ -93,18 +92,18 @@ describe('logOverallStatusChanges', () => {
     overall$.next({ level: ServiceStatusLevels.degraded, summary: 'Waiting (attempt #4)' });
     overall$.next({ level: ServiceStatusLevels.available, summary: 'Ready!' });
 
-    await delay();
+    await timer(10);
 
-    expect(l.get).not.toBeCalled();
-    expect(l.error).toBeCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
-    expect(l.warn).toBeCalledTimes(1);
-    expect(l.warn).nthCalledWith(
+    expect(l.get).not.toHaveBeenCalled();
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.warn).toHaveBeenCalledTimes(1);
+    expect(l.warn).toHaveBeenNthCalledWith(
       1,
       'Kibana is now degraded (was unavailable): Waiting for ES indices'
     );
-    expect(l.info).toBeCalledTimes(1);
-    expect(l.info).nthCalledWith(1, 'Kibana is now available (was degraded)');
+    expect(l.info).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenNthCalledWith(1, 'Kibana is now available (was degraded)');
   });
 
   it('stops emitting once `stop$` emits', async () => {
@@ -122,12 +121,12 @@ describe('logOverallStatusChanges', () => {
     overall$.next({ level: ServiceStatusLevels.degraded, summary: 'Waiting (attempt #4)' });
     overall$.next({ level: ServiceStatusLevels.available, summary: 'Ready!' });
 
-    await delay();
+    await timer(10);
 
-    expect(l.get).not.toBeCalled();
-    expect(l.error).toBeCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
-    expect(l.warn).not.toBeCalled();
-    expect(l.info).not.toBeCalled();
+    expect(l.get).not.toHaveBeenCalled();
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.warn).not.toHaveBeenCalled();
+    expect(l.info).not.toHaveBeenCalled();
   });
 });

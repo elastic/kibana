@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor } from '@kbn/core/server';
-import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 import { getEssqlFn } from '../../../common/search/expressions/essql';
 
 /**
@@ -34,9 +34,10 @@ export function getEssql({
       const [{ savedObjects, uiSettings }, , { search }] = await getStartServices();
       const request = getKibanaRequest();
       const savedObjectsClient = savedObjects.getScopedClient(request);
+      const scopedClient = search.asScoped(request);
 
       return {
-        search: search.asScoped(request).search,
+        searchService: scopedClient,
         uiSettings: uiSettings.asScopedToClient(savedObjectsClient),
       };
     },

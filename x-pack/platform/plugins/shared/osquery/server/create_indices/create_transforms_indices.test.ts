@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { actionsMapping } from './actions_mapping';
 import { actionResponsesMapping } from './action_responses_mapping';
 import {
@@ -111,6 +109,7 @@ function makeEsIndexMappings(
       '@timestamp': { type: 'date' },
       action_id: { ignore_above: 1024, type: 'keyword' },
       user_id: { ignore_above: 1024, type: 'keyword' },
+      user_profile_uid: { ignore_above: 1024, type: 'keyword' },
       expiration: { type: 'date' },
       event: {
         properties: {
@@ -124,6 +123,7 @@ function makeEsIndexMappings(
         ...((overrides.event as any) || {}),
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
+      tags: { ignore_above: 256, type: 'keyword' },
       ...overrides,
     },
   };

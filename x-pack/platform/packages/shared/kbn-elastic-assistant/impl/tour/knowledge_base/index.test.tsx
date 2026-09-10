@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiTourStepProps } from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { KnowledgeBaseTour } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -35,6 +35,23 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          ...notificationServiceMock.createStartContract(),
+          tours: {
+            isEnabled: mockToursIsEnabled,
+          },
+        },
+      },
+    }),
+  };
+});
+
 describe('Attack discovery tour', () => {
   const persistToLocalStorage = jest.fn();
   const navigateToApp = jest.fn();
@@ -51,6 +68,7 @@ describe('Attack discovery tour', () => {
       },
       persistToLocalStorage,
     ] as unknown as ReturnType<typeof useLocalStorage>);
+    mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('should not render any tour steps when tour is not activated', () => {
@@ -61,6 +79,27 @@ describe('Attack discovery tour', () => {
       },
       persistToLocalStorage,
     ] as unknown as ReturnType<typeof useLocalStorage>);
+    render(
+      <KnowledgeBaseTour>
+        <h1>{'Hello world'}</h1>
+      </KnowledgeBaseTour>,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(screen.queryByTestId('knowledgeBase-tour-step-1')).toBeNull();
+    expect(screen.queryByTestId('knowledgeBase-tour-step-2')).toBeNull();
+  });
+
+  it('should not render any tour steps when tour is disabled', () => {
+    jest.mocked(useLocalStorage).mockReturnValue([
+      {
+        currentTourStep: 1,
+        isTourActive: true,
+      },
+      persistToLocalStorage,
+    ] as unknown as ReturnType<typeof useLocalStorage>);
+    mockToursIsEnabled.mockReturnValue(false);
     render(
       <KnowledgeBaseTour>
         <h1>{'Hello world'}</h1>
@@ -116,7 +155,7 @@ describe('Attack discovery tour', () => {
     );
     fireEvent.click(getByTestId('tryKb'));
     expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+      path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
     });
   });
 

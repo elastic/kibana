@@ -6,13 +6,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AnonymizationFieldCreateProps,
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
   PerformAnonymizationFieldsBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas';
-import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 
 export const getAnonymizationFieldsSearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsAnonymizationFieldsSchema> = {

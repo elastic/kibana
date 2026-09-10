@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteWorkpadRoute } from './delete';
-import {
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
@@ -54,7 +50,7 @@ describe('DELETE workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true });
-    expect(mockRouteContext.core.savedObjects.client.delete).toBeCalledWith(CANVAS_TYPE, id);
+    expect(mockRouteContext.core.savedObjects.client.delete).toHaveBeenCalledWith(CANVAS_TYPE, id);
   });
 
   it(`returns bad request if delete is unsuccessful`, async () => {

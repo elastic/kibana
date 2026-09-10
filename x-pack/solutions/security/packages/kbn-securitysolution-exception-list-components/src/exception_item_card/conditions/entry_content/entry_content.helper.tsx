@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ElementType } from 'react';
+import type { ElementType } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -21,6 +22,7 @@ const EntryValueWrap = ({ children }: { children: React.ReactNode }) => (
   <span className={entryValueWrapStyle}>{children}</span>
 );
 
+// @ts-ignore
 const getEntryValue = (type: string, value: string | string[], showValueListModal: ElementType) => {
   const ShowValueListModal = showValueListModal;
   if (type === 'match_any' && Array.isArray(value)) {
@@ -36,6 +38,7 @@ const getEntryValue = (type: string, value: string | string[], showValueListModa
       </ShowValueListModal>
     );
   }
+  // @ts-expect-error upgrade typescript v5.9.3
   return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
 };
 

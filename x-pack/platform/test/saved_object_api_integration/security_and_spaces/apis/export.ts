@@ -6,13 +6,10 @@
  */
 
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  exportTestSuiteFactory,
-  getTestCases,
-  ExportTestDefinition,
-} from '../../common/suites/export';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ExportTestDefinition } from '../../common/suites/export';
+import { exportTestSuiteFactory, getTestCases } from '../../common/suites/export';
 
 const createTestCases = (spaceId: string) => {
   const cases = getTestCases(spaceId);
@@ -37,11 +34,8 @@ const createTestCases = (spaceId: string) => {
   return { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = exportTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const { exportableObjects, exportableTypes, nonExportableObjectsAndTypes, allObjectsAndTypes } =
       createTestCases(spaceId);

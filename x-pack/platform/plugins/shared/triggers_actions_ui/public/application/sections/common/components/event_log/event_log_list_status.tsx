@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
+import type { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import {
   RULE_LAST_RUN_OUTCOME_SUCCEEDED,
   RULE_LAST_RUN_OUTCOME_FAILED,
@@ -57,7 +57,7 @@ export const EventLogListStatus = (props: EventLogListStatusProps) => {
 
   return (
     <span style={statusContainerStyles} data-test-subj="eventLogListStatus">
-      <EuiIcon type="dot" color={color} style={iconStyles} />
+      <EuiIcon type="dot" color={color} style={iconStyles} aria-hidden={true} />
       {statusString}
     </span>
   );

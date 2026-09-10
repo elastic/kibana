@@ -8,48 +8,18 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { OperationDefinition } from '.';
-import {
-  ReferenceBasedIndexPatternColumn,
-  GenericIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
-import type { IndexPattern } from '../../../../types';
+import type {
+  ColumnBuildHints,
+  StaticValueIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE, ofNameStaticValue, staticValueLabelDefault } from '@kbn/lens-common';
+import type { OperationDefinition } from '.';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
 
-const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
-  defaultMessage: 'Static value',
-});
-
-const defaultValue = 100;
-
-function isEmptyValue(value: number | string | undefined) {
-  return value == null || value === '';
-}
-
-function ofName(value: number | string | undefined) {
-  if (isEmptyValue(value)) {
-    return defaultLabel;
-  }
-  return i18n.translate('xpack.lens.indexPattern.staticValueLabelWithValue', {
-    defaultMessage: 'Static value: {value}',
-    values: { value },
-  });
-}
-
-export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'static_value';
-  params: {
-    value?: string;
-    format?: ValueFormatConfig;
-  };
-}
-
-function isStaticValueColumnLike(
-  col: GenericIndexPatternColumn
-): col is StaticValueIndexPatternColumn {
+function isStaticValueColumnLike(col: ColumnBuildHints): col is StaticValueIndexPatternColumn {
   return Boolean('params' in col && col.params && 'value' in col.params);
 }
 
@@ -58,8 +28,8 @@ export const staticValueOperation: OperationDefinition<
   'managedReference'
 > = {
   type: 'static_value',
-  displayName: defaultLabel,
-  getDefaultLabel: (column) => ofName(column.params.value),
+  displayName: staticValueLabelDefault,
+  getDefaultLabel: (column) => ofNameStaticValue(column.params.value),
   input: 'managedReference',
   hidden: true,
   getDisabledStatus(indexPattern: IndexPattern) {
@@ -93,13 +63,13 @@ export const staticValueOperation: OperationDefinition<
     const currentColumn = layer.columns[columnId] as StaticValueIndexPatternColumn;
     const params = currentColumn.params;
     // TODO: improve this logic
-    const useDisplayLabel = currentColumn.label !== defaultLabel;
+    const useDisplayLabel = currentColumn.label !== staticValueLabelDefault;
     const isValid = isValidNumber(params.value, false, undefined, undefined, 15);
     const label = isValid
       ? useDisplayLabel
         ? currentColumn.label
-        : params?.value ?? defaultLabel
-      : defaultLabel;
+        : params?.value ?? staticValueLabelDefault
+      : staticValueLabelDefault;
 
     return [
       {
@@ -107,8 +77,8 @@ export const staticValueOperation: OperationDefinition<
         function: isValid ? 'mathColumn' : 'mapColumn',
         arguments: {
           id: [columnId],
-          name: [label || defaultLabel],
-          expression: [String(isValid ? params.value! : defaultValue)],
+          name: [label || staticValueLabelDefault],
+          expression: [String(isValid ? params.value! : DEFAULT_STATIC_VALUE)],
         },
       },
     ];
@@ -126,11 +96,11 @@ export const staticValueOperation: OperationDefinition<
       ...columnParams,
     };
     return {
-      label: ofName(previousParams.value),
+      label: ofNameStaticValue(previousParams.value),
       dataType: 'number',
       operationType: 'static_value',
       isBucketed: false,
-      params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
+      params: { ...previousParams, value: String(previousParams.value ?? DEFAULT_STATIC_VALUE) },
       references: [],
     };
   },
@@ -183,7 +153,7 @@ export const staticValueOperation: OperationDefinition<
               ...newLayer.columns,
               [columnId]: {
                 ...newColumn,
-                label: newColumn?.customLabel ? newColumn.label : ofName(newValue),
+                label: newColumn?.customLabel ? newColumn.label : ofNameStaticValue(newValue),
                 params: {
                   ...newColumn.params,
                   value: newValue,
@@ -203,7 +173,7 @@ export const staticValueOperation: OperationDefinition<
     const fallbackValue =
       currentColumn?.operationType !== 'static_value' && activeDataValue != null
         ? activeDataValue
-        : String(defaultValue);
+        : String(DEFAULT_STATIC_VALUE);
 
     const { inputValue, handleInputChange } = useDebouncedValue<string | undefined>(
       {
@@ -225,7 +195,7 @@ export const staticValueOperation: OperationDefinition<
 
     return (
       <EuiFormRow
-        label={paramEditorCustomProps?.labels?.[0] || defaultLabel}
+        label={paramEditorCustomProps?.labels?.[0] || staticValueLabelDefault}
         fullWidth
         isInvalid={!inputValueIsValid}
         error={
@@ -237,6 +207,7 @@ export const staticValueOperation: OperationDefinition<
         }
       >
         <EuiFieldNumber
+          isInvalid={!inputValueIsValid}
           fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
           compressed

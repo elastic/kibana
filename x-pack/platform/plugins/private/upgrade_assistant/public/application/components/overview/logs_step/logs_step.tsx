@@ -11,11 +11,11 @@ import {
   EuiText,
   EuiSpacer,
   EuiButton,
-  EuiCallOut,
   EuiSkeletonText,
   EuiCode,
   EuiFlexGroup,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -25,16 +25,15 @@ import {
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
 } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges, GlobalFlyout } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges, GlobalFlyout } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
 import { useDeprecationLogging } from '../../es_deprecation_logs';
 import { DiscoverExternalLinks } from '../../es_deprecation_logs/fix_deprecation_logs/external_links';
-import {
-  EsDeprecationLogsFlyout,
-  EsDeprecationLogsFlyoutProps,
-} from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
+import type { EsDeprecationLogsFlyoutProps } from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
+import { EsDeprecationLogsFlyout } from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
 
 const i18nTexts = {
   logsStepTitle: i18n.translate('xpack.upgradeAssistant.overview.logsStep.title', {
@@ -198,27 +197,23 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
         <EuiSpacer />
 
         {privilegesMissing.cluster && (
-          <EuiCallOut
-            iconType="question"
-            color="warning"
+          <KbnWarningCallout
+            announceOnMount={false}
             title={i18nTexts.missingClusterPrivilegesTitle}
             data-test-subj="missingClusterPrivilegesCallout"
-          >
-            <p>{i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}</p>
-          </EuiCallOut>
+            text={i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}
+          />
         )}
 
         {privilegesMissing.cluster && privilegesMissing.index && <EuiSpacer />}
 
         {privilegesMissing.index && (
-          <EuiCallOut
-            iconType="question"
-            color="warning"
+          <KbnWarningCallout
+            announceOnMount={false}
             title={i18nTexts.missingIndexPrivilegesTitle}
             data-test-subj="missingIndexPrivilegesCallout"
-          >
-            <p>{i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}</p>
-          </EuiCallOut>
+            text={i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}
+          />
         )}
       </>
     );
@@ -230,24 +225,23 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
 
   if (hasPrivileges && error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
+        announceOnMount={false}
         title={i18nTexts.loadingError}
-        color="danger"
-        iconType="warning"
         data-test-subj="deprecationLogsErrorCallout"
-      >
-        <p>
-          {error.statusCode} - {error.message as string}
-        </p>
-
-        <EuiButton
-          color="danger"
-          onClick={resendRequest}
-          data-test-subj="deprecationLogsRetryButton"
-        >
-          {i18nTexts.retryButton}
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {error.statusCode} - {error.message as string}
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: i18nTexts.retryButton,
+            onClick: resendRequest,
+            'data-test-subj': 'deprecationLogsRetryButton',
+          },
+        }}
+      />
     );
   }
 

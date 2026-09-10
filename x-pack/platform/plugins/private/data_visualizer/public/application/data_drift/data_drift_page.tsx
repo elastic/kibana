@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
@@ -16,7 +17,6 @@ import {
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
-  EuiPageHeader,
   EuiHorizontalRule,
   EuiBadge,
 } from '@elastic/eui';
@@ -31,10 +31,10 @@ import {
   DatePickerWrapper,
   FROZEN_TIER_PREFERENCE,
   FullTimeRangeSelector,
+  mlTimefilterRefresh$,
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import moment from 'moment';
-import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
@@ -49,16 +49,22 @@ import type { DataComparisonFullAppState } from './types';
 import { getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
+import { DataVisualizerDataSourcePicker } from '../common/components/data_source_picker';
 import { DataDriftView } from './data_drift_view';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
 import { useDataDriftColors } from './use_data_drift_colors';
+import {
+  filtersNotAlreadyPresent,
+  toFilterArray,
+} from '../index_data_visualizer/utils/saved_search_utils';
 
-const dataViewTitleHeader = css({
-  minWidth: '300px',
-});
+const maxInlineSizeStyles = css`
+  max-inline-size: 100%;
+  min-inline-size: 0;
+`;
 
 interface PageHeaderProps {
   onRefresh: () => void;
@@ -67,6 +73,9 @@ interface PageHeaderProps {
 export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+  const {
+    services: { cps },
+  } = useDataVisualizerKibana();
 
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     DVKey,
@@ -100,37 +109,44 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   );
 
   return (
-    <EuiPageHeader
-      pageTitle={
-        <div data-test-subj={'mlDataDriftPageDataViewTitle'} css={dataViewTitleHeader}>
-          {dataView.getName()}
-        </div>
-      }
-      rightSideGroupProps={{
-        gutterSize: 's',
-        'data-test-subj': 'dataComparisonTimeRangeSelectorSection',
-      }}
-      rightSideItems={[
-        <DatePickerWrapper
-          isAutoRefreshOnly={!hasValidTimeField}
-          showRefresh={!hasValidTimeField}
-          width="full"
-          onRefresh={onRefresh}
-          needsUpdate={needsUpdate}
-        />,
-        hasValidTimeField && (
-          <FullTimeRangeSelector
-            frozenDataPreference={frozenDataPreference}
-            setFrozenDataPreference={setFrozenDataPreference}
-            dataView={dataView}
-            query={undefined}
-            disabled={false}
-            timefilter={timefilter}
-            callback={updateTimeState}
-          />
-        ),
-      ].filter(Boolean)}
-    />
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      justifyContent="spaceBetween"
+      wrap={true}
+      data-test-subj="dataComparisonTimeRangeSelectorSection"
+    >
+      <EuiFlexItem grow={false}>
+        <DataVisualizerDataSourcePicker currentDataView={dataView} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
+        <EuiFlexGroup css={maxInlineSizeStyles} gutterSize="s" alignItems="center">
+          {hasValidTimeField && (
+            <EuiFlexItem grow={false}>
+              <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={dataView}
+                query={undefined}
+                disabled={false}
+                timefilter={timefilter}
+                callback={updateTimeState}
+                projectRouting={cps?.cpsManager?.getProjectRouting()}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
+            <DatePickerWrapper
+              isAutoRefreshOnly={!hasValidTimeField}
+              showRefresh={!hasValidTimeField}
+              width="full"
+              onRefresh={onRefresh}
+              needsUpdate={needsUpdate}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -153,7 +169,7 @@ const isBarBetween = (start: number, end: number, min: number, max: number) => {
 };
 export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
-    services: { data: dataService, uiSettings },
+    services: { data: dataService, uiSettings, cps },
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
@@ -167,7 +183,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const forceRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
+  const forcePageRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
 
   const randomSampler = useMemo(() => referenceStateManager.randomSampler, [referenceStateManager]);
 
@@ -192,7 +208,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: estypes.QueryDslQueryContainer;
+      searchQuery: NonNullable<estypes.QueryDslQueryContainer>;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -219,7 +235,12 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     dataComparisonListState
   );
 
-  const { documentStats, documentStatsProd, timefilter } = useData(
+  const {
+    documentStats,
+    documentStatsProd,
+    timefilter,
+    forceRefresh: forceDocCountRefresh,
+  } = useData(
     initialSettings,
     dataView,
     'data_drift',
@@ -230,6 +251,37 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     setGlobalState,
     undefined
   );
+
+  // Hydrate saved-search filters into FilterManager after render so doc counts and the
+  // primary search bar include them. Do not call addFilters from getEsQueryFromSavedSearch
+  // (that helper can run during render); mirror index data visualizer hydration instead.
+  // Track which saved search we hydrated: forceDocCountRefresh is an unstable inline
+  // callback, and FilterManager rewrites phrase query DSL on addFilters, so a naive
+  // dedupFilters(query) check + refresh would re-add forever (max update depth).
+  const hydratedSavedSearchKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const savedSearchKey = savedSearch?.id ?? savedSearch?.title ?? null;
+    if (!savedSearch || savedSearchKey == null) {
+      return;
+    }
+    if (hydratedSavedSearchKeyRef.current === savedSearchKey) {
+      return;
+    }
+
+    const savedFilters = toFilterArray(savedSearch.searchSource?.getField('filter'));
+    hydratedSavedSearchKeyRef.current = savedSearchKey;
+    if (!savedFilters.length) {
+      return;
+    }
+
+    const filterManager = dataService.query.filterManager;
+    const missing = filtersNotAlreadyPresent(filterManager.getFilters(), savedFilters);
+
+    if (missing.length > 0) {
+      filterManager.addFilters(missing);
+      forceDocCountRefresh();
+    }
+  }, [savedSearch, dataService.query.filterManager, forceDocCountRefresh]);
 
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
@@ -394,6 +446,13 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     dataComparisonListState,
   ]);
 
+  useEffect(() => {
+    const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe(() => {
+      mlTimefilterRefresh$.next({ lastRefresh: Date.now() });
+    });
+    return () => subscription?.unsubscribe();
+  }, [cps?.cpsManager]);
+
   return (
     <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>
       <PageHeader onRefresh={handleRefresh} needsUpdate={queryNeedsUpdate} />
@@ -416,7 +475,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 id={REFERENCE_LABEL}
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
-                reload={forceRefresh}
+                reload={forceDocCountRefresh}
                 brushSelectionUpdateHandler={referenceBrushSelectionUpdate}
                 documentCountStats={documentCountStats}
                 documentCountStatsSplit={documentCountStatsCompare}
@@ -443,7 +502,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 id={COMPARISON_LABEL}
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
-                reload={forceRefresh}
+                reload={forceDocCountRefresh}
                 brushSelectionUpdateHandler={comparisonBrushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
@@ -479,7 +538,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
-                onRefresh={forceRefresh}
+                onRefresh={forcePageRefresh}
                 hasValidTimeField={hasValidTimeField}
               />
             </EuiPanel>

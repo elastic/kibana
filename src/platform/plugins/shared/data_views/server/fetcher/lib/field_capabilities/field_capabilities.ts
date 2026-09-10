@@ -10,12 +10,12 @@
 import { defaults, keyBy, sortBy } from 'lodash';
 
 import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
-import { FieldDescriptor } from '../../index_patterns_fetcher';
-import { QueryDslQueryContainer } from '../../../../common/types';
+import type { FieldDescriptor } from '../../index_patterns_fetcher';
+import type { QueryDslQueryContainer } from '../../../../common/types';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
 import { getIndexFilterDsl } from '../../../utils';
 
@@ -32,6 +32,7 @@ interface FieldCapabilitiesParams {
   includeEmptyFields?: boolean;
   runtimeMappings?: MappingRuntimeFields;
   abortSignal?: AbortSignal;
+  projectRouting?: string;
 }
 
 /**
@@ -58,6 +59,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     includeEmptyFields,
     runtimeMappings,
     abortSignal,
+    projectRouting,
   } = params;
 
   const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
@@ -72,6 +74,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     includeEmptyFields,
     runtimeMappings,
     abortSignal,
+    projectRouting,
   });
   const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');

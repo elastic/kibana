@@ -9,22 +9,20 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { CONTENT_ID } from '../../common';
-import { LinksStartDependencies } from '../plugin';
+import { LINKS_LIBRARY_TYPE } from '../../common';
+import type { LinksStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
-export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
-export let uiActions: UiActionsPublicStart;
+export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let trackUiMetric: (
   type: string,
   eventNames: string | string[],
@@ -49,11 +47,14 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
   embeddableService = deps.embeddable;
-  presentationUtil = deps.presentationUtil;
   contentManagement = deps.contentManagement;
-  uiActions = deps.uiActions;
+  savedObjectsTaggingService = deps.savedObjectsTaggingOss;
+
   if (deps.usageCollection)
-    trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
+    trackUiMetric = deps.usageCollection.reportUiCounter.bind(
+      deps.usageCollection,
+      LINKS_LIBRARY_TYPE
+    );
 
   servicesReady$.next(true);
 };

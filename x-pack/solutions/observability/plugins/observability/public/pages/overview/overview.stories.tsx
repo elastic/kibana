@@ -6,12 +6,14 @@
  */
 
 import { makeDecorator } from '@storybook/preview-api';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { ReactNode } from 'react';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
 import {
@@ -24,16 +26,14 @@ import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock
 import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
-import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { ApmIndicesConfig } from '../../../common/typings';
-import { ConfigSchema } from '../../plugin';
+import type { ApmIndicesConfig } from '../../../common/typings';
+import type { ConfigSchema } from '../../plugin';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
   unregisterDataHandler({ appName: 'infra_logs' });
   unregisterDataHandler({ appName: 'infra_metrics' });
-  unregisterDataHandler({ appName: 'uptime' });
 }
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
@@ -75,6 +75,15 @@ const withCore = makeDecorator({
       usageCollection: {
         reportUiCounter: () => {},
       },
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              useUrl: () => '/app/observabilityOnboarding',
+            }),
+          },
+        },
+      },
     } as unknown as Partial<CoreStart>);
 
     const config: ConfigSchema = {
@@ -84,23 +93,26 @@ const withCore = makeDecorator({
           observability: { enabled: false },
         },
       },
+      managedOtlpServiceUrl: '',
     };
 
     return (
       <MemoryRouter>
         <KibanaReactContext.Provider>
-          <PluginContext.Provider
-            value={{
-              appMountParameters: {
-                setHeaderActionMenu: () => {},
-              } as unknown as AppMountParameters,
-              config,
-              observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-              ObservabilityPageTemplate: KibanaPageTemplate,
-            }}
-          >
-            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
-          </PluginContext.Provider>
+          <MockAppHeaderProvider>
+            <PluginContext.Provider
+              value={{
+                appMountParameters: {
+                  setHeaderActionMenu: () => {},
+                } as unknown as AppMountParameters,
+                config,
+                observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+                ObservabilityPageTemplate: KibanaPageTemplate,
+              }}
+            >
+              <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
+            </PluginContext.Provider>
+          </MockAppHeaderProvider>
         </KibanaReactContext.Provider>
       </MemoryRouter>
     );
@@ -238,11 +250,6 @@ export const EmptyState = () => {
     fetchData: fetchMetricsData,
     hasData: async () => ({ hasData: false, indices: 'metric-*' }),
   });
-  registerDataHandler({
-    appName: 'uptime',
-    fetchData: fetchUptimeData,
-    hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
-  });
 
   return <OverviewPage />;
 };
@@ -321,7 +328,7 @@ export const LogsMetricsApmAndAlerts = {
   parameters: { core: coreWithAlerts },
 };
 
-export const LogsMetricsApmAndUptime = {
+export const LogsMetricsApm = {
   render: () => {
     registerDataHandler({
       appName: 'apm',
@@ -338,19 +345,14 @@ export const LogsMetricsApmAndUptime = {
       fetchData: fetchMetricsData,
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-    });
 
     return <OverviewPage />;
   },
 
-  name: 'Logs, Metrics, APM, and Uptime',
+  name: 'Logs, Metrics, APM.',
 };
 
-export const LogsMetricsApmUptimeAndAlerts = {
+export const LogsMetricsApmAndNewsFeed = {
   render: () => {
     registerDataHandler({
       appName: 'apm',
@@ -367,45 +369,10 @@ export const LogsMetricsApmUptimeAndAlerts = {
       fetchData: fetchMetricsData,
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-    });
-
     return <OverviewPage />;
   },
 
-  name: 'Logs, Metrics, APM, Uptime, and Alerts',
-  parameters: { core: coreWithAlerts },
-};
-
-export const LogsMetricsApmUptimeAndNewsFeed = {
-  render: () => {
-    registerDataHandler({
-      appName: 'apm',
-      fetchData: fetchApmData,
-      hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
-    });
-    registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      hasData: async () => ({ hasData: true, indices: 'test-index' }),
-    });
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: fetchMetricsData,
-      hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
-    });
-    return <OverviewPage />;
-  },
-
-  name: 'Logs, Metrics, APM, Uptime, and News Feed',
+  name: 'Logs, Metrics, APM, and News Feed',
   parameters: { core: coreWithNewsFeed },
 };
 
@@ -424,11 +391,6 @@ export const NoData = () => {
     appName: 'infra_metrics',
     fetchData: async () => emptyMetricsResponse,
     hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-  });
-  registerDataHandler({
-    appName: 'uptime',
-    fetchData: async () => emptyUptimeResponse,
-    hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
   });
 
   return <OverviewPage />;
@@ -456,13 +418,6 @@ export const FetchDataWithError = {
         throw new Error('Error fetching Metric data');
       },
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: async () => {
-        throw new Error('Error fetching Uptime data');
-      },
-      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
     return <OverviewPage />;
   },
@@ -497,14 +452,7 @@ export const HasDataWithErrorAndAlerts = {
         throw new Error('Error has data');
       },
     });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
-      // @ts-ignore throws an error instead
-      hasData: async () => {
-        throw new Error('Error has data');
-      },
-    });
+
     return <OverviewPage />;
   },
 
@@ -533,14 +481,6 @@ export const HasDataWithError = {
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      // @ts-ignore throws an error instead
-      hasData: async () => {
-        throw new Error('Error has data');
-      },
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
       // @ts-ignore throws an error instead
       hasData: async () => {
         throw new Error('Error has data');

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import {
-  HistogramIndicator,
-  histogramIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
-} from '@kbn/slo-schema';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { HistogramIndicator } from '@kbn/slo-schema';
+import { histogramIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -19,16 +15,12 @@ import {
   getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
 import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!histogramIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -40,9 +32,10 @@ export class HistogramTransformGenerator extends TransformGenerator {
       await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
-      this.buildAggregations(slo, slo.indicator),
+      await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
-      slo
+      slo,
+      this.getProjectRouting(slo)
     );
   }
 
@@ -74,8 +67,12 @@ export class HistogramTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLODefinition, indicator: HistogramIndicator) {
-    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
+  private async buildAggregations(slo: SLODefinition, indicator: HistogramIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(
+      indicator,
+      dataView
+    );
 
     return {
       ...getHistogramIndicatorAggregations.execute({

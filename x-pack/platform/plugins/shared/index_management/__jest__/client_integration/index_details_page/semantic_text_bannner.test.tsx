@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { SemanticTextBanner } from '../../../public/application/sections/home/index_list/details_page/semantic_text_banner';
 
-describe('When semantic_text is enabled', () => {
-  let exists: any;
-  let find: any;
-  let wrapper: any;
+const mockNavigate = jest.fn();
+const mockUseAppContext = jest.fn();
+jest.mock('../../../public/application/app_context', () => ({
+  useAppContext: () => mockUseAppContext(),
+}));
+
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(<I18nProvider>{ui}</I18nProvider>);
+};
+
+describe('SemanticTextBanner', () => {
   let getItemSpy: jest.SpyInstance;
   let setItemSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    localStorage.clear();
+    mockNavigate.mockClear();
     getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
     setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
-    const setup = registerTestBed(SemanticTextBanner, {
-      defaultProps: { isSemanticTextEnabled: true, isPlatinumLicense: true },
-      memoryRouter: { wrapComponent: false },
-    });
-    const testBed = setup();
-    ({ exists, find } = testBed);
-    wrapper = testBed.component;
   });
 
   afterEach(() => {
@@ -33,56 +36,86 @@ describe('When semantic_text is enabled', () => {
     setItemSpy.mockRestore();
   });
 
-  it('should display the banner', () => {
-    expect(getItemSpy).toHaveBeenCalledWith('semantic-text-banner-display');
-    expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(true);
-  });
-
-  it('should contain content related to semantic_text', () => {
-    expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
-      'semantic_text field type now available!'
-    );
-
-    expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
-      'Documents will be automatically chunked to fit model context limits, to avoid truncation.'
-    );
-  });
-
-  it('should hide the banner if dismiss is clicked', async () => {
-    await act(async () => {
-      find('SemanticTextBannerDismissButton').simulate('click');
+  describe('when user can manage license', () => {
+    beforeEach(() => {
+      mockUseAppContext.mockReturnValue({
+        core: {
+          application: {
+            capabilities: { management: { stack: { license_management: true } } },
+          },
+        },
+        plugins: {
+          share: {
+            url: {
+              locators: {
+                get: () => ({
+                  navigate: mockNavigate,
+                }),
+              },
+            },
+          },
+        },
+      });
     });
 
-    wrapper.update();
+    it('should display the banner', () => {
+      renderWithIntl(<SemanticTextBanner />);
 
-    expect(setItemSpy).toHaveBeenCalledWith('semantic-text-banner-display', 'false');
-    expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(false);
+      expect(getItemSpy).toHaveBeenCalledWith('semantic-text-banner-display');
+      expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
+    });
+
+    it('should navigate to the license management page when clicked', () => {
+      renderWithIntl(<SemanticTextBanner />);
+
+      const manageButton = screen.getByTestId('SemanticTextBannerManageLicenseButton');
+      fireEvent.click(manageButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith({ page: 'dashboard' });
+    });
+
+    it('should hide the banner if dismiss is clicked', async () => {
+      renderWithIntl(<SemanticTextBanner />);
+
+      const dismissButton = screen.getByTestId('euiDismissCalloutButton');
+      fireEvent.click(dismissButton);
+
+      await waitFor(() => {
+        expect(setItemSpy).toHaveBeenCalledWith('semantic-text-banner-display', 'false');
+        expect(
+          screen.queryByTestId('indexDetailsMappingsSemanticTextBanner')
+        ).not.toBeInTheDocument();
+      });
+    });
   });
-});
 
-describe('when user does not have ML permissions', () => {
-  const setupWithNoMlPermission = registerTestBed(SemanticTextBanner, {
-    defaultProps: { isSemanticTextEnabled: true, isPlatinumLicense: false },
-    memoryRouter: { wrapComponent: false },
-  });
+  describe('when user cannot manage license', () => {
+    beforeEach(() => {
+      mockUseAppContext.mockReturnValue({
+        core: {
+          application: {
+            capabilities: { management: { stack: { license_management: false } } },
+          },
+        },
+        plugins: {
+          share: {
+            url: {
+              locators: {
+                get: () => ({
+                  navigate: mockNavigate,
+                }),
+              },
+            },
+          },
+        },
+      });
+    });
 
-  const { find } = setupWithNoMlPermission();
+    it('should display the banner without the "Manage license" button', () => {
+      renderWithIntl(<SemanticTextBanner />);
 
-  it('should contain content related to semantic_text', () => {
-    expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
-      'Semantic text now available for platinum license'
-    );
-  });
-});
-
-describe('When semantic_text is disabled', () => {
-  const setup = registerTestBed(SemanticTextBanner, {
-    defaultProps: { isSemanticTextEnabled: false },
-    memoryRouter: { wrapComponent: false },
-  });
-  const { exists } = setup();
-
-  it('should not display the banner', () => {
-    expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(false);
+      expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
+      expect(screen.queryByTestId('SemanticTextBannerManageLicenseButton')).not.toBeInTheDocument();
+    });
   });
 });

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 function findMatchingNodes(stats: any, nodeAttrs: string): any {
@@ -27,7 +27,7 @@ function findMatchingNodes(stats: any, nodeAttrs: string): any {
 }
 
 const paramsSchema = schema.object({
-  nodeAttrs: schema.string(),
+  nodeAttrs: schema.string({ maxLength: 1000 }),
 });
 
 export function registerDetailsRoute({

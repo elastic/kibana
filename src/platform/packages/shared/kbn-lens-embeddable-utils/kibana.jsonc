@@ -2,7 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/lens-embeddable-utils",
   "owner": [
-    "@elastic/obs-ux-infra_services-team",
     "@elastic/kibana-visualizations"
   ],
   "group": "platform",

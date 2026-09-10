@@ -8,13 +8,13 @@
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type {
   ActionConnector,
-  AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
   ConfigurationAttributes,
@@ -27,9 +27,12 @@ import {
 } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
   OWNER_FIELD,
 } from '../../../common/constants';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 
 import {
   createIncident,
@@ -47,7 +50,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
-import { buildFilter } from '../utils';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
 
@@ -68,12 +71,30 @@ const changeAlertsStatusToClose = async (
   caseService: CasesClientArgs['services']['caseService'],
   alertsService: CasesClientArgs['services']['alertsService']
 ) => {
-  const alertAttachments = (await caseService.getAllCaseComments({
+  const legacyAlertFilter = nodeBuilder.is(
+    `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+    AttachmentType.alert
+  );
+
+  const alertFilter = combineFilters(
+    [
+      legacyAlertFilter,
+      buildFilter({
+        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }),
+    ],
+    NodeBuilderOperators.or
+  );
+
+  const alertAttachments = await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
+      filter: alertFilter,
     },
-  })) as SavedObjectsFindResponse<AlertAttachmentPayload>;
+  });
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
@@ -99,6 +120,10 @@ export interface PushParams {
    * The ID of an external system to push to
    */
   connectorId: string;
+  /**
+   * The type of push
+   */
+  pushType: 'manual' | 'automatic';
 }
 
 /**
@@ -107,7 +132,7 @@ export interface PushParams {
  * @ignore
  */
 export const push = async (
-  { connectorId, caseId }: PushParams,
+  { connectorId, caseId, pushType }: PushParams,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
@@ -127,6 +152,7 @@ export const push = async (
     securityStartPlugin,
     spaceId,
     publicBaseUrl,
+    usageCounter,
   } = clientArgs;
 
   try {
@@ -173,6 +199,13 @@ export const push = async (
       throw Boom.failedDependency(
         pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service'
       );
+    } else {
+      if (usageCounter) {
+        usageCounter.incrementCounter({
+          counterName: `CasesPush-${pushType}`,
+          incrementBy: 1,
+        });
+      }
     }
 
     /* End of push to external service */
@@ -193,14 +226,12 @@ export const push = async (
       caseService.getAllCaseComments({
         id: caseId,
         options: {
-          fields: [],
           page: 1,
-          perPage: theCase?.totalComment ?? 0,
+          perPage: MAX_DOCS_PER_PAGE,
         },
       }),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
     const externalServiceResponse = pushRes.data as ExternalServiceResponse;
@@ -255,7 +286,7 @@ export const push = async (
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
-            attachmentId: comment.id,
+            savedObjectId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
               pushed_by: { username, full_name, email, profile_uid },
@@ -263,6 +294,7 @@ export const push = async (
             version: comment.version,
           })),
         refresh: false,
+        requestWithoutType: true,
       }),
     ]);
 
@@ -302,7 +334,9 @@ export const push = async (
         references: myCase.references,
       },
       comments: comments.saved_objects.map((origComment) => {
-        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        const foundComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        const updatedComment =
+          foundComment && !isSavedObjectErrorResult(foundComment) ? foundComment : undefined;
         return {
           ...origComment,
           ...updatedComment,

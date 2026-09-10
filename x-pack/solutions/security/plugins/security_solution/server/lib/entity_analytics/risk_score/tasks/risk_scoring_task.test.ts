@@ -24,6 +24,7 @@ import {
 } from './risk_scoring_task';
 import type { ConfigType } from '../../../../config';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { EntityType } from '../../../../../common/search_strategy';
 
@@ -132,7 +133,7 @@ describe('Risk Scoring Task', () => {
           taskManager: mockTaskManagerStart,
           riskEngineDataClient: mockRiskEngineDataClient,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
     });
   });
 
@@ -183,7 +184,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskManager: mockTaskManagerStart,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
 
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to remove risk scoring task: whoops');
     });
@@ -218,6 +219,7 @@ describe('Risk Scoring Task', () => {
         _meta: {
           mappingsVersion: 1,
         },
+        enableResetToZero: true,
       });
       mockIsCancelled = jest.fn().mockReturnValue(false);
 
@@ -230,6 +232,12 @@ describe('Risk Scoring Task', () => {
           after_keys: {},
           scores_written: 0,
           errors: [],
+          entities: {
+            host: [],
+            user: [],
+            service: [],
+            generic: [],
+          },
         });
       });
 
@@ -254,11 +262,23 @@ describe('Risk Scoring Task', () => {
             after_keys: { host: { 'host.name': 'value' } },
             scores_written: 5,
             errors: [],
+            entities: {
+              host: [],
+              user: [],
+              service: [],
+              generic: [],
+            },
           })
           .mockResolvedValueOnce({
             after_keys: {},
             scores_written: 5,
             errors: [],
+            entities: {
+              host: [],
+              user: [],
+              service: [],
+              generic: [],
+            },
           });
       });
 
@@ -304,6 +324,7 @@ describe('Risk Scoring Task', () => {
           _meta: {
             mappingsVersion: 1,
           },
+          enableResetToZero: true,
         });
         await runTask({
           getRiskScoreService,
@@ -344,6 +365,7 @@ describe('Risk Scoring Task', () => {
             _meta: {
               mappingsVersion: 1,
             },
+            enableResetToZero: true,
           });
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
@@ -352,16 +374,34 @@ describe('Risk Scoring Task', () => {
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             }) // second call - user entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             }) // third call - service entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
               errors: [],
+              entities: {
+                host: [],
+                user: [],
+                service: [],
+                generic: [],
+              },
             });
         });
 
@@ -427,6 +467,7 @@ describe('Risk Scoring Task', () => {
             _meta: {
               mappingsVersion: 1,
             },
+            enableResetToZero: true,
           });
           await runTask({
             getRiskScoreService,
@@ -689,7 +730,24 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           namespace: 'default',
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
+    });
+
+    it('throws a 409 when the task is already running', async () => {
+      mockTaskManagerStart.runSoon.mockRejectedValueOnce(
+        new TaskAlreadyRunningError('risk_engine:risk_scoring:default:0.0.1')
+      );
+
+      await expect(
+        scheduleNow({
+          taskManager: mockTaskManagerStart,
+          logger: mockLogger,
+          namespace: 'default',
+        })
+      ).rejects.toMatchObject({
+        message: 'The risk engine is already running',
+        statusCode: 409,
+      });
     });
   });
 });

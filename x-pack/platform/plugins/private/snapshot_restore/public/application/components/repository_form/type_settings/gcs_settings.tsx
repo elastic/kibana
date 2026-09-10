@@ -13,11 +13,12 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { GCSRepository, Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { GCSRepository, Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
@@ -29,6 +30,8 @@ interface Props {
     replaceSettings?: boolean
   ) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const GCSSettings: React.FunctionComponent<Props> = ({
@@ -36,6 +39,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
   isManagedRepository,
   updateRepositorySettings,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const {
     settings: {
@@ -59,6 +64,28 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
       [name]: value,
     });
   };
+
+  const readOnlyTooltipContent = isReadOnlyToggleDisabled
+    ? readOnlyToggleDisabledTooltipContent
+    : undefined;
+  const readOnlySwitchControl = (
+    <EuiSwitch
+      label={
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryForm.typeGCS.readonlyLabel"
+          defaultMessage="Read-only repository"
+        />
+      }
+      checked={!!readonly}
+      disabled={Boolean(isReadOnlyToggleDisabled)}
+      onChange={(e) => {
+        updateRepositorySettings({
+          readonly: e.target.checked,
+        });
+      }}
+      data-test-subj="readOnlyToggle"
+    />
+  );
 
   return (
     <Fragment>
@@ -98,21 +125,20 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={client || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    client: e.target.value,
-                  });
-                }}
-                data-test-subj="clientInput"
-                disabled={isManagedRepository}
-                aria-labelledby={clientId}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={client || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  client: e.target.value,
+                });
+              }}
+              data-test-subj="clientInput"
+              disabled={isManagedRepository}
+              aria-labelledby={clientId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -152,21 +178,20 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={bucket || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    bucket: e.target.value,
-                  });
-                }}
-                data-test-subj="bucketInput"
-                disabled={isManagedRepository}
-                aria-labelledby={bucketId}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={bucket || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  bucket: e.target.value,
+                });
+              }}
+              data-test-subj="bucketInput"
+              disabled={isManagedRepository}
+              aria-labelledby={bucketId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -206,21 +231,20 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={basePath || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    basePath: e.target.value,
-                  });
-                }}
-                data-test-subj="basePathInput"
-                disabled={isManagedRepository}
-                aria-labelledby={basePathId}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={basePath || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  basePath: e.target.value,
+                });
+              }}
+              data-test-subj="basePathInput"
+              disabled={isManagedRepository}
+              aria-labelledby={basePathId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -316,21 +340,11 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeGCS.readonlyLabel"
-                defaultMessage="Read-only repository"
-              />
-            }
-            checked={!!readonly}
-            onChange={(e) => {
-              updateRepositorySettings({
-                readonly: e.target.checked,
-              });
-            }}
-            data-test-subj="readOnlyToggle"
-          />
+          {readOnlyTooltipContent ? (
+            <EuiToolTip content={readOnlyTooltipContent}>{readOnlySwitchControl}</EuiToolTip>
+          ) : (
+            readOnlySwitchControl
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </Fragment>

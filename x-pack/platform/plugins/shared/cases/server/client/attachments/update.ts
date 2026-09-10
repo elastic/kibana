@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { AttachmentPatchRequestRt } from '../../../common/types/api';
+import { UnifiedAttachmentPatchRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
@@ -15,10 +15,11 @@ import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Update an attachment.
@@ -33,7 +34,7 @@ export async function update(
     services: { attachmentService, userActionService },
     logger,
     authorization,
-    externalReferenceAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
   try {
@@ -41,17 +42,25 @@ export async function update(
       id: queryCommentId,
       version: queryCommentVersion,
       ...queryRestAttributes
-    } = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(queryParams);
+    } = decodeWithExcessOrThrow(UnifiedAttachmentPatchRequestRt)(queryParams);
+    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
+
     await validateMaxUserActions({
       caseId: caseID,
       userActionService,
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
+    // Also enforce registry registration and the unified zod schema for
+    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
+    // paths so PATCH stays in sync with POST.
+    validateRegisteredAttachments({
+      query: queryRestAttributes,
+      unifiedAttachmentTypeRegistry,
+    });
 
     const myComment = await attachmentService.getter.get({
-      attachmentId: queryCommentId,
+      savedObjectId: queryCommentId,
     });
 
     if (myComment == null) {
@@ -98,7 +107,11 @@ export async function update(
     const updatedDate = new Date().toISOString();
 
     const updatedModel = await model.updateComment({
-      updateRequest: queryParams,
+      updateRequest: {
+        id: queryCommentId,
+        version: queryCommentVersion,
+        ...queryRestAttributes,
+      },
       updatedAt: updatedDate,
       owner: myComment.attributes.owner,
     });

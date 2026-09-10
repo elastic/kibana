@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@elastic/ecs';
 import { isEmpty } from 'lodash/fp';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { HttpHandler } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpHandler } from '@kbn/core-http-browser';
 
 import {
   getTotalDocsCount,
@@ -29,7 +29,7 @@ import {
   getEscapedIncompatibleValuesFields,
   getEscapedSameFamilyFields,
 } from './utils/metadata';
-import { UseResultsRollupReturnValue } from './types';
+import type { UseResultsRollupReturnValue } from './types';
 import { getDocsCount, getIndexIncompatible, getSizeInBytes } from '../../utils/stats';
 import { getIlmPhase } from '../../utils/get_ilm_phase';
 import { useStoredPatternResults } from './hooks/use_stored_pattern_results';

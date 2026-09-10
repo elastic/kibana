@@ -9,14 +9,13 @@
 
 import {
   type SavedObject,
-  type CreatedObject,
+  type SavedObjectBulkResult,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import type { RemappedImportResult } from './extract_errors';
 import { extractErrors } from './extract_errors';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  LegacyUrlAlias,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -26,7 +25,13 @@ describe('extractErrors()', () => {
   });
 
   test('extracts errors from saved objects', () => {
-    const savedObjects: Array<CreatedObject<unknown>> = [
+    const savedObjectsToImport: Array<SavedObject<any>> = [
+      { id: '1', type: 'dashboard', attributes: { title: 'My Dashboard 1' }, references: [] },
+      { id: '2', type: 'dashboard', attributes: { title: 'My Dashboard 2' }, references: [] },
+      { id: '3', type: 'dashboard', attributes: { title: 'My Dashboard 3' }, references: [] },
+      { id: '4', type: 'dashboard', attributes: { title: 'My Dashboard 4' }, references: [] },
+    ];
+    const savedObjectResults: Array<RemappedImportResult<unknown>> = [
       {
         id: '1',
         type: 'dashboard',
@@ -37,30 +42,21 @@ describe('extractErrors()', () => {
       {
         id: '2',
         type: 'dashboard',
-        attributes: { title: 'My Dashboard 2' },
-        references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '2').output.payload,
-        managed: false,
       },
       {
         id: '3',
         type: 'dashboard',
-        attributes: { title: 'My Dashboard 3' },
-        references: [],
         error: SavedObjectsErrorHelpers.createBadRequestError().output.payload,
-        managed: false,
       },
       {
         id: '4',
         type: 'dashboard',
-        attributes: { title: 'My Dashboard 4' },
-        references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '4').output.payload,
         destinationId: 'foo',
-        managed: false,
       },
     ];
-    const result = extractErrors(savedObjects, savedObjects, [], new Map());
+    const result = extractErrors(savedObjectResults, savedObjectsToImport, [], new Map());
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -68,7 +64,6 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "2",
-          "managed": false,
           "meta": Object {
             "title": "My Dashboard 2",
           },
@@ -82,7 +77,6 @@ describe('extractErrors()', () => {
             "type": "unknown",
           },
           "id": "3",
-          "managed": false,
           "meta": Object {
             "title": "My Dashboard 3",
           },
@@ -94,7 +88,6 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "4",
-          "managed": false,
           "meta": Object {
             "title": "My Dashboard 4",
           },
@@ -105,7 +98,12 @@ describe('extractErrors()', () => {
   });
 
   test('extracts errors from legacy URL alias saved objects', () => {
-    const savedObjects: Array<CreatedObject<unknown>> = [
+    const savedObjectsToImport: Array<SavedObject<any>> = [
+      { id: '1', type: 'dashboard', attributes: { title: 'My Dashboard 1' }, references: [] },
+      { id: '2', type: 'dashboard', attributes: { title: 'My Dashboard 2' }, references: [] },
+      { id: '3', type: 'dashboard', attributes: { title: 'My Dashboard 3' }, references: [] },
+    ];
+    const savedObjectResults: Array<RemappedImportResult<unknown>> = [
       {
         id: '1',
         type: 'dashboard',
@@ -117,10 +115,7 @@ describe('extractErrors()', () => {
       {
         id: '2',
         type: 'dashboard',
-        attributes: { title: 'My Dashboard 2' },
-        references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '2').output.payload,
-        managed: false,
       },
       {
         id: '3',
@@ -166,19 +161,17 @@ describe('extractErrors()', () => {
         },
       ],
     ]);
-    const legacyUrlAliasResults = [
+    const legacyUrlAliasResults: SavedObjectBulkResult[] = [
       { type: LEGACY_URL_ALIAS_TYPE, id: 'default:dashboard:1', attributes: {}, references: [] },
       {
         type: LEGACY_URL_ALIAS_TYPE,
         id: 'default:dashboard:3',
-        attributes: {},
-        references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '3').output.payload,
       },
     ];
     const result = extractErrors(
-      savedObjects,
-      savedObjects,
+      savedObjectResults,
+      savedObjectsToImport,
       legacyUrlAliasResults,
       legacyUrlAliasSavedObjects
     );
@@ -189,7 +182,6 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "2",
-          "managed": false,
           "meta": Object {
             "title": "My Dashboard 2",
           },

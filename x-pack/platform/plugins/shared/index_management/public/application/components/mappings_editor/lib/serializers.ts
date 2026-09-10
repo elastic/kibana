@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SerializerFunc } from '../shared_imports';
+import type { SerializerFunc } from '../shared_imports';
 import {
   PARAMETER_SERIALIZERS,
   PARAMETER_DESERIALIZERS,
 } from '../components/document_fields/field_parameters';
-import { Field, DataType } from '../types';
+import type { Field, DataType } from '../types';
 import { INDEX_DEFAULT } from '../constants';
 import { getTypeMetaFromSource } from './utils';
 

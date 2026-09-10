@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { IVectorLayer } from '../vector_layer';
+import type { IVectorLayer } from '../vector_layer';
 import { GeoJsonVectorLayer } from '../geojson_vector_layer';
-import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
+import type { IVectorStyle } from '../../../styles/vector/vector_style';
+import { VectorStyle } from '../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
-import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
-import { IStyleProperty } from '../../../styles/vector/properties/style_property';
+import type { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import type { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
   COUNT_PROP_NAME,
   GRID_RESOLUTION,
@@ -26,11 +28,11 @@ import {
 } from '../../../../../common/constants';
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { IESSource } from '../../../sources/es_source';
-import { ISource } from '../../../sources/source';
-import { DataRequestContext } from '../../../../actions';
+import type { IESSource } from '../../../sources/es_source';
+import type { ISource } from '../../../sources/source';
+import type { DataRequestContext } from '../../../../actions';
 import { DataRequestAbortError } from '../../../util/data_request';
-import {
+import type {
   CustomIcon,
   VectorStyleDescriptor,
   SizeDynamicOptions,
@@ -40,10 +42,11 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStylePropertiesDescriptor,
+  ESGeoGridSourceDescriptor,
 } from '../../../../../common/descriptor_types';
-import { IVectorSource } from '../../../sources/vector_source';
-import { LICENSED_FEATURES } from '../../../../licensed_features';
-import { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
+import type { IVectorSource } from '../../../sources/vector_source';
+import type { LICENSED_FEATURES } from '../../../../licensed_features';
+import type { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
 import { isSearchSourceAbortError } from '../../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
@@ -60,7 +63,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
     resolution: GRID_RESOLUTION.COARSE,
-  });
+  }) as Writable<ESGeoGridSourceDescriptor>;
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
   clusterSourceDescriptor.applyForceRefresh = documentSource.getApplyForceRefresh();
@@ -146,9 +149,11 @@ function getClusterStyleDescriptor(
                 ),
               }
             : undefined;
+
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.DYNAMIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error — style types are complex unions/intersections, TS expects fields not present
+          // at runtime when cloning options
           options: {
             ...options,
             field,
@@ -158,7 +163,8 @@ function getClusterStyleDescriptor(
         // copy static styles to cluster style
         clusterStyleDescriptor.properties[styleName] = {
           type: STYLE_TYPE.STATIC,
-          // @ts-expect-error upgrade typescript v5.1.6
+          // @ts-expect-error — style types are complex unions/intersections, TS expects fields not present
+          // at runtime when cloning options
           options: { ...styleProperty.getOptions() },
         };
       }
@@ -179,7 +185,10 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     options: Partial<VectorLayerDescriptor>,
     mapColors: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(options, mapColors);
+    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
+      options,
+      mapColors
+    ) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type = LAYER_TYPE.BLENDED_VECTOR;
     return layerDescriptor;
   }
@@ -246,7 +255,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     if (clones.length === 0) {
       return [];
     }
-    const clonedDescriptor = clones[0];
+    const clonedDescriptor = clones[0] as Writable<VectorLayerDescriptor>;
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
     const displayName = await super.getDisplayName();

@@ -8,9 +8,9 @@
 import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   DiffableRule,
-  FullRuleDiff,
+  FullThreeWayRuleDiff,
   ThreeWayDiff,
-  RuleFieldsDiff,
+  ThreeWayRuleFieldsDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   MissingVersion,
@@ -22,7 +22,7 @@ import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_as
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 
-import { calculateRuleFieldsDiff } from './calculation/calculate_rule_fields_diff';
+import { calculateThreeWayRuleFieldsDiff } from './calculation/calculate_three_way_rule_fields_diff';
 
 export interface RuleVersions {
   current?: RuleResponse;
@@ -31,7 +31,7 @@ export interface RuleVersions {
 }
 
 export interface CalculateRuleDiffResult {
-  ruleDiff: FullRuleDiff;
+  ruleDiff: FullThreeWayRuleDiff;
   ruleVersions: {
     input: RuleVersions;
     output: {
@@ -80,7 +80,7 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     ? convertRuleToDiffable(convertPrebuiltRuleAssetToRuleResponse(base))
     : undefined;
 
-  const fieldsDiff = calculateRuleFieldsDiff(
+  const fieldsDiff = calculateThreeWayRuleFieldsDiff(
     {
       base_version: diffableBaseVersion || MissingVersion,
       current_version: diffableCurrentVersion,
@@ -117,7 +117,7 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
   };
 };
 
-const getNumberOfFieldsByChangeType = (fieldsDiff: RuleFieldsDiff) =>
+const getNumberOfFieldsByChangeType = (fieldsDiff: ThreeWayRuleFieldsDiff) =>
   Object.values<ThreeWayDiff<unknown>>(fieldsDiff).reduce<{
     numberFieldsWithUpdates: number;
     numberFieldsWithConflicts: number;

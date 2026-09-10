@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
-import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
+import type { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { getAllowedTypes } from '../lib';
-import {
+import type {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
@@ -65,40 +67,44 @@ export const mountManagementSection = async ({
     return children! as React.ReactElement;
   };
 
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
+
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
-      <Router history={history}>
-        <Routes>
-          <Route path={'/:type/:id'} exact={true}>
-            <RedirectToHomeIfUnauthorized>
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <SavedObjectsEditionPage
-                  coreStart={coreStart}
-                  setBreadcrumbs={setBreadcrumbs}
-                  history={history}
-                />
-              </Suspense>
-            </RedirectToHomeIfUnauthorized>
-          </Route>
-          <Route path={'/'} exact={false}>
-            <RedirectToHomeIfUnauthorized>
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <SavedObjectsTablePage
-                  coreStart={coreStart}
-                  taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
-                  spacesApi={spacesApi}
-                  dataStart={data}
-                  dataViewsApi={dataViews}
-                  actionRegistry={getActionServiceStart()}
-                  columnRegistry={getColumnServiceStart()}
-                  allowedTypes={allowedObjectTypes}
-                  setBreadcrumbs={setBreadcrumbs}
-                />
-              </Suspense>
-            </RedirectToHomeIfUnauthorized>
-          </Route>
-        </Routes>
-      </Router>
+      <KibanaReactContextProvider>
+        <Router history={history}>
+          <Routes>
+            <Route path={'/:type/:id'} exact={true}>
+              <RedirectToHomeIfUnauthorized>
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <SavedObjectsEditionPage
+                    coreStart={coreStart}
+                    setBreadcrumbs={setBreadcrumbs}
+                    history={history}
+                  />
+                </Suspense>
+              </RedirectToHomeIfUnauthorized>
+            </Route>
+            <Route path={'/'} exact={false}>
+              <RedirectToHomeIfUnauthorized>
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <SavedObjectsTablePage
+                    coreStart={coreStart}
+                    taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
+                    spacesApi={spacesApi}
+                    dataStart={data}
+                    dataViewsApi={dataViews}
+                    actionRegistry={getActionServiceStart()}
+                    columnRegistry={getColumnServiceStart()}
+                    allowedTypes={allowedObjectTypes}
+                    setBreadcrumbs={setBreadcrumbs}
+                  />
+                </Suspense>
+              </RedirectToHomeIfUnauthorized>
+            </Route>
+          </Routes>
+        </Router>
+      </KibanaReactContextProvider>
     </KibanaRenderContextProvider>,
     element
   );

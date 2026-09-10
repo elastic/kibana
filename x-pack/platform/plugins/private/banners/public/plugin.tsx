@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { Banner } from './components';
 import { getBannerInfo } from './get_banner_info';
-import { BannerPluginStartDependencies } from './types';
+import type { BannerPluginStartDependencies } from './types';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, BannerPluginStartDependencies> {
   constructor(_context: PluginInitializerContext) {}
@@ -19,13 +18,13 @@ export class BannersPlugin implements Plugin<{}, {}, {}, BannerPluginStartDepend
     return {};
   }
 
-  start({ chrome, http, rendering }: CoreStart, { screenshotMode }: BannerPluginStartDependencies) {
+  start({ chrome, http }: CoreStart, { screenshotMode }: BannerPluginStartDependencies) {
     if (!(screenshotMode?.isScreenshotMode() ?? false)) {
       getBannerInfo(http).then(
         ({ allowed, banner }) => {
           if (allowed && banner.placement === 'top') {
             chrome.setHeaderBanner({
-              content: toMountPoint(<Banner bannerConfig={banner} />, rendering),
+              content: <Banner bannerConfig={banner} />,
             });
           }
         },

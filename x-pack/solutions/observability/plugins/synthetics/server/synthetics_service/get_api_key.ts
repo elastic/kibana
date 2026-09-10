@@ -9,12 +9,12 @@ import type {
   SecurityCreateApiKeyResponse,
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { syntheticsServiceAPIKeySavedObject } from '../saved_objects/service_api_key';
-import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
+import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
@@ -43,7 +43,10 @@ export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
   server: SyntheticsServerSetup;
-}): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
+}): Promise<{
+  apiKey?: SyntheticsServiceApiKey;
+  isValid: boolean;
+}> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
@@ -67,7 +70,6 @@ export const getAPIKeyForSyntheticsService = async ({
       if (!hasPermissions) {
         return { isValid: false, apiKey };
       }
-
       return { apiKey, isValid };
     }
   } catch (error) {

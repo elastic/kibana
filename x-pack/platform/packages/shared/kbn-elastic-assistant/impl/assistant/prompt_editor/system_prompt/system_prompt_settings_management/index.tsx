@@ -14,18 +14,17 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { useConversationsUpdater } from '../../../settings/use_settings_updater/use_conversations_updater';
-import {
-  SystemPromptSettings,
-  useSystemPromptUpdater,
-} from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import { useSystemPromptUpdater } from '../../../settings/use_settings_updater/use_system_prompt_updater';
 import { useAssistantContext, useFetchCurrentUserConversations } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
-import { AIConnector } from '../../../../connectorland/connector_selector';
+import type { AIConnector } from '../../../../connectorland/connector_selector';
 import { useFetchPrompts } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -63,6 +62,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   } = useFetchCurrentUserConversations({
     http,
     isAssistantEnabled,
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
 
   const refetchAll = useCallback(() => {
@@ -78,6 +79,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
   const [deletedPrompt, setDeletedPrompt] = useState<PromptResponse | null>();
+  const confirmModalTitleId = useGeneratedHtmlId();
+  const confirmModalDescriptionId = useGeneratedHtmlId();
 
   const {
     conversationsSettingsBulkActions,
@@ -216,7 +219,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
             <EuiText size="m">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={isTableLoading}>
+            <EuiButton iconType="plusCircle" onClick={onCreate} disabled={isTableLoading}>
               {i18n.CREATE_SYSTEM_PROMPT_LABEL}
             </EuiButton>
           </EuiFlexItem>
@@ -224,6 +227,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          tableCaption={i18n.SYSTEM_PROMPTS_TABLE_CAPTION}
           columns={columns}
           items={systemPromptSettings}
           onTableChange={onTableChange}
@@ -258,9 +262,10 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
       </Flyout>
       {deleteConfirmModalVisibility && deletedPrompt?.name && (
         <EuiConfirmModal
-          aria-labelledby={confirmationTitle}
+          aria-labelledby={confirmModalTitleId}
+          aria-describedby={confirmModalDescriptionId}
           title={confirmationTitle}
-          titleProps={{ id: deletedPrompt?.id ?? undefined }}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={onDeleteCancelled}
           onConfirm={onDeleteConfirmed}
           cancelButtonText={CANCEL}
@@ -268,7 +273,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
-          <p>{i18n.DELETE_SYSTEM_PROMPT_MODAL_DESCRIPTION}</p>
+          <p id={confirmModalDescriptionId}>{i18n.DELETE_SYSTEM_PROMPT_MODAL_DESCRIPTION}</p>
         </EuiConfirmModal>
       )}
     </>

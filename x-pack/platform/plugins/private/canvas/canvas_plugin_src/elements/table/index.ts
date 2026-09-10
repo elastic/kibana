@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const table: ElementFactory = () => ({
   name: 'table',
   displayName: 'Data table',
   type: 'chart',
   help: 'A scrollable grid for displaying data in a tabular format',
-  icon: 'visTable',
+  icon: 'table',
   expression: `kibana
 | selectFilter
 | demodata

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { nodeTypes } from '../node_types';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import type { KqlContext, KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
 
 import { parse as parseKuery } from '../grammar';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 
 const fromExpression = (
   expression: string | estypes.QueryDslQueryContainer,
@@ -42,8 +42,11 @@ export const fromLiteralExpression = (
   );
 };
 
+/**
+ * @throws an exception is thrown when this function receives malformed input.
+ */
 export const fromKueryExpression = (
-  expression: string | estypes.QueryDslQueryContainer,
+  expression: string | NonNullable<estypes.QueryDslQueryContainer>,
   parseOptions: Partial<KueryParseOptions> = {}
 ): KueryNode => {
   try {

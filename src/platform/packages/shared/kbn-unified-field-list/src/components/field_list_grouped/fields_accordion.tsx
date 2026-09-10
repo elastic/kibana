@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo, Fragment } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -16,11 +17,12 @@ import {
   EuiAccordion,
   EuiLoadingSpinner,
   EuiIconTip,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
-import './fields_accordion.scss';
+import type { FieldsGroupNames } from '../../types';
+import { type FieldListItem, type RenderFieldItemParams } from '../../types';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
@@ -65,24 +67,12 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   showExistenceFetchTimeout,
   extraAction,
 }: FieldsAccordionProps<T>) {
-  const renderButton = useMemo(() => {
-    const titleClassname = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      unifiedFieldList__fieldsAccordion__titleTooltip: !!helpTooltip,
-    });
+  const styles = useMemoCss(componentStyles);
 
+  const renderButton = useMemo(() => {
     return (
       <EuiText size="xs">
-        <strong
-          className={titleClassname}
-          aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
-            defaultMessage:
-              '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
-            values: { label, fieldsCount },
-          })}
-        >
-          {label}
-        </strong>
+        <strong css={!!helpTooltip ? styles.titleTooltip : undefined}>{label}</strong>
         {!!helpTooltip && (
           <EuiIconTip
             aria-label={helpTooltip}
@@ -98,7 +88,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         )}
       </EuiText>
     );
-  }, [label, helpTooltip, fieldsCount]);
+  }, [label, helpTooltip, styles.titleTooltip]);
 
   const accordionExtraAction = useMemo(() => {
     if (showExistenceFetchError) {
@@ -155,6 +145,10 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       id={id}
       buttonProps={{
         id: buttonId,
+        'aria-label': i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
+          defaultMessage: '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
+          values: { label, fieldsCount },
+        }),
       }}
       buttonContent={renderButton}
       extraAction={accordionExtraAction}
@@ -191,3 +185,10 @@ export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerF
 
 export const getFieldKey = (field: FieldListItem): string =>
   `${field.name}-${field.displayName}-${field.type}`;
+
+const componentStyles = {
+  titleTooltip: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginRight: euiTheme.size.xs,
+    }),
+};

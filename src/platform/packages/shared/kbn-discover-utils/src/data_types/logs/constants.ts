@@ -8,7 +8,7 @@
  */
 
 import { fieldConstants } from '../..';
-import { SmartFieldGridColumnOptions } from './types';
+import type { SmartFieldGridColumnOptions } from './types';
 
 export * from '../../field_constants';
 
@@ -80,6 +80,11 @@ export const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
 export const SERVICE_NAME_FIELDS = ['service.name', 'service_name'];
 export const AGENT_NAME_FIELD = 'agent.name';
 
+// Regex to detect log level terms
+// Includes common abbreviations/misspellings like err, eror, dbg, dbug
+export const LOG_LEVEL_REGEX =
+  /\b(trace|trac|debug|dbg|dbug|info|inf|notice|noti|warning|warn|error|err|eror|critical|crit|alert|emergency|emerg|fatal|fat)\b/gi;
+
 export const RESOURCE_FIELDS = [
   fieldConstants.SERVICE_NAME_FIELD,
   fieldConstants.CONTAINER_NAME_FIELD,
@@ -89,6 +94,7 @@ export const RESOURCE_FIELDS = [
   fieldConstants.ORCHESTRATOR_CLUSTER_ID_FIELD,
   fieldConstants.CONTAINER_ID_FIELD,
   fieldConstants.AGENT_NAME_FIELD,
+  fieldConstants.OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 ] as const;
 export const TRACE_FIELDS = [
   fieldConstants.SERVICE_NAME_FIELD,

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPage,
   EuiPageBody,
@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const App = ({ appName }: { appName: string }) => (
   <EuiPage>
@@ -43,11 +43,11 @@ const App = ({ appName }: { appName: string }) => (
 );
 
 export const renderApp = (appName: string, { element }: AppMountParameters, core: CoreStart) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <App appName={appName} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -10,7 +10,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
-import { DataViewEditorProps } from '../types';
+import type { DataViewEditorProps } from '../types';
 
 const DataViewFlyoutContentContainer = lazy(() => import('./data_view_flyout_content_container'));
 

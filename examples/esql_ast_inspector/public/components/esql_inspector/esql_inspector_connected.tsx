@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EsqlInspectorState } from './esql_inspector_state';
+import type { EsqlInspectorState } from './esql_inspector_state';
 import { Editor } from './components/editor';
 import { Preview } from './components/preview';
 

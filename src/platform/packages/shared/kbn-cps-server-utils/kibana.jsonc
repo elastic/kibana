@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/cps-server-utils",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

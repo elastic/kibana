@@ -6,17 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LegacyMetricState } from '@kbn/lens-plugin/common';
+import type { LegacyMetricState } from '@kbn/lens-plugin/common';
 import { euiPaletteForStatus } from '@elastic/eui';
 import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from '../constants/field_names/synthetics';
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 
 export const FINAL_SUMMARY_KQL = 'summary.final_attempt: true';
+
+/** Same document set as the Synthetics Errors table: summary docs, not run-once, down state. */
+export const ERROR_STATES_KQL =
+  'summary: * and not run_once: * and monitor.status: "down" and state.up: 0';
+
 export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'line',
@@ -110,6 +115,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary: *' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_successful',
@@ -122,11 +128,12 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary.down: 0' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_errors',
-        label: i18n.translate('xpack.exploratoryView.expView.errors', {
-          defaultMessage: 'Errors',
+        label: i18n.translate('xpack.exploratoryView.expView.errorStatesLabel', {
+          defaultMessage: 'Error states',
         }),
         metricStateOptions: {
           titlePosition: 'bottom',
@@ -134,7 +141,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: `unique_count(state.id, kql='${FINAL_SUMMARY_KQL} and monitor.status: "down"')`,
+        formula: `unique_count(state.id, kql='${ERROR_STATES_KQL}')`,
         format: 'number',
       },
       {
@@ -149,8 +156,9 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         columnFilter: {
           language: 'kuery',
-          query: 'summary.status: down and summary.final_attempt: true',
+          query: 'summary.status: down',
         },
+        emptyAsNull: false,
       },
     ],
     labels: FieldLabels,

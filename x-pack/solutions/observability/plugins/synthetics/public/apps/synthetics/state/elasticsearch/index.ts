@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { ESSearchResponse } from '@kbn/es-types';
+import { createReducer } from 'redux-toolkit-v1';
+import type { ESSearchResponse } from '@kbn/es-types';
 
-import { IHttpSerializedFetchError } from '..';
+import type { IHttpSerializedFetchError } from '..';
 import { executeEsQueryAction } from './actions';
 
 export interface QueriesState {

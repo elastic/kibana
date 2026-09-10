@@ -9,7 +9,7 @@ import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
 import { useCspBenchmarkIntegrationsV1 } from '../../pages/benchmarks/use_csp_benchmark_integrations';
-import { PostureTypes } from '../../../common/types_old';
+import type { PostureTypes } from '../../../common/types_old';
 
 export const useCISIntegrationPoliciesLink = ({
   postureType,

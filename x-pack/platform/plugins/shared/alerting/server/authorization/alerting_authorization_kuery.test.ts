@@ -605,8 +605,6 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
         },
@@ -624,8 +622,6 @@ describe('asFiltersBySpaceId', () => {
           {
             type: AlertingAuthorizationFilterType.KQL,
             fieldNames: {
-              ruleTypeId: 'path.to.rule_type_id',
-              consumer: 'consumer-field',
               spaceIds: 'path.to.space.id',
             },
           },
@@ -640,10 +636,7 @@ describe('asFiltersBySpaceId', () => {
       asFiltersBySpaceId(
         {
           type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-          },
+          fieldNames: {},
         },
         'space1'
       )
@@ -656,8 +649,6 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
         },
@@ -669,28 +660,35 @@ describe('asFiltersBySpaceId', () => {
 
 describe('ensureFieldIsSafeForQuery', () => {
   test('throws if field contains character that isnt safe in a KQL query', () => {
-    expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', 'alert-*')).toThrow(
       `expected id not to include invalid character: *`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
-      `expected id not to include invalid character: <=`
+    expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrow(
+      `expected id not to include invalid characters: <, =`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
-      `expected id not to include invalid character: >=`
+    expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrow(
+      `expected id not to include invalid characters: >, =`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrow(
       `expected id not to include whitespace and invalid character: :`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', ') or alertid:123')).toThrow(
       `expected id not to include whitespace and invalid characters: ), :`
     );
 
-    expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrowError(
+    expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrow(
       `expected id not to include whitespace`
+    );
+  });
+
+  test('throws if field length exceeds MAX_LENGTH', () => {
+    const invalidValue = 'a'.repeat(1001);
+    expect(() => ensureFieldIsSafeForQuery('id', invalidValue)).toThrow(
+      'Input exceeds maximum allowed length of 1000 characters'
     );
   });
 

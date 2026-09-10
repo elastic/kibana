@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { InputControlVisDependencies } from './plugin';
-import { InputControlRenderValue } from './input_control_fn';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type { InputControlVisDependencies } from './plugin';
+import type { InputControlRenderValue } from './input_control_fn';
 import type { InputControlVisControllerType } from './vis_controller';
 
 const inputControlVisRegistry = new Map<HTMLElement, InputControlVisControllerType>();

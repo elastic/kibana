@@ -9,6 +9,7 @@
 
 export {
   useDataGridInTableSearch,
+  InTableSearchCellContext,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
 } from './src';
@@ -21,3 +22,5 @@ export {
   INPUT_TEST_SUBJ,
   HIGHLIGHT_CLASS_NAME,
 } from './src/constants';
+
+export type { InTableSearchRestorableState } from './src/types';

@@ -18,7 +18,7 @@ import { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
  * about how we craft the queries (e.g. scripted fields)
  */
 export const toElasticsearchQuery = (...params: Parameters<typeof astToElasticsearchQuery>) => {
-  return astToElasticsearchQuery(...params) as estypes.QueryDslQueryContainer;
+  return astToElasticsearchQuery(...params) as NonNullable<estypes.QueryDslQueryContainer>;
 };
 
 export { KQLSyntaxError } from './kuery_syntax_error';
@@ -29,5 +29,7 @@ export {
   escapeQuotes,
   getKqlFieldNames,
   getKqlFieldNamesFromExpression,
+  getIsKqlFreeText,
+  getIsKqlFreeTextExpression,
 } from './utils';
 export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';

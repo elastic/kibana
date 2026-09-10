@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
   EuiLink,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   formatDate,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -27,8 +27,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { Ping } from '../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { Ping } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const StdErrorLogs = ({
   checkGroup,
@@ -37,6 +37,7 @@ export const StdErrorLogs = ({
   summaryMessage,
   hideTitle = false,
   pageSize = 5,
+  remoteName,
 }: {
   checkGroup?: string;
   timestamp?: string;
@@ -44,7 +45,9 @@ export const StdErrorLogs = ({
   summaryMessage?: string;
   hideTitle?: boolean;
   pageSize?: number;
+  remoteName?: string;
 }) => {
+  const isRemote = Boolean(remoteName);
   const columns = [
     {
       field: '@timestamp',
@@ -70,7 +73,7 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ checkGroup });
+  const { items, loading } = useStdErrorLogs({ checkGroup, remoteName });
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
 
@@ -112,22 +115,22 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
-                <EuiButtonEmpty
-                  data-test-subj="syntheticsStdErrorLogsButton"
-                  href={discoverLink}
-                  iconType="discoverApp"
-                  isDisabled={!discoverLink}
-                >
-                  {VIEW_IN_DISCOVER_LABEL}
-                </EuiButtonEmpty>
-              </EuiLink>
+              <EuiToolTip content={isRemote ? VIEW_IN_DISCOVER_REMOTE_TOOLTIP : undefined}>
+                <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
+                  <EuiButtonEmpty
+                    data-test-subj="syntheticsStdErrorLogsButton"
+                    href={isRemote ? undefined : discoverLink}
+                    iconType="discoverApp"
+                    isDisabled={isRemote || !discoverLink}
+                  >
+                    {VIEW_IN_DISCOVER_LABEL}
+                  </EuiButtonEmpty>
+                </EuiLink>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           {summaryMessage && (
-            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
-              <p>{summaryMessage}</p>
-            </EuiCallOut>
+            <KbnDangerCallout announceOnMount title={ERROR_SUMMARY_LABEL} text={summaryMessage} />
           )}
         </>
       )}
@@ -150,6 +153,7 @@ export const StdErrorLogs = ({
           pageSizeOptions: [2, 5, 10, 20, 50],
         }}
         onTableChange={onTableChange}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );
@@ -171,6 +175,13 @@ export const VIEW_IN_DISCOVER_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.viewInDiscover',
   {
     defaultMessage: 'View in discover',
+  }
+);
+
+export const VIEW_IN_DISCOVER_REMOTE_TOOLTIP = i18n.translate(
+  'xpack.synthetics.monitorList.viewInDiscover.remoteUnavailable',
+  {
+    defaultMessage: 'Open on the source cluster to view these logs in Discover.',
   }
 );
 

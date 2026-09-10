@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
+import type { PartialTheme } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -13,15 +14,15 @@ import {
   LegendValue,
   LineAnnotation,
   LineSeries,
-  PartialTheme,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import dateMath from '@kbn/datemath';
 import moment from 'moment-timezone';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
@@ -32,7 +33,8 @@ import { useGetWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
-import { SectionError, Error } from '../../../../components';
+import type { Error } from '../../../../components';
+import { SectionError } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
 
 const customTheme = (): PartialTheme => {
@@ -266,20 +268,21 @@ export const WatchVisualization = () => {
             })}
           </Chart>
         ) : (
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.watcher.thresholdPreviewChart.noDataTitle"
                 defaultMessage="No data"
               />
             }
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
-              defaultMessage="Your index and condition did not return any data."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
+                defaultMessage="Your index and condition did not return any data."
+              />
+            }
+          />
         )}
         <EuiSpacer size="l" />
       </div>

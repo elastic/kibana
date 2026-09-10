@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { NotFoundRouteException } from '@kbn/typed-react-router-config';
-import { EuiErrorBoundary } from '@elastic/eui';
+import {
+  InvalidRouteParamsException,
+  NotFoundRouteException,
+} from '@kbn/typed-react-router-config';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { useLocation } from 'react-router-dom';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmErrorBoundary({ children }: { children?: React.ReactNode }) {
@@ -36,8 +39,17 @@ class ErrorBoundary extends React.Component<
     return { error };
   }
 
+  componentDidCatch(error: Error) {
+    if (error instanceof InvalidRouteParamsException) {
+      throw error;
+    }
+  }
+
   render() {
     if (this.state.error) {
+      if (this.state.error instanceof InvalidRouteParamsException) {
+        return null;
+      }
       return <ErrorWithTemplate error={this.state.error} />;
     }
 
@@ -65,9 +77,9 @@ function ErrorWithTemplate({ error }: { error: Error }) {
 
   return (
     <ObservabilityPageTemplate pageHeader={pageHeader}>
-      <EuiErrorBoundary>
+      <KibanaErrorBoundary>
         <DummyComponent error={error} />
-      </EuiErrorBoundary>
+      </KibanaErrorBoundary>
     </ObservabilityPageTemplate>
   );
 }

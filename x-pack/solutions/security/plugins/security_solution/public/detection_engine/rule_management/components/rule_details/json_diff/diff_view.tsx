@@ -57,7 +57,13 @@ interface UseExpandReturn {
  */
 const useExpand = (hunks: HunkData[], oldSource: string): UseExpandReturn => {
   const [hunksWithSourceExpanded, expandRange] = useSourceExpansion(hunks, oldSource);
-  const hunksWithMinLinesCollapsed = useMinCollapsedLines(0, hunksWithSourceExpanded, oldSource);
+  // react-diff-view's expandCollapsedBlockBy crashes when hunks is empty but oldSource is non-empty.
+  // Passing empty string triggers its early-return guard, avoiding the bug.
+  const hunksWithMinLinesCollapsed = useMinCollapsedLines(
+    0,
+    hunksWithSourceExpanded,
+    hunksWithSourceExpanded.length > 0 ? oldSource : ''
+  );
 
   return {
     expandRange,
@@ -96,7 +102,7 @@ const useTokens = (
   }
 };
 
-const renderGutter: RenderGutter = ({ change }) => {
+const defaultRenderGutter: RenderGutter = ({ change }) => {
   /*
     Custom gutter: rendering "+" or "-" so the diff is readable by colorblind people.
   */
@@ -265,6 +271,8 @@ export interface DiffViewProps extends Partial<DiffProps> {
     https://github.com/otakustay/react-diff-view/blob/8a2dbdf97af0890aff6e563ed435e7da13c5e7b1/README.md#parse-diff-text
   */
   zip?: boolean;
+  renderGutter?: RenderGutter;
+  'data-test-subj'?: string;
 }
 
 export const DiffView = ({
@@ -273,6 +281,8 @@ export const DiffView = ({
   diffMethod = DiffMethod.WORDS_WITH_SPACE,
   viewType = 'split',
   zip = false,
+  'data-test-subj': dataTestSubj,
+  renderGutter,
 }: DiffViewProps) => {
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
@@ -308,23 +318,25 @@ export const DiffView = ({
 
   return (
     <CustomStyles>
-      <Diff
-        /*
+      <div data-test-subj={dataTestSubj}>
+        <Diff
+          /*
           "diffType": can be either 'add', 'delete', 'modify', 'rename' or 'copy'.
           Passing 'add' or 'delete' would skip rendering one of the sides in split view.
         */
-        diffType={diffFile.type}
-        viewType={viewType}
-        hunks={hunks}
-        renderGutter={renderGutter}
-        tokens={tokens}
-        className={tableClassName}
-        gutterClassName={GUTTER_CLASS_NAME}
-        codeClassName={CODE_CLASS_NAME}
-      >
-        {/* eslint-disable-next-line @typescript-eslint/no-shadow */}
-        {(hunks) => <Hunks hunks={hunks} oldSource={oldSource} expandRange={expandRange} />}
-      </Diff>
+          diffType={diffFile.type}
+          viewType={viewType}
+          hunks={hunks}
+          renderGutter={renderGutter ?? defaultRenderGutter}
+          tokens={tokens}
+          className={tableClassName}
+          gutterClassName={GUTTER_CLASS_NAME}
+          codeClassName={CODE_CLASS_NAME}
+        >
+          {/* eslint-disable-next-line @typescript-eslint/no-shadow */}
+          {(hunks) => <Hunks hunks={hunks} oldSource={oldSource} expandRange={expandRange} />}
+        </Diff>
+      </div>
     </CustomStyles>
   );
 };

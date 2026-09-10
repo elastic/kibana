@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { APIRoutes } from '../common/api_routes';
 
 import { DEFAULT_PAGE_VALUE } from '../common/pagination';
@@ -22,6 +22,16 @@ import { isQueryRulesetExist } from './lib/is_query_ruleset_exist';
 import { putRuleset } from './lib/put_query_rules_ruleset_set';
 import { errorHandler } from './utils/error_handler';
 import { checkPrivileges } from './utils/privilege_check';
+
+const RESOURCE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
+
+const resourceIdSchema = schema.string({
+  maxLength: 512,
+  validate: (value) =>
+    RESOURCE_ID_REGEX.test(value)
+      ? undefined
+      : 'must only contain letters, numbers, hyphens (-), and underscores (_)',
+});
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -47,21 +57,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+
+      await checkPrivileges(core, response);
       const result = await fetchQueryRulesSets(asCurrentUser, {
         from: request.query.from,
         size: request.query.size,
@@ -87,7 +84,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
       },
     },
@@ -96,21 +93,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+      await checkPrivileges(core, response);
       const rulesetData = await fetchQueryRulesRuleset(asCurrentUser, request.params.ruleset_id);
 
       if (!rulesetData) {
@@ -141,41 +124,41 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
         }),
-        // TODO: body is not going to be nullable. It will be fixed in the followup PR
-        body: schema.nullable(
-          schema.maybe(
-            schema.object({
-              rules: schema.arrayOf(
-                schema.object({
-                  rule_id: schema.string(),
-                  type: schema.string(),
-                  criteria: schema.arrayOf(
-                    schema.object({
-                      type: schema.string(),
-                      metadata: schema.maybe(schema.string()),
-                      values: schema.maybe(schema.arrayOf(schema.string())),
-                    })
-                  ),
-                  actions: schema.object({
-                    ids: schema.maybe(schema.arrayOf(schema.string())),
-                    docs: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          _id: schema.string(),
-                          _index: schema.string(),
-                        })
-                      )
-                    ),
+        body: schema.maybe(
+          schema.object({
+            rules: schema.arrayOf(
+              schema.object({
+                rule_id: schema.string({ maxLength: 512 }),
+                type: schema.string({ maxLength: 512 }),
+                criteria: schema.arrayOf(
+                  schema.object({
+                    type: schema.string({ maxLength: 512 }),
+                    metadata: schema.maybe(schema.string({ maxLength: 4096 })),
+                    values: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
                   }),
-                })
-              ),
-            })
-          )
+                  { maxSize: 100 }
+                ),
+                actions: schema.object({
+                  ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+                  docs: schema.maybe(
+                    schema.arrayOf(
+                      schema.object({
+                        _id: schema.string({ maxLength: 512 }),
+                        _index: schema.string({ maxLength: 255 }),
+                      }),
+                      { maxSize: 10000 }
+                    )
+                  ),
+                }),
+              }),
+              { maxSize: 100 }
+            ),
+          })
         ),
       },
     },
@@ -184,24 +167,11 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+      await checkPrivileges(core, response);
+
       const rulesetId = request.params.ruleset_id;
       const forceWrite = request.query.forceWrite;
-      const rules = request.body?.rules as QueryRulesQueryRuleset['rules'] | undefined;
+      const rules = request.body?.rules as QueryRulesQueryRuleset['rules'];
       const isExisting = await isQueryRulesetExist(asCurrentUser, rulesetId);
       if (isExisting && !forceWrite) {
         return response.customError({
@@ -234,7 +204,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          rulesetId: schema.string(),
+          rulesetId: resourceIdSchema,
         }),
       },
     },
@@ -271,7 +241,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
+          ruleset_id: resourceIdSchema,
         }),
       },
     },
@@ -280,13 +250,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
+      await checkPrivileges(core, response);
+
       const rulesetId = request.params.ruleset_id;
       const result = await deleteRuleset(asCurrentUser, rulesetId);
       return response.ok({
@@ -311,8 +276,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
-          rule_id: schema.string(),
+          ruleset_id: resourceIdSchema,
+          rule_id: resourceIdSchema,
         }),
       },
     },
@@ -321,13 +286,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
+      await checkPrivileges(core, response);
+
       const rulesetId = request.params.ruleset_id;
       const ruleId = request.params.rule_id;
       const result = await deleteRulesetRule(asCurrentUser, rulesetId, ruleId);
@@ -353,8 +313,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          ruleset_id: schema.string(),
-          rule_id: schema.string(),
+          ruleset_id: resourceIdSchema,
+          rule_id: resourceIdSchema,
         }),
       },
     },
@@ -364,21 +324,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+      await checkPrivileges(core, response);
+
       const ruleData = await fetchQueryRulesQueryRule(asCurrentUser, rulesetId, ruleId);
       return response.ok({
         headers: {
@@ -412,21 +359,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+      await checkPrivileges(core, response);
+
       const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
       return response.ok({
         headers: {
@@ -460,21 +394,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+      await checkPrivileges(core, response);
+
       try {
         const document = await asCurrentUser.get({
           index: indexName,
@@ -515,7 +436,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          rulesetId: schema.string(),
+          rulesetId: resourceIdSchema,
         }),
       },
     },
@@ -525,22 +446,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const {
         client: { asCurrentUser },
       } = core.elasticsearch;
-      const user = core.security.authc.getCurrentUser();
-
-      if (!user) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Could not retrieve current user, security plugin is not ready',
-        });
-      }
-      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
-        cluster: ['manage_search_query_rules'],
-      });
-      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
-        return response.forbidden({
-          body: "Your user doesn't have manage_search_query_rules privileges",
-        });
-      }
+      await checkPrivileges(core, response);
 
       for (let i = 0; i < 100; i++) {
         const ruleId = `rule-${Math.floor(Math.random() * 10000)

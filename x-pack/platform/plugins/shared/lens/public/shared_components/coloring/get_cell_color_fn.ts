@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import {
-  ColorMappingInputData,
-  PaletteOutput,
-  PaletteRegistry,
-  getSpecialString,
-  getValueKey,
-} from '@kbn/coloring';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { ColorMappingInputData, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { getSpecialString, getValueKey } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { RawValue } from '@kbn/data-plugin/common';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
 export type CellColorFn = (value: RawValue) => string | null;

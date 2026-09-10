@@ -23,33 +23,31 @@ export function pickLevelFromFlags(
   return options.default || DEFAULT_LOG_LEVEL;
 }
 
-export const LOG_LEVEL_FLAGS = [
-  {
-    name: 'verbose',
-    help: '--verbose, -v      Log verbosely',
-  },
-  {
-    name: 'info',
-    help: "--info             Don't log debug messages",
-  },
-  {
-    name: 'debug',
-    help: '--debug            Log debug messages (less than verbose)',
-  },
-  {
-    name: 'quiet',
-    help: '--quiet            Only log errors',
-  },
-  {
-    name: 'silent',
-    help: "--silent           Don't log anything",
-  },
+export const LOG_LEVEL_FLAGS: Array<{
+  name: 'verbose' | 'info' | 'debug' | 'quiet' | 'silent';
+  flag: string;
+  description: string;
+}> = [
+  { name: 'verbose', flag: '--verbose, -v', description: 'Log verbosely' },
+  { name: 'info', flag: '--info', description: "Don't log debug messages" },
+  { name: 'debug', flag: '--debug', description: 'Log debug messages (less than verbose)' },
+  { name: 'quiet', flag: '--quiet', description: 'Only log errors' },
+  { name: 'silent', flag: '--silent', description: "Don't log anything" },
 ];
 
+export function getLogLevelFlagHelpItems(
+  defaultLogLevel: string = DEFAULT_LOG_LEVEL
+): Array<{ flag: string; description: string }> {
+  return LOG_LEVEL_FLAGS.filter(({ name }) => name !== defaultLogLevel).map(
+    ({ flag, description }) => ({ flag, description })
+  );
+}
+
 export function getLogLevelFlagsHelp(defaultLogLevel: string = DEFAULT_LOG_LEVEL) {
-  return LOG_LEVEL_FLAGS.filter(({ name }) => name !== defaultLogLevel)
-    .map(({ help }) => help)
-    .join('\n');
+  const items = LOG_LEVEL_FLAGS.filter(({ name }) => name !== defaultLogLevel);
+  const maxWidth = Math.max(...items.map(({ flag }) => flag.length));
+  const pad = maxWidth + 2;
+  return items.map(({ flag, description }) => `${flag.padEnd(pad)}${description}`).join('\n');
 }
 
 export type ParsedLogLevel = ReturnType<typeof parseLogLevel>;

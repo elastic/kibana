@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { IconType } from '@elastic/eui';
+import type { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { IconType } from '@elastic/eui';
 
 export interface ResultFieldProps {
   fieldName: string;
   fieldType: string;
   fieldValue: string;
+  dimensions?: number;
+  embeddings?: string;
   iconType?: IconType;
   isExpanded?: boolean;
 }
@@ -28,4 +30,6 @@ export interface FieldProps {
   fieldName: string;
   fieldType: Exclude<MappingProperty['type'], undefined>;
   fieldValue: string;
+  dimensions?: number;
+  embeddings?: string;
 }

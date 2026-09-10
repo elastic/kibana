@@ -9,7 +9,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 import { ConnectorMissingCallout } from '.';
-import { AssistantAvailability } from '../../..';
+import type { AssistantAvailability } from '../../..';
 import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 
 describe('connectorMissingCallout', () => {

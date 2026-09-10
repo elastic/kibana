@@ -13,6 +13,7 @@ import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 
 import { EventCounts } from '.';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../overview_host', () => ({
@@ -31,11 +32,17 @@ describe('EventCounts', () => {
   const from = '2020-01-20T20:49:57.080Z';
   const to = '2020-01-21T20:49:57.080Z';
 
+  beforeEach(() => {
+    OverviewHostMocked.mockClear();
+    OverviewNetworkMocked.mockClear();
+  });
+
   const testProps = {
     filters: [],
     from,
     indexNames: [],
     dataViewSpec: mockDataViewSpec,
+    dataView: createStubDataView({ spec: {} }),
     setQuery: jest.fn(),
     to,
     query: {
@@ -66,5 +73,50 @@ describe('EventCounts', () => {
     expect(OverviewNetworkMocked.mock.calls[0][0].filterQuery).toContain(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
+  });
+
+  test('passes indexNames through to OverviewHost and OverviewNetwork unchanged', () => {
+    // EventCounts itself does not filter indexNames; callers (e.g. overview.tsx) are
+    // responsible for passing event-only patterns. This test verifies the prop flows through.
+    const eventOnlyIndexNames = ['logs-*', 'auditbeat-*'];
+
+    render(
+      <TestProviders>
+        <EventCounts {...testProps} indexNames={eventOnlyIndexNames} />
+      </TestProviders>
+    );
+
+    expect(OverviewHostMocked.mock.calls[0][0].indexNames).toEqual(eventOnlyIndexNames);
+    expect(OverviewNetworkMocked.mock.calls[0][0].indexNames).toEqual(eventOnlyIndexNames);
+  });
+
+  test('alert-backing indices are absent from indexNames when caller passes filtered patterns', () => {
+    // Simulate the filtering done by overview.tsx via filterAlertsFromIndexPatterns.
+    const filteredPatterns = ['logs-*', 'auditbeat-*'];
+
+    render(
+      <TestProviders>
+        <EventCounts {...testProps} indexNames={filteredPatterns} />
+      </TestProviders>
+    );
+
+    const hostIndexNames: string[] = OverviewHostMocked.mock.calls[0][0].indexNames;
+    expect(hostIndexNames.some((p) => p.startsWith('.alerts-security.alerts'))).toBe(false);
+
+    const networkIndexNames: string[] = OverviewNetworkMocked.mock.calls[0][0].indexNames;
+    expect(networkIndexNames.some((p) => p.startsWith('.alerts-security.alerts'))).toBe(false);
+  });
+
+  test('remote cluster–prefixed event patterns are preserved in indexNames (CPS)', () => {
+    const cpsPatterns = ['cluster-a:logs-*', 'cluster-a:auditbeat-*', 'logs-*'];
+
+    render(
+      <TestProviders>
+        <EventCounts {...testProps} indexNames={cpsPatterns} />
+      </TestProviders>
+    );
+
+    expect(OverviewHostMocked.mock.calls[0][0].indexNames).toEqual(cpsPatterns);
+    expect(OverviewNetworkMocked.mock.calls[0][0].indexNames).toEqual(cpsPatterns);
   });
 });

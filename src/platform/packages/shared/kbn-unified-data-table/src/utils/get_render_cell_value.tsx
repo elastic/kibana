@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useContext, memo } from 'react';
+import React, { useCallback, useEffect, useContext, memo, useRef } from 'react';
+import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDataGridCellValueElementProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import {
+import type {
   DataTableColumnsMeta,
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
+import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
+import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer } from '../types';
+import type { CustomCellRenderer, JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
+import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
@@ -46,6 +44,9 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
+  documentsDisplayMode,
+  jsonModeSettings,
+  selectedColumns,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -57,6 +58,9 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
+  documentsDisplayMode: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
+  selectedColumns?: string[];
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -74,29 +78,79 @@ export const getRenderCellValueFn = ({
       columnMeta: columnsMeta?.[columnId],
     });
     const ctx = useContext(UnifiedDataTableContext);
-    const { euiTheme } = useEuiTheme();
-    const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
+    const internalCellProps = useRef<EuiDataGridSetCellProps>({});
+    const customCellProps = useRef<EuiDataGridSetCellProps>({});
+    const CustomCellRenderer = externalCustomRenderers?.[columnId];
+
+    const applyCellProps = useCallback(() => {
+      setCellProps({
+        ...internalCellProps.current,
+        ...customCellProps.current,
+        className: classNames(
+          internalCellProps.current.className,
+          customCellProps.current.className
+        ),
+        style: {
+          ...internalCellProps.current.style,
+          ...customCellProps.current.style,
+        },
+      });
+    }, [setCellProps]);
+
+    const setInternalCellProps = useCallback(
+      (nextCellProps: EuiDataGridSetCellProps = {}) => {
+        internalCellProps.current = nextCellProps;
+        applyCellProps();
+      },
+      [applyCellProps]
+    );
+
+    const setCustomCellProps = useCallback(
+      (nextCellProps: EuiDataGridSetCellProps = {}) => {
+        customCellProps.current = nextCellProps;
+        applyCellProps();
+      },
+      [applyCellProps]
+    );
+
+    useEffect(() => {
+      if (CustomCellRenderer && row) {
+        return () => setCustomCellProps({});
+      }
+
+      setCustomCellProps({});
+    }, [CustomCellRenderer, columnId, row, setCustomCellProps]);
 
     useEffect(() => {
       if (row?.isAnchor) {
-        setCellProps({
-          className: 'unifiedDataTable__cell--highlight',
-          css: { backgroundColor: anchorColor },
-        });
+        setInternalCellProps({ className: 'unifiedDataTable__cell--highlight' });
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
-        setCellProps({
-          className: 'unifiedDataTable__cell--expanded',
-        });
+        setInternalCellProps({ className: 'unifiedDataTable__cell--expanded' });
       } else {
-        setCellProps({ style: undefined });
+        setInternalCellProps({});
       }
-    }, [ctx, row, setCellProps, anchorColor]);
+      // re-apply styles if `columnId` changes, e.g. when reordering columns in the grid
+    }, [ctx, row, setInternalCellProps, columnId]);
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;
     }
 
-    const CustomCellRenderer = externalCustomRenderers?.[columnId];
+    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+
+    if (isSourceColumn && documentsDisplayMode === 'json') {
+      return (
+        <SourceDocumentJsonMode
+          row={row}
+          dataView={dataView}
+          columnsMeta={columnsMeta}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          fieldFormats={fieldFormats}
+          jsonModeSettings={jsonModeSettings}
+          selectedColumns={selectedColumns}
+        />
+      );
+    }
 
     if (CustomCellRenderer) {
       return (
@@ -105,7 +159,7 @@ export const getRenderCellValueFn = ({
             rowIndex={rowIndex}
             columnId={columnId}
             isDetails={isDetails}
-            setCellProps={setCellProps}
+            setCellProps={setCustomCellProps}
             isExpandable={isExpandable}
             isExpanded={isExpanded}
             colIndex={colIndex}
@@ -114,6 +168,7 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
+            columnsMeta={columnsMeta}
           />
         </span>
       );
@@ -136,10 +191,11 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
+        isPlainRecord,
       });
     }
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (isSourceColumn || useTopLevelObjectColumns) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -151,19 +207,21 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
+          columnsMeta={columnsMeta}
         />
       );
     }
 
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        {formatFieldValueReact({
+          value: row.flattened[columnId],
+          hit: row.raw,
+          fieldFormats,
+          dataView,
+          field,
+        })}
+      </span>
     );
   };
 
@@ -187,6 +245,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
+  isPlainRecord,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -195,20 +254,32 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
+  isPlainRecord?: boolean;
 }) {
   const closeButton = (
-    <EuiButtonIcon
-      aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
+    <EuiToolTip
+      content={i18n.translate('unifiedDataTable.grid.closePopover', {
         defaultMessage: `Close popover`,
       })}
-      data-test-subj="docTableClosePopover"
-      iconSize="s"
-      iconType="cross"
-      size="xs"
-      onClick={closePopover}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
+          defaultMessage: `Close popover`,
+        })}
+        data-test-subj="docTableClosePopover"
+        iconSize="s"
+        iconType="cross"
+        size="xs"
+        onClick={closePopover}
+      />
+    </EuiToolTip>
   );
-  if (useTopLevelObjectColumns || field?.type === '_source') {
+  if (
+    useTopLevelObjectColumns ||
+    field?.type === '_source' ||
+    (isPlainRecord && columnId === '_source')
+  ) {
     return (
       <SourcePopoverContent
         row={row}
@@ -219,6 +290,13 @@ function renderPopoverContent({
     );
   }
 
+  const value = row.flattened[columnId];
+
+  const formattedValue =
+    field?.type === 'string' && typeof value === 'string'
+      ? tryPrettyPrintJsonBlocks(value) ?? value
+      : value;
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -228,19 +306,23 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span
-            // formatFieldValue guarantees sanitized values
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: formatFieldValue(
-                row.flattened[columnId],
-                row.raw,
-                fieldFormats,
-                dataView,
-                field
-              ),
-            }}
-          />
+          <div
+            data-test-subj="dataTableExpandCellActionPopoverValue"
+            css={css`
+              white-space: pre-wrap;
+              max-height: 350px;
+              overflow: auto;
+            `}
+            tabIndex={0}
+          >
+            {formatFieldValueReact({
+              value: formattedValue,
+              hit: row.raw,
+              fieldFormats,
+              dataView,
+              field,
+            })}
+          </div>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

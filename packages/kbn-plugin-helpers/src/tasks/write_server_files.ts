@@ -14,7 +14,7 @@ import vfs from 'vinyl-fs';
 import { transformFileStream } from '@kbn/dev-utils';
 import { transformFileWithBabel } from './transform_file_with_babel';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -36,7 +36,7 @@ export async function writeServerFiles({
         '.i18nrc.json',
         ...(plugin.manifest.server
           ? config.serverSourcePatterns || [
-              'yarn.lock',
+              'pnpm-lock.yaml',
               'tsconfig.json',
               'package.json',
               'index.{js,ts}',

@@ -10,7 +10,8 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 interface Props {
   minute?: string;

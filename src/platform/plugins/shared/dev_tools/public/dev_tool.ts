@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
-import { AppUnmount } from '@kbn/core/public';
-import { DevToolsStartServices } from './types';
+import type { AppUnmount } from '@kbn/core/public';
+import type { DevToolsStartServices } from './types';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application
@@ -42,11 +42,6 @@ export class DevToolApp {
   public readonly mount: (params: DevToolMountParams) => AppUnmount | Promise<AppUnmount>;
 
   /**
-   * Mark the navigation tab as beta.
-   */
-  public readonly isBeta?: boolean;
-
-  /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
    * disabled dev tool will be treated as the navigation to an unknown route
    * (redirect to the console).
@@ -68,6 +63,11 @@ export class DevToolApp {
    * Number used to order the tabs.
    */
   public readonly order: number;
+
+  /**
+   * Mark the navigation tab as beta. Renders an icon-only beta badge on the tab.
+   */
+  public readonly isBeta?: boolean;
 
   constructor(
     id: string,

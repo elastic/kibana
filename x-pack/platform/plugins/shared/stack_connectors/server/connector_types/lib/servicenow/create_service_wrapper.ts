@@ -11,9 +11,10 @@ import type {
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ServiceNowPublicConfigurationType } from '@kbn/connector-schemas/servicenow';
 import type { ExternalService, ExternalServiceCredentials, SNProductsConfigValue } from './types';
 
-import type { ServiceNowPublicConfigurationType, ServiceFactory } from './types';
+import type { ServiceFactory } from './types';
 import { getAxiosInstance } from './utils';
 
 interface CreateServiceWrapperOpts<T = ExternalService> {

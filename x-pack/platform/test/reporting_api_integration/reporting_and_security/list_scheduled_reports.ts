@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const pdfPayload: JobParamsPDFV2 = {
   browserTimezone: 'UTC',
@@ -32,7 +32,7 @@ const csvPayload: JobParamsCSV = {
   columns: [],
   version: '7.13.0',
 };
-// eslint-disable-next-line import/no-default-export
+
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 
@@ -125,6 +125,42 @@ export default function ({ getService }: FtrProviderContext) {
         expect(report.payload).to.have.property('objectType');
         expect(report.payload).to.have.property('browserTimezone');
         expect(report.payload).to.have.property('title');
+      }
+    });
+
+    it('should search reports by title when a search string is provided', async () => {
+      const res = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
+        'PDF'
+      );
+
+      expect(res.total).to.eql(2);
+
+      for (const report of res.data) {
+        expect(report.payload.title).to.equal(pdfPayload.title);
+      }
+    });
+
+    it('should search reports by author when a search string is provided', async () => {
+      let res = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
+        reportingAPI.REPORTING_USER_USERNAME
+      );
+
+      for (const report of res.data) {
+        expect(report.created_by).to.equal(reportingAPI.REPORTING_USER_USERNAME);
+      }
+
+      res = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME
+      );
+
+      for (const report of res.data) {
+        expect(report.created_by).to.equal(reportingAPI.MANAGE_REPORTING_USER_USERNAME);
       }
     });
   });

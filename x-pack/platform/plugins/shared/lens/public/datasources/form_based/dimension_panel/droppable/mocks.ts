@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { FormBasedLayer } from '../../types';
-import { documentField } from '../../document_field';
-import { IndexPatternMap, OperationMetadata } from '../../../../types';
-import {
+import type {
+  IndexPatternMap,
+  OperationMetadata,
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '../../operations';
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import { documentField } from '../../document_field';
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../../id_generator');
 
@@ -77,7 +78,7 @@ export const mockDataViews = (): IndexPatternMap => {
       hasRestrictions: false,
       fields,
       getFieldByName: getFieldByNameFactory(fields),
-      getFormatterForField: () => ({ convert: (v: unknown) => v }),
+      getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
       isPersisted: true,
       spec: {},
     },
@@ -88,7 +89,7 @@ export const mockDataViews = (): IndexPatternMap => {
       timeFieldName: 'timestamp',
       fields: [fields[0]],
       getFieldByName: getFieldByNameFactory([fields[0]]),
-      getFormatterForField: () => ({ convert: (v: unknown) => v }),
+      getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
       isPersisted: true,
       spec: {},
     },

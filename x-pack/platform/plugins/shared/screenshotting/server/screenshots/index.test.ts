@@ -10,7 +10,8 @@ import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { lastValueFrom, of, throwError } from 'rxjs';
-import { ScreenshotOptions, Screenshots } from '.';
+import type { ScreenshotOptions } from '.';
+import { Screenshots } from '.';
 import {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
@@ -120,13 +121,13 @@ describe('Screenshot Observable Pipeline', () => {
     expect(result.results).toMatchSnapshot();
 
     expect(driver.open).toHaveBeenCalledTimes(2);
-    expect(driver.open).nthCalledWith(
+    expect(driver.open).toHaveBeenNthCalledWith(
       1,
       expect.anything(),
       expect.objectContaining({ waitForSelector: '.kbnAppWrapper' }),
       expect.anything()
     );
-    expect(driver.open).nthCalledWith(
+    expect(driver.open).toHaveBeenNthCalledWith(
       2,
       expect.anything(),
       expect.objectContaining({ waitForSelector: '[data-shared-page="2"]' }),
@@ -208,7 +209,7 @@ describe('Screenshot Observable Pipeline', () => {
         screenshots.getScreenshots(options as PngScreenshotOptions)
       );
 
-      expect(driverFactory.createPage).toBeCalledWith(
+      expect(driverFactory.createPage).toHaveBeenCalledWith(
         expect.objectContaining({
           defaultViewport: {
             width: layout.width,

@@ -8,10 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import type { CcrFollowRequest } from '@elastic/elasticsearch/lib/api/types';
 import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
-import { FollowerIndex } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { removeEmptyFields } from '../../../../common/services/utils';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Create a follower index
@@ -23,18 +22,18 @@ export const registerCreateRoute = ({
 }: RouteDependencies) => {
   const bodySchema = schema.object({
     name: schema.string({ maxLength: 1000 }),
-    remoteCluster: schema.string(),
-    leaderIndex: schema.string(),
+    remoteCluster: schema.string({ maxLength: 1000 }),
+    leaderIndex: schema.string({ maxLength: 1000 }),
     maxReadRequestOperationCount: schema.maybe(schema.number()),
     maxOutstandingReadRequests: schema.maybe(schema.number()),
-    maxReadRequestSize: schema.maybe(schema.string()), // byte value
+    maxReadRequestSize: schema.maybe(schema.string({ maxLength: 1000 })),
     maxWriteRequestOperationCount: schema.maybe(schema.number()),
-    maxWriteRequestSize: schema.maybe(schema.string()), // byte value
+    maxWriteRequestSize: schema.maybe(schema.string({ maxLength: 1000 })),
     maxOutstandingWriteRequests: schema.maybe(schema.number()),
     maxWriteBufferCount: schema.maybe(schema.number()),
-    maxWriteBufferSize: schema.maybe(schema.string()), // byte value
-    maxRetryDelay: schema.maybe(schema.string()), // time value
-    readPollTimeout: schema.maybe(schema.string()), // time value
+    maxWriteBufferSize: schema.maybe(schema.string({ maxLength: 1000 })),
+    maxRetryDelay: schema.maybe(schema.string({ maxLength: 1000 })),
+    readPollTimeout: schema.maybe(schema.string({ maxLength: 1000 })),
   });
 
   router.post(
@@ -52,8 +51,8 @@ export const registerCreateRoute = ({
     },
     license.guardApiRoute(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { name, ...rest } = request.body;
-      const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
+      const { name, ...followerIndex } = request.body;
+      const body = removeEmptyFields(serializeFollowerIndex(followerIndex));
 
       try {
         const responseBody = await client.asCurrentUser.ccr.follow({

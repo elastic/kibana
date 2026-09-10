@@ -7,25 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiTitle,
-  EuiFlexItem,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { FeatureCatalogueEntry } from '../../../services';
+import { AppStatus, type ApplicationStart } from '@kbn/core/public';
+import useObservable from 'react-use/lib/useObservable';
+import type { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
+
+const MANAGEMENT_APP_ID = 'management';
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -40,11 +37,15 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
     ?.useUrl({ sectionId: '' });
+  const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+    application.capabilities.navLinks;
+  const applications = useObservable(application.applications$);
+  const managementApp = applications?.get(MANAGEMENT_APP_ID);
+  const isManagementAppAccessible = Boolean(
+    isManagementEnabled && managementApp?.status === AppStatus.accessible
+  );
 
   if (features.length) {
-    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
-      application.capabilities.navLinks;
-
     return (
       <KibanaPageTemplate.Section
         bottomBorder
@@ -61,51 +62,39 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             </EuiTitle>
           </EuiFlexItem>
 
-          {isDevToolsEnabled || isManagementEnabled ? (
+          {isDevToolsEnabled || isManagementAppAccessible ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" responsive={false} wrap>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
                 {isDevToolsEnabled && consoleHref !== undefined ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks
-                      coreStart={{
-                        application,
-                      }}
+                    <EuiButtonEmpty
+                      data-test-subj="homeDevTools"
+                      flush="both"
+                      iconType="wrench"
+                      href={consoleHref}
                     >
-                      <EuiButtonEmpty
-                        data-test-subj="homeDevTools"
-                        flush="both"
-                        iconType="wrench"
-                        href={consoleHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.devToolsButtonLabel"
-                          defaultMessage="Dev Tools"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
+                      <FormattedMessage
+                        id="home.manageData.devToolsButtonLabel"
+                        defaultMessage="Dev Tools"
+                      />
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
 
-                {isManagementEnabled ? (
+                {isManagementAppAccessible ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks
-                      coreStart={{
-                        application,
-                      }}
+                    <EuiButtonEmpty
+                      data-test-subj="homeManage"
+                      flush="both"
+                      iconType="gear"
+                      href={managementHref}
                     >
-                      <EuiButtonEmpty
-                        data-test-subj="homeManage"
-                        flush="both"
-                        iconType="gear"
-                        href={managementHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.stackManagementButtonLabel"
-                          defaultMessage="Stack Management"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
+                      <FormattedMessage
+                        id="home.manageData.stackManagementButtonLabel"
+                        defaultMessage="Stack Management"
+                      />
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>

@@ -11,7 +11,7 @@ import React from 'react';
 import { FieldDescription } from './field_description';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
 
 const mockSetLocalStorage = jest.fn();
@@ -98,6 +98,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -121,6 +122,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -146,6 +148,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'keyword' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -165,6 +168,7 @@ describe('FieldDescription', () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
       useFieldsMetadata: jest.fn(() => ({
         fieldsMetadata: {},
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),

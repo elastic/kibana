@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { Writable } from 'utility-types';
+import type { Writable } from 'utility-types';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/server';
 import { cloneDeep, mapValues } from 'lodash';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
-import type {
-  FieldBasedIndexPatternColumn,
-  GenericIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  getTextBasedLayerQueries,
+  type IndexPatternRef,
+  type TextBasedLayerColumn,
+  type FieldBasedIndexPatternColumn,
+  type GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import type { ContentPackSavedObject } from '../models';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
@@ -96,7 +98,7 @@ export function replaceIndexPatterns(
         name: updatedName,
       };
     },
-    field(field: any) {
+    field(field) {
       return field;
     },
   });
@@ -154,13 +156,8 @@ function traverseLensPanel(panel: LensAttributes, options: TraverseOptions) {
   }
 
   const {
-    query: stateQuery,
     datasourceStates: { formBased, textBased },
   } = state;
-
-  if (stateQuery && 'esql' in stateQuery) {
-    stateQuery.esql = options.esqlQuery(stateQuery.esql);
-  }
 
   if (formBased) {
     Object.values(formBased.layers).forEach((layer) => {
@@ -184,6 +181,17 @@ function traverseLensPanel(panel: LensAttributes, options: TraverseOptions) {
         options.indexPattern(ref)
       );
     }
+  }
+
+  // An aggregate (ES|QL) value in `state.query` is a pure legacy artifact:
+  // dual-written by older Kibana versions and ignored by current readers. The
+  // authoritative layer queries were already rewritten above, so this only
+  // keeps the legacy mirror consistent for n-1 Kibana readers of installed
+  // content packs (matching `withLegacyAggregateQuerySlot` save semantics).
+  const legacySlotState: { query?: Query | AggregateQuery } = state;
+  if (legacySlotState.query && isOfAggregateQueryType(legacySlotState.query)) {
+    const [firstLayerQuery] = getTextBasedLayerQueries(panel);
+    legacySlotState.query = firstLayerQuery;
   }
 
   return panel;

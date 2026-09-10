@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeprecationsDetails } from '@kbn/core-deprecations-common';
+import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 
 import { buildApiRouteDeprecationDetails } from './route/route_deprecations';
 import { buildApiAccessDeprecationDetails } from './access/access_deprecations';

@@ -25,8 +25,6 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
-
 type UseCaseItemsReturn = ReturnType<UseCaseItems>;
 const defaultCaseItemsReturn: UseCaseItemsReturn = {
   items: [],
@@ -83,9 +81,9 @@ describe('CasesTable', () => {
 
   it('should render the table columns', () => {
     mockUseCaseItemsReturn({ items: parsedCasesItems });
-    const { getAllByRole } = renderComponent();
+    const { getAllByTestId } = renderComponent();
 
-    const columnHeaders = getAllByRole('columnheader');
+    const columnHeaders = getAllByTestId(/tableHeaderCell_/);
     expect(columnHeaders.at(0)).toHaveTextContent('Name');
     expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
     expect(columnHeaders.at(2)).toHaveTextContent('Time');

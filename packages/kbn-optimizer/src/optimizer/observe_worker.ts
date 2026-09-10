@@ -13,10 +13,11 @@ import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
 import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
+import type { WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
-import { OptimizerConfig } from './optimizer_config';
+import type { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';
@@ -61,7 +62,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
     (): ProcResource => {
       const proc = fork(require.resolve('../worker/run_worker'), [], {
         execArgv: [
-          `--require=@kbn/babel-register/install`,
+          `--require=@kbn/swc-register/install`,
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
@@ -74,6 +75,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
           // or just low powerful ones we need to default to polling instead of relying in the OS events watcher system.
           // That can be done in the worker/run_compilers file.
           WATCHPACK_WATCHER_LIMIT: '4000',
+          ...process.env,
         },
       });
 

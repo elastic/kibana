@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
-import { AgentPolicyInfo } from '../../../../common/types';
+import type { AgentPolicyInfo } from '../../../../common/types';
 import type {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
@@ -16,12 +17,10 @@ import type {
   SyntheticsPrivateLocationsAttributes,
   PrivateLocationAttributes,
 } from '../../../runtime_types/private_locations';
-import { PrivateLocation } from '../../../../common/runtime_types';
-import {
-  MonitorConfigUpdate,
-  syncEditedMonitorBulk,
-} from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
-import { RouteContext } from '../../types';
+import type { PrivateLocation } from '../../../../common/runtime_types';
+import type { MonitorConfigUpdate } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import { syncEditedMonitorBulk } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import type { RouteContext } from '../../types';
 
 export const toClientContract = (
   locationObject: SavedObject<PrivateLocationAttributes>
@@ -36,6 +35,7 @@ export const toClientContract = (
     tags: location.tags,
     geo: location.geo,
     spaces: locationObject.namespaces,
+    ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
   };
 };
 
@@ -54,6 +54,7 @@ export const allLocationsToClientContract = (
       tags: location.tags,
       geo: location.geo,
       spaces: location.spaces,
+      ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
     };
   });
 };
@@ -68,11 +69,13 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     geo: location.geo,
     namespace: location.namespace,
     spaces: location.spaces,
+    ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
   };
 };
 
-// This should be called when changing the label of a private location because the label is also stored
-// in the locations array of monitors attributes
+// Label and sharding edits must rewrite this location's monitors: the label is
+// stored on each monitor's locations array, and toggling isAgentSharding
+// restamps (or clears) per-monitor `${agent.id}` package-policy conditions.
 export const updatePrivateLocationMonitors = async ({
   locationId,
   newLocationLabel,
@@ -119,5 +122,15 @@ export const updatePrivateLocationMonitors = async ({
     }),
   ]);
 
-  return Promise.all(promises.flat());
+  const results = await Promise.all(promises.flat());
+  if (
+    results.some((result) => result?.failedConfigs && Object.keys(result.failedConfigs).length > 0)
+  ) {
+    throw new Error(
+      i18n.translate('xpack.synthetics.editPrivateLocation.monitorRewriteFailed', {
+        defaultMessage: 'Failed to update monitors for this private location.',
+      })
+    );
+  }
+  return results;
 };

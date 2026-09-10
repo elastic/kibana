@@ -93,24 +93,26 @@ describe('ConnectorUsageReportingTask', () => {
         CONNECTOR_USAGE_REPORTING_TASK_TYPE
       ].createTaskRunner;
 
-    return createTaskRunnerFunction({
-      taskInstance: {
-        id: CONNECTOR_USAGE_REPORTING_TASK_ID,
-        runAt: timestamp,
-        attempts: 0,
-        ownerId: '',
-        status: TaskStatus.Running,
-        startedAt: timestamp,
-        scheduledAt: timestamp,
-        retryAt: null,
-        params: {},
-        state: {
-          lastReportedUsageDate,
-          attempts,
+    return createTaskRunnerFunction(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          id: CONNECTOR_USAGE_REPORTING_TASK_ID,
+          runAt: timestamp,
+          attempts: 0,
+          ownerId: '',
+          status: TaskStatus.Running,
+          startedAt: timestamp,
+          scheduledAt: timestamp,
+          retryAt: null,
+          params: {},
+          state: {
+            lastReportedUsageDate,
+            attempts,
+          },
+          taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
         },
-        taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
-      },
-    });
+      })
+    );
   };
 
   it('registers the task', async () => {
@@ -130,7 +132,7 @@ describe('ConnectorUsageReportingTask', () => {
       },
     });
 
-    expect(mockTaskManagerSetup.registerTaskDefinitions).toBeCalledTimes(1);
+    expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
       [CONNECTOR_USAGE_REPORTING_TASK_TYPE]: {
         title: 'Connector usage reporting task',
@@ -162,7 +164,7 @@ describe('ConnectorUsageReportingTask', () => {
 
     await task.start(taskManagerStart);
 
-    expect(taskManagerStart.ensureScheduled).toBeCalledTimes(1);
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith({
       id: CONNECTOR_USAGE_REPORTING_TASK_ID,
       taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
@@ -196,7 +198,7 @@ describe('ConnectorUsageReportingTask', () => {
 
     await task.start();
 
-    expect(taskManagerStart.ensureScheduled).not.toBeCalled();
+    expect(taskManagerStart.ensureScheduled).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
       `Missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
     );
@@ -487,6 +489,6 @@ describe('ConnectorUsageReportingTask', () => {
 
     await task.start(taskManagerStart);
 
-    expect(taskManagerStart.ensureScheduled).not.toBeCalled();
+    expect(taskManagerStart.ensureScheduled).not.toHaveBeenCalled();
   });
 });

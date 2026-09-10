@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { css, CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
@@ -166,7 +167,7 @@ export const DataTableScoreColumnHeader = ({
             content={tooltipContent}
             color="warning"
             size="s"
-            type="alert"
+            type="warning"
             position="left"
           />
         </span>

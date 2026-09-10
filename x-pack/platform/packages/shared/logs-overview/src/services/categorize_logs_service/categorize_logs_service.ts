@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { LogCategory } from '../../types';
+import { createActorContext } from '@xstate/react';
+import type { MachineImplementationsFrom } from 'xstate';
+import { assign, setup } from 'xstate';
+import type { LogCategory } from '../../types';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
-import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
+import type { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
 
 export const categorizeLogsService = setup({
   types: {
@@ -29,9 +31,7 @@ export const categorizeLogsService = setup({
       parameters: LogCategorizationParams;
       samplingProbability: number;
     },
-    events: {} as {
-      type: 'cancel';
-    },
+    events: {} as { type: 'cancel' } | { type: 'retry' },
   },
   actors: {
     countDocuments: getPlaceholderFor(countDocuments),
@@ -53,6 +53,13 @@ export const categorizeLogsService = setup({
         samplingProbability: params.samplingProbability,
       })
     ),
+    resetCategorizationResults: assign(() => ({
+      categories: [],
+      documentCount: 0,
+      error: undefined,
+      hasReachedLimit: false,
+      samplingProbability: 1,
+    })),
   },
   guards: {
     hasTooFewDocuments: (_guardArgs, params: { documentCount: number }) => params.documentCount < 1,
@@ -72,6 +79,7 @@ export const categorizeLogsService = setup({
   initial: 'countingDocuments',
   states: {
     countingDocuments: {
+      entry: 'resetCategorizationResults',
       invoke: {
         src: 'countDocuments',
         input: ({ context }) => context.parameters,
@@ -124,15 +132,7 @@ export const categorizeLogsService = setup({
       },
 
       on: {
-        cancel: {
-          target: 'failed',
-          actions: [
-            {
-              type: 'storeError',
-              params: () => ({ error: new Error('Counting cancelled') }),
-            },
-          ],
-        },
+        cancel: { target: 'cancelled' },
       },
     },
 
@@ -167,15 +167,7 @@ export const categorizeLogsService = setup({
       },
 
       on: {
-        cancel: {
-          target: 'failed',
-          actions: [
-            {
-              type: 'storeError',
-              params: () => ({ error: new Error('Categorization cancelled') }),
-            },
-          ],
-        },
+        cancel: { target: 'cancelled' },
       },
     },
 
@@ -210,15 +202,13 @@ export const categorizeLogsService = setup({
       },
 
       on: {
-        cancel: {
-          target: 'failed',
-          actions: [
-            {
-              type: 'storeError',
-              params: () => ({ error: new Error('Categorization cancelled') }),
-            },
-          ],
-        },
+        cancel: { target: 'cancelled' },
+      },
+    },
+
+    cancelled: {
+      on: {
+        retry: { target: 'countingDocuments' },
       },
     },
 
@@ -237,6 +227,8 @@ export const categorizeLogsService = setup({
     samplingProbability: context.samplingProbability,
   }),
 });
+
+export const CategorizeLogsServiceContext = createActorContext(categorizeLogsService);
 
 export const createCategorizeLogsServiceImplementations = ({
   search,

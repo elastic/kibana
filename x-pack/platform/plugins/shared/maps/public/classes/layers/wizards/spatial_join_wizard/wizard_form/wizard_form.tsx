@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getGeoFields, getGeoPointFields } from '../../../../../index_pattern_util';
-import { RenderWizardArguments } from '../../layer_wizard_registry';
+import type { RenderWizardArguments } from '../../layer_wizard_registry';
 import { LeftSourcePanel } from './left_source_panel';
 import { RightSourcePanel } from './right_source_panel';
 import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_descriptor';

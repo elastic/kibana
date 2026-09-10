@@ -26,6 +26,7 @@ export {
   MIN_ZOOM,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
+  LAYER_STYLE_TYPE,
 } from './constants';
 
 export type { FieldFormatter } from './constants';
@@ -35,9 +36,12 @@ export type {
   EMSFileSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor,
+  RuntimeLayerState,
   TooltipFeature,
   TooltipFeatureAction,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
   VectorSourceRequestMeta,
 } from './descriptor_types';
+
+export type { MapEmbeddableState, MapByReferenceState, MapByValueState } from './embeddable/types';

@@ -7,25 +7,21 @@
 
 import { useMemo } from 'react';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import { DataViewManagerScopeName } from '../constants';
-import { useDataViewSpec } from './use_data_view_spec';
-import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { buildBrowserFields } from '../utils/build_browser_fields';
 
-export const useBrowserFields = (
-  scope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): BrowserFields => {
-  const { dataViewSpec } = useDataViewSpec(scope);
+const emptyFields = {} as BrowserFields;
 
+/**
+ * Returns the BrowserFields map for the provided dataView.
+ * The dataView should be retrieved once via the useDataView hook and passed in here.
+ */
+export const useBrowserFields = (dataView: DataView): BrowserFields => {
   return useMemo(() => {
-    if (!dataViewSpec) {
-      return {};
+    if (!dataView?.id) {
+      return emptyFields;
     }
 
-    const { browserFields } = getDataViewStateFromIndexFields(
-      dataViewSpec?.title ?? '',
-      dataViewSpec.fields
-    );
-
-    return browserFields;
-  }, [dataViewSpec]);
+    return buildBrowserFields(dataView.fields);
+  }, [dataView]);
 };

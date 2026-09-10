@@ -6,10 +6,10 @@
  */
 
 import { lazy } from 'react';
-import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { XSOARConnector } from './types';
-import { XSOAR_CONNECTOR_ID, SUB_ACTION, XSOAR_TITLE } from '../../../common/xsoar/constants';
-import { ExecutorParams } from '../../../common/xsoar/types';
+import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/xsoar/constants';
+import type { ExecutorParams } from '@kbn/connector-schemas/xsoar';
+import type { XSOARConnector } from './types';
 import * as i18n from './translations';
 
 interface ValidationErrors {
@@ -18,10 +18,10 @@ interface ValidationErrors {
 
 export function getConnectorType(): XSOARConnector {
   return {
-    id: XSOAR_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.SELECT_MESSAGE,
-    actionTypeTitle: XSOAR_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: ExecutorParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {

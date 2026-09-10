@@ -6,8 +6,9 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const NodeBuilderOperators = {
   and: 'and',
@@ -27,7 +28,7 @@ export const buildFilter = ({
   filters,
   field,
   operator,
-  type = RULE_SAVED_OBJECT_TYPE,
+  type,
 }: FilterField): KueryNode | undefined => {
   if (filters === undefined) {
     return;
@@ -44,20 +45,42 @@ export const buildFilter = ({
   );
 };
 
-export const buildRuleTypeIdsFilter = (ruleTypeIds?: string[]) => {
+export const buildRuleTypeIdsFilter = (ruleTypeIds?: string[], type = RULE_SAVED_OBJECT_TYPE) => {
   if (!ruleTypeIds || !ruleTypeIds?.length) {
     return;
   }
 
-  return buildFilter({ filters: ruleTypeIds, field: 'alertTypeId', operator: 'or' });
+  // why???
+  const field = type === RULE_TEMPLATE_SAVED_OBJECT_TYPE ? 'ruleTypeId' : 'alertTypeId';
+
+  return buildFilter({ filters: ruleTypeIds, field, operator: 'or', type });
 };
 
-export const buildConsumersFilter = (consumers?: string[]) => {
+export const buildConsumersFilter = (consumers?: string[], type = RULE_SAVED_OBJECT_TYPE) => {
   if (!consumers || !consumers?.length) {
     return;
   }
 
-  return buildFilter({ filters: consumers, field: 'consumer', operator: 'or' });
+  return buildFilter({ filters: consumers, field: 'consumer', operator: 'or', type });
+};
+
+export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) => {
+  if (!tags || !tags?.length) {
+    return;
+  }
+
+  return buildFilter({ filters: tags, field: 'tags', operator: 'or', type });
+};
+
+/**
+ * Matches Fleet / alerting v1 rule templates: `engine: "v1"` or no `engine` field.
+ * Prefer this allowlist over excluding `"v2"` so future engine values stay out of v1 APIs.
+ */
+export const buildAlertingV1RuleTemplateEngineFilter = (
+  type = RULE_TEMPLATE_SAVED_OBJECT_TYPE
+): KueryNode => {
+  const field = `${type}.attributes.engine`;
+  return fromKueryExpression(`${field}: v1 or not ${field}: *`);
 };
 
 /**

@@ -6,34 +6,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
+import { useKibana } from '../../../../../../../../shared_imports';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
 export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="noTiersAvailableUsingNodeAttributesNotice"
       title={noCustomAttributesTitle}
-      color="warning"
-    >
-      <p>
-        {i18n.translate(
-          'xpack.indexLifecycleMgmt.dataTier.noTiersAvailableUsingNodeAttributesDescription',
-          {
-            defaultMessage: 'Unable to allocate data: no available data nodes.',
-          }
-        )}
-      </p>
-
-      {
-        // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
-        nodeAllocationMigrationGuidance
+      text={
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.indexLifecycleMgmt.dataTier.noTiersAvailableUsingNodeAttributesDescription',
+              {
+                defaultMessage: 'Unable to allocate data: no available data nodes.',
+              }
+            )}
+          </p>
+          {nodeAllocationMigrationGuidance({ docLinks })}
+        </>
       }
-    </EuiCallOut>
+    />
   );
 };

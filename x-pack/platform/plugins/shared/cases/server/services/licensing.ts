@@ -7,7 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import type { ILicense, LicenseType, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 
 export class LicensingService {
   private readonly license$: Observable<ILicense>;

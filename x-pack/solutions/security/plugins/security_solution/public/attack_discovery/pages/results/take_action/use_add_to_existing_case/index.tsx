@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { COMMENT_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -55,18 +55,21 @@ export const useAddToExistingCase = ({
       replacements?: Replacements;
     }) => {
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
-        comment: x,
-        type: AttachmentType.user,
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: x },
       }));
 
-      const alertAttachments = alertIds.map<CaseAttachmentWithoutOwner>((alertId) => ({
-        alertId: replacements != null ? replacements[alertId] ?? alertId : alertId,
-        index: alertsIndexPattern ?? '',
-        rule: {
-          id: null,
-          name: null,
+      const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
+      const alertAttachments = originalAlertIds.map<CaseAttachmentWithoutOwner>((alertId) => ({
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: alertId,
+        metadata: {
+          index: alertsIndexPattern ?? '',
+          rule: {
+            id: null,
+            name: null,
+          },
         },
-        type: AttachmentType.alert,
       }));
 
       const attachments = [...userCommentAttachments, ...alertAttachments];

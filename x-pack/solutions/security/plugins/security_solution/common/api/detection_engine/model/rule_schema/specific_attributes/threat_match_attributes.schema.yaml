@@ -9,6 +9,24 @@ components:
     ThreatQuery:
       type: string
       description: Query used to determine which fields in the Elasticsearch index are used for generating alerts.
+ 
+    ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        type:
+          type: string
+          enum:
+            - mapping
+        value:
+          $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        negate:
+          type: boolean
+      required:
+        - field
+        - type
+        - value
 
     ThreatMapping:
       type: array
@@ -27,20 +45,7 @@ components:
           entries:
             type: array
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                type:
-                  type: string
-                  enum:
-                    - mapping
-                value:
-                  $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/ThreatMappingEntry'
         required:
           - entries
 

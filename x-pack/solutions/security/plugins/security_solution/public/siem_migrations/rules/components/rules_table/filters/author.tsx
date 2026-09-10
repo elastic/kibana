@@ -59,7 +59,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
     const triggerButton = (
       <EuiFilterButton
         grow
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={() => {
           setIsPopoverOpen(!isPopoverOpen);
         }}
@@ -82,6 +82,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
         }}
         panelPaddingSize="none"
         repositionOnScroll
+        aria-label={i18n.AUTHOR_FILTER_ARIAL_LABEL}
       >
         <EuiSelectable
           aria-label={i18n.AUTHOR_FILTER_ARIAL_LABEL}
@@ -90,7 +91,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
           singleSelection
           data-test-subj="authorFilterSelectableList"
         >
-          {(list) => <div style={{ width: AUTHOR_FILTER_POPOVER_WIDTH }}>{list}</div>}
+          {(list) => <div css={{ width: AUTHOR_FILTER_POPOVER_WIDTH }}>{list}</div>}
         </EuiSelectable>
       </EuiPopover>
     );

@@ -14,18 +14,22 @@ import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
+import type { Color, Gradient } from 'vega';
 import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
-import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
+import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { EsQueryParser } from './es_query_parser';
-import { Utils, getVegaThemeColors } from './utils';
+import { EsqlQueryParser } from './esql_query_parser';
+import { Utils, getDefaultAreaGradientFill, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
-import { SearchAPI } from './search_api';
-import { TimeCache } from './time_cache';
+import type { SearchAPI } from './search_api';
+import type { TimeCache } from './time_cache';
 import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
-import {
+import type {
   Bool,
   Data,
   VegaSpec,
@@ -57,6 +61,7 @@ export class VegaParser {
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
   isVegaLite?: boolean;
+  approximationApplied?: boolean;
   useHover?: boolean;
   _config?: VegaConfig;
   useMap?: boolean;
@@ -72,6 +77,7 @@ export class VegaParser {
   filters: Bool;
   timeCache: TimeCache;
   theme: CoreTheme;
+  esqlVariables?: ESQLControlVariable[];
 
   constructor(
     spec: VegaSpec | string,
@@ -79,7 +85,8 @@ export class VegaParser {
     timeCache: TimeCache,
     filters: Bool,
     getServiceSettings: () => Promise<IServiceSettings>,
-    theme: CoreTheme
+    theme: CoreTheme,
+    esqlVariables?: ESQLControlVariable[]
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -91,6 +98,7 @@ export class VegaParser {
     this.filters = filters;
     this.timeCache = timeCache;
     this.theme = theme;
+    this.esqlVariables = esqlVariables;
   }
 
   async parseAsync() {
@@ -271,8 +279,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     }
     this.vlspec = this.spec;
-    const vegaLogger = logger(Warn); // note: eslint has a false positive here
-    vegaLogger.warn = this._onWarning.bind(this);
+    const vegaLogger = logger(Warn);
+    vegaLogger.warn = (...args) => {
+      this._onWarning(...args);
+      return vegaLogger;
+    };
     this.spec = compile(this.vlspec as TopLevelSpec, { logger: vegaLogger }).spec;
 
     // When using Vega-Lite (VL) with the type=map and user did not provid their own projection settings,
@@ -601,6 +612,13 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       const onWarn = this._onWarning.bind(this);
       this._urlParsers = {
         elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        esql: new EsqlQueryParser(
+          this.timeCache,
+          this.searchAPI,
+          this.filters,
+          onWarn,
+          this.esqlVariables
+        ),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
       };
@@ -644,6 +662,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       await Promise.all(
         pendingParsers.map((type) => this._urlParsers![type].populateData(pending[type]))
       );
+      this.approximationApplied = (this._urlParsers.esql as EsqlQueryParser).approximationApplied;
     }
   }
 
@@ -706,26 +725,43 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
     const defaultColor = getVegaThemeColors(this.theme, 'default');
+    const defaultAreaFill = getDefaultAreaGradientFill(defaultColor);
+
+    const setMarkDefaultColor = (
+      markType: string,
+      colorProperty: 'fill' | 'stroke',
+      color: Color | Gradient
+    ) => {
+      const hasCustomColor = [this.spec?.config?.mark, this.spec?.config?.[markType]].some(
+        (markConfig) => markConfig?.color !== undefined || markConfig?.[colorProperty] !== undefined
+      );
+
+      if (!hasCustomColor) {
+        this._setDefaultValue(color, 'config', markType, colorProperty);
+      }
+    };
+
     if (this.isVegaLite) {
+      setMarkDefaultColor('area', 'fill', defaultAreaFill);
       // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: 'euiColorVis0' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
       // https://github.com/vega/vega/issues/1083
-      // Don't set defaults if spec.config.mark.color or fill are set
-      if (
-        !this.spec?.config.mark ||
-        (this.spec.config.mark.color === undefined && this.spec.config.mark.fill === undefined)
-      ) {
-        this._setDefaultValue(defaultColor, 'config', 'arc', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'area', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'line', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'path', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'rect', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'rule', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'shape', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'symbol', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
+      const markDefaults = [
+        ['arc', 'fill', defaultColor],
+        ['area', 'fill', defaultAreaFill],
+        ['line', 'stroke', defaultColor],
+        ['path', 'stroke', defaultColor],
+        ['rect', 'fill', defaultColor],
+        ['rule', 'stroke', defaultColor],
+        ['shape', 'stroke', defaultColor],
+        ['symbol', 'fill', defaultColor],
+        ['trail', 'fill', defaultColor],
+      ] as const;
+
+      for (const [markType, colorProperty, color] of markDefaults) {
+        setMarkDefaultColor(markType, colorProperty, color);
       }
     }
 
@@ -740,7 +776,12 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'tickColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'domainColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
+    this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
+    this._setDefaultValue(0.3, 'config', 'area', 'fillOpacity');
+    this._setDefaultValue(null, 'config', 'view', 'stroke');
+    this._setDefaultValue(true, 'config', 'area', 'line');
+    this._setDefaultValue(1.5, 'config', 'area', 'line', 'strokeWidth');
     this._setDefaultValue('transparent', 'config', 'background');
   }
 
@@ -775,8 +816,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    */
   _onWarning(...args: any[]) {
     if (!this.hideWarnings) {
-      this.warnings.push(Utils.formatWarningToStr(args));
-      return Utils.formatWarningToStr(args);
+      this.warnings.push(Utils.formatWarningToStr(...args));
+      return Utils.formatWarningToStr(...args);
     }
   }
 }

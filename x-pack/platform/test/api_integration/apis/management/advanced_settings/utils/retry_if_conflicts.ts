@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 // Number of times to retry when conflicts occur
 const RETRY_ATTEMPTS = 2;

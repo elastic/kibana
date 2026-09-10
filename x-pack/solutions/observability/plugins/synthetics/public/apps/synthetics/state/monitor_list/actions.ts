@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
-import { UpsertMonitorError, UpsertMonitorRequest } from '..';
-import {
+import { createAction } from 'redux-toolkit-v1';
+import type { UpsertMonitorError, UpsertMonitorRequest } from '..';
+import type {
   MonitorManagementListResult,
   MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
-import { MonitorListPageState } from './models';
+import type { MonitorListPageState } from './models';
 
 export const fetchMonitorListAction = createAsyncAction<
   MonitorListPageState,

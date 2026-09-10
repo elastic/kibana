@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler } from 'react';
+import type { MouseEventHandler } from 'react';
+import React from 'react';
 import { EuiPanel, EuiStat, useEuiTheme, EuiIcon } from '@elastic/eui';
 import type { EuiStatProps } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -69,6 +70,7 @@ export const VulnCounterCard = ({
             top: ${euiTheme.size.s};
             right: ${euiTheme.size.s};
           `}
+          aria-hidden={true}
         />
       )}
     </EuiPanel>

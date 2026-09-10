@@ -10,7 +10,8 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiIconTip } from '@elastic/eui';
-import { SizeParamEditor, SizeParamEditorProps } from './size';
+import type { SizeParamEditorProps } from './size';
+import { SizeParamEditor } from './size';
 import { aggParamCommonPropsMock } from './test_utils';
 
 describe('SizeParamEditor', () => {
@@ -67,11 +68,11 @@ describe('SizeParamEditor', () => {
     const input = comp.find('input[type="number"]');
     input.simulate('change', { target: { value: '3' } });
 
-    expect(defaultProps.setValue).toBeCalledWith(3);
+    expect(defaultProps.setValue).toHaveBeenCalledWith(3);
 
     input.simulate('change', { target: { value: '' } });
 
-    expect(defaultProps.setValue).toBeCalledWith('');
+    expect(defaultProps.setValue).toHaveBeenCalledWith('');
     expect(defaultProps.setValue).toHaveBeenCalledTimes(2);
   });
 

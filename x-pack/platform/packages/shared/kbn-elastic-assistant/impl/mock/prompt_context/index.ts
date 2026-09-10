@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PromptContext } from '../../assistant/prompt_context/types';
+import type { PromptContext } from '../../assistant/prompt_context/types';
 
 export const mockAlertPromptContext: PromptContext = {
   category: 'alert',

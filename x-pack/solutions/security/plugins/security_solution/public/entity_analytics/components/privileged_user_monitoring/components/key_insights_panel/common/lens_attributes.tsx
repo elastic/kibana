@@ -33,10 +33,6 @@ export const createKeyInsightsPanelLensAttributes = ({
         layerType: 'data',
         metricAccessor: 'count',
       },
-      query: {
-        query: esqlQuery,
-        language: 'esql',
-      },
       filters: [{ query: filterQuery, meta: {} }],
       datasourceStates: {
         textBased: {
@@ -45,7 +41,7 @@ export const createKeyInsightsPanelLensAttributes = ({
               columns: [
                 {
                   columnId: 'count',
-                  fieldName: 'COUNT(*)',
+                  fieldName: 'count',
                   label,
                   customLabel: true,
                   params: {

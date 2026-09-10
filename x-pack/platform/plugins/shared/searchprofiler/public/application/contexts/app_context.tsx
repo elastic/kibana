@@ -6,16 +6,17 @@
  */
 
 import React, { useContext, createContext, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
-import { HttpSetup, ToastsSetup } from '@kbn/core/public';
-import { LicenseStatus } from '../../../common';
-import { SearchProfilerStartServices } from '../../types';
+import type { HttpSetup, ToastsSetup } from '@kbn/core/public';
+import type { LicenseStatus } from '../../../common';
+import type { SearchProfilerStartServices } from '../../types';
 
 export interface ContextArgs extends SearchProfilerStartServices {
   http: HttpSetup;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
+  history: RouteComponentProps['history'];
   location: RouteComponentProps['location'];
 }
 
@@ -23,6 +24,7 @@ export interface ContextValue extends SearchProfilerStartServices {
   http: HttpSetup;
   notifications: ToastsSetup;
   getLicenseStatus: () => LicenseStatus;
+  history: RouteComponentProps['history'];
   location: RouteComponentProps['location'];
 }
 
@@ -30,7 +32,7 @@ const AppContext = createContext<ContextValue>(null as any);
 
 export const AppContextProvider = ({
   children,
-  args: { http, notifications, initialLicenseStatus, location, ...startServices },
+  args: { http, notifications, initialLicenseStatus, history, location, ...startServices },
 }: {
   children: React.ReactNode;
   args: ContextArgs;
@@ -44,6 +46,7 @@ export const AppContextProvider = ({
         http,
         notifications,
         getLicenseStatus,
+        history,
         location,
       }}
     >

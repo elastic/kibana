@@ -17,13 +17,12 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiCallOut,
   EuiBadge,
-  EuiButton,
   EuiCode,
 } from '@elastic/eui';
+import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import {
   SectionLoading,
   TabSettings,
@@ -35,8 +34,10 @@ import { useAppContext } from '../../../app_context';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
-import { ComponentTemplateTabs, TabType } from './tabs';
-import { ManageButton, ManageAction } from './manage_button';
+import type { TabType } from './tabs';
+import { ComponentTemplateTabs } from './tabs';
+import type { ManageAction } from './manage_button';
+import { ManageButton } from './manage_button';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../locator';
 
 export interface Props {
@@ -99,18 +100,16 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
       isIntegrationsComponentTemplate(decodedComponentTemplateName)
     ) {
       content = (
-        <EuiCallOut
+        <KbnWarningCallout
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.calloutTitle"
               defaultMessage="Custom template doesn't exist"
             />
           }
-          color="warning"
-          iconType="warning"
           data-test-subj="missingCustomComponentTemplate"
-        >
-          <p>
+          text={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.text"
               defaultMessage="The custom template {templateName} doesn't exist."
@@ -118,32 +117,37 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
                 templateName: <EuiCode>{decodedComponentTemplateName}</EuiCode>,
               }}
             />
-          </p>
-          {createTemplateLink && (
-            <EuiButton color="warning" href={createTemplateLink}>
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.button"
-                defaultMessage="Create component template"
-              />
-            </EuiButton>
-          )}
-        </EuiCallOut>
+          }
+          actionProps={
+            createTemplateLink
+              ? {
+                  primary: {
+                    href: createTemplateLink,
+                    children: (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.button"
+                        defaultMessage="Create component template"
+                      />
+                    ),
+                  },
+                }
+              : undefined
+          }
+        />
       );
     } else {
       content = (
-        <EuiCallOut
+        <KbnDangerCallout
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.loadingErrorMessage"
               defaultMessage="Error loading component template"
             />
           }
-          color="danger"
-          iconType="warning"
           data-test-subj="sectionError"
-        >
-          <p>{error.message}</p>
-        </EuiCallOut>
+          text={error.message}
+        />
       );
     }
   } else if (componentTemplateDetails) {
@@ -233,7 +237,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
             </EuiFlexItem>
 
             {/* "Manage" context menu */}
-            {componentTemplateDetails && (
+            {componentTemplateDetails && actions.length > 0 && (
               <EuiFlexItem grow={false}>
                 <ManageButton
                   actions={actions}

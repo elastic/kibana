@@ -18,7 +18,7 @@ export default function ({ getService }) {
     ['mb', 'package'].forEach((source) => {
       describe(`overview ${source}`, () => {
         describe('with green platinum cluster', () => {
-          const archive = `x-pack/test/functional/es_archives/monitoring/singlecluster_green_platinum_${source}`;
+          const archive = `x-pack/platform/test/fixtures/es_archives/monitoring/singlecluster_green_platinum_${source}`;
           const timeRange = {
             min: '2018-02-13T17:04:50.000Z',
             max: '2018-02-13T17:51:55.000Z',

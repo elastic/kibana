@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -50,7 +50,6 @@ export class LocatorExplorerPlugin implements Plugin<void, void, SetupDeps, Star
           label: 'README',
           href: 'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/share/common/url_service/locators/README.md',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

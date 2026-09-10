@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
@@ -90,17 +92,19 @@ export const PageSimpleStringStream: FC = () => {
         <p data-test-subj="responseStreamString">{data}</p>
       </EuiText>
       {errors.length > 0 && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
-          {errors.length === 1 ? (
-            <p>{errors[0]}</p>
-          ) : (
+        <KbnDangerCallout
+          announceOnMount
+          title="Sorry, there was an error"
+          text={errors.length === 1 ? errors[0] : undefined}
+        >
+          {errors.length > 1 && (
             <ul>
               {errors.map((e, i) => (
                 <li key={i}>{e}</li>
               ))}
             </ul>
-          )}{' '}
-        </EuiCallOut>
+          )}
+        </KbnDangerCallout>
       )}
     </Page>
   );

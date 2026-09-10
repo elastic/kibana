@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
+import type { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 import { getFileUpload } from '../../../../kibana_services';
 import { WIZARD_ID } from '../../../../../common/constants';
@@ -30,7 +30,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
     });
     return !hasImportPermission;
   },
-  icon: 'importAction',
+  icon: 'download',
   prerequisiteSteps: [
     {
       id: UPLOAD_STEPS.CONFIGURE_UPLOAD,

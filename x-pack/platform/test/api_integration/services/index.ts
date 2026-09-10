@@ -16,9 +16,10 @@ import { FleetAndAgentsProvider } from './fleet_and_agents';
 import { SpacesServiceProvider } from './spaces';
 import { SearchSecureProvider } from './search_secure';
 import { TransformProvider } from './transform';
-import { IndexManagementProvider } from './index_management';
 import { AlertingApiProvider } from './alerting_api';
 import { MachineLearningProvider } from './ml';
+import { SynthtraceClientProvider } from './synthtrace';
+import { IngestManagerProvider } from './ingest_manager';
 
 export const services = {
   ...kibanaApiIntegrationServices,
@@ -26,7 +27,6 @@ export const services = {
   alertingApi: AlertingApiProvider,
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-  indexManagement: IndexManagementProvider,
   ingestPipelines: IngestPipelinesProvider,
   fleetAndAgents: FleetAndAgentsProvider,
   ml: MachineLearningProvider,
@@ -34,4 +34,6 @@ export const services = {
   spaces: SpacesServiceProvider,
   transform: TransformProvider,
   usageAPI: UsageAPIProvider,
+  synthtrace: SynthtraceClientProvider,
+  ingestManager: IngestManagerProvider,
 };

@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  CSSProperties,
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { CSSProperties, FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
+import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
@@ -26,8 +21,11 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
+  useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
-import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
 import {
   getStatusCodeDecorations,
   isJSONContentType,
@@ -36,9 +34,78 @@ import {
   languageForContentType,
   convertMapboxVectorTileToJson,
 } from './utils';
-import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
+import {
+  useEditorReadContext,
+  useRequestReadContext,
+  useServicesContext,
+  useOutputFilterReadContext,
+} from '../../contexts';
+import { applyResponseFilter, isFilterableStatusCode } from '../../lib/apply_response_filter';
+import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
+import { useActionStyles, useHighlightedLinesClassName } from './styles';
+import type { StatusCodeClassNames } from './types';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { actions } = useActionStyles();
+
+  return {
+    outputActions: css`
+      ${actions}
+
+      // For IE11
+      min-width: ${euiTheme.size.l};
+    `,
+  };
+};
+
+const useStatusCodeClassNames = (): StatusCodeClassNames => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(
+    () => ({
+      monacoStatusCodeLinePrimary: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+      `,
+      monacoStatusCodeLineNumberPrimary: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.primary, 0.5)};
+      `,
+      monacoStatusCodeLineSuccess: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.success, 0.1)};
+      `,
+      monacoStatusCodeLineNumberSuccess: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.success, 0.5)};
+      `,
+      monacoStatusCodeLineDefault: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.lightShade, 0.1)};
+      `,
+      monacoStatusCodeLineNumberDefault: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+      `,
+      monacoStatusCodeLineWarning: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.warning, 0.1)};
+      `,
+      monacoStatusCodeLineNumberWarning: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.warning, 0.5)};
+      `,
+      monacoStatusCodeLineDanger: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.danger, 0.1)};
+      `,
+      monacoStatusCodeLineNumberDanger: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.danger, 0.5)};
+      `,
+    }),
+    [
+      euiTheme.colors.primary,
+      euiTheme.colors.success,
+      euiTheme.colors.lightShade,
+      euiTheme.colors.warning,
+      euiTheme.colors.danger,
+    ]
+  );
+};
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const context = useServicesContext();
@@ -53,20 +120,28 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const monacoEditorOutputStyles = useStyles();
+  const statusCodeClassNames = useStatusCodeClassNames();
+  const highlightedLinesClassName = useHighlightedLinesClassName();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
+  const filterState = useOutputFilterReadContext();
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorOutputActionsProvider(editor, setEditorActionsCss);
+      const provider = new MonacoEditorOutputActionsProvider(
+        editor,
+        setEditorActionsCss,
+        highlightedLinesClassName
+      );
       actionsProvider.current = provider;
 
       setupResizeChecker(divRef.current!, editor);
       lineDecorations.current = editor.createDecorationsCollection();
     },
-    [setupResizeChecker]
+    [highlightedLinesClassName, setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -105,7 +180,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       );
       if (isMultipleRequest) {
         // If there are multiple responses, add decorations for their status codes
-        const decorations = getStatusCodeDecorations(data);
+        const decorations = getStatusCodeDecorations(data, statusCodeClassNames);
         lineDecorations.current?.set(decorations);
         // Highlight first line of the output editor
         actionsProvider.current?.selectFirstLine();
@@ -113,17 +188,32 @@ export const MonacoEditorOutput: FunctionComponent = () => {
     } else {
       setValue('');
     }
-  }, [readOnlySettings, data, value]);
+  }, [readOnlySettings, data, value, statusCodeClassNames]);
+
+  const displayValue = useMemo(() => {
+    const statusCode = data?.length === 1 ? data[0].response.statusCode : undefined;
+    if (
+      data &&
+      statusCode !== undefined &&
+      isFilterableStatusCode(statusCode) &&
+      filterState.expression
+    ) {
+      return applyResponseFilter({
+        text: value,
+        contentType: data[0].response.contentType,
+        state: filterState,
+      });
+    }
+    return value;
+  }, [value, data, filterState]);
 
   const copyOutputCallback = useCallback(async () => {
-    const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
-
     try {
-      if (!window.navigator?.clipboard) {
+      const selectedText = await actionsProvider.current?.getParsedOutput();
+
+      if (selectedText === undefined || !(await copyTextToClipboard(selectedText))) {
         throw new Error('Could not copy to clipboard!');
       }
-
-      await window.navigator.clipboard.writeText(selectedText);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('console.outputPanel.copyOutputToast', {
@@ -136,6 +226,11 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           defaultMessage: 'Could not copy selected output to clipboard',
         }),
       });
+    } finally {
+      // Clear the highlight and hide the actions once the copy attempt completes,
+      // mirroring the pre-existing visual feedback (the selection used to disappear
+      // via the editor blur that the mousedown handler above now prevents).
+      actionsProvider.current?.resetOutputActions();
     }
   }, [notifications.toasts]);
 
@@ -148,11 +243,17 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       ref={divRef}
     >
       <EuiFlexGroup
-        className="conApp__outputActions"
+        css={monacoEditorOutputStyles.outputActions}
         responsive={false}
         style={editorActionsCss}
         justifyContent="center"
         alignItems="center"
+        // Keep the output editor focused while the actions are clicked. Without this,
+        // pressing the copy button blurs the editor, whose blur handler hides the
+        // actions 100ms later -- faster than a typical human click is released -- so
+        // the mouseup lands on a hidden element and the click never fires.
+        // See https://github.com/elastic/kibana/issues/266698.
+        onMouseDown={(e) => e.preventDefault()}
       >
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -161,13 +262,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
             })}
           >
             <EuiButtonIcon
-              iconType="copyClipboard"
+              iconType="copy"
               onClick={copyOutputCallback}
               data-test-subj="copyOutputButton"
               aria-label={i18n.translate('console.outputPanel.copyOutputButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to copy to clipboard',
               })}
-              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -182,7 +282,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       <CodeEditor
         dataTestSubj={'consoleMonacoOutput'}
         languageId={mode}
-        value={value}
+        value={displayValue}
         fullWidth={true}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}

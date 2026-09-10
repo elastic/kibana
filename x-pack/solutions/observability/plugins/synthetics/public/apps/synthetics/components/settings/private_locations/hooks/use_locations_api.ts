@@ -6,9 +6,9 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { EditPrivateLocationAttributes } from '../../../../../../../server/routes/settings/private_locations/edit_private_location';
-import { NewLocation } from '../add_or_edit_location_flyout';
+import type { NewLocation } from '../add_or_edit_location_flyout';
 import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
@@ -16,15 +16,17 @@ import {
   getPrivateLocationsAction,
 } from '../../../../state/private_locations/actions';
 import { selectPrivateLocationsState } from '../../../../state/private_locations/selectors';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 export const usePrivateLocationsAPI = () => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { loading, createLoading, deleteLoading, data } = useSelector(selectPrivateLocationsState);
 
   useEffect(() => {
     dispatch(getPrivateLocationsAction.get());
-  }, [dispatch]);
+  }, [dispatch, lastRefresh]);
 
   useEffect(() => {
     if (data === null) {

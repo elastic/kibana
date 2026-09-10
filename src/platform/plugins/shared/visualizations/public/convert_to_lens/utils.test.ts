@@ -7,22 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import {
-  AggBasedColumn,
+import type {
   CounterRateColumn,
   GenericColumnWithMeta,
   SchemaConfig,
   SupportedAggregation,
 } from '../../common';
-import {
+import type {
   AvgColumn,
   CountColumn,
   MaxColumn,
   DateHistogramColumn,
-  Meta,
+  AggBasedColumn,
 } from '../../common/convert_to_lens/lib';
+import type { AnyMetricColumnWithSourceFieldWithMeta, Meta } from '../../common/convert_to_lens';
 import {
   getBucketCollapseFn,
   getBucketColumns,
@@ -34,7 +35,7 @@ import {
   isValidVis,
   sortColumns,
 } from './utils';
-import { Schemas } from '../vis_schemas';
+import type { Schemas } from '../vis_schemas';
 
 const mockConvertBucketToColumns = jest.fn();
 
@@ -231,7 +232,7 @@ describe('getBucketColumns', () => {
     };
 
     expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toEqual([]);
-    expect(mockConvertBucketToColumns).toBeCalledTimes(0);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if metric is invalid', () => {
@@ -257,7 +258,7 @@ describe('getBucketColumns', () => {
     mockConvertBucketToColumns.mockReturnValueOnce(null);
 
     expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toBeNull();
-    expect(mockConvertBucketToColumns).toBeCalledTimes(1);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if no buckets are returned', () => {
@@ -283,7 +284,7 @@ describe('getBucketColumns', () => {
     mockConvertBucketToColumns.mockReturnValueOnce([null]);
 
     expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toBeNull();
-    expect(mockConvertBucketToColumns).toBeCalledTimes(1);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(1);
   });
   test('should return columns', () => {
     const metricKey = 'metric';
@@ -325,7 +326,7 @@ describe('getBucketColumns', () => {
       ...returnValue,
       ...returnValue,
     ]);
-    expect(mockConvertBucketToColumns).toBeCalledTimes(2);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -704,7 +705,7 @@ describe('getColumnIds', () => {
             { columnId: 'col-3', meta: { aggId: '3' } },
             { columnId: 'col-4', meta: { aggId: '4' } },
             { columnId: 'col-5', meta: { aggId: '5' } },
-          ] as AggBasedColumn[],
+          ] as AnyMetricColumnWithSourceFieldWithMeta[],
           dataView,
           [metric1, metric2]
         )

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasFiltersTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -15,7 +15,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
   const { canvas } = getPageObjects(['canvas']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter';
+  const archive = 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/filter';
 
   describe('filters', function () {
     // there is an issue with FF not properly clicking on workpad elements

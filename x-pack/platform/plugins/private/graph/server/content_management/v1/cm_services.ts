@@ -23,7 +23,7 @@ const referenceSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const referencesSchema = schema.arrayOf(referenceSchema);
+const referencesSchema = schema.arrayOf(referenceSchema, { maxSize: 100 });
 
 const graphAttributesSchema = schema.object(
   {
@@ -49,7 +49,7 @@ const graphSavedObjectSchema = schema.object(
     error: schema.maybe(apiError),
     attributes: graphAttributesSchema,
     references: referencesSchema,
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     originId: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' }
@@ -130,8 +130,8 @@ export const serviceDefinition: ServicesDefinition = {
         schema: schema.maybe(
           schema.object(
             {
-              searchFields: schema.maybe(schema.arrayOf(schema.string())),
-              types: schema.maybe(schema.arrayOf(schema.string())),
+              searchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+              types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
             },
             { unknowns: 'forbid' }
           )

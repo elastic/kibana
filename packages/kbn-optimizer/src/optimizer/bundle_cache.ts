@@ -13,9 +13,10 @@ import * as Rx from 'rxjs';
 import { mergeAll } from 'rxjs';
 import { dllManifestPath } from '@kbn/ui-shared-deps-npm';
 
-import { Bundle, BundleRemotes, Hashes, parseDllManifest } from '../common';
+import type { Bundle } from '../common';
+import { BundleRemotes, Hashes, parseDllManifest } from '../common';
 
-import { OptimizerConfig } from './optimizer_config';
+import type { OptimizerConfig } from './optimizer_config';
 import { diffCacheKey } from './diff_cache_key';
 
 export type BundleCacheEvent = BundleNotCachedEvent | BundleCachedEvent;

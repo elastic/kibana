@@ -17,7 +17,6 @@ import {
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function xmattersTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -73,6 +72,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           configUrl: null,
           usesBasic: false,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -108,6 +108,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           configUrl: xmattersSimulatorURL,
           usesBasic: true,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -130,7 +131,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: Error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
+              'error validating connector type config: Error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });

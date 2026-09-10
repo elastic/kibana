@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, ReactNode } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  EuiPopover,
+  EuiSelectable,
+  EuiBadge,
+  type EuiBadgeProps,
+  type UseEuiTheme,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
-import { WorkspaceField } from '../../types';
+import type { WorkspaceField } from '../../types';
 import { gphFieldBadgeSizeStyles } from '../../styles';
 
 export interface FieldPickerProps {
@@ -49,8 +57,24 @@ export function FieldPicker({
     defaultMessage: 'Add fields',
   });
 
+  const onClickCallback: EuiBadgeProps['onClick'] = useCallback(() => {
+    setOpen(!open);
+  }, [open, setOpen]);
+
+  const onClickProps = useMemo(
+    () =>
+      hasFields
+        ? {
+            onClick: onClickCallback,
+            onClickAriaLabel: badgeDescription,
+          }
+        : {},
+    [badgeDescription, hasFields, onClickCallback]
+  );
+
   return (
     <EuiPopover
+      aria-label={badgeDescription}
       id="graphFieldPicker"
       anchorPosition="downCenter"
       ownFocus
@@ -59,14 +83,9 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           color="hollow"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           aria-disabled={!hasFields}
-          onClick={() => {
-            if (hasFields) {
-              setOpen(!open);
-            }
-          }}
-          onClickAriaLabel={badgeDescription}
+          {...onClickProps}
           css={[
             gphFieldBadgeSizeStyles(euiThemeContext),
             css({
@@ -127,9 +146,12 @@ export function FieldPicker({
   );
 }
 
-function toOptions(
-  fields: WorkspaceField[]
-): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
+function toOptions(fields: WorkspaceField[]): Array<{
+  label: string;
+  checked?: 'on' | 'off';
+  prepend?: ReactNode;
+  'data-test-subj': string;
+}> {
   return (
     fields
       // don't show non-aggregatable fields, except for the case when they are already selected.
@@ -140,6 +162,7 @@ function toOptions(
         label: field.name,
         prepend: <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />,
         checked: field.selected ? 'on' : undefined,
+        'data-test-subj': `graph-field-option-${field.name}`,
       }))
   );
 }

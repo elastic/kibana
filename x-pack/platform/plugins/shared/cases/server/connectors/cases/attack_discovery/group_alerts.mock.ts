@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryExpandedAlerts } from './types';
+import type { AttackDiscoveryExpandedAlert, AttackDiscoveryExpandedAlerts } from './types';
 
 export const attackDiscoveryAlerts: AttackDiscoveryExpandedAlerts = [
   {
@@ -69,3 +69,39 @@ export const attackDiscoveryAlerts: AttackDiscoveryExpandedAlerts = [
     },
   },
 ];
+
+export const attackDiscoveryAlertWithAnonymizedId: AttackDiscoveryExpandedAlert = {
+  _id: '79d9d501-15cf-4b83-835d-fde194606638',
+  _index: '.internal.alerts-security.attack.discovery.alerts-default-000001',
+  kibana: {
+    alert: {
+      attack_discovery: {
+        alert_ids: ['019ba0c6-bc40-474e-8622-3fbb92f6cb38', '9dfd82b9-4c17-417a-bb59-5dce32f84e26'],
+        details_markdown: `- The attack chain spans multiple hosts, including {{ host.name debdbf9b-9e88-442d-8885-7cd6a18fddbc }}.`,
+        entity_summary_markdown: `Credential access on {{ host.name debdbf9b-9e88-442d-8885-7cd6a18fddbc }}.`,
+        mitre_attack_tactics: ['Credential Access', 'Lateral Movement', 'Defense Evasion'],
+        replacements: [
+          { uuid: '3bc96e6a-d2ad-411e-8202-f2c6ee892f5b', value: 'g1thqubmti' },
+          { uuid: 'debdbf9b-9e88-442d-8885-7cd6a18fddbc', value: 'Host-7y3d5eahjg' },
+          { uuid: '686626cb-1a91-45b1-ba46-78cc783c2176', value: 'mimzsybazr' },
+          {
+            uuid: '019ba0c6-bc40-474e-8622-3fbb92f6cb38',
+            value: '5429aba88d09ac8afa1a5b55755aaa98fb09249abc5dc5ac243034977a4b23d3',
+          },
+          {
+            uuid: '9dfd82b9-4c17-417a-bb59-5dce32f84e26',
+            value: 'fef0ce55b49650196e72f5590f65800e37edff396ffa4acfbb595fb192e579db',
+          },
+        ],
+        summary_markdown: `Credential dumping tools like {{ process.name mimikatz.exe }} and {{ process.name lsass.exe }}.`,
+        title: 'Coordinated credential access across hosts',
+      },
+      rule: {
+        parameters: {
+          alertsIndexPattern: '.alerts-security.alerts-default',
+        },
+        rule_type_id: 'attack-discovery',
+      },
+    },
+  },
+};

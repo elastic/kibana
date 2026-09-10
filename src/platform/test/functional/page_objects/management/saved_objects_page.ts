@@ -76,13 +76,21 @@ export class SavedObjectsPageObject extends FtrService {
 
     if (!overwriteAll) {
       this.log.debug(`Toggling overwriteAll`);
-      const radio = await this.testSubjects.find(
-        'savedObjectsManagement-importModeControl-overwriteRadioGroup'
-      );
-      // a radio button consists of a div tag that contains an input, a div, and a label
-      // we can't click the input directly, need to go up one level and click the parent div
-      const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
-      await div.click();
+      // The click on the radio's wrapper div can silently fail to register, leaving
+      // overwrite-all enabled; retry until the input is actually selected.
+      await this.retry.try(async () => {
+        const radio = await this.testSubjects.find(
+          'savedObjectsManagement-importModeControl-overwriteRadioGroup'
+        );
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to go up one level and click the parent div
+        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
+        await div.click();
+        const input = await radio.findByCssSelector('input#overwriteDisabled');
+        if (!(await input.isSelected())) {
+          throw new Error('overwriteDisabled radio not selected yet');
+        }
+      });
     } else {
       this.log.debug(`Leaving overwriteAll alone`);
     }
@@ -256,6 +264,11 @@ export class SavedObjectsPageObject extends FtrService {
     await table[title].checkbox.click();
   }
 
+  async clickObjectLinkByTitle(title: string) {
+    const table = keyBy(await this.getElementsInTable(), 'title');
+    await table[title].titleElement.click();
+  }
+
   async getObjectTypeByTitle(title: string) {
     const table = keyBy(await this.getElementsInTable(), 'title');
     // should we check if table size > 0 and log error if not?
@@ -385,7 +398,7 @@ export class SavedObjectsPageObject extends FtrService {
   async clickDelete({ confirmDelete = true }: { confirmDelete?: boolean } = {}) {
     await this.testSubjects.click('savedObjectsManagementDelete');
     if (confirmDelete) {
-      await this.testSubjects.click('confirmModalConfirmButton');
+      await this.testSubjects.click('confirmModalConfirmButton', undefined, undefined, 5);
       await this.testSubjects.waitForDeleted('confirmModalConfirmButton');
       await this.waitTableIsLoaded();
     }

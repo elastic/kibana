@@ -22,6 +22,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface SearchConnectorsPluginSetup {
   getConnectorTypes: () => ConnectorServerSideDefinition[];
@@ -51,8 +52,6 @@ export interface SearchConnectorsPluginSetupDependencies {
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
-  getStartServices: StartServicesAccessor<
-    SearchConnectorsPluginStartDependencies,
-    SearchConnectorsPluginStart
-  >;
+  getStartServices: StartServicesAccessor<SearchConnectorsPluginStartDependencies, unknown>;
+  usageCollection?: UsageCollectionSetup;
 }

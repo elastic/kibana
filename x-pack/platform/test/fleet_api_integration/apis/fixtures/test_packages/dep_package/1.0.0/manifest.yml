@@ -1,0 +1,22 @@
+format_version: 1.0.0
+name: dep_package
+title: Dependency package for integration tests
+description: Minimal package used as a dependency by parent_with_dep
+version: 1.0.0
+categories: []
+release: ga
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

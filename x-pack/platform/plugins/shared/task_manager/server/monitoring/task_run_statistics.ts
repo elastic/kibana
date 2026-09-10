@@ -40,6 +40,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
+  filterOutliers,
 } from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
@@ -89,8 +90,9 @@ interface FillPoolRawStat extends JsonObject {
 }
 
 interface ResultFrequency extends JsonObject {
+  // NOTE: TaskRunResult.Success and TaskRunResult.SuccessRescheduled share the value 'Success',
+  // so they collapse to a single key here.
   [TaskRunResult.Success]: number;
-  [TaskRunResult.SuccessRescheduled]: number;
   [TaskRunResult.RetryScheduled]: number;
   [TaskRunResult.Failed]: number;
 }
@@ -345,12 +347,9 @@ export function summarizeTaskRunStat(
   logger: Logger,
   {
     polling: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_successful_poll,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_polling_delay,
       duration: pollingDuration,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       claim_duration,
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
@@ -359,7 +358,6 @@ export function summarizeTaskRunStat(
       persistence: pollingPersistence,
     },
     drift,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     drift_by_type,
     load,
     execution: {
@@ -398,9 +396,10 @@ export function summarizeTaskRunStat(
       load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
-        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) =>
-          calculateRunningAverage(typedDurations)
-        ),
+        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) => {
+          const filteredDurations = filterOutliers(typedDurations);
+          return calculateRunningAverage(filteredDurations);
+        }),
         persistence: {
           [TaskPersistence.Recurring]: 0,
           [TaskPersistence.NonRecurring]: 0,

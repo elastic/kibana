@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Prompt } from './types';
+import type { Prompt } from './types';
 
 export const promptGroupId = {
   attackDiscovery: 'attackDiscovery',

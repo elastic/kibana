@@ -8,7 +8,8 @@
  */
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
-import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
+import type { HomeServerPluginSetupDependencies } from './plugin';
+import { HomeServerPlugin } from './plugin';
 import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 

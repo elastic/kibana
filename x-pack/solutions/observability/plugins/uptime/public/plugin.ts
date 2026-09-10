@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -14,8 +14,8 @@ import {
 } from '@kbn/core/public';
 import { BehaviorSubject, from } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -23,40 +23,42 @@ import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import {
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import {
-  enableLegacyUptimeApp,
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type {
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { enableLegacyUptimeApp } from '@kbn/observability-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
-import {
+import type { AppUpdater } from '@kbn/core-application-browser';
+import { AppStatus } from '@kbn/core-application-browser';
+import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { PLUGIN } from '../common/constants/plugin';
-import { UptimeConfig } from '../common/config';
+import type { UptimeConfig } from '../common/config';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -86,6 +88,7 @@ export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
@@ -127,7 +130,9 @@ export class UptimePlugin
       this.initContext.config.get().experimental || this.experimentalFeatures;
   }
 
-  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({
+    status: AppStatus.inaccessible,
+  }));
   private experimentalFeatures: UptimeConfig['experimental'] = {
     ruleFormV2Enabled: false,
   };
@@ -203,7 +208,12 @@ export class UptimePlugin
       keywords: appKeywords,
       deepLinks: [
         { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
-        { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+        {
+          id: 'Certificates',
+          title: 'TLS Certificates',
+          path: '/certificates',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         { id: 'Settings', title: 'Settings', path: '/settings' },
       ],
       mount: async (params: AppMountParameters) => {
@@ -310,16 +320,24 @@ function setUptimeAppStatus(
     const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
     if (hasUptimePrivileges) {
       const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
-      indexStatusPromise.then((indexStatus) => {
-        if (indexStatus.indexExists) {
-          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-          updater.next(() => ({ status: AppStatus.accessible }));
-          registerAlertRules(coreStart, pluginsStart, stackVersion, false);
-        } else {
+      indexStatusPromise
+        .then((indexStatus) => {
+          if (indexStatus.indexExists) {
+            registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+            updater.next(() => ({ status: AppStatus.accessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, false);
+          } else {
+            updater.next(() => ({ status: AppStatus.inaccessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, true);
+          }
+        })
+        .catch(() => {
+          // The index-status check runs as the current user, so feature visibility
+          // without ES index read privileges returns a 403 (not a 404). Keep the app
+          // hidden on any failure instead of leaving the promise rejection unhandled.
           updater.next(() => ({ status: AppStatus.inaccessible }));
           registerAlertRules(coreStart, pluginsStart, stackVersion, true);
-        }
-      });
+        });
     }
   }
 }

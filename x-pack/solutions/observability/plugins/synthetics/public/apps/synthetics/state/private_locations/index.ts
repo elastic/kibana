@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import { createReducer } from 'redux-toolkit-v1';
+import type {
+  PrivateLocation,
+  SyntheticsPrivateLocations,
+} from '../../../../../common/runtime_types';
 import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
@@ -14,7 +17,7 @@ import {
   setPrivateLocationToEdit,
 } from './actions';
 import { setIsPrivateLocationFlyoutVisible, getPrivateLocationsAction } from './actions';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface PrivateLocationsState {
   data?: SyntheticsPrivateLocations | null;
@@ -77,7 +80,6 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     })
     .addCase(editPrivateLocationAction.fail, (state, action) => {
       state.editLoading = false;
-      state.privateLocationToEdit = undefined;
       state.error = action.payload;
     })
     .addCase(deletePrivateLocationAction.get, (state) => {

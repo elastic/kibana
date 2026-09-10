@@ -26,28 +26,29 @@ import {
   useEuiFontSize,
   euiTextTruncate,
 } from '@elastic/eui';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import {
+import type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import chroma from 'chroma-js';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
-import {
+import type {
   Datasource,
   Visualization,
   FramePublicAPI,
   DatasourceMap,
-  VisualizationMap,
   UserMessagesGetter,
   DatasourceLayers,
-} from '../../types';
+  DatasourceStates,
+} from '@kbn/lens-common';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
@@ -60,7 +61,6 @@ import {
   useLensSelector,
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
-  DatasourceStates,
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
@@ -71,6 +71,7 @@ import {
   selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { useEditorFrameService } from '../editor_frame_service_context';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -102,8 +103,6 @@ const configurationsValid = (
 };
 
 export interface SuggestionPanelProps {
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   getUserMessages?: UserMessagesGetter;
@@ -200,21 +199,31 @@ const SuggestionPreview = ({
   const { euiTheme } = euiThemeContext;
   const xsFontSize = useEuiFontSize('xs');
   return (
-    <EuiToolTip
-      content={preview.title}
-      anchorProps={
+    <div
+      data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}
+      css={
         wrapSuggestions
-          ? {
-              css: css`
-                display: flex;
-                flex-direction: column;
-                flex-basis: calc(50% - 9px);
-              `,
-            }
+          ? css`
+              flex-basis: calc(50% - 9px);
+            `
           : undefined
       }
     >
-      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+      <EuiToolTip
+        content={preview.title}
+        // anchor element is button with aria label, tooltip announcement would be redundant
+        disableScreenReaderOutput
+        anchorProps={
+          wrapSuggestions
+            ? {
+                css: css`
+                  display: flex;
+                  flex-direction: column;
+                `,
+              }
+            : undefined
+        }
+      >
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
@@ -278,7 +287,7 @@ const SuggestionPreview = ({
             />
           ) : (
             <span css={suggestionStyles.icon(euiThemeContext)}>
-              <EuiIcon size="xxl" type={preview.icon} />
+              <EuiIcon size="xxl" type={preview.icon} aria-hidden={true} />
             </span>
           )}
           {showTitleAsLabel && (
@@ -296,8 +305,8 @@ const SuggestionPreview = ({
             </span>
           )}
         </EuiPanel>
-      </div>
-    </EuiToolTip>
+      </EuiToolTip>
+    </div>
   );
 };
 
@@ -307,8 +316,6 @@ export const SuggestionPanelWrapper = (props: SuggestionPanelProps) => {
 };
 
 export function SuggestionPanel({
-  datasourceMap,
-  visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
@@ -319,6 +326,7 @@ export function SuggestionPanel({
   toggleAccordionCb,
   isAccordionOpen,
 }: SuggestionPanelProps) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const activeData = useLensSelector(selectStagedActiveData);
@@ -523,7 +531,7 @@ export function SuggestionPanel({
       </EuiText>
 
       <EuiButtonEmpty
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         size="s"
         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
         onClick={() => dispatchLens(applyChanges())}

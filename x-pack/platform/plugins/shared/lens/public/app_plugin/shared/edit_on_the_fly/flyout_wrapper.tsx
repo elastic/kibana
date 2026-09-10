@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,39 +19,53 @@ import {
   EuiButton,
   EuiLink,
   EuiBetaBadge,
+  EuiSpacer,
   EuiText,
   EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import type { FlyoutWrapperProps } from './types';
+
+const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
+  defaultMessage: 'Apply and close',
+});
+
+const closeConfigurationLabel = i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
+  defaultMessage: 'Close configuration',
+});
 
 export const FlyoutWrapper = ({
   children,
+  toolbar,
+  layerTabs,
   isInlineFlyoutVisible,
   isScrollable,
   displayFlyoutHeader,
-  language,
-  isNewPanel,
   isSaveable,
   onCancel,
   navigateToLensEditor,
   onApply,
   isReadOnly,
+  applyButtonLabel = applyAndCloseLabel,
+  applyButtonDisabledTooltip,
 }: FlyoutWrapperProps) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
-          hasBorder
+          hasBorder={false}
           css={css`
             pointer-events: auto;
-            background-color: ${euiThemeVars.euiColorEmptyShade};
+            background-color: ${euiTheme.colors.emptyShade};
           `}
           data-test-subj="editFlyoutHeader"
         >
+          {/* Header row 1: Title + close (same onCancel as footer Cancel) */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
@@ -75,8 +90,9 @@ export const FlyoutWrapper = ({
                         )}
                       >
                         <EuiBetaBadge
+                          tabIndex={0}
                           label=""
-                          iconType="beaker"
+                          iconType="flask"
                           size="s"
                           css={css`
                             vertical-align: middle;
@@ -88,22 +104,65 @@ export const FlyoutWrapper = ({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {navigateToLensEditor && !isReadOnly && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                    {i18n.translate('xpack.lens.config.editLinkLabel', {
-                      defaultMessage: 'Edit in Lens',
-                    })}
-                  </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={closeConfigurationLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="text"
+                  iconType="cross"
+                  onClick={onCancel}
+                  data-test-subj="euiFlyoutCloseButton"
+                  aria-label={closeConfigurationLabel}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          {/* Header row 2: Edit in Lens and button groups */}
+          {(navigateToLensEditor || toolbar) && (
+            <>
+              <EuiFlexGroup
+                gutterSize="xs"
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+              >
+                {navigateToLensEditor && !isReadOnly && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <EuiLink
+                        onClick={navigateToLensEditor}
+                        data-test-subj="navigateToLensEditorLink"
+                      >
+                        {i18n.translate('xpack.lens.config.editLinkLabel', {
+                          defaultMessage: 'Edit in Lens',
+                        })}
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {/* Empty growing flex item to push toolbar to the right */}
+                <EuiFlexItem grow={true} />
+                {toolbar ?? null}
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {/* Header row 3: Layer tabs */}
+          {layerTabs ? (
+            <div
+              // Adding negative margin to compensate for EuiFlyout header padding
+              css={css({
+                marginInline: `-${euiTheme.size.base}`,
+              })}
+            >
+              {layerTabs}
+            </div>
+          ) : null}
         </EuiFlyoutHeader>
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
@@ -118,9 +177,14 @@ export const FlyoutWrapper = ({
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
+          padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
           pointer-events: none;
+          // Override the default max-width of drag-drop extra targets to reduce
+          // horizontal overflow space requirements
+          .domDroppable__extraTargets {
+            width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
+          }
           .euiFlyoutBody__overflow {
             transform: initial;
             -webkit-mask-image: none;
@@ -135,8 +199,8 @@ export const FlyoutWrapper = ({
             }
           }
           .euiFlyoutBody__overflowContent {
+            background-color: ${euiTheme.colors.emptyShade};
             padding: 0;
-            block-size: 100%;
           }
         `}
       >
@@ -163,18 +227,21 @@ export const FlyoutWrapper = ({
             </EuiFlexItem>
             {isReadOnly ? null : (
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={onApply}
-                  fill
-                  disabled={Boolean(isNewPanel) ? false : !isSaveable}
-                  iconType="check"
-                  data-test-subj="applyFlyoutButton"
+                <EuiToolTip
+                  content={applyButtonDisabledTooltip}
+                  display={applyButtonDisabledTooltip ? 'inlineBlock' : 'block'}
                 >
-                  <FormattedMessage
-                    id="xpack.lens.config.applyFlyoutLabel"
-                    defaultMessage="Apply and close"
-                  />
-                </EuiButton>
+                  <EuiButton
+                    onClick={onApply}
+                    fill
+                    disabled={!isSaveable}
+                    hasAriaDisabled
+                    iconType="check"
+                    data-test-subj="applyFlyoutButton"
+                  >
+                    {applyButtonLabel}
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

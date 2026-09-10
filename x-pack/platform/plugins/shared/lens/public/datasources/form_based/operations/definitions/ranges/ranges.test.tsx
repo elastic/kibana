@@ -8,16 +8,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { mountWithProviders } from '../../../../../test_utils/test_utils';
-import type { FormBasedLayer } from '../../../types';
+import type { FormBasedLayer, RangeIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
 import { rangeOperation } from '..';
-import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
   DEFAULT_INTERVAL,
@@ -28,7 +27,6 @@ import {
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
-import { IndexPattern } from '../../../../../types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -55,13 +53,13 @@ jest.mock('lodash', () => {
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
-const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const kqlPluginMockValue = kqlPluginMock.createStartContract();
 const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
 const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
-    convert: ({ gte, lt }: { gte: string; lt: string }) => {
+    convertToText: ({ gte, lt }: { gte: string; lt: string }) => {
       if (params?.id === 'custom') {
         return `Custom format: ${gte} - ${lt}`;
       }
@@ -91,7 +89,7 @@ const defaultOptions = {
   },
   data: dataPluginMockValue,
   fieldFormats: fieldFormatsPluginMockValue,
-  unifiedSearch: unifiedSearchPluginMockValue,
+  kql: kqlPluginMockValue,
   dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
@@ -116,7 +114,7 @@ const defaultOptions = {
         aggregatable: true,
       },
     ]),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },

@@ -12,6 +12,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
+  filterOutliers,
 } from './task_run_calculators';
 
 describe('calculateRunningAverage', () => {
@@ -76,5 +77,27 @@ describe('createMapOfRunningAveragedStats', () => {
       [term2]: [3, 5, 6],
       [term3]: [4],
     });
+  });
+});
+
+describe('filterOutliers', () => {
+  test('determines outliers and filters them out', async () => {
+    const filtered = filterOutliers([484, 711, 892, 1051, 233, 411, 600071]);
+    expect(filtered).toEqual([484, 711, 892, 1051, 233, 411]);
+  });
+
+  test('determines outliers and filters them out if needed', async () => {
+    const filtered = filterOutliers([484, 711, 892, 1051, 600000, 600175, 600071]);
+    expect(filtered).toEqual([484, 711, 892, 1051, 600000, 600175, 600071]);
+  });
+
+  test('doesnt filter lower outliers', async () => {
+    const filtered = filterOutliers([23, 600010, 680000, 600002, 600000, 600175, 600071]);
+    expect(filtered).toEqual([23, 600010, 600002, 600000, 600175, 600071]);
+  });
+
+  test('doesnt filter for an array less than 4', async () => {
+    const filtered = filterOutliers([484, 600071]);
+    expect(filtered).toEqual([484, 600071]);
   });
 });

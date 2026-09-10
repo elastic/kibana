@@ -9,10 +9,27 @@
 
 import React, { memo } from 'react';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
+import { css } from '@emotion/react';
+import { type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { TableVisBasic } from './table_vis_basic';
+
+const tableVisSplitStyles = {
+  base: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+      marginBottom: euiTheme.size.l,
+      display: 'flex',
+      flexDirection: 'column',
+      flex: '1 0 0',
+      '> h3': {
+        textAlign: 'center',
+      },
+    }),
+};
 
 interface TableVisSplitProps {
   fireEvent: IInterpreterRenderHandlers['event'];
@@ -24,6 +41,8 @@ interface TableVisSplitProps {
 
 export const TableVisSplit = memo(
   ({ fireEvent, tables, visConfig, uiStateProps, enforceMinWidth }: TableVisSplitProps) => {
+    const styles = useMemoCss(tableVisSplitStyles);
+
     return (
       <>
         {tables.map(({ table, title }) => {
@@ -38,13 +57,14 @@ export const TableVisSplit = memo(
             <div
               key={title}
               className="tbvChart__split"
-              css={
+              css={[
+                styles.base,
                 enforceMinWidth
                   ? {
                       minWidth: `calc(${minTableWidth}px + 2 * ${euiThemeVars.euiSizeS})`,
                     }
-                  : {}
-              }
+                  : {},
+              ]}
             >
               <TableVisBasic
                 fireEvent={fireEvent}

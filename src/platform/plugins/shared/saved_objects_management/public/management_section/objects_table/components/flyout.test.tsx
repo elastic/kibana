@@ -12,8 +12,9 @@ import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { FlyoutClass as Flyout, FlyoutProps, FlyoutState } from './flyout';
-import { ShallowWrapper } from 'enzyme';
+import type { FlyoutProps, FlyoutState } from './flyout';
+import { FlyoutClass as Flyout } from './flyout';
+import type { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockFile = {
@@ -80,7 +81,7 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
   });
 
@@ -93,9 +94,9 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
-    component.find('EuiFilePickerClass').simulate('change', []);
+    component.find('EuiFilePicker').simulate('change', []);
     expect(component.state('file')).toBe(undefined);
   });
 
@@ -112,7 +113,7 @@ describe('Flyout', () => {
       'EuiButton[data-test-subj="importSavedObjectsImportBtn"]'
     );
     expect(importButton.prop('isDisabled')).toBe(true);
-    component.find('EuiFilePickerClass').simulate('change', [mockFile]);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
 
     // Ensure state changes are reflected
     component.update();

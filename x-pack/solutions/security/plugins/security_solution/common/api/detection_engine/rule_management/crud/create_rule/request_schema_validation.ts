@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
+import { validateThreatMapping } from '../../../../../utils/request_validation/indicator_match';
 import type { RuleCreateProps } from '../../../model';
 
 /**
@@ -14,8 +16,9 @@ export const validateCreateRuleProps = (props: RuleCreateProps): string[] => {
   return [
     ...validateTimelineId(props),
     ...validateTimelineTitle(props),
-    ...validateThreatMapping(props),
+    ...validateThreatMatchConcurrentSearches(props),
     ...validateThreshold(props),
+    ...validateThreatMapping(props),
   ];
 };
 
@@ -45,7 +48,7 @@ const validateTimelineTitle = (props: RuleCreateProps): string[] => {
   return [];
 };
 
-const validateThreatMapping = (props: RuleCreateProps): string[] => {
+const validateThreatMatchConcurrentSearches = (props: RuleCreateProps): string[] => {
   const errors: string[] = [];
   if (props.type === 'threat_match') {
     if (props.concurrent_searches != null && props.items_per_search == null) {
@@ -58,22 +61,4 @@ const validateThreatMapping = (props: RuleCreateProps): string[] => {
   return errors;
 };
 
-const validateThreshold = (props: RuleCreateProps): string[] => {
-  const errors: string[] = [];
-  if (props.type === 'threshold') {
-    if (!props.threshold) {
-      errors.push('when "type" is "threshold", "threshold" is required');
-    } else {
-      if (
-        props.threshold.cardinality?.length &&
-        props.threshold.field.includes(props.threshold.cardinality[0].field)
-      ) {
-        errors.push('Cardinality of a field that is being aggregated on is always 1');
-      }
-      if (Array.isArray(props.threshold.field) && props.threshold.field.length > 3) {
-        errors.push('Number of fields must be 3 or less');
-      }
-    }
-  }
-  return errors;
-};
+const validateThreshold = (props: RuleCreateProps): string[] => validateThresholdBase(props);

@@ -8,8 +8,8 @@
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiForm,
   EuiFormRow,
@@ -18,11 +18,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiSwitch,
-  EuiButton,
-  EuiComboBoxOptionOption,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
@@ -40,6 +40,8 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
   onSuccess,
   onCancel,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [isLegacy, setIsLegacy] = useState<boolean>(false);
   const [templateName, setTemplateName] = useState<string>('');
   const [aliasName, setAliasName] = useState<string>('');
@@ -56,7 +58,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        <EuiCallOut
+        <KbnWarningCallout
           style={{ maxWidth: 400 }}
           title={
             <FormattedMessage
@@ -64,17 +66,17 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
               defaultMessage="Template already has policy"
             />
           }
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.indexHasNoAliasesWarningMessage"
-            defaultMessage="This index template already has the policy {existingPolicyName} attached to it.
+          text={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.indexHasNoAliasesWarningMessage"
+              defaultMessage="This index template already has the policy {existingPolicyName} attached to it.
             Adding this policy will overwrite that configuration."
-            values={{
-              existingPolicyName,
-            }}
-          />
-        </EuiCallOut>
+              values={{
+                existingPolicyName,
+              }}
+            />
+          }
+        />
         <EuiSpacer size="s" />
       </Fragment>
     );
@@ -85,7 +87,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        <EuiCallOut
+        <KbnDangerCallout
           style={{ maxWidth: 400 }}
           title={
             <FormattedMessage
@@ -93,18 +95,24 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
               defaultMessage="Unable to load index templates"
             />
           }
-          color="danger"
-        >
-          <p>
-            {message} ({statusCode})
-          </p>
-          <EuiButton isLoading={isLoading} color="danger" onClick={resendRequest}>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesButton"
-              defaultMessage="Try again"
-            />
-          </EuiButton>
-        </EuiCallOut>
+          text={
+            <p>
+              {message} ({statusCode})
+            </p>
+          }
+          actionProps={{
+            primary: {
+              isLoading,
+              onClick: resendRequest,
+              children: (
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesButton"
+                  defaultMessage="Try again"
+                />
+              ),
+            },
+          }}
+        />
         <EuiSpacer size="s" />
       </Fragment>
     );
@@ -180,6 +188,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
               }
             >
               <EuiComboBox
+                isInvalid={!!templateError}
                 isLoading={isLoading}
                 placeholder={i18n.translate(
                   'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
@@ -264,6 +273,8 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
     <EuiConfirmModal
       data-test-subj="addPolicyToTemplateModal"
       title={title}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={addPolicyToTemplate}
       cancelButtonText={i18n.translate(

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CustomHelpers } from 'joi';
 import {
   isSchema,
   type CustomValidator,
@@ -14,9 +15,12 @@ import {
   type Schema,
   type SchemaLike,
   type WhenOptions,
-  CustomHelpers,
 } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
+import {
+  META_FIELD_X_OAS_AVAILABILITY,
+  META_FIELD_X_OAS_DEPRECATED,
+  META_FIELD_X_OAS_DISCONTINUED,
+} from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -24,7 +28,26 @@ import { Reference } from '../references';
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */
+export interface TypeMetaAvailability {
+  /** @default stable */
+  stability?: 'experimental' | 'stable' | 'tech_preview';
+  /**
+   * The stack version in which this field was introduced (eg: 9.4.0).
+   */
+  since?: string;
+}
+
 export interface TypeMeta {
+  /**
+   * A unique identifier for this type, reduces duplication.
+   */
+  id?: string;
+  /**
+   * A human-friendly title for this type to be used in documentation.
+   *
+   * Defaults to the `id`, if provided.
+   */
+  title?: string;
   /**
    * A human-friendly description of this type to be used in documentation.
    */
@@ -38,6 +61,10 @@ export interface TypeMeta {
    * @example 9.0.0
    */
   'x-discontinued'?: string;
+  /**
+   * Availability metadata for this field to be used in generated API docs.
+   */
+  availability?: TypeMetaAvailability;
 }
 
 export interface TypeOptions<T> {
@@ -110,8 +137,11 @@ export abstract class Type<V> {
    * @type {Schema}
    */
   protected readonly internalSchema: Schema;
+  private readonly meta: TypeOptions<V>['meta'];
 
   protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+    this.meta = options.meta;
+
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -132,6 +162,11 @@ export abstract class Type<V> {
     }
 
     if (options.meta) {
+      const title = options.meta.title ?? options.meta.id;
+      if (title) {
+        schema = schema.meta({ title });
+      }
+
       if (options.meta.description) {
         schema = schema.description(options.meta.description);
       }
@@ -140,6 +175,9 @@ export abstract class Type<V> {
       }
       if (options.meta.deprecated && options.meta['x-discontinued'])
         schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta['x-discontinued'] });
+      if (options.meta.availability) {
+        schema = schema.meta({ [META_FIELD_X_OAS_AVAILABILITY]: options.meta.availability });
+      }
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
@@ -184,6 +222,10 @@ export abstract class Type<V> {
    */
   public getSchema() {
     return this.internalSchema;
+  }
+
+  public getMeta(): TypeOptions<V>['meta'] {
+    return this.meta;
   }
 
   public getSchemaStructure() {
@@ -284,7 +326,9 @@ function prettyPrintTypeParts(
 ): string | string[] {
   if (!isSchema(schema)) {
     if (schema === null) return 'null';
-    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+    // schema can be a Symbol (because of SymbolSchema). We need to wrap it with String() because
+    // implicit conversion of a 'symbol' to a 'string' will fail at runtime.
+    return `${String(schema ?? 'unknown')}${optional ? '?' : ''}`;
   }
 
   const isOptionalType = optional || schema._flags?.presence === 'optional';

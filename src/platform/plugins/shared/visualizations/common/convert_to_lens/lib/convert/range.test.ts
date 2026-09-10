@@ -8,11 +8,11 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
+import type { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import { convertToRangeColumn } from './range';
-import { RangeColumn } from './types';
-import { DataType } from '../../types';
-import { RANGE_MODES } from '../../constants';
+import type { RangeColumn } from './types';
+import type { DataType } from '@kbn/lens-common';
+import { LENS_RANGE_MODES } from '@kbn/lens-common';
 
 describe('convertToRangeColumn', () => {
   const aggId = `some-id`;
@@ -43,7 +43,7 @@ describe('convertToRangeColumn', () => {
         sourceField: stubLogstashDataView.fields[0].name,
         meta: { aggId },
         params: {
-          type: RANGE_MODES.Range,
+          type: LENS_RANGE_MODES.Range,
           maxBars: 'auto',
           ranges,
         },
@@ -59,8 +59,9 @@ describe('convertToRangeColumn', () => {
         sourceField: stubLogstashDataView.fields[0].name,
         meta: { aggId },
         params: {
-          type: RANGE_MODES.Histogram,
+          type: LENS_RANGE_MODES.Histogram,
           maxBars: 'auto',
+          ranges: [],
         },
       },
     ],

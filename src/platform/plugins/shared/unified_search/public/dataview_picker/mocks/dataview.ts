@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const fields = [
@@ -110,7 +110,7 @@ export const buildDataViewMock = ({
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName: timeFieldName || '',
     docvalueFields: [],
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({ convertToText: (value: unknown) => value })),
     isTimeNanosBased: () => false,
     isPersisted: () => false,
     toSpec: () => ({}),
@@ -119,6 +119,7 @@ export const buildDataViewMock = ({
     },
   } as unknown as DataView;
 
+  // @ts-expect-error upgrade typescript v5.9.3
   dataView.isTimeBased = () => !!timeFieldName;
 
   return dataView;

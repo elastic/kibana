@@ -61,6 +61,24 @@ properties:
     example: ">"
   timeField:
     $ref: 'timefield.yaml'
+  sourceFields:
+    description: >
+      An optional list of source fields to include in the alert payload.
+      Currently this parameter is accepted but ignored by the rule executor.
+    type: array
+    maxItems: 5
+    items:
+      type: object
+      required:
+        - label
+        - searchPath
+      properties:
+        label:
+          description: A display label for the field
+          type: string
+        searchPath:
+          description: The field path to retrieve from the source document
+          type: string
   timeWindowSize:
     $ref: 'timewindowsize.yaml'
   timeWindowUnit:

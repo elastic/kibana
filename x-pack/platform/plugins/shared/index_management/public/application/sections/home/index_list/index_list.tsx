@@ -6,17 +6,16 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 
-import { ScopedHistory } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { useAppContext } from '../../../app_context';
 import { IndexTable } from './index_table';
 
-export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history, location }) => {
   const {
-    core: { executionContext },
+    core: { executionContext, http },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
@@ -29,8 +28,8 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
   }, []);
 
   return (
-    <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
-      <IndexTable history={history as ScopedHistory} />
+    <div className={APP_WRAPPER_CLASS} data-test-subj="indicesList">
+      <IndexTable history={history} location={location} http={http} />
     </div>
   );
 };

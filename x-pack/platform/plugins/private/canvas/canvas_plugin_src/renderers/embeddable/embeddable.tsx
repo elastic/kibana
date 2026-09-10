@@ -5,32 +5,55 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { omit } from 'lodash';
-import {
-  AggregateQuery,
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { apiHasSerializableState, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
-import { EmbeddableExpression } from '../../expression_types/embeddable';
-import { StartDeps } from '../../plugin';
+import type { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
+import type { EmbeddableExpression } from '../../expression_types/embeddable';
+import type { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 
 const { embeddable: strings } = RendererStrings;
 
 const children: Record<string, { setFilters: (filters: Filter[] | undefined) => void }> = {};
+
+const CanvasEmbeddableContainer: FC<{ children: ReactNode }> = ({ children: childNodes }) => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      & .embPanel--dragHandle:hover {
+        background-color: ${transparentize(
+          euiTheme.colors.warning,
+          colorMode === 'DARK' ? 0.3 : 0.1
+        )};
+      }
+    `,
+    [colorMode, euiTheme]
+  );
+
+  return (
+    <div
+      className={CANVAS_EMBEDDABLE_CLASSNAME}
+      css={styles}
+      style={{ width: '100%', height: '100%', cursor: 'auto' }}
+    >
+      {childNodes}
+    </div>
+  );
+};
 
 const renderReactEmbeddable = ({
   type,
@@ -60,9 +83,7 @@ const renderReactEmbeddable = ({
 
     // set intial panel state onMount
     useMemo(() => {
-      container.setSerializedStateForChild(uuid, {
-        rawState: omit(input, ['disableTriggers', 'filters']),
-      });
+      container.setSerializedStateForChild(uuid, omit(input, ['disableTriggers', 'filters']));
     }, []);
 
     const searchApi = useMemo(() => {
@@ -73,10 +94,18 @@ const renderReactEmbeddable = ({
       };
     }, []);
 
+    const panelProps = useMemo(
+      () => ({
+        isSharedItem: true,
+      }),
+      []
+    );
+
     return (
       <EmbeddableRenderer
         type={type}
         maybeId={uuid}
+        panelProps={panelProps}
         getParentApi={(): CanvasContainerApi => ({
           ...container,
           ...searchApi,
@@ -89,12 +118,7 @@ const renderReactEmbeddable = ({
               const newState = api.serializeState();
               // canvas auto-saves so update child state on any change
               container.setSerializedStateForChild(uuid, newState);
-              const newExpression = embeddableInputToExpression(
-                newState.rawState,
-                type,
-                undefined,
-                true
-              );
+              const newExpression = embeddableInputToExpression(newState, type);
               if (newExpression) handlers.onEmbeddableInputChange(newExpression);
             });
           }
@@ -119,12 +143,9 @@ const renderReactEmbeddable = ({
 
   return (
     <KibanaRenderContextProvider {...core}>
-      <div
-        className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: '100%', height: '100%', cursor: 'auto' }}
-      >
+      <CanvasEmbeddableContainer>
         <RendererWrapper />
-      </div>
+      </CanvasEmbeddableContainer>
     </KibanaRenderContextProvider>
   );
 };

@@ -8,12 +8,11 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
@@ -71,14 +70,16 @@ export function HostBreakdown({ hasDistinctProbabilisticValues, onReady }: Props
           {i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title', {
             defaultMessage: 'Host agent breakdown',
           })}
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title.hint', {
               defaultMessage:
                 'This graph shows the combined values of Universal Profiling samples and metrics. host.name[host.id].',
             })}
-          >
-            <EuiIcon type="question" style={{ marginLeft: 4 }} />
-          </EuiToolTip>
+            type="question"
+            iconProps={{
+              style: { marginLeft: 4 },
+            }}
+          />
         </EuiText>
       </EuiTitle>
       <EuiSpacer />

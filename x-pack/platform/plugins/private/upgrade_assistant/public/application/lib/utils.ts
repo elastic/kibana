@@ -8,8 +8,9 @@
 import { pipe } from 'fp-ts/pipeable';
 import { tryCatch, fold } from 'fp-ts/Either';
 
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { ReindexStep, DataStreamMigrationStatus } from '../../../common/types';
+import { DataStreamMigrationStatus } from '../../../common/types';
 
 export const validateRegExpString = (s: string) =>
   pipe(

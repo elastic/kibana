@@ -94,6 +94,7 @@ export const ColumnsPopover: React.FC<Props> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.COLUMN_SELECTION_POPOVER_ARIA_LABEL}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
@@ -193,7 +194,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                             aria-label={i18n.DRAG_HANDLE}
                             grow={false}
                           >
-                            <EuiIcon type="grab" color="subdued" />
+                            <EuiIcon type="dragVertical" color="subdued" aria-hidden={true} />
                           </EuiPanel>
                         </EuiFlexItem>
                       )}

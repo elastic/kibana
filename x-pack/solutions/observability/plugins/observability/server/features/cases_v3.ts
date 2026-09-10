@@ -8,8 +8,8 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
 import { casesFeatureIdV3, casesFeatureId, observabilityFeatureId } from '../../common';
 
 export const getCasesFeatureV3 = (
@@ -22,7 +22,6 @@ export const getCasesFeatureV3 = (
   }),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.observability,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [casesFeatureId, 'kibana'],
   catalogue: [observabilityFeatureId],
   cases: [observabilityFeatureId],
@@ -199,6 +198,36 @@ export const getCasesFeatureV3 = (
                 assign: [observabilityFeatureId],
               },
               ui: casesCapabilities.assignCase,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.observability.features.manageTemplatesSubFeatureName', {
+        defaultMessage: 'Manage templates',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'cases_manage_templates',
+              name: i18n.translate(
+                'xpack.observability.features.manageTemplatesSubFeatureDetails',
+                {
+                  defaultMessage: 'Manage case templates',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              cases: {
+                manageTemplates: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.manageTemplates,
             },
           ],
         },

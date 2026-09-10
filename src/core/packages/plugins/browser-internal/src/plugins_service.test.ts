@@ -9,11 +9,7 @@
 
 import { omit } from 'lodash';
 
-import {
-  type MockedPluginInitializer,
-  mockPluginInitializerProvider,
-  runtimeResolverMock,
-} from './plugins_service.test.mocks';
+import { mockPluginInitializerProvider, runtimeResolverMock } from './plugins_service.test.mocks';
 
 import { type PluginName, type DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -38,18 +34,18 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import type { Plugin, PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
-export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
+type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;
+let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
-mockPluginInitializerProvider.mockImplementation(
-  (pluginName) => mockPluginInitializers.get(pluginName)!
-);
+mockPluginInitializerProvider.mockImplementation((pluginName) => ({
+  plugin: mockPluginInitializers.get(pluginName)!,
+}));
 
 let plugins: InjectedMetadataPlugin[];
 
@@ -115,6 +111,7 @@ describe('PluginsService', () => {
         ...mockSetupDeps.http,
         staticAssets: expect.any(Object),
       },
+      injection: expect.any(Object),
     };
     // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockStartDeps = {
@@ -129,7 +126,6 @@ describe('PluginsService', () => {
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
@@ -147,6 +143,7 @@ describe('PluginsService', () => {
         ...mockStartDeps.http,
         staticAssets: expect.any(Object),
       },
+      injection: expect.any(Object),
     };
 
     // Reset these for each test.

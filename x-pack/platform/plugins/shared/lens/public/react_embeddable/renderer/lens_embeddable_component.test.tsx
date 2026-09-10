@@ -12,9 +12,10 @@ import {
   getValidExpressionParams,
   makeEmbeddableServices,
 } from '../mocks';
-import { LensApi, LensInternalApi } from '../types';
+import type { LensInternalApi } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import React from 'react';
 import { LensEmbeddableComponent } from './lens_embeddable_component';
 
@@ -53,18 +54,5 @@ describe('Lens Embeddable component', () => {
 
     render(<LensEmbeddableComponent {...props} />);
     expect(screen.queryByTestId('lens-embeddable')).not.toBeInTheDocument();
-  });
-
-  it('shoud not render the title if the visualization forces the title to be hidden', () => {
-    const getDisplayOptions = jest.fn(() => ({ noPanelTitle: true }));
-    const props = getDefaultProps({
-      internalApiOverrides: {
-        getDisplayOptions,
-      },
-    });
-
-    render(<LensEmbeddableComponent {...props} />);
-    expect(props.internalApi.getDisplayOptions).toHaveBeenCalled();
-    expect(screen.getByTestId('lens-embeddable').parentElement).not.toHaveAttribute('data-title');
   });
 });

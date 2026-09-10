@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ClusterSettingsReasonResponse } from '../../types';
+import type { ClusterSettingsReasonResponse } from '../../types';
 
 /*
  * Return true if the settings property is enabled or is using its default state of enabled

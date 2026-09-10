@@ -21,20 +21,19 @@ import {
   EuiPanel,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import {
-  useForm,
-  Form,
-  UseField,
-  TextField,
-  FieldConfig,
-  fieldValidators,
-  FormConfig,
-  ValidationFuncArg,
-} from '../../../shared_imports';
+import type { FieldConfig, FormConfig, ValidationFuncArg } from '../../../shared_imports';
+import { useForm, Form, UseField, TextField, fieldValidators } from '../../../shared_imports';
 
 import { type DevToolsVariable } from './types';
 import { isValidVariableName } from './utils';
+
+const styles = {
+  fullWidthPanel: css`
+    width: 100%;
+  `,
+};
 
 export interface VariableEditorFormProps {
   onSubmit: (data: DevToolsVariable) => void;
@@ -106,7 +105,7 @@ export const VariableEditorForm = (props: VariableEditorFormProps) => {
         hasShadow={false}
         borderRadius="none"
         grow={false}
-        css={{ width: '100%' }}
+        css={styles.fullWidthPanel}
       >
         <EuiTitle size="xs">
           <h2>

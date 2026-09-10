@@ -5,23 +5,14 @@
  * 2.0.
  */
 
-import type {
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  Logger,
-} from '@kbn/core/server';
+import type { Plugin, CoreSetup, PluginInitializerContext, Logger } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { getPersistableStateAttachment } from './attachments/persistable_state';
-import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
 import { registerCaseFixtureFileKinds } from './files';
 
@@ -46,9 +37,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   }
 
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
-    deps.cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
-    deps.cases.attachmentFramework.registerPersistableState(getPersistableStateAttachment());
-
     registerRoutes(core, this.log);
     registerCaseFixtureFileKinds(deps.files);
 
@@ -61,7 +49,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'TestNoCasesConnectorFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       cases: ['testNoCasesConnectorFixture'],
       privileges: {
         all: {
@@ -93,6 +80,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
   }
 
-  public start(core: CoreStart, plugins: FixtureStartDeps) {}
+  public start() {}
+
   public stop() {}
 }

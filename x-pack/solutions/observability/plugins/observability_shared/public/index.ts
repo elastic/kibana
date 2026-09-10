@@ -23,7 +23,6 @@ export type {
   NavigationEntry,
 } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
-export { useObservabilityTourContext, observTourStepStorageKey } from './components/tour';
 export { ActionMenu, ActionMenuDivider } from './components/action_menu/action_menu';
 export {
   Section,
@@ -37,6 +36,15 @@ export type { SectionLinkProps } from './components/section/section';
 export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_view_lazy';
 export { TagsList } from './components/tags_list/tags_list_lazy';
 export type { TagsListProps } from './components/tags_list/tags_list';
+
+export { TagsComboBox } from './components/tags_combo_box/tags_combo_box_lazy';
+export type { TagsComboBoxProps } from './components/tags_combo_box/tags_combo_box';
+export {
+  createTagsPasteHandler,
+  getNewTags,
+  hasTagDelimiter,
+  splitTags,
+} from './components/tags_combo_box/tags_input';
 
 export { TechnicalPreviewBadge } from './components/technical_preview_badge/technical_preview_badge';
 
@@ -96,10 +104,6 @@ export {
 } from './components/profiling/embeddables';
 
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
-export {
-  FeatureFeedbackButton,
-  getSurveyFeedbackURL,
-} from './components/feature_feedback_button/feature_feedback_button';
 export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
 export { FieldValueSelection, FieldValueSuggestions } from './components';
 
@@ -110,3 +114,9 @@ export { type ControlPanels, useControlPanels } from './hooks/use_control_panels
 export { useKibanaQuerySettings } from './hooks/use_kibana_query_settings';
 
 export { ExternalResourceLinks } from './components/external_resource_links';
+
+export {
+  NightshiftMarkIcon,
+  NightshiftNavigationIcon,
+} from './components/nightshift_navigation_icon/nightshift_navigation_icon';
+export type { NightshiftMarkIconProps } from './components/nightshift_navigation_icon/nightshift_navigation_icon';

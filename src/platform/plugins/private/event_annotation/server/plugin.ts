@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import {
   manualPointEventAnnotation,
   eventAnnotationGroup,

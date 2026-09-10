@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -74,7 +74,7 @@ describe('get_exception_list_summary', () => {
       const summary = (await getExceptionListSummary({
         filter: undefined,
         id: undefined,
-        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
         namespaceType: 'agnostic',
         savedObjectsClient,
       })) as ExceptionListSummarySchema;

@@ -6,15 +6,16 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getRollupJobByIndexName, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { UpdateIndexOperation } from '../../../common/update_index';
-import { getReindexWarnings } from '../reindexing/index_settings';
-import { getRollupJobByIndexName } from '../rollup_job';
 
 export interface UpdateIndexParams {
   esClient: ElasticsearchClient;
   index: string;
   operations: UpdateIndexOperation[];
   log: Logger;
+  versionService: Version;
 }
 
 /**
@@ -24,7 +25,13 @@ export interface UpdateIndexParams {
  * @param operations The operations to perform on the specified index
  * @param logger Optional logger to log information
  */
-export async function updateIndex({ esClient, index, operations, log }: UpdateIndexParams) {
+export async function updateIndex({
+  esClient,
+  index,
+  operations,
+  log,
+  versionService,
+}: UpdateIndexParams) {
   for (const operation of operations) {
     let res;
 
@@ -38,7 +45,7 @@ export async function updateIndex({ esClient, index, operations, log }: UpdateIn
 
         res = await esClient.indices.addBlock({ index, block: 'write' });
 
-        await removeDeprecatedSettings(esClient, index, log);
+        await removeDeprecatedSettings(esClient, index, versionService, log);
         break;
       }
       case 'unfreeze': {
@@ -60,6 +67,7 @@ export async function updateIndex({ esClient, index, operations, log }: UpdateIn
 async function removeDeprecatedSettings(
   esClient: ElasticsearchClient,
   index: string,
+  versionService: Version,
   log?: Logger
 ) {
   try {
@@ -71,7 +79,9 @@ async function removeDeprecatedSettings(
 
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = indexSettings[index] || {};
-    const warnings = flatSettings ? getReindexWarnings(flatSettings) : undefined;
+    const warnings = flatSettings
+      ? getReindexWarnings(flatSettings, versionService.getMajorVersion())
+      : undefined;
     const indexSettingsWarning = warnings?.find(
       (warning) =>
         warning.warningType === 'indexSetting' &&

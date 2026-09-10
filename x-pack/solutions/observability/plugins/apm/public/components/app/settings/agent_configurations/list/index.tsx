@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiHealth,
+  EuiIcon,
   EuiToolTip,
   RIGHT_ALIGNMENT,
   useEuiTheme,
@@ -18,15 +19,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
+import { Timestamp } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { LoadingStatePrompt } from '../../../../shared/loading_state_prompt';
 import type { ITableColumn } from '../../../../shared/managed_table';
 import { ManagedTable } from '../../../../shared/managed_table';
-import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 type Config =
@@ -50,7 +51,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
 
   const emptyStatePrompt = (
     <EuiEmptyPrompt
-      iconType="controlsHorizontal"
+      iconType="controls"
       title={
         <h2>
           {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptTitle', {
@@ -114,10 +115,15 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
       width: euiTheme.size.xl,
       name: '',
       sortable: true,
-      render: (_, { applied_by_agent: appliedByAgent }) => (
+      render: (_, { applied_by_agent: appliedByAgent, error }) => (
         <EuiToolTip
           content={
-            appliedByAgent
+            error
+              ? i18n.translate('xpack.apm.agentConfig.configTable.errorTooltipMessage', {
+                  defaultMessage: 'Error: {error}',
+                  values: { error },
+                })
+              : appliedByAgent
               ? i18n.translate('xpack.apm.agentConfig.configTable.appliedTooltipMessage', {
                   defaultMessage: 'Applied by at least one agent',
                 })
@@ -126,7 +132,17 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
                 })
           }
         >
-          <EuiHealth color={appliedByAgent ? 'success' : euiTheme.colors.lightShade} />
+          {error ? (
+            <EuiIcon
+              type="error"
+              size="s"
+              color="danger"
+              data-test-subj="apmAgentConfigurationErrorIcon"
+              aria-hidden={true}
+            />
+          ) : (
+            <EuiHealth color={appliedByAgent ? 'success' : euiTheme.colors.lightShade} />
+          )}
         </EuiToolTip>
       ),
     },
@@ -168,7 +184,9 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
         defaultMessage: 'Last updated',
       }),
       sortable: true,
-      render: (_, item) => <TimestampTooltip time={item['@timestamp']} timeUnit="minutes" />,
+      render: (_, item) => (
+        <Timestamp timestamp={item['@timestamp']} timeUnit="minutes" renderMode="tooltip" />
+      ),
     },
     ...(canSave
       ? [
@@ -176,33 +194,47 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             width: euiTheme.size.xl,
             name: '',
             render: (config: Config) => (
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="pencil"
-                href={apmRouter.link('/settings/agent-configuration/edit', {
-                  query: {
-                    name: config.service.name,
-                    environment: config.service.environment,
-                  },
-                })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+                    defaultMessage: 'Edit',
+                  })}
+                  iconType="pencil"
+                  href={apmRouter.link('/settings/agent-configuration/edit', {
+                    query: {
+                      name: config.service.name,
+                      environment: config.service.environment,
+                    },
+                  })}
+                />
+              </EuiToolTip>
             ),
           },
           {
             width: euiTheme.size.xl,
             name: '',
             render: (config: Config) => (
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
                   defaultMessage: 'Delete',
                 })}
-                iconType="trash"
-                onClick={() => setConfigToBeDeleted(config)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+                    defaultMessage: 'Delete',
+                  })}
+                  iconType="trash"
+                  onClick={() => setConfigToBeDeleted(config)}
+                />
+              </EuiToolTip>
             ),
           },
         ]

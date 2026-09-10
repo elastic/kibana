@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useGetDataStreamStatuses } from './use_get_data_stream_statuses';
 import { policyLabels } from '../data_retention/policy_labels';
-import { DataStream } from '@kbn/index-management-plugin/common';
+import type { DataStream } from '@kbn/index-management-plugin/common';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   ...jest.requireActual('@kbn/observability-shared-plugin/public'),
@@ -51,6 +51,32 @@ describe('useGetDataStreamStatuses', () => {
     // check special cases for summary row
     expect(dataStreamSummary?.storageSize).toEqual('18 MB');
     expect(dataStreamSummary?.lifecycle?.data_retention).toEqual('--');
+  });
+
+  it('falls back to metering storage size when data stream stats are disabled (serverless)', () => {
+    (useFetcher as jest.Mock).mockImplementation((callback) => {
+      callback();
+      return {
+        error: undefined,
+        loading: false,
+        status: FETCH_STATUS.SUCCESS,
+        refetch: () => {},
+        fetch: jest.fn(),
+        data: serverlessExampleData,
+      };
+    });
+
+    const {
+      result: {
+        current: { dataStreamStatuses },
+      },
+    } = renderHook(() => useGetDataStreamStatuses());
+
+    const browserChecks = dataStreamStatuses?.find((d) => d.name === 'Browser Checks');
+    expect(browserChecks?.storageSize).toEqual('18 MB');
+
+    const dataStreamSummary = dataStreamStatuses?.find((d) => d.name === 'All Checks');
+    expect(dataStreamSummary?.storageSize).toEqual('18 MB');
   });
 
   it('returns a undefined set for no data', () => {
@@ -195,5 +221,18 @@ const exampleData = [
   testData({
     name: 'synthetics-http-default',
     indexTemplateName: 'synthetics-http',
+  }),
+];
+
+// On serverless, data stream stats are disabled so `storageSizeBytes` is absent and
+// size is only available via the metering API (`meteringStorageSizeBytes`).
+const serverlessExampleData = [
+  testData({
+    name: 'synthetics-browser-default',
+    indexTemplateName: 'synthetics-browser',
+    storageSize: undefined,
+    storageSizeBytes: undefined,
+    meteringStorageSize: '18.3mb',
+    meteringStorageSizeBytes: 19265414,
   }),
 ];

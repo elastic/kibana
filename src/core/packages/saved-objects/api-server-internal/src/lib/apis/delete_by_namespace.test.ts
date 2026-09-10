@@ -19,10 +19,8 @@ import type { SavedObjectsDeleteByNamespaceOptions } from '@kbn/core-saved-objec
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  LEGACY_URL_ALIAS_TYPE,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -125,7 +123,7 @@ describe('#deleteByNamespace', () => {
       it(`throws when namespace is not a string or is '*'`, async () => {
         const test = async (namespace: unknown) => {
           // @ts-expect-error namespace is unknown
-          await expect(repository.deleteByNamespace(namespace)).rejects.toThrowError(
+          await expect(repository.deleteByNamespace(namespace)).rejects.toThrow(
             `namespace is required, and must be a string`
           );
           expect(client.updateByQuery).not.toHaveBeenCalled();

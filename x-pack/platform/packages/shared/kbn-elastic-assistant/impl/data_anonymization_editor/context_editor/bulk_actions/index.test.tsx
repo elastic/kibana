@@ -13,6 +13,7 @@ import { BulkActions } from '.';
 
 const selected = [
   {
+    id: '1',
     allowed: true,
     anonymized: false,
     denied: false,
@@ -20,6 +21,7 @@ const selected = [
     rawValues: ['abc', 'def'],
   },
   {
+    id: '2',
     allowed: false,
     anonymized: true,
     denied: true,
@@ -33,7 +35,8 @@ const defaultProps = {
   disabled: false,
   onListUpdated: jest.fn(),
   onlyDefaults: false,
-  selected,
+  selectedFields: selected.map((item) => item.field),
+  handleRowChecked: jest.fn(),
 };
 
 describe('BulkActions', () => {
@@ -45,7 +48,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Allow$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'add', update: 'allow' },
       { field: 'user.name', operation: 'add', update: 'allow' },
     ]);
@@ -57,7 +60,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Deny$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'remove', update: 'allow' },
       { field: 'user.name', operation: 'remove', update: 'allow' },
     ]);
@@ -69,7 +72,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Anonymize$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'add', update: 'allowReplacement' },
       { field: 'user.name', operation: 'add', update: 'allowReplacement' },
     ]);
@@ -81,7 +84,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Unanonymize$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'remove', update: 'allowReplacement' },
       { field: 'user.name', operation: 'remove', update: 'allowReplacement' },
     ]);

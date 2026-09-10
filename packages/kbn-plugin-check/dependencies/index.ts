@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Flags } from '@kbn/dev-cli-runner';
+import type { Flags } from '@kbn/dev-cli-runner';
 import { findTeamPlugins } from '@kbn/docs-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { Project } from 'ts-morph';
 import { getPlugin } from '../lib';
 import { displayDependencyCheck } from './display_dependency_check';

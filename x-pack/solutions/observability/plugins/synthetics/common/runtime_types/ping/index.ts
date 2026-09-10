@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './histogram';
+export type * from './histogram';
 export * from './ping';
 export * from './synthetics';
+export * from './error_groups';
+export * from './error_stats';

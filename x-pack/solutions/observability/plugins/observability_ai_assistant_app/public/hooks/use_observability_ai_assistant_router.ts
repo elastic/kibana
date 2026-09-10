@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
+import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
-import { ObservabilityAIAssistantRouter, ObservabilityAIAssistantRoutes } from '../routes/config';
+import type {
+  ObservabilityAIAssistantRouter,
+  ObservabilityAIAssistantRoutes,
+} from '../routes/config';
 import { observabilityAIAssistantRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
 

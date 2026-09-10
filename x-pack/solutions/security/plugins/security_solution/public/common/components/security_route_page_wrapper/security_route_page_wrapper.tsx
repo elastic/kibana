@@ -8,7 +8,7 @@
 import React, { type PropsWithChildren } from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { SecurityPageName } from '../../../../common';
+import { SecurityPageName } from '../../../../common';
 import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
@@ -20,11 +20,18 @@ interface SecurityRoutePageWrapperOptionProps {
    * @default false
    */
   omitSpyRoute?: boolean;
+  /**
+   * Used when the wrapped page handles its own unauthorized state.
+   * @default false
+   */
+  skipLinkAuthorization?: boolean;
 }
 
 type SecurityRoutePageWrapperProps = {
   pageName: SecurityPageName;
 } & SecurityRoutePageWrapperOptionProps;
+
+const deprectedPagesWithRedirect = [SecurityPageName.detections];
 
 /**
  * This component is created to wrap all the pages in the security solution app.
@@ -44,7 +51,7 @@ type SecurityRoutePageWrapperProps = {
  * ```
  */
 export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRoutePageWrapperProps>> =
-  React.memo(({ children, pageName, omitSpyRoute = false }) => {
+  React.memo(({ children, pageName, omitSpyRoute = false, skipLinkAuthorization = false }) => {
     const link = useLinkInfo(pageName);
     const UpsellingPage = useUpsellingPage(pageName);
 
@@ -61,12 +68,13 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
 
     // Redirect to the home page if the link does not exist in the application links (has been filtered out).
     // or if the link is unavailable (payment plan not met, if it had upselling page associated it would have been rendered above).
-    if (link == null || link.unavailable) {
+    // Some pages handle their own redirect logic, so we need to exclude them from this check.
+    if (!deprectedPagesWithRedirect.includes(pageName) && (link == null || link.unavailable)) {
       return <Redirect to="" />;
     }
 
     // Show the no privileges page if the link is unauthorized.
-    if (link.unauthorized) {
+    if (!skipLinkAuthorization && link?.unauthorized) {
       return (
         <>
           <SpyRoute pageName={pageName} />

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+import React from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
-import {
+import type {
   PaletteOutput,
   PaletteRegistry,
-  CustomizablePalette,
   DataBounds,
   CustomPaletteParams,
 } from '@kbn/coloring';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { PalettePanelContainer } from './palette_panel_container';
 
@@ -35,7 +37,10 @@ export function ColorMappingByValues<T>({
   panelRef,
   dataBounds,
 }: ColorMappingByValuesProps) {
-  const colors = palette.params?.stops?.map(({ color }) => color) ?? [];
+  const colors =
+    palette.name === CUSTOM_PALETTE
+      ? (palette.params?.colorStops ?? palette.params?.stops)?.map(({ color }) => color) ?? []
+      : paletteService.get(palette.name).getCategoricalColors(palette.params?.steps || 10, palette);
 
   return (
     <EuiFormRow

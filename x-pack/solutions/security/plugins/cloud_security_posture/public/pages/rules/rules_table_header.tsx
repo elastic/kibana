@@ -18,16 +18,15 @@ import {
   EuiPopoverTitle,
   EuiFilterGroup,
   EuiFilterButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import {
-  RuleStateAttributesWithoutStates,
-  useChangeCspRuleState,
-} from './use_change_csp_rule_state';
-import { CspBenchmarkRulesWithStates } from './rules_container';
+import type { RuleStateAttributesWithoutStates } from './use_change_csp_rule_state';
+import { useChangeCspRuleState } from './use_change_csp_rule_state';
+import type { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 import { RULES_TABLE_HEADER_TEST_SUBJ } from './test_subjects';
 
@@ -211,7 +210,7 @@ const SearchField = ({
 
   return (
     <div>
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+      <EuiFlexItem grow={true} css={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
           data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_SEARCH_INPUT}
           isLoading={isSearching}
@@ -220,7 +219,7 @@ const SearchField = ({
           })}
           value={localValue}
           onChange={(e) => setLocalValue(e.target.value)}
-          style={{ minWidth: 150 }}
+          css={{ minWidth: 150 }}
           fullWidth
         />
       </EuiFlexItem>
@@ -236,6 +235,7 @@ const CurrentPageOfTotal = ({
   setSelectedRules,
 }: RuleTableCount) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const onPopoverClick = () => {
     setIsPopoverOpen((e) => !e);
   };
@@ -276,7 +276,7 @@ const CurrentPageOfTotal = ({
     <EuiButtonEmpty
       onClick={onPopoverClick}
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.BULK_ACTION_BUTTON}
     >
@@ -312,7 +312,7 @@ const CurrentPageOfTotal = ({
           grow={false}
           data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_RULE_SHOWING_LABEL}
         >
-          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+          <EuiText size="xs" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
               defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
@@ -355,14 +355,15 @@ const CurrentPageOfTotal = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-labelledby={popoverTitleId}
             button={popoverButton}
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >
-            <EuiPopoverTitle style={{ minWidth: 240 }}>
-              <EuiText size="s" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <EuiPopoverTitle id={popoverTitleId} css={{ minWidth: 240 }}>
+              <EuiText size="s" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
                 <b>
                   <FormattedMessage
                     id="xpack.csp.rules.rulesTable.bulkActionsOptionTitle"
@@ -372,7 +373,6 @@ const CurrentPageOfTotal = ({
               </EuiText>
             </EuiPopoverTitle>
             <EuiContextMenuPanel
-              size="s"
               items={items}
               css={css`
                 mid-width: 540px;

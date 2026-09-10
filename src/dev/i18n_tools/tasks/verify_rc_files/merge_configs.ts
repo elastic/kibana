@@ -10,7 +10,7 @@
 import { join } from 'path';
 import { arrayify, ErrorReporter, makeAbsolutePath } from '../../utils';
 import { assignConfigFromPath } from './i18n_config';
-import { I18nCheckTaskContext } from '../../types';
+import type { I18nCheckTaskContext } from '../../types';
 import { I18N_RC } from '../../constants';
 
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {

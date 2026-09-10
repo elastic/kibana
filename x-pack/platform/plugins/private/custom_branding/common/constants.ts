@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 export const PLUGIN = {
   ID: 'customBranding',

@@ -10,6 +10,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiBasicTable,
   EuiFlyout,
   EuiButton,
   EuiCodeBlock,
@@ -17,6 +18,7 @@ import {
   EuiTitle,
   EuiFlyoutFooter,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiFlyoutBody,
   EuiToolTip,
@@ -24,19 +26,35 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { MonitorTypeEnum, SyntheticsMonitor } from '../../../../../../common/runtime_types';
-import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
+import type {
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
+import type {
+  MonitorInspectResponse,
+  PackagePolicyLink,
+} from '../../../state/monitor_management/api';
+import {
+  fetchMonitorAPI,
+  inspectMonitorAPI,
+  updateMonitorAPI,
+} from '../../../state/monitor_management/api';
+import { kibanaService } from '../../../../../utils/kibana_service';
 
 interface InspectorProps {
   isValid: boolean;
   monitorFields: SyntheticsMonitor;
+  isEditFlow?: boolean;
 }
 
-export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
+export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
@@ -49,6 +67,7 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
   };
 
   const [isInspecting, setIsInspecting] = useState(false);
+  const [migrateCount, setMigrateCount] = useState(0);
   const onButtonClick = () => {
     setIsInspecting(() => !isInspecting);
     setIsFlyoutVisible(() => !isFlyoutVisible);
@@ -64,7 +83,7 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
     // FIXME: Dario couldn't find a solution for monitorFields
     // which is not memoized downstream
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInspecting, hideParams]);
+  }, [isInspecting, hideParams, migrateCount]);
 
   let flyout;
 
@@ -109,6 +128,17 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
                 {formatContent(data.result, asJson)}
               </EuiCodeBlock>
               {data.decodedCode && <MonitorCode code={data.decodedCode} />}
+              {isEditFlow && (data.packagePolicyLinks.length > 0 || data.hasMissingReferences) && (
+                <>
+                  <EuiHorizontalRule />
+                  <PackagePolicyLinksTable
+                    links={data.packagePolicyLinks}
+                    hasMissingReferences={data.hasMissingReferences}
+                    monitorFields={monitorFields}
+                    onMigrateSuccess={() => setMigrateCount((c) => c + 1)}
+                  />
+                </>
+              )}
             </>
           ) : loading && !error ? (
             <LoadingState />
@@ -147,6 +177,120 @@ export const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
   );
 };
 
+const stripServerFields = ({
+  created_at: _ca,
+  updated_at: _ua,
+  spaceId: _si,
+  revision: _rev,
+  ...savedMonitor
+}: SyntheticsMonitorWithId): SyntheticsMonitor => savedMonitor;
+
+const PackagePolicyLinksTable = ({
+  links,
+  hasMissingReferences,
+  monitorFields,
+  onMigrateSuccess,
+}: {
+  links: PackagePolicyLink[];
+  hasMissingReferences: boolean;
+  monitorFields: SyntheticsMonitor;
+  onMigrateSuccess: () => void;
+}) => {
+  const { basePath } = useSyntheticsSettingsContext();
+  const [isMigrating, setIsMigrating] = useState(false);
+
+  const handleMigrate = async () => {
+    const monitorId = monitorFields.config_id;
+    if (!monitorId) return;
+    setIsMigrating(true);
+    try {
+      const savedMonitor = stripServerFields(await fetchMonitorAPI({ id: monitorId }));
+      await updateMonitorAPI({ monitor: savedMonitor, id: monitorId });
+      kibanaService.toasts.addSuccess({
+        title: MIGRATE_SUCCESS_LABEL,
+        toastLifeTimeMs: 3000,
+      });
+      onMigrateSuccess();
+    } catch (err) {
+      kibanaService.toasts.addError(err, { title: MIGRATE_FAILURE_LABEL });
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
+  const columns: Array<EuiBasicTableColumn<PackagePolicyLink>> = [
+    {
+      field: 'locationLabel',
+      name: PRIVATE_LOCATION_LABEL,
+    },
+    {
+      field: 'agentPolicyId',
+      name: AGENT_POLICY_LABEL,
+      render: (agentPolicyId: string) => (
+        <EuiLink
+          data-test-subj="syntheticsPackagePolicyAgentPolicyLink"
+          href={`${basePath}/app/fleet/policies/${agentPolicyId}`}
+          target="_blank"
+          external
+        >
+          {agentPolicyId}
+        </EuiLink>
+      ),
+    },
+    {
+      field: 'packagePolicyId',
+      name: PACKAGE_POLICY_LABEL,
+      render: (packagePolicyId: string, item: PackagePolicyLink) => (
+        <EuiLink
+          data-test-subj="syntheticsPackagePolicyLink"
+          href={`${basePath}/app/fleet/policies/${item.agentPolicyId}/edit-integration/${packagePolicyId}`}
+          target="_blank"
+          external
+        >
+          {packagePolicyId}
+        </EuiLink>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <EuiTitle size="s">
+        <h3>{LINKED_POLICIES_LABEL}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {hasMissingReferences && (
+        <>
+          <KbnWarningCallout
+            title={MISSING_REFERENCES_TITLE}
+            size="s"
+            announceOnMount
+            data-test-subj="syntheticsPackagePolicyMissingReferencesCallout"
+            text={MISSING_REFERENCES_DESCRIPTION}
+            actionProps={{
+              primary: {
+                isLoading: isMigrating,
+                onClick: handleMigrate,
+                'data-test-subj': 'syntheticsPackagePolicyMigrateButton',
+                children: MIGRATE_LABEL,
+              },
+            }}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {links.length > 0 && (
+        <EuiBasicTable
+          tableCaption={LINKED_POLICIES_LABEL}
+          items={links}
+          columns={columns}
+          data-test-subj="syntheticsPackagePolicyLinksTable"
+        />
+      )}
+    </>
+  );
+};
+
 // @ts-ignore: Unused variable
 // tslint:disable-next-line: no-unused-variable
 const MonitorCode = ({ code }: { code: string }) => (
@@ -172,7 +316,7 @@ const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
 
   const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
   if (!asJson) {
-    return yaml.dump(data);
+    return stringify(data);
   }
 
   return JSON.stringify(data, null, 2);
@@ -217,3 +361,54 @@ const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams',
 const AS_JSON = i18n.translate('xpack.synthetics.monitorInspect.asJson', {
   defaultMessage: 'As JSON',
 });
+
+const LINKED_POLICIES_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.linkedPoliciesLabel',
+  {
+    defaultMessage: 'Linked Fleet policies',
+  }
+);
+
+const PRIVATE_LOCATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.privateLocationLabel',
+  {
+    defaultMessage: 'Private location',
+  }
+);
+
+const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorInspect.agentPolicyLabel', {
+  defaultMessage: 'Agent policy',
+});
+
+const PACKAGE_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorInspect.packagePolicyLabel', {
+  defaultMessage: 'Package policy',
+});
+
+const MISSING_REFERENCES_TITLE = i18n.translate(
+  'xpack.synthetics.monitorInspect.missingReferencesTitle',
+  {
+    defaultMessage: 'Package policy references not found',
+  }
+);
+
+const MISSING_REFERENCES_DESCRIPTION = i18n.translate(
+  'xpack.synthetics.monitorInspect.missingReferencesDescription',
+  {
+    defaultMessage:
+      'This monitor has package policies that use a legacy ID format. Click Migrate now to update them.',
+  }
+);
+
+const MIGRATE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.migrateLabel', {
+  defaultMessage: 'Migrate now',
+});
+
+const MIGRATE_SUCCESS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.migrateSuccessLabel',
+  { defaultMessage: 'Monitor policies migrated successfully' }
+);
+
+const MIGRATE_FAILURE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorInspect.migrateFailureLabel',
+  { defaultMessage: 'Failed to migrate monitor policies' }
+);

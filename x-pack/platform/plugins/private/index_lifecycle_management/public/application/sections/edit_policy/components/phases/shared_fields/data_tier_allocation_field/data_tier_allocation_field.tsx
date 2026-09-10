@@ -6,15 +6,17 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionComponent } from 'react';
-import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
-import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../common/types';
+import type { PhaseWithAllocation, DataTierRole } from '../../../../../../../../common/types';
 import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../../../../../lib';
 import { useLoadNodes } from '../../../../../../services/api';
 import { i18nTexts } from '../../../../i18n_texts';
-import { DataTierAllocationType } from '../../../../types';
+import type { DataTierAllocationType } from '../../../../types';
 
 import {
   DataTierAllocation,
@@ -28,7 +30,15 @@ import {
   LoadingError,
 } from './components';
 
-import './_data_tier_allocation.scss';
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    dataTierAllocationField: css`
+      max-width: ${euiTheme.components.forms.maxWidth};
+    `,
+  };
+};
 
 interface Props {
   phase: PhaseWithAllocation;
@@ -39,6 +49,8 @@ interface Props {
  * Top-level layout control for the data tier allocation field.
  */
 export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
+  const styles = useStyles();
+
   const {
     services: { cloud },
   } = useKibana();
@@ -204,7 +216,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
       }
       fullWidth
     >
-      <div className="ilmDataTierAllocationField">
+      <div css={styles.dataTierAllocationField}>
         <DataTierAllocation
           hasNodeAttributes={hasNodeAttributes}
           phase={phase}

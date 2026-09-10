@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-workflows",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "private"
+}

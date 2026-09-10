@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '../../../services';
+import type { ExtensionsService } from '../../../services';
 
 // Temporary hack to provide the extensionsService instance to this file.
 // TODO: Refactor and export all the app selectors through the app dependencies context
 
-let extensionsService;
+let extensionsService: ExtensionsService;
 export const setExtensionsService = (_extensionsService: ExtensionsService) => {
   extensionsService = _extensionsService;
 };

@@ -7,16 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DISMISS_ATTACK_DISCOVERY_GENERATIONS_SUCCESS = (succeeded = 1) =>
-  i18n.translate(
-    'xpack.securitySolution.attackDiscovery.usePostAttackDiscoveryGenerationsDismiss.dismissAttackDiscoveryGenerationsSuccess',
-    {
-      defaultMessage:
-        '{succeeded, plural, one {# attack discovery generation} other {# attack discovery generations}} dismissed successfully.',
-      values: { succeeded },
-    }
-  );
-
 export const DISMISS_ATTACK_DISCOVERY_GENERATIONS_FAILURE = (failed = 1) =>
   i18n.translate(
     'xpack.securitySolution.attackDiscovery.usePostAttackDiscoveryGenerationsDismiss.dismissAttackDiscoveryGenerationsFailDescription',

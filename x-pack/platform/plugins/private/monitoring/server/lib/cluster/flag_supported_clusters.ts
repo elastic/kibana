@@ -6,10 +6,10 @@
  */
 
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { TimeRange } from '../../../common/http_api/shared';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { TimeRange } from '../../../common/http_api/shared';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import { Cluster, LegacyRequest } from '../../types';
+import type { Cluster, LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 
 export interface FindSupportClusterRequestPayload {

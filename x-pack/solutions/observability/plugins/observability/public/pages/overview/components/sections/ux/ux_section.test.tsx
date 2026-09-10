@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
+import type { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import { render, data as dataMock } from '../../../../../utils/test_helper';

@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiHealth,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPage,
   EuiPageBody,
@@ -63,9 +63,7 @@ const getNodeTooltip = (node) => {
   if (nodeTypeLabel) {
     return (
       <>
-        <EuiToolTip position="bottom" content={nodeTypeLabelContent}>
-          <EuiIcon type={nodeTypeClassIcon} />
-        </EuiToolTip>{' '}
+        <EuiIconTip position="bottom" content={nodeTypeLabelContent} type={nodeTypeClassIcon} />{' '}
         &nbsp;
       </>
     );
@@ -181,6 +179,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
                 status,
               },
             })}
+            tabIndex={0}
           >
             {status}
           </EuiHealth>
@@ -228,7 +227,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
               position="bottom"
               content={tail.join(', ')}
             >
-              <EuiBadge>+{tail.length}</EuiBadge>
+              <EuiBadge tabIndex={0}>+{tail.length}</EuiBadge>
             </EuiToolTip>
           )}
         </EuiBadgeGroup>
@@ -413,6 +412,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle',
                     {
@@ -420,7 +420,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                     }
                   )}
                   color={setupMode.data.totalUniqueInstanceCount > 0 ? 'danger' : 'warning'}
-                  iconType="flag"
+                  iconType="pencil"
                 >
                   <p>
                     {i18n.translate(
@@ -447,6 +447,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle',
                     {
@@ -454,7 +455,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                     }
                   )}
                   color="warning"
-                  iconType="flag"
+                  iconType="pencil"
                 >
                   <p>
                     {i18n.translate(

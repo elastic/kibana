@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
-import { useQuery } from '@tanstack/react-query';
+import type { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
+import { useQuery } from '@kbn/react-query';
 import { ALERTS_API_URLS } from '../../../../common/constants';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
 export const fetchRelatedDashboards = async ({
   alertId,
@@ -24,27 +24,35 @@ export const fetchRelatedDashboards = async ({
   });
 };
 
-const getDashboardMetadata = <T extends DashboardMetadata>({ description, id, title }: T) => ({
-  description,
-  id,
-  title,
-});
-
 export const getRelatedDashboardsQueryKey = (alertId: string) => ['relatedDashboards', alertId];
 
-export const useRelatedDashboards = (alertId: string) => {
+export const useRelatedDashboards = (
+  alertId: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { http } = useKibana().services;
 
   const { data, isLoading, refetch } = useQuery<GetRelatedDashboardsResponse>({
     queryKey: getRelatedDashboardsQueryKey(alertId),
     queryFn: () => fetchRelatedDashboards({ alertId, http }),
+    // Resolving related dashboards requires rule read (it reads the rule and
+    // scans dashboards), so skip the fetch when the caller is not authorized.
+    enabled: Boolean(alertId) && enabled,
     refetchOnWindowFocus: false, // Disable window focus refetching
+    retry: (failureCount, error) => {
+      // Don't retry on 403; an unauthorized request will keep failing.
+      const status = (error as IHttpFetchError<{ statusCode?: number }>)?.response?.status;
+      if (status === 403) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
   return {
     isLoadingRelatedDashboards: isLoading,
-    suggestedDashboards: data?.suggestedDashboards?.map(getDashboardMetadata),
-    linkedDashboards: data?.linkedDashboards?.map(getDashboardMetadata),
+    suggestedDashboards: data?.suggestedDashboards,
+    linkedDashboards: data?.linkedDashboards,
     refetchRelatedDashboards: refetch,
   };
 };

@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import {
   alertsSelector,
@@ -21,7 +21,7 @@ import {
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 import { DefineAlertConnectors } from './define_connectors';
 import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
 
 interface Props {
   monitorId: string;

@@ -9,10 +9,11 @@
 
 import React from 'react';
 
-import { EuiBetaBadge, EuiBetaBadgeProps } from '@elastic/eui';
+import type { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { isBoolean } from 'lodash';
 
 /**

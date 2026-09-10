@@ -9,13 +9,15 @@ import React, { memo, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { ThrottlingUploadField } from './throttling_upload_field';
 import { ThrottlingExceededCallout } from './throttling_exceeded_callout';
-import {
-  BandwidthLimitKey,
-  DEFAULT_BANDWIDTH_LIMIT,
+import type {
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
-import { Validation } from '../../types';
+import {
+  BandwidthLimitKey,
+  DEFAULT_BANDWIDTH_LIMIT,
+} from '../../../../../../../common/runtime_types';
+import type { Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingDownloadField } from './throttling_download_field';
 import { ThrottlingLatencyField } from './throttling_latency_field';

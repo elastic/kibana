@@ -16,31 +16,3 @@ export const EXPAND_UNCHANGED_LINES = (linesCount: number) =>
         'Expand {linesCount} unchanged {linesCount, plural, one {line} other {lines}}',
     }
   );
-
-export const CURRENT_RULE_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionLabel',
-  {
-    defaultMessage: 'Current rule',
-  }
-);
-
-export const CURRENT_VERSION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionDescriptionLabel',
-  {
-    defaultMessage: 'Shows currently installed rule',
-  }
-);
-
-export const ELASTIC_UPDATE_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.elasticUpdateVersionLabel',
-  {
-    defaultMessage: 'Elastic update',
-  }
-);
-
-export const UPDATED_VERSION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.updatedVersionDescriptionLabel',
-  {
-    defaultMessage: 'Shows rule that will be installed',
-  }
-);

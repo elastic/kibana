@@ -8,22 +8,34 @@
  */
 
 import React from 'react';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { Header } from './header';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockManagementPlugin } from '../../../../../mocks';
-
-import { Header } from './header';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 describe('Header', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
-  test('should render normally', () => {
-    const component = mountWithI18nProvider(<Header />, {
-      wrappingComponent: KibanaContextProvider,
-      wrappingComponentProps: {
-        services: mockedContext,
-      },
-    });
 
-    expect(component.render()).toMatchSnapshot();
+  it('should render normally', () => {
+    renderWithKibanaRenderContext(
+      <KibanaContextProvider services={mockedContext}>
+        <Header />
+      </KibanaContextProvider>
+    );
+
+    expect(screen.getByText('Scripted fields are deprecated')).toBeVisible();
+    expect(
+      screen.getByText('instead of scripted fields. Runtime fields support Painless scripting', {
+        exact: false,
+      })
+    ).toBeVisible();
+    expect(screen.getByText('runtime fields')).toBeVisible();
+    expect(screen.getByText('Elasticsearch Query Language (ES|QL)')).toBeVisible();
+    expect(
+      screen.getByText(
+        'Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.'
+      )
+    ).toBeVisible();
   });
 });

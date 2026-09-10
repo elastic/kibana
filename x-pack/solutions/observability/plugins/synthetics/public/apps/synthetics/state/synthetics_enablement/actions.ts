@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
-import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import { createAction } from 'redux-toolkit-v1';
+import type { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 export const getSyntheticsEnablement = createAction('[SYNTHETICS_ENABLEMENT] GET');
 export const getSyntheticsEnablementSuccess = createAction<MonitorManagementEnablementResult>(

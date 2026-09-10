@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 import { getFieldListFromTypeMapping } from './get_field_list';
 
 describe('getFieldListFromTypeMapping', () => {

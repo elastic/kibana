@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AutoFollowPattern, AutoFollowPatternFromEs, AutoFollowPatternToEs } from '../types';
+import type { AutoFollowPattern, AutoFollowPatternFromEs, AutoFollowPatternToEs } from '../types';
 
 export const deserializeAutoFollowPattern = (
   autoFollowPattern: AutoFollowPatternFromEs
@@ -37,7 +37,10 @@ export const serializeAutoFollowPattern = ({
   remoteCluster,
   leaderIndexPatterns,
   followIndexPattern,
-}: AutoFollowPattern): AutoFollowPatternToEs => ({
+}: Pick<
+  AutoFollowPattern,
+  'remoteCluster' | 'leaderIndexPatterns' | 'followIndexPattern'
+>): AutoFollowPatternToEs => ({
   remote_cluster: remoteCluster,
   leader_index_patterns: leaderIndexPatterns,
   follow_index_pattern: followIndexPattern,

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
-import {
+import type { Filter } from '@kbn/es-query';
+import type {
   SerializedSearchSourceFields,
   TimefilterContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export async function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],

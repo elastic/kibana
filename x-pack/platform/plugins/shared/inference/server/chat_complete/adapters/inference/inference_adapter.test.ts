@@ -6,7 +6,7 @@
  */
 
 import { isNativeFunctionCallingSupportedMock } from './inference_adapter.test.mocks';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { lastValueFrom, toArray, filter, noop, of } from 'rxjs';
@@ -20,7 +20,7 @@ import {
   InferenceConnectorType,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { InferenceExecutor } from '../../utils/inference_executor';
+import type { InferenceExecutor } from '../../utils/inference_executor';
 import { inferenceAdapter } from './inference_adapter';
 
 function createOpenAIChunk({
@@ -68,6 +68,9 @@ describe('inferenceAdapter', () => {
         name: 'inference connector',
         connectorId: '.id',
         config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
       };
     });
   });
@@ -182,6 +185,7 @@ describe('inferenceAdapter', () => {
             prompt: 10,
             total: 15,
           },
+          model: 'gpt-4o', // Model from createOpenAIChunk helper
         },
       ]);
     });
@@ -217,16 +221,17 @@ describe('inferenceAdapter', () => {
         response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
       );
 
-      expect(tokenChunks).toEqual([
-        {
-          type: ChatCompletionEventType.ChatCompletionTokenCount,
-          tokens: {
-            completion: expect.any(Number),
-            prompt: expect.any(Number),
-            total: expect.any(Number),
-          },
+      expect(tokenChunks).toHaveLength(1);
+      expect(tokenChunks[0]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionTokenCount,
+        tokens: {
+          completion: expect.any(Number),
+          prompt: expect.any(Number),
+          total: expect.any(Number),
         },
-      ]);
+      });
+      // Model field is optional - only present if request.model is set
+      // Since no modelName is provided, model should be undefined/not present
     });
 
     it('propagates the temperature parameter', () => {
@@ -245,6 +250,174 @@ describe('inferenceAdapter', () => {
         subActionParams: expect.objectContaining({
           body: expect.objectContaining({
             temperature: 0.4,
+          }),
+        }),
+      });
+    });
+
+    it('defaults reasoning effort to none when native tools are present and the model requires it', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gpt-5.4',
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            tools: expect.any(Array),
+            reasoning: { effort: 'none' },
+          }),
+        }),
+      });
+    });
+
+    it('resolves the model from the connector inference endpoint id for the reasoning default', () => {
+      executorMock.getConnector.mockImplementation(() => {
+        return {
+          type: InferenceConnectorType.Inference,
+          name: 'inference connector',
+          connectorId: '.id',
+          config: { provider: 'elastic', inferenceId: '.openai-gpt-5.4-chat_completion' },
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        };
+      });
+
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            tools: expect.any(Array),
+            reasoning: { effort: 'none' },
+          }),
+        }),
+      });
+    });
+
+    it('omits the reasoning default when the model does not tolerate disabled reasoning', () => {
+      executorMock.getConnector.mockImplementation(() => {
+        return {
+          type: InferenceConnectorType.Inference,
+          name: 'inference connector',
+          connectorId: '.id',
+          config: { provider: 'elastic', inferenceId: '.google-gemini-2.5-pro-chat_completion' },
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        };
+      });
+
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
+          }),
+        }),
+      });
+    });
+
+    it('omits the reasoning default when the model is unknown', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
+          }),
+        }),
+      });
+    });
+
+    it('propagates an explicit reasoning parameter', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+          reasoning: { effort: 'high', summary: 'concise' },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            reasoning: { effort: 'high', summary: 'concise' },
+          }),
+        }),
+      });
+    });
+
+    it('omits reasoning when tools are absent and reasoning is not provided', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.not.objectContaining({
+            reasoning: expect.anything(),
           }),
         }),
       });

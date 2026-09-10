@@ -9,14 +9,15 @@ import type { AxiosError } from 'axios';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
-  DEFAULT_OPENAI_MODEL,
+  DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
-  OPENAI_CONNECTOR_ID,
+  CONNECTOR_ID,
   OpenAiProviderType,
-} from '../../../common/openai/constants';
+  RunActionResponseSchema,
+  StreamingResponseSchema,
+} from '@kbn/connector-schemas/openai';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -93,11 +94,11 @@ describe('OpenAIConnector', () => {
   describe('OpenAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         headers: {
           'X-My-Custom-Header': 'foo',
           Authorization: 'override',
@@ -129,14 +130,14 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -149,13 +150,29 @@ describe('OpenAIConnector', () => {
         expect(response).toEqual(mockResponse.data);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.runApi(
+          { body: JSON.stringify(sampleOpenAiBody), maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector);
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       it('overrides the default model with the default model specified in the body', async () => {
         const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
         const response = await connector.runApi(
           { body: JSON.stringify(requestBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -176,14 +193,14 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -215,7 +232,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -266,7 +283,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'https://api.openai.com/v1/chat/completions',
@@ -275,7 +292,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -288,6 +305,26 @@ describe('OpenAIConnector', () => {
         expect(response).toEqual(mockResponse.data);
       });
 
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        // Streaming responses are still subject to axios `maxContentLength` (enforced while the
+        // response stream is consumed), so the override must be forwarded for streaming too.
+        await connector.streamApi(
+          {
+            body: JSON.stringify(sampleOpenAiBody),
+            stream: true,
+            maxContentLength: 10 * 1024 * 1024,
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
+          connectorUsageCollector
+        );
+      });
+
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
         const response = await connector.streamApi(
           {
@@ -296,7 +333,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -307,7 +344,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -343,7 +380,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -403,7 +440,7 @@ describe('OpenAIConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'https://api.openai.com/v1/chat/completions',
@@ -414,7 +451,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -440,7 +477,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -467,7 +504,7 @@ describe('OpenAIConnector', () => {
               ...sampleOpenAiBody,
               stream: true,
               stream_options: { include_usage: true },
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -500,14 +537,14 @@ describe('OpenAIConnector', () => {
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -531,7 +568,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -554,7 +591,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -580,16 +617,16 @@ describe('OpenAIConnector', () => {
     describe('invokeAsyncIterator', () => {
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(0);
+        expect(mockRequest).toHaveBeenCalledTimes(0);
         expect(mockCreate).toHaveBeenCalledWith(
           {
             ...sampleOpenAiBody,
             stream: true,
-            model: DEFAULT_OPENAI_MODEL,
+            model: DEFAULT_MODEL,
           },
           { signal: undefined }
         );
-        expect(mockTee).toBeCalledTimes(1);
+        expect(mockTee).toHaveBeenCalledTimes(1);
       });
       it('signal and timeout is properly passed', async () => {
         const timeout = 180000;
@@ -598,19 +635,19 @@ describe('OpenAIConnector', () => {
           { ...sampleOpenAiBody, signal, timeout },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(0);
+        expect(mockRequest).toHaveBeenCalledTimes(0);
         expect(mockCreate).toHaveBeenCalledWith(
           {
             ...sampleOpenAiBody,
             stream: true,
-            model: DEFAULT_OPENAI_MODEL,
+            model: DEFAULT_MODEL,
           },
           {
             signal,
             timeout,
           }
         );
-        expect(mockTee).toBeCalledTimes(1);
+        expect(mockTee).toHaveBeenCalledTimes(1);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -716,11 +753,11 @@ describe('OpenAIConnector', () => {
   describe('OpenAI with special headers', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         organizationId: 'org-id',
         projectId: 'proj-id',
         headers: {
@@ -753,14 +790,14 @@ describe('OpenAIConnector', () => {
         { body: JSON.stringify(sampleOpenAiBody) },
         connectorUsageCollector
       );
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           ...mockDefaults,
           data: JSON.stringify({
             ...sampleOpenAiBody,
             stream: false,
-            model: DEFAULT_OPENAI_MODEL,
+            model: DEFAULT_MODEL,
           }),
           headers: {
             'OpenAI-Organization': 'org-id',
@@ -779,11 +816,11 @@ describe('OpenAIConnector', () => {
   describe('OpenAI without headers', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
       },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -811,14 +848,14 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: false,
-              model: DEFAULT_OPENAI_MODEL,
+              model: DEFAULT_MODEL,
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -835,7 +872,7 @@ describe('OpenAIConnector', () => {
   describe('Other OpenAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'http://localhost:1234/v1/chat/completions',
         apiProvider: OpenAiProviderType.Other,
@@ -872,7 +909,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleOpenAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -912,7 +949,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -951,7 +988,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'http://localhost:1234/v1/chat/completions',
@@ -980,7 +1017,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1026,7 +1063,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1085,7 +1122,7 @@ describe('OpenAIConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'http://localhost:1234/v1/chat/completions',
@@ -1176,7 +1213,7 @@ describe('OpenAIConnector', () => {
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -1260,7 +1297,7 @@ describe('OpenAIConnector', () => {
   describe('AzureAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl:
           'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
@@ -1292,7 +1329,7 @@ describe('OpenAIConnector', () => {
           { body: JSON.stringify(sampleAzureAiBody) },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -1323,7 +1360,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             ...mockDefaults,
@@ -1358,7 +1395,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
@@ -1383,7 +1420,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1424,7 +1461,7 @@ describe('OpenAIConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             responseType: 'stream',
@@ -1466,7 +1503,7 @@ describe('OpenAIConnector', () => {
   describe('Token dashboard', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -1482,7 +1519,7 @@ describe('OpenAIConnector', () => {
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1501,7 +1538,7 @@ describe('OpenAIConnector', () => {
     it('the create dashboard API call returns available: false when user has correct permissions', async () => {
       mockRequest.mockResolvedValue({ has_all_requested: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1521,7 +1558,7 @@ describe('OpenAIConnector', () => {
     it('the create dashboard API call returns available: false when init dashboard fails', async () => {
       mockGenAi.mockResolvedValue({ success: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1561,7 +1598,7 @@ describe('OpenAIConnector', () => {
     it('should initialize PKI SSL overrides when PKI secrets are present', () => {
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        connector: { id: '1', type: CONNECTOR_ID },
         config,
         secrets,
         logger,
@@ -1576,7 +1613,7 @@ describe('OpenAIConnector', () => {
       expect(() => {
         new OpenAIConnector({
           configurationUtilities: actionsConfigMock.create(),
-          connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+          connector: { id: '1', type: CONNECTOR_ID },
           config,
           secrets: badSecrets,
           logger,
@@ -1587,7 +1624,7 @@ describe('OpenAIConnector', () => {
     it('should call runApi with sslOverrides when they exist', async () => {
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        connector: { id: '1', type: CONNECTOR_ID },
         config,
         secrets,
         logger,
@@ -1616,11 +1653,11 @@ describe('OpenAIConnector', () => {
     it('should include OpenAI-Organization and OpenAI-Project headers if present', async () => {
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        connector: { id: '1', type: CONNECTOR_ID },
         config: {
           apiUrl: 'https://api.openai.com/v1/chat/completions',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
           organizationId: 'org-id',
           projectId: 'proj-id',
           headers: { 'X-My-Custom-Header': 'foo' },
@@ -1646,11 +1683,11 @@ describe('OpenAIConnector', () => {
   describe('Enhanced error handling', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         headers: {},
       },
       secrets: { apiKey: '123' },

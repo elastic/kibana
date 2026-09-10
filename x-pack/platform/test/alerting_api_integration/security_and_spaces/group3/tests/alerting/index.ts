@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts - Group 3', () => {
     describe('alerts', () => {
@@ -31,6 +30,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./suggestions_value_rule'));
       loadTestFile(require.resolve('./update_flapping_settings'));
       loadTestFile(require.resolve('./user_managed_api_key'));
+      loadTestFile(require.resolve('./task_created_rule_api_key'));
       loadTestFile(require.resolve('./get_query_delay_settings'));
       loadTestFile(require.resolve('./update_query_delay_settings'));
       loadTestFile(require.resolve('./resolve'));

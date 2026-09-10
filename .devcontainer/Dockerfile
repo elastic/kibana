@@ -1,8 +1,10 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+FROM mcr.microsoft.com/devcontainers/base:bookworm
 
 ARG KBN_DIR
 
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
+# Non-interactive corepack downloads (pnpm version pinned via `corepack prepare` below).
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 ENV HOME=/home/vscode
 ENV NVM_DIR=${HOME}/nvm
 ENV NVM_VERSION=v0.39.1
@@ -10,7 +12,7 @@ ENV OPENSSL_PATH=${HOME}/openssl
 # Only specific versions are FIPS certified.
 ENV OPENSSL_VERSION='3.0.8'
 
-RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc xvfb
+RUN apt-get update && apt-get install -y curl git zsh locales docker.io perl make gcc xvfb gawk
 
 RUN locale-gen en_US.UTF-8
 
@@ -61,12 +63,16 @@ RUN mkdir -p $NVM_DIR && \
   nvm install ${NODE_VERSION} && \
   nvm use ${NODE_VERSION} && \
   nvm alias default ${NODE_VERSION} && \
-  npm install -g yarn && \
+  corepack enable && \
+  corepack prepare pnpm@11.21.0 --activate && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
   chown -R 1000:1000 "${HOME}/.npm"
 
 USER root
+
+# Install Chromium and chromedriver from Debian repos (native amd64 and arm64 support).
+RUN apt-get update && apt-get install -y --no-install-recommends chromium chromium-driver
 
 # Reload the env everytime a new shell is opened incase the .env file changed.
 RUN echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && \

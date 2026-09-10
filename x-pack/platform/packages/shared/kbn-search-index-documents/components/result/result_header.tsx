@@ -17,10 +17,14 @@ import {
   EuiPopoverTitle,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { MetaDataProps } from './result_types';
+import type { MetaDataProps } from './result_types';
+import * as Styles from './styles';
 
 interface Props {
   metaData: MetaDataProps;
@@ -47,27 +51,33 @@ const Definition: React.FC<TermDef> = ({ label }) => (
 const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
+  const popoverTitleId = useGeneratedHtmlId();
+  const metaDataLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+    { defaultMessage: 'Metadata for document: {id}', values: { id } }
+  );
 
   const metaDataIcon = (
-    <EuiButtonIcon
-      display="empty"
-      size="xs"
-      iconType="info"
-      color="primary"
-      onClick={() => setPopoverIsOpen(!popoverIsOpen)}
-      aria-label={i18n.translate(
-        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-        {
-          defaultMessage: 'Metadata for document: {id}',
-          values: { id },
-        }
-      )}
-    />
+    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        display="empty"
+        size="xs"
+        iconType="info"
+        color="primary"
+        onClick={() => setPopoverIsOpen(!popoverIsOpen)}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.title', {
           defaultMessage: 'Document metadata',
         })}
@@ -94,8 +104,9 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
 };
 
 export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <div className="resultHeader">
+    <Styles.ResultHeader euiTheme={euiTheme}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -108,6 +119,6 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </div>
+    </Styles.ResultHeader>
   );
 };

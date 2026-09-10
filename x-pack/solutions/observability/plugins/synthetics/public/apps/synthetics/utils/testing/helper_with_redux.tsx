@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import type { Store } from 'redux';
-import { createStore as createReduxStore, applyMiddleware } from 'redux';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { Store } from 'redux-v4';
+import { createStore as createReduxStore, applyMiddleware } from 'redux-v4';
 
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import createSagaMiddleware from 'redux-saga';
 
-import { AppState } from '../../state';
+import type { AppState } from '../../state';
 import { rootReducer } from '../../state/root_reducer';
 import { rootEffect } from '../../state/root_effect';
 

@@ -6,9 +6,9 @@
  */
 
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
@@ -221,7 +221,6 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
             isAllowedSubAction ? 'allow' : 'deny'
           } execute of ${s1SubAction}`, async () => {
             const {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,

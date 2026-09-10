@@ -158,6 +158,8 @@ describe('duplicateRule', () => {
       rule.params.ruleSource = {
         type: 'external',
         isCustomized: false,
+        customizedFields: [],
+        hasBaseVersion: true,
       };
       return rule;
     };

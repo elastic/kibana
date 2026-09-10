@@ -6,12 +6,12 @@
  */
 
 import { SCORE_SUGGESTIONS_FUNCTION_NAME, scoreSuggestions } from './score_suggestions';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
 import { StreamingChatResponseEventType } from '../../../../common';
-import { RecalledSuggestion } from './recall_and_score';
-import { FunctionCallChatFunction } from '../../../service/types';
-import { ChatEvent } from '../../../../common/conversation_complete';
+import type { RecalledSuggestion } from './recall_and_score';
+import type { FunctionCallChatFunction } from '../../../service/types';
+import type { ChatEvent } from '../../../../common/conversation_complete';
 import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
 
 const suggestions: RecalledSuggestion[] = [

@@ -58,7 +58,8 @@ jest.mock('v8', () => {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
-import { OptimizerConfig, ParsedOptions } from './optimizer_config';
+import type { ParsedOptions } from './optimizer_config';
+import { OptimizerConfig } from './optimizer_config';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
@@ -92,7 +93,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       dist: true,
     });
 
-    expect(parseThemeTags).toBeCalledWith('*');
+    expect(parseThemeTags).toHaveBeenCalledWith('*');
   });
 
   it('defaults to KBN_OPTIMIZER_THEMES when dist = false', () => {
@@ -103,7 +104,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       dist: false,
     });
 
-    expect(parseThemeTags).toBeCalledWith('foo');
+    expect(parseThemeTags).toHaveBeenCalledWith('foo');
   });
 
   it('applies defaults', () => {
@@ -122,6 +123,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -150,6 +152,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -178,6 +181,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": true,
           "parentDirs": undefined,
           "paths": undefined,
@@ -205,6 +209,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -233,6 +238,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -261,6 +267,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -289,6 +296,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -318,6 +326,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,
@@ -347,6 +356,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "maxWorkerCount": 100,
         "outputRoot": <absolute path>,
         "pluginSelector": Object {
+          "allowlistPluginGroups": undefined,
           "examples": false,
           "parentDirs": undefined,
           "paths": undefined,

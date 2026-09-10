@@ -14,6 +14,7 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getEsQuerySort, getTieBreakerFieldName } from '@kbn/discover-utils';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import type { ContextFetchState } from '../services/context_query_state';
@@ -24,10 +25,6 @@ import {
 } from '../services/context_query_state';
 import type { AppState } from '../services/context_state';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import {
-  getTieBreakerFieldName,
-  getEsQuerySort,
-} from '../../../../common/utils/sorting/get_es_query_sort';
 import { useScopedServices } from '../../../components/scoped_services_provider';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({

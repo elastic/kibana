@@ -9,24 +9,24 @@ import React, { useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIcon,
+  EuiIconTip,
   EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getIndicesWithNoSourceFields } from '@kbn/search-queries';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -43,8 +43,8 @@ const IndicesErrorCallout = ({ emptyIndices, isFieldsLoading }: IndicesErrorCall
 
   if (emptyIndices.length > 0) {
     return (
-      <EuiCallOut
-        color="danger"
+      <KbnDangerCallout
+        announceOnMount
         data-test-subj="NoIndicesFieldsMessage"
         title={
           <FormattedMessage
@@ -64,6 +64,8 @@ interface SelectIndicesFlyout {
 
 export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const modalTitleId = useGeneratedHtmlId();
+
   const [query, setQuery] = useState<string>('');
   const { indices, isLoading: isIndicesLoading } = useQueryIndices({ query });
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
@@ -95,15 +97,15 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         };
         if (emptyIndices.includes(index)) {
           option.append = (
-            <EuiToolTip
+            <EuiIconTip
               position="top"
               content={i18n.translate(
                 'xpack.searchPlayground.addDataSource.flyout.emptyIndexTooltip',
                 { defaultMessage: 'No fields found in index' }
               )}
-            >
-              <EuiIcon type="warning" color="danger" />
-            </EuiToolTip>
+              type="warning"
+              color="danger"
+            />
           );
         } else if (
           selectedTempIndices.includes(index) &&
@@ -129,7 +131,13 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   };
 
   return (
-    <EuiFlyout size="s" ownFocus onClose={onClose} data-test-subj="selectIndicesFlyout">
+    <EuiFlyout
+      size="s"
+      ownFocus
+      onClose={onClose}
+      data-test-subj="selectIndicesFlyout"
+      aria-labelledby={modalTitleId}
+    >
       <EuiSelectable
         data-test-subj="indicesTable"
         searchable
@@ -148,6 +156,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           showIcons: true,
           bordered: true,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
         isLoading={isIndicesLoading}
       >
@@ -155,7 +164,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <>
             <EuiFlyoutHeader>
               <EuiTitle size="m">
-                <h2>
+                <h2 id={modalTitleId}>
                   <FormattedMessage
                     id="xpack.searchPlayground.addDataSource.flyout.title"
                     defaultMessage="Add data"

@@ -18,7 +18,7 @@ import {
   FIELD_PREVIEW_PATH,
   INITIAL_REST_VERSION,
 } from '@kbn/data-view-field-editor-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const INDEX_NAME = 'api-integration-test-field-preview';
 
@@ -45,9 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const deleteIndex = async () => {
-    await es.indices.delete({
-      index: INDEX_NAME,
-    });
+    await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
   describe('Field preview', function () {

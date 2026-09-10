@@ -24,7 +24,7 @@ import {
   createDocumentMigrator,
 } from '../test_helpers/repository.test.common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 describe('SavedObjectsRepository', () => {

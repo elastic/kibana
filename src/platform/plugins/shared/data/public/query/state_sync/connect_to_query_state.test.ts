@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from '../filter_manager';
+import type { Subscription } from 'rxjs';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { BaseStateContainer, createStateContainer, Storage } from '@kbn/kibana-utils-plugin/public';
-import { QueryService, QueryStart } from '../query_service';
+import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer, Storage } from '@kbn/kibana-utils-plugin/public';
+import type { QueryStart } from '../query_service';
+import { QueryService } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { connectToQueryState } from './connect_to_query_state';
-import { TimefilterContract } from '../timefilter';
-import { QueryState } from '../query_state';
+import type { TimefilterContract } from '../timefilter';
+import type { QueryState } from '../query_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>
@@ -150,7 +153,7 @@ describe('connect_to_global_state', () => {
       time: { from: 'now-30m', to: 'now' },
     });
 
-    expect(globalStateChangeTriggered).toBeCalledTimes(1);
+    expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
 
     expect(filterManager.getGlobalFilters()).toHaveLength(2);
     expect(timeFilter.getRefreshInterval()).toEqual({ pause: true, value: 5000 });
@@ -184,7 +187,7 @@ describe('connect_to_global_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF1, aF2]);
 
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(globalState.get().filters).toHaveLength(1);
 
       stop();
@@ -197,7 +200,7 @@ describe('connect_to_global_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF2, aF1]);
 
-      expect(globalStateChangeTriggered).toBeCalledTimes(2);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(2);
       expect(globalState.get().filters).toHaveLength(1);
 
       stop();
@@ -237,7 +240,7 @@ describe('connect_to_global_state', () => {
 
       globalStateChangeTriggered.mockClear();
       const stop = connectToQueryGlobalState(queryServiceStart, globalState);
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(globalState.get().filters).toHaveLength(0);
 
       stop();
@@ -254,7 +257,7 @@ describe('connect_to_global_state', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(1);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -268,7 +271,7 @@ describe('connect_to_global_state', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(2);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
-      expect(globalStateChangeTriggered).toBeCalledTimes(1);
+      expect(globalStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -280,7 +283,7 @@ describe('connect_to_global_state', () => {
       const stop = connectToQueryGlobalState(queryServiceStart, globalState);
       globalState.set({ ...globalState.get(), filters: [gF1, gF2] });
 
-      expect(filterManagerChangeTriggered).toBeCalledTimes(0);
+      expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(0);
       stop();
     });
 
@@ -367,7 +370,7 @@ describe('connect_to_app_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF2, aF1]);
 
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(appState.get().filters).toHaveLength(1);
 
       stop();
@@ -380,7 +383,7 @@ describe('connect_to_app_state', () => {
       filterManager.setFilters([gF1, aF1]);
       filterManager.setFilters([gF1, aF2]);
 
-      expect(appStateChangeTriggered).toBeCalledTimes(2);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(2);
       expect(appState.get().filters).toHaveLength(1);
 
       stop();
@@ -420,7 +423,7 @@ describe('connect_to_app_state', () => {
 
       appStateChangeTriggered.mockClear();
       const stop = connectToQueryAppState(queryServiceStart, appState);
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       expect(appState.get().filters).toHaveLength(0);
 
       stop();
@@ -437,7 +440,7 @@ describe('connect_to_app_state', () => {
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getAppFilters()).toHaveLength(1);
       expect(filterManager.getGlobalFilters()).toHaveLength(1);
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -450,7 +453,7 @@ describe('connect_to_app_state', () => {
 
       expect(filterManager.getFilters()).toHaveLength(2);
       expect(filterManager.getGlobalFilters()).toHaveLength(2);
-      expect(appStateChangeTriggered).toBeCalledTimes(1);
+      expect(appStateChangeTriggered).toHaveBeenCalledTimes(1);
       stop();
     });
 
@@ -462,7 +465,7 @@ describe('connect_to_app_state', () => {
       const stop = connectToQueryAppState(queryServiceStart, appState);
       appState.set({ filters: [aF1, aF2] });
 
-      expect(filterManagerChangeTriggered).toBeCalledTimes(0);
+      expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(0);
       stop();
     });
 
@@ -542,7 +545,7 @@ describe('filters with different state', () => {
 
     runChanges();
 
-    expect(filterManagerChangeTriggered).toBeCalledTimes(3);
+    expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(3);
 
     stop();
   });
@@ -554,7 +557,7 @@ describe('filters with different state', () => {
 
     runChanges();
 
-    expect(filterManagerChangeTriggered).toBeCalledTimes(1);
+    expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(1);
 
     stop();
   });
@@ -566,7 +569,7 @@ describe('filters with different state', () => {
 
     runChanges();
 
-    expect(filterManagerChangeTriggered).toBeCalledTimes(1);
+    expect(filterManagerChangeTriggered).toHaveBeenCalledTimes(1);
 
     stop();
   });

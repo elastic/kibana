@@ -20,7 +20,7 @@ import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { getLogs } from '../../../../lib/logs/get_logs';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { metricSets } from './metric_set_index_detail';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;

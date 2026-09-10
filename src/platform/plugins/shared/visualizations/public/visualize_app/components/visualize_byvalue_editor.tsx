@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisualizeInput } from '../..';
+import { VisualizeConstants } from '@kbn/visualizations-common';
+import type { VisualizeInput } from '../..';
 import {
   useChromeVisibility,
   useVisByValue,
@@ -21,14 +22,17 @@ import {
   useLinkedSearchUpdates,
   useDataViewUpdates,
 } from '../utils';
-import { VisualizeServices } from '../types';
+import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
+import type { VisualizeAppProps } from '../app';
+import { useProjectRouting } from '../utils/use/use_project_routing';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
+  const [incomingBreadcrumbs, setIncomingBreadcrumbs] = useState<
+    EmbeddableEditorBreadcrumb[] | undefined
+  >();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -43,9 +47,11 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       valueInput: valueInputValue,
       searchSessionId,
       originatingPath: pathValue,
+      breadcrumbs: breadcrumbsValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
     setOriginatingPath(pathValue);
+    setIncomingBreadcrumbs(breadcrumbsValue);
     setOriginatingApp(value);
     setValueInput(valueInputValue as VisualizeInput | undefined);
     setEmbeddableId(embeddableIdValue);
@@ -62,7 +68,10 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     }
   }, [services]);
 
-  const isChromeVisible = useChromeVisibility(services.chrome);
+  const chromeVisibility = useChromeVisibility(services.chrome);
+  // Screenshot mode hides Chrome externally but must keep the editor renderer. In normal mode,
+  // preserve `undefined` so initialization waits for the Chrome visibility subscription.
+  const isChromeVisible = services.isScreenshotMode ? true : chromeVisibility;
 
   const { byValueVisInstance, visEditorRef, visEditorController } = useVisByValue(
     services,
@@ -70,20 +79,24 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     isChromeVisible,
     valueInput,
     originatingApp,
-    originatingPath
+    originatingPath,
+    incomingBreadcrumbs
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
     byValueVisInstance
   );
+  // Initialize CPS project routing manager for Vega
+  const projectRoutingManager = useProjectRouting(services);
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
     byValueVisInstance,
-    visEditorController
+    visEditorController,
+    projectRoutingManager
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);
@@ -107,6 +120,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
+      incomingBreadcrumbs={incomingBreadcrumbs}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}

@@ -9,31 +9,36 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   AppLeaveAction,
   AppMountParameters,
   KibanaExecutionContext,
   ScopedHistory,
 } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { Subscription } from 'rxjs';
+import {
+  type Filter,
+  FilterStateStore,
+  type ProjectRouting,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
-import {
+import type {
   GlobalQueryStateFromUrl,
   QueryState,
   QueryStateChange,
+  RefreshInterval,
   SavedQuery,
-  syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { css } from '@emotion/react';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-  IKbnUrlStateStorage,
-} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getData,
@@ -45,25 +50,27 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
+import { initializeProjectRoutingManager } from '../../project_routing_manager';
 import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import { getTopNavConfig } from '../top_nav_config';
+import { getMapsAppHeaderBack, getMapsAppHeaderMenu } from '../top_nav_config';
 import {
   getEditPath,
   getFullPath,
   APP_ID,
   MAP_EMBEDDABLE_NAME,
 } from '../../../../common/constants';
+import type { SavedMap } from '../saved_map';
+import { getMapClient } from '../../../content_management';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
-  SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
-import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
+import type { MapAttributes } from '../../../../server';
 
 const styles = {
   wrapper: css([
@@ -83,6 +90,7 @@ const styles = {
   }),
 };
 export interface Props {
+  isMapLoading: boolean;
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
   saveCounter: number;
@@ -100,17 +108,18 @@ export interface Props {
     query,
     timeFilters,
     searchSessionId,
+    projectRouting,
   }: {
     filters?: Filter[];
     query?: Query;
     timeFilters?: TimeRange;
     forceRefresh?: boolean;
     searchSessionId?: string;
+    projectRouting?: ProjectRouting;
   }) => void;
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
   query: Query | undefined;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: ScopedHistory;
   setExecutionContext: (executionContext: KibanaExecutionContext) => void;
 }
@@ -121,6 +130,7 @@ export interface State {
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
+  hasSavedMaps: boolean;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -128,6 +138,7 @@ export class MapApp extends React.Component<Props, State> {
   _globalSyncUnsubscribe: (() => void) | null = null;
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
+  _projectRoutingUnsubscribe: (() => void) | undefined = undefined;
   _appStateManager = new AppStateManager();
   _prevIndexPatternIds: string[] | null = null;
   _isMounted: boolean = false;
@@ -141,6 +152,7 @@ export class MapApp extends React.Component<Props, State> {
       initialized: false,
       isRefreshPaused: true,
       refreshInterval: 0,
+      hasSavedMaps: false,
     };
     this._kbnUrlStateStorage = createKbnUrlStateStorage({
       useHash: false,
@@ -188,6 +200,13 @@ export class MapApp extends React.Component<Props, State> {
       this._updateFromGlobalState
     );
 
+    // Initialize project routing manager for CPS support
+    this._projectRoutingUnsubscribe = initializeProjectRoutingManager({
+      onProjectRoutingChange: (projectRouting) => {
+        this.props.setQuery({ projectRouting });
+      },
+    });
+
     // savedQuery must be fetched from savedQueryId
     // const initialSavedQuery = this._appStateManager.getAppState().savedQuery;
     // if (initialSavedQuery) {
@@ -222,6 +241,9 @@ export class MapApp extends React.Component<Props, State> {
     }
     if (this._globalSyncChangeMonitorSubscription) {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
+    }
+    if (this._projectRoutingUnsubscribe) {
+      this._projectRoutingUnsubscribe();
     }
 
     this.props.onAppLeave((actions) => {
@@ -328,7 +350,7 @@ export class MapApp extends React.Component<Props, State> {
     this._updateGlobalState(updatedGlobalState);
   };
 
-  _getInitialTime(mapState?: ParsedMapStateJSON) {
+  _getInitialTime(mapState?: MapAttributes) {
     if (this._initialTimeFromUrl) {
       return this._initialTimeFromUrl;
     }
@@ -338,7 +360,7 @@ export class MapApp extends React.Component<Props, State> {
       : getTimeFilter().getTime();
   }
 
-  _initMapAndLayerSettings(mapState?: ParsedMapStateJSON) {
+  _initMapAndLayerSettings(mapState?: MapAttributes) {
     const globalState = this._getGlobalState();
 
     const savedObjectFilters = mapState?.filters ? mapState.filters : [];
@@ -372,16 +394,13 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  _onRefreshConfigChange({ isPaused, interval }: MapRefreshConfig) {
+  _onRefreshConfigChange(refreshInterval: RefreshInterval) {
     this.setState({
-      isRefreshPaused: isPaused,
-      refreshInterval: interval,
+      isRefreshPaused: refreshInterval.pause,
+      refreshInterval: refreshInterval.value,
     });
     this._updateGlobalState({
-      refreshInterval: {
-        pause: isPaused,
-        value: interval,
-      },
+      refreshInterval,
     });
   }
 
@@ -396,10 +415,7 @@ export class MapApp extends React.Component<Props, State> {
 
     const refreshInterval = _.get(savedQuery, 'attributes.timefilter.refreshInterval');
     if (refreshInterval) {
-      this._onRefreshConfigChange({
-        isPaused: refreshInterval.pause,
-        interval: refreshInterval.value,
-      });
+      this._onRefreshConfigChange(refreshInterval);
     }
     this._onQueryChange({
       filters: allFilters,
@@ -471,52 +487,83 @@ export class MapApp extends React.Component<Props, State> {
       );
     }
 
-    let mapState: ParsedMapStateJSON | undefined;
-    try {
-      const attributes = this.props.savedMap.getAttributes();
-      if (attributes.mapStateJSON) {
-        mapState = JSON.parse(attributes.mapStateJSON);
-      }
-    } catch (e) {
-      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-    }
-    this._initMapAndLayerSettings(mapState);
+    this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
 
-    this.setState({ initialized: true });
+    const hasSavedObject = Boolean(this.props.savedMap.getSavedObjectId());
+    this.setState({ initialized: true, hasSavedMaps: hasSavedObject });
+
+    if (hasSavedObject || this.props.savedMap.hasSaveAndReturnConfig()) {
+      return;
+    }
+
+    try {
+      const results = await getMapClient().search({ limit: 1 });
+      if (this._isMounted) {
+        this.setState({ hasSavedMaps: results.hits.length > 0 });
+      }
+    } catch {
+      // Keep hasSavedMaps false so create-without-library does not render a looping back button.
+    }
   }
 
-  _renderTopNav() {
+  _getManagedBadge(): AppHeaderBadge[] | undefined {
+    if (!this.props.savedMap.isManaged()) {
+      return undefined;
+    }
+
+    const tooltip = i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
+      defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
+    });
+    const managedBadge = getManagedContentBadge(tooltip);
+
+    return [
+      {
+        label: managedBadge.badgeText,
+        color: 'primary',
+        tooltip,
+        'data-test-subj': managedBadge['data-test-subj'],
+      },
+    ];
+  }
+
+  _renderAppHeader() {
     if (this.props.isFullScreen) {
       return null;
     }
 
-    const topNavConfig = getTopNavConfig({
-      savedMap: this.props.savedMap,
-      isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
-      isSaveDisabled: this.props.isSaveDisabled,
-      enableFullScreen: this.props.enableFullScreen,
-      openMapSettings: this.props.openMapSettings,
-      inspectorAdapters: this.props.inspectorAdapters,
-      history: this.props.history,
-    });
+    return (
+      <AppHeader
+        title={this.props.savedMap.getPageTitle()}
+        back={getMapsAppHeaderBack({
+          savedMap: this.props.savedMap,
+          history: this.props.history,
+          hasSavedMaps: this.state.hasSavedMaps,
+        })}
+        badges={this._getManagedBadge()}
+        menu={getMapsAppHeaderMenu({
+          savedMap: this.props.savedMap,
+          isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
+          isSaveDisabled: this.props.isSaveDisabled,
+          enableFullScreen: this.props.enableFullScreen,
+          openMapSettings: this.props.openMapSettings,
+          inspectorAdapters: this.props.inspectorAdapters,
+          history: this.props.history,
+        })}
+        spacing="compact"
+      />
+    );
+  }
+
+  _renderSearchBar() {
+    if (this.props.isFullScreen) {
+      return null;
+    }
 
     const { TopNavMenu } = getNavigation().ui;
     return (
       <TopNavMenu
-        setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
-        badges={
-          this.props.savedMap.isManaged()
-            ? [
-                getManagedContentBadge(
-                  i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
-                    defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
-                  })
-                ),
-              ]
-            : undefined
-        }
-        config={topNavConfig}
+        config={[]}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}
         query={this.props.query}
@@ -545,8 +592,8 @@ export class MapApp extends React.Component<Props, State> {
           refreshInterval: number;
         }) => {
           this._onRefreshConfigChange({
-            isPaused,
-            interval: refreshInterval,
+            pause: isPaused,
+            value: refreshInterval,
           });
         }}
         showSearchBar={true}
@@ -597,17 +644,18 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     return (
-      <div id="maps-plugin" css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}>
-        {this._renderTopNav()}
-        <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
+      <div
+        id="maps-plugin"
+        data-map-loaded={this.state.initialized && !this.props.isMapLoading}
+        css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}
+      >
+        {this._renderAppHeader()}
+        {this._renderSearchBar()}
         <div id="react-maps-root" css={styles.reactMapsRoot}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
-            title={this.props.savedMap.getAttributes().title}
-            description={this.props.savedMap.getAttributes().description}
             waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
-            isSharable
           />
         </div>
       </div>

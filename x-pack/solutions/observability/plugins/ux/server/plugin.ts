@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart, CoreSetup, Plugin as PluginType } from '@kbn/core/server';
+import type { CoreStart, CoreSetup, Plugin as PluginType } from '@kbn/core/server';
 
 export class Plugin implements PluginType {
   constructor() {}

@@ -9,7 +9,7 @@
 
 import { FieldFormatsRegistry } from './field_formats_registry';
 import { BoolFormat, PercentFormat, StringFormat } from './converters';
-import { FieldFormatConfig, FieldFormatsGetConfigFn } from './types';
+import type { FieldFormatConfig, FieldFormatsGetConfigFn } from './types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 describe('FieldFormatsRegistry', () => {
@@ -51,6 +51,35 @@ describe('FieldFormatsRegistry', () => {
       expect(fieldFormatsRegistry.getDefaultConfig(KBN_FIELD_TYPES.NUMBER)).toEqual(
         defaultMap[KBN_FIELD_TYPES.NUMBER]
       );
+    });
+  });
+
+  describe('getDefaultInstance', () => {
+    test('should not return a cached instance built with different params', () => {
+      fieldFormatsRegistry.register([StringFormat]);
+      defaultMap = {
+        [KBN_FIELD_TYPES.STRING]: { id: StringFormat.id, params: {} },
+      };
+      fieldFormatsRegistry.init(getConfig, {}, []);
+
+      const upper = fieldFormatsRegistry.getDefaultInstance(KBN_FIELD_TYPES.STRING, undefined, {
+        transform: 'upper',
+      });
+      const lower = fieldFormatsRegistry.getDefaultInstance(KBN_FIELD_TYPES.STRING, undefined, {
+        transform: 'lower',
+      });
+
+      expect(upper.convertToText('abc')).toBe('ABC');
+      expect(lower.convertToText('ABC')).toBe('abc');
+
+      // different params must not share an instance...
+      expect(upper).not.toBe(lower);
+      // ...while identical params still hit the memoized instance
+      expect(
+        fieldFormatsRegistry.getDefaultInstance(KBN_FIELD_TYPES.STRING, undefined, {
+          transform: 'upper',
+        })
+      ).toBe(upper);
     });
   });
 

@@ -16,10 +16,9 @@ test('returns rule settings feature with query delay subfeature if serverless', 
       label: 'Management',
       order: 5000,
     },
-    scope: ['spaces', 'security'],
     id: 'rulesSettings',
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     name: 'Rules Settings',
     privileges: {
@@ -27,7 +26,7 @@ test('returns rule settings feature with query delay subfeature if serverless', 
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: ['rules-settings'],
@@ -39,7 +38,7 @@ test('returns rule settings feature with query delay subfeature if serverless', 
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],
@@ -158,10 +157,9 @@ test('returns rule settings feature without query delay subfeature if not server
       label: 'Management',
       order: 5000,
     },
-    scope: ['spaces', 'security'],
     id: 'rulesSettings',
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     name: 'Rules Settings',
     privileges: {
@@ -169,7 +167,7 @@ test('returns rule settings feature without query delay subfeature if not server
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: ['rules-settings'],
@@ -181,7 +179,7 @@ test('returns rule settings feature without query delay subfeature if not server
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],

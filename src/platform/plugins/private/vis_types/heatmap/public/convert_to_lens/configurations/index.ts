@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { HeatmapVisParams } from '../../types';
+import type { HeatmapVisualizationState as HeatmapConfiguration } from '@kbn/lens-common';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { HeatmapVisParams } from '../../types';
 import { getPaletteForHeatmap } from './palette';
 
 export const getConfiguration = async (

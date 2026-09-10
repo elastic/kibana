@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
+import type { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
 import { isLeft } from 'fp-ts/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -17,7 +17,7 @@ import {
   findAnnotationRt,
   updateAnnotationRt,
 } from '../../../common/annotations';
-import { ScopedAnnotationsClient } from './bootstrap_annotations';
+import type { ScopedAnnotationsClient } from './bootstrap_annotations';
 import { createAnnotationsClient } from './create_annotations_client';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 

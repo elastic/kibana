@@ -7,8 +7,7 @@
 
 import type { MlTrainedModelAssignmentTaskParametersAdaptive } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
-import type { CloudInfo } from '../services/ml_server_info';
-import type { MlServerLimits } from '../../../common/types/ml_server_info';
+import type { CloudInfo, MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
 
 describe('DeploymentParamsMapper', () => {
   const modelId = 'test-model';
@@ -24,8 +23,6 @@ describe('DeploymentParamsMapper', () => {
 
   let mapper: DeploymentParamsMapper;
 
-  mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, true);
-
   describe('DeploymentParamsMapper', () => {
     describe('running in serverless', () => {
       beforeEach(() => {
@@ -37,7 +34,16 @@ describe('DeploymentParamsMapper', () => {
           {
             isMlAutoscalingEnabled: false,
           } as CloudInfo,
-          false
+          {
+            modelDeployment: {
+              allowStaticAllocations: false,
+              vCPURange: {
+                low: { min: 0, max: 2, static: 2, maxThreads: 2 },
+                medium: { min: 0, max: 32, static: 32, maxThreads: 4 },
+                high: { min: 0, max: 512, static: 512, maxThreads: 8 },
+              },
+            },
+          }
         );
       });
 
@@ -68,13 +74,17 @@ describe('DeploymentParamsMapper', () => {
             vCPUUsage: 'low',
           })
         ).toEqual({
-          modelId: 'test-model',
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 1,
+            min_number_of_allocations: 0,
+          },
           deploymentParams: {
-            number_of_allocations: 1,
             deployment_id: 'test-deployment',
             priority: 'normal',
             threads_per_allocation: 2,
           },
+          modelId: 'test-model',
         });
 
         expect(
@@ -85,13 +95,17 @@ describe('DeploymentParamsMapper', () => {
             vCPUUsage: 'low',
           })
         ).toEqual({
-          modelId: 'test-model',
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 2,
+            min_number_of_allocations: 0,
+          },
           deploymentParams: {
             deployment_id: 'test-deployment',
-            threads_per_allocation: 1,
             priority: 'normal',
-            number_of_allocations: 2,
+            threads_per_allocation: 1,
           },
+          modelId: 'test-model',
         });
 
         expect(
@@ -106,11 +120,32 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 16,
+            threads_per_allocation: 4,
           },
           adaptiveAllocationsParams: {
             enabled: true,
-            max_number_of_allocations: 2,
+            max_number_of_allocations: 8,
+            min_number_of_allocations: 0,
+          },
+        });
+
+        expect(
+          mapper.mapUiToApiDeploymentParams(modelId, {
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'high',
+          })
+        ).toEqual({
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+          },
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 64,
             min_number_of_allocations: 0,
           },
         });
@@ -137,14 +172,73 @@ describe('DeploymentParamsMapper', () => {
         });
       });
 
+      it('maps API params to UI correctly', () => {
+        expect(
+          mapper.mapApiToUiDeploymentParams({
+            model_id: modelId,
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 8,
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 0,
+              max_number_of_allocations: 8,
+            },
+          } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+        ).toEqual({
+          deploymentId: 'test-deployment',
+          optimized: 'optimizedForSearch',
+          adaptiveResources: true,
+          vCPUUsage: 'high',
+        });
+
+        expect(
+          mapper.mapApiToUiDeploymentParams({
+            model_id: modelId,
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 4,
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 1,
+              max_number_of_allocations: 2,
+            },
+          } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+        ).toEqual({
+          deploymentId: 'test-deployment',
+          optimized: 'optimizedForSearch',
+          adaptiveResources: true,
+          vCPUUsage: 'medium',
+        });
+
+        expect(
+          mapper.mapApiToUiDeploymentParams({
+            model_id: modelId,
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 2,
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 0,
+              max_number_of_allocations: 1,
+            },
+          } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
+        ).toEqual({
+          deploymentId: 'test-deployment',
+          optimized: 'optimizedForSearch',
+          adaptiveResources: true,
+          vCPUUsage: 'low',
+        });
+      });
+
       it('overrides vCPUs levels and enforces adaptive allocations if static support is not configured', () => {
-        mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, false, {
+        mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, {
           modelDeployment: {
             allowStaticAllocations: false,
             vCPURange: {
-              low: { min: 0, max: 2, static: 2 },
-              medium: { min: 1, max: 32, static: 32 },
-              high: { min: 1, max: 128, static: 128 },
+              low: { min: 0, max: 2, static: 2, maxThreads: 2 },
+              medium: { min: 0, max: 32, static: 32, maxThreads: 4 },
+              high: { min: 0, max: 128, static: 128, maxThreads: 8 },
             },
           },
         });
@@ -155,12 +249,12 @@ describe('DeploymentParamsMapper', () => {
           static: 16,
         });
         expect(mapper.getVCURange('medium')).toEqual({
-          min: 8,
+          min: 0,
           max: 256,
           static: 256,
         });
         expect(mapper.getVCURange('high')).toEqual({
-          min: 8,
+          min: 0,
           max: 1024,
           static: 1024,
         });
@@ -218,8 +312,7 @@ describe('DeploymentParamsMapper', () => {
           },
           {
             isMlAutoscalingEnabled: false,
-          } as CloudInfo,
-          true
+          } as CloudInfo
         );
       });
 
@@ -232,13 +325,9 @@ describe('DeploymentParamsMapper', () => {
 
     describe('when autoscaling is disabled', () => {
       beforeEach(() => {
-        mapper = new DeploymentParamsMapper(
-          mlServerLimits,
-          {
-            isMlAutoscalingEnabled: false,
-          } as CloudInfo,
-          true
-        );
+        mapper = new DeploymentParamsMapper(mlServerLimits, {
+          isMlAutoscalingEnabled: false,
+        } as CloudInfo);
       });
 
       it('should map UI params to API request correctly', () => {
@@ -521,11 +610,13 @@ describe('DeploymentParamsMapper', () => {
     describe('when autoscaling is enabled', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(
-          mlServerLimits,
+          {
+            max_single_ml_node_processors: 16,
+            total_ml_processors: 32,
+          } as MlServerLimits,
           {
             isMlAutoscalingEnabled: true,
-          } as CloudInfo,
-          true
+          } as CloudInfo
         );
       });
 
@@ -559,8 +650,8 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
-            number_of_allocations: 4,
+            threads_per_allocation: 16,
+            number_of_allocations: 2,
           },
         });
 
@@ -576,8 +667,8 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
-            number_of_allocations: 12499,
+            threads_per_allocation: 16,
+            number_of_allocations: 6249,
           },
         });
       });
@@ -616,12 +707,12 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 16,
           },
           adaptiveAllocationsParams: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 4,
+            max_number_of_allocations: 2,
           },
         });
 
@@ -637,11 +728,11 @@ describe('DeploymentParamsMapper', () => {
           deploymentParams: {
             deployment_id: 'test-deployment',
             priority: 'normal',
-            threads_per_allocation: 8,
+            threads_per_allocation: 16,
           },
           adaptiveAllocationsParams: {
             enabled: true,
-            max_number_of_allocations: 12499,
+            max_number_of_allocations: 6249,
             min_number_of_allocations: 1,
           },
         });
@@ -734,7 +825,7 @@ describe('DeploymentParamsMapper', () => {
               model_id: modelId,
               deployment_id: 'test-deployment',
               priority: 'normal',
-              threads_per_allocation: 16,
+              threads_per_allocation: 4,
               number_of_allocations: 1,
             } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
           ).toEqual({

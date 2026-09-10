@@ -7,15 +7,15 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
+import { PageScope } from '../../../../../data_view_manager/constants';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
@@ -27,12 +27,7 @@ import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import {
-  useEnableExperimental,
-  useIsExperimentalFeatureEnabled,
-} from '../../../../../common/hooks/use_experimental_features';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
@@ -41,9 +36,13 @@ import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
-import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
-import { NotesFlyout } from '../../properties/notes_flyout';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import {
+  DocumentEventTypes,
+  FLYOUT_ORIGIN,
+  NotesEventTypes,
+} from '../../../../../common/lib/telemetry';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
@@ -84,29 +83,15 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
 
   const { telemetry } = useKibana().services;
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNotes } = useFlyoutApi();
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-
-  const {
-    dataViewId: oldDataViewId,
-    sourcererDataView: oldSourcererDataViewSpec,
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
-  const dataViewSpec: DataViewSpec = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
-    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
-  );
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId),
-    [experimentalDataViewSpec.id, newDataViewPickerEnabled, oldDataViewId]
+  const { dataView } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
+  const runtimeMappings = useMemo(
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
   );
 
   const filterQuery = useMemo(() => {
@@ -166,21 +151,24 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
   const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
-  const [queryLoadingState, { events, totalCount, loadNextBatch, refreshedAt, refetch }] =
-    useTimelineEvents({
-      endDate: '',
-      id: `pinned-${timelineId}`,
-      indexNames: selectedPatterns,
-      dataViewId: dataViewId ?? '',
-      fields: timelineQueryFields,
-      limit: itemsPerPage,
-      filterQuery,
-      runtimeMappings: dataViewSpec.runtimeFieldMap as RunTimeMappings,
-      skip: filterQuery === '',
-      startDate: '',
-      sort: timelineQuerySortField,
-      timerangeKind: undefined,
-    });
+  const [
+    queryLoadingState,
+    { events, rawEvents, totalCount, loadNextBatch, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    endDate: '',
+    id: `pinned-${timelineId}`,
+    indexNames: selectedPatterns,
+    dataViewId: dataViewId ?? '',
+    fields: timelineQueryFields,
+    limit: itemsPerPage,
+    filterQuery,
+    runtimeMappings,
+    skip: filterQuery === '',
+    startDate: '',
+    sort: timelineQuerySortField,
+    timerangeKind: undefined,
+    dateRangeField: dataView?.getTimeField()?.name ?? '@timestamp',
+  });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -204,29 +192,17 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
-  const {
-    associateNote,
-    notes,
-    isNotesFlyoutVisible,
-    closeNotesFlyout,
-    showNotesFlyout,
-    eventId: noteEventId,
-    setNotesEventId,
-  } = useNotesInFlyout({
-    eventIdToNoteIds,
-    refetch,
-    timelineId,
-    activeTab: TimelineTabs.pinned,
-  });
 
   const onToggleShowNotes = useCallback(
-    (eventId?: string) => {
-      const indexName = selectedPatterns.join(',');
-      if (eventId && !securitySolutionNotesDisabled) {
+    (eventId?: string, eventData?: DataTableRecord & TimelineItem) => {
+      if (!eventId) {
+        return;
+      }
+
+      if (enableNewFlyout && eventData) {
+        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
+      } else {
+        const indexName = selectedPatterns.join(',');
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -248,78 +224,48 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-          location: timelineId,
-        });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'left',
-        });
-      } else {
-        if (eventId) {
-          setNotesEventId(eventId);
-          showNotesFlyout();
-        }
       }
+      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
+        location: timelineId,
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: timelineId,
+        panel: 'left',
+      });
     },
-    [
-      openFlyout,
-      securitySolutionNotesDisabled,
-      selectedPatterns,
-      telemetry,
-      timelineId,
-      setNotesEventId,
-      showNotesFlyout,
-    ]
+    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
-    pinnedEventIds,
+    rawEvents,
     eventIdToNoteIds,
     onToggleShowNotes,
   });
 
-  const NotesFlyoutMemo = useMemo(() => {
-    return (
-      <NotesFlyout
-        associateNote={associateNote}
-        eventId={noteEventId}
-        show={isNotesFlyoutVisible}
-        notes={notes}
-        onClose={closeNotesFlyout}
-        onCancel={closeNotesFlyout}
-        timelineId={timelineId}
-      />
-    );
-  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
-
   return (
-    <>
-      {NotesFlyoutMemo}
-      <UnifiedTimelineBody
-        header={<></>}
-        columns={augmentedColumnHeaders}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={queryLoadingState}
-        totalCount={totalCount}
-        onFetchMoreRecords={loadNextBatch}
-        activeTab={TimelineTabs.pinned}
-        updatedAt={refreshedAt}
-        isTextBasedQuery={false}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        trailingControlColumns={rowDetailColumn}
-        onUpdatePageIndex={onUpdatePageIndex}
-      />
-    </>
+    <UnifiedTimelineBody
+      header={<></>}
+      columns={augmentedColumnHeaders}
+      rowRenderers={rowRenderers}
+      timelineId={timelineId}
+      itemsPerPage={itemsPerPage}
+      itemsPerPageOptions={itemsPerPageOptions}
+      sort={sort}
+      events={events}
+      refetch={refetch}
+      dataLoadingState={queryLoadingState}
+      totalCount={totalCount}
+      onFetchMoreRecords={loadNextBatch}
+      activeTab={TimelineTabs.pinned}
+      updatedAt={refreshedAt}
+      isTextBasedQuery={false}
+      leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+      trailingControlColumns={rowDetailColumn}
+      onUpdatePageIndex={onUpdatePageIndex}
+    />
   );
 };
 
@@ -343,7 +289,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

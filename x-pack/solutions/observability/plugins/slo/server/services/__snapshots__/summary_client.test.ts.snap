@@ -2,6 +2,23 @@
 
 exports[`SummaryClient fetchSummary with calendar aligned and timeslices SLO returns the summary 1`] = `
 Object {
+  "burnRateWindows": Array [
+    Object {
+      "burnRate": 0.5,
+      "name": "5m",
+      "sli": 0.9,
+    },
+    Object {
+      "burnRate": 0.6,
+      "name": "1h",
+      "sli": 0.9,
+    },
+    Object {
+      "burnRate": 0.7,
+      "name": "1d",
+      "sli": 0.9,
+    },
+  ],
   "groupings": Object {},
   "meta": Object {},
   "summary": Object {
@@ -22,6 +39,23 @@ Object {
 
 exports[`SummaryClient fetchSummary with rolling and occurrences SLO returns the summary 1`] = `
 Object {
+  "burnRateWindows": Array [
+    Object {
+      "burnRate": 0.5,
+      "name": "5m",
+      "sli": 0.9,
+    },
+    Object {
+      "burnRate": 0.6,
+      "name": "1h",
+      "sli": 0.9,
+    },
+    Object {
+      "burnRate": 0.7,
+      "name": "1d",
+      "sli": 0.9,
+    },
+  ],
   "groupings": Object {},
   "meta": Object {},
   "summary": Object {
@@ -42,6 +76,23 @@ Object {
 
 exports[`SummaryClient fetchSummary with rolling and timeslices SLO returns the summary 1`] = `
 Object {
+  "burnRateWindows": Array [
+    Object {
+      "burnRate": 0.5,
+      "name": "5m",
+      "sli": 0.9,
+    },
+    Object {
+      "burnRate": 0.6,
+      "name": "1h",
+      "sli": 0.9,
+    },
+    Object {
+      "burnRate": 0.7,
+      "name": "1d",
+      "sli": 0.9,
+    },
+  ],
   "groupings": Object {},
   "meta": Object {},
   "summary": Object {

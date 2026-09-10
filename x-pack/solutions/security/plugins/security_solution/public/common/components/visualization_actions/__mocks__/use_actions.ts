@@ -52,7 +52,7 @@ export const MOCK_ACTIONS = [
   {
     id: 'openInLens',
     getDisplayName: () => 'Open in Lens',
-    getIconType: () => 'visArea',
+    getIconType: () => 'chartArea',
     type: 'actionButton',
     order: 0,
     isCompatible: () => true,

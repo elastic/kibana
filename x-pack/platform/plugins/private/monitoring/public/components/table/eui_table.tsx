@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import { EuiInMemoryTable, EuiButton, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
@@ -54,7 +55,7 @@ export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
     footerContent = (
       <Fragment>
         <EuiSpacer size="m" />
-        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
+        <EuiButton iconType="pencil" onClick={() => setupMode.openFlyout({}, true)}>
           {i18n.translate('xpack.monitoring.euiTable.setupNewButtonLabel', {
             defaultMessage: 'Monitor another {identifier} with Metricbeat',
             values: {
@@ -72,6 +73,9 @@ export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
         items={items}
         search={search}
         columns={columns}
+        tableCaption={i18n.translate('xpack.monitoring.euiTable.tableCaption', {
+          defaultMessage: 'Monitoring data table',
+        })}
         {...props}
         data-test-subj={
           items.length && hasItems ? 'monitoringTableHasData' : 'monitoringTableNoData'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { scheduledReportMappings, scheduledReportModelVersions } from './scheduled_report';
 

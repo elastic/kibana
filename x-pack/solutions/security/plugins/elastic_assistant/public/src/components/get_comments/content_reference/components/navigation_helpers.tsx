@@ -90,8 +90,8 @@ const openAlertsPage = (
 ) =>
   openAlertsPageWithFilters(
     {
-      selectedOptions: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
-      fieldName: 'kibana.alert.workflow_status',
+      selected_options: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
+      field_name: 'kibana.alert.workflow_status',
       persist: false,
     },
     true,
@@ -131,7 +131,7 @@ const openKnowledgeBasePage = (
   knowledgeBaseEntryId: string
 ) =>
   navigateToApp('management', {
-    path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${knowledgeBaseEntryId}`,
+    path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${knowledgeBaseEntryId}`,
     openInNewTab: true,
   });
 

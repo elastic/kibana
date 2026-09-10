@@ -6,21 +6,23 @@
  */
 
 import { uniq, difference } from 'lodash';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  SavedObject,
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
   KibanaRequest,
   SavedObjectsBulkGetObject,
 } from '@kbn/core/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import {
+import { isSavedObjectErrorResult } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type {
   AssignableObject,
   UpdateTagAssignmentsOptions,
   FindAssignableObjectsOptions,
-  getKey,
   ObjectReference,
 } from '../../../common/assignments';
+import { getKey } from '../../../common/assignments';
 import { updateTagReferences } from '../../../common/references';
 import { taggableTypes } from '../../../common/constants';
 import { getUpdatableSavedObjectTypes } from './get_updatable_types';
@@ -131,28 +133,30 @@ export class AssignmentService {
     ]);
 
     // if we failed to fetch any object, just halt and throw an error
-    const firstObjWithError = objects.find((obj) => !!obj.error);
+    const firstObjWithError = objects.find(isSavedObjectErrorResult);
     if (firstObjWithError) {
-      const firstError = firstObjWithError.error!;
+      const firstError = firstObjWithError.error;
       throw new AssignmentError(firstError.message, firstError.statusCode);
     }
 
     const toAssign = new Set(assign.map(getKey));
     const toUnassign = new Set(unassign.map(getKey));
 
-    const updatedObjects = objects.map((object) => {
-      return {
-        id: object.id,
-        type: object.type,
-        // partial update. this will not update any attribute
-        attributes: {},
-        references: updateTagReferences({
-          references: object.references,
-          toAdd: toAssign.has(getKey(object)) ? tags : [],
-          toRemove: toUnassign.has(getKey(object)) ? tags : [],
-        }),
-      };
-    });
+    const updatedObjects = objects
+      .filter((object): object is SavedObject => !isSavedObjectErrorResult(object))
+      .map((object) => {
+        return {
+          id: object.id,
+          type: object.type,
+          // partial update. this will not update any attribute
+          attributes: {},
+          references: updateTagReferences({
+            references: object.references,
+            toAdd: toAssign.has(getKey(object)) ? tags : [],
+            toRemove: toUnassign.has(getKey(object)) ? tags : [],
+          }),
+        };
+      });
 
     await this.soClient.bulkUpdate(updatedObjects, { refresh });
   }

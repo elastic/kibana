@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataSourceExclusions } from '../../common/types';
+import type { DataSourceExclusions } from '../../common/types';
 
 /**
  * These are the default exclusions for data sources (data streams and indices).

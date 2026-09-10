@@ -17,8 +17,9 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
@@ -26,7 +27,7 @@ import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { QueryBuilder } from '../../common/query_builder';
 import { COMPARATOR_OPTIONS } from '../../../constants';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { MetricInput } from './metric_input';
 
 interface MetricIndicatorProps {
@@ -127,21 +128,28 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
                   indexFields={indexFields}
                 />
                 <EuiFlexItem grow={0}>
-                  <EuiButtonIcon
-                    data-test-subj="o11yMetricIndicatorButton"
-                    iconType="trash"
-                    color="danger"
-                    style={{ marginTop: '1.5em' }}
-                    onClick={handleDeleteMetric(index)}
-                    disabled={disableDelete}
-                    title={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel', {
-                      defaultMessage: 'Delete metric',
-                    })}
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
-                      { defaultMessage: 'Delete metric' }
+                      {
+                        defaultMessage: 'Delete metric',
+                      }
                     )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="o11yMetricIndicatorButton"
+                      iconType="trash"
+                      color="danger"
+                      style={{ marginTop: '1.5em' }}
+                      onClick={handleDeleteMetric(index)}
+                      disabled={disableDelete}
+                      aria-label={i18n.translate(
+                        'xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
+                        { defaultMessage: 'Delete metric' }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <QueryBuilder
@@ -177,7 +185,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
               data-test-subj="timesliceMetricIndicatorAddMetricButton"
               color={'primary'}
               size="xs"
-              iconType={'plusInCircleFilled'}
+              iconType={'plusCircle'}
               onClick={handleAddMetric}
               isDisabled={disableAdd}
               aria-label={i18n.translate(
@@ -256,6 +264,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
                   )}
                 >
                   <EuiSelect
+                    isInvalid={fieldState.invalid}
                     {...field}
                     data-test-subj="timesliceMetricComparatorSelection"
                     disabled={!indexPattern}

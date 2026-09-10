@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
-import { KbnClient } from '@kbn/test';
-import {
+import type { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
+import type { KbnClient } from '@kbn/test';
+import type {
   GetEnrollmentAPIKeysResponse,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
+import { getAgentVersionMatchingCurrentStack } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -126,64 +130,16 @@ export const addIntegrationToAgentPolicy = async (
   });
 };
 
-/**
- * Check if the given version string is a valid artifact version
- * @param version Version string
- */
-// const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
-
-/**
- * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
- * that is equal to or less than `maxVersion`.
- * @param kbnClient
- * @param log
- */
-//
-// export const getLatestAvailableAgentVersion = async (
-//   kbnClient: KbnClient,
-//   log: ToolingLog
-// ): Promise<string> => {
-//   let currentVersion: string;
-//
-//   try {
-//     const kbnStatus = await kbnClient.status.get();
-//     currentVersion = kbnStatus.version.number;
-//   } catch {
-//     log.warning(chalk.bold('Failed to get Kibana version, using package.json version'));
-//     currentVersion = kibanaPackageJson.version;
-//   }
-//
-//   const agentVersions = await pRetry(
-//     async () => {
-//       const response = await axios.get('https://artifacts-api.elastic.co/v1/versions');
-//       return map(
-//         response.data.versions.filter(isValidArtifactVersion),
-//         (version) => version.split('-SNAPSHOT')[0]
-//       );
-//     },
-//     {
-//       retries: 6,
-//     }
-//   ).catch(() => null);
-//
-//   if (!agentVersions) {
-//     log.warning(
-//       chalk.bold('Failed to get agent versions from artifacts-api, using package.json version')
-//     );
-//   }
-//
-//   const version = agentVersions
-//     ? semver.maxSatisfying(agentVersions, `<=${currentVersion}`)
-//     : currentVersion;
-//
-//   return `${version}-SNAPSHOT`;
-// };
-
 export const getLatestAvailableAgentVersion = async (
   kbnClient: KbnClient,
   log: ToolingLog
 ): Promise<string> => {
-  return `9.1.0-SNAPSHOT`;
+  const isServerless = await isServerlessKibanaFlavor(kbnClient);
+  if (isServerless) {
+    return fetchFleetLatestAvailableAgentVersion(kbnClient);
+  }
+
+  return getAgentVersionMatchingCurrentStack(kbnClient, log);
 };
 
 export const generateRandomString = (length: number) => {

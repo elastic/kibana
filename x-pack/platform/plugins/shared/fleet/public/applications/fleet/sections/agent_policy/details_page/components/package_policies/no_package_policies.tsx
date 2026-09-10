@@ -24,7 +24,7 @@ export const NoPackagePolicies = memo<{ agentPolicy: AgentPolicy; refreshAgentPo
     return (
       <>
         <EuiEmptyPrompt
-          iconType="plusInCircle"
+          iconType="plusCircle"
           title={
             <h3>
               <FormattedMessage
@@ -41,7 +41,7 @@ export const NoPackagePolicies = memo<{ agentPolicy: AgentPolicy; refreshAgentPo
           }
           actions={
             <EuiButton
-              iconType="plusInCircle"
+              iconType="plusCircle"
               isDisabled={!canWriteIntegrationPolicies}
               fill
               onClick={() => {

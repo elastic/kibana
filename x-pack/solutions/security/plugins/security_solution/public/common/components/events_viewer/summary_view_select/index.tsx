@@ -61,13 +61,13 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         iconSize="s"
         onClick={onButtonClick}
         size="xs"
         flush="both"
-        style={{ fontWeight: 'normal' }}
+        css={{ fontWeight: 'normal' }}
       >
         {viewSelected === 'gridView' ? gridView : eventRenderedView}
       </EuiButtonEmpty>
@@ -141,6 +141,9 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.securitySolution.summaryViewSelector.popover.ariaLabel', {
+        defaultMessage: 'View selection',
+      })}
       panelPaddingSize="none"
       button={button}
       isOpen={isPopoverOpen}

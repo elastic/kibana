@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import classNames from 'classnames';
 import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
 export interface FrameLayoutProps {
@@ -64,7 +65,10 @@ export function FrameLayout(props: FrameLayoutProps) {
             left: 0;
             right: 0;
             bottom: 0;
-            overflow: hidden;
+            /* Use 'clip' for y-axis to constrain layout, 'visible' for x-axis to allow
+               drag-drop extra targets in the config panel to overflow horizontally. */
+            overflow-y: clip;
+            overflow-x: visible;
             flex-direction: column;
             ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
               position: static;
@@ -76,7 +80,10 @@ export function FrameLayout(props: FrameLayoutProps) {
             className="lnsFrameLayout__pageContent"
             aria-labelledby="lns_ChartTitle"
             css={css`
-              overflow: hidden;
+              /* Use 'clip' for y-axis to constrain layout, 'visible' for x-axis to allow
+                 drag-drop extra targets in the config panel to overflow horizontally. */
+              overflow-y: clip;
+              overflow-x: visible;
               flex-grow: 1;
               flex-direction: row;
               ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
@@ -111,7 +118,7 @@ export function FrameLayout(props: FrameLayoutProps) {
               {props.dataPanel}
             </section>
             <section
-              className="eui-scrollBar"
+              className={classNames('eui-scrollBar', 'lnsVisualizationWorkspace_container')}
               css={css`
                 min-width: 432px;
                 overflow: hidden auto;
@@ -154,6 +161,11 @@ export function FrameLayout(props: FrameLayoutProps) {
                   min-width: 358px;
                   max-width: 440px;
                   max-height: 100%;
+                  /* Use 'clip' for y-axis to constrain flex children for scrolling,
+                     and 'visible' for x-axis to allow drag-drop extra targets to overflow.
+                     Unlike 'hidden'/'auto', 'clip' can be combined with 'visible' on the other axis. */
+                  overflow-y: clip;
+                  overflow-x: visible;
                   ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
                     max-width: 100%;
                   }

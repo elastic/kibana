@@ -5,37 +5,45 @@
  * 2.0.
  */
 
-import { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
+import type { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
-import {
+import type {
   IBasePath,
   IUiSettingsClient,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
+  ALERT_GROUPING,
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { sloDefinitionSchema } from '@kbn/slo-schema';
-import { get } from 'lodash';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import { storedSloDefinitionSchema } from '@kbn/slo-schema';
+import {
+  getErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running/errors';
+import { get, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   ALERT_ACTION,
   ALERT_ACTION_ID,
@@ -46,28 +54,39 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
-import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
+} from '../../../../common/burn_rate_rule/field_names';
+import type { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import { BurnRateAlert, getRuleExecutor } from './executor';
+import type { BurnRateAlert } from './executor';
+import { getRuleExecutor } from './executor';
 import {
-  LONG_WINDOW,
-  SHORT_WINDOW,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateStatsKey,
   generateWindowId,
+  LONG_WINDOW,
+  SHORT_WINDOW,
 } from './lib/build_query';
-import { EvaluationBucket } from './lib/evaluate';
-import {
-  AlertStates,
+import type { EvaluationBucket } from './lib/evaluate';
+import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
 } from './types';
+import { AlertStates } from './types';
+
+jest.mock('@kbn/apm-utils', () => ({
+  addTransactionLabels: jest.fn(),
+  withSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
+}));
+
+jest.mock('elastic-apm-node', () => ({
+  default: { setCustomContext: jest.fn() },
+  __esModule: true,
+}));
 
 const commonEsResponse = {
   took: 100,
@@ -90,13 +109,15 @@ function createFindResponse(
     page: 1,
     per_page: 25,
     total: sloList.length,
-    saved_objects: sloList.map((slo) => ({
-      id: slo.id,
-      attributes: sloDefinitionSchema.encode(slo),
-      type: SO_SLO_TYPE,
-      references: [],
-      score: 1,
-    })),
+    saved_objects: sloList.map((slo) => {
+      return {
+        id: slo.id,
+        attributes: storedSloDefinitionSchema.encode(omit(slo, 'artifacts')),
+        type: SO_SLO_TYPE,
+        references: [],
+        score: 1,
+      };
+    }),
   };
 }
 
@@ -161,6 +182,8 @@ describe('BurnRateRuleExecutor', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
     loggerMock = loggingSystemMock.createLogger();
+    searchSourceClientMock = jest.fn() as any;
+    uiSettingsClientMock = jest.fn() as any;
     servicesMock = {
       savedObjectsClient: soClientMock,
       scopedClusterClient: {
@@ -181,6 +204,8 @@ describe('BurnRateRuleExecutor', () => {
       share: {} as SharePluginStart,
       getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
       getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+      getMaintenanceWindowNames: jest.fn().mockResolvedValue([]),
+      getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
     };
   });
 
@@ -189,8 +214,8 @@ describe('BurnRateRuleExecutor', () => {
       soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
       const executor = getRuleExecutor(basePathMock);
 
-      await expect(
-        executor({
+      try {
+        await executor({
           params: someRuleParamsWithWindows({ sloId: 'non-existent' }),
           startedAt: new Date(),
           startedAtOverridden: false,
@@ -198,14 +223,61 @@ describe('BurnRateRuleExecutor', () => {
           executionId: 'irrelevant',
           logger: loggerMock,
           previousStartedAt: null,
-          rule: {} as SanitizedRuleConfig,
-          spaceId: 'irrelevant',
+          rule: {
+            id: '123-456',
+            name: 'an slo rule',
+          } as SanitizedRuleConfig,
+          spaceId: asSpaceId('irrelevant'),
+          state: {},
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          getTimeRange,
+          isServerless: false,
+        });
+        throw new Error('the executor ran successfully, but should not have');
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe(
+          'Rule "an slo rule" 123-456 is referencing an SLO which cannot be found: "non-existent": SLO [non-existent] not found'
+        );
+      }
+    });
+
+    it('keeps the failure that stopped the lookup as `cause`', async () => {
+      // The definition is read with the rule's own API key, so this rethrow is the only thing standing
+      // between the alerting framework and the reason the read failed. A missing SLO is a user error,
+      // but a credential the framework granted going missing is not: it reaches here as a 401 carrying
+      // UIAM's `authentication_error_code`, which the framework matches to re-grant the key. Flatten
+      // that into the message and the rule fails the same way on every scheduled run, forever.
+      const authError = Object.assign(new Error('security_exception'), {
+        statusCode: 401,
+        body: {
+          error: {
+            type: 'security_exception',
+            reason: 'failed to authenticate cloud API key: [0x28D520]',
+            caused_by: { authentication_error_code: '0x28D520' },
+          },
+        },
+      });
+      soClientMock.find.mockRejectedValue(authError);
+      const executor = getRuleExecutor(basePathMock);
+
+      await expect(
+        executor({
+          params: someRuleParamsWithWindows({ sloId: 'some-slo' }),
+          startedAt: new Date(),
+          startedAtOverridden: false,
+          services: servicesMock,
+          executionId: 'irrelevant',
+          logger: loggerMock,
+          previousStartedAt: null,
+          rule: { id: '123-456', name: 'an slo rule' } as SanitizedRuleConfig,
+          spaceId: asSpaceId('irrelevant'),
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
           isServerless: false,
         })
-      ).rejects.toThrowError();
+      ).rejects.toMatchObject({ cause: authError });
     });
 
     it('returns early when the slo is disabled', async () => {
@@ -222,7 +294,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -273,15 +345,15 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).not.toBeCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
     });
 
     it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
@@ -321,15 +393,15 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).not.toBeCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
@@ -346,6 +418,10 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'foo' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
         },
         {
           instanceId: 'bar,asia',
@@ -353,6 +429,10 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'bar' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
         },
       ];
       esClientMock.search.mockResolvedValueOnce(
@@ -379,14 +459,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'foo,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -410,10 +490,14 @@ describe('BurnRateRuleExecutor', () => {
               value: 'asia',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'foo' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
           'client.geo.continent_name': 'asia',
         },
       });
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'bar,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -437,6 +521,10 @@ describe('BurnRateRuleExecutor', () => {
               value: 'asia',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'bar' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
           'client.geo.continent_name': 'asia',
         },
       });
@@ -450,6 +538,7 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo,asia',
+          viewInAppUrl: `https://kibana.dev/s/irrelevant/app/slos/${slo.id}?instanceId=foo,asia`,
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -461,12 +550,16 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar,asia',
+          viewInAppUrl: `https://kibana.dev/s/irrelevant/app/slos/${slo.id}?instanceId=bar,asia`,
         }),
       });
     });
 
     it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
-      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
+      const slo = createSLO({
+        objective: { target: 0.9 },
+        groupBy: ['group.by.field'],
+      });
       const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
       const ruleParams = someRuleParamsWithWindows({
         sloId: slo.id,
@@ -480,6 +573,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'foo' } },
+          },
         },
         {
           instanceId: 'bar',
@@ -487,6 +583,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'bar' } },
+          },
         },
       ];
       esClientMock.search.mockResolvedValueOnce(
@@ -527,14 +626,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'foo',
         actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
         state: {
@@ -554,9 +653,12 @@ describe('BurnRateRuleExecutor', () => {
               value: 'foo',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'foo' } },
+          },
         },
       });
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'bar',
         actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
         state: {
@@ -576,6 +678,9 @@ describe('BurnRateRuleExecutor', () => {
               value: 'bar',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'bar' } },
+          },
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -587,6 +692,9 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo',
+          grouping: {
+            group: { by: { field: 'foo' } },
+          },
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -598,6 +706,9 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar',
+          grouping: {
+            group: { by: { field: 'bar' } },
+          },
         }),
       });
     });
@@ -613,6 +724,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
             { shortWindowBurnRate: 1.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'foo' } },
+          },
         },
         {
           instanceId: 'bar',
@@ -620,6 +734,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
             { shortWindowBurnRate: 1.5, longWindowBurnRate: 1.1 },
           ],
+          groupings: {
+            group: { by: { field: 'bar' } },
+          },
         },
       ];
       esClientMock.search.mockResolvedValueOnce(
@@ -648,14 +765,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: 'foo',
         actionGroup: HIGH_PRIORITY_ACTION_ID,
         state: {
@@ -675,9 +792,12 @@ describe('BurnRateRuleExecutor', () => {
               value: 'foo',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'foo' } },
+          },
         },
       });
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: 'bar',
         actionGroup: HIGH_PRIORITY_ACTION_ID,
         state: {
@@ -697,6 +817,9 @@ describe('BurnRateRuleExecutor', () => {
               value: 'bar',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'bar' } },
+          },
         },
       });
 
@@ -736,6 +859,190 @@ describe('BurnRateRuleExecutor', () => {
         }),
       });
     });
+
+    it('includes APM service and transaction fields in alert when available in SLO summary', async () => {
+      const slo = createSLO({
+        objective: { target: 0.9 },
+      });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const buckets = [
+        {
+          instanceId: '*',
+          windows: [
+            { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
+            { shortWindowBurnRate: 1.2, longWindowBurnRate: 1.5 },
+          ],
+        },
+      ];
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, buckets, { instanceId: '*' })
+      );
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: '*' })
+      );
+      esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponseWithApmFields());
+
+      // @ts-ignore
+      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
+        uuid: `uuid-${id}`,
+        start: new Date().toISOString(),
+      }));
+
+      const executor = getRuleExecutor(basePathMock);
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
+        id: '*',
+        actionGroup: ALERT_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: expect.objectContaining({
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: '*',
+          'service.name': 'my-service',
+          'service.environment': 'production',
+          'transaction.name': 'GET /api/endpoint',
+          'transaction.type': 'request',
+        }),
+      });
+    });
+  });
+
+  describe('APM instrumentation', () => {
+    const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+      typeof addTransactionLabels
+    >;
+    const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+    const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+      typeof apm.setCustomContext
+    >;
+
+    beforeEach(() => {
+      addTransactionLabelsMock.mockClear();
+      withSpanMock.mockClear();
+      setCustomContextMock.mockClear();
+    });
+
+    it('sets SLO-shape labels and custom context after loading the SLO definition', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      const ruleId = 'rule-123';
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: '*' })
+      );
+      const executor = getRuleExecutor(basePathMock);
+
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: { id: ruleId, name: 'test rule' } as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          slo_indicator_type: slo.indicator.type,
+          slo_budgeting_method: slo.budgetingMethod,
+        })
+      );
+      expect(setCustomContextMock).toHaveBeenCalledWith({ slo_id: slo.id });
+    });
+
+    it('sets executor_outcome: skipped when the SLO is disabled', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const executor = getRuleExecutor(basePathMock);
+
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: { id: 'abc', name: 'test' } as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'skipped' });
+      expect(addTransactionLabelsMock).not.toHaveBeenCalledWith({ executor_outcome: 'success' });
+    });
+
+    it('sets executor_outcome: success and creates named spans for all pipeline stages', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: '*' })
+      );
+      const executor = getRuleExecutor(basePathMock);
+
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: { id: 'abc', name: 'test' } as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'success' });
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:load_definition', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:eval', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:es_query', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:action_dispatch', type: 'rule' },
+        expect.any(Function)
+      );
+    });
   });
 });
 
@@ -770,6 +1077,7 @@ interface ResponseBucket {
     shortWindowBurnRate: number;
     longWindowBurnRate: number;
   }>;
+  groupings?: Record<string, unknown> | undefined;
 }
 
 interface AfterKey {
@@ -818,6 +1126,19 @@ function generateEsResponse(
               {
                 key: { instanceId: bucket.instanceId },
                 doc_count: 100,
+                groupings: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          slo: {
+                            groupings: bucket.groupings,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               } as EvaluationBucket
             );
           })
@@ -854,6 +1175,34 @@ function generateEsSummaryResponse() {
             status: 'HEALTHY',
             errorBudgetConsumed: 0.6,
             errorBudgetRemaining: 0.4,
+          },
+        },
+      ],
+    },
+  };
+}
+
+function generateEsSummaryResponseWithApmFields() {
+  return {
+    ...commonEsResponse,
+    hits: {
+      hits: [
+        {
+          _index: '.slo-observability.summary-v3.2',
+          _id: 'X19fX19fJWJbqiqq1WN9x1e_kHkXpwAA',
+          _source: {
+            sliValue: 0.9,
+            status: 'HEALTHY',
+            errorBudgetConsumed: 0.6,
+            errorBudgetRemaining: 0.4,
+            service: {
+              environment: 'production',
+              name: 'my-service',
+            },
+            transaction: {
+              name: 'GET /api/endpoint',
+              type: 'request',
+            },
           },
         },
       ],

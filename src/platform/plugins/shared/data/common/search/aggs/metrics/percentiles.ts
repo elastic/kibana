@@ -16,7 +16,7 @@ import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { aggPercentilesFnName } from './percentiles_fn';
 import { getPercentileValue } from './percentiles_get_value';
 import { ordinalSuffix } from './lib/ordinal_suffix';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 export interface AggParamsPercentiles extends BaseAggParams {
   field: string;

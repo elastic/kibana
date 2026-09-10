@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import type { DiscoveryDataset } from '../../common/types';
+
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import type { InstallType } from '../types';
 
@@ -20,11 +22,19 @@ export interface PackageUpdateEvent {
   error?: UpgradeError[];
   eventType: UpdateEventType;
   installType?: InstallType;
+  packageType?: string;
+  discoveryDatasets?: DiscoveryDataset[];
+  automaticInstall?: boolean;
+  latestExecutedState?: {
+    name: string;
+    error?: string;
+  };
 }
 
 export enum UpdateEventType {
   PACKAGE_POLICY_UPGRADE = 'package-policy-upgrade',
   PACKAGE_INSTALL = 'package-install',
+  PACKAGE_ROLLBACK = 'package-rollback',
 }
 
 export interface UpgradeError {

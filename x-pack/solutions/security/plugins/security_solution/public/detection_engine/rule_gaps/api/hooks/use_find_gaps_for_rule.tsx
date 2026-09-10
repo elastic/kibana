@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import { findGapsForRule } from '../api';
-import type { GapStatus } from '../../types';
+import type { GapReasonType, GapStatus } from '../../types';
 
 const FIND_GAPS_FOR_RULE = 'FIND_GAP_FOR_RULE';
 
@@ -31,6 +31,7 @@ export const useFindGapsForRule = (
     start,
     end,
     statuses,
+    excludedReasons,
     sortField,
     sortOrder,
   }: {
@@ -40,6 +41,7 @@ export const useFindGapsForRule = (
     start: string;
     end: string;
     statuses: GapStatus[];
+    excludedReasons?: GapReasonType[];
     sortField: string;
     sortOrder: string;
   },
@@ -52,6 +54,7 @@ export const useFindGapsForRule = (
       page,
       perPage,
       statuses?.join(','),
+      excludedReasons?.join(','),
       sortField,
       sortOrder,
       start,
@@ -66,6 +69,7 @@ export const useFindGapsForRule = (
         start,
         end,
         statuses,
+        excludedReasons,
         sortField: sortField as string,
         sortOrder,
       });

@@ -6,13 +6,15 @@
  */
 
 import { toArray, map, firstValueFrom } from 'rxjs';
-import {
+import type {
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
+  ToolOptions,
+} from '@kbn/inference-common';
+import {
   createInferenceInternalError,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
-  ToolOptions,
   withoutChunkEvents,
 } from '@kbn/inference-common';
 
@@ -25,7 +27,8 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
       toArray(),
       map((events) => {
         const messageEvent = events.find(isChatCompletionMessageEvent);
-        const tokenEvent = events.find(isChatCompletionTokenCountEvent);
+        // if several token events are present, the latest reflects the final usage
+        const tokenEvent = events.findLast(isChatCompletionTokenCountEvent);
 
         if (!messageEvent) {
           throw createInferenceInternalError('No message event found');
@@ -33,8 +36,13 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
 
         return {
           content: messageEvent.content,
+          refusal: messageEvent.refusal,
           toolCalls: messageEvent.toolCalls,
           tokens: tokenEvent?.tokens,
+          deanonymized_input: messageEvent.deanonymized_input,
+          deanonymized_output: messageEvent.deanonymized_output,
+          model: tokenEvent?.model,
+          metadata: messageEvent.metadata,
         };
       })
     )

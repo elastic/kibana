@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
+  EuiHealth,
   EuiSpacer,
   EuiTitle,
-  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { TextField, SelectField, SuperSelectField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
 import { useFormData } from '../../hooks';
-import { FormConfig } from '../../types';
+import type { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';
@@ -201,11 +203,13 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   </EuiFlexItem>
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="minusInCircle"
-                        onClick={() => removeItem(id)}
-                        aria-label="Remove processor"
-                      />
+                      <EuiToolTip content="Remove processor" disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="minusCircle"
+                          onClick={() => removeItem(id)}
+                          aria-label="Remove processor"
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -462,7 +466,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => removeItem(id)}
                         aria-label="Remove processor"
                       />

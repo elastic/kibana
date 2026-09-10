@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScreenshotRefImageData } from '../../../../common/runtime_types/ping/synthetics';
+import type { ScreenshotRefImageData } from '../../../../common/runtime_types/ping/synthetics';
 import { composeScreenshotRef } from './compose_screenshot_images';
 
 describe('composeScreenshotRef', () => {

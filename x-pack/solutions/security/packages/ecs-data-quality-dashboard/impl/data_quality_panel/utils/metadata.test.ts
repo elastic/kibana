@@ -6,10 +6,14 @@
  */
 import { omit } from 'lodash/fp';
 
-import { EnrichedFieldMetadata, PartitionedFieldMetadata, UnallowedValueCount } from '../types';
+import type {
+  EnrichedFieldMetadata,
+  PartitionedFieldMetadata,
+  UnallowedValueCount,
+} from '../types';
 import { mockMappingsProperties } from '../mock/mappings_properties/mock_mappings_properties';
+import type { FieldType } from './metadata';
 import {
-  FieldType,
   getEnrichedFieldMetadata,
   getFieldTypes,
   getMappingsProperties,
@@ -81,7 +85,7 @@ describe('getFieldTypes', () => {
     // @ts-expect-error
     const invalidType: Record<string, unknown> = []; // <-- this is an array, NOT a valid Record<string, unknown>
 
-    expect(() => getFieldTypes(invalidType)).toThrowError('Root value is not flatten-able');
+    expect(() => getFieldTypes(invalidType)).toThrow('Root value is not flatten-able');
   });
 });
 

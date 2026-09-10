@@ -9,8 +9,26 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Suggestion } from './types';
+
+const LENS_ITEM_LATEST_VERSION = 2 as const;
+
+interface LensAttributesFromSuggestion {
+  references: Array<{ name: string; id: string; type: string }>;
+  visualizationType: string;
+  state: {
+    visualization: {};
+    datasourceStates: Record<string, unknown>;
+    query?: Query;
+    filters: Filter[];
+    adHocDataViews?: Record<string, DataViewSpec>;
+  };
+  title: string;
+  version: typeof LENS_ITEM_LATEST_VERSION;
+}
 
 export const getLensAttributesFromSuggestion = ({
   filters,
@@ -22,17 +40,7 @@ export const getLensAttributesFromSuggestion = ({
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
-}): {
-  references: Array<{ name: string; id: string; type: string }>;
-  visualizationType: string;
-  state: {
-    visualization: {};
-    datasourceStates: Record<string, unknown>;
-    query: Query | AggregateQuery;
-    filters: Filter[];
-  };
-  title: string;
-} => {
+}): LensAttributesFromSuggestion => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -56,7 +64,9 @@ export const getLensAttributesFromSuggestion = ({
     state: {
       datasourceStates,
       filters,
-      query,
+      // ES|QL queries live exclusively on the text-based datasource layers;
+      // the top-level slot only carries a chart-scoped KQL/Lucene filter.
+      ...(isOfAggregateQueryType(query) ? {} : { query }),
       visualization,
       ...(dataView &&
         dataView.id &&
@@ -65,6 +75,7 @@ export const getLensAttributesFromSuggestion = ({
         }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
+    version: LENS_ITEM_LATEST_VERSION,
   };
   return attributes;
 };

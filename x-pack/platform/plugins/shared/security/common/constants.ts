@@ -6,14 +6,10 @@
  */
 
 /**
- * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
+ * Re-exported from `@kbn/core-spaces-common` rather than redeclared, so the security
+ * plugin and the spaces plugin cannot drift apart on the saved-objects sentinels.
  */
-export const ALL_SPACES_ID = '*';
-
-/**
- * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
- */
-export const UNKNOWN_SPACE = '?';
+export { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 
 export const APPLICATION_PREFIX = 'kibana-';
 
@@ -55,6 +51,18 @@ export const NEXT_URL_QUERY_STRING_PARAMETER = 'next';
  * HTTP response with more details of the problem.
  */
 export const SESSION_ERROR_REASON_HEADER = 'kbn-session-error-reason';
+
+/**
+ * Indicates that any authentication optimizations (e.g., minimal authentication mode) should be disabled and the full
+ * authentication information should be made available.
+ */
+export const KIBANA_AUTH_FULL_HEADER = 'kbn-auth-full';
+
+/**
+ * The HTTP header that's supposed to carry the client ES authentication information when needed (e.g.,
+ * UIAM shared secret).
+ */
+export const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
 
 /**
  * Matches valid usernames and role names.

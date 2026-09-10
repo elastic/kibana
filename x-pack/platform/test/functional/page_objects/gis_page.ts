@@ -13,11 +13,19 @@ function escapeLayerName(layerName: string) {
   return layerName.split(' ').join('_');
 }
 
+// Mirror the legacy `listingTable.searchForItemWithName` escaping: EUI Query
+// syntax rejects `[...]` tokens, and map fixtures historically searched with
+// the first `-` collapsed to a space.
+function escapeMapSearchTerm(name: string) {
+  return name.replace('-', ' ').replace(/ *\[[^)]*\] */g, '');
+}
+
 export class GisPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visualize = this.ctx.getPageObject('visualize');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -26,9 +34,8 @@ export class GisPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly comboBox = this.ctx.getService('comboBox');
-  private readonly renderable = this.ctx.getService('renderable');
   private readonly browser = this.ctx.getService('browser');
-  private readonly listingTable = this.ctx.getService('listingTable');
+  private readonly contentList = this.ctx.getService('contentList');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
 
@@ -82,7 +89,7 @@ export class GisPageObject extends FtrService {
 
   async enterFullScreen() {
     this.log.debug(`enterFullScreen`);
-    await this.testSubjects.click('mapsFullScreenMode');
+    await this.appMenu.clickMenuItem('mapsFullScreenMode');
     await this.retry.try(async () => {
       await this.testSubjects.exists('exitFullScreenModeButton');
     });
@@ -149,7 +156,7 @@ export class GisPageObject extends FtrService {
 
     await this.retry.try(async () => {
       await this.searchForMapWithName(name);
-      await this.listingTable.clickItemLink('map', name);
+      await this.contentList.clickItemByName(name);
       await this.header.waitUntilLoadingHasFinished();
       // check Map landing page is not present
       await this.testSubjects.missingOrFail('mapLandingPage', { timeout: 10000 });
@@ -160,9 +167,7 @@ export class GisPageObject extends FtrService {
 
   async deleteSavedMaps(search: string) {
     await this.searchForMapWithName(search);
-    await this.listingTable.checkListingSelectAllCheckbox();
-    await this.listingTable.clickDeleteSelected();
-    await this.common.clickConfirmOnModal();
+    await this.contentList.selectAllAndDelete();
 
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -173,11 +178,19 @@ export class GisPageObject extends FtrService {
     // Navigate directly because we don't need to go through the map listing
     // page. The listing page is skipped if there are no saved objects
     await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
-    await this.renderable.waitForRender();
+    await this.waitForLayersToLoad();
+  }
+
+  async clickSaveButton() {
+    await this.appMenu.clickMenuItem('mapSaveButton');
+  }
+
+  async expectSaveButtonExists() {
+    await this.appMenu.existOrFail('mapSaveButton');
   }
 
   async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
-    await this.testSubjects.click('mapSaveButton');
+    await this.clickSaveButton();
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
@@ -229,7 +242,9 @@ export class GisPageObject extends FtrService {
 
   async onMapListingPage() {
     this.log.debug(`onMapListingPage`);
-    return await this.listingTable.onListingPage('map');
+    return await this.testSubjects.exists('mapLandingPage', {
+      timeout: 5000,
+    });
   }
 
   async onMapPage() {
@@ -244,7 +259,7 @@ export class GisPageObject extends FtrService {
 
     await this.gotoMapListingPage();
 
-    await this.listingTable.searchForItemWithName(name);
+    await this.contentList.search(escapeMapSearchTerm(name));
 
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -265,16 +280,17 @@ export class GisPageObject extends FtrService {
       await this.retry.try(async () => {
         await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
         const onMapListingPage = await this.onMapListingPage();
-        if (!onMapListingPage) throw new Error('Not on map listing page.');
+        if (!onMapListingPage) {
+          throw new Error('Not on map listing page.');
+        }
       });
     }
   }
 
   async searchAndExpectItemsCount(name: string, count: number) {
-    await this.gotoMapListingPage();
-
     this.log.debug(`searchAndExpectItemsCount: ${name}`);
-    await this.listingTable.searchAndExpectItemsCount('map', name, count);
+    await this.searchForMapWithName(name);
+    await this.contentList.expectItemCount(count);
   }
 
   async setView(lat: number, lon: number, zoom: number) {
@@ -320,7 +336,9 @@ export class GisPageObject extends FtrService {
   // Please keep in mind when udpating, removing or adding to this method
   // upgrade needs to be tested too
   async clearLegendTooltip() {
-    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+    // The tooltip renders instantly when present, so use a short timeout: this is an
+    // absence probe called many times per hook, and a long timeout burns hook budget.
+    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 1000 });
     if (isTooltipOpen) {
       await this.testSubjects.click(`layerTocTooltip`);
       // Wait for tooltip to go away
@@ -513,10 +531,8 @@ export class GisPageObject extends FtrService {
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
-    const filterEditorContainer = await this.testSubjects.find('mapFilterEditor');
-    const queryBarInFilterEditor = await this.testSubjects.findDescendant(
-      'queryInput',
-      filterEditorContainer
+    const queryBarInFilterEditor = await this.find.displayedByCssSelector(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
     );
     await queryBarInFilterEditor.click();
     const input = await this.find.activeElement();
@@ -535,10 +551,8 @@ export class GisPageObject extends FtrService {
   async setJoinWhereQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapJoinWhereExpressionButton');
-    const filterEditorContainer = await this.testSubjects.find('mapJoinWhereFilterEditor');
-    const queryBarInFilterEditor = await this.testSubjects.findDescendant(
-      'queryInput',
-      filterEditorContainer
+    const queryBarInFilterEditor = await this.find.displayedByCssSelector(
+      '[data-test-subj="mapJoinWhereFilterEditor"] [data-test-subj="queryInput"]'
     );
     await queryBarInFilterEditor.click();
     const input = await this.find.activeElement();
@@ -578,12 +592,12 @@ export class GisPageObject extends FtrService {
   }
 
   async fullScreenModeMenuItemExists() {
-    return await this.testSubjects.exists('mapsFullScreenMode');
+    return await this.appMenu.menuItemExists('mapsFullScreenMode');
   }
 
   async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
-    await this.testSubjects.click('mapsFullScreenMode');
+    await this.appMenu.clickMenuItem('mapsFullScreenMode');
   }
 
   async exitFullScreenLogoButtonExists() {
@@ -709,7 +723,7 @@ export class GisPageObject extends FtrService {
   }
 
   async enableAutoFitToBounds() {
-    await this.testSubjects.click('openSettingsButton');
+    await this.appMenu.clickMenuItem('openSettingsButton');
     const isEnabled = await this.testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
     if (!isEnabled) {
       await this.retry.try(async () => {

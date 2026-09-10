@@ -1,0 +1,33 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          listSkillsResponseExample:
+            description: "Example response returning a list of skills"
+            value:
+              results:
+                - id: built-in-skill-id
+                  name: Built-in Skill
+                  description: A built-in skill provided by the platform.
+                  readonly: true
+                  experimental: false
+                  referenced_content_count: 0
+                - id: custom-skill-id
+                  name: Custom Skill
+                  description: A user-created skill for data analysis.
+                  readonly: false
+                  experimental: false
+                  tool_ids:
+                    - platform.core.search
+                  referenced_content_count: 1
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "https://${KIBANA_URL}/api/agent_builder/skills" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn:/api/agent_builder/skills

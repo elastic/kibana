@@ -8,12 +8,18 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
-import { IndexPatternManagmentContext } from '../../../types';
+import {
+  dataViewsListTitle,
+  getEditFieldBreadcrumbs,
+  getCreateFieldBreadcrumbs,
+} from '../../breadcrumbs';
+import type { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
 export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;
@@ -35,17 +41,26 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
     });
   }, [props.match.params.id, fieldName, setBreadcrumbs, dataViews]);
 
-  if (indexPattern) {
+  if (!indexPattern) {
     return (
-      <CreateEditField
-        indexPattern={indexPattern}
-        mode={fieldName ? 'edit' : 'create'}
-        fieldName={fieldName}
+      <AppHeader
+        title={dataViewsListTitle}
+        back={{
+          href: props.history.createHref({ pathname: '/' }),
+          label: dataViewsListTitle,
+        }}
+        spacing="bleed"
       />
     );
-  } else {
-    return <></>;
   }
+
+  return (
+    <CreateEditField
+      indexPattern={indexPattern}
+      mode={fieldName ? 'edit' : 'create'}
+      fieldName={fieldName}
+    />
+  );
 };
 
 export const CreateEditFieldContainer = withRouter(CreateEditFieldCont);

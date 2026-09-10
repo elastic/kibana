@@ -18,7 +18,7 @@ import {
   saveVisualization,
   SAVED_VIS_TYPE,
 } from './saved_visualize_utils';
-import { VisTypeAlias, TypesStart } from '../vis_types';
+import type { VisTypeAlias, TypesStart } from '../vis_types';
 import type { VisSavedObject } from '../types';
 
 let visTypes = [] as VisTypeAlias[];
@@ -77,6 +77,9 @@ jest.mock('../services', () => ({
       mSearch: mockFindContent,
     },
   })),
+  getEmbeddable: jest.fn(() => ({
+    getSavedObjects: mockFindContent,
+  })),
 }));
 
 const mockParseSearchSourceJSON = jest.fn();
@@ -96,16 +99,7 @@ jest.mock('./saved_visualization_references', () => ({
   extractReferences: jest.fn((arg) => mockExtractReferences(arg)),
 }));
 
-let isTitleDuplicateConfirmed = true;
-const mockCheckForDuplicateTitle = jest.fn(() => {
-  if (!isTitleDuplicateConfirmed) {
-    throw new Error();
-  }
-});
 const mockSaveWithConfirmation = jest.fn(() => ({ item: { id: 'test-after-confirm' } }));
-jest.mock('./saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(() => mockCheckForDuplicateTitle()),
-}));
 jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
   saveWithConfirmation: jest.fn(() => mockSaveWithConfirmation()),
 }));
@@ -278,31 +272,6 @@ describe('saved_visualize_utils', () => {
         expect(savedVisId).toBe('test-after-confirm');
       });
     });
-
-    describe('isTitleDuplicateConfirmed', () => {
-      it('as false we should not save vis with duplicated title', async () => {
-        isTitleDuplicateConfirmed = false;
-        try {
-          const savedVisId = await saveVisualization(vis, { isTitleDuplicateConfirmed }, coreStart);
-          expect(savedVisId).toBe('');
-        } catch {
-          // ignore
-        }
-        expect(mockCreateContent).not.toHaveBeenCalled();
-        expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
-        expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(vis.id).toBeUndefined();
-      });
-
-      it('as true we should save vis with duplicated title', async () => {
-        isTitleDuplicateConfirmed = true;
-        const savedVisId = await saveVisualization(vis, { isTitleDuplicateConfirmed }, coreStart);
-        expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(mockCreateContent).toHaveBeenCalled();
-        expect(savedVisId).toBe('test');
-        expect(vis.id).toBe('test');
-      });
-    });
   });
 
   describe('findListItems', () => {
@@ -327,10 +296,8 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            options: {
-              types: ['visualization'],
-              searchFields: ['title^3', 'description'],
-            },
+            type: ['visualization'],
+            limit: 10,
           },
         ],
       ]);
@@ -354,15 +321,7 @@ describe('saved_visualize_utils', () => {
         props.size
       );
       expect(mockFindContent.mock.calls).toMatchObject([
-        [
-          {
-            contentTypes: [
-              { contentTypeId: 'bazdoc' },
-              { contentTypeId: 'etc' },
-              { contentTypeId: 'visualization' },
-            ],
-          },
-        ],
+        [{ limit: 10, type: ['bazdoc', 'etc', 'visualization'] }],
       ]);
     });
 
@@ -392,16 +351,7 @@ describe('saved_visualize_utils', () => {
         props.size
       );
       expect(mockFindContent.mock.calls).toMatchObject([
-        [
-          {
-            contentTypes: [
-              { contentTypeId: 'bazdoc' },
-              { contentTypeId: 'bar' },
-              { contentTypeId: 'visualization' },
-              { contentTypeId: 'foo' },
-            ],
-          },
-        ],
+        [{ limit: 10, type: ['bazdoc', 'bar', 'visualization', 'foo'] }],
       ]);
     });
 
@@ -418,7 +368,9 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            query: { text: 'ahoythere*' },
+            limit: 10,
+            search: 'ahoythere*',
+            type: ['bazdoc', 'bar', 'visualization', 'foo'],
           },
         ],
       ]);
@@ -441,10 +393,11 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            query: {
-              tags: {
-                included: ['hello', 'dolly'],
-              },
+            limit: 10,
+            type: ['bazdoc', 'bar', 'visualization', 'foo'],
+            tags: {
+              excluded: undefined,
+              included: ['hello', 'dolly'],
             },
           },
         ],
@@ -462,7 +415,7 @@ describe('saved_visualize_utils', () => {
               toListItem(savedObject) {
                 return {
                   id: savedObject.id,
-                  title: `${(savedObject.attributes as { label: string }).label} THE GRAY`,
+                  title: `${(savedObject.attributes as any).label} THE GRAY`,
                 };
               },
             },
@@ -470,7 +423,7 @@ describe('saved_visualize_utils', () => {
         } as VisTypeAlias,
       ];
       (mockFindContent as jest.Mock).mockImplementationOnce(async () => ({
-        pagination: { total: 2 },
+        total: 2,
         hits: [
           {
             id: 'lotr',
@@ -501,6 +454,7 @@ describe('saved_visualize_utils', () => {
           {
             id: 'wat',
             image: undefined,
+            managed: undefined,
             editor: {
               editUrl: '/edit/wat',
             },

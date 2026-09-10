@@ -1,0 +1,75 @@
+{
+  "sha1": "642eb3b26f9449be6678474d34ac019342dab9f5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "cfdaded726a30b0-8cf1f3cf6c6d663",
+      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 42,
+        "column": 44
+      }
+    },
+    {
+      "id": "cfdaded726a30b0-a0554bccd589a70",
+      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 86,
+        "column": 24
+      }
+    },
+    {
+      "id": "9618baea2490340-c6dcf15528a3e01",
+      "title": "Action Policies - read/write privileges editor sees every write affordance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 36,
+        "column": 23
+      }
+    },
+    {
+      "id": "9618baea2490340-5993a4bf6be8200",
+      "title": "Action Policies - read/write privileges read-only user cannot access write affordances",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 46,
+        "column": 47
+      }
+    },
+    {
+      "id": "9618baea2490340-1c84e85eee0a8b0",
+      "title": "Action Policies - read/write privileges read-only user is blocked from the edit route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    }
+  ]
+}

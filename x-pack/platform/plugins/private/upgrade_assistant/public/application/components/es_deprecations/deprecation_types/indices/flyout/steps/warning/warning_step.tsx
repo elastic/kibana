@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,22 +17,25 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EnrichedDeprecationInfo,
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type {
   IndexWarning,
   IndexWarningType,
-  ReindexAction,
-  ReindexStatus,
   ReindexStatusResponse,
+} from '@kbn/reindex-service-plugin/common';
+import type {
+  EnrichedDeprecationInfo,
+  ReindexAction,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
 import {
   DeprecatedSettingWarningCheckbox,
   ReplaceIndexWithAliasWarningCheckbox,
   MakeIndexReadonlyWarningCheckbox,
-  WarningCheckboxProps,
 } from './warning_step_checkbox';
 import {
   FrozenCallOut,
@@ -44,7 +46,7 @@ import {
   ReindexingFailedCallOut,
 } from '../callouts';
 import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
-import { ReindexState } from '../../../use_reindex';
+import type { ReindexState } from '../../../use_reindex';
 
 const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
@@ -138,23 +140,23 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
         {isMLAnomalyIndex && <MlAnomalyCallout />}
         {warnings.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutTitle"
                   defaultMessage="This index requires destructive changes that cannot be reversed"
                 />
               }
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutDetail"
-                  defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutDetail"
+                    defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
+                  />
+                </p>
+              }
+            />
 
             <EuiSpacer />
 

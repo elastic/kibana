@@ -44,7 +44,6 @@ import {
 } from '../../../../common/users';
 import { roles as api_int_roles } from '../../../../common/roles';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -585,7 +584,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bulkGetAttachmentsResponse = await bulkGetAttachments({
           supertest,
-          attachmentIds: [caseWithAttachments.comments![0].id, caseWithAttachments.comments![1].id],
+          savedObjectIds: [
+            caseWithAttachments.comments![0].id,
+            caseWithAttachments.comments![1].id,
+          ],
           caseId: postedCase.id,
         });
 

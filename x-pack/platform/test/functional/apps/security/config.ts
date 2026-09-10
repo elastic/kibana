@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
@@ -15,6 +15,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
+    },
+    security: {
+      ...functionalConfig.get('security'),
+      cookieLogin: false, // these tests verify the login form itself
     },
   };
 }

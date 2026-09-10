@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, firstValueFrom } from 'rxjs';
-import { ISavedObjectsRepository } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getTelemetrySavedObject, TelemetrySavedObject } from '../../saved_objects';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { TelemetrySavedObject } from '../../saved_objects';
+import { getTelemetrySavedObject } from '../../saved_objects';
 import type { TelemetryConfigType } from '../../config';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 

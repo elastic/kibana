@@ -11,10 +11,13 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APP_ID, FEATURE_ID, FEATURE_ID_V3 } from '../../common/constants';
 import { createUICapabilities, getApiTags } from '../../common';
-import { CASES_DELETE_SUB_PRIVILEGE_ID, CASES_SETTINGS_SUB_PRIVILEGE_ID } from './constants';
+import {
+  CASES_DELETE_SUB_PRIVILEGE_ID,
+  CASES_SETTINGS_SUB_PRIVILEGE_ID,
+  CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
+} from './constants';
 
 /**
  * The order of appearance in the feature privilege page
@@ -44,7 +47,6 @@ export const getV1 = (): KibanaFeatureConfig => {
       defaultMessage: 'Cases (Deprecated)',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     order: FEATURE_ORDER,
     management: {
@@ -62,6 +64,7 @@ export const getV1 = (): KibanaFeatureConfig => {
           createComment: [APP_ID],
           reopenCase: [APP_ID],
           assign: [APP_ID],
+          manageTemplates: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],
@@ -75,13 +78,20 @@ export const getV1 = (): KibanaFeatureConfig => {
           ...capabilities.createComment,
           ...capabilities.reopenCase,
           ...capabilities.assignCase,
+          ...capabilities.manageTemplates,
         ],
         replacedBy: {
           default: [{ feature: FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
               feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+              privileges: [
+                'minimal_all',
+                'create_comment',
+                'case_reopen',
+                'cases_assign',
+                CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
+              ],
             },
           ],
         },

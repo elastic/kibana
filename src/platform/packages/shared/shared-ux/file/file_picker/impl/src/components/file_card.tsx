@@ -11,9 +11,9 @@ import React, { useMemo } from 'react';
 import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiCard, EuiText, EuiIcon, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiCard, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FileJSON } from '@kbn/shared-ux-file-types';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { isImage } from '@kbn/shared-ux-file-util';
 import { FileImage as Image } from '@kbn/shared-ux-file-image';
 import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
@@ -60,7 +60,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
             height: ${imageHeight};
           `}
         >
-          <EuiIcon type="filebeatApp" size="xl" />
+          <EuiIcon type="filebeatApp" size="xl" aria-hidden={true} />
         </div>
       )}
     </div>
@@ -97,18 +97,20 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   );
 
   const deleteButton = shouldAllowDelete && shouldAllowDelete(file) && (
-    <EuiButtonIcon
-      iconType="trash"
-      aria-label={i18nTexts.delete}
-      color="danger"
-      css={{
-        position: 'absolute',
-        right: `${euiTheme.size.s}`,
-        top: `${euiTheme.size.s}`,
-        display: 'none',
-      }}
-      onClick={() => state.showDeletePrompt(file)}
-    />
+    <EuiToolTip content={i18nTexts.delete} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="trash"
+        aria-label={i18nTexts.delete}
+        color="danger"
+        css={{
+          position: 'absolute',
+          right: `${euiTheme.size.s}`,
+          top: `${euiTheme.size.s}`,
+          display: 'none',
+        }}
+        onClick={() => state.showDeletePrompt(file)}
+      />
+    </EuiToolTip>
   );
 
   return (

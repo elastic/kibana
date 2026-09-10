@@ -14,9 +14,9 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { Pagination as PaginationTypeEui } from '@elastic/eui';
+import type { Pagination as PaginationTypeEui } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
-import { Pagination } from '../../types';
+import type { Pagination } from '../../types';
 
 export interface ResultListArgs {
   executionTime: number;
@@ -34,7 +34,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
   onPaginationChange,
 }) => {
   const {
-    services: { data },
+    services: { data, chrome },
   } = useKibana();
   const [dataView, setDataView] = useState<DataView | null>(null);
   useEffect(() => {
@@ -66,7 +66,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
 
       {flyoutDocId && dataView && hit && (
         <UnifiedDocViewerFlyout
-          services={{}}
+          services={{ chrome }}
           onClose={() => setFlyoutDocId(undefined)}
           isEsqlQuery={false}
           columns={[]}

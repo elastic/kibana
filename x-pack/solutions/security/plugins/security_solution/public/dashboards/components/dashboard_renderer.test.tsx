@@ -14,10 +14,14 @@ import {
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
-  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
-}));
+jest.mock('@kbn/dashboard-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/dashboard-plugin/public');
+  return {
+    ...actual,
+    DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
+    DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -63,8 +67,11 @@ describe('DashboardRenderer', () => {
     expect(input).toEqual(
       expect.objectContaining({
         viewMode: 'view',
-        timeRange: props.timeRange,
-        query: props.query,
+        time_range: props.timeRange,
+        query: {
+          expression: props.query.query,
+          language: 'kql',
+        },
         filters: props.filters,
       })
     );

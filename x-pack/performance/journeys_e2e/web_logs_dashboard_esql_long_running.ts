@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Journey } from '@kbn/journeys';
+import { setupDashboardJourney } from '../utils/dashboard_journey';
+
+export const journey = setupDashboardJourney({
+  // call the journey constructor in this file so the name is set correctly
+  journey: new Journey({
+    esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
+    kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard_esql_long_running'],
+  }),
+  dashboardName: 'Web Logs Dashboard',
+  dashboardLinkSubj: 'dashboardListingTitleLink-Logs-dashboard-with-ES|QL',
+  visualizationCount: 11,
+});

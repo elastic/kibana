@@ -6,7 +6,8 @@
  */
 
 import { useCallback } from 'react';
-import { LogViewReference } from '../../../common/log_views';
+import type { ProjectRouting } from '@kbn/es-query';
+import type { LogViewReference } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logEntrySearchRequestParamsRT,
@@ -22,9 +23,11 @@ import {
 export const useLogEntry = ({
   logViewReference,
   logEntryId,
+  projectRouting,
 }: {
   logViewReference: LogViewReference | null | undefined;
   logEntryId: string | null | undefined;
+  projectRouting?: ProjectRouting;
 }) => {
   const { search: fetchLogEntry, requests$: logEntrySearchRequests$ } = useDataSearch({
     getRequest: useCallback(() => {
@@ -36,10 +39,10 @@ export const useLogEntry = ({
                 logEntryId,
               }),
             },
-            options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
+            options: { strategy: LOG_ENTRY_SEARCH_STRATEGY, projectRouting },
           }
         : null;
-    }, [logViewReference, logEntryId]),
+    }, [logViewReference, logEntryId, projectRouting]),
     parseResponses: parseLogEntrySearchResponses,
   });
 

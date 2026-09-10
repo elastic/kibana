@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor } from '@kbn/core/server';
-import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 import { getEsdslFn } from '../../../common/search/expressions/esdsl';
 
 /**
@@ -38,9 +38,10 @@ export function getEsdsl({
       }
       const request = getKibanaRequest();
       const savedObjectsClient = core.savedObjects.getScopedClient(request);
+      const scopedClient = search.asScoped(request);
       return {
         uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
-        search: search.asScoped(request).search,
+        searchService: scopedClient,
       };
     },
   });

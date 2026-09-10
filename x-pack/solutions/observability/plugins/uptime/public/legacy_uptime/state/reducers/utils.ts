@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
-import { AsyncAction } from '../actions/types';
+import type { Action } from 'redux-actions';
+import type { AsyncAction } from '../actions/types';
 
 export function handleAsyncAction<ReducerState>(
   storeKey: keyof ReducerState,

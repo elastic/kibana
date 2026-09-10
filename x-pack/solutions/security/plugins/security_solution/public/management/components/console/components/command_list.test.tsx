@@ -13,6 +13,7 @@ import {
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
 import React from 'react';
+import { consoleTranslations } from './translations';
 
 describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];
@@ -69,10 +70,7 @@ describe('When rendering the command list (help output)', () => {
       renderAndOpenHelpPanel();
 
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
-        'Helpful tips:You can enter consecutive response actions — no need to wait for previous ' +
-          'actions to complete.Leaving the response console does not terminate any actions that have ' +
-          'been submitted.Learn more(external, opens in a new tab or window) about response actions ' +
-          'and using the console.'
+        `Helpful tips:${consoleTranslations.escapeDoubleDashesInfo}${consoleTranslations.keyTabInfo}${consoleTranslations.keyUpArrowInfo}${consoleTranslations.keyAltSpaceInfo}`
       );
 
       expect(renderResult.getByTestId('test-commandList-helpfulHintDocLink')).toBeTruthy();

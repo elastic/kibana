@@ -37,14 +37,14 @@ describe('SuricataDetails', () => {
   };
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
-      const wrapper = shallow(<SuricataDetails data={mockTimelineData[2].ecs} timelineId="test" />);
+      const wrapper = shallow(<SuricataDetails data={mockTimelineData[2].ecs} scopeId="test" />);
       expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns text if the data does contain suricata data', async () => {
       const wrapper = await getWrapper(
         <TestProviders>
-          <SuricataDetails data={mockTimelineData[2].ecs} timelineId="test" />
+          <SuricataDetails data={mockTimelineData[2].ecs} scopeId="test" />
         </TestProviders>
       );
       const removeEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
@@ -57,7 +57,7 @@ describe('SuricataDetails', () => {
     });
 
     test('it returns null for text if the data contains no suricata data', () => {
-      const wrapper = shallow(<SuricataDetails data={mockTimelineData[0].ecs} timelineId="test" />);
+      const wrapper = shallow(<SuricataDetails data={mockTimelineData[0].ecs} scopeId="test" />);
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
   });

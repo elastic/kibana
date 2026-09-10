@@ -9,8 +9,7 @@
 
 import type { MutableRefObject } from 'react';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import type { EuiDataGridRefProps } from '@elastic/eui';
-import { type EuiDataGridColumnCellAction } from '@elastic/eui';
+import { type EuiDataGridColumnCellAction, type EuiDataGridRefProps } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CellAction,
@@ -42,6 +41,10 @@ export interface UseDataGridColumnsCellActionsProps
    * ref to the EuiDataGrid instance
    */
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  /**
+   * If true, disables all cell actions
+   */
+  disableCellActions?: boolean;
 }
 export type UseDataGridColumnsCellActions<
   P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
@@ -56,6 +59,7 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   metadata,
   dataGridRef,
   disabledActionTypes = [],
+  disableCellActions = false,
 }) => {
   const [cellActions, setCellActions] = useState<EuiDataGridColumnCellAction[][]>(emptyActions);
 
@@ -101,6 +105,10 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
       )
     );
   }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
+
+  if (disableCellActions) {
+    return emptyActions; // Return empty actions if cell actions are disabled
+  }
 
   return cellActions;
 };

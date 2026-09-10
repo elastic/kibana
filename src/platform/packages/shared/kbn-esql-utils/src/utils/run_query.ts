@@ -10,12 +10,15 @@
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { TimeRange } from '@kbn/es-query';
+import type { ProjectRouting, TimeRange } from '@kbn/es-query';
+import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { type ESQLControlVariable } from '@kbn/esql-types';
+import { getESQLQueryVariables } from './query_parsing_helpers';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
@@ -46,20 +49,27 @@ export const getNamedParams = (
 ) => {
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
-    variables?.forEach(({ key, value }) => {
-      namedParams.push({ [key]: value });
-    });
+    const usedVariables = new Set(getESQLQueryVariables(query));
+    variables
+      .filter(({ key }) => usedVariables.has(key))
+      .forEach(({ key, value }) => {
+        namedParams.push({ [key]: value });
+      });
   }
   return namedParams;
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
-  return columns.map(({ name, type }) => {
+  return columns.map(({ name, type, _meta }) => {
     const kibanaType = esFieldTypeToKibanaFieldType(type);
     return {
       id: name,
       name,
-      meta: { type: kibanaType, esType: type },
+      meta: {
+        type: kibanaType,
+        esType: type,
+        ...(_meta !== undefined && { esMeta: _meta }),
+      },
     } as DatatableColumn;
   });
 }
@@ -70,21 +80,32 @@ export async function getESQLQueryColumnsRaw({
   esqlQuery,
   search,
   signal,
+  filter,
+  dropNullColumns,
   timeRange,
+  variables,
+  includeColumnMetadata,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  dropNullColumns?: boolean;
+  filter?: unknown;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
+  includeColumnMetadata?: boolean;
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getStartEndParams(esqlQuery, timeRange);
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables);
     const response = await lastValueFrom(
       search(
         {
           params: {
+            ...(filter ? { filter } : {}),
             query: `${esqlQuery} | limit 0`,
+            ...(dropNullColumns ? { dropNullColumns: true } : {}),
             ...(namedParams.length ? { params: namedParams } : {}),
+            ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
           },
         },
         {
@@ -94,7 +115,22 @@ export async function getESQLQueryColumnsRaw({
       )
     );
 
-    return (response.rawResponse as unknown as ESQLSearchResponse).columns ?? [];
+    const table = response.rawResponse as unknown as ESQLSearchResponse;
+    const hasEmptyColumns = table.all_columns && table.all_columns?.length > table.columns.length;
+    const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
+
+    const allColumns =
+      (table.all_columns ?? table.columns)?.map(({ name, type, original_types, _meta }) => {
+        return {
+          name,
+          type,
+          original_types,
+          isNull: hasEmptyColumns ? !lookup.has(name) : false,
+          ...(_meta !== undefined && { _meta }),
+        };
+      }) ?? [];
+
+    return allColumns ?? [];
   } catch (error) {
     throw new Error(
       i18n.translate('esqlUtils.columnsErrorMsg', {
@@ -111,15 +147,32 @@ export async function getESQLQueryColumns({
   esqlQuery,
   search,
   signal,
+  filter,
+  dropNullColumns,
   timeRange,
+  variables,
+  includeColumnMetadata,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  filter?: unknown;
+  dropNullColumns?: boolean;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
+  includeColumnMetadata?: boolean;
 }): Promise<DatatableColumn[]> {
   try {
-    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal, timeRange });
+    const rawColumns = await getESQLQueryColumnsRaw({
+      esqlQuery,
+      search,
+      filter,
+      dropNullColumns,
+      signal,
+      timeRange,
+      variables,
+      includeColumnMetadata,
+    });
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
   } catch (error) {
@@ -142,6 +195,11 @@ export async function getESQLResults({
   dropNullColumns,
   timeRange,
   variables,
+  timezone,
+  executionContext,
+  approximation,
+  projectRouting,
+  includeColumnMetadata,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -150,6 +208,11 @@ export async function getESQLResults({
   dropNullColumns?: boolean;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
+  timezone?: string;
+  executionContext?: KibanaExecutionContext;
+  approximation?: boolean;
+  projectRouting?: ProjectRouting;
+  includeColumnMetadata?: boolean;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -163,16 +226,35 @@ export async function getESQLResults({
           query: esqlQuery,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
           ...(namedParams.length ? { params: namedParams } : {}),
+          ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
+          ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
         },
       },
       {
         abortSignal: signal,
         strategy: 'esql_async',
+        ...(executionContext ? { executionContext } : {}),
+        ...(approximation !== undefined ? { approximation } : {}),
+        ...(projectRouting !== undefined ? { projectRouting } : {}),
       }
     )
   );
+
+  const rawResponse = result.rawResponse as unknown as ESQLSearchResponse;
+
+  // Normalize response.values: if all arrays are empty, convert to single empty array
+  const normalizedValues =
+    rawResponse.values && rawResponse.values.every((row) => Array.isArray(row) && row.length === 0)
+      ? []
+      : rawResponse.values;
+
+  const response = {
+    ...rawResponse,
+    values: normalizedValues,
+  };
+
   return {
-    response: result.rawResponse as unknown as ESQLSearchResponse,
+    response,
     params: result.requestParams as unknown as ESQLSearchParams,
   };
 }

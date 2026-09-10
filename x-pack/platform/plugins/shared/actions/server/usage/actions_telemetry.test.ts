@@ -16,6 +16,7 @@ import {
   getInUseTotalCount,
   getTotalCount,
 } from './actions_telemetry';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 let logger: MockedLogger;
 
@@ -357,13 +358,11 @@ describe('actions telemetry', () => {
       },
     });
     const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, [
-      {
+      createMockInMemoryConnector({
         id: 'test',
         actionTypeId: '.email',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -371,17 +370,13 @@ describe('actions telemetry', () => {
         secrets: {
           clientSecret: 'sdfsdf',
         },
-      },
-      {
+      }),
+      createMockInMemoryConnector({
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
@@ -578,26 +573,18 @@ describe('actions telemetry', () => {
       }
     );
     const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
-      {
+      createMockInMemoryConnector({
         id: 'test',
         actionTypeId: '.test',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-      },
-      {
+      }),
+      createMockInMemoryConnector({
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -634,16 +621,12 @@ describe('actions telemetry', () => {
       }
     );
     const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
-      {
+      createMockInMemoryConnector({
         id: 'system_action:system-connector-test.system-action',
         actionTypeId: 'test.system-action',
         name: 'System connector',
         isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: true,
-        secrets: {},
-        config: {},
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -748,16 +731,12 @@ describe('actions telemetry', () => {
       },
     });
     const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, [
-      {
+      createMockInMemoryConnector({
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-        config: {},
-      },
+      }),
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
@@ -1124,6 +1103,35 @@ describe('actions telemetry', () => {
         },
       },
       hasErrors: false,
+    });
+  });
+
+  test('getExecutionsPerDayCount should return empty results without errors when response has no aggregations', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    // ES omits `aggregations` when the target index matches no indices (e.g. a fresh
+    // project that has never executed a connector action).
+    mockEsClient.search.mockResponseOnce(
+      // @ts-expect-error not full search response
+      {}
+    );
+
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(0);
+    expect(loggerCalls.warn).toHaveLength(0);
+
+    expect(telemetry).toStrictEqual({
+      hasErrors: false,
+      countTotal: 0,
+      countByType: {},
+      countFailed: 0,
+      countFailedByType: {},
+      avgExecutionTime: 0,
+      avgExecutionTimeByType: {},
+      countRunOutcomeByConnectorType: {},
     });
   });
 

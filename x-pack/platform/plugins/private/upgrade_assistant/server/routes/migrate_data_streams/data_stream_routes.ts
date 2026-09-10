@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { error } from '../../lib/data_streams/error';
 import { API_BASE_PATH } from '../../../common/constants';
-import { DataStreamReindexStatusResponse } from '../../../common/types';
-import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
+import type { DataStreamReindexStatusResponse } from '../../../common/types';
 import { dataStreamMigrationServiceFactory } from '../../lib/data_streams';
 
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export function registerMigrateDataStreamRoutes({
@@ -23,6 +23,7 @@ export function registerMigrateDataStreamRoutes({
   licensing,
   log,
   lib: { handleEsError },
+  current,
 }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/migrate_data_stream`;
 
@@ -37,11 +38,11 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string(),
+          dataStreamName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -88,11 +89,11 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string(),
+          dataStreamName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -137,11 +138,11 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string(),
+          dataStreamName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -180,11 +181,11 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string(),
+          dataStreamName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;
@@ -235,14 +236,14 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
         }),
         params: schema.object({
-          dataStreamName: schema.string(),
+          dataStreamName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       const {
         elasticsearch: { client: esClient },
       } = await core;

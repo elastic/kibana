@@ -6,9 +6,9 @@
  */
 
 import { createAction } from 'redux-actions';
-import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without, last } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
+import { set, del } from '../../../common/lib/object_path_immutable';
 import { createThunk } from '../../lib/create_thunk';
 import { isGroupId } from '../../lib/workpad';
 import {
@@ -30,8 +30,6 @@ import * as args from './resolved_args';
 import { setFilter } from './filters';
 
 const { actionsElements: strings } = ErrorStrings;
-
-const { set, del } = immutable;
 
 export function getSiblingContext(state, elementId, checkIndex, path = ['ast.chain']) {
   const prevContextPath = [elementId, 'expressionContext', ...path, checkIndex];

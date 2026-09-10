@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function createFlappingHistoryTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

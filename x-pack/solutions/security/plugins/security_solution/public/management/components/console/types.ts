@@ -7,12 +7,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode, MutableRefObject } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState, ArgSelectorState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
+
+export type { ArgSelectorState } from './components/console_state/types';
 
 /**
  * Definition interface for a Command argument
@@ -23,8 +25,18 @@ export interface CommandArgDefinition {
    * the user has entered the argument name - it does not validate that the argument must have a
    * value. Arguments that have no value entered by the user have (by default) a value of
    * `true` boolean.
+   *
+   * NOTE: an argument should not be both `required` and `conditionallyRequired`.
    */
   required: boolean;
+
+  /**
+   * Indicates that this argument is required only when one of the other arguments in the
+   * list defined is used by the user
+   *
+   * NOTE: an argument should not be both `required` and `conditionallyRequired`.
+   */
+  conditionallyRequired?: string[];
 
   /** If argument can be used multiple times */
   allowMultiples: boolean;
@@ -36,24 +48,26 @@ export interface CommandArgDefinition {
   about: ReactNode;
 
   /**
-   * If argument (when used) should have a value defined by the user.
-   * Default is `false` which mean that argument can be entered without any value - internally the
-   * value for the argument will be a boolean `true`.
-   * When set to `true` the argument is expected to have a value that is non-boolean
-   * In addition, the following options can be used with this parameter to further validate the user's input:
+   * If argument (when used) should have a value defined by the user. Default is `false`
+   * This parameter supports the following values:
    *
-   * - `non-empty-string`: user's value must be a string whose length is greater than zero. Note that
-   *   the value entered will first be `trim()`'d.
-   * - `number`: user's value will be converted to a Number and ensured to be a `safe integer`
-   * - `number-greater-than-zero`: user's value must be a number greater than zero
-   * - `truthy`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
+   * - `false`: argument does not accept a value from the user. Internally, the value for the
+   *            argument will be a boolean `true`.
+   * - `true`: the argument is expected to have a value that is non-boolean
+   * - `'non-empty-string'`: user's value must be a string whose length is greater than zero. Note that
+   *    the value entered will first be `trim()`'d.
+   * - `'number'`: user's value will be converted to a Number and ensured to be a `safe integer`
+   * - `'number-greater-than-zero'`: user's value must be a number greater than zero
+   * - `'truthy'`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
    */
   mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero' | 'truthy';
 
   /**
-   * Specifies that one or more arguments might be required, but only one of them can be used at a time.
+   * Indicates that the argument definition is part of a group of arguments (all sharing the same id) and
+   * that only one of them can be used at a time. Defining this property will make the argument group
+   * required for command input as long as it is not also defined as a conditionally required argument.
    */
-  exclusiveOr?: boolean;
+  exclusiveOrGroupId?: string;
 
   /**
    * Validate the individual values given to this argument.
@@ -78,7 +92,7 @@ export interface CommandDefinition<TMeta = any> {
   /** Name of the command. This will be the value that the user will enter on the console to access this command */
   name: string;
 
-  /** Some information about the command */
+  /** Some information about the command. This information is output when displaying `--help` info. for the command */
   about: ReactNode;
 
   /**
@@ -106,9 +120,24 @@ export interface CommandDefinition<TMeta = any> {
   helpDisabled?: boolean;
 
   /**
-   * If defined, the command will be hidden from in the Help menu and help text. It will warn the user and not execute the command if manually typed in.
+   * If defined, the command will be hidden from in the Help menu and help text. It will warn the
+   * user and not execute the command if manually typed in.
+   * Usually set as a result of checking if user has Authz to the given response action
    */
   helpHidden?: boolean;
+
+  /**
+   * Displayed in the output of this command's `--help`.
+   * This value will override the command usage generated by the console from the Command Definition
+   */
+  helpUsage?: ReactNode;
+
+  /**
+   * Displayed in the output of this command's `--help`.
+   * This value will override the command usage generated by the console
+   * from the Command Definition.
+   */
+  helpExample?: string;
 
   /**
    * A store for any data needed when the command is executed.
@@ -122,29 +151,35 @@ export interface CommandDefinition<TMeta = any> {
 
   /**
    * Displayed in the input hint area when the user types the command. The Command usage will be
-   * appended to this value
+   * appended to this value (see 'exampleUsage' property below)
    */
   exampleInstruction?: string;
 
   /**
-   * Displayed in the input hint area when the user types the command as well as in the output of
-   * this command's `--help`. This value will override the command usage generated by the console
-   * from the Command Definition. It's value displayed in `--help` would overriden by `helpUsage` if defined.
+   * Displayed in the input hint area when the user types the command. This value will override
+   * the command usage generated by the console from the Command Definition.
+   * This value is also used as the default `helpExample` (output of `<command> --help`) value
+   * if `helpExample` is not defined.
    */
-  exampleUsage?: string;
-
-  /**
-   * Displayed in the output of this command's `--help`.
-   * This value will override the command usage generated by the console
-   * from the Command Definition.
-   */
-  helpUsage?: string;
+  exampleUsage?:
+    | string
+    | ((
+        /**
+         * The command that the user has entered (so far) into the input area. Will be `undefined`
+         * for instances where `exampleUsage` is called outside the user's entering it in the
+         * input area (example: to display it on the help panel or `--help` output)
+         */
+        enteredCommand?: Command
+      ) => string);
 
   /**
    * Validate the command entered by the user. This is called only after the Console has ran
    * through all of its builtin validations (based on `CommandDefinition`).
    * Example: used it when there are multiple optional arguments but at least one of those
    * must be defined.
+   *
+   * NOTE:  this callback will also be invoked when a user enters the console's built in `--help`
+   *        argument. Ensure the validation code exists early when that is the case.
    */
   validate?: (command: Command) => true | string;
 
@@ -165,7 +200,26 @@ export interface SupportedArguments {
  */
 export interface Command<
   TDefinition extends CommandDefinition = CommandDefinition,
-  TArgs extends SupportedArguments = any
+  TArgs extends SupportedArguments = any,
+  /**
+   * The `state` that is stored for Argument Selectors. It's a record where the key is
+   * the argument name (from the command definition) and the value is the state that the
+   * argument selector stores. This will then provide proper typings to `command.argState`
+   *
+   * @example
+   * const enteredCommand = Command<
+   *    CommandDef,
+   *    { script: string },
+   *    {
+   *      script: {
+   *        isPopupOpen: boolean;
+   *        selection: ResponseActionScript
+   *      }
+   *    }
+   * >;
+   * const script = enteredCommand.argSate.script[0].store.selection; // type === `ResponseActionScript`
+   */
+  TSelectorArgsState extends object = any
 > {
   /** The raw input entered by the user */
   input: string;
@@ -176,6 +230,13 @@ export interface Command<
   inputDisplay: string;
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInterface<TArgs>;
+
+  /** Object containing state for any argument that is using a Value Selector component */
+  argState?: Record<
+    keyof TSelectorArgsState,
+    ArgSelectorState<TSelectorArgsState[keyof TSelectorArgsState]>[]
+  >;
+
   /** The command definition associated with this user command */
   commandDefinition: TDefinition;
 }
@@ -238,10 +299,23 @@ export type CommandExecutionComponent<
 /**
  * The component props for an argument `SelectorComponent`
  */
-export interface CommandArgumentValueSelectorProps<TSelection = any, TState = any> {
+export interface CommandArgumentValueSelectorProps<
+  TSelection = any,
+  TState = any,
+  /** The metadata defined on the Command Definition */
+  TMeta = any,
+  /** List of arguments that the command supports and that the console parses by default */
+  TArgs extends SupportedArguments = any,
+  /** The `state` that is stored for Argument Selectors. See the full definition under the ` Command ` type */
+  TSelectorArgsState extends object = any
+> {
   /**
    * The current value that was selected. This will not be displayed in the UI, but will
-   * be passed on to the command execution as part of the argument's value
+   * be passed on to the command execution as part of the argument's value.
+   *
+   * NOTE:  that this value might be defined during the initial component render as a result of the
+   *        user selecting the command from the input history or pasting the command into the
+   *        console's input area. Components should be coded to handle this possibility
    */
   value: TSelection | undefined;
 
@@ -249,6 +323,10 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
    * A string value for display purposes only that describes the selected value. This
    * will be used when the command is entered and displayed in the console as well as in
    * the command input history popover
+   *
+   * NOTE:  that this value might be defined during the initial component render as a result of the
+   *        user selecting the command from the input history or pasting the command into the
+   *        console's input area. Components should be coded to handle this possibility
    */
   valueText: string;
 
@@ -276,13 +354,44 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
    * @param newData
    */
   onChange: (newData: ArgSelectorState<TState>) => void;
+
+  /**
+   * The full Command object containing command definition, input, and parsed arguments.
+   * This provides context that selector components can use to access command metadata.
+   */
+  command: Command<CommandDefinition<TMeta>, TArgs, TSelectorArgsState>;
+
+  /** API to the interacting with the console */
+  consoleApi: ConsoleApi;
+
+  /**
+   * Callback to request focus back to the console input after selector operations.
+   * Should be called when the selector component closes or completes its interaction.
+   * @deprecated use `consoleApi` instead
+   */
+  requestFocus?: () => void;
 }
 
 /**
- * Component for rendering an argument's value selector
+ * Component for rendering an argument's value selector.
+ *
+ * Note that the component could be initialized with a `value` and `valueText` in cases where the
+ * user might have either selected the command entry from the input history or from pasting the
+ * command into the input.
  */
 export type CommandArgumentValueSelectorComponent =
   ComponentType<CommandArgumentValueSelectorProps>;
+
+/**
+ * Interface that allows interacting with the console once it has already been rendered.
+ */
+export interface ConsoleApi {
+  /** Populate the console input with the provided command  */
+  setInput(command: string): void;
+
+  /** Set focus on the console input area */
+  setFocusOnInput(): void;
+}
 
 export interface ConsoleProps extends CommonProps {
   /**
@@ -303,6 +412,12 @@ export interface ConsoleProps extends CommonProps {
 
   /** The string to display to the left of the input area */
   prompt?: string;
+
+  /**
+   * If provided, it will add the console's API to the `current` property. The API returned
+   * allows for interacting with the console from outside the component.
+   */
+  apiRef?: MutableRefObject<ConsoleApi | undefined>;
 
   /**
    * If defined, certain console data (ex. command input history) will be persisted to localstorage

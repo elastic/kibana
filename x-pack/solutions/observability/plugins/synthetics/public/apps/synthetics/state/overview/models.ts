@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
+import type { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
 import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import { ConfigKey } from '../../../../../common/runtime_types';
+import type { ConfigKey } from '../../../../../common/runtime_types';
 
-import { MonitorFilterState } from '../monitor_list';
+import type { MonitorFilterState } from '../monitor_list';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
+  page: number;
   perPage: number;
   sortOrder: 'asc' | 'desc';
   sortField: MonitorListSortField;
@@ -36,9 +37,21 @@ export interface MonitorOverviewState {
   groupBy: GroupByState;
   trendStats: TrendTable;
   view: OverviewView;
+  // When true, monitors demoted to `stale` by the live-window freshness guard
+  // are shown with their last-known up/down instead. Purely presentational (no
+  // refetch) — kept outside `pageState` so it never re-triggers the status fetch.
+  showLastRun: boolean;
 }
 
 export interface GroupByState {
-  field: ConfigKey.TAGS | ConfigKey.PROJECT_ID | ConfigKey.MONITOR_TYPE | 'locationId' | 'none';
+  field:
+    | ConfigKey.TAGS
+    | ConfigKey.PROJECT_ID
+    | ConfigKey.MONITOR_TYPE
+    | 'locationId'
+    | 'monitor'
+    | 'remoteName'
+    | 'origin'
+    | 'none';
   order: 'asc' | 'desc';
 }

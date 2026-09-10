@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -40,6 +42,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get proxies`,
+      description: `List all Fleet proxies.`,
       options: {
         tags: ['oas-tag:Fleet proxies'],
       },
@@ -47,13 +50,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_fleet_proxies.yaml'),
+        },
         validate: {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(FleetProxySchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -71,6 +79,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Create a proxy`,
+      description: `Create a new Fleet proxy.`,
       options: {
         tags: ['oas-tag:Fleet proxies'],
       },
@@ -78,13 +87,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_fleet_proxy.yaml'),
+        },
         validate: {
           request: PostFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetProxyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -110,13 +124,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_fleet_proxy.yaml'),
+        },
         validate: {
           request: PutFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetProxyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -142,13 +161,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_fleet_proxy.yaml'),
+        },
         validate: {
           request: GetOneFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetProxyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -174,16 +198,21 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_fleet_proxy.yaml'),
+        },
         validate: {
           request: GetOneFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   id: schema.string(),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

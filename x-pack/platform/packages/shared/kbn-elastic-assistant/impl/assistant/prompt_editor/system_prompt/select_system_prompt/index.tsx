@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';
@@ -122,6 +123,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           css={css`
             min-width: 100%;
           `}
+          aria-label={i18n.SELECT_A_SYSTEM_PROMPT}
         >
           <EuiSuperSelect
             // Limits popover z-index to prevent it from getting too high and covering tooltips.
@@ -130,8 +132,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             compressed={compressed}
             data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
             fullWidth
-            hasDividers
-            itemLayoutAlign="top"
             disabled={isDisabled}
             isOpen={isOpenLocal && !isSettingsModalVisible}
             onChange={onChange}
@@ -156,7 +156,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         `}
       >
         {isClearable && selectedPrompt && (
-          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
+          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"

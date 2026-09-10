@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { generateAPIKeyName } from '@kbn/alerting-plugin/server/rules_client/common';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import {
   checkAAD,
   getEventLog,
@@ -19,7 +20,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function userManagedApiKeyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -44,7 +44,9 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
     after(() => objectRemover.removeAll());
 
     it('should successfully create rule using API key authorization', async () => {
-      const testRuleData = getTestRuleData({});
+      // The default rule name is shared with rules other suites create, and framework managed keys
+      // are named after the rule, so this rule needs a name of its own to assert against.
+      const testRuleData = getTestRuleData({ name: 'test_user_managed_api_key1' });
       const response = await superTestWithoutAuth
         .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -56,7 +58,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       objectRemover.add(SuperuserAtSpace1.space.id, ruleId, 'rule', 'alerting');
 
       expect(response.body.api_key_created_by_user).to.eql(true);
-      expect(apiKeyExists(testRuleData.rule_type_id, testRuleData.name)).to.eql(false);
+      expect(await apiKeyExists(testRuleData.rule_type_id, testRuleData.name)).to.eql(false);
 
       // Make sure rule runs successfully
       const events = await retry.try(async () => {
@@ -77,6 +79,58 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         (event: IValidatedEvent) => event?.event?.action === 'execute'
       );
       expect(executeEvent?.event?.outcome).to.eql('success');
+    });
+
+    it('should create rule with a framework managed API key when the clone API key header is set', async () => {
+      const testRuleData = getTestRuleData({ name: 'test_clone_api_key1' });
+      const response = await superTestWithoutAuth
+        .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .set('Authorization', `ApiKey ${apiKey}`)
+        .set(ALERTING_CLONE_API_KEY_HEADER, 'true')
+        .send(testRuleData);
+
+      expect(response.status).to.eql(200);
+      const ruleId = response.body.id;
+      objectRemover.add(SuperuserAtSpace1.space.id, ruleId, 'rule', 'alerting');
+
+      // The caller's key is not persisted on the rule, so its lifecycle stays with the framework
+      expect(response.body.api_key_created_by_user).to.eql(false);
+      expect(response.body.api_key_owner).to.eql('elastic');
+      expect(await apiKeyExists(testRuleData.rule_type_id, testRuleData.name)).to.eql(true);
+
+      // Make sure the rule runs successfully with the generated key
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: SuperuserAtSpace1.space.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
+        });
+      });
+
+      const executeEvent = events.find(
+        (event: IValidatedEvent) => event?.event?.action === 'execute'
+      );
+      expect(executeEvent?.event?.outcome).to.eql('success');
+    });
+
+    it('should keep the caller API key when the clone API key header is not "true"', async () => {
+      const testRuleData = getTestRuleData({ name: 'test_clone_api_key2' });
+      const response = await superTestWithoutAuth
+        .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .set('Authorization', `ApiKey ${apiKey}`)
+        .set(ALERTING_CLONE_API_KEY_HEADER, 'false')
+        .send(testRuleData);
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(SuperuserAtSpace1.space.id, response.body.id, 'rule', 'alerting');
+
+      expect(response.body.api_key_created_by_user).to.eql(true);
+      expect(await apiKeyExists(testRuleData.rule_type_id, testRuleData.name)).to.eql(false);
     });
 
     describe('rule operations', () => {
@@ -134,7 +188,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure no API key was generated
-        expect(apiKeyExists('test.noop', updatedData.name)).to.eql(false);
+        expect(await apiKeyExists('test.noop', updatedData.name)).to.eql(false);
       });
 
       it('should successfully update rule and regenerate API key', async () => {
@@ -190,7 +244,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(apiKeyExists('test.noop', updatedData.name)).to.eql(true);
+        expect(await apiKeyExists('test.noop', updatedData.name)).to.eql(true);
       });
 
       it('should successfully clone rule with user managed API key', async () => {
@@ -258,13 +312,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
                   total_alerts_detected: null,
                   total_alerts_created: null,
                   gap_duration_s: null,
-                  // TODO: uncomment after intermidiate release
-                  // gap_range: null,
+                  gap_range: null,
+                  gap_reason: null,
                 },
               },
             },
           },
           snooze_schedule: [],
+          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken
@@ -276,7 +331,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure no API key was generated
-        expect(apiKeyExists(response.body.rule_type_id, response.body.name)).to.eql(false);
+        expect(await apiKeyExists(response.body.rule_type_id, response.body.name)).to.eql(false);
       });
 
       it('should successfully clone rule and regenerate API key', async () => {
@@ -343,13 +398,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
                   total_alerts_detected: null,
                   total_alerts_created: null,
                   gap_duration_s: null,
-                  // TODO: uncomment after intermidiate release
-                  // gap_range: null,
+                  gap_range: null,
+                  gap_reason: null,
                 },
               },
             },
           },
           snooze_schedule: [],
+          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken
@@ -361,7 +417,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(apiKeyExists(response.body.rule_type_id, response.body.name)).to.eql(true);
+        expect(await apiKeyExists(response.body.rule_type_id, response.body.name)).to.eql(true);
       });
 
       it('should successfully bulk edit rule with user managed API key', async () => {
@@ -397,7 +453,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure no API key was generated
-        expect(apiKeyExists('test.noop', 'test_bulk_edit1')).to.eql(false);
+        expect(await apiKeyExists('test.noop', 'test_bulk_edit1')).to.eql(false);
       });
 
       it('should successfully bulk edit rule and regenerate API key', async () => {
@@ -432,7 +488,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(apiKeyExists('test.noop', 'test_bulk_edit2')).to.eql(true);
+        expect(await apiKeyExists('test.noop', 'test_bulk_edit2')).to.eql(true);
       });
 
       it('should successfully update api key for rule with user managed API key', async () => {
@@ -457,7 +513,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure no API key was generated
-        expect(apiKeyExists('test.noop', 'test_update_api_key1')).to.eql(false);
+        expect(await apiKeyExists('test.noop', 'test_update_api_key1')).to.eql(false);
       });
 
       it('should successfully update api key for rule and regenerate API key', async () => {
@@ -481,7 +537,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(apiKeyExists('test.noop', 'test_update_api_key2')).to.eql(true);
+        expect(await apiKeyExists('test.noop', 'test_update_api_key2')).to.eql(true);
       });
 
       it('should successfully enable rule with user managed API key', async () => {
@@ -502,7 +558,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure no API key was generated
-        expect(apiKeyExists('test.noop', 'test_enable1')).to.eql(false);
+        expect(await apiKeyExists('test.noop', 'test_enable1')).to.eql(false);
       });
 
       it('should successfully enable rule and generate API key', async () => {
@@ -522,7 +578,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(apiKeyExists('test.noop', 'test_enable2')).to.eql(true);
+        expect(await apiKeyExists('test.noop', 'test_enable2')).to.eql(true);
       });
 
       it('should successfully bulk enable rule with user managed API key', async () => {
@@ -546,7 +602,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure no API key was generated
-        expect(apiKeyExists('test.noop', 'test_bulk_enable1')).to.eql(false);
+        expect(await apiKeyExists('test.noop', 'test_bulk_enable1')).to.eql(false);
       });
 
       it('should successfully bulk enable rule and generate API key', async () => {
@@ -569,7 +625,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(apiKeyExists('test.noop', 'test_bulk_enable2')).to.eql(true);
+        expect(await apiKeyExists('test.noop', 'test_bulk_enable2')).to.eql(true);
       });
 
       it('should successfully delete rule with user managed API key', async () => {

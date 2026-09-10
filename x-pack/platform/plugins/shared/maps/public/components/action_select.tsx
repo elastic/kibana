@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
 
 interface Props {
@@ -63,7 +63,9 @@ export class ActionSelect extends Component<Props, State> {
         value: action.id,
         inputDisplay: (
           <div>
-            {iconType ? <EuiIcon className="mapActionSelectIcon" type={iconType} /> : null}
+            {iconType ? (
+              <EuiIcon className="mapActionSelectIcon" type={iconType} aria-hidden={true} />
+            ) : null}
             {action.getDisplayName(actionContext)}
           </div>
         ),

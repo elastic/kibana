@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '../common';
+import {
+  DASHBOARD_KI_TYPE,
+  VISUALIZATION_KI_TYPE,
+} from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
@@ -42,7 +45,7 @@ export const buildOSSFeatures = ({
       deprecated: {
         notice: i18n.translate('xpack.features.visualizeFeatureDeprecationNotice', {
           defaultMessage:
-            'The Visualize Library V1 privilege has been deprecated and replaced with a Visualize Library V2 privilege in order to improve saved query management. See {link} for more details.',
+            'The Visualize library V1 privilege has been deprecated and replaced with a Visualize library V2 privilege in order to improve saved query management. See {link} for more details.',
           values: { link: 'https://github.com/elastic/kibana/pull/202863' },
         }),
         replacedBy: ['visualize_v2'],
@@ -81,7 +84,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1300,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['dev_tools', 'kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
@@ -118,7 +120,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1500,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['advanced_settings'],
       management: {
@@ -136,6 +137,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['manage_advanced_settings'],
         },
         read: {
           app: ['kibana'],
@@ -158,7 +160,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['indexPatterns'],
       management: {
@@ -199,7 +200,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       management: {
@@ -232,6 +232,7 @@ export const buildOSSFeatures = ({
         },
       },
     },
+
     {
       id: 'filesSharedImage',
       name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {
@@ -239,7 +240,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
@@ -273,7 +273,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1700,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: ['saved_objects'],
       management: {
@@ -315,7 +314,6 @@ export const buildOSSFeatures = ({
       }),
       order: 1750,
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
@@ -375,7 +373,6 @@ const getBaseDiscoverFeature = ({
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['discover', 'kibana'],
     catalogue: ['discover'],
     privileges: {
@@ -457,7 +454,7 @@ const getBaseDiscoverFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -468,7 +465,7 @@ const getBaseDiscoverFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',
@@ -517,13 +514,12 @@ const getBaseVisualizeFeature = ({
 
   return {
     name: i18n.translate('xpack.features.visualizeFeatureName', {
-      defaultMessage: 'Visualize Library',
+      defaultMessage: 'Visualize library',
     }),
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['visualize', 'lens', 'kibana'],
     catalogue: ['visualize'],
     privileges: {
@@ -531,6 +527,7 @@ const getBaseVisualizeFeature = ({
         app: ['visualize', 'lens', 'kibana'],
         api: apiAllPrivileges,
         catalogue: ['visualize'],
+        aiIndex: { read: [VISUALIZATION_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: ['index-pattern', 'search', 'tag'],
@@ -553,6 +550,7 @@ const getBaseVisualizeFeature = ({
         app: ['visualize', 'lens', 'kibana'],
         api: apiReadPrivileges,
         catalogue: ['visualize'],
+        aiIndex: { read: [VISUALIZATION_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,
@@ -616,7 +614,7 @@ const getBaseDashboardFeature = ({
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
-  const savedObjectAllPrivileges = ['dashboard'];
+  const savedObjectAllPrivileges = ['dashboard', 'links', 'markdown'];
   const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
   const apiReadPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectReadPrivileges = [
@@ -630,6 +628,7 @@ const getBaseDashboardFeature = ({
     'map',
     'dashboard',
     'tag',
+    'markdown',
   ];
 
   if (version === 'v1') {
@@ -649,13 +648,13 @@ const getBaseDashboardFeature = ({
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
     },
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['dashboards', 'kibana'],
     catalogue: ['dashboard'],
     privileges: {
       all: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: [
@@ -665,7 +664,6 @@ const getBaseDashboardFeature = ({
             'canvas-workpad',
             'event-annotation-group',
             'lens',
-            'links',
             'map',
             'tag',
           ],
@@ -688,6 +686,7 @@ const getBaseDashboardFeature = ({
       read: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,
@@ -741,7 +740,7 @@ const getBaseDashboardFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -752,7 +751,7 @@ const getBaseDashboardFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 
-import { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
-import { SyntheticsAppState } from '../root_reducer';
-import { MonitorFilterState } from './models';
+import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
+import type { SyntheticsAppState } from '../root_reducer';
+import type { MonitorFilterState } from './models';
 
 export const selectMonitorListState = (state: SyntheticsAppState) => state.monitorList;
 export const selectEncryptedSyntheticsSavedMonitors = createSelector(
@@ -29,11 +29,21 @@ export const selectMonitorFiltersAndQueryState = createSelector(selectMonitorLis
     locations,
     projects,
     schedules,
+    remoteNames,
     useLogicalAndFor,
   }: MonitorFilterState = state.pageState;
   const { query } = state.pageState;
 
-  return { monitorTypes, tags, locations, projects, schedules, query, useLogicalAndFor };
+  return {
+    monitorTypes,
+    tags,
+    locations,
+    projects,
+    schedules,
+    remoteNames,
+    query,
+    useLogicalAndFor,
+  };
 });
 
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>

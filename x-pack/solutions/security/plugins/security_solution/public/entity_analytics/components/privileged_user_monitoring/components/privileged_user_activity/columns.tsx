@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize, isArray } from 'lodash/fp';
-import { EuiBadge, EuiButtonIcon, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiToolTip, type EuiBasicTableColumn } from '@elastic/eui';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -42,7 +42,7 @@ const timestampColumn: EuiBasicTableColumn<TableItemType> = {
   },
 };
 
-const getPrivilegedUserColumn = (fieldName: string) => ({
+const getPrivilegedUserColumn = () => ({
   field: 'privileged_user',
   name: (
     <FormattedMessage
@@ -52,21 +52,16 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
   ),
   width: COLUMN_WIDTHS.privileged_user,
   render: (user: string[] | string) =>
-    user != null
-      ? getRowItemsWithActions({
-          values: isArray(user) ? user : [user],
-          // TODO We need a way to filter by several field with an OR expression
-          // because the ESQL queries several source indices that have different field names
-          // Issue to extend SecurityCellActions to support this: https://github.com/elastic/security-team/issues/12712
-          fieldName,
-          idPrefix: 'privileged-user-monitoring-privileged-user',
-          render: (item) => <UserName userName={item} />,
-          displayCount: 1,
-        })
-      : getEmptyTagValue(),
+    getRowItemsWithActions({
+      values: isArray(user) ? user : [user],
+      fieldName: 'user.name',
+      idPrefix: 'privileged-user-monitoring-privileged-user',
+      render: (item) => <UserName userName={item} scopeId={SCOPE_ID} />,
+      displayCount: 1,
+    }),
 });
 
-const getTargetUserColumn = (fieldName: string) => ({
+const getTargetUserColumn = () => ({
   field: 'target_user',
   name: (
     <FormattedMessage
@@ -74,16 +69,8 @@ const getTargetUserColumn = (fieldName: string) => ({
       defaultMessage="Target user"
     />
   ),
-  render: (user: string[] | string) =>
-    user != null
-      ? getRowItemsWithActions({
-          values: isArray(user) ? user : [user],
-          fieldName,
-          idPrefix: 'privileged-user-monitoring-target-user',
-          render: (item) => <UserName userName={item} />,
-          displayCount: 1,
-        })
-      : getEmptyTagValue(),
+  render: (user: string) =>
+    user != null ? <UserName userName={user} scopeId={SCOPE_ID} /> : getEmptyTagValue(),
 });
 
 const getIpColumn = (fieldName = 'source.ip') => ({
@@ -95,15 +82,13 @@ const getIpColumn = (fieldName = 'source.ip') => ({
     />
   ),
   render: (ips: string[] | string) =>
-    ips != null
-      ? getRowItemsWithActions({
-          values: isArray(ips) ? ips : [ips],
-          fieldName,
-          idPrefix: 'privileged-user-monitoring-ip',
-          render: (item) => <NetworkDetails ip={item} />,
-          displayCount: 1,
-        })
-      : getEmptyTagValue(),
+    getRowItemsWithActions({
+      values: isArray(ips) ? ips : [ips],
+      fieldName: '', // Dirty hack to disable CellActions, remove this when CellActions support multiple fields
+      idPrefix: 'privileged-user-monitoring-ip',
+      render: (item) => <NetworkDetails ip={item} />,
+      displayCount: 1,
+    }),
 });
 
 const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => ({
@@ -126,17 +111,28 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
     };
 
     return (
-      <EuiButtonIcon
-        iconType="expand"
-        onClick={onClick}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.preview.ariaLabel',
           {
             defaultMessage: 'Preview event with id {id}',
             values: { id: record._id },
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="maximize"
+          onClick={onClick}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.preview.ariaLabel',
+            {
+              defaultMessage: 'Preview event with id {id}',
+              values: { id: record._id },
+            }
+          )}
+        />
+      </EuiToolTip>
     );
   },
   width: COLUMN_WIDTHS.actions,
@@ -148,8 +144,8 @@ export const buildGrantedRightsColumns = (
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openRightPanel),
   timestampColumn,
-  getPrivilegedUserColumn('user.name'),
-  getTargetUserColumn('user.target.name'),
+  getPrivilegedUserColumn(),
+  getTargetUserColumn(),
   {
     field: 'group_name',
     name: (
@@ -167,9 +163,9 @@ export const buildAccountSwitchesColumns = (
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openRightPanel),
   timestampColumn,
-  getPrivilegedUserColumn('process.real_user.name'),
+  getPrivilegedUserColumn(),
   {
-    ...getTargetUserColumn('process.group_leader.user.name'),
+    ...getTargetUserColumn(),
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.targetAccount"
@@ -203,7 +199,7 @@ export const buildAuthenticationsColumns = (
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openRightPanel),
   timestampColumn,
-  getPrivilegedUserColumn('client.user.name'),
+  getPrivilegedUserColumn(),
   {
     field: 'source',
     name: (

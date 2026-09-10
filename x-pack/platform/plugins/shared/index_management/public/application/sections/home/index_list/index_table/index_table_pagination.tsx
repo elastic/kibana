@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTablePagination } from '@elastic/eui';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { Index } from '../../../../../../common';
+import type { Index } from '../../../../../../common';
 
 interface IndexTablePaginationProps {
   pager: any;

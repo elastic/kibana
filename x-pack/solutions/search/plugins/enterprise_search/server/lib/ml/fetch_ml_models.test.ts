@@ -7,7 +7,7 @@
 
 import { mockLogger } from '../../__mocks__';
 
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import {
   E5_LINUX_OPTIMIZED_MODEL_ID,
@@ -37,7 +37,7 @@ describe('fetchMlModels', () => {
   });
 
   it('errors when there is no trained model provider', async () => {
-    await expect(() => fetchMlModels(undefined, mockLogger)).rejects.toThrowError(
+    await expect(() => fetchMlModels(undefined, mockLogger)).rejects.toThrow(
       'Machine Learning is not enabled'
     );
   });

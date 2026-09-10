@@ -15,12 +15,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import {
-  ChromiumArchivePaths,
-  ConfigType,
-  createConfig,
-  getChromiumPackage,
-} from '@kbn/screenshotting-server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import { ChromiumArchivePaths, createConfig, getChromiumPackage } from '@kbn/screenshotting-server';
 import { from, switchMap } from 'rxjs';
 import { HeadlessChromiumDriverFactory, install } from './browsers';
 import { Screenshots } from './screenshots';

@@ -11,11 +11,41 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import type { ChartType } from '@kbn/visualization-utils';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
-import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+
+/**
+ * Mirrors the real suggestions API behavior: the generated text-based layers
+ * carry the context query (see `getDatasourceSuggestionsForVisualizeField`).
+ */
+const withContextQuery = (suggestion: Suggestion, contextQuery: unknown): Suggestion => {
+  if (
+    !contextQuery ||
+    typeof contextQuery !== 'object' ||
+    !('esql' in contextQuery) ||
+    !suggestion.datasourceState ||
+    typeof suggestion.datasourceState !== 'object' ||
+    !('layers' in suggestion.datasourceState)
+  ) {
+    return suggestion;
+  }
+  const { layers } = suggestion.datasourceState as {
+    layers: Record<string, { query?: unknown }>;
+  };
+  return {
+    ...suggestion,
+    datasourceState: {
+      ...suggestion.datasourceState,
+      layers: Object.fromEntries(
+        Object.entries(layers).map(([id, layer]) => [id, { ...layer, query: contextQuery }])
+      ),
+    },
+  };
+};
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',
@@ -36,6 +66,7 @@ export const getLensVisMock = async ({
   table,
   externalVisContext,
   getModifiedVisAttributes,
+  onLensSuggestionsApiCall,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -50,6 +81,7 @@ export const getLensVisMock = async ({
   table?: Datatable;
   externalVisContext?: UnifiedHistogramVisContext;
   getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
+  onLensSuggestionsApiCall?: (preferredChartType: ChartType | undefined) => void;
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -61,24 +93,28 @@ export const getLensVisMock = async ({
     lensSuggestionsApi: allSuggestions
       ? (...params) => {
           const context = params[0];
+          const preferredChartType = params[3];
+          onLensSuggestionsApiCall?.(preferredChartType);
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }
           return !isTransformationalESQL && dataView.isTimeBased()
-            ? [histogramESQLSuggestionMock]
+            ? [
+                withContextQuery(
+                  histogramESQLSuggestionMock,
+                  'query' in context ? context.query : undefined
+                ),
+              ]
             : [];
         }
       : lensApi.suggestions,
   });
 
   let visContext: UnifiedHistogramVisContext | undefined;
-  lensService.visContext$.subscribe((nextAttributesContext) => {
-    visContext = nextAttributesContext;
-  });
-
   let currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
-  lensService.currentSuggestionContext$.subscribe((nextSuggestionContext) => {
-    currentSuggestionContext = nextSuggestionContext;
+  lensService.state$.subscribe((state) => {
+    visContext = state.visContext;
+    currentSuggestionContext = state.currentSuggestionContext;
   });
 
   lensService.update({

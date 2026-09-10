@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggParamsTopHit, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { AggParamsTopHit } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { SchemaConfig } from '../../..';
+import type { SchemaConfig } from '../../..';
 import { convertToLastValueColumn } from './last_value';
-import { FiltersColumn } from './types';
+import type { FiltersColumn } from './types';
 
 const mockGetFieldNameFromField = jest.fn();
 const mockGetFieldByName = jest.fn();
@@ -98,8 +99,8 @@ describe('convertToLastValueColumn', () => {
   test('should skip if top hit field is not specified', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
     expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(0);
   });
 
   test('should skip if top hit field is not present in index pattern', () => {
@@ -107,9 +108,9 @@ describe('convertToLastValueColumn', () => {
     dataView.getFieldByName = mockGetFieldByName;
 
     expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
-    expect(mockGetLabel).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
+    expect(mockGetLabel).toHaveBeenCalledTimes(0);
   });
 
   test('should return top hit column if top hit field is not present in index pattern', () => {
@@ -122,8 +123,8 @@ describe('convertToLastValueColumn', () => {
         sourceField: 'bytes',
       })
     );
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
-    expect(mockGetLabel).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
+    expect(mockGetLabel).toHaveBeenCalledTimes(1);
   });
 });

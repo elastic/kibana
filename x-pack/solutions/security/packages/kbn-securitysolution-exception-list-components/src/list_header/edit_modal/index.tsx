@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,9 +20,10 @@ import {
   EuiModalHeaderTitle,
   EuiTextArea,
   EuiProgress,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
-import { ListDetails } from '../../types';
+import type { ListDetails } from '../../types';
 import { useEditModal } from './use_edit_modal';
 
 interface EditModalProps {
@@ -36,13 +38,21 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
       listDetails,
       onSave,
     });
+
+  const editModalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal data-test-subj="EditModal" onClose={onCancel} initialFocus="[name=popswitch]">
+    <EuiModal
+      aria-labelledby={editModalTitleId}
+      data-test-subj="EditModal"
+      onClose={onCancel}
+      initialFocus="[name=popswitch]"
+    >
       {showProgress && (
         <EuiProgress data-test-subj="editModalProgess" size="xs" position="absolute" />
       )}
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="editModalTitle">
+        <EuiModalHeaderTitle id={editModalTitleId} data-test-subj="editModalTitle">
           {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

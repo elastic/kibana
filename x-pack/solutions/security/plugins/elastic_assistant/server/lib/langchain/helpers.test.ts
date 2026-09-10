@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import type { Message } from '@kbn/elastic-assistant-common';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Message, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import {
   getLangChainMessage,
@@ -19,7 +18,12 @@ import { langChainMessages } from '../../__mocks__/lang_chain_messages';
 
 describe('helpers', () => {
   describe('getLangChainMessage', () => {
-    const testCases: Array<[Pick<Message, 'content' | 'role'>, typeof BaseMessage]> = [
+    const testCases: Array<
+      [
+        Pick<Message, 'content' | 'role'>,
+        typeof SystemMessage | typeof HumanMessage | typeof AIMessage
+      ]
+    > = [
       [
         {
           role: 'system',

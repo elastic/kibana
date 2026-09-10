@@ -8,13 +8,15 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
+import type { WebElement, WebDriver } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
-// @ts-ignore not supported yet
+import type { ToolingLog } from '@kbn/tooling-log';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import type { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
+
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../remote/browsers';
 
@@ -90,6 +92,8 @@ export class WebElementWrapper {
     return elements;
   }
 
+  // Locator is re-found from the document root on retry. Omit it for child finds
+  // so retry cannot click a different element.
   private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null = null) {
     return WebElementWrapper.create(
       otherWebElement,
@@ -198,9 +202,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click(topOffset?: number) {
+  public async click(topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }) {
     await this.retryCall(async function click(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary(topOffset);
+      await wrapper.scrollIntoViewIfNecessary(topOffsetOrOptions);
       await wrapper._webElement.click();
     });
   }
@@ -483,10 +487,7 @@ export class WebElementWrapper {
    */
   public async findByCssSelector(selector: string) {
     return await this.retryCall(async function findByCssSelector(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(selector)),
-        wrapper.By.css(selector)
-      );
+      return wrapper._wrap(await wrapper._webElement.findElement(wrapper.By.css(selector)));
     });
   }
 
@@ -551,10 +552,7 @@ export class WebElementWrapper {
    */
   public async findByClassName(className: string) {
     return await this.retryCall(async function findByClassName(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.className(className)),
-        wrapper.By.className(className)
-      );
+      return wrapper._wrap(await wrapper._webElement.findElement(wrapper.By.className(className)));
     });
   }
 
@@ -590,10 +588,7 @@ export class WebElementWrapper {
   public async findByTagName<T extends string>(tagName: T): Promise<WebElementWrapper>;
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByTagName(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(tagName)),
-        wrapper.By.css(tagName)
-      );
+      return wrapper._wrap(await wrapper._webElement.findElement(wrapper.By.css(tagName)));
     });
   }
 
@@ -633,10 +628,7 @@ export class WebElementWrapper {
    */
   async findByXpath(selector: string) {
     return await this.retryCall(async function findByXpath(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.xpath(selector)),
-        wrapper.By.xpath(selector)
-      );
+      return wrapper._wrap(await wrapper._webElement.findElement(wrapper.By.xpath(selector)));
     });
   }
 
@@ -669,8 +661,7 @@ export class WebElementWrapper {
   public async findByPartialLinkText(linkText: string) {
     return await this.retryCall(async function findByPartialLinkText(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.partialLinkText(linkText)),
-        wrapper.By.partialLinkText(linkText)
+        await wrapper._webElement.findElement(wrapper.By.partialLinkText(linkText))
       );
     });
   }
@@ -779,6 +770,7 @@ export class WebElementWrapper {
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
+      APP_MAIN_SCROLL_CONTAINER_ID,
       topOffset || this.fixedHeaderHeight,
       bottomOffset
     );

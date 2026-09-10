@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import { State } from '../../../../types';
+import type { State } from '../../../../types';
 import { getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { useDownloadWorkpad } from '../../hooks';
 import { ShareMenu as ShareMenuComponent } from './share_menu.component';

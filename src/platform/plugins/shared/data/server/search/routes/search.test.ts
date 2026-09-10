@@ -9,10 +9,11 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { from } from 'rxjs';
-import { CoreSetup, type Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerSearchRoute } from './search';
-import { DataPluginStart } from '../../plugin';
+import type { DataPluginStart } from '../../plugin';
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
 import { KbnSearchError } from '../report_search_error';
@@ -91,9 +92,9 @@ describe('Search service', () => {
 
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search.search).toBeCalled();
+    expect(mockContext.search.search).toHaveBeenCalled();
     expect(mockContext.search.search.mock.calls[0][0]).toStrictEqual(mockBody);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
     });
@@ -119,7 +120,7 @@ describe('Search service', () => {
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
     // verify error
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(400);
     expect(error.body.message).toBe('search_phase_execution_exception');
@@ -148,7 +149,7 @@ describe('Search service', () => {
 
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(404);
     expect(error.body.message).toBe('index_not_found_exception');
@@ -175,7 +176,7 @@ describe('Search service', () => {
 
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(500);
     expect(error.body.message).toBe('This is odd');
@@ -200,7 +201,7 @@ describe('Search service', () => {
 
     await runMockDelete(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search.cancel).toBeCalled();
-    expect(mockContext.search.cancel).toBeCalledWith(id, { strategy });
+    expect(mockContext.search.cancel).toHaveBeenCalled();
+    expect(mockContext.search.cancel).toHaveBeenCalledWith(id, { strategy });
   });
 });

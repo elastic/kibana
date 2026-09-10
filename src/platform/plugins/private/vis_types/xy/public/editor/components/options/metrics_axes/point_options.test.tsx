@@ -11,8 +11,9 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { SeriesParam } from '../../../../types';
-import { PointOptions, PointOptionsParams } from './point_options';
+import type { SeriesParam } from '../../../../types';
+import type { PointOptionsParams } from './point_options';
+import { PointOptions } from './point_options';
 import { seriesParam } from './mocks';
 
 describe('PointOptions component', () => {

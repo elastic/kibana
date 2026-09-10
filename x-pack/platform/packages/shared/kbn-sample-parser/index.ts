@@ -6,5 +6,7 @@
  */
 
 export { cli } from './cli';
-export { SampleParserClient } from './client';
-export { type LoghubQuery, createQueryMatcher, tokenize } from './src/validate_queries';
+export { SampleParserClient } from './src/client';
+export { type LoghubQuery, createQueryMatcher, tokenize } from './src/loghub/validate_queries';
+export { type StreamLogGenerator } from './src/types';
+export { type LoghubTimestampLayout } from './src/loghub/create_loghub_generator';

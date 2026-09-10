@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
@@ -34,6 +33,8 @@ export default function alertingApiIntegrationTests({
     loadTestFile(require.resolve('./rule_types_internal'));
     loadTestFile(require.resolve('./retain_api_key'));
     loadTestFile(require.resolve('./bulk_untrack'));
+    loadTestFile(require.resolve('./bulk_untrack_space_isolation'));
     loadTestFile(require.resolve('./bulk_untrack_by_query'));
+    loadTestFile(require.resolve('./bulk_edit_params'));
   });
 }

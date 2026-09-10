@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const security = getService('security');
   const config = getService('config');
@@ -29,7 +29,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         esNode = isRunningInCcsMode
           ? getService('remoteEsArchiver' as 'esArchiver')
           : getService('esArchiver');
-        await esNode.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esNode.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       });
 
       after(async () => {
@@ -39,6 +39,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       if (isRunningInCcsMode) {
         loadTestFile(require.resolve('./smoke_test'));
       } else {
+        // Note: most of the Canvas FTR suite was migrated to Scout
+        // (x-pack/platform/plugins/private/canvas/test/scout). The specs kept here still run in
+        // the Firefox cross-browser config (tagged `includeFirefox`); `smoke_test` also runs in
+        // the CCS config above.
         loadTestFile(require.resolve('./smoke_test'));
         loadTestFile(require.resolve('./expression'));
         loadTestFile(require.resolve('./filters'));
@@ -46,17 +50,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         loadTestFile(require.resolve('./datasource'));
         loadTestFile(require.resolve('./feature_controls/canvas_security'));
         loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
-        loadTestFile(require.resolve('./embeddables/lens'));
-        loadTestFile(require.resolve('./embeddables/maps'));
-        loadTestFile(require.resolve('./embeddables/saved_search'));
-        loadTestFile(require.resolve('./embeddables/visualization'));
-        loadTestFile(require.resolve('./reports'));
         loadTestFile(require.resolve('./saved_object_resolve'));
-      }
-    });
-    describe('Canvas management', () => {
-      if (!isRunningInCcsMode) {
-        loadTestFile(require.resolve('./migrations_smoke_test'));
       }
     });
   });

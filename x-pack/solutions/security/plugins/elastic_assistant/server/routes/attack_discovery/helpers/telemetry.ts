@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core/server';
-import { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import type { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 
 import dateMath from '@kbn/datemath';
+import type { AttackDiscoveryScheduleInfo } from '../../../lib/telemetry/event_based_telemetry';
 import {
   ATTACK_DISCOVERY_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
-  AttackDiscoveryScheduleInfo,
 } from '../../../lib/telemetry/event_based_telemetry';
 
 export const reportAttackDiscoveryGenerationSuccess = ({
   alertsContextCount,
   apiConfig,
   attackDiscoveries,
+  duplicatesDroppedCount,
   durationMs,
   end,
+  execution_mode,
   hasFilter,
   scheduleInfo,
   size,
   start,
   telemetry,
+  trigger,
 }: {
   alertsContextCount: number;
   apiConfig: ApiConfig;
   attackDiscoveries: AttackDiscovery[] | null;
+  duplicatesDroppedCount?: number;
   durationMs: number;
   end?: string;
+  execution_mode?: string;
   hasFilter: boolean;
   scheduleInfo?: AttackDiscoveryScheduleInfo;
   size: number;
   start?: string;
   telemetry: AnalyticsServiceSetup;
+  trigger?: string;
 }) => {
   const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ start, end });
 
@@ -52,32 +58,41 @@ export const reportAttackDiscoveryGenerationSuccess = ({
     configuredAlertsCount: size,
     dateRangeDuration,
     discoveriesGenerated: attackDiscoveries?.length ?? 0,
+    duplicatesDroppedCount,
     durationMs,
+    execution_mode,
     hasFilter,
     isDefaultDateRange,
     model: apiConfig.model,
     provider: apiConfig.provider,
     scheduleInfo,
+    trigger,
   });
 };
 
 export const reportAttackDiscoveryGenerationFailure = ({
   apiConfig,
   errorMessage,
+  execution_mode,
   scheduleInfo,
   telemetry,
+  trigger,
 }: {
   apiConfig: ApiConfig;
   errorMessage: string;
+  execution_mode?: string;
   scheduleInfo?: AttackDiscoveryScheduleInfo;
   telemetry: AnalyticsServiceSetup;
+  trigger?: string;
 }) => {
   telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
     actionTypeId: apiConfig.actionTypeId,
     errorMessage,
+    execution_mode,
     model: apiConfig.model,
     provider: apiConfig.provider,
     scheduleInfo,
+    trigger,
   });
 };
 

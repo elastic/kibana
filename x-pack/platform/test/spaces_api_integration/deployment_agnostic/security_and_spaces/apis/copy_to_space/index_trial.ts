@@ -9,10 +9,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
   describe('spaces api with security', function () {
-    // Should be enabled when custom roles can be provisioned for MKI
-    // See: https://github.com/elastic/kibana/issues/207361
-    this.tags('skipMKI');
-
-    loadTestFile(require.resolve('./copy_to_space'));
+    loadTestFile(require.resolve('./copy_to_space.common'));
   });
 }

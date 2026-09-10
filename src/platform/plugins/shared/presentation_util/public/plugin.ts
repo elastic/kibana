@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
   PresentationUtilPluginSetup,
   PresentationUtilPluginSetupDeps,
   PresentationUtilPluginStart,
   PresentationUtilPluginStartDeps,
 } from './types';
 
-import { registerExpressionsLanguage } from '.';
 import { setKibanaServices } from './services/kibana_services';
-import { getPresentationLabsService } from './services/presentation_labs_service';
 
 export class PresentationUtilPlugin
   implements
@@ -41,10 +39,7 @@ export class PresentationUtilPlugin
   ): PresentationUtilPluginStart {
     setKibanaServices(coreStart, startPlugins);
 
-    return {
-      labsService: getPresentationLabsService(),
-      registerExpressionsLanguage,
-    };
+    return {};
   }
 
   public stop() {}

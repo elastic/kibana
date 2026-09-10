@@ -19,6 +19,7 @@ import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { ContentTabIds } from '../types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
 import { ALERT_STATUS_ALL } from '../../shared/alerts/constants';
+import { DataSchemaFormatRT } from '../../../../common/http_api/shared';
 
 export const DEFAULT_STATE: AssetDetailsUrlState = {
   tabId: ContentTabIds.OVERVIEW,
@@ -60,6 +61,7 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),
+  rt.literal(ContentTabIds.DASHBOARDS),
 ]);
 
 const AlertStatusRT = rt.union([
@@ -99,6 +101,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   alertStatus: AlertStatusRT,
   dashboardId: rt.string,
   alertMetric: rt.string,
+  preferredSchema: DataSchemaFormatRT,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);

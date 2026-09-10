@@ -10,7 +10,8 @@ import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { render } from '../rtl_helpers';
 import * as hooks from '../hooks/use_series_storage';
 import { ViewActions } from './view_actions';
-import { AllSeries, reportTypeKey } from '../hooks/use_series_storage';
+import type { AllSeries } from '../hooks/use_series_storage';
+import { reportTypeKey } from '../hooks/use_series_storage';
 import { ReportTypes } from '../../../..';
 
 describe('ViewActions', () => {
@@ -46,7 +47,7 @@ describe('ViewActions', () => {
     fireEvent.click(applyBtn);
 
     await waitFor(() => {
-      expect(applyChanges).toBeCalledTimes(1);
+      expect(applyChanges).toHaveBeenCalledTimes(1);
     });
   };
 
@@ -70,7 +71,7 @@ describe('ViewActions', () => {
     fireEvent.click(applyBtn);
 
     await waitFor(() => {
-      expect(applyChanges).toBeCalledTimes(0);
+      expect(applyChanges).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -145,7 +146,7 @@ describe('ViewActions', () => {
     fireEvent.click(applyBtn);
 
     await waitFor(() => {
-      expect(applyChanges).toBeCalledTimes(0);
+      expect(applyChanges).toHaveBeenCalledTimes(0);
     });
   });
 });

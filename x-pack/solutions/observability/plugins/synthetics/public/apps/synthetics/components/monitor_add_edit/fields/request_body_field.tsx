@@ -10,7 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent } from '@elastic/eui';
 import { CodeEditorMode, MonacoEditorLangId } from '../types';
-import { KeyValuePairsField, Pair } from './key_value_field';
+import type { Pair } from './key_value_field';
+import { KeyValuePairsField } from './key_value_field';
 import { CodeEditor } from './code_editor';
 
 export interface RequestBodyFieldProps {

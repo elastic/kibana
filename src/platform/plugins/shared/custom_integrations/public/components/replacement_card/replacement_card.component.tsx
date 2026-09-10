@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CustomIntegration } from '../../../common';
+import type { CustomIntegration } from '../../../common';
 import { usePlatformService } from '../../services';
 
 export interface Props {
@@ -83,9 +83,6 @@ export const ReplacementCard = ({ replacements }: Props) => {
   return (
     <div
       css={css`
-        & .euiAccordion__button {
-          color: ${euiTheme.colors.link};
-        }
         & .euiAccordion-isOpen .euiAccordion__childWrapper {
           margin-top: ${euiTheme.size.m};
         }

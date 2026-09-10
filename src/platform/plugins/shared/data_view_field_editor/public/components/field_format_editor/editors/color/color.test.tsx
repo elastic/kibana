@@ -7,95 +7,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
-
 import { ColorFormatEditor } from './color';
-import { FieldFormat, DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
+import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 const fieldType = 'string';
+
 const format = {
-  getConverterFor: jest.fn(),
+  convertToReact: jest.fn(),
 };
+
 const formatParams = {
   colors: [{ ...DEFAULT_CONVERTER_COLOR }],
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderEditor = (params = formatParams, props: { fieldType?: string } = {}) =>
+  renderWithI18n(
+    <ColorFormatEditor
+      fieldType={props.fieldType ?? fieldType}
+      format={format as unknown as FieldFormat}
+      formatParams={params}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
+
 describe('ColorFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(ColorFormatEditor.formatId).toEqual('color');
+    expect(ColorFormatEditor.formatId).toEqual(formatId);
   });
 
   it('renders the color swatch icon inside the button', () => {
-    const component = mountWithI18nProvider(
-      <ColorFormatEditor
-        fieldType={'color'}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+    renderEditor(formatParams, { fieldType: 'color' });
 
-    const button = component.find('[data-test-subj="buttonColorSwatchIcon"]').at(0);
-    expect(button.exists()).toBe(true);
+    expect(screen.getAllByTestId('buttonColorSwatchIcon')).toHaveLength(2);
   });
 
-  it('should render string type normally (regex field)', async () => {
-    const component = shallowWithI18nProvider(
-      <ColorFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render string type normally (regex field)', () => {
+    renderEditor();
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Color formatting')).toBeVisible();
+    expect(screen.getByTestId('colorEditorKeyPattern 0')).toBeVisible();
+    expect(screen.getByTestId('colorEditorAddColor')).toHaveTextContent('Add color');
   });
 
-  it('should render boolean type normally', async () => {
-    const component = shallowWithI18nProvider(
-      <ColorFormatEditor
-        fieldType={'boolean'}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render boolean type normally', () => {
+    renderEditor(formatParams, { fieldType: 'boolean' });
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByTestId('colorEditorKeyBoolean 0')).toBeVisible();
   });
 
-  it('should render other type normally (range field)', async () => {
-    const component = shallowWithI18nProvider(
-      <ColorFormatEditor
-        fieldType={'number'}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render other type normally (range field)', () => {
+    renderEditor(formatParams, { fieldType: 'number' });
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByTestId('colorEditorKeyRange 0')).toBeVisible();
   });
 
-  it('should render multiple colors', async () => {
-    const component = shallowWithI18nProvider(
-      <ColorFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render multiple colors', () => {
+    renderEditor({ colors: [...formatParams.colors, ...formatParams.colors] });
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getAllByTestId(/^colorEditorKeyPattern/)).toHaveLength(2);
+    expect(screen.getAllByTestId('colorEditorRemoveColor')).toHaveLength(2);
+    expect(screen.getAllByTestId('buttonColorSwatchIcon')).toHaveLength(4);
   });
 });

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors/constants/doc_links';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
+import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { type ClientConfigType } from '../common/types/config';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
-import {
+import type {
   SearchConnectorsPluginSetup,
   SearchConnectorsPluginSetupDependencies,
   SearchConnectorsPluginStart,
@@ -31,6 +31,7 @@ export class SearchConnectorsPlugin
 {
   private readonly kibanaVersion: string;
   private readonly config: ClientConfigType;
+  private contentConnectorsApp?: ManagementApp;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -45,34 +46,29 @@ export class SearchConnectorsPlugin
     const connectorTypes = getConnectorTypes(core.http.staticAssets);
     const kibanaVersion = this.kibanaVersion;
 
-    core.getStartServices().then(([coreStart, pluginsStartDeps, pluginStart]) => {
-      const hasAnyContentConnectorsSolutions = pluginsStartDeps.home.featureCatalogue
-        .getSolutions()
-        .some(({ id }: FeatureCatalogueSolution) =>
-          ['securitySolution', 'observability'].includes(id)
+    // Register the management app synchronously in setup so the management plugin's
+    // start-phase capability sweep can disable it for users without the
+    // `management.data.content_connectors` capability. Solution/config gating is
+    // applied later in start() via this.contentConnectorsApp.disable().
+    this.contentConnectorsApp = management.sections.section.data.registerApp({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      order: 8,
+      keywords: ['content connectors', 'search'],
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStartDeps, pluginStart] = await core.getStartServices();
+        const { renderApp } = await import('./app');
+
+        const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
+        return renderApp(
+          coreStart,
+          pluginsStartDeps,
+          pluginStart,
+          params,
+          connectorsDefinitions,
+          kibanaVersion
         );
-
-      if (this.config.ui.enabled && hasAnyContentConnectorsSolutions) {
-        management.sections.section.data.registerApp({
-          id: PLUGIN_ID,
-          title: PLUGIN_NAME,
-          order: 8,
-          keywords: ['content connectors', 'search'],
-          async mount(params: ManagementAppMountParams) {
-            const { renderApp } = await import('./app');
-
-            const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
-            return renderApp(
-              coreStart,
-              pluginsStartDeps,
-              pluginStart,
-              params,
-              connectorsDefinitions,
-              kibanaVersion
-            );
-          },
-        });
-      }
+      },
     });
 
     return {
@@ -87,6 +83,16 @@ export class SearchConnectorsPlugin
     const { http } = core;
     docLinks.setDocLinks(core.docLinks.links);
     const connectorTypes = getConnectorFullTypes(http.staticAssets);
+
+    const hasAnyContentConnectorsSolutions = services.home.featureCatalogue
+      .getSolutions()
+      .some(({ id }: FeatureCatalogueSolution) =>
+        ['securitySolution', 'observability'].includes(id)
+      );
+
+    if (!this.config.ui.enabled || !hasAnyContentConnectorsSolutions) {
+      this.contentConnectorsApp?.disable();
+    }
 
     return {
       getConnectorTypes: () => connectorTypes,

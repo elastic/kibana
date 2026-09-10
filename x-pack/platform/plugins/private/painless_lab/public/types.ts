@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import {
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type {
   AnalyticsServiceStart,
   I18nStart,
   ThemeServiceStart,

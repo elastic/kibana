@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
   displayName: 'Text',
   type: 'text',
   help: 'Add text using Markdown',
-  icon: 'visText',
+  icon: 'text',
   expression: `kibana
 | selectFilter
 | demodata

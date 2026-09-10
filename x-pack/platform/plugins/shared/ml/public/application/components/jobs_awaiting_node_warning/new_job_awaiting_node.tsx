@@ -8,9 +8,10 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobType } from '../../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -26,36 +27,33 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
 
   return showNodeInfo ? (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.title"
             defaultMessage="Awaiting machine learning node"
           />
         }
-        color="primary"
-        iconType="info"
-      >
-        <div>
+        text={
           <FormattedMessage
             id="xpack.ml.newJobAwaitingNodeWarning.noMLNodesAvailableDescription"
             defaultMessage="There are currently no nodes that can run the job, therefore it will remain in OPENING state until autoscaling increases ML capacity. This may take several minutes."
           />
-        </div>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="m" />
     </>
   ) : (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.serverless.title"
             defaultMessage="Machine learning is starting..."
           />
         }
-        color="primary"
-        iconType="info"
       />
       <EuiSpacer size="m" />
     </>

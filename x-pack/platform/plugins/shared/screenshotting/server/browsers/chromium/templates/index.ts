@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs/promises';
 import path from 'path';
-import Handlebars, { TemplateDelegate } from '@kbn/handlebars';
+import type { TemplateDelegate } from '@kbn/handlebars';
+import Handlebars from '@kbn/handlebars';
 import { assetPath } from '../../../constants';
 
 // see: https://handlebarsjs.com/guide/builtin-helpers.html

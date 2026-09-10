@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldFormat } from '../../types';
+import type { FieldFormat } from '../../types';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,

@@ -9,7 +9,7 @@ import { omit } from 'lodash/fp';
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { mockStats } from '../../../../mock/stats/mock_stats';
 import { getIndexNames, getPatternDocsCount, getPatternSizeInBytes } from './stats';
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { mockStatsPacketbeatIndex } from '../../../../mock/stats/mock_stats_packetbeat_index';
 import { mockStatsAuditbeatIndex } from '../../../../mock/stats/mock_stats_auditbeat_index';
 

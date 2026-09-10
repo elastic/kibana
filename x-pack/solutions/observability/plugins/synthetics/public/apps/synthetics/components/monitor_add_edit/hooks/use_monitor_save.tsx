@@ -9,14 +9,15 @@ import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/publi
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
-import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
+import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { cleanMonitorListState, IHttpSerializedFetchError } from '../../../state';
+import type { IHttpSerializedFetchError } from '../../../state';
+import { cleanMonitorListState } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {

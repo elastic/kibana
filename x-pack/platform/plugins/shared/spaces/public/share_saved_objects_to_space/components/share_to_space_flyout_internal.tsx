@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
@@ -365,6 +366,8 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     }
   }
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   const getFlyoutBody = () => {
     // Step 1: loading assets for main form
     if (isLoading) {
@@ -469,17 +472,22 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     (enableSpaceAgnosticBehavior && !shareOptions.selectedSpaceIds.length); // the object must exist in at least one space, or all spaces
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
+    <EuiFlyout
+      onClose={onClose}
+      maxWidth={500}
+      data-test-subj="share-to-space-flyout"
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           {flyoutIcon && (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="l" type={flyoutIcon} />
+              <EuiIcon size="l" type={flyoutIcon} aria-hidden={true} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2>{flyoutTitle}</h2>
+              <h2 id={flyoutTitleId}>{flyoutTitle}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -498,7 +506,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             {savedObjectTarget.icon && (
               <EuiFlexItem grow={false}>
-                <EuiIcon type={savedObjectTarget.icon} />
+                <EuiIcon type={savedObjectTarget.icon} aria-hidden={true} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>

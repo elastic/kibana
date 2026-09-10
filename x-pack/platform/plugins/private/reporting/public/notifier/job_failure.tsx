@@ -8,10 +8,10 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { CoreStart, DocLinksStart, ToastInput } from '@kbn/core/public';
+import type { CoreStart, DocLinksStart, ToastInput } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import * as errors from '@kbn/reporting-common/errors';
-import { ManagementLinkFn } from '@kbn/reporting-common/types';
+import type { ManagementLinkFn } from '@kbn/reporting-common/types';
 import { sharedI18nTexts } from '../shared_i18n_texts';
 import type { JobSummary } from '../types';
 

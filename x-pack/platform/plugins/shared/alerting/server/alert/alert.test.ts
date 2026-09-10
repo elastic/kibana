@@ -10,6 +10,7 @@ import { Alert } from './alert';
 import type { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
 import type { CombinedSummarizedAlerts } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -23,6 +24,27 @@ describe('getId()', () => {
   test('correctly sets id in constructor', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     expect(alert.getId()).toEqual('1');
+  });
+});
+
+describe('matchesUuid()', () => {
+  test('returns true if alert UUID matches given uuid', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const uuid = alert.getUuid();
+
+    expect(alert.matchesUuid(uuid)).toBe(true);
+  });
+
+  test('returns true if alert ID matches given uuid', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('123');
+
+    expect(alert.matchesUuid('123')).toBe(true);
+  });
+
+  test('returns false if neither alert ID or UUID matches given uuid', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('123');
+
+    expect(alert.matchesUuid('xyz')).toBe(false);
   });
 });
 
@@ -364,6 +386,7 @@ describe('updateLastScheduledActions()', () => {
         },
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
       },
     });
   });
@@ -378,6 +401,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -395,6 +419,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -410,6 +435,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -417,6 +443,77 @@ describe('updateLastScheduledActions()', () => {
           actions: {
             '111-111': { date: new Date().toISOString() },
           },
+        },
+      },
+    });
+  });
+
+  test('removes the outdated actions', () => {
+    const actionsOnTheRule = ['222-222', '333-333'];
+
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+    alert.clearThrottlingLastScheduledActions(actionsOnTheRule);
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
+  test('removes all the actions when there is no action on the rule', () => {
+    const actionsOnTheRule: string[] = [];
+
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+    alert.clearThrottlingLastScheduledActions(actionsOnTheRule);
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {},
         },
       },
     });
@@ -508,6 +605,7 @@ describe('toJSON', () => {
           },
           flappingHistory: [false, true],
           maintenanceWindowIds: [],
+          maintenanceWindowNames: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -575,6 +673,7 @@ describe('toRaw', () => {
         flappingHistory: [false, true, true],
         flapping: false,
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         activeCount: 1,
       },
@@ -599,6 +698,7 @@ describe('setFlappingHistory', () => {
             false,
           ],
           "maintenanceWindowIds": Array [],
+          "maintenanceWindowNames": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -632,6 +732,7 @@ describe('setFlapping', () => {
           "flapping": false,
           "flappingHistory": Array [],
           "maintenanceWindowIds": Array [],
+          "maintenanceWindowNames": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -688,7 +789,6 @@ describe('resetPendingRecoveredCount', () => {
     expect(alert.getPendingRecoveredCount()).toEqual(0);
   });
 });
-
 describe('isFilteredOut', () => {
   const summarizedAlerts: CombinedSummarizedAlerts = {
     all: {
@@ -787,5 +887,73 @@ describe('resetActiveCount', () => {
     });
     alert.resetActiveCount();
     expect(alert.getActiveCount()).toEqual(0);
+  });
+});
+
+describe('isDelayed', () => {
+  test('returns false when status is not delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('active');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns false when status is not set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns true when status is delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('delayed');
+    expect(alert.isDelayed()).toEqual(true);
+  });
+});
+
+describe('setSnoozeConfig and getSnoozeConfig', () => {
+  test('stores and retrieves a snooze config with all fields', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const config: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+      expiresAt: '2024-12-31T00:00:00.000Z',
+    };
+    alert.setSnoozeConfig(config);
+    expect(alert.getSnoozeConfig()).toEqual(config);
+  });
+
+  test('stores and retrieves a snooze config without expiresAt (indefinite)', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const config: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    alert.setSnoozeConfig(config);
+    expect(alert.getSnoozeConfig()).toEqual(config);
+    expect(alert.getSnoozeConfig()?.expiresAt).toBeUndefined();
+  });
+
+  test('returns undefined when no snooze config has been set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getSnoozeConfig()).toBeUndefined();
+  });
+
+  test('overwrites a previously set snooze config', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const first: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user-a',
+    };
+    const second: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2025-06-01T00:00:00.000Z',
+      snoozedBy: 'user-b',
+      expiresAt: '2025-07-01T00:00:00.000Z',
+    };
+    alert.setSnoozeConfig(first);
+    alert.setSnoozeConfig(second);
+    expect(alert.getSnoozeConfig()).toEqual(second);
   });
 });

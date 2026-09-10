@@ -16,10 +16,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { ApplicationStart } from '@kbn/core/public';
+import { navigateToModelManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -160,6 +162,11 @@ export function ChatFlyout({
     setConversationId(id || undefined);
   };
 
+  const navigateToModelManagementAppHandler = (application: ApplicationStart) => {
+    onClose();
+    navigateToModelManagementApp(application);
+  };
+
   return isOpen ? (
     <ObservabilityAIAssistantMultipaneFlyoutContext.Provider
       value={{
@@ -179,6 +186,7 @@ export function ChatFlyout({
             marginTop: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
           },
         }}
+        focusTrapProps={{ returnFocus: false }}
         paddingSize="m"
         pushAnimation
         minWidth={SIDEBAR_WIDTH}
@@ -200,6 +208,10 @@ export function ChatFlyout({
           {!hideConversationList ? (
             <EuiFlexItem className={breakpoint === 'xs' ? hideClassName : sidebarClass}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.aiAssistant.chatFlyout.conversationListPopoverAriaLabel',
+                  { defaultMessage: 'Conversation list' }
+                )}
                 anchorPosition="downLeft"
                 className={expandButtonContainerClassName}
                 button={
@@ -247,6 +259,10 @@ export function ChatFlyout({
                 />
               ) : (
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.aiAssistant.chatFlyout.newConversationPopoverAriaLabel',
+                    { defaultMessage: 'New conversation' }
+                  )}
                   anchorPosition="downLeft"
                   button={
                     <EuiToolTip
@@ -306,6 +322,7 @@ export function ChatFlyout({
               refreshConversations={refreshConversations}
               updateDisplayedConversation={updateDisplayedConversation}
               onConversationDuplicate={onConversationDuplicate}
+              navigateToModelManagementApp={navigateToModelManagementAppHandler}
             />
           </EuiFlexItem>
 

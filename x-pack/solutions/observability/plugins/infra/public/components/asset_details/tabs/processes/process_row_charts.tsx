@@ -25,7 +25,10 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
@@ -38,6 +41,7 @@ import { MetricNotAvailableExplanationTooltip } from '../../components/metric_no
 import { useProcessListContext } from '../../hooks/use_process_list';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 interface Props {
   command: string;
@@ -72,6 +76,7 @@ const EmptyChartPlaceholder = ({ metricName }: { metricName: string }) => (
 export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) => {
   const { request$ } = useRequestObservable();
   const { hostTerm, indexPattern, to } = useProcessListContext();
+  const { schema } = useAssetDetailsRenderPropsContext();
   const { isActiveTab } = useTabSwitcherContext();
 
   const { data, status, error } = useFetcher(
@@ -83,12 +88,13 @@ export const ProcessRowCharts = ({ command, hasCpuData, hasMemoryData }: Props) 
           indexPattern,
           to,
           command,
+          schema,
         }),
       });
 
       return decodeOrThrow(ProcessListAPIChartResponseRT)(response);
     },
-    [command, hostTerm, indexPattern, to],
+    [command, hostTerm, indexPattern, to, schema],
     {
       requestObservable$: request$,
       autoFetch: isActiveTab('processes'),
@@ -158,12 +164,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
   const yAxisFormatter = createFormatter('percent');
 
   const dataDomain = calculateDomain(timeseries, [chartMetric], false);
-  const domain = dataDomain
-    ? {
-        max: dataDomain.max * 1.1, // add 10% headroom.
-        min: dataDomain.min,
-      }
-    : { max: 0, min: 0 };
+  const domain = dataDomain ? applyHeadroomToDomain(dataDomain) : { max: 0, min: 0 };
 
   return (
     <Chart

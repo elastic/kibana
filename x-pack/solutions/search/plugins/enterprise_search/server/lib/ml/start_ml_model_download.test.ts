@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
-import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
+import type { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import * as mockGetStatus from './get_ml_model_deployment_status';
 import { startMlModelDownload } from './start_ml_model_download';
@@ -27,7 +27,7 @@ describe('startMlModelDownload', () => {
   });
 
   it('should error when there is no trained model provider', async () => {
-    await expect(() => startMlModelDownload(knownModelName, undefined)).rejects.toThrowError(
+    await expect(() => startMlModelDownload(knownModelName, undefined)).rejects.toThrow(
       'Machine Learning is not enabled'
     );
   });
@@ -96,6 +96,6 @@ describe('startMlModelDownload', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Downloading);
-    expect(mockTrainedModelsProvider.putTrainedModel).toBeCalledTimes(1);
+    expect(mockTrainedModelsProvider.putTrainedModel).toHaveBeenCalledTimes(1);
   });
 });

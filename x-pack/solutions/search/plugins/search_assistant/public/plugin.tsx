@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { type CoreSetup, type Plugin } from '@kbn/core/public';
 import { createAppService } from '@kbn/ai-assistant';
 import ReactDOM from 'react-dom';
 import React from 'react';
@@ -60,22 +61,24 @@ export class SearchAssistantPlugin
       return {};
     }
 
-    coreStart.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <NavControlInitiator
-            appService={appService}
-            coreStart={coreStart}
-            pluginsStart={pluginsStart}
-          />,
-          element,
-          () => {}
-        );
+    const mountSearchAssistant = (element: HTMLElement) => {
+      ReactDOM.render(
+        <NavControlInitiator
+          appService={appService}
+          coreStart={coreStart}
+          pluginsStart={pluginsStart}
+        />,
+        element,
+        () => {}
+      );
 
-        return () => {};
-      },
-      // right before the user profile
-      order: 1001,
+      return () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
+    };
+
+    coreStart.chrome.next.aiButton.register({
+      content: mountSearchAssistant,
     });
 
     return {};

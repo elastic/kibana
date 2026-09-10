@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { BulkDeleteParams, BulkDeleteResult } from '@kbn/slo-schema';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { BulkDeleteParams, BulkDeleteResult } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { DeleteSLO } from '../../delete_slo';
+import type { DeleteSLO } from '../../delete_slo';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
   rulesClient: RulesClientApi;
   deleteSLO: DeleteSLO;
   logger: Logger;
-  abortController: AbortController;
+  signal: AbortSignal;
 }
 
 export async function runBulkDelete(
   params: BulkDeleteParams,
   dependencies: Dependencies
 ): Promise<BulkDeleteResult[]> {
-  const { scopedClusterClient, rulesClient, deleteSLO, logger, abortController } = dependencies;
+  const { scopedClusterClient, rulesClient, deleteSLO, logger, signal } = dependencies;
 
   logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);
 
@@ -74,7 +74,7 @@ export async function runBulkDelete(
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       ),
       scopedClusterClient.asCurrentUser.deleteByQuery(
         {
@@ -94,7 +94,7 @@ export async function runBulkDelete(
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       ),
     ]);
   } catch (err) {

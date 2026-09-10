@@ -9,9 +9,8 @@
 
 import moment from 'moment';
 import dateMath from '@kbn/datemath';
-import { loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { loader, logger, Warn, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
-import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { i18n } from '@kbn/i18n';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
@@ -20,6 +19,7 @@ import { TooltipHandler } from './vega_tooltip';
 import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { normalizeDate, normalizeString, normalizeObject } from './utils';
+import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -87,7 +87,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
-    this._renderMode = opts.renderMode;
+    this._showWarnings = opts.showWarnings;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -236,29 +236,42 @@ export class VegaBaseView {
 
     const vegaSpec = this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec;
     const usermetaLoaderOptions = vegaSpec.usermeta?.embedOptions?.loader;
-    vegaLoader.options = usermetaLoaderOptions ?? {};
+    const ALLOWED_LOADER_OPTIONS = ['target', 'rel'];
+    const sanitizedLoaderOptions = {};
+    for (const key of ALLOWED_LOADER_OPTIONS) {
+      if (usermetaLoaderOptions?.[key] != null) {
+        sanitizedLoaderOptions[key] = String(usermetaLoaderOptions[key]);
+      }
+    }
+    vegaLoader.options = sanitizedLoaderOptions;
 
     config.loader = vegaLoader;
 
     const vegaLogger = logger(Warn);
 
-    vegaLogger.warn = this.onWarn.bind(this);
-    vegaLogger.error = this.onError.bind(this);
+    vegaLogger.warn = (...args) => {
+      this.onWarn(...args);
+      return vegaLogger;
+    };
+    vegaLogger.error = (...args) => {
+      this.onError(...args);
+      return vegaLogger;
+    };
 
     config.logger = vegaLogger;
 
     return config;
   }
 
-  onError() {
-    const error = Utils.formatErrorToStr(...arguments);
+  onError(...args) {
+    const error = Utils.formatErrorToStr(...args);
     this._addMessage('err', error);
     this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
   }
 
-  onWarn() {
-    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
-      this._addMessage('warn', Utils.formatWarningToStr(...arguments));
+  onWarn(...args) {
+    if (this._showWarnings && (!this._parser || !this._parser.hideWarnings)) {
+      this._addMessage('warn', Utils.formatWarningToStr(...args));
     }
   }
 
@@ -376,7 +389,7 @@ export class VegaBaseView {
     const indexId = await this.findIndex(normalizedIndex);
     const filter = buildQueryFilter(normalizedQuery, indexId, normalizedAlias);
 
-    this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
+    this._fireEvent({ name: VEGA_EVENT_APPLY_FILTER, data: { filters: [filter] } });
   }
 
   /**
@@ -416,7 +429,7 @@ export class VegaBaseView {
     const { from, to, mode } = VegaBaseView._parseTimeRange(normalizedStart, normalizedEnd);
 
     this._fireEvent({
-      name: 'applyFilter',
+      name: VEGA_EVENT_APPLY_FILTER,
       data: {
         timeFieldName: '*',
         filters: [
@@ -499,33 +512,6 @@ export class VegaBaseView {
       view,
       spec: vlspec || spec,
     });
-
-    if (window) {
-      if (window.VEGA_DEBUG === undefined && console) {
-        console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
-        console.log(
-          'You can access the Vega view with VEGA_DEBUG. ' +
-            'Learn more at https://vega.github.io/vega/docs/api/debugging/.'
-        );
-      }
-      const debugObj = {};
-      window.VEGA_DEBUG = debugObj;
-      window.VEGA_DEBUG.VEGA_VERSION = vegaVersion;
-      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLiteVersion;
-      window.VEGA_DEBUG.view = view;
-      window.VEGA_DEBUG.vega_spec = spec;
-      window.VEGA_DEBUG.vegalite_spec = vlspec;
-
-      // On dispose, clean up, but don't use undefined to prevent repeated debug statements
-      this._addDestroyHandler(() => {
-        if (debugObj === window.VEGA_DEBUG) {
-          window.VEGA_DEBUG.view = null;
-          window.VEGA_DEBUG.vega_spec = null;
-          window.VEGA_DEBUG.vegalite_spec = null;
-          window.VEGA_DEBUG = null;
-        }
-      });
-    }
   }
 
   destroy() {

@@ -12,7 +12,7 @@
  * License: https://github.com/microsoft/monaco-languages/blob/master/LICENSE.md
  */
 
-import { monaco } from '../../monaco_imports';
+import type { monaco } from '../../monaco_imports';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\@\$\^\&\*\(\)\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\s]+)/g,

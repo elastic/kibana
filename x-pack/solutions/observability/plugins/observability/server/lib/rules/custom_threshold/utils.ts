@@ -6,17 +6,16 @@
  */
 
 import { isError } from 'lodash';
-import { schema } from '@kbn/config-schema';
-import { Logger, LogMeta } from '@kbn/logging';
+import type { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import type { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { flattenObject, unflattenObject } from '@kbn/object-utils';
-import { ObservabilityConfig } from '../../..';
-import { AlertExecutionDetails } from './types';
+import type { ObservabilityConfig } from '../../..';
+import type { AlertExecutionDetails } from './types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
@@ -35,12 +34,6 @@ const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.IP,
   ES_FIELD_TYPES.BOOLEAN,
 ];
-
-export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: (value) =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
 
 export const createScopedLogger = (
   logger: Logger,

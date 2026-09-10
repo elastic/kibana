@@ -6,11 +6,8 @@
  */
 
 import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
-import {
-  ChatCompleteResponse,
-  ChatCompletionEvent,
-  ChatCompletionEventType,
-} from '@kbn/inference-common';
+import type { ChatCompleteResponse, ChatCompletionEvent } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';
 import { createToolValidationError } from '../chat_complete/errors';
 
@@ -195,7 +192,7 @@ describe('createOutputApi', () => {
             onValidationError: 1,
           },
         })
-      ).toThrowError('Retry options are not supported in streaming mode');
+      ).toThrow('Retry options are not supported in streaming mode');
     });
   });
 

@@ -32,6 +32,7 @@ export type {
   RouteSecurityGetter,
   InternalRouteSecurity,
   AnyKibanaRequest,
+  RequestTimingState,
 } from './request';
 export type { RequestHandlerWrapper, RequestHandler } from './request_handler';
 export type { RequestHandlerContextBase } from './request_handler_context';
@@ -62,11 +63,14 @@ export type {
   RouteAuthc,
   AuthcDisabled,
   AuthcEnabled,
+  AuthcMinimal,
+  AuthcOptional,
   RouteSecurity,
   AllRequiredCondition,
   AnyRequiredCondition,
   Privilege,
   PrivilegeSet,
+  Privileges,
   RouteDeprecationInfo,
   PostValidationMetadata,
 } from './route';
@@ -83,6 +87,9 @@ export type {
   RouteValidator,
   RouteValidatorRequestAndResponses,
   LazyValidator,
+  OnRequestValidationError,
+  RequestValidationError,
+  RequestValidationErrorHandler,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type {
@@ -94,6 +101,7 @@ export type {
   RouterRouteDeprecatedApiDetails,
 } from './router';
 export type { IKibanaSocket } from './socket';
+export type { RequestTiming, Timer, TimingEvent } from './timing';
 export type {
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,

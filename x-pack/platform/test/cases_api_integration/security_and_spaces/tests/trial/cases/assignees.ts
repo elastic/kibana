@@ -22,7 +22,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -76,6 +75,34 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(retrievedProfiles[0]).to.eql(profile[0]);
+      });
+
+      it('populates the assignee identity fields from the resolved profile', async () => {
+        const profile = await suggestUserProfiles({
+          supertest: supertestWithoutAuth,
+          req: {
+            name: 'delete',
+            owners: ['securitySolutionFixture'],
+            size: 1,
+          },
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            assignees: [{ uid: profile[0].uid }],
+          })
+        );
+
+        expect(postedCase.assignees).to.eql([
+          {
+            uid: profile[0].uid,
+            username: profile[0].user.username,
+            full_name: profile[0].user.full_name ?? null,
+            email: profile[0].user.email ?? null,
+          },
+        ]);
       });
 
       it('assigns multiple users to a case and retrieves their profiles', async () => {

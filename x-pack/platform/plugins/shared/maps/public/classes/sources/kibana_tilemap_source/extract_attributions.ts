@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Attribution } from '../../../../common/descriptor_types';
+import type { Attribution } from '../../../../common/descriptor_types';
 
 export function extractAttributions(markdown: string): Attribution[] {
   const attributions: Attribution[] = [];

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFormLabel, EuiDatePicker } from '@elastic/eui';
+import { EuiFormRow, EuiDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import React from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { CreateAnnotationForm } from './create_annotation';
+import type { CreateAnnotationForm } from './create_annotation';
 
 const getHelpfulDateFormat = (dateFormat: string) => {
   if (dateFormat.endsWith('HH:mm:ss.SSS')) {
@@ -51,13 +51,12 @@ export function AnnotationRange() {
                   selected={field.value}
                   fullWidth
                   compressed
-                  prepend={
-                    <EuiFormLabel>
-                      {i18n.translate('xpack.observability.annotationRange.fromFormLabelLabel', {
-                        defaultMessage: 'From',
-                      })}
-                    </EuiFormLabel>
-                  }
+                  prepend={i18n.translate(
+                    'xpack.observability.annotationRange.fromFormLabelLabel',
+                    {
+                      defaultMessage: 'From',
+                    }
+                  )}
                   dateFormat={dateFormat}
                   {...rest}
                 />
@@ -80,13 +79,9 @@ export function AnnotationRange() {
                   selected={field.value}
                   fullWidth
                   compressed
-                  prepend={
-                    <EuiFormLabel>
-                      {i18n.translate('xpack.observability.annotationRange.toFormLabelLabel', {
-                        defaultMessage: 'To',
-                      })}
-                    </EuiFormLabel>
-                  }
+                  prepend={i18n.translate('xpack.observability.annotationRange.toFormLabelLabel', {
+                    defaultMessage: 'To',
+                  })}
                   dateFormat={dateFormat}
                   {...rest}
                 />

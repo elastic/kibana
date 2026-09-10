@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 
 import type { State } from '../../../common/store';
@@ -104,7 +104,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
 
   return (
     <>
-      <EuiToolTip content={i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}>
+      <EuiToolTip content={i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE} disableScreenReaderOutput>
         <EuiButtonIcon
           aria-label={i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}
           data-test-subj="show-row-renderers-gear"

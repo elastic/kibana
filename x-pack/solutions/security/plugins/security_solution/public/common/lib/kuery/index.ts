@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Filter, EsQueryConfig, Query, DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
+  buildEsQuery,
+  FilterStateStore,
   fromKueryExpression,
   toElasticsearchQuery,
-  FilterStateStore,
-  buildEsQuery,
 } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
@@ -30,7 +30,7 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  dataViewSpec?: DataViewSpec;
+  dataView: DataView;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -91,6 +91,19 @@ export const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFiel
   return false;
 };
 
+const formatNestedFieldValue = (
+  value: PrimitiveOrArrayOfPrimitives,
+  browserField: { type?: string }
+): string => {
+  if (browserField.type === 'date') {
+    return `"${value}"`;
+  }
+  if (Array.isArray(value)) {
+    return `(${value.map((item) => prepareKQLParam(item)).join(' OR ')})`;
+  }
+  return prepareKQLParam(value);
+};
+
 export const convertNestedFieldToQuery = (
   field: string,
   value: PrimitiveOrArrayOfPrimitives,
@@ -100,7 +113,7 @@ export const convertNestedFieldToQuery = (
   const browserField = get(pathBrowserField, browserFields);
   const nestedPath = browserField.subType.nested.path;
   const key = field.replace(`${nestedPath}.`, '');
-  return `${nestedPath}: { ${key}: ${browserField.type === 'date' ? `"${value}"` : value} }`;
+  return `${nestedPath}: { ${key}: ${formatNestedFieldValue(value, browserField)} }`;
 };
 
 export const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
@@ -137,7 +150,9 @@ const buildQueryMatch = (
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             Array.isArray(dataProvider.queryMatch.value)
-              ? `(${dataProvider.queryMatch.value.join(' OR ')})`
+              ? `(${dataProvider.queryMatch.value
+                  .map((item) => prepareKQLParam(item))
+                  .join(' OR ')})`
               : prepareKQLParam(dataProvider.queryMatch.value)
           }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
@@ -200,18 +215,14 @@ export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
 };
 
-export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBase => {
-  return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
-};
-
 export const convertToBuildEsQuery = ({
   config,
-  dataViewSpec,
+  dataView,
   queries,
   filters,
 }: {
   config: EsQueryConfig;
-  dataViewSpec: DataViewSpec | undefined;
+  dataView: DataView;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
@@ -219,7 +230,7 @@ export const convertToBuildEsQuery = ({
     return [
       JSON.stringify(
         buildEsQuery(
-          dataViewSpecToViewBase(dataViewSpec),
+          dataView,
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -245,7 +256,7 @@ export interface CombinedQuery {
 export const combineQueries = ({
   config,
   dataProviders = [],
-  dataViewSpec,
+  dataView,
   browserFields,
   filters = [],
   kqlQuery,
@@ -258,7 +269,7 @@ export const combineQueries = ({
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
-      dataViewSpec,
+      dataView,
       filters,
     });
 
@@ -286,7 +297,7 @@ export const combineQueries = ({
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
-    dataViewSpec,
+    dataView,
     filters,
   });
 

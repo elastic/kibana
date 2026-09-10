@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { findTestPluginPaths } from '@kbn/test';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

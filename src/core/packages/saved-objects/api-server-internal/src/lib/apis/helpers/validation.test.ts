@@ -8,7 +8,7 @@
  */
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
 import { ValidationHelper } from './validation';
 import { typedef, typedef1, typedef2 } from './validation_fixtures';
@@ -67,7 +67,7 @@ describe('Saved Objects type validation helper', () => {
         kibanaVersion: defaultVersion,
       });
       const data = createMockObject(typeA, { attributes: { foo: 'hi', count: 1 } });
-      expect(() => helper.validateObjectForCreate(typeA, data)).not.toThrowError();
+      expect(() => helper.validateObjectForCreate(typeA, data)).not.toThrow();
     });
 
     it('should validate objects against model versions', () => {
@@ -77,7 +77,7 @@ describe('Saved Objects type validation helper', () => {
         kibanaVersion: modelVirtualVersion,
       });
       const data = createMockObject(typeB, { attributes: { foo: 'hi', count: 1 } });
-      expect(() => helper.validateObjectForCreate(typeB, data)).not.toThrowError();
+      expect(() => helper.validateObjectForCreate(typeB, data)).not.toThrow();
     });
 
     it('should fail validation against invalid objects when version requested does not support a field', () => {
@@ -87,10 +87,10 @@ describe('Saved Objects type validation helper', () => {
         kibanaVersion: defaultVersion,
       });
       const validationError = new Error(
-        '[attributes.count]: definition for this key is missing: Bad Request'
+        "[attributes.count]: Additional properties are not allowed ('count' was unexpected): Bad Request"
       );
       const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
-      expect(() => helper.validateObjectForCreate(typeC, data)).toThrowError(validationError);
+      expect(() => helper.validateObjectForCreate(typeC, data)).toThrow(validationError);
     });
   });
 });

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
+import type { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   BudgetingMethod,
-  calendarAlignedTimeWindowSchema,
   DurationUnit,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
+} from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  calendarAlignedTimeWindowSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
@@ -23,14 +25,8 @@ import {
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import {
-  DateRange,
-  GroupBy,
-  Objective,
-  SLOId,
-  TimeWindow,
-  toCalendarAlignedTimeWindowMomentUnit,
-} from '../domain/models';
+import type { DateRange, GroupBy, Objective, SLOId, TimeWindow } from '../domain/models';
+import { toCalendarAlignedTimeWindowMomentUnit } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
@@ -53,7 +49,7 @@ interface DailyAggBucket {
 }
 
 export class HistoricalSummaryClient {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   async fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<
@@ -78,6 +74,7 @@ export class HistoricalSummaryClient {
           timeWindow,
           budgetingMethod,
           dateRange: dateRangeBySlo[sloId],
+          spaceId: this.spaceId,
         }),
       ]
     );
@@ -277,6 +274,7 @@ function generateSearchQuery({
   dateRange,
   timeWindow,
   budgetingMethod,
+  spaceId,
 }: {
   instanceId: string;
   sloId: string;
@@ -285,6 +283,7 @@ function generateSearchQuery({
   dateRange: { range: DateRange; queryRange: DateRange };
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;
+  spaceId: string;
 }): SearchSearchRequestBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
@@ -306,6 +305,7 @@ function generateSearchQuery({
     query: {
       bool: {
         filter: [
+          { term: { spaceId } },
           { term: { 'slo.id': sloId } },
           { term: { 'slo.revision': revision } },
           {

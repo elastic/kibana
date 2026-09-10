@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 // 1. Assume we have an existing field format configuration serialized and saved somewhere
 // In this case it is `bytes` field formatter with a configured `'0.00b'` pattern
@@ -28,7 +28,7 @@ export function getSample(fieldFormats: FieldFormatsStart) {
   // 3. now we can use it to convert values
   const pairs = [1000, 100000, 100000000].map((value) => ({
     raw: value,
-    formatted: fieldFormat.convert(value),
+    formatted: fieldFormat.convertToText(value),
   }));
 
   return pairs;

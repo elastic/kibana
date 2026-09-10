@@ -11,7 +11,6 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APP_ID, FEATURE_ID_V3 } from '../../common/constants';
 import { createUICapabilities, getApiTags } from '../../common';
 import {
@@ -20,6 +19,7 @@ import {
   CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
   CASES_REOPEN_SUB_PRIVILEGE_ID,
   CASES_ASSIGN_SUB_PRIVILEGE_ID,
+  CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
 } from './constants';
 
 /**
@@ -40,7 +40,6 @@ export const getV3 = (): KibanaFeatureConfig => {
       defaultMessage: 'Cases',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     order: FEATURE_ORDER,
     management: {
@@ -213,6 +212,33 @@ export const getV3 = (): KibanaFeatureConfig => {
                   assign: [APP_ID],
                 },
                 ui: capabilities.assignCase,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.manageTemplatesSubFeatureName', {
+          defaultMessage: 'Manage templates',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.manageTemplatesSubFeatureDetails', {
+                  defaultMessage: 'Manage case templates',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  manageTemplates: [APP_ID],
+                },
+                ui: capabilities.manageTemplates,
               },
             ],
           },

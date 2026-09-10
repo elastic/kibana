@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
 import { serializeHttpFetchError } from '../utils/http_error';
-import { FetchNetworkEventsParams } from '../network_events/actions';
-import {
+import type {
   ScreenshotBlockDoc,
   ScreenshotBlockCache,
   SyntheticsJourneyApiResponse,
 } from '../../../../../common/runtime_types';
 import { fetchBrowserJourney, fetchScreenshotBlockSet } from './api';
+import type { FetchJourneyStepsParams } from './api';
 
+import type { FetchBlocksActionPayload } from './actions';
 import {
   fetchBlocksAction,
   setBlockLoadingAction,
@@ -34,20 +35,27 @@ export function* browserJourneyEffects() {
   yield all([fork(fetchScreenshotBlocks), fork(generateBlockStatsOnPut), fork(pruneBlockCache)]);
 }
 
-function* fetchBlocks(hashes: string[]) {
+function* fetchBlocks(hashes: string[], remoteName?: string) {
   yield put(setBlockLoadingAction(hashes));
-  const blocks: ScreenshotBlockDoc[] = yield call(fetchScreenshotBlockSet, hashes);
+  const blocks: ScreenshotBlockDoc[] = yield call(fetchScreenshotBlockSet, hashes, remoteName);
   yield put(putBlocksAction({ blocks }));
 }
 
 function* fetchScreenshotBlocks() {
+  // Within any given Kibana session window the user is viewing one monitor
+  // at a time, so all `fetchBlocksAction` dispatches inside the saga's
+  // throttle window share the same `remoteName`. We capture the most recent
+  // value here and use it when the throttled fetch finally fires.
+  let latestRemoteName: string | undefined;
+
   /**
    * We maintain a list of each hash and how many times it is requested so we can avoid
    * subsequent re-requests if the block is dropped due to cache pruning.
    */
-  yield takeEvery(String(fetchBlocksAction), function* (action: Action<string[]>) {
-    if (action.payload.length > 0) {
-      yield put(updateHitCountsAction(action.payload));
+  yield takeEvery(String(fetchBlocksAction), function* (action: Action<FetchBlocksActionPayload>) {
+    latestRemoteName = action.payload.remoteName;
+    if (action.payload.hashes.length > 0) {
+      yield put(updateHitCountsAction(action.payload.hashes));
     }
   });
 
@@ -63,7 +71,7 @@ function* fetchScreenshotBlocks() {
     });
 
     if (toFetch.length > 0) {
-      yield fork(fetchBlocks, toFetch);
+      yield fork(fetchBlocks, toFetch, latestRemoteName);
     }
   });
 }
@@ -94,26 +102,32 @@ function* pruneBlockCache() {
 }
 
 export function* fetchJourneyStepsEffect() {
+  // Compose the dedupe key from both `checkGroup` and `remoteName`: in
+  // theory the same checkGroup could exist on both the local cluster and a
+  // remote one, and we want to keep them as distinct in-flight requests.
   const inProgressRequests = new Set<string>();
+  const dedupeKey = ({ checkGroup, remoteName }: FetchJourneyStepsParams) =>
+    `${remoteName ?? ''}::${checkGroup}`;
 
   yield takeEvery(
     String(fetchJourneyAction.get),
-    function* (action: Action<FetchNetworkEventsParams>): Generator {
+    function* (action: Action<FetchJourneyStepsParams>): Generator {
+      const key = dedupeKey(action.payload);
       try {
-        if (!inProgressRequests.has(action.payload.checkGroup)) {
-          inProgressRequests.add(action.payload.checkGroup);
+        if (!inProgressRequests.has(key)) {
+          inProgressRequests.add(key);
 
           const response = (yield call(
             fetchBrowserJourney,
             action.payload
           )) as SyntheticsJourneyApiResponse;
 
-          inProgressRequests.delete(action.payload.checkGroup);
+          inProgressRequests.delete(key);
 
           yield put(fetchJourneyAction.success(response));
         }
       } catch (e) {
-        inProgressRequests.delete(action.payload.checkGroup);
+        inProgressRequests.delete(key);
         yield put(fetchJourneyAction.fail(serializeHttpFetchError(e, action.payload)));
       }
     }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IndexPatternFieldEditorPlugin } from './plugin';
+import type { IndexPatternFieldEditorPlugin } from './plugin';
 
 export type Start = jest.Mocked<
   Omit<ReturnType<IndexPatternFieldEditorPlugin['start']>, 'DeleteRuntimeFieldProvider'>

@@ -14,6 +14,7 @@ import type { SavedObjectsValidationSpec } from '../validation';
  * The validation and conversion schemas associated with this model version.
  *
  * @public
+ * @deprecated Use {@link SavedObjectsFullModelVersionSchemaDefinitions} instead.
  */
 export interface SavedObjectsModelVersionSchemaDefinitions {
   /**
@@ -36,6 +37,29 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
    * Allows for validating properties using @kbn/config-schema validations
    */
   create?: SavedObjectsValidationSpec;
+}
+
+export interface SavedObjectsFullModelVersionSchemaDefinitions {
+  /**
+   * The schema applied when retrieving documents of a higher version from the cluster.
+   * Used for multi-version compatibility in managed environments.
+   *
+   * When retrieving a savedObject document from an index, if the version of the document
+   * is higher than the latest version known of the Kibana instance, the document will go
+   * through the `forwardCompatibility` schema of the associated model version.
+   *
+   * E.g a Kibana instance with model version `2` for type `foo` types fetches a `foo` document
+   * at model version `3`. The document will then go through the `forwardCompatibility`
+   * of the model version 2 (if present).
+   *
+   * See {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info.
+   */
+  forwardCompatibility: SavedObjectModelVersionForwardCompatibilitySchema;
+  /**
+   * The schema applied when creating a document of the current version
+   * Allows for validating properties using @kbn/config-schema validations
+   */
+  create: SavedObjectsValidationSpec;
 }
 
 /**

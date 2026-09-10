@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { ChartPosition } from '@kbn/chart-expressions-common';
 import {
   AvailableReferenceLineIcons,
   REFERENCE_LINE_DECORATION_CONFIG,
@@ -17,7 +17,7 @@ import {
   LineStyles,
 } from '../constants';
 import { strings } from '../i18n';
-import { ReferenceLineDecorationConfigFn } from '../types';
+import type { ReferenceLineDecorationConfigFn } from '../types';
 import { commonDecorationConfigArgs } from './common_y_config_args';
 
 export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfigFn = {
@@ -30,12 +30,12 @@ export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfi
     ...commonDecorationConfigArgs,
     position: {
       types: ['string'],
-      options: [Position.Right, Position.Left, Position.Bottom],
+      options: [ChartPosition.Right, ChartPosition.Left, ChartPosition.Bottom],
       help: i18n.translate('expressionXY.referenceLine.position.help', {
         defaultMessage:
           'Position of axis (first axis of that position) to which the reference line belongs.',
       }),
-      default: Position.Left,
+      default: ChartPosition.Left,
       strict: true,
     },
     lineStyle: {

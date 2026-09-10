@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PrivateLocation, ServiceLocation } from '../runtime_types';
+import type { PrivateLocation, ServiceLocation } from '../runtime_types';
 
 export const formatLocation = (location: ServiceLocation | PrivateLocation) => {
   if ('agentPolicyId' in location) {
@@ -15,6 +15,7 @@ export const formatLocation = (location: ServiceLocation | PrivateLocation) => {
       geo: location.geo,
       isServiceManaged: location.isServiceManaged,
       agentPolicyId: location.agentPolicyId,
+      ...(location.isAgentSharding === true ? { isAgentSharding: true } : {}),
     };
   }
 

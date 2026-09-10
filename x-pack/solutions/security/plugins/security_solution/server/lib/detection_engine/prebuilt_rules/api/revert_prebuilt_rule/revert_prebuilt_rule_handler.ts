@@ -9,8 +9,8 @@ import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getErrorMessage, getErrorStatusCode } from '../../../../../utils/error_helpers';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import type { BulkActionReversionSkipResult } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
+  type BulkActionReversionSkipResult,
   type RevertPrebuiltRulesRequest,
   type RevertPrebuiltRulesResponseBody,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -70,7 +70,9 @@ export const revertPrebuiltRuleHandler = async (
 
     const { rulesToRevert, skipped } = filterOutNonRevertableRules([ruleResponse]);
 
-    const prebuiltRuleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
+    const { assets: prebuiltRuleAssets } = await ruleAssetsClient.fetchAssetsByVersion(
+      rulesToRevert
+    );
     const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], prebuiltRuleAssets); // We use base versions as target param as we are reverting rules
     const revertableRules: RuleTriad[] = [];
 

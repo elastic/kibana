@@ -10,15 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { distinct, map, switchMap } from 'rxjs';
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-  AppStatus,
-} from '@kbn/core/public';
-import {
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
+import type {
   KibanaOverviewPluginSetup,
   KibanaOverviewPluginStart,
   AppPluginSetupDependencies,
@@ -73,7 +67,7 @@ export class KibanaOverviewPlugin
       order: 1,
       updater$: appUpdater$,
       appRoute: PLUGIN_PATH,
-      visibleIn: ['globalSearch', 'home', 'sideNav'],
+      visibleIn: ['globalSearch', 'home', 'classicSideNav', 'projectSideNav'],
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

@@ -5,29 +5,59 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '../../../types';
-export const normalizedLoad1m: MetricsUIAggregation = {
-  load_1m: {
-    avg: {
-      field: 'system.load.1',
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
+
+export const normalizedLoad1m: SchemaBasedAggregations = {
+  ecs: {
+    load_1m: {
+      avg: {
+        field: 'system.load.1',
+      },
+    },
+    max_cores: {
+      max: {
+        field: 'system.load.cores',
+      },
+    },
+    normalizedLoad1m: {
+      bucket_script: {
+        buckets_path: {
+          load1m: 'load_1m',
+          maxCores: 'max_cores',
+        },
+        script: {
+          source: 'params.load1m / params.maxCores',
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
+      },
     },
   },
-  max_cores: {
-    max: {
-      field: 'system.load.cores',
+  semconv: {
+    load_1m: {
+      avg: {
+        // OTel lands these gauges under the `metrics.*` prefix; the unprefixed
+        // fields returned null and made the `bucket_script` ratio fall back to 0.
+        field: 'metrics.system.cpu.load_average.1m',
+      },
     },
-  },
-  normalizedLoad1m: {
-    bucket_script: {
-      buckets_path: {
-        load1m: 'load_1m',
-        maxCores: 'max_cores',
+    max_cores: {
+      max: {
+        field: 'metrics.system.cpu.logical.count',
       },
-      script: {
-        source: 'params.load1m / params.maxCores',
-        lang: 'painless',
+    },
+    normalizedLoad1m: {
+      bucket_script: {
+        buckets_path: {
+          load1m: 'load_1m',
+          maxCores: 'max_cores',
+        },
+        script: {
+          source: 'params.load1m / params.maxCores',
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
       },
-      gap_policy: 'skip',
     },
   },
 };

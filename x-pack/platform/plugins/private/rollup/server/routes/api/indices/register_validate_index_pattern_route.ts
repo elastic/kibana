@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 type NumericField =
   | 'long'
@@ -68,7 +68,7 @@ export const registerValidateIndexPatternRoute = ({
       },
       validate: {
         params: schema.object({
-          indexPattern: schema.string(),
+          indexPattern: schema.string({ maxLength: 1000 }),
         }),
       },
     },

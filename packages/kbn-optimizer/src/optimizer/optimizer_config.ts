@@ -10,11 +10,15 @@
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
-import { ThemeTag, ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import type { ThemeTag, ThemeTags } from '@kbn/core-ui-settings-common';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
-import { Bundle, WorkerConfig, CacheableWorkerConfig, omit } from '../common';
+import type { WorkerConfig, CacheableWorkerConfig } from '../common';
+import { Bundle, omit } from '../common';
 
-import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
+import type { KibanaPlatformPlugin } from './kibana_platform_plugins';
+import { toKibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
 import { focusBundles } from './focus_bundles';
@@ -110,6 +114,8 @@ interface Options {
   pluginPaths?: string[];
   /** absolute paths to directories, any plugins in these directories will be built */
   pluginScanDirs?: string[];
+  /** restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 
   /**
    * array of comma separated patterns that will be matched against bundle ids.
@@ -232,6 +238,7 @@ export class OptimizerConfig {
         testPlugins,
         paths: pluginPaths,
         parentDirs: pluginScanDirs,
+        allowlistPluginGroups: options.allowlistPluginGroups,
       },
     };
   }

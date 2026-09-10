@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MonitorStatusList } from './monitor_status_list';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { mockMoment } from '../../../../lib/helper/test_helpers';
 import { render } from '../../../../lib/helper/rtl_helpers';
 

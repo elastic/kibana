@@ -10,7 +10,7 @@ import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
 
 import { ExtendedTemplate } from '../extended_template';
-import { ExpressionAstExpression } from '../../../../../types';
+import type { ExpressionAstExpression } from '../../../../../types';
 
 const defaultExpression: ExpressionAstExpression = {
   type: 'expression',

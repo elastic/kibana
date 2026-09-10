@@ -13,7 +13,7 @@ export const EllipseHoverShape = memo<HoverShapeProps>(({ stroke }) => (
 ));
 EllipseHoverShape.displayName = 'EllipseHoverShape';
 
-export const EllipseShape = memo<ShapeProps>(({ stroke, fill }) => (
-  <circle cx="36" cy="36" r="35.5" fill={fill} stroke={stroke} />
+export const EllipseShape = memo<ShapeProps>(({ stroke, fill, ...rest }) => (
+  <circle cx="36" cy="36" r="35.5" fill={fill} stroke={stroke} {...rest} />
 ));
 EllipseShape.displayName = 'EllipseShape';

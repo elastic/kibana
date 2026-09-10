@@ -7,14 +7,15 @@
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
@@ -28,12 +29,12 @@ import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
+import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { SloDetailsPage } from './slo_details';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -66,8 +67,6 @@ const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 TagsListMock.mockReturnValue(<div>Tags list</div>);
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
-HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
@@ -172,7 +171,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -189,7 +188,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -302,10 +301,8 @@ describe('SLO Details Page', () => {
     fireEvent.click(button!);
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(
-        paths.sloCreateWithEncodedForm(
-          encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
-        )
+      expect(mockNavigate).toHaveBeenCalledWith(
+        paths.sloCreateWithEncodedForm(encodeURIComponent(encode(transformSloToCloneState(slo))))
       );
     });
   });
@@ -332,13 +329,13 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(deleteModalConfirmButton!);
 
-    expect(mockDelete).toBeCalledWith({
+    expect(mockDelete).toHaveBeenCalledWith({
       id: slo.id,
       name: slo.name,
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slos);
     });
   });
 
@@ -349,7 +346,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: new ActiveAlerts({ [`${slo.id}|${ALL_VALUE}`]: 2 }),
+      data: new ActiveAlerts([[{ id: slo.id, instanceId: ALL_VALUE }, 2]]),
     });
 
     render(<SloDetailsPage />);

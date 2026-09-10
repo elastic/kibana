@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { FIELD_PREVIEW_PATH as path } from '../../common/constants';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { handleEsError } from '../shared_imports';
 
 const bodySchema = schema.object({
@@ -38,9 +38,9 @@ const responseSchema = () => {
   return schema.object({
     values: schema.oneOf([
       // composite field
-      schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
+      schema.recordOf(schema.string(), schema.arrayOf(valueSchema, { maxSize: 1_000 })),
       // primitive field
-      schema.arrayOf(valueSchema),
+      schema.arrayOf(valueSchema, { maxSize: 1_000 }),
     ]),
     error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     status: schema.maybe(schema.number()),

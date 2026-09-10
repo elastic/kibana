@@ -9,7 +9,8 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
 
-import { AddIndicesLogic, AddIndicesLogicValues } from './add_indices_logic';
+import type { AddIndicesLogicValues } from './add_indices_logic';
+import { AddIndicesLogic } from './add_indices_logic';
 
 const DEFAULT_VALUES: AddIndicesLogicValues = {
   selectedIndices: [],

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldTextProps } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import type { Ref } from 'react';
+import React from 'react';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 import { BrowserMonitorCallout } from './browser_monitor_callout';
 import { SpaceSelector } from '../components/spaces_select';
 import { TagsField } from '../components/tags_field';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
 
@@ -65,7 +67,11 @@ export const LocationForm = ({
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
+        <PolicyHostsField
+          privateLocations={privateLocations}
+          isDisabled={isEditingLocation}
+          isEditingShardedLocation={privateLocationToEdit?.isAgentSharding === true}
+        />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />
@@ -107,7 +113,8 @@ export const LOCATION_NAME_LABEL = i18n.translate(
 const LOCATION_HELP_TEXT = i18n.translate(
   'xpack.synthetics.privateLocation.locationSpacesHelpText',
   {
-    defaultMessage: 'Select the spaces where this location will be available.',
+    defaultMessage:
+      'Available spaces are filtered based on the selected agent policy. You can select from the spaces that the agent policy has access to. If no space is selected, the private location will automatically use all spaces that the agent policy has access to.',
   }
 );
 

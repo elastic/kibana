@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DataViewSpec, DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
-import { VisualizationState, DatasourceStates } from '.';
-import { LensDocument } from '../persistence';
-import { DatasourceMap, VisualizationMap, Datasource } from '../types';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import {
+  getChartScopedFilterQuery,
+  type VisualizationState,
+  type DatasourceStates,
+  type DatasourceMap,
+  type VisualizationMap,
+  type Datasource,
+  type LensDocument,
+  type Visualization,
+} from '@kbn/lens-common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { INDEX_PATTERN_TYPE } from '../../common/constants';
+import { applyLegacySecondaryLabelIfMetric } from '../visualizations/metric/runtime_state/apply_legacy_secondary_label';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
   persistedDoc: LensDocument | undefined,
   visualization: VisualizationState,
   datasourceStates: DatasourceStates,
-  query: AggregateQuery | Query,
+  query: AggregateQuery | Query | undefined,
   filters: Filter[],
   activeDatasourceId: string | null,
   adHocDataViews: Record<string, DataViewSpec>,
@@ -33,7 +43,7 @@ export function mergeToNewDoc(
     visualizationMap: VisualizationMap;
     extractFilterReferences: FilterManager['extract'];
   }
-) {
+): LensDocument | undefined {
   const activeVisualization =
     visualization.state && visualization.activeId ? visualizationMap[visualization.activeId] : null;
   const activeDatasource =
@@ -45,7 +55,14 @@ export function mergeToNewDoc(
     return;
   }
 
-  const activeDatasources: Record<string, Datasource> = Object.keys(datasourceStates).reduce(
+  const { visualizationState: syncedVisualizationState, datasourceStates: syncedDatasourceStates } =
+    applyLegacySecondaryLabelIfMetric(
+      visualization.activeId,
+      visualization.state,
+      datasourceStates
+    );
+
+  const activeDatasources: Record<string, Datasource> = Object.keys(syncedDatasourceStates).reduce(
     (acc, datasourceId) => ({
       ...acc,
       [datasourceId]: datasourceMap[datasourceId],
@@ -54,14 +71,13 @@ export function mergeToNewDoc(
   );
 
   const persistibleDatasourceStates: Record<string, unknown> = {};
-  const references: SavedObjectReference[] = [];
-  const internalReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
+  const internalReferences: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
-      datasourceStates[id].state
-    );
+    const { state: persistableState, references: persistableReferences } =
+      datasource.getPersistableState(syncedDatasourceStates[id].state);
     persistibleDatasourceStates[id] = persistableState;
-    savedObjectReferences.forEach((r) => {
+    persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
         internalReferences.push(r);
       } else {
@@ -70,16 +86,16 @@ export function mergeToNewDoc(
     });
   });
 
-  let persistibleVisualizationState = visualization.state;
+  let persistibleVisualizationState = syncedVisualizationState;
   if (activeVisualization.getPersistableState) {
-    const { state: persistableState, savedObjectReferences } =
+    const { state: persistableState, references: persistableReferences } =
       activeVisualization.getPersistableState(
-        visualization.state,
+        syncedVisualizationState,
         activeDatasource,
-        datasourceStates[activeDatasource.id]
+        syncedDatasourceStates[activeDatasource.id]
       );
     persistibleVisualizationState = persistableState;
-    savedObjectReferences.forEach((r) => {
+    persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
         internalReferences.push(r);
       } else {
@@ -115,16 +131,38 @@ export function mergeToNewDoc(
     title: persistedDoc?.title || '',
     description: persistedDoc?.description,
     visualizationType: visualization.activeId!,
-    type: DOC_TYPE,
     references,
     state: {
       visualization: persistibleVisualizationState,
-      query,
+      // Chart-scoped KQL/Lucene filter only. ES|QL queries live exclusively
+      // on the text-based datasource layers (`datasourceStates.textBased`);
+      // an aggregate editor query is never persisted into this slot.
+      query: getChartScopedFilterQuery(query),
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
       internalReferences,
       adHocDataViews: persistableAdHocDataViews,
     },
+    version: LENS_ITEM_LATEST_VERSION,
+  } satisfies LensDocument;
+}
+
+/**
+ * Converts runtime visualization state to its persisted (storage-ready) format
+ * by delegating to the visualization's `getPersistableState` method.
+ *
+ * This is the same conversion that `mergeToNewDoc` performs for the full editor
+ * save path — extracted here so the inline editor's `saveByRef` can reuse it.
+ */
+export function serializeVisualizationToSave<T extends { state: { visualization: unknown } }>(
+  attrs: T,
+  visualization: Pick<Visualization, 'getPersistableState'>
+): T {
+  if (!visualization.getPersistableState) return attrs;
+  const { state: persistedVisState } = visualization.getPersistableState(attrs.state.visualization);
+  return {
+    ...attrs,
+    state: { ...attrs.state, visualization: persistedVisState },
   };
 }
 

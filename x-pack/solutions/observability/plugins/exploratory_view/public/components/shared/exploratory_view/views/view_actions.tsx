@@ -15,7 +15,7 @@ import {
   reportTypeKey,
   useSeriesStorage,
 } from '../hooks/use_series_storage';
-import { SeriesUrl } from '../types';
+import type { SeriesUrl } from '../types';
 
 interface Props {
   onApply?: () => void;

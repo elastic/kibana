@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 
@@ -35,7 +36,7 @@ export function ChatBanner({
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type={icon} />
+          <EuiIcon size="l" type={icon} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiText size="xs">

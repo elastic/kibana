@@ -8,15 +8,10 @@
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiHealth,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiHealth, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 
-import { SnapshotRestore } from '../../../../../../common/types';
+import type { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';
@@ -179,17 +174,25 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       width: '40px',
       isExpander: true,
       render: (item: SnapshotRestore) => (
-        <EuiButtonIcon
-          onClick={() => toggleIndexRestoreDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
-          iconType={itemIdToExpandedRowMap[item.index] ? 'arrowUp' : 'arrowDown'}
-        />
+        <EuiToolTip
+          content={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleIndexRestoreDetails(item)}
+            aria-label={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.index] ? 'chevronSingleUp' : 'chevronSingleDown'}
+          />
+        </EuiToolTip>
       ),
     },
   ];
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.snapshotRestore.restoreList.table.caption', {
+        defaultMessage: 'Snapshot restore list',
+      })}
       items={getRestores()}
       itemId="index"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}

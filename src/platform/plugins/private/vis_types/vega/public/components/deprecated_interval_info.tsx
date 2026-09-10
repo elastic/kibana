@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
-import { VegaSpec } from '../data_model/types';
+import type { VegaSpec } from '../data_model/types';
 import { getDocLinks } from '../services';
 
 export const DeprecatedHistogramIntervalInfo = () => (
@@ -26,11 +27,23 @@ export const DeprecatedHistogramIntervalInfo = () => (
         explicit fields: 'calendar_interval' and 'fixed_interval'. {dateHistogramDoc}"
         values={{
           dateHistogramDoc: (
-            <EuiButtonIcon
-              iconType="popout"
-              href={getDocLinks().links.aggs.date_histogram}
-              target="_blank"
-            />
+            <EuiToolTip
+              content={i18n.translate(
+                'visTypeVega.deprecatedHistogramIntervalInfo.dateHistogramDocAriaLabel',
+                { defaultMessage: 'Open date histogram documentation' }
+              )}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="external"
+                href={getDocLinks().links.aggs.date_histogram}
+                target="_blank"
+                aria-label={i18n.translate(
+                  'visTypeVega.deprecatedHistogramIntervalInfo.dateHistogramDocAriaLabel',
+                  { defaultMessage: 'Open date histogram documentation' }
+                )}
+              />
+            </EuiToolTip>
           ),
         }}
       />

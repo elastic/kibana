@@ -43,7 +43,18 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     latencyAggregationType = LatencyAggregationType.avg,
     comparisonEnabled,
     offset,
+    logsColumns,
+    logsSort,
+    logsGrid,
+    logsRowHeight,
+    logsRowsPerPage,
+    logsDensity,
   } = query;
+
+  // Service inventory no longer supports sorting by `healthStatus`. If old saved URLs still
+  // include `sortField=healthStatus`, drop it so tables fall back to their current defaults.
+  const normalizedSortField =
+    location.pathname.endsWith('/services') && sortField === 'healthStatus' ? undefined : sortField;
 
   return removeUndefinedProps({
     // date params
@@ -56,7 +67,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     // query params
     environment: toString(environment) || ENVIRONMENT_ALL.value,
     sortDirection,
-    sortField,
+    sortField: normalizedSortField,
     page: toNumber(page) || 0,
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),
@@ -75,5 +86,13 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     comparisonEnabled: comparisonEnabled ? toBoolean(comparisonEnabled) : undefined,
     offset,
+
+    // Logs tab state
+    logsColumns: toString(logsColumns),
+    logsSort: toString(logsSort),
+    logsGrid: toString(logsGrid),
+    logsRowHeight: logsRowHeight ? toNumber(logsRowHeight) : undefined,
+    logsRowsPerPage: logsRowsPerPage ? toNumber(logsRowsPerPage) : undefined,
+    logsDensity: toString(logsDensity),
   });
 }

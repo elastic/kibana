@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsClient } from '@elastic/ebt/client';
-import { of } from 'rxjs';
+import { of, timer, map, distinct } from 'rxjs';
 import { parseDeploymentIdFromDeploymentUrl } from './parse_deployment_id_from_deployment_url';
 
 export interface CloudDeploymentMetadata {
@@ -18,7 +18,9 @@ export interface CloudDeploymentMetadata {
   serverless?: {
     project_id?: string;
     project_type?: string;
+    product_tier?: string;
     orchestrator_target?: string;
+    in_trial?: boolean;
   };
 }
 
@@ -37,22 +39,35 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
     serverless: {
       project_id: projectId,
       project_type: projectType,
+      product_tier: productTier,
       orchestrator_target: orchestratorTarget,
+      in_trial: serverlessInTrial,
     } = {},
   } = cloudMetadata;
 
+  const inTrial$ = cloudTrialEndDate
+    ? timer(0, 1000).pipe(
+        map(() => Date.now() < new Date(cloudTrialEndDate).getTime()),
+        distinct()
+      )
+    : of(serverlessInTrial);
+
   analytics.registerContextProvider({
     name: 'Cloud Deployment Metadata',
-    context$: of({
-      cloudId,
-      organizationId,
-      deploymentId: parseDeploymentIdFromDeploymentUrl(cloudMetadata.deployment_url),
-      cloudTrialEndDate,
-      cloudIsElasticStaffOwned,
-      projectId,
-      projectType,
-      orchestratorTarget,
-    }),
+    context$: inTrial$.pipe(
+      map((cloudInTrial) => ({
+        cloudId,
+        organizationId,
+        deploymentId: parseDeploymentIdFromDeploymentUrl(cloudMetadata.deployment_url),
+        cloudTrialEndDate,
+        cloudInTrial,
+        cloudIsElasticStaffOwned,
+        projectId,
+        projectType,
+        productTier,
+        orchestratorTarget,
+      }))
+    ),
     schema: {
       cloudId: {
         type: 'keyword',
@@ -73,6 +88,10 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
         type: 'date',
         _meta: { description: 'When the Elastic Cloud trial ends/ended', optional: true },
       },
+      cloudInTrial: {
+        type: 'boolean',
+        _meta: { description: 'Whether the Elastic Cloud Org is in trial', optional: true },
+      },
       cloudIsElasticStaffOwned: {
         type: 'boolean',
         _meta: {
@@ -87,6 +106,10 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
       projectType: {
         type: 'keyword',
         _meta: { description: 'The Serverless Project type', optional: true },
+      },
+      productTier: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Product Tier', optional: true },
       },
       orchestratorTarget: {
         type: 'keyword',

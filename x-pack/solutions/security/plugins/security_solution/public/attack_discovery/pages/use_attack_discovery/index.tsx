@@ -5,52 +5,42 @@
  * 2.0.
  */
 
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
-import type {
-  AttackDiscoveries,
-  Replacements,
-  GenerationInterval,
-  AttackDiscoveryStats,
-} from '@kbn/elastic-assistant-common';
-import {
-  AttackDiscoveryPostResponse,
-  API_VERSIONS,
-  ATTACK_DISCOVERY,
-} from '@kbn/elastic-assistant-common';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
-import { usePollApi } from './use_poll_api/use_poll_api';
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getErrorToastText } from '../helpers';
-import { getGenAiConfig, getRequestBody } from './helpers';
-import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
+import { callInternalGenerateApi, callPublicGenerateApi, getRequestBody } from './helpers';
+import {
+  ALERTS_INDEX_PATTERN_ERROR,
+  CONNECTOR_ERROR,
+  ERROR_GENERATING_ATTACK_DISCOVERIES,
+} from '../translations';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface FetchAttackDiscoveriesOptions {
   end?: string;
   filter?: Record<string, unknown>;
+  overrideConnectorId?: string;
+  overrideConnectorName?: string;
+  overrideEnd?: string;
+  overrideFilter?: Record<string, unknown>;
+  overrideSize?: number;
+  overrideStart?: string;
   size?: number;
   start?: string;
+  trigger?: 'manual' | 'save_and_run';
 }
 
 export interface UseAttackDiscovery {
-  alertsContextCount: number | null;
-  approximateFutureTime: Date | null;
-  attackDiscoveries: AttackDiscoveries;
-  didInitialFetch: boolean;
-  failureReason: string | null;
   fetchAttackDiscoveries: (options?: FetchAttackDiscoveriesOptions) => Promise<void>;
-  generationIntervals: GenerationInterval[] | undefined;
   isLoading: boolean;
-  isLoadingPost: boolean;
-  lastUpdated: Date | null;
-  onCancel: () => Promise<void>;
-  replacements: Replacements;
-  stats: AttackDiscoveryStats | null;
 }
 
 export const useAttackDiscovery = ({
@@ -64,29 +54,17 @@ export const useAttackDiscovery = ({
   size: number;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   // get Kibana services and connectors
   const {
+    featureFlags,
     http,
     notifications: { toasts },
+    telemetry,
+    uiSettings,
   } = useKibana().services;
-  const { data: aiConnectors } = useLoadConnectors({
-    http,
-  });
 
-  // generation can take a long time, so we calculate an approximate future time:
-  const [approximateFutureTime, setApproximateFutureTime] = useState<Date | null>(null);
-  // whether post request is loading (dont show actions)
-  const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false);
-  const {
-    cancelAttackDiscovery,
-    data: pollData,
-    pollApi,
-    status: pollStatus,
-    setStatus: setPollStatus,
-    didInitialFetch,
-    stats,
-  } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
+  // Get current space ID for workflow configuration
+  const spaceId = useSpaceId();
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -96,147 +74,93 @@ export const useAttackDiscovery = ({
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-  const [generationIntervals, setGenerationIntervals] = React.useState<GenerationInterval[]>([]);
-  const [attackDiscoveries, setAttackDiscoveries] = useState<AttackDiscoveries>([]);
-  const [replacements, setReplacements] = useState<Replacements>({});
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [failureReason, setFailureReason] = useState<string | null>(null);
-
-  // number of alerts sent as context to the LLM:
-  const [alertsContextCount, setAlertsContextCount] = useState<number | null>(null);
-
-  const requestBody = useMemo(() => {
-    const selectedConnector = aiConnectors?.find((connector) => connector.id === connectorId);
-    const genAiConfig = getGenAiConfig(selectedConnector);
-    return getRequestBody({
-      alertsIndexPattern,
-      anonymizationFields,
-      genAiConfig,
-      size,
-      selectedConnector,
-      traceOptions,
-    });
-  }, [aiConnectors, alertsIndexPattern, anonymizationFields, connectorId, size, traceOptions]);
-
-  useEffect(() => {
-    if (
-      !attackDiscoveryAlertsEnabled &&
-      connectorId != null &&
-      connectorId !== '' &&
-      aiConnectors != null &&
-      aiConnectors.length > 0
-    ) {
-      pollApi();
-      setLoadingConnectorId?.(connectorId);
-      setAlertsContextCount(null);
-      setFailureReason(null);
-      setLastUpdated(null);
-      setReplacements({});
-      setAttackDiscoveries([]);
-      setGenerationIntervals([]);
-      setPollStatus(null);
-    }
-  }, [
-    aiConnectors,
-    attackDiscoveryAlertsEnabled,
-    connectorId,
-    pollApi,
-    setLoadingConnectorId,
-    setPollStatus,
-  ]);
-
-  useEffect(() => {
-    if (attackDiscoveryAlertsEnabled) {
-      return;
-    }
-
-    if (pollStatus === 'running') {
-      setIsLoading(true);
-      setLoadingConnectorId?.(connectorId ?? null);
-    } else {
-      setIsLoading(false);
-      setLoadingConnectorId?.(null);
-    }
-  }, [pollStatus, connectorId, setLoadingConnectorId, attackDiscoveryAlertsEnabled]);
-
-  useEffect(() => {
-    if (attackDiscoveryAlertsEnabled) {
-      return;
-    }
-
-    if (pollData !== null && pollData.connectorId === connectorId) {
-      if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
-      if (pollData.attackDiscoveries.length && pollData.attackDiscoveries[0].timestamp != null) {
-        // get last updated from timestamp, not from updatedAt since this can indicate the last time the status was updated
-        setLastUpdated(new Date(pollData.attackDiscoveries[0].timestamp));
-      }
-      if (pollData.replacements) setReplacements(pollData.replacements);
-      if (pollData.status === 'failed' && pollData.failureReason) {
-        setFailureReason(pollData.failureReason);
-      } else {
-        setFailureReason(null);
-      }
-      setAttackDiscoveries(pollData.attackDiscoveries);
-      setGenerationIntervals(pollData.generationIntervals);
-    }
-  }, [attackDiscoveryAlertsEnabled, connectorId, pollData]);
-
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(
     async (options: FetchAttackDiscoveriesOptions | undefined) => {
       try {
-        if (options?.size != null) {
-          setAlertsContextCount(options.size);
-        }
+        const effectiveSize = options?.overrideSize ?? options?.size ?? size;
 
-        const end = options?.end;
-        const filter = !isEmpty(options?.filter) ? options?.filter : undefined;
-        const start = options?.start;
+        const effectiveEnd = options?.overrideEnd ?? options?.end;
+        const effectiveFilter =
+          options?.overrideFilter ?? (!isEmpty(options?.filter) ? options?.filter : undefined);
+        const effectiveStart = options?.overrideStart ?? options?.start;
+        const effectiveConnectorId = options?.overrideConnectorId ?? connectorId;
+        const effectiveTrigger = options?.trigger ?? 'manual';
 
-        const bodyWithOverrides = {
-          ...requestBody,
-          connectorName,
-          end,
-          filter,
-          size,
-          start,
-        };
-
-        if (
-          bodyWithOverrides.apiConfig.connectorId === '' ||
-          bodyWithOverrides.apiConfig.actionTypeId === ''
-        ) {
+        if (!effectiveConnectorId) {
           throw new Error(CONNECTOR_ERROR);
         }
-        setLoadingConnectorId?.(connectorId ?? null);
-        // sets isLoading to true
-        setPollStatus('running');
-        setIsLoadingPost(true);
-        setApproximateFutureTime(null);
 
-        // call the internal API to generate attack discoveries:
-        const rawResponse = await http.post(ATTACK_DISCOVERY, {
-          body: JSON.stringify(bodyWithOverrides),
-          version: API_VERSIONS.internal.v1,
+        const effectiveRequestBody = getRequestBody({
+          alertsIndexPattern,
+          anonymizationFields,
+          connectorId: effectiveConnectorId,
+          size,
+          traceOptions,
         });
 
-        setIsLoadingPost(false);
-        const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
+        const bodyWithOverrides = {
+          ...effectiveRequestBody,
+          connectorName,
+          end: effectiveEnd,
+          filter: effectiveFilter,
+          size: effectiveSize,
+          start: effectiveStart,
+        };
+        setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        if (!parsedResponse.success) {
-          throw new Error('Failed to parse the response');
-        }
+        // Check if workflow integration feature flag is enabled AND the per-space uiSetting opt-in
+        const attackDiscoveryWorkflowsEnabled =
+          (await featureFlags.getBooleanValue(
+            'securitySolution.attackDiscoveryWorkflowsEnabled',
+            true
+          )) && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
-        if (attackDiscoveryAlertsEnabled) {
-          toasts?.addSuccess({
-            title: i18n.GENERATION_STARTED_TITLE,
-            text: i18n.GENERATION_STARTED_TEXT(connectorName),
+        // Call appropriate API based on feature flag + per-space setting
+        if (attackDiscoveryWorkflowsEnabled) {
+          if (!alertsIndexPattern) {
+            throw new Error(ALERTS_INDEX_PATTERN_ERROR);
+          }
+
+          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
+            execution_mode: 'workflow',
+            trigger: effectiveTrigger,
+          });
+
+          await callInternalGenerateApi({
+            alertsIndexPattern,
+            apiConfig: {
+              actionTypeId: bodyWithOverrides.apiConfig.actionTypeId,
+              connectorId: bodyWithOverrides.apiConfig.connectorId,
+              model: bodyWithOverrides.apiConfig.model,
+            },
+            end: effectiveEnd,
+            filter: effectiveFilter,
+            http,
+            size: effectiveSize,
+            spaceId: spaceId ?? null,
+            start: effectiveStart,
+          });
+        } else {
+          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
+            execution_mode: 'legacy',
+            trigger: effectiveTrigger,
+          });
+
+          await callPublicGenerateApi({
+            body: bodyWithOverrides,
+            http,
           });
         }
+
+        // Show success toast
+        toasts?.addSuccess({
+          text: i18n.GENERATION_STARTED_TEXT(options?.overrideConnectorName ?? connectorName),
+          title: i18n.GENERATION_STARTED_TITLE,
+        });
       } catch (error) {
-        setIsLoadingPost(false);
         setIsLoading(false);
         toasts?.addDanger(error, {
           title: ERROR_GENERATING_ATTACK_DISCOVERIES,
@@ -247,32 +171,25 @@ export const useAttackDiscovery = ({
       }
     },
     [
-      attackDiscoveryAlertsEnabled,
+      alertsIndexPattern,
+      anonymizationFields,
       connectorId,
       connectorName,
+      featureFlags,
       http,
       invalidateGetAttackDiscoveryGenerations,
-      requestBody,
       setLoadingConnectorId,
-      setPollStatus,
       size,
+      spaceId,
+      telemetry,
       toasts,
+      traceOptions,
+      uiSettings,
     ]
   );
 
   return {
-    alertsContextCount,
-    approximateFutureTime,
-    attackDiscoveries,
-    didInitialFetch,
-    failureReason,
     fetchAttackDiscoveries,
-    generationIntervals,
     isLoading,
-    isLoadingPost,
-    lastUpdated,
-    onCancel: cancelAttackDiscovery,
-    replacements,
-    stats,
   };
 };

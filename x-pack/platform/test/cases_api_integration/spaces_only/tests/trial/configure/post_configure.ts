@@ -25,7 +25,6 @@ import {
 } from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

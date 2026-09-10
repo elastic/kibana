@@ -11,7 +11,6 @@ import { Space1AllAtSpace1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../.
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -127,7 +126,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
                 expectedStatusCode: 403,
                 expectedResponse: {
                   error: 'Forbidden',
-                  message: 'Unauthorized to find rules for any rule types',
+                  message: 'Unauthorized to find rules for any rule types.',
                   statusCode: 403,
                 },
               });

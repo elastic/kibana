@@ -39,14 +39,14 @@ describe('getHighlightedFieldsToDisplay', () => {
   });
 
   it('should return a list of unique fields', () => {
+    const ruleCustomHighlightedFields = ['customField1', 'customField2', 'host.name'];
     const result = getHighlightedFieldsToDisplay({
       eventCategories: {},
-      ruleCustomHighlightedFields: ['customField1', 'customField2', 'host.name'],
+      ruleCustomHighlightedFields,
     });
     expect(result).toEqual([
-      { id: 'customField1' },
-      { id: 'customField2' },
-      ...alwaysDisplayedFields,
+      ...ruleCustomHighlightedFields.map((item) => ({ id: item })),
+      ...alwaysDisplayedFields.filter((item) => !ruleCustomHighlightedFields.includes(item.id)),
     ]);
   });
 });

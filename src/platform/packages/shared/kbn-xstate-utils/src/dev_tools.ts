@@ -18,7 +18,8 @@ import {
   mapValues,
 } from 'lodash';
 
-export const isDevMode = () => process.env.NODE_ENV !== 'production';
+export const isDevMode = () =>
+  process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test';
 
 export const getDevToolsOptions = (): boolean | object =>
   isDevMode()

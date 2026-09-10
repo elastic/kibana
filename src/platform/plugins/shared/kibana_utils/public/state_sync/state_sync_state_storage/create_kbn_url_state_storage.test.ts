@@ -8,8 +8,10 @@
  */
 
 import { mockStorage } from '../../storage/hashed_item_store/mock';
-import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
-import { History, createBrowserHistory } from 'history';
+import type { IKbnUrlStateStorage } from './create_kbn_url_state_storage';
+import { createKbnUrlStateStorage } from './create_kbn_url_state_storage';
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs';
 import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -100,7 +102,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
       expect(() => urlStateStorage.get(key)).not.toThrow();
-      expect(cb).toBeCalledWith(expect.any(Error));
+      expect(cb).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should notify about errors throttled', () => {
@@ -110,7 +112,7 @@ describe('KbnUrlStateStorage', () => {
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
       urlStateStorage.get(key);
       urlStateStorage.get(key);
-      expect(cb).toBeCalledTimes(1);
+      expect(cb).toHaveBeenCalledTimes(1);
     });
 
     describe('withNotifyOnErrors integration', () => {
@@ -125,7 +127,7 @@ describe('KbnUrlStateStorage', () => {
         history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
         flushNotifyOnErrors();
-        expect(toasts.addError).toBeCalled();
+        expect(toasts.addError).toHaveBeenCalled();
       });
     });
   });
@@ -185,7 +187,7 @@ describe('KbnUrlStateStorage', () => {
         const cb = jest.fn();
         urlStateStorage = createKbnUrlStateStorage({ useHash: true, history, onSetError: cb });
         await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
-        expect(cb).toBeCalledWith(expect.any(Error));
+        expect(cb).toHaveBeenCalledWith(expect.any(Error));
       });
 
       describe('withNotifyOnErrors integration', () => {
@@ -197,7 +199,7 @@ describe('KbnUrlStateStorage', () => {
             ...withNotifyOnErrors(toasts),
           });
           await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
-          expect(toasts.addError).toBeCalled();
+          expect(toasts.addError).toHaveBeenCalled();
         });
       });
     });
@@ -291,7 +293,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       history.replace(`/?${key}=(ok:2,test:`); // malformed rison
       expect(() => urlStateStorage.get(key)).not.toThrow();
-      expect(cb).toBeCalledWith(expect.any(Error));
+      expect(cb).toHaveBeenCalledWith(expect.any(Error));
     });
 
     describe('withNotifyOnErrors integration', () => {
@@ -307,7 +309,7 @@ describe('KbnUrlStateStorage', () => {
         history.replace(`/?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
         flushNotifyOnErrors();
-        expect(toasts.addError).toBeCalled();
+        expect(toasts.addError).toHaveBeenCalled();
       });
     });
   });

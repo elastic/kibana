@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
-import { FieldsConfig } from './shared';
+import type { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 
@@ -35,7 +36,9 @@ const fieldsConfig: FieldsConfig = {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.separatorRequiredError', {
             defaultMessage: 'A value is required.',
-          })
+          }),
+          // Do not trim the separator value to avoid whitespace characters being removed
+          false
         ),
       },
     ],
@@ -52,7 +55,12 @@ export const Join: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
+      <UseField
+        config={fieldsConfig.separator}
+        component={Field}
+        path="fields.separator"
+        data-test-subj="separatorValueField"
+      />
 
       <TargetField />
     </>

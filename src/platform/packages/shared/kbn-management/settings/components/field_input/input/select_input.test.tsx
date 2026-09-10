@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { SelectInput, SelectInputProps } from './select_input';
+import type { SelectInputProps } from './select_input';
+import { SelectInput } from './select_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
 
@@ -74,7 +75,7 @@ describe('SelectInput', () => {
       optionValues: [],
     } as SelectInputProps;
 
-    expect(() => render(wrap(<SelectInput {...props} />))).toThrowError(
+    expect(() => render(wrap(<SelectInput {...props} />))).toThrow(
       'non-empty `optionValues` are required for `SelectInput`.'
     );
     consoleMock.mockRestore();

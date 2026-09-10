@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type { SecurityLicenseFeatures } from './license_features';
 

@@ -19,7 +19,7 @@
       "type": "master",
       "isOnline": true,
       "nodeTypeLabel": "Master Node",
-      "nodeTypeClass": "starFilled",
+      "nodeTypeClass": "starFill",
       "shardCount": 6,
       "node_cgroup_quota": {
         "metric": {

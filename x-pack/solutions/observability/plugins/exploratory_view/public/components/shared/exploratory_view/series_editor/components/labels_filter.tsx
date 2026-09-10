@@ -6,25 +6,27 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverTitle,
   EuiFilterButton,
   EuiPopover,
   EuiIcon,
   EuiButtonEmpty,
-  EuiSelectableOption,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { EuiSelectable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FilterProps } from '../columns/filter_expanded';
+import type { FilterProps } from '../columns/filter_expanded';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { FilterValuesList } from './filter_values_list';
 import { useFilterValues } from '../use_filter_values';
 
 export function LabelsFieldFilter(props: FilterProps) {
   const { series } = props;
+  const labelsFilterPopoverTitleId = useGeneratedHtmlId();
 
   const [query, setQuery] = useState('');
 
@@ -40,7 +42,7 @@ export function LabelsFieldFilter(props: FilterProps) {
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isPopoverOpen}
       onClick={onButtonClick}
@@ -57,7 +59,7 @@ export function LabelsFieldFilter(props: FilterProps) {
     return {
       label: field.name,
       searchableLabel: field.name,
-      append: <EuiIcon type="arrowRight" />,
+      append: <EuiIcon type="chevronSingleRight" aria-hidden={true} />,
       showIcons: false,
     };
   });
@@ -73,13 +75,25 @@ export function LabelsFieldFilter(props: FilterProps) {
   };
 
   return (
-    <EuiPopover button={button} closePopover={closePopover} isOpen={isPopoverOpen}>
+    <EuiPopover
+      aria-label={
+        selectedLabel
+          ? undefined
+          : i18n.translate('xpack.exploratoryView.labelsFieldFilter.popoverAriaLabel', {
+              defaultMessage: 'Select label field',
+            })
+      }
+      aria-labelledby={selectedLabel ? labelsFilterPopoverTitleId : undefined}
+      button={button}
+      closePopover={closePopover}
+      isOpen={isPopoverOpen}
+    >
       {selectedLabel ? (
         <>
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={labelsFilterPopoverTitleId}>
             <EuiButtonEmpty
               data-test-subj="o11yLabelsFieldFilterButton"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               onClick={() => setSelectedLabel('')}
             >

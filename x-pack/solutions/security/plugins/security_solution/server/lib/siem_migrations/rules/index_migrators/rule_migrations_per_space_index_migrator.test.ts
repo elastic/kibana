@@ -6,9 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Adapters, StoredSiemMigration } from '../types';
+import type { RuleMigrationAdapters, StoredRuleMigration } from '../types';
 import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
-import type { SearchResponseBody } from 'elasticsearch-8.x/lib/api/types';
+import type { estypes } from 'elasticsearch-8.x';
+
+type SearchResponseBody<TDocument = unknown> = estypes.SearchResponseBody<TDocument>;
 
 const mockRuleIndexAggregationsResult = {
   aggregations: {
@@ -33,7 +35,7 @@ const mockMigrationsIndexResult = {
   hits: {
     hits: [],
   },
-} as unknown as SearchResponseBody<StoredSiemMigration>;
+} as unknown as SearchResponseBody<StoredRuleMigration>;
 
 const getMockedESSearchFunction = (
   rulesIndexAggResult: typeof mockRuleIndexAggregationsResult = mockRuleIndexAggregationsResult,
@@ -70,7 +72,7 @@ const ruleMigrationIndexAdapters = {
       `.kibana-siem-rule-migrations-migrations-${spaceId}`,
     createIndex: jest.fn(),
   },
-} as unknown as Adapters;
+} as unknown as RuleMigrationAdapters;
 
 describe('RuleMigrationSpaceIndexMigrator', () => {
   beforeEach(() => {
@@ -114,7 +116,7 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
           },
         ],
       },
-    } as unknown as SearchResponseBody<StoredSiemMigration>;
+    } as unknown as SearchResponseBody<StoredRuleMigration>;
     esClientMock.search.mockImplementation(
       getMockedESSearchFunction(
         mockRuleIndexAggregationsResult,
@@ -164,7 +166,7 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
           },
         ],
       },
-    } as unknown as SearchResponseBody<StoredSiemMigration>;
+    } as unknown as SearchResponseBody<StoredRuleMigration>;
 
     esClientMock.search.mockImplementation(
       getMockedESSearchFunction(

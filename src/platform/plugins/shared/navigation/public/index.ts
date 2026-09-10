@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
 }
@@ -21,6 +21,8 @@ export type {
   SolutionType,
   AddSolutionNavigationArg,
 } from './types';
+
+export { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '../common';
 
 // Export plugin after all other imports
 import { NavigationPublicPlugin } from './plugin';

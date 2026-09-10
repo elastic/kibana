@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { makePing } from './make_ping';
-import { TlsProps } from './make_tls';
+import type { TlsProps } from './make_tls';
 
 interface CheckProps {
   es: Client;

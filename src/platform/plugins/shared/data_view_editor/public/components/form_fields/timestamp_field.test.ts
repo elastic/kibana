@@ -8,7 +8,7 @@
  */
 
 import { requireTimestampOptionValidator } from './timestamp_field';
-import { TimestampOption } from '../../types';
+import type { TimestampOption } from '../../types';
 
 const noOptions: TimestampOption[] = [];
 const options: TimestampOption[] = [

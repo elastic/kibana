@@ -7,14 +7,13 @@
 
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
-import { EndpointEntryNested, endpointEntryNested } from '.';
+import type { EndpointEntryNested } from '.';
+import { endpointEntryNested } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEndpointEntryNestedMock } from './index.mock';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
-import {
-  nonEmptyEndpointNestedEntriesArray,
-  NonEmptyEndpointNestedEntriesArray,
-} from '../non_empty_nested_entries_array';
+import type { NonEmptyEndpointNestedEntriesArray } from '../non_empty_nested_entries_array';
+import { nonEmptyEndpointNestedEntriesArray } from '../non_empty_nested_entries_array';
 import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import { getEntryExistsMock } from '../../entries_exist/index.mock';
 

@@ -22,8 +22,16 @@ import type {
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneIsolateHostParams,
   SentinelOneExecuteScriptParams,
-} from '../../../common/sentinelone/types';
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetRemoteScriptResultsParams,
+  SentinelOneDownloadRemoteScriptResultsParams,
+  SentinelOneGetRemoteScriptResultsApiResponse,
+  SentinelOneGetRemoteScriptStatusApiResponse,
+} from '@kbn/connector-schemas/sentinelone';
 import {
+  SUB_ACTION,
   SentinelOneExecuteScriptParamsSchema,
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
@@ -45,19 +53,8 @@ import {
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsResponseSchema,
   SentinelOneApiDoNotValidateResponsesSchema,
-} from '../../../common/sentinelone/schema';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import type {
-  SentinelOneFetchAgentFilesParams,
-  SentinelOneDownloadAgentFileParams,
-  SentinelOneGetActivitiesParams,
-  SentinelOneGetRemoteScriptResultsParams,
-  SentinelOneDownloadRemoteScriptResultsParams,
-  SentinelOneGetRemoteScriptResultsApiResponse,
-  SentinelOneGetRemoteScriptStatusApiResponse,
-} from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 
-export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
 
 export class SentinelOneConnector extends SubActionConnector<
@@ -388,6 +385,8 @@ export class SentinelOneConnector extends SubActionConnector<
         method: 'get',
         responseType: 'stream',
         responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       },
       connectorUsageCollector
     );
@@ -411,6 +410,8 @@ export class SentinelOneConnector extends SubActionConnector<
           ...req.params,
           APIToken: this.secrets.token,
         },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
       },
       connectorUsageCollector
     );
@@ -441,14 +442,13 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async getRemoteScripts(
-    payload: SentinelOneGetRemoteScriptsParams,
+    payload: Partial<SentinelOneGetRemoteScriptsParams>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptsResponse> {
     return this.sentinelOneApiRequest(
       {
         url: this.urls.remoteScripts,
         params: {
-          limit: API_MAX_RESULTS,
           ...payload,
         },
         responseSchema: SentinelOneGetRemoteScriptsResponseSchema,

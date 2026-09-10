@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('index_patterns', () => {
     loadTestFile(require.resolve('./es_errors'));
     loadTestFile(require.resolve('./existing_indices_route'));
     loadTestFile(require.resolve('./fields_for_wildcard_route'));
-    loadTestFile(require.resolve('./data_views_crud'));
     loadTestFile(require.resolve('./scripted_fields_crud'));
     loadTestFile(require.resolve('./fields_api'));
-    loadTestFile(require.resolve('./default_index_pattern'));
     loadTestFile(require.resolve('./runtime_fields_crud'));
     loadTestFile(require.resolve('./integration'));
     loadTestFile(require.resolve('./deprecations'));

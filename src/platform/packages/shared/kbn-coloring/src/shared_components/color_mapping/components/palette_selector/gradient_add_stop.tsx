@@ -17,11 +17,11 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { IKbnPalette } from '@kbn/palettes';
-import { ColorMapping } from '../../config';
+import type { IKbnPalette } from '@kbn/palettes';
+import type { ColorMapping } from '../../config';
 import { addGradientColorStep } from '../../state/color_mapping';
 import { colorPickerVisibility } from '../../state/ui';
 
@@ -96,6 +96,7 @@ export function AddStop({
               type="plus"
               height={16}
               width={16}
+              aria-hidden={true}
               css={css`
                 position: absolute;
                 top: 0;

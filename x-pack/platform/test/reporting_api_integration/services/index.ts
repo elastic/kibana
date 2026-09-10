@@ -7,7 +7,7 @@
 
 import { services as xpackServices } from '../../functional/services';
 import { services as apiIntegrationServices } from '../../api_integration/services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { createUsageServices } from './usage';
 import { createScenarios } from './scenarios';
 

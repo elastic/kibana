@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import type { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
   KibanaRequestState,
@@ -68,14 +68,11 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       }
 
       if (preRoutingResult.isRewriteUrl(result)) {
-        const appState = request.app as KibanaRequestState;
-        appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
-
-        const { url } = result;
-        request.setUrl(url);
-
-        // We should update raw request as well since it can be proxied to the old platform
-        request.raw.req.url = url;
+        const app = request.app as KibanaRequestState;
+        app.rewrittenUrl = app.rewrittenUrl ?? request.url;
+        request.setUrl(result.url);
+        // Also update the raw request URL so legacy-platform proxying sees the rewritten URL.
+        request.raw.req.url = result.url;
         return responseToolkit.continue;
       }
       throw new Error(

@@ -11,7 +11,7 @@ import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@ela
 
 import { i18n } from '@kbn/i18n';
 import { ResultField } from './result_field';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 
 interface Props {
   documentId: string;
@@ -47,6 +47,8 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
             fieldName={field.fieldName}
             fieldValue={field.fieldValue}
             fieldType={field.fieldType}
+            dimensions={field.dimensions}
+            embeddings={field.embeddings}
             key={field.fieldName}
           />
         ))}

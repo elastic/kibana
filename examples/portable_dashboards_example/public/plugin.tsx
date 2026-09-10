@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
@@ -47,18 +47,13 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       image: img,
     });
 
-    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
       const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });
   }
 
-  public async start(core: CoreStart, deps: StartDeps) {
-    deps.dashboard.registerDashboardPanelPlacementSetting(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
-      width: 48,
-      height: 12,
-    }));
-  }
+  public start() {}
 
   public stop() {}
 }

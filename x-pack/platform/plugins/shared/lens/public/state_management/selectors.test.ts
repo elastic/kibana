@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LensAppState, selectTriggerApplyChanges, selectChangesApplied } from '.';
+import type { LensAppState } from '@kbn/lens-common';
+import { selectTriggerApplyChanges, selectChangesApplied } from '.';
 
 describe('lens selectors', () => {
   describe('selecting changes applied', () => {

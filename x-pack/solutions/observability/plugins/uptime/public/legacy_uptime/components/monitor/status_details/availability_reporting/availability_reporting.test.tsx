@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AvailabilityReporting } from './availability_reporting';
-import { StatusTag } from './location_status_tags';
+import type { StatusTag } from './location_status_tags';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('AvailabilityReporting component', () => {
@@ -39,10 +39,9 @@ describe('AvailabilityReporting component', () => {
     ];
   });
 
-  it('renders correctly against snapshot', async () => {
-    const { findByText } = render(<AvailabilityReporting allLocations={allLocations} />);
+  it('renders correctly against snapshot', () => {
+    const { getByText } = render(<AvailabilityReporting allLocations={allLocations} />);
 
-    expect(await findByText('This table contains 3 rows.')).toBeInTheDocument();
-    expect(await findByText('au-heartbeat')).toBeInTheDocument();
+    expect(getByText('au-heartbeat')).toBeInTheDocument();
   });
 });

@@ -11,19 +11,24 @@ import React from 'react';
 import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiLink } from '@elastic/eui';
-import { ActionType } from '@kbn/actions-types';
+import type { ActionType } from '@kbn/actions-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../common/constants';
 
 export const getLicenseCheckResult = (actionType: ActionType) => {
+  const license = actionType.minimumLicenseRequired;
+  const minimumLicenseRequired = upperFirst(license);
+
   return {
     isEnabled: false,
     message: i18n.translate(
       'alertsUIShared.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage',
       {
-        defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
+        defaultMessage:
+          'This connector requires {license, select, enterprise {an Enterprise} other {a {minimumLicenseRequired}}} license.',
         values: {
-          minimumLicenseRequired: upperFirst(actionType.minimumLicenseRequired),
+          license,
+          minimumLicenseRequired,
         },
       }
     ),
@@ -33,9 +38,11 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
         title={i18n.translate(
           'alertsUIShared.licenseCheck.actionTypeDisabledByLicenseMessageTitle',
           {
-            defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
+            defaultMessage:
+              'This feature requires {license, select, enterprise {an Enterprise} other {a {minimumLicenseRequired}}} license.',
             values: {
-              minimumLicenseRequired: upperFirst(actionType.minimumLicenseRequired),
+              license,
+              minimumLicenseRequired,
             },
           }
         )}

@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { entries, findLastIndex, intersection, isNil } from 'lodash';
-import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
-import type { ESQLCommandOption } from '@kbn/esql-ast';
-import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
-import { isOptionItem, isColumnItem, isFunctionItem } from '@kbn/esql-validation-autocomplete';
+import { entries, findLastIndex, isNil } from 'lodash';
+import type {
+  ParseAggregationResultsOpts,
+  ParsedAggregationBucket,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLCommandOption, ESQLAstCommand } from '@elastic/esql/types';
+import { Parser, isOptionNode, isColumn, isFunctionExpression, isAssignment } from '@elastic/esql';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
+import type {
+  EsqlEsqlShardFailure,
+  EsqlQueryResponse,
+  FieldValue,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -39,46 +46,74 @@ interface EsqlQueryHits {
 type EsqlResultRow = Array<string | null>;
 
 const ESQL_DOCUMENT_ID = 'esql_query_document';
+const CHUNK_SIZE = 100;
 
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  is_partial?: boolean;
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const ALERT_ID_COLUMN = 'Alert ID';
 export const ALERT_ID_SUGGESTED_MAX = 10;
 
-export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
-  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
-    acc[column.name] = row[i];
-
-    return acc;
-  }, {});
+export const rowToDocument = (
+  columns: EsqlQueryResponse['columns'],
+  row: FieldValue[]
+): EsqlDocument => {
+  const doc: EsqlDocument = {};
+  for (let i = 0; i < columns.length; ++i) {
+    doc[columns[i].name] = row[i]?.toString() || null;
+  }
+  return doc;
 };
 
-export const getEsqlQueryHits = (
-  table: EsqlTable,
+// The union type "EsqlTable | EsqlQueryResponse" is needed in this file to support both the UI test query funtionality and the server side execution of the rule.
+// The UI uses the data plugin to fetch results and while the server side execution calls the esClient directly.
+export const getEsqlQueryHits = async (
+  table: EsqlTable | EsqlQueryResponse,
   query: string,
-  isGroupAgg: boolean
-): EsqlQueryHits => {
+  isGroupAgg: boolean,
+  isPreview: boolean = false
+): Promise<EsqlQueryHits> => {
   if (isGroupAgg) {
     const alertIdFields = getAlertIdFields(query, table.columns);
-    return toGroupedEsqlQueryHits(table, alertIdFields);
+    return await toGroupedEsqlQueryHits(table, alertIdFields, isPreview);
   }
-  return toEsqlQueryHits(table);
+  return await toEsqlQueryHits(table, isPreview);
 };
 
-export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
+export const toEsqlQueryHits = async (
+  table: EsqlTable | EsqlQueryResponse,
+  isPreview: boolean = false,
+  chunkSize: number = CHUNK_SIZE
+): Promise<EsqlQueryHits> => {
   const hits: EsqlHit[] = [];
   const rows: EsqlDocument[] = [];
-  for (const row of table.values) {
+  for (let r = 0; r < table.values.length; r++) {
+    const row = table.values[r];
     const document = rowToDocument(table.columns, row);
     hits.push({
       _id: ESQL_DOCUMENT_ID,
       _index: '',
       _source: document,
     });
-    rows.push(rows.length > 0 ? document : { [ALERT_ID_COLUMN]: ActionGroupId, ...document });
+    if (isPreview) {
+      rows.push(
+        rows.length > 0 ? document : Object.assign({ [ALERT_ID_COLUMN]: ActionGroupId }, document)
+      );
+    }
+
+    if (r !== 0 && r % chunkSize === 0) {
+      await new Promise(setImmediate);
+    }
   }
 
   return {
@@ -96,21 +131,35 @@ export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
       },
     },
     rows,
-    cols: getColumnsForPreview(table.columns),
+    cols: isPreview ? getColumnsForPreview(table.columns) : [],
   };
 };
 
-export const toGroupedEsqlQueryHits = (
-  table: EsqlTable,
-  alertIdFields: string[]
-): EsqlQueryHits => {
+export const toGroupedEsqlQueryHits = async (
+  table: EsqlTable | EsqlQueryResponse,
+  alertIdFields: string[],
+  isPreview: boolean = false,
+  chunkSize: number = CHUNK_SIZE
+): Promise<EsqlQueryHits> => {
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
-  const mappedAlertIds: Record<string, Array<string | null>> = {};
-  const groupedHits = table.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
+  const mappedAlertIds: Record<string, string[]> = {};
+  const mappedAlertIdFields: Record<string, string[]> = {};
+  const groupedHits: Record<string, EsqlHit[]> = {};
+  for (let r = 0; r < table.values.length; r++) {
+    const row = table.values[r];
     const document = rowToDocument(table.columns, row);
-    const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
+    // Single pass keeps fields/values index-aligned (bucket keyFields/key) and narrows out nulls.
+    const filteredAlertIdFields: string[] = [];
+    const mappedAlertId: string[] = [];
+    for (const field of alertIdFields) {
+      const value = document[field];
+      if (!isNil(value)) {
+        filteredAlertIdFields.push(field);
+        mappedAlertId.push(value);
+      }
+    }
     if (mappedAlertId.length > 0) {
       const alertId = mappedAlertId.join(',');
       const hit = {
@@ -118,27 +167,35 @@ export const toGroupedEsqlQueryHits = (
         _index: '',
         _source: document,
       };
-      if (acc[alertId]) {
+      if (groupedHits[alertId]) {
         duplicateAlertIds.add(alertId);
-        acc[alertId].push(hit);
+        groupedHits[alertId].push(hit);
       } else {
-        acc[alertId] = [hit];
+        groupedHits[alertId] = [hit];
         mappedAlertIds[alertId] = mappedAlertId;
+        mappedAlertIdFields[alertId] = filteredAlertIdFields;
       }
-      rows.push({ [ALERT_ID_COLUMN]: alertId, ...document });
 
-      if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
-        longAlertIds.add(alertId);
+      if (isPreview) {
+        rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
+
+        if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
+          longAlertIds.add(alertId);
+        }
+      }
+
+      if (r !== 0 && r % chunkSize === 0) {
+        await new Promise(setImmediate);
       }
     }
-    return acc;
-  }, {});
+  }
 
-  const aggregations = {
+  const aggregations: { groupAgg: { buckets: ParsedAggregationBucket[] } } = {
     groupAgg: {
       buckets: entries(groupedHits).map(([key, value]) => {
         return {
           key: mappedAlertIds[key],
+          keyFields: mappedAlertIdFields[key],
           doc_count: value.length,
           topHitsAgg: {
             hits: {
@@ -149,7 +206,6 @@ export const toGroupedEsqlQueryHits = (
       }),
     },
   };
-
   return {
     results: {
       isCountAgg: false,
@@ -166,21 +222,21 @@ export const toGroupedEsqlQueryHits = (
     duplicateAlertIds,
     longAlertIds,
     rows,
-    cols: getColumnsForPreview(table.columns),
+    cols: isPreview ? getColumnsForPreview(table.columns) : [],
   };
 };
 
-export const transformDatatableToEsqlTable = (datatable: Datatable): EsqlTable => {
-  const columns: EsqlResultColumn[] = datatable.columns.map((c) => ({
-    name: c.id,
-    type: c.meta.type,
-  }));
-  const values: EsqlResultRow[] = datatable.rows.map((r) => Object.values(r));
+export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable => {
+  const columns: EsqlResultColumn[] = datatable.columns;
+  // Convert each value to string or null to match EsqlResultRow type
+  const values: EsqlResultRow[] = datatable.values.map(
+    (row) => row.map((v) => (v === null || typeof v === 'string' ? v : String(v))) as EsqlResultRow
+  );
   return { columns, values };
 };
 
 export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[]): string[] => {
-  const { root } = parse(query);
+  const { root } = Parser.parse(query);
   const commands = root.commands;
   const columns = resultColumns.map((c) => c.name);
 
@@ -191,7 +247,7 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
     // Check for BY option and get fields
     const byOption = getByOption(statsCommand);
     if (byOption) {
-      let fields = getFields(byOption);
+      let fields = getFields(byOption, query);
 
       // Check if any STATS fields were renamed
       const renameCommands = getRenameCommands(commands.slice(statsCommandIndex));
@@ -223,21 +279,30 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
 };
 
 const getLastStatsCommandIndex = (commands: ESQLAstCommand[]): number =>
-  findLastIndex(commands, (c) => c.name === 'stats');
+  findLastIndex(commands, (c) => c.name === 'stats' || c.name === 'inline stats');
 
 const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined => {
   for (const statsArg of astCommand.args) {
-    if (isOptionItem(statsArg) && statsArg.name === 'by') {
+    if (isOptionNode(statsArg) && statsArg.name === 'by') {
       return statsArg;
     }
   }
 };
 
-const getFields = (option: ESQLCommandOption): string[] => {
+const getFields = (option: ESQLCommandOption, query: string): string[] => {
   const fields: string[] = [];
   for (const arg of option.args) {
-    if (isColumnItem(arg)) {
+    if (isColumn(arg)) {
       fields.push(arg.name);
+      // Handle columns renamed inline in the BY clause
+    } else if (isAssignment(arg)) {
+      const { renamed } = getArgsFromRenameFunction(arg);
+      if (isColumn(renamed)) {
+        fields.push(renamed.name);
+      }
+      // Handle unnamed grouping expressions in the BY clause
+    } else if (!Array.isArray(arg) && arg.location) {
+      fields.push(query.substring(arg.location.min, arg.location.max + 1));
     }
   }
   return fields;
@@ -247,19 +312,17 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
   commands.filter((c) => c.name === 'rename');
 
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
-  return astCommands.reduce((updatedFields, command) => {
+  for (const command of astCommands) {
     for (const renameArg of command.args) {
-      if (isFunctionItem(renameArg)) {
+      if (isFunctionExpression(renameArg)) {
         const { original, renamed } = getArgsFromRenameFunction(renameArg);
-        if (isColumnItem(original) && isColumnItem(renamed)) {
-          updatedFields = updatedFields.map((field) =>
-            field === original.name ? renamed.name : field
-          );
+        if (isColumn(original) && isColumn(renamed)) {
+          fields = fields.map((field) => (field === original.name ? renamed.name : field));
         }
       }
     }
-    return updatedFields;
-  }, fields);
+  }
+  return fields;
 };
 
 const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | undefined => {
@@ -267,7 +330,7 @@ const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | unde
 
   if (fromCommand) {
     for (const fromArg of fromCommand.args) {
-      if (isOptionItem(fromArg) && fromArg.name === 'metadata') {
+      if (isOptionNode(fromArg) && fromArg.name === 'metadata') {
         return fromArg;
       }
     }
@@ -279,7 +342,7 @@ const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | unde
 const getIdField = (option: ESQLCommandOption): string[] => {
   const fields: string[] = [];
   for (const arg of option.args) {
-    if (isColumnItem(arg) && arg.name === '_id') {
+    if (isColumn(arg) && arg.name === '_id') {
       fields.push(arg.name);
       return fields;
     }
@@ -295,4 +358,9 @@ const getColumnsForPreview = (
     cols.push({ id: c.name, actions: false });
   }
   return cols;
+};
+
+const intersection = (fields: string[], columns: string[]): string[] => {
+  const columnSet = new Set(columns);
+  return fields.filter((item) => columnSet.has(item));
 };

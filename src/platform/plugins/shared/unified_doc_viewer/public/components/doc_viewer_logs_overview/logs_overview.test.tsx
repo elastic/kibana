@@ -11,23 +11,30 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LogsOverview, LogsOverviewApi, LogsOverviewProps } from './logs_overview';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { LogsOverviewApi, LogsOverviewProps } from './logs_overview';
+import { LogsOverview } from './logs_overview';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { hasErrorFields } from './utils/has_error_fields';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({
-    children,
-    dangerouslySetInnerHTML,
-  }: {
-    children?: string;
-    dangerouslySetInnerHTML?: { __html: string };
-  }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+    <code data-test-subj="codeBlock">{children ?? ''}</code>
+  ),
+}));
+
+jest.mock('./utils/has_error_fields', () => ({
+  hasErrorFields: jest.fn(),
+}));
+
+jest.mock('./sub_components/similar_errors', () => ({
+  SimilarErrors: () => <div data-test-subj="docViewerSimilarErrorsSection" />,
 }));
 
 const DATASET_NAME = 'logs.overview';
@@ -64,7 +71,10 @@ const dataView = {
       })),
   },
   metaFields: ['_index', '_score'],
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({
+    convertToText: (value: unknown) => value,
+    convertToReact: (value: unknown) => value,
+  })),
 } as unknown as DataView;
 
 dataView.fields.getByName = (name: string) => {
@@ -141,20 +151,43 @@ setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
 );
 
+const indexes: ObservabilityIndexes = {
+  apm: {
+    errors: 'apm-error-index',
+    traces: 'apm-trace-index',
+  },
+  logs: 'logs-index',
+};
+
 const renderLogsOverview = (
   props: Partial<LogsOverviewProps> = {},
   ref?: (api: LogsOverviewApi) => void
 ) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider highContrastMode={false}>
-      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} />
+      <LogsOverview
+        ref={ref}
+        dataView={dataView}
+        hit={fullHit}
+        indexes={indexes}
+        profileId="test-profile"
+        {...props}
+      />
     </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<LogsOverviewProps>) =>
     baseRerender(
       <EuiProvider highContrastMode={false}>
-        <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+        <LogsOverview
+          ref={ref}
+          dataView={dataView}
+          hit={fullHit}
+          indexes={indexes}
+          profileId="test-profile"
+          {...props}
+          {...rerenderProps}
+        />
       </EuiProvider>
     );
 
@@ -162,8 +195,12 @@ const renderLogsOverview = (
 };
 
 describe('LogsOverview', () => {
-  beforeEach(() => renderLogsOverview());
-
+  beforeEach(
+    async () =>
+      await act(async () => {
+        renderLogsOverview();
+      })
+  );
   describe('Header section', () => {
     it('should display a timestamp badge', async () => {
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewTimestamp')).toBeInTheDocument();
@@ -180,35 +217,32 @@ describe('LogsOverview', () => {
 
   describe('Highlights section', () => {
     it('should load the service container with all fields', async () => {
-      expect(
-        screen.queryByTestId('unifiedDocViewLogsOverviewHighlightSectionServiceInfra')
-      ).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewService')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTrace')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewServiceName')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTraceID')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewHostName')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewClusterName')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewResourceId')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewOrchestratorClusterName')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewOrchestratorResourceID')
+      ).toBeInTheDocument();
     });
 
     it('should load the cloud container with all fields', async () => {
-      expect(
-        screen.queryByTestId('unifiedDocViewLogsOverviewHighlightSectionCloud')
-      ).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudProvider')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudRegion')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudAz')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudProjectId')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudInstanceId')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewCloudAvailabilityZone')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudProjectID')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudInstanceID')).toBeInTheDocument();
     });
 
     it('should load the other container with all fields', async () => {
-      expect(
-        screen.queryByTestId('unifiedDocViewLogsOverviewHighlightSectionOther')
-      ).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewLogPathFile')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewNamespace')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewDataset')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewLogShipper')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewShipper')).toBeInTheDocument();
     });
   });
 
@@ -352,7 +386,8 @@ describe('LogsOverview with accordion state', () => {
 describe('LogsOverview with APM links', () => {
   describe('Highlights section', () => {
     describe('When APM is enabled', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
+        Element.prototype.scrollIntoView = jest.fn();
         setUnifiedDocViewerServices(
           merge(
             mockUnifiedDocViewerServices,
@@ -361,7 +396,9 @@ describe('LogsOverview with APM links', () => {
             })
           )
         );
-        renderLogsOverview();
+        await act(async () => {
+          renderLogsOverview();
+        });
       });
       it('should not render service name link', () => {
         expect(
@@ -369,10 +406,12 @@ describe('LogsOverview with APM links', () => {
         ).not.toBeInTheDocument();
       });
 
-      it('should render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).toBeInTheDocument();
+      it('should render trace id without a link', () => {
+        const traceId = screen.getByTestId('unifiedDocViewLogsOverviewTraceID');
+        expect(traceId).toBeInTheDocument();
+
+        const traceLink = traceId.querySelector('a');
+        expect(traceLink).toBeNull();
       });
     });
   });
@@ -381,14 +420,56 @@ describe('LogsOverview with APM links', () => {
 describe('LogsOverview content breakdown', () => {
   it('should render message value', async () => {
     const message = 'This is a message';
-    renderLogsOverview({ hit: buildHit({ message }) });
-    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
+    await act(async () => {
+      renderLogsOverview({ hit: buildHit({ message }) });
+    });
+    const codeBlock = screen.queryByTestId('codeBlock');
+    expect(codeBlock).toBeInTheDocument();
+    expect(codeBlock?.textContent).toBe(message);
   });
 
   it('should render formatted JSON message value', async () => {
     const json = { foo: { bar: true } };
     const message = JSON.stringify(json);
-    renderLogsOverview({ hit: buildHit({ message }) });
-    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
+    await act(async () => {
+      renderLogsOverview({ hit: buildHit({ message }) });
+    });
+    const codeBlock = screen.queryByTestId('codeBlock');
+    expect(codeBlock).toBeInTheDocument();
+    expect(codeBlock?.textContent).toBe(JSON.stringify(json, null, 2));
+  });
+});
+
+describe('LogsOverview SimilarErrors section', () => {
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+    jest.clearAllMocks();
+  });
+
+  it('should render SimilarErrors section when traceId is present and hasErrorFields returns true', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(true);
+
+    renderLogsOverview({ hit: buildHit({ 'trace.id': '123' }) });
+
+    expect(hasErrorFields).toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).toBeInTheDocument();
+  });
+
+  it('should not render SimilarErrors section when hasErrorFields returns false', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(false);
+
+    renderLogsOverview({ hit: buildHit() });
+
+    expect(hasErrorFields).toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).not.toBeInTheDocument();
+  });
+
+  it('should not render SimilarErrors section when traceId is not present', () => {
+    (hasErrorFields as jest.Mock).mockReturnValue(false);
+
+    renderLogsOverview({ hit: buildHit({ 'trace.id': undefined }) });
+
+    expect(hasErrorFields).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('docViewerSimilarErrorsSection')).not.toBeInTheDocument();
   });
 });

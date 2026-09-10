@@ -43,10 +43,10 @@ ALWAYS use this tool to generate ES|QL queries and never generate ES|QL any othe
     },
   },
   {
-    promptId: 'AskAboutEsqlTool',
+    promptId: 'AskAboutESQLTool',
     promptGroupId,
     prompt: {
-      default: `You MUST use the "AskAboutEsqlTool" function when the user:
+      default: `You MUST use the "AskAboutESQLTool" function when the user:
 - asks for help with ES|QL
 - asks about ES|QL syntax
 - asks for ES|QL examples
@@ -70,8 +70,46 @@ Never use this tool when they user wants to generate a ES|QL for their data.`,
     promptId: 'KnowledgeBaseRetrievalTool',
     promptGroupId,
     prompt: {
-      default:
-        "Call this for fetching details from the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Call this function when the user asks for information about themself, like 'what is my favorite...' or 'using my saved....'. Input must always be the free-text query on a single line, with no other text. You are welcome to re-write the query to be a summary of items/things to search for in the knowledge base, as a vector search will be performed to return similar results when requested. If the results returned do not look relevant, disregard and tell the user you were unable to find the information they were looking for. All requests include a `knowledge history` section which includes some existing knowledge of the user. DO NOT CALL THIS FUNCTION if the `knowledge history` sections appears to be able to answer the user's query.",
+      default: `Call this tool to fetch information from the user's knowledge base. The knowledge base contains useful details the user has saved between conversation contexts.
+
+Use this tool **only in the following cases**:
+
+1. When the user asks a question about their personal, organizational, saved, or previously provided information/knowledge, such as:
+- "What was the detection rule I saved for unusual AWS API calls?"
+- "Using my saved investigation notes, what did I find about the incident last Thursday?"
+- "What are my preferred index patterns?"
+- "What did I say about isolating hosts?"
+- "What is my favorite coffee spot near the office?" *(non-security example)*
+
+2. Always call this tool when the user's query includes phrases like:**
+- "my favorite"
+- "what did I say about"
+- "my saved"
+- "my notes"
+- "my preferences"
+- "using my"
+- "what do I know about"
+- "based on my saved knowledge"
+
+3. When you need to retrieve saved information the user has stored in their knowledge base, whether it's security-related or not.
+
+**Do NOT call this tool if**:
+- The \`knowledge history\` section already answers the user's question.
+- The user's query is about general knowledge not specific to their saved information.
+
+**When calling this tool**:
+- Provide only the user's free-text query as the input, rephrased if helpful to clarify the search intent.
+- Format the input as a single, clean line of text.
+
+Example:
+- User query: "What did I note about isolating endpoints last week?"
+- Tool input: "User notes about isolating endpoints."
+
+If no relevant information is found, inform the user you could not locate the requested information.
+
+**Important**:
+- Always check the \`knowledge history\` section first for an answer.
+- Only call this tool if the user's query is explicitly about their own saved data or preferences.`,
     },
   },
   {
@@ -99,10 +137,58 @@ Never use this tool when they user wants to generate a ES|QL for their data.`,
     },
   },
   {
+    promptId: 'EntityRiskScoreTool',
+    promptGroupId,
+    prompt: {
+      default:
+        "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.",
+    },
+  },
+  {
     promptId: 'defendInsightsTool',
     promptGroupId,
     prompt: {
       default: 'Call this for Elastic Defend insights.',
+    },
+  },
+  {
+    promptId: 'IntegrationKnowledgeTool',
+    promptGroupId,
+    prompt: {
+      default:
+        'Call this for knowledge from Fleet-installed integrations, which contains information on how to configure and use integrations for data ingestion.',
+    },
+  },
+  {
+    promptId: 'AssetMisconfigurationsTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to retrieve security misconfigurations and compliance violations for a specific cloud asset or resource.
+
+**When to use this tool:**
+- When the user asks about misconfigurations, compliance failures, or security findings for a specific asset
+- When viewing an entity and the user wants to know about security issues
+- When the user provides an ARN (Amazon Resource Name), Azure Resource ID, or GCP Resource Name
+
+**Important - Resource ID format:**
+The resource_id parameter must be the full cloud resource identifier (eg. ARN, Azure Resource ID, or GCP Resource Name), NOT an Elasticsearch document ID.
+
+Examples of CORRECT resource IDs:
+- AWS: "arn:aws:ec2:us-east-1:123456789:security-group/sg-abc123"
+- Azure: "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Compute/virtualMachines/vm-name"
+- GCP: "//compute.googleapis.com/projects/project-id/zones/zone/instances/instance-name"
+
+**How to extract the resource ID:**
+- From entity data: Use the \`entity.id\` field
+- From event data: Use the \`cloud.instance.id\`, \`resource.id\`, or similar cloud resource identifier fields
+- From user input: If the user provides an ARN, Azure Resource ID, or GCP Resource Name directly
+
+**Do NOT use:**
+- Kibana document IDs (like "82a224ff-3db6-4f94-8fd8-4c6661599cb6")
+- Entity store document IDs
+- Elasticsearch document _id values
+
+The tool returns only FAILED findings from the last 26 hours, including rule details, benchmark information, and evidence.`,
     },
   },
 ];

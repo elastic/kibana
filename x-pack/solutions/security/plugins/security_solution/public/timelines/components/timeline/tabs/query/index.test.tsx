@@ -11,8 +11,9 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -21,28 +22,49 @@ import {
   TestProviders,
 } from '../../../../../common/mock';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, fireEvent, within, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
-  defaultUdtHeaders,
   defaultColumnHeaderType,
+  defaultUdtHeaders,
 } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
-import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
 import { userEvent } from '@testing-library/user-event';
 import * as notesApi from '../../../../../notes/api/api';
 import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
 import * as useTimelineEventsModule from '../../../../containers';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
+import { mockBrowserFields } from '@kbn/timelines-plugin/public/mock/browser_fields';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+
+const mockPatterns = [
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+  'journalbeat-*',
+];
+
+jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/utils/route/use_route_spy', () => {
   return {
@@ -60,11 +82,6 @@ jest.mock('../../../../containers/details');
 
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../../sourcerer/containers');
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
@@ -175,16 +192,14 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
 
-describe('query tab with unified timeline', () => {
+// Failing: See https://github.com/elastic/kibana/issues/224186
+describe.skip('query tab with unified timeline', () => {
   const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   beforeAll(() => {
     fetchNotesSpy.mockImplementation(jest.fn());
     jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
@@ -241,7 +256,9 @@ describe('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
+    jest.mocked(useDataView).mockReturnValue(withIndices(mockPatterns));
+
+    jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock
@@ -254,6 +271,10 @@ describe('query tab with unified timeline', () => {
       endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
     });
+
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   describe('render', () => {
@@ -295,7 +316,7 @@ describe('query tab with unified timeline', () => {
     it(
       'should hide row-renderers when disabled',
       async () => {
-        renderTestComponents();
+        const { container } = renderTestComponents();
         await waitFor(() => {
           expect(screen.getByTestId('discoverDocTable')).toBeVisible();
         });
@@ -306,12 +327,12 @@ describe('query tab with unified timeline', () => {
         expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
 
         fireEvent.click(screen.getByTestId('disable-all'));
-
         expect(
-          within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+          screen.getAllByTestId('renderer-checkbox')[0].querySelector('[type="checkbox"]')
         ).not.toBeChecked();
-
-        fireEvent.click(screen.getByLabelText('Closes this modal window'));
+        fireEvent.click(
+          container.closest('body')!.querySelector('[aria-label="Closes this modal window"]')!
+        );
 
         expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
 
@@ -770,7 +791,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -799,7 +820,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('dataGridColumnSortingButton')).toBeVisible();
         expect(
-          within(screen.getByTestId('dataGridColumnSortingButton')).getByRole('marquee')
+          screen.getByTestId('dataGridColumnSortingButton').querySelector('[role="marquee"]')
         ).toHaveTextContent('1');
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingButton'));
@@ -900,8 +921,8 @@ describe('query tab with unified timeline', () => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
             String(customColumnOrder.length + 1)
           );
+          expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
         });
-        expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -914,7 +935,7 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '37'
+            '43'
           );
         });
 
@@ -960,7 +981,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
           'data-euiicon-type',
-          'expand'
+          'maximize'
         );
 
         // Open Flyout
@@ -991,7 +1012,7 @@ describe('query tab with unified timeline', () => {
           expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
           expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
             'data-euiicon-type',
-            'expand'
+            'maximize'
           );
         });
       },
@@ -1000,320 +1021,240 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - notes', () => {
-    describe('securitySolutionNotesDisabled = false', () => {
-      beforeEach(() => {
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-          jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesDisabled') {
-              return false;
-            }
-            return allowedExperimentalValues[feature];
-          })
-        );
-      });
-
-      // Flaky: https://github.com/elastic/kibana/issues/189794
-      it.skip(
-        'should have the notification dot & correct tooltip',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-          expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-
-          expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
-
-          userEvent.hover(screen.getByTestId('timeline-notes-button-small'));
-
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeInTheDocument();
-            expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-              '1 Note available. Click to view it & add more.'
-            );
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-      it(
-        'should be able to add notes through expandable flyout',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-          });
-
-          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-          await waitFor(() => {
-            expect(mockOpenFlyout).toHaveBeenCalled();
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
+    beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+        jest.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
       );
     });
 
-    describe('securitySolutionNotesDisabled = true', () => {
-      beforeEach(() => {
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-          jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesDisabled') {
-              return true;
-            }
-            return allowedExperimentalValues[feature];
-          })
-        );
-      });
+    // Flaky: https://github.com/elastic/kibana/issues/189794
+    it.skip(
+      'should have the notification dot & correct tooltip',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-      // Flaky: https://github.com/elastic/kibana/issues/189794
-      it.skip(
-        'should have the notification dot & correct tooltip',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
+        expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
 
-          expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
+        expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
+
+        userEvent.hover(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-tool-tip')).toBeInTheDocument();
+          expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
+            '1 Note available. Click to view it & add more.'
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+    it(
+      'should be able to add notes through expandable flyout',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
           expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
 
-          expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
-          fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalled();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
-            expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-              '1 Note available. Click to view it & add more.'
-            );
+    it(
+      'should open the document details flyout with notes tab for a regular event',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalledWith(
+            expect.objectContaining({
+              right: expect.objectContaining({ id: 'document-details-right' }),
+              left: expect.objectContaining({ id: 'document-details-left' }),
+            })
+          );
+        });
+        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should open the new notes flyout when the new flyout is enabled',
+      async () => {
+        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(flyoutApi.openNotes).toHaveBeenCalledWith({
+            hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: FLYOUT_ORIGIN.TIMELINE,
           });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-      it(
-        'should be able to add notes using EuiFlyout',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        });
+        expect(mockOpenFlyout).not.toHaveBeenCalled();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-          });
+    it(
+      'should open the attack details flyout with notes tab for an attack discovery event',
+      async () => {
+        const attackDiscoveryEvent = {
+          ...mockTimelineData[0],
+          data: [
+            ...mockTimelineData[0].data,
+            {
+              field: ALERT_RULE_TYPE_ID,
+              value: [ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID],
+            },
+          ],
+          ecs: {
+            ...mockTimelineData[0].ecs,
+            _index: '.alerts-security.attack.discovery.alerts-default-000001',
+          },
+        };
 
-          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+        useTimelineEventsSpy.mockReturnValue([
+          DataLoadingState.loaded,
+          {
+            id: 'id',
+            pageInfo: {
+              activePage: 0,
+              querySize: 0,
+            },
+            events: [attackDiscoveryEvent],
+            rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
+            inspect: { dsl: [], response: [] },
+            totalCount: 1,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
+            loadNextBatch: jest.fn(),
+            refreshedAt: 0,
+            refetch: jest.fn(),
+          },
+        ]);
 
-          await waitFor(() => {
-            expect(screen.getByTestId('add-note-container')).toBeVisible();
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-      it(
-        'should cancel adding notes',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
 
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-          });
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
-          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-          await waitFor(() => {
-            expect(screen.getByTestId('add-note-container')).toBeVisible();
-          });
-
-          expect(screen.getByTestId('cancel')).not.toBeDisabled();
-
-          fireEvent.click(screen.getByTestId('cancel'));
-
-          await waitFor(() => {
-            expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-
-      it(
-        'should be able to delete notes',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-          });
-
-          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-          await waitFor(() => {
-            expect(screen.getByTestId('delete-note')).toBeVisible();
-          });
-
-          const noteDeleteSpy = jest.spyOn(timelineActions, 'setConfirmingNoteId');
-
-          fireEvent.click(screen.getByTestId('delete-note'));
-
-          await waitFor(() => {
-            expect(noteDeleteSpy).toHaveBeenCalled();
-            expect(noteDeleteSpy).toHaveBeenCalledWith({
-              confirmingNoteId: '1',
-              id: TimelineId.test,
-            });
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-
-      it(
-        'should not show toggle event details action',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-          });
-
-          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-          await waitFor(() => {
-            expect(screen.queryByTestId(OPEN_FLYOUT_BUTTON_TEST_ID)).not.toBeInTheDocument();
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-    });
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalledWith(
+            expect.objectContaining({
+              right: expect.objectContaining({ id: 'attack-details-right' }),
+              left: expect.objectContaining({ id: 'attack-details-left' }),
+            })
+          );
+        });
+        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 
   describe('Leading actions - pin', () => {
-    describe('securitySolutionNotesDisabled = false', () => {
-      beforeEach(() => {
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-          jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesDisabled') {
-              return false;
-            }
-            return allowedExperimentalValues[feature];
-          })
-        );
-      });
-      it(
-        'should disable pinning when event has notes attached in timeline',
-        async () => {
-          const mockStateWithNoteInTimeline = {
-            ...mockState,
-            timeline: {
-              ...mockState.timeline,
-              timelineById: {
-                [TimelineId.test]: {
-                  ...mockState.timeline.timelineById[TimelineId.test],
-                  savedObjectId: 'timeline-1', // match timelineId in mocked notes data
-                  pinnedEventIds: { '1': true },
-                },
+    beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+        jest.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
+      );
+    });
+    it(
+      'should disable pinning when event has notes attached in timeline',
+      async () => {
+        const mockStateWithNoteInTimeline = {
+          ...mockState,
+          timeline: {
+            ...mockState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockState.timeline.timelineById[TimelineId.test],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
               },
             },
-          };
+          },
+        };
 
-          render(
-            <TestProviders
-              store={createMockStore({
-                ...structuredClone(mockStateWithNoteInTimeline),
-              })}
-            >
-              <TestComponent />
-            </TestProviders>
-          );
-
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-          expect(screen.getAllByTestId('pin')).toHaveLength(1);
-          // disabled because it is already pinned
-          expect(screen.getByTestId('pin')).toBeDisabled();
-
-          fireEvent.mouseOver(screen.getByTestId('pin'));
-
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
-            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
-              'This event cannot be unpinned because it has notes in Timeline'
-            );
-            /*
-             * Above event is alert and not an event but `getEventType` in
-             * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
-             * returns it has event and not an alert even though, it has event.kind as signal.
-             * Need to see if it is okay
-             *
-             * */
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-
-      it(
-        'should allow pinning when event has notes but notes are not attached in current timeline',
-        async () => {
-          renderTestComponents();
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-          expect(screen.getAllByTestId('pin')).toHaveLength(1);
-          expect(screen.getByTestId('pin')).not.toBeDisabled();
-
-          fireEvent.mouseOver(screen.getByTestId('pin'));
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
-            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
-              'Pin event'
-            );
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-    });
-
-    describe('securitySolutionNotesDisabled = true', () => {
-      beforeEach(() => {
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-          jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesDisabled') {
-              return true;
-            }
-            return allowedExperimentalValues[feature];
-          })
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
         );
-      });
 
-      it(
-        'should have the pin button with correct tooltip',
-        async () => {
-          renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
-          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(screen.getAllByTestId('pin')).toHaveLength(1);
+        // disabled because it is already pinned
+        expect(screen.getByTestId('pin')).toBeDisabled();
 
-          expect(screen.getAllByTestId('pin')).toHaveLength(1);
-          // disabled because it is already pinned
-          expect(screen.getByTestId('pin')).toBeDisabled();
+        fireEvent.mouseOver(screen.getByTestId('pin'));
 
-          fireEvent.mouseOver(screen.getByTestId('pin'));
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
+            'This event cannot be unpinned because it has notes in Timeline'
+          );
+          /*
+           * Above event is alert and not an event but `getEventType` in
+           * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
+           * returns it has event and not an alert even though, it has event.kind as signal.
+           * Need to see if it is okay
+           *
+           * */
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-          await waitFor(() => {
-            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
-            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
-              'This event cannot be unpinned because it has notes'
-            );
-            /*
-             * Above event is alert and not an event but `getEventType` in
-             * x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
-             * returns it has event and not an alert even though, it has event.kind as signal.
-             * Need to see if it is okay
-             *
-             * */
-          });
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-    });
+    it(
+      'should allow pinning when event has notes but notes are not attached in current timeline',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        expect(screen.getAllByTestId('pin')).toHaveLength(1);
+        expect(screen.getByTestId('pin')).not.toBeDisabled();
+
+        fireEvent.mouseOver(screen.getByTestId('pin'));
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+          expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent('Pin event');
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 });

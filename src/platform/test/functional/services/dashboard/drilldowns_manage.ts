@@ -8,7 +8,13 @@
  */
 
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type {
+  ON_CLICK_IMAGE,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
 const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
@@ -31,7 +37,7 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       log.debug('loadData');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns'
       );
     }
 
@@ -79,10 +85,10 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       drilldownName: string;
       destinationURLTemplate: string;
       trigger:
-        | 'VALUE_CLICK_TRIGGER'
-        | 'SELECT_RANGE_TRIGGER'
-        | 'IMAGE_CLICK_TRIGGER'
-        | 'CONTEXT_MENU_TRIGGER';
+        | typeof ON_CLICK_VALUE
+        | typeof ON_SELECT_RANGE
+        | typeof ON_CLICK_IMAGE
+        | typeof ON_OPEN_PANEL_MENU;
     }) {
       await this.fillInDrilldownName(drilldownName);
       await this.selectTriggerIfNeeded(trigger);
@@ -99,10 +105,10 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
 
     async selectTriggerIfNeeded(
       trigger:
-        | 'VALUE_CLICK_TRIGGER'
-        | 'SELECT_RANGE_TRIGGER'
-        | 'IMAGE_CLICK_TRIGGER'
-        | 'CONTEXT_MENU_TRIGGER'
+        | typeof ON_CLICK_VALUE
+        | typeof ON_SELECT_RANGE
+        | typeof ON_CLICK_IMAGE
+        | typeof ON_OPEN_PANEL_MENU
     ) {
       if (await testSubjects.exists(`triggerPicker`)) {
         const container = await testSubjects.find(`triggerPicker-${trigger}`);

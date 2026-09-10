@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { ReplaySubject } from 'rxjs';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import type { CreateRouteDefinition } from '../../../common/api_routes';
 import { MaxByteSizeExceededError } from '../../file_client/stream_transforms/max_byte_size_transform/errors';
 import { FILES_API_ROUTES } from '../api_routes';
+import { fileId } from '../common_schemas';
 import { fileErrors } from '../../file';
 import { getById } from './helpers';
 import type { FileKindRouter } from './types';
-import { CreateHandler } from './types';
+import type { CreateHandler } from './types';
 
 export const method = 'put' as const;
 
 const rt = {
   params: schema.object({
-    id: schema.string(),
+    id: fileId,
   }),
   body: schema.stream() as Type<unknown>,
   query: schema.object({

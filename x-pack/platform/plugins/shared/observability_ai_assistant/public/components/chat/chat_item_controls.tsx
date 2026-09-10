@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { Feedback, FeedbackButtons } from '../buttons/feedback_buttons';
+import type { Feedback } from '../buttons/feedback_buttons';
+import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 

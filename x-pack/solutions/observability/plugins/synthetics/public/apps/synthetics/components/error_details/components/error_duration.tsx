@@ -8,7 +8,8 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { useErrorFailedTests } from '../hooks/use_error_failed_tests';
 import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
 

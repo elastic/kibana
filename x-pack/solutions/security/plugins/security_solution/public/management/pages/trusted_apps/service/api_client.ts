@@ -20,21 +20,31 @@ import {
 } from '../../../../common/utils/exception_list_items';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
+import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
+import type { EndpointSuggestionsBody } from '../../../../../common/api/endpoint';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { isAdvancedModeEnabled } from '../../../../../common/endpoint/service/artifacts/utils';
 
 function readTransform(item: ExceptionListItemSchema): ExceptionListItemSchema {
-  return {
-    ...item,
-    entries: entriesToConditionEntries(item.entries) as ExceptionListItemSchema['entries'],
-  };
+  if (!isAdvancedModeEnabled(item)) {
+    return {
+      ...item,
+      entries: entriesToConditionEntries(item.entries) as ExceptionListItemSchema['entries'],
+    };
+  }
+  return item;
 }
 
 function writeTransform<T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
   item: T
 ): T {
-  return {
-    ...item,
-    entries: conditionEntriesToEntries(item.entries as ConditionEntry[], true),
-  } as T;
+  if (!isAdvancedModeEnabled(item)) {
+    return {
+      ...item,
+      entries: conditionEntriesToEntries(item.entries as ConditionEntry[], true),
+    } as T;
+  }
+  return item;
 }
 
 /**
@@ -61,5 +71,20 @@ export class TrustedAppsApiClient extends ExceptionsListApiClient {
       readTransform,
       writeTransform
     );
+  }
+
+  /**
+   * Returns suggestions for given field
+   */
+  async getSuggestions(body: EndpointSuggestionsBody): Promise<string[]> {
+    const result: string[] = await this.getHttp().post(
+      resolvePathVariables(SUGGESTIONS_INTERNAL_ROUTE, { suggestion_type: 'trustedApps' }),
+      {
+        version: '1',
+        body: JSON.stringify(body),
+      }
+    );
+
+    return result;
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
+import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 
 jest.mock('../classes/layers/heatmap_layer', () => {});
 jest.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => {});
@@ -43,12 +43,12 @@ import {
   getSpatialFiltersLayer,
 } from './map_selectors';
 
-import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
+import type { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { buildGeoShapeFilter } from '../../common/elasticsearch_util';
-import { ILayer } from '../classes/layers/layer';
-import { Filter } from '@kbn/es-query';
+import type { ILayer } from '../classes/layers/layer';
+import type { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
-import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import type { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import { getDefaultMapSettings } from '../reducers/map/default_map_settings';
 
 describe('getDataFilters', () => {
@@ -92,6 +92,7 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
+      undefined,
       isReadOnly,
       executionContext
     );
@@ -110,10 +111,50 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       undefined,
+      undefined,
       isReadOnly,
       executionContext
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
+  });
+
+  test('should include projectRouting in data filters when provided', () => {
+    const projectRouting = '_alias:_origin';
+    const dataFilters = getDataFilters.resultFunc(
+      mapExtent,
+      mapBuffer,
+      mapZoom,
+      timeFilters,
+      timeslice,
+      query,
+      filters,
+      embeddableSearchContext,
+      searchSessionId,
+      searchSessionMapBuffer,
+      projectRouting,
+      isReadOnly,
+      executionContext
+    );
+    expect(dataFilters.projectRouting).toBe('_alias:_origin');
+  });
+
+  test('should include projectRouting as undefined in data filters when not provided', () => {
+    const dataFilters = getDataFilters.resultFunc(
+      mapExtent,
+      mapBuffer,
+      mapZoom,
+      timeFilters,
+      timeslice,
+      query,
+      filters,
+      embeddableSearchContext,
+      searchSessionId,
+      searchSessionMapBuffer,
+      undefined,
+      isReadOnly,
+      executionContext
+    );
+    expect(dataFilters.projectRouting).toBeUndefined();
   });
 });
 
@@ -239,7 +280,6 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       },
       visible,
       sourceDescriptor: ESSearchSource.createDescriptor({
-        type: SOURCE_TYPES.ES_SEARCH,
         indexPatternId,
         geoField: 'field',
       }),

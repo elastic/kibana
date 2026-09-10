@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { ColorPickerInput, ColorPickerInputProps } from './color_picker_input';
+import type { ColorPickerInputProps } from './color_picker_input';
+import { ColorPickerInput } from './color_picker_input';
 import { wrap } from '../mocks';
 
 const name = 'Some color field';

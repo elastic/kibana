@@ -10,14 +10,10 @@
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
-import {
-  LegacyShortUrlLocatorParams,
-  LEGACY_SHORT_URL_LOCATOR_ID,
-} from '../../../common/url_service/locators/legacy_short_url_locator';
-import {
-  SHORT_URL_REDIRECT_LOCATOR,
-  ShortUrlRedirectLocatorParams,
-} from '../../../common/url_service/locators/short_url_redirect_locator';
+import type { LegacyShortUrlLocatorParams } from '../../../common/url_service/locators/legacy_short_url_locator';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../common/url_service/locators/legacy_short_url_locator';
+import type { ShortUrlRedirectLocatorParams } from '../../../common/url_service/locators/short_url_redirect_locator';
+import { SHORT_URL_REDIRECT_LOCATOR } from '../../../common/url_service/locators/short_url_redirect_locator';
 import type {
   IShortUrlClient,
   ShortUrl,
@@ -80,19 +76,22 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
     const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
-      const timeRange = inputParams.params?.timeRange as SerializableRecord;
-      if (isAbsoluteTime && timeRange?.from && timeRange?.to)
-        return {
-          ...inputParams,
-          params: {
-            ...inputParams.params,
-            timeRange: {
-              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
-              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
-            },
-          },
-        };
-      return inputParams;
+      if (!isAbsoluteTime || !inputParams.locator.getTimeRange || !inputParams.locator.setTimeRange)
+        return inputParams;
+
+      const timeRange = inputParams.locator.getTimeRange(inputParams.params);
+
+      return timeRange
+        ? {
+            ...inputParams,
+            params: inputParams.locator.setTimeRange(inputParams.params, {
+              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from),
+              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to, {
+                roundUp: true,
+              }),
+            }),
+          }
+        : inputParams;
     };
 
     const result = await this.create(getUpdatedParams(params));

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import React, { FC, useEffect } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -20,7 +21,7 @@ import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shar
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { CertRefreshBtn, CertificateTitle, CertificatesPage } from './components/certificates';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
-import { ClientPluginsStart } from '../../plugin';
+import type { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
 import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
@@ -31,6 +32,10 @@ import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
+import {
+  GettingStartedBackLink,
+  hasGettingStartedAddDataReturn,
+} from './components/getting_started/getting_started_back_link';
 import {
   InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
@@ -83,6 +88,9 @@ const getRoutes = (
         alignment: 'center',
         paddingSize: 'none',
       },
+      pageHeader: hasGettingStartedAddDataReturn(location.search)
+        ? { pageTitle: <GettingStartedBackLink />, bottomBorder: false }
+        : undefined,
     },
     {
       title: i18n.translate('xpack.synthetics.createMonitorRoute.title', {
@@ -221,7 +229,7 @@ export const PageRouter: FC = () => {
               actions={[
                 <EuiButtonEmpty
                   data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   flush="both"
                   onClick={() => {
                     application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);

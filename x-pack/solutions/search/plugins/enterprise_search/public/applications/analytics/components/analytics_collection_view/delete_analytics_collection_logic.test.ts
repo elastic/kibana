@@ -13,7 +13,7 @@ import {
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
 
 import { DeleteAnalyticsCollectionLogic } from './delete_analytics_collection_logic';

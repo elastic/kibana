@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { extractKey } from './extract_key';
 import { MISSING_VALUE } from './types';
 

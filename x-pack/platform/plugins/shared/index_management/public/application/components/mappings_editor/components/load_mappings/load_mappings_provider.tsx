@@ -8,10 +8,13 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { validateMappings, MappingsValidationError } from '../../lib';
+import type { OnJsonEditorUpdateHandler } from '../../shared_imports';
+import { JsonEditor } from '../../shared_imports';
+import type { MappingsValidationError } from '../../lib';
+import { validateMappings } from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 
@@ -129,6 +132,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
   const view: ModalView =
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
+  const modalTitleId = useGeneratedHtmlId();
 
   const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
     jsonContent.current = jsonUpdateData;
@@ -187,36 +191,15 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
     }
   };
 
-  const renderErrorsFilterButton = () => {
-    const showingAllErrors = totalErrorsToDisplay > MAX_ERRORS_TO_DISPLAY;
-    return (
-      <EuiButtonEmpty
-        onClick={() =>
-          setTotalErrorsToDisplay(showingAllErrors ? MAX_ERRORS_TO_DISPLAY : state.errors!.length)
-        }
-        iconType={showingAllErrors ? 'arrowUp' : 'arrowDown'}
-      >
-        {showingAllErrors
-          ? i18n.translate('xpack.idxMgmt.mappingsEditor.hideErrorsButtonLabel', {
-              defaultMessage: 'Hide errors',
-            })
-          : i18n.translate('xpack.idxMgmt.mappingsEditor.showAllErrorsButtonLabel', {
-              defaultMessage: 'Show {numErrors} more errors',
-              values: {
-                numErrors: state.errors!.length - MAX_ERRORS_TO_DISPLAY,
-              },
-            })}
-      </EuiButtonEmpty>
-    );
-  };
-
   return (
     <>
       {children(openModal)}
 
       {state.isModalOpen && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18nTexts.modalTitle}
+          titleProps={{ id: modalTitleId }}
           onCancel={onCancel}
           onConfirm={onConfirm}
           cancelButtonText={i18nTexts.buttons.cancel}
@@ -248,22 +231,50 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
             </>
           ) : (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
+                announceOnMount
                 title={i18nTexts.validationErrors.title}
-                iconType="warning"
-                color="warning"
+                text={i18nTexts.validationErrors.description}
+                actionProps={
+                  state.errors!.length > MAX_ERRORS_TO_DISPLAY
+                    ? {
+                        primary: {
+                          onClick: () =>
+                            setTotalErrorsToDisplay(
+                              totalErrorsToDisplay > MAX_ERRORS_TO_DISPLAY
+                                ? MAX_ERRORS_TO_DISPLAY
+                                : state.errors!.length
+                            ),
+                          iconType:
+                            totalErrorsToDisplay > MAX_ERRORS_TO_DISPLAY
+                              ? 'chevronSingleUp'
+                              : 'chevronSingleDown',
+                          children:
+                            totalErrorsToDisplay > MAX_ERRORS_TO_DISPLAY
+                              ? i18n.translate(
+                                  'xpack.idxMgmt.mappingsEditor.hideErrorsButtonLabel',
+                                  { defaultMessage: 'Hide errors' }
+                                )
+                              : i18n.translate(
+                                  'xpack.idxMgmt.mappingsEditor.showAllErrorsButtonLabel',
+                                  {
+                                    defaultMessage: 'Show {numErrors} more errors',
+                                    values: {
+                                      numErrors: state.errors!.length - MAX_ERRORS_TO_DISPLAY,
+                                    },
+                                  }
+                                ),
+                        },
+                      }
+                    : undefined
+                }
               >
-                <EuiText>
-                  <p>{i18nTexts.validationErrors.description}</p>
-                </EuiText>
-                <EuiSpacer />
                 <ol>
                   {state.errors!.slice(0, totalErrorsToDisplay).map((error, i) => (
                     <li key={i}>{getErrorMessage(error)}</li>
                   ))}
                 </ol>
-                {state.errors!.length > MAX_ERRORS_TO_DISPLAY && renderErrorsFilterButton()}
-              </EuiCallOut>
+              </KbnWarningCallout>
             </>
           )}
         </EuiConfirmModal>

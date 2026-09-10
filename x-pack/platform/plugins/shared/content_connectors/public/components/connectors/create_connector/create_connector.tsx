@@ -26,13 +26,14 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-import { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { useActions, useValues } from 'kea';
 import { useAppContext } from '../../../app_context';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
@@ -52,7 +53,9 @@ export type SelfManagePreference = 'native' | 'selfManaged';
 import { SearchConnectorsPageTemplateWrapper } from '../../shared/page_template';
 import { useBreadcrumbs } from '../../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { getContentConnectorsUrl } from '../../../utils/get_content_connectors_url';
 import { connectorsBreadcrumbs } from '../connectors';
+import { CONNECTORS_PATH } from '../../routes';
 const StartStep = lazy(() => import('./start_step'));
 
 export const createConnectorBreadcrumbs: ChromeBreadcrumb[] = [
@@ -86,10 +89,10 @@ const CreateConnector: React.FC = () => {
   useBreadcrumbs(createConnectorBreadcrumbs, appParams, chrome);
 
   const { selectedConnector, currentStep, isFormDirty, connectorId } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { setCurrentStep } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const stepStates = generateStepState(currentStep);
   useEffect(() => {
@@ -214,14 +217,24 @@ const CreateConnector: React.FC = () => {
 
   return (
     <SearchConnectorsPageTemplateWrapper
-      pageHeader={{
-        description: i18n.translate('xpack.contentConnectors.createConnector.description', {
-          defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
-        }),
-        pageTitle: i18n.translate('xpack.contentConnectors.createConnector..title', {
-          defaultMessage: 'Create a connector',
-        }),
-      }}
+      appHeader={
+        <AppHeader
+          title={i18n.translate('xpack.contentConnectors.createConnector..title', {
+            defaultMessage: 'Create a connector',
+          })}
+          description={i18n.translate('xpack.contentConnectors.createConnector.description', {
+            defaultMessage:
+              'Extract, transform, index and sync data from a third-party data source.',
+          })}
+          back={{
+            href: getContentConnectorsUrl(application?.getUrlForApp, CONNECTORS_PATH),
+            label: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
+              defaultMessage: 'Content Connectors',
+            }),
+          }}
+          spacing="bleed"
+        />
+      }
     >
       <EuiFlexGroup gutterSize="m">
         {/* Col 1 */}
@@ -292,6 +305,7 @@ const CreateConnector: React.FC = () => {
                             <EuiIcon
                               size="l"
                               type={selectedConnector?.iconPath ?? ''}
+                              aria-hidden={true}
                               css={css`
                                 margin-right: ${euiTheme.size.m};
                               `}

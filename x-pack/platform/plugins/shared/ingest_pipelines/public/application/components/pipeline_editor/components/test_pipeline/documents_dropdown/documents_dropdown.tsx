@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
+import type { CSSProperties, FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -14,13 +15,12 @@ import {
   EuiButtonEmpty,
   EuiPopoverTitle,
   EuiSelectable,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Document } from '../../../types';
+import type { Document } from '../../../types';
 
-import { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
-
-import './documents_dropdown.scss';
+import type { TestPipelineFlyoutTab } from '../test_pipeline_tabs';
 
 const i18nTexts = {
   dropdownLabel: i18n.translate(
@@ -50,19 +50,22 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
+const panelStyle = { minWidth: '200px' } satisfies CSSProperties;
+
 export const DocumentsDropdown: FunctionComponent<Props> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,
   openFlyout,
 }) => {
-  const [showPopover, setShowPopover] = useState<boolean>(false);
+  const [showPopover, setShowPopover] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const managePipelineButton = (
     <EuiButtonEmpty
       data-test-subj="documentsButton"
       onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
     >
       {i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.selectedDocumentLabel', {
@@ -82,7 +85,8 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       panelPaddingSize="none"
       repositionOnScroll
       data-test-subj="documentsDropdown"
-      panelClassName="documentsDropdownPanel"
+      panelStyle={panelStyle}
+      aria-labelledby={popoverTitleId}
     >
       <EuiSelectable
         singleSelection
@@ -98,6 +102,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
             },
           }),
         }))}
+        listProps={{ paddingSize: 's' }}
         onChange={(newOptions) => {
           const selectedOption = newOptions.find((option) => option.checked === 'on');
           if (selectedOption) {
@@ -109,7 +114,9 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       >
         {(list) => (
           <>
-            <EuiPopoverTitle paddingSize="s">{i18nTexts.popoverTitle}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {i18nTexts.popoverTitle}
+            </EuiPopoverTitle>
             {list}
           </>
         )}

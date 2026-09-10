@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PROCESSOR_EVENT_FIELD, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
 import { isSpanHit } from './is_span';
 
 describe('isSpanHit', () => {

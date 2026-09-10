@@ -5,34 +5,20 @@
  * 2.0.
  */
 
-import { RunnableConfig } from '@langchain/core/runnables';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { BaseMessage } from '@langchain/core/messages';
-import {
-  ContentReferencesStore,
-  contentReferenceString,
-  DocumentEntry,
-  knowledgeBaseReference,
-  removeContentReferences,
-} from '@kbn/elastic-assistant-common';
-import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
-import { promptGroupId } from '../../../../prompt/local_prompt_object';
-import { getPrompt, promptDictionary } from '../../../../prompt';
-import { AgentState, NodeParamsBase } from '../types';
+import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
 
-export interface RunAgentParams extends NodeParamsBase {
-  state: AgentState;
+export interface RunAgentParams extends Pick<NodeParamsBase, 'logger'> {
+  state: Pick<AgentState, 'messages'>;
   config?: RunnableConfig;
-  agentRunnable: AgentRunnableSequence;
-  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
+  model: Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>;
 }
 
 export const AGENT_NODE_TAG = 'agent_run';
-
-const KNOWLEDGE_HISTORY_PREFIX = 'Knowledge History:';
-const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
 
 /**
  * Node to run the agent
@@ -40,84 +26,40 @@ const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
  * @param logger - The scoped logger
  * @param state - The current state of the graph
  * @param config - Any configuration that may've been supplied
- * @param agentRunnable - The agent to run
- * @param kbDataClient -  Data client for accessing the Knowledge Base on behalf of the current user
+ * @param model - The LLM
  */
 export async function runAgent({
-  actionsClient,
   logger,
-  savedObjectsClient,
   state,
-  agentRunnable,
+  model,
   config,
-  kbDataClient,
-  contentReferencesStore,
 }: RunAgentParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const knowledgeHistory: DocumentEntry[] =
-    (await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries()) ?? [];
-  const citedKnowledgeHistory = knowledgeHistory.map(enrichDocument(contentReferencesStore));
-
-  const userPrompt =
-    state.llmType === 'gemini'
-      ? await getPrompt({
-          actionsClient,
-          connectorId: state.connectorId,
-          promptId: promptDictionary.userPrompt,
-          promptGroupId: promptGroupId.aiAssistant,
-          provider: 'gemini',
-          savedObjectsClient,
-        })
-      : '';
-  const agentOutcome = await agentRunnable
-    .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
-    .invoke(
-      {
-        ...state,
-        knowledge_history: `${KNOWLEDGE_HISTORY_PREFIX}\n${
-          citedKnowledgeHistory.length
-            ? JSON.stringify(citedKnowledgeHistory.map((e) => e.text))
-            : NO_KNOWLEDGE_HISTORY
-        }`,
-        citations_prompt: contentReferencesStore.options?.disabled ? '' : INCLUDE_CITATIONS,
-        // prepend any user prompt (gemini)
-        input: `${userPrompt}${state.input}`,
-        chat_history: sanitizeChatHistory(state.messages), // TODO: Message de-dupe with ...state spread
-      },
-      config
-    );
-
-  return {
-    agentOutcome,
-    lastNode: NodeType.AGENT,
-  };
-}
-
-/**
- * Removes content references from chat history
- */
-const sanitizeChatHistory = (messages: BaseMessage[]): BaseMessage[] => {
-  return messages.map((message) => {
-    if (!Array.isArray(message.content)) {
-      message.content = removeContentReferences(message.content).trim();
+  const modifiedMessages = state.messages.map((message) => {
+    if (
+      'content' in message &&
+      typeof message.content === 'string' &&
+      (message.content[message.content.length - 1] === '}' ||
+        message.content[message.content.length - 1] === ']')
+    ) {
+      /* The Gemini models throw an error if the content can be parsed as JSON.
+      A hack to avoid this is to append a period to the end of the message. This map
+      should be removed when the root cause of that issue is fixed.
+      */
+      const newContent = `${message.content}.`;
+      message.content = newContent;
+      message.lc_kwargs.content = newContent;
     }
     return message;
   });
-};
 
-const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
-  return (document: DocumentEntry): DocumentEntry => {
-    if (document.id == null) {
-      return document;
-    }
-    const documentId = document.id;
-    const reference = contentReferencesStore.add((p) =>
-      knowledgeBaseReference(p.id, document.name, documentId)
-    );
-    return {
-      ...document,
-      text: `${contentReferenceString(reference)}\n${document.text}`,
-    };
+  const result = await model
+    .withConfig({ tags: [AGENT_NODE_TAG], ...config })
+    .invoke(modifiedMessages);
+
+  return {
+    messages: [result],
+    lastNode: NodeType.AGENT,
   };
-};
+}

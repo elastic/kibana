@@ -1,0 +1,129 @@
+- name: auth0
+  type: group
+  description: Fields for Auth0 events.
+  fields:
+    - name: logs
+      type: group
+      description: Fields for Auth0 log events.
+      fields:
+        - name: log_id
+          type: keyword
+          description: Unique log event identifier
+        - name: data
+          type: group
+          description: log stream event data
+          fields:
+            - name: log_id
+              type: keyword
+              description: Unique log event identifier
+            - name: tenant_name
+              type: keyword
+              description: The name of the auth0 tenant.
+            - name: date
+              type: date
+              description: Date when the event occurred in ISO 8601 format.
+            - name: type
+              type: keyword
+              description: Type of event.
+            - name: type_id
+              type: keyword
+              description: The short Auth0 type identifier.
+            - name: description
+              type: text
+              description: Description of this event.
+            - name: connection
+              type: keyword
+              description: Name of the connection the event relates to.
+            - name: connection_id
+              type: keyword
+              description: ID of the connection the event relates to.
+            - name: client_id
+              type: keyword
+              description: ID of the client (application).
+            - name: client_name
+              type: keyword
+              description: Name of the client (application).
+            - name: ip
+              type: ip
+              description: IP address of the log event source.
+            - name: hostname
+              type: keyword
+              description: Hostname the event applies to.
+            - name: user_id
+              type: keyword
+              description: ID of the user involved in the event.
+            - name: user_name
+              type: keyword
+              description: Name of the user involved in the event.
+            - name: audience
+              type: keyword
+              description: API audience the event applies to.
+            - name: scope
+              type: keyword
+              description: Scope permissions applied to the event.
+            - name: strategy
+              type: keyword
+              description: Name of the strategy involved in the event.
+            - name: strategy_type
+              type: keyword
+              description: Type of strategy involved in the event.
+            - name: is_mobile
+              type: boolean
+              description: Whether the client was a mobile device (true) or desktop/laptop/server (false).
+            - name: classification
+              type: keyword
+              description: Log stream filters
+            - name: details
+              type: flattened
+              description: Additional useful details about this event (values here depend upon event type).
+            - name: login
+              type: group
+              description: Filtered fields for login type
+              fields:
+                - name: initiatedAt
+                  type: date
+                  description: Time at which the operation was initiated
+                - name: completedAt
+                  type: date
+                  description: Time at which the operation was completed
+                - name: elapsedTime
+                  type: long
+                  description: The total amount of time in milliseconds the operation took to complete.
+                - name: stats
+                  type: group
+                  description: login stats
+                  fields:
+                    - name: loginsCount
+                      type: long
+                      description: Total number of logins performed by the user
+            - name: user_agent
+              type: text
+              description: User agent string from the client device that caused the event.
+            - name: location_info
+              type: group
+              description: Information about the location that triggered this event based on the IP.
+              fields:
+                - name: country_code
+                  type: keyword
+                  description: Two-letter [Alpha-2 ISO 3166-1](https://www.iso.org/iso-3166-country-codes.html) country code
+                - name: country_code3
+                  type: keyword
+                  description: Three-letter [Alpha-3 ISO 3166-1](https://www.iso.org/iso-3166-country-codes.html) country code
+                - name: country_name
+                  type: keyword
+                  description: Full country name in English.
+                - name: city_name
+                  type: keyword
+                  description: Full city name in English.
+                - name: latitude
+                  type: keyword
+                  description: Global latitude (horizontal) position.
+                - name: longitude
+                  type: keyword
+                  description: Global longitude (vertical) position.
+                - name: time_zone
+                  type: keyword
+                  description: Time zone name as found in the [tz database](https://www.iana.org/time-zones).
+                - name: continent_code
+                  type: keyword
+                  description: Continent the country is located within. Can be AF (Africa), AN (Antarctica), AS (Asia), EU (Europe), NA (North America), OC (Oceania) or SA (South America).

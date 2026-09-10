@@ -5,7 +5,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   class="euiBadgeGroup emotion-euiBadgeGroup-xs"
 >
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-hollow"
     href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -21,7 +21,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-hollow"
     href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -37,7 +37,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-hollow"
     href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -53,7 +53,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-hollow"
     href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -69,7 +69,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-hollow"
     href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -86,7 +86,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   </a>
   <button
     aria-label="Click to view remaining tags"
-    class="euiBadge emotion-euiBadge-hollow-clickable"
+    class="euiBadge emotion-euiBadge-hollow-hollow"
   >
     <span
       class="euiBadge__content emotion-euiBadge__content"
@@ -242,8 +242,6 @@ exports[`MonitorTags component render against summary 1`] = `
               },
               "timestamp": "2020-12-09T17:08:22.200Z",
               "tls": Object {
-                "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
-                "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
                 "cipher": "TLS-AES-128-GCM-SHA256",
                 "established": true,
                 "server": Object {
@@ -279,8 +277,6 @@ exports[`MonitorTags component render against summary 1`] = `
           ],
           "timestamp": "2020-12-09T17:08:22.200Z",
           "tls": Object {
-            "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
-            "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
             "cipher": "TLS-AES-128-GCM-SHA256",
             "established": true,
             "rtt": Object {
@@ -424,8 +420,6 @@ exports[`MonitorTags component renders against ping 1`] = `
         },
         "timestamp": "2020-12-09T17:08:22.200Z",
         "tls": Object {
-          "certificate_not_valid_after": "2021-01-26T07:38:14.000Z",
-          "certificate_not_valid_before": "2020-11-03T07:38:14.000Z",
           "cipher": "TLS-AES-128-GCM-SHA256",
           "established": true,
           "server": Object {

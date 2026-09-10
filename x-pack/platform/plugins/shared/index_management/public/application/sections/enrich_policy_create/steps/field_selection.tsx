@@ -8,21 +8,15 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiIconTip,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
-  EuiCallOut,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
+import type { FormSchema } from '../../../../shared_imports';
 import {
   useForm,
   Form,
   fieldValidators,
-  FormSchema,
   UseField,
   FIELD_TYPES,
   ComboBoxField,
@@ -30,7 +24,8 @@ import {
 
 import type { IndexWithFields, FieldItem } from '../../../../../common';
 import { getFieldsFromIndices } from '../../../services/api';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import type { DraftPolicy } from '../create_policy_context';
+import { useCreatePolicyContext } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;
@@ -96,9 +91,12 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchFields = async () => {
       setIsLoading(true);
       const { data } = await getFieldsFromIndices(draft.sourceIndices as string[]);
+      if (isCancelled) return;
       setIsLoading(false);
 
       if (data?.commonFields?.length) {
@@ -119,6 +117,10 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
     };
 
     fetchFields();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [draft.sourceIndices]);
 
   const { form } = useForm({
@@ -156,19 +158,19 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
     <Form form={form} data-test-subj="fieldSelectionForm">
       {!isLoading && hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.noCommonFieldsFoundError', {
               defaultMessage: 'No common fields',
             })}
-            color="danger"
-            iconType="error"
             data-test-subj="noCommonFieldsError"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldError"
-              defaultMessage="The selected indices don't have any fields in common."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldError"
+                defaultMessage="The selected indices don't have any fields in common."
+              />
+            }
+          />
 
           <EuiSpacer />
         </>
@@ -255,7 +257,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
           <EuiButton
             color="primary"
             iconSide="left"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             data-test-subj="backButton"
             onClick={onBack}
           >
@@ -271,7 +273,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
             fill
             color="primary"
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             disabled={form.isValid === false}
             data-test-subj="nextButton"
             onClick={onSubmit}

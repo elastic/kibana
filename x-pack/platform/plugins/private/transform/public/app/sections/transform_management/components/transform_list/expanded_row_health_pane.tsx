@@ -94,6 +94,12 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
             compressed={true}
             pagination={issues.length > 10}
             sorting={sorting}
+            tableCaption={i18n.translate(
+              'xpack.transform.transformList.transformDetails.healthPane.issuesTableCaption',
+              {
+                defaultMessage: 'Transform health issues',
+              }
+            )}
           />
         </>
       )}

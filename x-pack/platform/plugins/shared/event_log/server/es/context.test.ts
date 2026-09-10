@@ -26,7 +26,7 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
       prefer_ilm: false,
       rollover_on_write: true,
       next_generation_managed_by: 'Index Lifecycle Management',
-    },
+    } as Partial<estypes.IndicesDataStream> as estypes.IndicesDataStream,
   ],
 };
 
@@ -140,13 +140,13 @@ describe('createEsContext', () => {
       indexNameRoot: 'test2',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
-    expect(mockCreateReadySignal).toBeCalledTimes(1);
+    expect(mockCreateReadySignal).toHaveBeenCalledTimes(1);
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
-    expect(signal).toBeCalledTimes(0);
+    expect(signal).toHaveBeenCalledTimes(0);
     context.initialize();
     await context.shutdown();
-    expect(signal).toBeCalledTimes(1);
-    expect(signal).toBeCalledWith(false);
+    expect(signal).toHaveBeenCalledTimes(1);
+    expect(signal).toHaveBeenCalledWith(false);
   });
 
   test('should handled failed initialization', async () => {

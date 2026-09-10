@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { MountWrapper, mountReactNode } from './mount';
 
 describe('MountWrapper', () => {
@@ -21,8 +21,8 @@ describe('MountWrapper', () => {
       return () => {};
     };
     const wrapper = <MountWrapper mount={mountPoint} />;
-    const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(
+    const container = render(wrapper);
+    expect(container.container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"kbnMountWrapper\\"><p class=\\"bar\\">hello</p></div>"`
     );
   });
@@ -37,14 +37,13 @@ describe('MountWrapper', () => {
     };
 
     const wrapper = <MountWrapper mount={mountPoint} />;
-    const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(
+    const container = render(wrapper);
+    expect(container.container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"kbnMountWrapper\\"><p>initial</p></div>"`
     );
 
     el.textContent = 'changed';
-    container.update();
-    expect(container.html()).toMatchInlineSnapshot(
+    expect(container.container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"kbnMountWrapper\\"><p>changed</p></div>"`
     );
   });
@@ -52,8 +51,8 @@ describe('MountWrapper', () => {
   it('can render a detached react component', () => {
     const mountPoint = mountReactNode(<span>detached</span>);
     const wrapper = <MountWrapper mount={mountPoint} />;
-    const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(
+    const container = render(wrapper);
+    expect(container.container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"kbnMountWrapper\\"><span>detached</span></div>"`
     );
   });
@@ -61,8 +60,8 @@ describe('MountWrapper', () => {
   it('accepts a className prop to override default className', () => {
     const mountPoint = mountReactNode(<span>detached</span>);
     const wrapper = <MountWrapper mount={mountPoint} className="customClass" />;
-    const container = mount(wrapper);
-    expect(container.html()).toMatchInlineSnapshot(
+    const container = render(wrapper);
+    expect(container.container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"customClass\\"><span>detached</span></div>"`
     );
   });

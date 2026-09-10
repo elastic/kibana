@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
-import { LensGetState, LensStoreDeps } from '.';
+import type { Dispatch, MiddlewareAPI, Action } from 'redux-toolkit-v1';
+import type { LensStoreDeps } from '@kbn/lens-common';
+import type { LensGetState } from '.';
+
 import { setToggleFullscreen } from './lens_slice';
 
 export const fullscreenMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {

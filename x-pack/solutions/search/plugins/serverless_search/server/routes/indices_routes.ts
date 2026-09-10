@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
 import { fetchIndex } from '../lib/indices/fetch_index';
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => {
@@ -124,6 +124,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
         body: schema.object({
           searchQuery: schema.string({
             defaultValue: '',
+            maxLength: 10000,
           }),
           trackTotalHits: schema.boolean({ defaultValue: false }),
         }),

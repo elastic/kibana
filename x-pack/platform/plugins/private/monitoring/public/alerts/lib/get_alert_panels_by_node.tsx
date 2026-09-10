@@ -8,14 +8,14 @@
 import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
-import {
+import type {
   CommonAlertStatus,
   CommonAlertState,
   CommonAlert,
   AlertState,
 } from '../../../common/types/alerts';
 import { getDateFromNow, getCalendar } from '../../../common/formatting';
-import { PanelItem } from '../types';
+import type { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
 import { Legacy } from '../../legacy_shims';
 
@@ -103,7 +103,7 @@ export function getAlertPanelsByNode(
                     Legacy.shims.uiSettings.get('dateFormat:tz')
                   )}
                 >
-                  <EuiText size="s">
+                  <EuiText size="s" tabIndex={0}>
                     {getDateFromNow(
                       alertState.state.ui.triggeredMS,
                       Legacy.shims.uiSettings.get('dateFormat:tz')

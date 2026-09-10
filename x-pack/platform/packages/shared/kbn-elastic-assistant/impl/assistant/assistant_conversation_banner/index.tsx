@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { AIConnector, Conversation, useAssistantContext } from '../../..';
+import type { AIConnector, Conversation } from '../../..';
+import { useAssistantContext } from '../../..';
 import { isElasticManagedLlmConnector } from '../../connectorland/helpers';
 import { ConnectorMissingCallout } from '../../connectorland/connector_missing_callout';
 import { ElasticLlmCallout } from './elastic_llm_callout';

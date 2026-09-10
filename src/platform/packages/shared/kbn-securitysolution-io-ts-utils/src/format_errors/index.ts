@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
 
 export const formatErrors = (errors: t.Errors): string[] => {

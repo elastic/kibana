@@ -60,18 +60,12 @@ export function RouteBreadcrumbsContextProvider({ children }: { children: React.
     [breadcrumbs]
   );
 
-  const formattedBreadcrumbs: ChromeBreadcrumb[] = api
-    .getBreadcrumbs(matches)
-    .map((breadcrumb, index, array) => {
-      return {
-        text: breadcrumb.title,
-        ...(index === array.length - 1
-          ? {}
-          : {
-              href: breadcrumb.href,
-            }),
-      };
-    });
+  const formattedBreadcrumbs: ChromeBreadcrumb[] = api.getBreadcrumbs(matches).map((breadcrumb) => {
+    return {
+      text: breadcrumb.title,
+      href: breadcrumb.href,
+    };
+  });
 
   useBreadcrumbs(formattedBreadcrumbs);
 

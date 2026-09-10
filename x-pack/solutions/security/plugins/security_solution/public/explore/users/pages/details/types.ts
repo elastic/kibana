@@ -7,9 +7,9 @@
 
 import type { ActionCreator } from 'typescript-fsa';
 
-import { type DataViewSpec } from '@kbn/data-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
 
@@ -19,11 +19,15 @@ import type { usersModel } from '../../store';
 interface UsersDetailsComponentReduxProps {
   query: Query;
   filters: Filter[];
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 
 interface UserBodyComponentDispatchProps {
   detailName: string;
   usersDetailsPagePath: string;
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 
 interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {
@@ -33,6 +37,8 @@ interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchPr
 export interface UsersDetailsProps {
   detailName: string;
   usersDetailsPagePath: string;
+  entityId?: string;
+  identityFields?: Record<string, string>;
 }
 
 export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
@@ -46,8 +52,17 @@ export type UsersDetailsNavTab = Partial<Record<KeyUsersDetailsNavTab, NavTab>>;
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
     indexNames: string[];
+    /**
+     * Filter for user identity (either generated from euidApi or fallback user.name filter)
+     */
     userDetailFilter: Filter[];
+    /**
+     * Stringified filter query that includes the user identity filter
+     * (either generated from euidApi or fallback user.name filter) and any global filters applied on the page.
+     */
     filterQuery?: string;
-    dataViewSpec?: DataViewSpec;
     type: usersModel.UsersType;
+    entityId?: string;
+    entityRecord?: EntityStoreRecord | null;
+    identityFields?: Record<string, string>;
   };

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -22,7 +22,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/{analyticsId}/_stop', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
       // job config with high training percent so it takes longer to run
       const slowRunningConfig = ml.commonConfig.getDFABmClassificationJobConfig(analyticsId);

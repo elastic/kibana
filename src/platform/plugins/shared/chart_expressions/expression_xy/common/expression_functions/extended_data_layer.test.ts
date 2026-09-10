@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExtendedDataLayerArgs } from '../types';
+import type { ExtendedDataLayerArgs } from '../types';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { mockPaletteOutput, sampleArgs } from '../__mocks__';
+import { mockPaletteOutput, sampleArgs } from '../test_utils';
 import { LayerTypes } from '../constants';
 import { extendedDataLayerFunction } from './extended_data_layer';
 
@@ -43,6 +43,8 @@ describe('extendedDataLayerConfig', () => {
       type: 'extendedDataLayer',
       layerType: LayerTypes.DATA,
       ...fullArgs,
+      xScaleType: 'time', // xAccessor `c` is a date type column
+      isHistogram: true,
       table: data,
       showLines: true,
     });

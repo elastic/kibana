@@ -7,22 +7,22 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  LogsSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
-import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+  kbnTestConfig,
+} from '@kbn/test';
+import path from 'path';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
-import { APMFtrConfigName } from '../configs';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import type { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
-import {
+import type {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,
@@ -79,14 +79,8 @@ export interface CreateTest {
   services: InheritedServices & {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
-    logSynthtraceEsClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<LogsSynthtraceEsClient>;
-    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    synthtraceKibanaClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<ApmSynthtraceKibanaClient>;
+    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => ApmSynthtraceEsClient;
+
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
@@ -110,10 +104,34 @@ export function createTestConfig(
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
-    const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
+
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+    // packages without `.sig` files, so opt out of upstream signature enforcement
+    // (added in elastic/package-registry#1646).
+    const dockerArgs: string[] = [
+      '-v',
+      `${packageRegistryConfig}:/package-registry/config.yml`,
+      '-e',
+      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+    ];
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: fleetPackageRegistryDockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+          preferCached: true,
+        },
+      }),
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
@@ -122,15 +140,17 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return getApmSynthtraceEsClient(context, synthtraceKibanaClient);
+          const synthtrace = context.getService('synthtrace');
+          const { apmEsClient } = synthtrace.getClients(['apmEsClient']);
+
+          return apmEsClient;
         },
-        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new LogsSynthtraceEsClient({
-            client: context.getService('es'),
-            logger: createLogger(LogLevel.info),
-            refreshAfterIndex: true,
-          }),
-        synthtraceKibanaClient: () => synthtraceKibanaClient,
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          const synthtrace = context.getService('synthtrace');
+          const { logsEsClient } = synthtrace.getClients(['logsEsClient']);
+
+          return logsEsClient;
+        },
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);
@@ -205,6 +225,9 @@ export function createTestConfig(
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
           ...(kibanaConfig
             ? Object.entries(kibanaConfig).map(([key, value]) =>
                 Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`

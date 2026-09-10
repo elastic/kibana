@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EventAnnotationResultFn } from '../types';
+import type { EventAnnotationResultFn } from '../types';
 import { strings } from '../i18n';
 import { EXTENDED_ANNOTATION_LAYER } from '../constants';
 

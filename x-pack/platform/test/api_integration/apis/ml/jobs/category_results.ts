@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -203,7 +204,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Categorization job results', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/categorization_small'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createAnomalyDetectionJob(job);

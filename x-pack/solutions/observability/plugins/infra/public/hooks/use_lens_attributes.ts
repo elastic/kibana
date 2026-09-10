@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
@@ -14,7 +14,7 @@ import {
   type LensAttributes,
   type LensConfig,
   LensConfigBuilder,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 import { useKibanaContextForPlugin } from './use_kibana';
 
@@ -32,15 +32,14 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   const { navigateToPrefilledEditor } = lens;
 
   const { value: attributes, error } = useAsync(async () => {
-    const { formula: formulaAPI } = await lens.stateHelperApi();
-    if (!dataViews || !formulaAPI || !params.dataset) {
+    if (!dataViews || !params.dataset) {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(dataViews, formulaAPI);
+    const builder = new LensConfigBuilder(dataViews);
 
     return builder.build(params) as Promise<LensAttributes>;
-  }, [params, dataViews, lens]);
+  }, [params, dataViews]);
 
   const injectFilters = useCallback(
     ({
@@ -48,7 +47,9 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       query,
     }: {
       filters: Filter[];
-      query: Query | AggregateQuery;
+      // `state.query` only holds chart-scoped KQL/Lucene filters; ES|QL queries
+      // live on the text-based datasource layers and must not be injected here
+      query: Query;
     }): LensAttributes | null => {
       if (!attributes) {
         return null;
@@ -75,7 +76,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       }: {
         timeRange: TimeRange;
         filters: Filter[];
-        query: Query | AggregateQuery;
+        query: Query;
         lastReloadRequestTime?: number;
       }) =>
       (openInNewTab: boolean) => {
@@ -84,7 +85,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
           navigateToPrefilledEditor(
             {
               id: '',
-              timeRange,
+              time_range: timeRange,
               attributes: injectedAttributes,
               lastReloadRequestTime,
             },
@@ -106,7 +107,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
-      query?: Query | AggregateQuery;
+      query?: Query;
       lastReloadRequestTime?: number;
     }) => {
       const openInLens = getOpenInLensAction(
@@ -142,7 +143,7 @@ const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action
       });
     },
     getIconType(_context: ActionExecutionContext): string | undefined {
-      return 'visArea';
+      return 'chartArea';
     },
     type: 'actionButton',
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {

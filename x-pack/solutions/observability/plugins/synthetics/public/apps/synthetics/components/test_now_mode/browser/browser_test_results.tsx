@@ -14,18 +14,16 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTitle,
-  EuiCallOut,
   EuiScreenReaderLive,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import styled from 'styled-components';
 import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
-import {
-  CheckGroupResult,
-  useBrowserRunOnceMonitors,
-} from '../hooks/use_browser_run_once_monitors';
+import type { CheckGroupResult } from '../hooks/use_browser_run_once_monitors';
+import { useBrowserRunOnceMonitors } from '../hooks/use_browser_run_once_monitors';
 import { TestResultHeader } from '../test_result_header';
 import { StdErrorLogs } from '../../common/components/stderr_logs';
 
@@ -54,7 +52,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
   }, [onDone, expectedSummariesLoaded, testRunId]);
 
   if (retriesExceeded) {
-    return <EuiCallOut title={FAILED_TO_SCHEDULE} color="danger" iconType="alert" />;
+    return <KbnDangerCallout announceOnMount title={FAILED_TO_SCHEDULE} />;
   }
 
   return (
@@ -92,7 +90,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
             )}
 
             {(isStepsLoadingFailed || isDownMonitor) && (
-              <EuiCallOut
+              <KbnDangerCallout
+                announceOnMount
                 data-test-subj="monitorTestRunErrorCallout"
                 style={{
                   marginTop: euiTheme.base,
@@ -102,11 +101,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 }}
                 title={ERROR_RUNNING_TEST}
                 size="s"
-                color="danger"
-                iconType="warning"
-              >
-                <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
-              </EuiCallOut>
+                text={summaryDoc?.error?.message ?? FAILED_TO_RUN}
+              />
             )}
 
             {(isStepsLoadingFailed || isDownMonitor) &&

@@ -13,7 +13,7 @@ import {
   mockIsNotFoundFromUnsupportedServer,
 } from './internal_bulk_resolve.test.mock';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
@@ -195,14 +195,7 @@ describe('internalBulkResolve', () => {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'exactMatch' };
   }
 
-  function expectAliasMatchResult({
-    id,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    alias_purpose,
-  }: {
-    id: string;
-    alias_purpose?: string;
-  }) {
+  function expectAliasMatchResult({ id, alias_purpose }: { id: string; alias_purpose?: string }) {
     return {
       saved_object: `mock-obj-for-${id}`,
       outcome: 'aliasMatch',
@@ -213,9 +206,9 @@ describe('internalBulkResolve', () => {
 
   function expectConflictResult({
     id,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     alias_target_id,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     alias_purpose,
   }: {
     id: string;
@@ -392,11 +385,11 @@ describe('internalBulkResolve', () => {
       );
 
       expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenCalledTimes(2);
-      expect(migrationHelper.migrateAndDecryptStorageDocument).nthCalledWith(1, {
+      expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenNthCalledWith(1, {
         document: 'mock-obj-for-1',
         typeMap: undefined,
       });
-      expect(migrationHelper.migrateAndDecryptStorageDocument).nthCalledWith(2, {
+      expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenNthCalledWith(2, {
         document: 'mock-obj-for-2',
         typeMap: undefined,
       });

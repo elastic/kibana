@@ -9,10 +9,12 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { Subject } from 'rxjs';
-import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { RuleMigrationIndexNameProviders } from '../types';
 import type { SetupParams } from './rule_migrations_data_service';
-import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
+import { RuleMigrationsDataService } from './rule_migrations_data_service';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
 
 jest.mock('../index_migrators');
@@ -20,20 +22,25 @@ jest.mock('../index_migrators');
 jest.mock('@kbn/index-adapter');
 
 // This mock is required to have a way to await the index pattern name promise
-let mockIndexNameProviders: IndexNameProviders;
+let mockIndexNameProviders: RuleMigrationIndexNameProviders;
 jest.mock('./rule_migrations_data_client', () => ({
-  RuleMigrationsDataClient: jest.fn((indexNameProviders: IndexNameProviders) => {
+  RuleMigrationsDataClient: jest.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
     mockIndexNameProviders = indexNameProviders;
   }),
 }));
+
+// @ts-expect-error accessing protected property
+const INDEX_PATTERN = new RuleMigrationsDataService().baseIndexName;
 
 const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedClass<
   typeof IndexPatternAdapter
 >;
 const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof IndexAdapter>;
 
-const dependencies = {} as SiemRuleMigrationsClientDependencies;
+const dependencies = {} as SiemMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
+const getComponentTemplate = (adapter: IndexAdapter) =>
+  (adapter.setComponentTemplate as jest.Mock).mock.calls[0][0];
 
 describe('SiemRuleMigrationsDataService', () => {
   const kibanaVersion = '8.16.0';
@@ -65,6 +72,59 @@ describe('SiemRuleMigrationsDataService', () => {
       );
       expect(prebuiltRulesAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
+      );
+    });
+
+    it('should create ELSER component templates with the default ELSER inference endpoint', () => {
+      new RuleMigrationsDataService(logger, kibanaVersion);
+      const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
+
+      expect(getComponentTemplate(integrationsAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: defaultInferenceEndpoints.ELSER,
+            }),
+          }),
+        })
+      );
+      expect(getComponentTemplate(prebuiltRulesAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: defaultInferenceEndpoints.ELSER,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should create ELSER component templates with the configured ELSER inference endpoint', () => {
+      const elserInferenceId = 'pt_tiny_elser_elasticsearch';
+      new RuleMigrationsDataService(logger, kibanaVersion, elserInferenceId);
+      const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
+
+      expect(getComponentTemplate(integrationsAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: elserInferenceId,
+            }),
+          }),
+        })
+      );
+      expect(getComponentTemplate(prebuiltRulesAdapter)).toEqual(
+        expect.objectContaining({
+          fieldMap: expect.objectContaining({
+            elser_embedding: expect.objectContaining({
+              type: 'semantic_text',
+              inference_id: elserInferenceId,
+            }),
+          }),
+        })
       );
     });
 

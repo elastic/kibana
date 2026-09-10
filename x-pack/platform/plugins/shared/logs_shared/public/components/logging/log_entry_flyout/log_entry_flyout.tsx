@@ -14,16 +14,17 @@ import {
   EuiSpacer,
   EuiTextColor,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { OverlayRef } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
+import type { OverlayRef } from '@kbn/core/public';
+import type { ProjectRouting, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { TimeKey } from '@kbn/io-ts-utils';
+import type { TimeKey } from '@kbn/io-ts-utils';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { LogViewReference } from '../../../../common/log_views';
+import type { LogViewReference } from '../../../../common/log_views';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { DataSearchErrorCallout } from '../../data_search_error_callout';
@@ -36,6 +37,10 @@ export interface LogEntryFlyoutProps {
   onCloseFlyout: () => void;
   onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
   logViewReference: LogViewReference | null | undefined;
+  /**
+   * CPS project scope to look the log entry up with, overriding the project picker.
+   */
+  projectRouting?: ProjectRouting;
 }
 
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
@@ -100,7 +105,10 @@ export const LogEntryFlyout = ({
   onCloseFlyout,
   onSetFieldFilter,
   logViewReference,
+  projectRouting,
 }: LogEntryFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     cancelRequest: cancelLogEntryRequest,
     errors: logEntryErrors,
@@ -112,6 +120,7 @@ export const LogEntryFlyout = ({
   } = useLogEntry({
     logViewReference,
     logEntryId,
+    projectRouting,
   });
 
   const {
@@ -127,12 +136,12 @@ export const LogEntryFlyout = ({
   }, [fetchLogEntry, logViewReference, logEntryId]);
 
   return (
-    <EuiFlyout onClose={onCloseFlyout} size="m">
+    <EuiFlyout onClose={onCloseFlyout} size="m" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h3 id="flyoutTitle">
+              <h3 id={modalTitleId}>
                 <FormattedMessage
                   defaultMessage="Details for log entry {logEntryId}"
                   id="xpack.logsShared.logFlyout.flyoutTitle"

@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/vectordb-onboarding",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "vectordb",
+  "visibility": "private"
+}

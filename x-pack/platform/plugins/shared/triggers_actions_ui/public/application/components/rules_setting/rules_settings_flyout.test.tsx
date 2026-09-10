@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
-import { IToasts } from '@kbn/core/public';
-import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
-import { RulesSettingsFlyout, RulesSettingsFlyoutProps } from './rules_settings_flyout';
+import type { IToasts } from '@kbn/core/public';
+import type { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
+import type { RulesSettingsFlyoutProps } from './rules_settings_flyout';
+import { RulesSettingsFlyout } from './rules_settings_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
@@ -507,5 +508,18 @@ describe('rules_settings_flyout', () => {
     });
 
     expect(result.queryByTestId('alert-delete-open-modal-button')).toBe(null);
+  });
+
+  test('save button is disabled on initial load and enabled when user changes a setting', async () => {
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    await waitForFlyoutLoad();
+
+    const saveButton = screen.getByTestId('rulesSettingsFlyoutSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    const lookBackWindowInput = screen.getByTestId('lookBackWindowRangeInput');
+    fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
+
+    expect(saveButton).not.toBeDisabled();
   });
 });

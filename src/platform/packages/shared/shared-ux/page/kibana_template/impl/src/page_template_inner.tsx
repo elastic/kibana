@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
-import { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
+import type { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
 
 const getClasses = (template?: string, className?: string) => {
   return classNames(

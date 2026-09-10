@@ -1,0 +1,2084 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "n-tsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:37.727Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "4OOf0i6UHGUJ1N3DfYAOKVLejIIwsKENYCb4rFM4MQI4782g",
+        "name": "rLMRBOEuUoWpkl0kZ7dbBK03mMk1izbxQGwiu2qmcok3ARia1SFaeSU0r9o5EMd",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "provider": "azure"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:37.727Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "20b81a6d-69a0-49f1-97fa-c3ff65d99606",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure That No Custom Subscription Administrator Roles Exist\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "905GsSBXB9traT4qAeXrNfhRa8acae0FVVO4y6djfaTzGLRWNTk7nBulNsV6JDF0HWd9fSn3unUTgYnCr9jfqB6"
+        ]
+      },
+      "resource": {
+        "id": "aubFychsB7J0pkeyxZZcZrp4MrWm2WcjI8jPdGhRmnOiAXELn6KxJtjwfkQ0RaukgKdNSNrPoER9Xx4UJYgbDUF",
+        "name": "nU0sWv5jtydf8GLtQWJiFkQ79c9TiQqFNNz4",
+        "raw": {
+          "id": "raw_id_test_3",
+          "name": "raw_name_test_3",
+          "properties": {
+            "assignableScopes": [
+              "/providers/Microsoft.Management/managementGroups/research-and-development"
+            ],
+            "createdBy": "creator_name_test_3",
+            "createdOn": "2025-04-29T17:45:23.736Z",
+            "description": "PointFive SP Custom Role Actions",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.CostManagementExports/register/action",
+                  "Microsoft.Insights/diagnosticSettings/write",
+                  "Microsoft.OperationalInsights/workspaces/sharedKeys/action"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "PointFive SP Custom Role Actions",
+            "type": "CustomRole",
+            "updatedBy": "updater_name_test_3",
+            "updatedOn": "2025-04-29T17:45:23.736Z"
+          },
+          "tenant_id": "tenant_id_test_3",
+          "type": "microsoft.authorization/roledefinitions"
+        },
+        "sub_type": "azure-role-definition",
+        "type": "identity-management"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "ZpNcFvYhA3L8sWrMqDExBjuR5nTq0VokXg2HidJpLtEyKM9OwCcSZblVmP6xRYgah"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Select `View` next to a role.\n7. Select `JSON`.\n8. Check for `assignableScopes` set to `/` or the subscription, and `actions` set to `*`.\n9. Repeat steps 6-8 for each custom role.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`\n\n**From PowerShell**\n\n```\nConnect-AzAccount\nGet-AzRoleDefinition |Where-Object {($_.IsCustom -eq $true) -and ($_.Actions.contains('*'))}\n```\n\nCheck the output for `AssignableScopes` value set to '/' or the subscription.",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "1.23",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "The principle of least privilege should be followed and only necessary privileges should be assigned instead of allowing full administrative access.",
+        "id": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "impact": "Subscriptions will need to be handled by Administrators with permissions.",
+        "name": "Ensure That No Custom Subscription Administrator Roles Exist",
+        "profile_applicability": "* Level 1",
+        "rationale": "Classic subscription admin roles offer basic access management and include Account Administrator, Service Administrator, and Co-Administrators.\nIt is recommended the least necessary permissions be given initially.\nPermissions can be added as needed by the account holder.\nThis ensures the account holder cannot perform actions which were not intended.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "references": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "remediation": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Check the box next to each role which grants subscription administrator privileges.\n7. Select `Remove`.\n8. Select `Yes`.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`.\n\nTo remove a violating role:\n\n```\naz role definition delete --name <role name>\n```\n\nNote that any role assignments must be removed before a custom role can be deleted.\nEnsure impact is assessed before deleting a custom role granting subscription administrator privileges.",
+        "section": "Identity and Access Management",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 1.23",
+          "Identity and Access Management"
+        ],
+        "uuid": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "version": "1.0"
+      },
+      "user": {
+        "effective": {
+          "id": "/providers/Microsoft.Authorization/RoleDefinitions/faf601cc-2149-4ca3-91cc-1f6ed87d253c",
+          "name": "faf601cc-2149-4ca3-91cc-1f6ed87d253c"
+        }
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "oOtsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:37.674Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "2GguyOwwPzfImu5jodaMTuRhY7Tsg4fal8nYCesfbml4l18L",
+        "name": "HsDYlhNy1ELfkAhxPYmlLfznTI4rkK2DSQGgCjEqDtT97qZm3Z9OBS5KjxUG6sd",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "provider": "azure"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:37.674Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "7617a239-b306-4363-84cd-c09ceff85a35",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure That No Custom Subscription Administrator Roles Exist\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "neCRysvTDKFJfcFyMrC8BHF4OU2ymJnZEGXSiRoE4FGlyAWy2W5bBE6ZfsJHOSjbVA1MrbZrhn3UwRiliErL4LQ"
+        ]
+      },
+      "resource": {
+        "id": "3ROVMaCfYWTbXIRJ3MyD2QMwv0Jq12qpyz3wzdHArkD7X0s7e8K9BzgqpLq7KeLXJeDVUCBAhucUDATFVZPCGvS",
+        "name": "Fudn0YQeuFkMgsiI6aqV4tBfGIV4cOjU1TF4",
+        "raw": {
+          "id": "raw_id_test_4",
+          "name": "raw_name_test_4",
+          "properties": {
+            "assignableScopes": [
+              "test_4"
+            ],
+            "createdBy": "creator_id_test_4",
+            "createdOn": "2025-04-29T17:45:23.736Z",
+            "description": "PointFive SP Custom Role Actions",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.CostManagementExports/register/action",
+                  "Microsoft.Insights/diagnosticSettings/write",
+                  "Microsoft.OperationalInsights/workspaces/sharedKeys/action"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "PointFive SP Custom Role Actions",
+            "type": "CustomRole",
+            "updatedBy": "Updater_id_test_4",
+            "updatedOn": "2025-04-29T17:45:23.736Z"
+          },
+          "tenant_id": "tenant_id_test_4",
+          "type": "microsoft.authorization/roledefinitions"
+        },
+        "sub_type": "azure-role-definition",
+        "type": "identity-management"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "QxBzWuGkM7t2XpnrHfLoYIjvKa1dCeNLVZs84OE3AwRDKbPYcxugmJTh9qMFzv5SW"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Select `View` next to a role.\n7. Select `JSON`.\n8. Check for `assignableScopes` set to `/` or the subscription, and `actions` set to `*`.\n9. Repeat steps 6-8 for each custom role.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`\n\n**From PowerShell**\n\n```\nConnect-AzAccount\nGet-AzRoleDefinition |Where-Object {($_.IsCustom -eq $true) -and ($_.Actions.contains('*'))}\n```\n\nCheck the output for `AssignableScopes` value set to '/' or the subscription.",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "1.23",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "The principle of least privilege should be followed and only necessary privileges should be assigned instead of allowing full administrative access.",
+        "id": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "impact": "Subscriptions will need to be handled by Administrators with permissions.",
+        "name": "Ensure That No Custom Subscription Administrator Roles Exist",
+        "profile_applicability": "* Level 1",
+        "rationale": "Classic subscription admin roles offer basic access management and include Account Administrator, Service Administrator, and Co-Administrators.\nIt is recommended the least necessary permissions be given initially.\nPermissions can be added as needed by the account holder.\nThis ensures the account holder cannot perform actions which were not intended.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "references": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "remediation": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Check the box next to each role which grants subscription administrator privileges.\n7. Select `Remove`.\n8. Select `Yes`.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`.\n\nTo remove a violating role:\n\n```\naz role definition delete --name <role name>\n```\n\nNote that any role assignments must be removed before a custom role can be deleted.\nEnsure impact is assessed before deleting a custom role granting subscription administrator privileges.",
+        "section": "Identity and Access Management",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 1.23",
+          "Identity and Access Management"
+        ],
+        "uuid": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "version": "1.0"
+      },
+      "user": {
+        "effective": {
+          "id": "/providers/Microsoft.Authorization/RoleDefinitions/eafbd026-9941-aef4-00d5-3c0eb9151dc3",
+          "name": "eafbd026-9941-aef4-00d5-3c0eb9151dc3"
+        }
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "oetsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:37.440Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "kaelal2oRcRtihJ6pUyQxvbljdnLCdPeWxsLovBOqSsRiJJD",
+        "name": "PC1mW55XG64hqWfODV0kJjSfnz7QAuOGqCJz25rVTbymtF0OWDLMUipHZOzspbR",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "provider": "azure"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:37.440Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "ec5f9045-5166-4e22-9021-5420014376c6",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure That No Custom Subscription Administrator Roles Exist\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "x2jmBZ9XAnNALlAwNEWlbmjfiy8Bd2gEetafUyFNaqWyV9TFdA6PdG9y1lazxMlLbOGynVU89TLZWgKRDhAufz3"
+        ]
+      },
+      "resource": {
+        "id": "ZAXWs2WYSGYW6ZKPTaQ76HrXQxJmQwLvJFkX1ZGQylfQzrbDowyyD6s6omOtEkVgsp102DP8xOGGSm7BoGgnxRw",
+        "name": "jeiBKQUVjfwHFSjyA4t9GL48CV05Sj5dQg8q",
+        "raw": {
+          "id": "raw_id_test_5",
+          "name": "raw_name_test_5",
+          "properties": {
+            "assignableScopes": [
+              "test_5"
+            ],
+            "createdBy": "creator_id_5",
+            "createdOn": "2024-03-11T11:45:13.927Z",
+            "description": "Additional read permissions for cloudbeatVM",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.Web/sites/*/read",
+                  "Microsoft.Web/sites/config/Read",
+                  "Microsoft.Web/sites/config/list/Action"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "cloudbeatVM additional permissions",
+            "type": "CustomRole",
+            "updatedBy": "Updater_id_test_5",
+            "updatedOn": "2025-07-18T04:32:57.292Z"
+          },
+          "tenant_id": "tenant_id_test_5",
+          "type": "microsoft.authorization/roledefinitions"
+        },
+        "sub_type": "azure-role-definition",
+        "type": "identity-management"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "KwUjTpFeD91sGLoMxzZvcBArlY7ihXPOMqWtRNnEK6Jf38ybVguCQXdaomHt24kLs"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Select `View` next to a role.\n7. Select `JSON`.\n8. Check for `assignableScopes` set to `/` or the subscription, and `actions` set to `*`.\n9. Repeat steps 6-8 for each custom role.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`\n\n**From PowerShell**\n\n```\nConnect-AzAccount\nGet-AzRoleDefinition |Where-Object {($_.IsCustom -eq $true) -and ($_.Actions.contains('*'))}\n```\n\nCheck the output for `AssignableScopes` value set to '/' or the subscription.",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "1.23",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "The principle of least privilege should be followed and only necessary privileges should be assigned instead of allowing full administrative access.",
+        "id": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "impact": "Subscriptions will need to be handled by Administrators with permissions.",
+        "name": "Ensure That No Custom Subscription Administrator Roles Exist",
+        "profile_applicability": "* Level 1",
+        "rationale": "Classic subscription admin roles offer basic access management and include Account Administrator, Service Administrator, and Co-Administrators.\nIt is recommended the least necessary permissions be given initially.\nPermissions can be added as needed by the account holder.\nThis ensures the account holder cannot perform actions which were not intended.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "references": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "remediation": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Check the box next to each role which grants subscription administrator privileges.\n7. Select `Remove`.\n8. Select `Yes`.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`.\n\nTo remove a violating role:\n\n```\naz role definition delete --name <role name>\n```\n\nNote that any role assignments must be removed before a custom role can be deleted.\nEnsure impact is assessed before deleting a custom role granting subscription administrator privileges.",
+        "section": "Identity and Access Management",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 1.23",
+          "Identity and Access Management"
+        ],
+        "uuid": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "version": "1.0"
+      },
+      "user": {
+        "effective": {
+          "id": "/providers/Microsoft.Authorization/RoleDefinitions/b797a779-6c2d-5688-a4bf-784679a0621b",
+          "name": "b797a779-6c2d-5688-a4bf-784679a0621b"
+        }
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "outsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:37.412Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "hjAtkYoCUfBjl5AH8LW7hQVtwV20F4QwwhwdAT4Ka3V8n4hC",
+        "name": "sED3g4xkxotUmgG9T1k9CPEIzQj5plB3dKsPFRK8cdBwqyy4dADwZwwTn2r8zoa",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "provider": "azure"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:37.411Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "bd6d26ae-a278-4bd9-a88c-391c7c49cd84",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure That No Custom Subscription Administrator Roles Exist\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "NExa5PeepiyEpmcAPGTJqyuLk13OUrld5PrmIEuyBpJdnvDSGeajxH20oMUdVYeIK5V6uHsiJX37z8LoM5OWhNa"
+        ]
+      },
+      "resource": {
+        "id": "Bsw4uOLGW3w78qVwyoQUfXDXXgRit3PmEI2eWE25MRM11v1XDIKkX95KkhbpA8LBWFKkBA0jlxeyfatb08Bq0nR",
+        "name": "51hRPI4oevnrLw9OtgG7zkRuXCyM4gQ1wGce",
+        "raw": {
+          "id": "raw_id_test_2",
+          "name": "raw_name_test_2",
+          "properties": {
+            "assignableScopes": [
+              "test_2"
+            ],
+            "createdBy": "creator_id_test_2",
+            "createdOn": "2024-04-26T21:06:30.399Z",
+            "description": "Read access to Azure Subscription",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.Resources/subscriptions/read"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "AzureSubscriptionReader",
+            "type": "CustomRole",
+            "updatedBy": "updater_id_test_2",
+            "updatedOn": "2024-04-26T21:06:30.399Z"
+          },
+          "tenant_id": "tenant_id_test_2",
+          "type": "microsoft.authorization/roledefinitions"
+        },
+        "sub_type": "azure-role-definition",
+        "type": "identity-management"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "NTXJqaGY6MPoVFlzKxDEZj7bwAr1RnOLchUisBvd0mCtWpQR8HgLyx9eu3S5fkA2n"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Select `View` next to a role.\n7. Select `JSON`.\n8. Check for `assignableScopes` set to `/` or the subscription, and `actions` set to `*`.\n9. Repeat steps 6-8 for each custom role.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`\n\n**From PowerShell**\n\n```\nConnect-AzAccount\nGet-AzRoleDefinition |Where-Object {($_.IsCustom -eq $true) -and ($_.Actions.contains('*'))}\n```\n\nCheck the output for `AssignableScopes` value set to '/' or the subscription.",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "1.23",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "The principle of least privilege should be followed and only necessary privileges should be assigned instead of allowing full administrative access.",
+        "id": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "impact": "Subscriptions will need to be handled by Administrators with permissions.",
+        "name": "Ensure That No Custom Subscription Administrator Roles Exist",
+        "profile_applicability": "* Level 1",
+        "rationale": "Classic subscription admin roles offer basic access management and include Account Administrator, Service Administrator, and Co-Administrators.\nIt is recommended the least necessary permissions be given initially.\nPermissions can be added as needed by the account holder.\nThis ensures the account holder cannot perform actions which were not intended.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "references": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "remediation": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Check the box next to each role which grants subscription administrator privileges.\n7. Select `Remove`.\n8. Select `Yes`.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`.\n\nTo remove a violating role:\n\n```\naz role definition delete --name <role name>\n```\n\nNote that any role assignments must be removed before a custom role can be deleted.\nEnsure impact is assessed before deleting a custom role granting subscription administrator privileges.",
+        "section": "Identity and Access Management",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 1.23",
+          "Identity and Access Management"
+        ],
+        "uuid": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "version": "1.0"
+      },
+      "user": {
+        "effective": {
+          "id": "/providers/Microsoft.Authorization/RoleDefinitions/b4463b34-8465-5787-b956-0aacb624095c",
+          "name": "b4463b34-8465-5787-b956-0aacb624095c"
+        }
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "o-tsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.790Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "5IOl4a4kokWUF3rbdtrxDgqNvM9Bh8TyejQVYEdvj8nwTW35",
+        "name": "Z3GlQyOEYvScvKMQ6JXQREeDIpeSGibdFqMGYBm8p1wHcRJb2Uoh6OrZqYzrM6W",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "provider": "azure"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.786Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "31916484-f9c5-49b5-9381-7b729e7eab67",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "failure",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure That No Custom Subscription Administrator Roles Exist\": failed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "7xvoXgw2FJbU3o8oMceoCYM5EHCCxz96ydFiRxHeBfrIC9kHswC8XqgliboJBGx1Tsubsgj4ew4ykzDdrnjPnsO"
+        ]
+      },
+      "resource": {
+        "id": "tU4VLRs2ZSjXQggLJHSNCcmATYgT040UykWA8isEG8WXIjo9ZO7xWCcHeEpid4c2hDemrVgIs2WAyLgm82MlotB",
+        "name": "Q68xK5Cp8eVeSaAhT5gBe2KHmfKoiAKlmTr9",
+        "raw": {
+          "id": "raw_id_test_7",
+          "name": "raw_name_test_7",
+          "properties": {
+            "assignableScopes": [
+              "test_7"
+            ],
+            "createdBy": "creator_id_test_7",
+            "createdOn": "2024-04-02T09:04:10.25Z",
+            "description": "Permissions to register application as owners",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "*"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "Register Application",
+            "type": "CustomRole",
+            "updatedBy": "Updater_test_id_7",
+            "updatedOn": "2024-04-04T08:34:36.827Z"
+          },
+          "tenant_id": "tenant_id_test_7",
+          "type": "microsoft.authorization/roledefinitions"
+        },
+        "sub_type": "azure-role-definition",
+        "type": "identity-management"
+      },
+      "result": {
+        "evaluation": "failed",
+        "evidence": {
+          "Resource": {
+            "id": "FbPaqJWyZDoGL0CvKrYeVTxM9n6OXEuhiSRmAHst45kgBj8NcQ3f7lbIpwdUN1z2M"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Select `View` next to a role.\n7. Select `JSON`.\n8. Check for `assignableScopes` set to `/` or the subscription, and `actions` set to `*`.\n9. Repeat steps 6-8 for each custom role.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`\n\n**From PowerShell**\n\n```\nConnect-AzAccount\nGet-AzRoleDefinition |Where-Object {($_.IsCustom -eq $true) -and ($_.Actions.contains('*'))}\n```\n\nCheck the output for `AssignableScopes` value set to '/' or the subscription.",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "1.23",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "The principle of least privilege should be followed and only necessary privileges should be assigned instead of allowing full administrative access.",
+        "id": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "impact": "Subscriptions will need to be handled by Administrators with permissions.",
+        "name": "Ensure That No Custom Subscription Administrator Roles Exist",
+        "profile_applicability": "* Level 1",
+        "rationale": "Classic subscription admin roles offer basic access management and include Account Administrator, Service Administrator, and Co-Administrators.\nIt is recommended the least necessary permissions be given initially.\nPermissions can be added as needed by the account holder.\nThis ensures the account holder cannot perform actions which were not intended.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "references": "1. https://docs.microsoft.com/en-us/azure/billing/billing-add-change-azure-subscription-administrator\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-1-protect-and-limit-highly-privileged-users\n5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-2-restrict-administrative-access-to-business-critical-systems\n7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-2-define-enterprise-segmentation-strategy\n8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy\n9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-7-follow-just-enough-administration-least-privilege-principle",
+        "remediation": "**From Azure Portal**\n\n1. From Azure Home select the Portal Menu.\n2. Select `Subscriptions`.\n3. Select `Access control (IAM)`.\n4. Select `Roles`.\n5. Click `Type` and select `CustomRole` from the drop down menu.\n6. Check the box next to each role which grants subscription administrator privileges.\n7. Select `Remove`.\n8. Select `Yes`.\n\n**From Azure CLI**\n\nList custom roles:\n\n```\naz role definition list --custom-role-only True\n```\n\nCheck for entries with `assignableScope` of `/` or the `subscription`, and an action of `*`.\n\nTo remove a violating role:\n\n```\naz role definition delete --name <role name>\n```\n\nNote that any role assignments must be removed before a custom role can be deleted.\nEnsure impact is assessed before deleting a custom role granting subscription administrator privileges.",
+        "section": "Identity and Access Management",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 1.23",
+          "Identity and Access Management"
+        ],
+        "uuid": "05676b4e-3274-5984-9981-6aa1623c24ec",
+        "version": "1.0"
+      },
+      "user": {
+        "effective": {
+          "id": "/providers/Microsoft.Authorization/RoleDefinitions/20e4c49f-1bfb-5da8-a1fc-5697e996d9bb",
+          "name": "20e4c49f-1bfb-5da8-a1fc-5697e996d9bb"
+        }
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "pOtsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.650Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "uBPToKIVxXK3tfUoAfp8tQ5652NqMcRQ3nbyv1MYCecWNmHU",
+        "name": "s1neoGzSkg9gWWhO8z7KDhB5KWkKbbZNE65S3C6gudnMkH1JwfWA4kbYIJvOCNl",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "account": {
+          "id": "b7gwXmgw1h3pQcPCp1aNyY0H3VecTWhMmI6hLkM7qtlnWXP0Q7J",
+          "name": "Gg3CGOAi"
+        },
+        "provider": "azure",
+        "region": "centralus"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.648Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "d73993d1-6cb7-4d0d-a889-22d0dcf35a7f",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "cloudbeatVM",
+        "name": "cloudbeatvm"
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure Virtual Machines are utilizing Managed Disks\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "ZiQwGN6rpN6bwDwTT4XBpRqHxiRAH8rC9pMD4tqFs9tr9z7jmd73Jv33RBDKgjJzLlYe3ACkRRiYGzFm8vU8Pr5jHrGtsGaEIz0MjVv8U22DeOktnzC0SmE0B0y5v1eb7251UUZ5hNXyJudp5C4sIis"
+        ]
+      },
+      "resource": {
+        "account_id": "/subscriptions/JXAgM0KIHlVLtTdVIrPmD1miRSCyE3kqbOoMKPZoJnHgjO8RBrxfS230MNiB80nFqB9Poj9sT0t3P783m16DjZthFHb7OEhwoSiybg8SaEVf3wzcbRY5b6hgHampjMftxlGXggREBUiNlvqvBYriIMx",
+        "account_name": "csp-team",
+        "id": "JXAgM0KIHlVLtTdVIrPmD1miRSCyE3kqbOoMKPZoJnHgjO8RBrxfS230MNiB80nFqB9Poj9sT0t3P783m16DjZthFHb7OEhwoSiybg8SaEVf3wzcbRY5b6hgHampjMftxlGXggREBUiNlvqvBYriIMx",
+        "name": "ba7LevRhdQM",
+        "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
+        "sub_type": "azure-vm",
+        "type": "cloud-compute"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "oXt7bLuRaKZVyPMNf1sJCHYIwWc3TEnqXg69QFOBd5AzmGrlk28hjeDSUvRBp0MxA"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. Using the search feature, go to `Virtual Machines`\n2. Click the `Manage view` dropdown, then select `Edit columns`\n3. Add `Uses managed disks` to the selected columns\n4. Select `Save`\n5. Ensure all virtual machines listed are using managed disks\n\n**From PowerShell**\n\n```\nGet-AzVM | ForEach-Object {\"Name: \" + $_.Name;\"ManagedDisk Id: \" + $_.StorageProfile.OsDisk.ManagedDisk.Id;\"\"}\n```\n\nExample output:\n\n```\nName: vm1\nManagedDisk Id: /disk1/id\n\nName: vm2\nManagedDisk Id: /disk2/id\n```\n\nIf the 'ManagedDisk Id' field is empty the os disk for that vm is not managed.",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "7.2",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "Migrate blob-based VHDs to Managed Disks on Virtual Machines to exploit the default features of this configuration.\nThe features include: \n1) Default Disk Encryption\n2) Resilience, as Microsoft will managed the disk storage and move around if underlying hardware goes faulty\n3) Reduction of costs over storage accounts",
+        "id": "61ab077c-fc0f-5920-8bcf-ccc037a4139b",
+        "impact": "There are additional costs for managed disks based off of disk space allocated. When converting to managed disks, VMs will be powered off and back on.",
+        "name": "Ensure Virtual Machines are utilizing Managed Disks",
+        "profile_applicability": "* Level 1",
+        "rationale": "Managed disks are by default encrypted on the underlying hardware, so no additional encryption is required for basic protection.\nIt is available if additional encryption is required.\nManaged disks are by design more resilient that storage accounts.\n\nFor ARM-deployed Virtual Machines, Azure Adviser will at some point recommend moving VHDs to managed disks both from a security and cost management perspective.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/virtual-machines/windows/convert-unmanaged-to-managed-disks\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-4-enable-data-at-rest-encryption-by-default\n3. https://docs.microsoft.com/en-us/azure/virtual-machines/faq-for-disks\n4. https://azure.microsoft.com/en-us/pricing/details/managed-disks/",
+        "references": "1. https://docs.microsoft.com/en-us/azure/virtual-machines/windows/convert-unmanaged-to-managed-disks\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-4-enable-data-at-rest-encryption-by-default\n3. https://docs.microsoft.com/en-us/azure/virtual-machines/faq-for-disks\n4. https://azure.microsoft.com/en-us/pricing/details/managed-disks/",
+        "remediation": "**From Azure Portal**\n\n1. Using the search feature, go to `Virtual Machines`\n2. Select the virtual machine you would like to convert\n3. Select `Disks` in the menu for the VM\n4. At the top select `Migrate to managed disks`\n5. You may follow the prompts to convert the disk and finish by selecting `Migrate` to start the process\n\n**NOTE** VMs will be stopped and restarted after migration is complete.\n\n**From PowerShell**\n```\nStop-AzVM -ResourceGroupName $rgName -Name $vmName -Force\nConvertTo-AzVMManagedDisk -ResourceGroupName $rgName -VMName $vmName\nStart-AzVM -ResourceGroupName $rgName -Name $vmName\n```",
+        "section": "Virtual Machines",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 7.2",
+          "Virtual Machines"
+        ],
+        "uuid": "61ab077c-fc0f-5920-8bcf-ccc037a4139b",
+        "version": "1.0"
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "petsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.650Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "LEDlC3TBeJh8TrL7k34Q0YPx8uGjFZJ9UgOEBhMoOdp63sL0",
+        "name": "TK3X310QvqEayhjpBs7mIAwKIq1m9CUgt2DKetYb9AoWJADsYF8JDkf1U7Pv9sL",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "account": {
+          "id": "EcsvN0q88a0HT59OsHeputTRxgjY7yo3D6hnWalUel5DFkBDOJ9",
+          "name": "VfyjyeEL"
+        },
+        "provider": "azure",
+        "region": "centralus"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.648Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "b53b7586-ac01-45ae-aa2c-d4e5baaae6d5",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "cloudbeatVM",
+        "name": "cloudbeatvm"
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure that UDP access from the Internet is evaluated and restricted\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "ThMhJf9kEWybPHltpaGirrtlFvfEWr3buj2f6gN3LVwK3UsqJIlsWcgzVFL6ywS47t4FXgREATBHkBTeb7ylHQ0X7nqXSscCyiomlzOk3MksOUPBBVLyXyDZ2kzW2fzlVlZ3MHZ7DnMxoQvrRWduiyv"
+        ]
+      },
+      "resource": {
+        "account_id": "/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df",
+        "account_name": "csp-team",
+        "id": "pYuOLyeCsh49vokqUDoN4wUxliTuLIwPGYY3Fi3gpQnPzILi9uYDT1LsgcOWYB5J4S8J49ODj5TXSUVNGIDxGDai1128zQ4qNNN61h7nN1aO1Au2NedvFWtNi7ODf5e60sendvLZLz5Anhawr22Unos",
+        "name": "EmU4xMIQFAN",
+        "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
+        "sub_type": "azure-vm",
+        "type": "cloud-compute"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "AhqvTWJn0DZCS2xRPu5LyYVkKXrBi1cg8zmOMoEN39tw7bldjFeQnMHaGfIU64sXy"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. Open the `Networking` blade for the specific Virtual machine in Azure portal\n2. Verify that the `INBOUND PORT RULES` **does not** have a rule for UDP such as\n- protocol = `UDP`,\n- Source = `Any` OR `Internet`\n\n**From Azure CLI**\n\nList Network security groups with corresponding non-default Security rules:\n\n```\naz network nsg list --query [*].[name,securityRules]\n```\nEnsure that none of the NSGs have security rule as below\n```\n\"access\" : \"Allow\"\n\"destinationPortRange\" : \"*\" or \"[port range containing 53, 123, 161, 389, 1900, or other vulnerable UDP-based services]\"\n\"direction\" : \"Inbound\"\n\"protocol\" : \"UDP\"\n\"sourceAddressPrefix\" : \"*\" or \"0.0.0.0\" or \"<nw>/0\" or \"/0\" or \"internet\" or \"any\"\n```",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "6.3",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "Network security groups should be periodically evaluated for port misconfigurations.\nWhere certain ports and protocols may be exposed to the Internet, they should be evaluated for necessity and restricted wherever they are not explicitly required.",
+        "id": "6e339632-0d1c-5a7c-8ca3-fac5813932d9",
+        "impact": "",
+        "name": "Ensure that UDP access from the Internet is evaluated and restricted",
+        "profile_applicability": "* Level 1",
+        "rationale": "The potential security problem with broadly exposing UDP services over the Internet is that attackers can use DDoS amplification techniques to reflect spoofed UDP traffic from Azure Virtual Machines.\nThe most common types of these attacks use exposed DNS, NTP, SSDP, SNMP, CLDAP and other UDP-based services as amplification sources for disrupting services of other machines on the Azure Virtual Network or even attack networked devices outside of Azure.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/security/fundamentals/network-best-practices#secure-your-critical-azure-service-resources-to-only-your-virtual-networks\n2. https://docs.microsoft.com/en-us/azure/security/fundamentals/ddos-best-practices\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries:ExpressRoute: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal",
+        "references": "1. https://docs.microsoft.com/en-us/azure/security/fundamentals/network-best-practices#secure-your-critical-azure-service-resources-to-only-your-virtual-networks\n2. https://docs.microsoft.com/en-us/azure/security/fundamentals/ddos-best-practices\n3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries:ExpressRoute: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal",
+        "remediation": "Where UDP is not explicitly required and narrowly configured for resources attached to the Network Security Group, Internet-level access to your Azure resources should be restricted or eliminated.\n\nFor internal access to relevant resources, configure an encrypted network tunnel such as:\n\n[ExpressRoute](https://docs.microsoft.com/en-us/azure/expressroute/)\n\n[Site-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal)\n\n[Point-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal)",
+        "section": "Networking",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 6.3",
+          "Networking"
+        ],
+        "uuid": "6e339632-0d1c-5a7c-8ca3-fac5813932d9",
+        "version": "1.0"
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "putsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.650Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "PN0mqzgnk5KIjQMXYv80tLUbI5wqjBujHYmqCGonfVVjpNUF",
+        "name": "R9IPhHUNtRjRS3YU9VBxcV55YgXD0qfTK9K17Sj0TNAFqh7Jt6xrDzzPC7UMv0r",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "account": {
+          "id": "jXRY0pAtlzvzcENCMT1SXm7C8XDW6ete7UfXr2P8ZnThLMP295C",
+          "name": "EJTaHr4e"
+        },
+        "provider": "azure",
+        "region": "centralus"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.648Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "8bd8474b-3f8f-4bf5-a87a-c63738dc8a6d",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "cloudbeatVM",
+        "name": "cloudbeatvm"
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure that SSH access from the Internet is evaluated and restricted\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "EHdw2fVKhIqEmv161Eu4Te4UCsodepJnvCfGq3UHjFKE9RazhsTBn0iH8kgkcI5ZSaUx4MZP7yo9uqHcWjUk0VI6Cz9VSqbb2MqoYZJUaZzR7oaXaluBAKUK4IsGrrCUYizVJwmw7BleWUeeoRjPKYD"
+        ]
+      },
+      "resource": {
+        "account_id": "/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df",
+        "account_name": "csp-team",
+        "id": "AviOPfHj7oaDWQAUM0rWiARlQf55r3EsIdhLkzkQEuw7oWpC5rpzGO9aXSejDy5rIoHzjznMKjGvVicsm7CBspTKqOKZt7xQeE7jG8e8mUcmlmJbZtUIl9vPhoYN1syBVakR0T8nhtP2nTfSIZlwoVo",
+        "name": "b9LPBgGO6AO",
+        "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
+        "sub_type": "azure-vm",
+        "type": "cloud-compute"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "GdZRFLMYw7vBtU9oQzpaNHIcnEbmX6rsJfXK4OqkCdgxS32uTAl5W0eY1VPMjhibA"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. Open the `Networking` blade for the specific Virtual machine in Azure portal\n2. Verify that the `INBOUND PORT RULES` **does not** have a rule for SSH such as \n - port = `22`, \n - protocol = `TCP`, \n - Source = `Any` OR `Internet`\n\n**From Azure CLI**\n\nList Network security groups with corresponding non-default Security rules: \n\n```\naz network nsg list --query [*].[name,securityRules]\n```\n\nEnsure that none of the NSGs have security rule as below\n\n```\n\"access\" : \"Allow\"\n\"destinationPortRange\" : \"22\" or \"*\" or \"[port range containing 22]\"\n\"direction\" : \"Inbound\"\n\"protocol\" : \"TCP\"\n\"sourceAddressPrefix\" : \"*\" or \"0.0.0.0\" or \"<nw>/0\" or \"/0\" or \"internet\" or \"any\"\n```",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "6.2",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "Network security groups should be periodically evaluated for port misconfigurations.\nWhere certain ports and protocols may be exposed to the Internet, they should be evaluated for necessity and restricted wherever they are not explicitly required.",
+        "id": "72bb12e0-31c0-54f4-a409-4aace3b602be",
+        "impact": "",
+        "name": "Ensure that SSH access from the Internet is evaluated and restricted",
+        "profile_applicability": "* Level 1",
+        "rationale": "The potential security problem with using SSH over the Internet is that attackers can use various brute force techniques to gain access to Azure Virtual Machines.\nOnce the attackers gain access, they can use a virtual machine as a launch point for compromising other machines on the Azure Virtual Network or even attack networked devices outside of Azure.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/security/azure-security-network-security-best-practices#disable-rdpssh-access-to-azure-virtual-machines\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries:Express Route: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal",
+        "references": "1. https://docs.microsoft.com/en-us/azure/security/azure-security-network-security-best-practices#disable-rdpssh-access-to-azure-virtual-machines\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries:Express Route: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal",
+        "remediation": "Where SSH is not explicitly required and narrowly configured for resources attached to the Network Security Group, Internet-level access to your Azure resources should be restricted or eliminated.\n\nFor internal access to relevant resources, configure an encrypted network tunnel such as:\n\n[ExpressRoute](https://docs.microsoft.com/en-us/azure/expressroute/)\n\n[Site-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal)\n\n[Point-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal)",
+        "section": "Networking",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 6.2",
+          "Networking"
+        ],
+        "uuid": "72bb12e0-31c0-54f4-a409-4aace3b602be",
+        "version": "1.0"
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "p-tsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.650Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "zmNO4J4V0iuDkSgZTJ8gThsreMA3Tu8nwZYXU9kwsx8u1gLw",
+        "name": "ImBOALGsEG6vw32sbw0CwAuVEWzsG8x6CYYVSfgo08BhAJ4xnfP5cg4RN1K4TIu",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "account": {
+          "id": "jt8Sh9aq9UtQqNHy4Peo8Aazt7Lp26gaXIF4nJq7RO1IJZSKZtJ",
+          "name": "NwA5arcq"
+        },
+        "provider": "azure",
+        "region": "centralus"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.648Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "30d0b89c-19b4-4e35-ae87-a34f09b4dc2f",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "cloudbeatVM",
+        "name": "cloudbeatvm"
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure that RDP access from the Internet is evaluated and restricted\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "EMH7XzASskVhPe9jGwi9wMi72jYYOGGt8zktYQoRyoaTXiwTlOF5HM4LyB33Jn95BAnHxKcoIttZfAXA4W4FMV4Sj9TSB008GjocsJjZhknrwKNwSSlTGaLSqjpvDCBk9WyLrPoYr7D1ctr7QXzwoPQ"
+        ]
+      },
+      "resource": {
+        "account_id": "/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df",
+        "account_name": "csp-team",
+        "id": "vXCLvwCsXKofuwzQEpg6FFltouZ2KLwlUNpXTcXIdOQsAt23OoRWlfUaCvws6rRrbpdSH67Kwkgl007u9iBcRNJIc8pa97KE8j0MjFTo93gfdJ9691IQ7DEu4JgHWcHwU1B68Eat8tk6mIv3uOk6YTs",
+        "name": "wzJq4zD3num",
+        "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
+        "sub_type": "azure-vm",
+        "type": "cloud-compute"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "MEUfj9oZ8qtSpRIGayVxTcWL7K6blCNd3HB2OX0mJwsnFepgD5iurAhvMYzXk1QnO"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. For each VM, open the `Networking` blade\n2. Verify that the `INBOUND PORT RULES` **does not** have a rule for RDP such as \n - port = `3389`, \n - protocol = `TCP`, \n - Source = `Any` OR `Internet`\n\n**From Azure CLI**\n\nList Network security groups with corresponding non-default Security rules:\n\n```\naz network nsg list --query [*].[name,securityRules]\n```\n\nEnsure that none of the NSGs have security rule as below \n\n```\n\"access\" : \"Allow\"\n\"destinationPortRange\" : \"3389\" or \"*\" or \"[port range containing 3389]\"\n\"direction\" : \"Inbound\"\n\"protocol\" : \"TCP\"\n\"sourceAddressPrefix\" : \"*\" or \"0.0.0.0\" or \"<nw>/0\" or \"/0\" or \"internet\" or \"any\"\n```",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "6.1",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "Network security groups should be periodically evaluated for port misconfigurations.\nWhere certain ports and protocols may be exposed to the Internet, they should be evaluated for necessity and restricted wherever they are not explicitly required.",
+        "id": "b4133ca4-32f1-501e-ad0a-a22700208a4f",
+        "impact": "",
+        "name": "Ensure that RDP access from the Internet is evaluated and restricted",
+        "profile_applicability": "* Level 1",
+        "rationale": "The potential security problem with using RDP over the Internet is that attackers can use various brute force techniques to gain access to Azure Virtual Machines.\nOnce the attackers gain access, they can use a virtual machine as a launch point for compromising other machines on an Azure Virtual Network or even attack networked devices outside of Azure.",
+        "reference": "1. https://docs.microsoft.com/en-us/azure/security/azure-security-network-security-best-practices#disable-rdpssh-access-to-azure-virtual-machines\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries:Express Route: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal",
+        "references": "1. https://docs.microsoft.com/en-us/azure/security/azure-security-network-security-best-practices#disable-rdpssh-access-to-azure-virtual-machines\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries:Express Route: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal",
+        "remediation": "Where RDP is not explicitly required and narrowly configured for resources attached to the Network Security Group, Internet-level access to your Azure resources should be restricted or eliminated.\n\nFor internal access to relevant resources, configure an encrypted network tunnel such as:\n\n[ExpressRoute](https://docs.microsoft.com/en-us/azure/expressroute/)\n\n[Site-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal)\n\n[Point-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal)",
+        "section": "Networking",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 6.1",
+          "Networking"
+        ],
+        "uuid": "b4133ca4-32f1-501e-ad0a-a22700208a4f",
+        "version": "1.0"
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "qOtsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.650Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "cP6QtvNmsX87LOlsgeT8UpHyCjjUSeF885dKMmdqpkF8GHBC",
+        "name": "pJHI6UjTThfA6Kws7RQ6nOiOBhz66lGDFT6zHgMG8Dr0YKVjxSFtPUx55jjYsLr",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "account": {
+          "id": "dCw2y3Tk4WmjTBrxgJPQdrx3RVPQLAPhHKL9ABi5Ws01EPzfYXg",
+          "name": "lRVMji7v"
+        },
+        "provider": "azure",
+        "region": "centralus"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.648Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "9d4239fa-2f53-4518-9db7-6f3779145a6f",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "success",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "hostname": "cloudbeatVM",
+        "name": "cloudbeatvm"
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure that HTTP(S) access from the Internet is evaluated and restricted\": passed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "7p5Imlugd17S5j5vNVAwZTIcgdF0UeGoUDhcUIpDJKfUmTqPNxO5hFfAv0h7DeG7ZJdRODQKTf04EQEkjRTVZHZ6w0mAWugxxzipAmhpEKimhzAAuhtNot4PS8aUTmCk8MCAnXXknxcsbZnipGSFz4P"
+        ]
+      },
+      "resource": {
+        "account_id": "/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df",
+        "account_name": "csp-team",
+        "id": "W0LcSIl7aTCUWPII8agBKA6ycMU98zcYjOYqIWxXZePhXAFgVeKXAgrdRaVZpjgiu2gowd53qvzmz1zlt4tvwXodZXN9fC97iXXH5Mj5ODeBVPx92ZmOS64WW4p8yj26eXf1SgoZjQ3FwUjBxm0oi0a",
+        "name": "OQfaRQSpt7d",
+        "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
+        "sub_type": "azure-vm",
+        "type": "cloud-compute"
+      },
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "Resource": {
+            "id": "UwZqXLJ9Ns0fbpORikM7deHyTEgFV3AYtPoKnxQmlcr4BaWuvCsGj126zD8hCMXnI"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. For each VM, open the Networking blade\n2. Verify that the INBOUND PORT RULES does not have a rule for HTTP such as\n - port = `80`,\n - protocol = `TCP`,\n - Source = `Any` OR `Internet`\n\n**From Azure CLI**\n\nList Network security groups with corresponding non-default Security rules:\n```\naz network nsg list --query [*].[name,securityRules]\n```\n\nEnsure that none of the NSGs have security rule as below\n```\n\"access\" : \"Allow\"\n\"destinationPortRange\" : \"80\" or \"*\" or \"[port range containing 80]\"\n\"direction\" : \"Inbound\"\n\"protocol\" : \"TCP\"\n\"sourceAddressPrefix\" : \"*\" or \"0.0.0.0\" or \"<nw>/0\" or \"/0\" or \"internet\" or \"any\"\n```",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "6.4",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "Network security groups should be periodically evaluated for port misconfigurations.\nWhere certain ports and protocols may be exposed to the Internet, they should be evaluated for necessity and restricted wherever they are not explicitly required and narrowly configured.",
+        "id": "bb264405-de3e-5b91-9654-2056f905fc67",
+        "impact": "",
+        "name": "Ensure that HTTP(S) access from the Internet is evaluated and restricted",
+        "profile_applicability": "* Level 1",
+        "rationale": "The potential security problem with using HTTP(S) over the Internet is that attackers can use various brute force techniques to gain access to Azure resources.\nOnce the attackers gain access, they can use the resource as a launch point for compromising other resources within the Azure tenant.",
+        "reference": "1. Express Route: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries",
+        "references": "1. Express Route: https://docs.microsoft.com/en-us/azure/expressroute/:Site-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal:Point-to-Site VPN: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal\n2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-1-establish-network-segmentation-boundaries",
+        "remediation": "Where HTTP(S) is not explicitly required and narrowly configured for resources attached to the Network Security Group, Internet-level access to your Azure resources should be restricted or eliminated.\n\n\nFor internal access to relevant resources, configure an encrypted network tunnel such as:\n\n[ExpressRoute](https://docs.microsoft.com/en-us/azure/expressroute/)\n\n[Site-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-portal)\n\n[Point-to-site VPN](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-resource-manager-portal)",
+        "section": "Networking",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 6.4",
+          "Networking"
+        ],
+        "uuid": "bb264405-de3e-5b91-9654-2056f905fc67",
+        "version": "1.0"
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "qetsH5gByhqgmIOMFb0J",
+    "index": "security_solution-cloud_security_posture.misconfiguration_latest-v1",
+    "source": {
+      "@timestamp": "2025-07-18T13:31:36.640Z",
+      "agent": {
+        "ephemeral_id": "9d2bf610-a822-4184-be4a-f47991eb5197",
+        "id": "Xn2MO9JlmE5qQ9pyHPgsH1q2V4jKfLFfuaidd5Iz4Zy13Yh1",
+        "name": "9RYpXJJ6mBr5DTOG2dJMBSz3Pry9XVaQ1e0AjHHySh0DrU2kG1zrLYYNVZmPWZV",
+        "type": "cloudbeat",
+        "version": "9.1.0"
+      },
+      "cloud": {
+        "account": {
+          "id": "abm5JCdUclpTAD1xYIxgAzAv4jQ2rZGNM3PcVhG4UZt2ssWa8sy",
+          "name": "Gd5ByNa8"
+        },
+        "provider": "azure",
+        "region": "centralus"
+      },
+      "cloud_security_posture": {
+        "package_policy": {
+          "id": "741fdd61-3410-445f-ac25-44706cfdbda0",
+          "revision": 1
+        }
+      },
+      "cloudbeat": {
+        "commit_time": "0001-01-01T00:00:00Z",
+        "policy": {
+          "commit_time": "0001-01-01T00:00:00Z",
+          "version": "9.1.0"
+        },
+        "version": "9.1.0"
+      },
+      "data_stream": {
+        "dataset": "cloud_security_posture.findings",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.6.0"
+      },
+      "elastic_agent": {
+        "id": "M2Y2NThkZGYtNjNjNi0xMWYwLTg2NzctMjJiYzY2ODRkZmIw",
+        "snapshot": false,
+        "version": "9.1.0"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "category": [
+          "configuration"
+        ],
+        "created": "2025-07-18T13:31:36.638Z",
+        "dataset": "cloud_security_posture.findings",
+        "id": "a7402e66-790f-46af-8520-9c622690848d",
+        "ingested": "2025-07-18T13:31:45Z",
+        "kind": "state",
+        "outcome": "failure",
+        "sequence": 1752845433,
+        "type": [
+          "info"
+        ]
+      },
+      "host.name": "Host-0rlfgcpnl5",
+      "message": "Rule \"Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK)\": failed",
+      "observer": {
+        "vendor": "Elastic"
+      },
+      "related": {
+        "entity": [
+          "7p5Imlugd17S5j5vNVAwZTIcgdF0UeGoUDhcUIpDJKfUmTqPNxO5hFfAv0h7DeG7ZJdRODQKTf04EQEkjRTVZHZ6w0mAWugxxzipAmhpEKimhzAAuhtNot4PS8aUTmCk8MCAnXXknxcsbZnipGSFz4P"
+        ]
+      },
+      "resource": {
+        "account_id": "/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df",
+        "account_name": "csp-team",
+        "id": "qOzq70VPowYDIouG2qkT4EJGiqZm6BdCpd5aynTZmtIxIPno0RIlV2fE1Aigp2bhflpkN4RwwjtxFqMaBjnykbXIJpuOyz1OrR8myqvzgyWb6qtLG5P35tKIQnsYht502yyJ68dVsHLFBDIfzE5KzYtPXayFLX97gNjJSdqe31pQQKmS4giC8k9",
+        "name": "M67VdiyWlG4dRqivrDA0i2l84V7VH7wQEYL8VN1l80TIAtRq0nFIG",
+        "region": "centralus",
+        "raw": {
+          "id": "raw_id_test_6",
+          "location": "centralus",
+          "name": "raw_name_test_6",
+          "properties": {
+            "LastOwnershipUpdateTime": "2024-07-28T08:26:23.0865673Z",
+            "creationData": {
+              "createOption": "FromImage",
+              "imageReference": {
+                "id": "image_id_test_6"
+              }
+            },
+            "diskIOPSReadWrite": 500,
+            "diskMBpsReadWrite": 60,
+            "diskSizeBytes": 32213303296,
+            "diskSizeGB": 30,
+            "diskState": "Attached",
+            "encryption": {
+              "type": "EncryptionAtRestWithPlatformKey"
+            },
+            "hyperVGeneration": "V2",
+            "networkAccessPolicy": "AllowAll",
+            "osType": "Linux",
+            "provisioningState": "Succeeded",
+            "publicNetworkAccess": "Enabled",
+            "supportedCapabilities": {
+              "acceleratedNetwork": true,
+              "architecture": "x64",
+              "diskControllerTypes": "SCSI, NVMe"
+            },
+            "supportsHibernation": true,
+            "timeCreated": "2024-07-28T08:26:23.0865673Z",
+            "uniqueId": "unique_id_test_6"
+          },
+          "resource_group": "resource_group_test_6",
+          "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+          },
+          "subscription_id": "subscription_id_test_6",
+          "tenant_id": "tenant_id_test_6",
+          "type": "microsoft.compute/disks"
+        },
+        "sub_type": "azure-disk",
+        "type": "cloud-compute"
+      },
+      "result": {
+        "evaluation": "failed",
+        "evidence": {
+          "Resource": {
+            "id": "cBFY3ZnKV9qAxJPg0eWpoMNd2iu7CHXbrtOLRYTmk84lsw5EfgvSdajMQnzcIUh6A"
+          }
+        }
+      },
+      "rule": {
+        "audit": "**From Azure Portal**\n\n1. Go to `Virtual machines`\n2. For each virtual machine, go to `Settings`\n3. Click on `Disks`\n4. Ensure that the `OS disk` and `Data disks` have encryption set to CMK.\n\n**From PowerShell**\n\n```\n$ResourceGroupName=\"yourResourceGroupName\"\n$DiskName=\"yourDiskName\"\n\n$disk=Get-AzDisk -ResourceGroupName $ResourceGroupName -DiskName $DiskName\n$disk.Encryption.Type\n```",
+        "benchmark": {
+          "id": "cis_azure",
+          "name": "CIS Microsoft Azure Foundations",
+          "posture_type": "cspm",
+          "rule_number": "7.3",
+          "version": "v2.0.0"
+        },
+        "default_value": "",
+        "description": "Ensure that OS disks (boot volumes) and data disks (non-boot volumes) are encrypted with CMK (Customer Managed Keys).\nCustomer Managed keys can be either ADE or Server Side Encryption (SSE).",
+        "id": "26ff6dff-042f-5901-8191-0e347d113e9e",
+        "impact": "Using CMK/BYOK will entail additional management of keys.\n\n**NOTE:** You must have your key vault set up to utilize this.",
+        "name": "Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK)",
+        "profile_applicability": "* Level 2",
+        "rationale": "Encrypting the IaaS VM's OS disk (boot volume) and Data disks (non-boot volume) ensures that the entire content is fully unrecoverable without a key, thus protecting the volume from unwanted reads.\nPMK (Platform Managed Keys) are enabled by default in Azure-managed disks and allow encryption at rest.\nCMK is recommended because it gives the customer the option to control which specific keys are used for the encryption and decryption of the disk.\nThe customer can then change keys and increase security by disabling them instead of relying on the PMK key that remains unchanging.\nThere is also the option to increase security further by using automatically rotating keys so that access to disk is ensured to be limited.\nOrganizations should evaluate what their security requirements are, however, for the data stored on the disk.\nFor high-risk data using CMK is a must, as it provides extra steps of security.\nIf the data is low risk, PMK is enabled by default and provides sufficient data security.",
+        "reference": "1. https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss\n2. https://docs.microsoft.com/en-us/azure/security-center/security-center-disk-encryption?toc=%2fazure%2fsecurity%2ftoc.json\n3. https://docs.microsoft.com/azure/security/fundamentals/data-encryption-best-practices#protect-data-at-rest https://docs.microsoft.com/azure/virtual-machines/windows/disk-encryption-portal-quickstart\n4. https://docs.microsoft.com/en-us/rest/api/compute/disks/delete\n5. https://docs.microsoft.com/en-us/rest/api/compute/disks/update#encryptionsettings\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-5-use-customer-managed-key-option-in-data-at-rest-encryption-when-required\n7. https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-enable-customer-managed-keys-powershell\n8. https://docs.microsoft.com/en-us/azure/virtual-machines/disk-encryption",
+        "references": "1. https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss\n2. https://docs.microsoft.com/en-us/azure/security-center/security-center-disk-encryption?toc=%2fazure%2fsecurity%2ftoc.json\n3. https://docs.microsoft.com/azure/security/fundamentals/data-encryption-best-practices#protect-data-at-rest https://docs.microsoft.com/azure/virtual-machines/windows/disk-encryption-portal-quickstart\n4. https://docs.microsoft.com/en-us/rest/api/compute/disks/delete\n5. https://docs.microsoft.com/en-us/rest/api/compute/disks/update#encryptionsettings\n6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-5-use-customer-managed-key-option-in-data-at-rest-encryption-when-required\n7. https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disks-enable-customer-managed-keys-powershell\n8. https://docs.microsoft.com/en-us/azure/virtual-machines/disk-encryption",
+        "remediation": "**From Azure Portal** \n\n**Note:** Disks must be detached from VMs to have encryption changed.\n\n1. Go to `Virtual machines`\n2. For each virtual machine, go to `Settings`\n3. Click on `Disks`\n4. Click the ellipsis (`...`), then click `Detach` to detach the disk from the VM\n5. Now search for `Disks` and locate the unattached disk\n6. Click the disk then select `Encryption`\n7. Change your encryption type, then select your encryption set\n8. Click `Save`\n9. Go back to the VM and re-attach the disk\n\n**From PowerShell**\n\n```\n$KVRGname = 'MyKeyVaultResourceGroup';\n $VMRGName = 'MyVirtualMachineResourceGroup';\n $vmName = 'MySecureVM';\n $KeyVaultName = 'MySecureVault';\n $KeyVault = Get-AzKeyVault -VaultName $KeyVaultName -ResourceGroupName $KVRGname;\n $diskEncryptionKeyVaultUrl = $KeyVault.VaultUri;\n $KeyVaultResourceId = $KeyVault.ResourceId;\n\n Set-AzVMDiskEncryptionExtension -ResourceGroupName $VMRGname -VMName $vmName -DiskEncryptionKeyVaultUrl $diskEncryptionKeyVaultUrl -DiskEncryptionKeyVaultId $KeyVaultResourceId;\n```\n\n**NOTE:** During encryption it is likely that a reboot will be required.\nIt may take up to 15 minutes to complete the process.\n\n**NOTE 2:** This may differ for Linux machines as you may need to set the `-skipVmBackup` parameter",
+        "section": "Virtual Machines",
+        "tags": [
+          "CIS",
+          "AZURE",
+          "CIS 7.3",
+          "Virtual Machines"
+        ],
+        "uuid": "26ff6dff-042f-5901-8191-0e347d113e9e",
+        "version": "1.0"
+      },
+      "user.name": "0048thtr18"
+    }
+  }
+}

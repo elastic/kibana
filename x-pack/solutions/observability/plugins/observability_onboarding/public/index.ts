@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import {
+import type {
+  AnalyticsServiceStart,
   ApplicationStart,
   ChromeStart,
+  CoreStart,
   DocLinksStart,
+  FeatureFlagsStart,
   HttpStart,
+  NotificationsStart,
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  ObservabilityOnboardingPlugin,
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type {
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart,
 } from './plugin';
+import { ObservabilityOnboardingPlugin } from './plugin';
 
 export interface ConfigSchema {
   ui: {
@@ -38,13 +45,22 @@ export interface AppContext {
 }
 
 export interface ObservabilityOnboardingAppServices {
+  analytics: AnalyticsServiceStart;
   application: ApplicationStart;
   http: HttpStart;
+  notifications: NotificationsStart;
+  pricing: CoreStart['pricing'];
+  rendering: CoreStart['rendering'];
   share: SharePluginStart;
   context: AppContext;
   config: ConfigSchema;
   docLinks: DocLinksStart;
   chrome: ChromeStart;
+  featureFlags: FeatureFlagsStart;
+  observability: ObservabilityPublicStart;
+  cloud?: CloudStart;
+  /** Present at runtime as a required plugin, absent in tests that do not read it. */
+  fleet?: FleetStart;
 }
 
 export const plugin: PluginInitializer<

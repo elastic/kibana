@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { SavedObjectWithMetadata } from '../../../../common';
+import type { SavedObjectWithMetadata } from '../../../../common';
 
 export interface InspectProps {
   object: SavedObjectWithMetadata<any>;
@@ -44,7 +45,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
                 aria-label={copyToClipboardLabel}
                 size="s"
                 flush="right"
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
               >
                 {copyToClipboardLabel}
@@ -57,6 +58,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
           aria-label={codeEditorAriaLabel(title)}
+          enableFindAction
           options={{
             automaticLayout: false,
             fontSize: 12,

@@ -15,9 +15,10 @@ import { removeUnusedTranslations } from './remove_unused_translations';
 import { removeOutdatedTranslations } from './remove_outdated_translations';
 import { updateTranslationFile } from './update_translation_file';
 import { ErrorReporter } from '../../utils/error_reporter';
-import { getLocalesFromFiles } from './get_locale_from_file';
+import { getLocalesFromFiles, getLocaleFromFile } from './get_locale_from_file';
+import { validateTranslationFileLocale } from './validate_translation_file_locale';
 
-import { TaskSignature } from '../../types';
+import type { TaskSignature } from '../../types';
 import { makeAbsolutePath } from '../../utils';
 
 export interface TaskOptions {
@@ -54,6 +55,8 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
           const translationFiles = getLocalesFromFiles(config.translations);
           for (const filePath of translationFiles.values()) {
             const translationInput = await parseTranslationFile(filePath);
+            // Intentionally runs before namespace filtering — locale validity is checked on every file.
+            validateTranslationFileLocale({ filePath, translationInput, errorReporter });
             if (filterTranslationFiles && filterTranslationFiles.length) {
               const matchingFilteredFile = filterTranslationFiles.find((filterTranslationFile) => {
                 return makeAbsolutePath(filterTranslationFile) === makeAbsolutePath(filePath);
@@ -96,6 +99,7 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
                 formats: translationInput.formats,
                 namespacedTranslatedMessages,
                 targetFilePath: filePath,
+                locale: getLocaleFromFile(filePath),
               });
             } else if (errorReporter.hasErrors()) {
               // only throw if --fix is not set (or dry-run)

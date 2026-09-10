@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 /**
  * Mock of the portion of the {@link IUiSettingsClient} used as a parameter in the {@link getFieldDefinitions} function.

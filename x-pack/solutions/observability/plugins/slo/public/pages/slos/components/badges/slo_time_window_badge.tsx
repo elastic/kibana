@@ -7,15 +7,13 @@
 
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
-  rollingTimeWindowTypeSchema,
-} from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import { SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import moment from 'moment';
-import React, { MouseEvent, useCallback } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useCallback } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';
 import { toDurationLabel } from '../../../../utils/slo/labels';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
@@ -45,7 +43,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
             defaultMessage: 'Click to filter by {timeWindow} SLOs',
             values: { timeWindow: toDurationLabel(slo.timeWindow.duration) },
           })}
-          iconType="editorItemAlignRight"
+          iconType="alignRight"
           iconSide="left"
           onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
             if (isSloPage) e.stopPropagation(); // stops propagation of metric onElementClick

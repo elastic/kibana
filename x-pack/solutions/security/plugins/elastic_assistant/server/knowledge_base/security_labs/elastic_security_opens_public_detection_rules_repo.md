@@ -26,7 +26,7 @@ Within the [rules/](https://github.com/elastic/detection-rules/tree/main/rules) 
 
 Every rule contains several fields of metadata in addition to the query itself. This captures information like the title, description, noise level, ATT&CK mappings, tags, and the scheduling interval. We have a few additional fields to aid analysts performing triage, describing known false positives or helpful steps for an investigation. For more information on the metadata that pertains to rules, see the [Kibana rule creation guide](https://www.elastic.co/guide/en/siem/guide/current/rules-ui-create.html#create-rule-ui) or our [summary of rule metadata](https://github.com/elastic/detection-rules/blob/main/CONTRIBUTING.md#rule-metadata) in the contribution guide.
 
-![detection-rules-repo-blog-msbuild.png](https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt683eae32569f7543/5efb61e38304ac0dbc4a5a0e/detection-rules-repo-blog-msbuild.png)
+![detection-rules-repo-blog-msbuild.png](/assets/images/elastic-security-opens-public-detection-rules-repo/detection-rules-repo-blog-msbuild.png)
 
 Preview of the file behind the “MsBuild Making Network Connections” rule
 
@@ -34,7 +34,7 @@ Preview of the file behind the “MsBuild Making Network Connections” rule
 
 If you’re using our [Elastic Cloud managed service](https://www.elastic.co/cloud/) or the default distribution of the Elastic Stack software that includes the [full set of free features](https://www.elastic.co/subscriptions), you’ll get the latest rules the first time you navigate to the detection engine. When you upgrade, the detection engine recognizes that rules were added or changed and [prompts](https://www.elastic.co/guide/en/siem/guide/current/rules-ui-create.html#load-prebuilt-rules) you to decide whether you want those rules upgraded. Follow the steps after upgrading and you’ll get the latest copy of the rules.
 
-![detection-rules-repo-blog-msbuild-network-connections.png](https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt1ca938b9d35957ee/5efb6250f715ab0f6bc3dea1/detection-rules-repo-blog-msbuild-network-connections.png)
+![detection-rules-repo-blog-msbuild-network-connections.png](/assets/images/elastic-security-opens-public-detection-rules-repo/detection-rules-repo-blog-msbuild-network-connections.png)
 
 The same rule — “MsBuild Making Network Connections” — loaded in the detection engine
 

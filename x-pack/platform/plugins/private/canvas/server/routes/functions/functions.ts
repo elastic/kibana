@@ -7,7 +7,7 @@
 
 import { serializeProvider } from '@kbn/expressions-plugin/common';
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
 
 interface FunctionCall {
@@ -81,7 +81,14 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
           args: request.body.args,
           context: request.body.context,
         };
-        const result = await runFunction(handlers, fnCall);
+
+        let result;
+        try {
+          result = await runFunction(handlers, fnCall);
+        } catch (err) {
+          return response.badRequest({ body: err instanceof Error ? err.message : String(err) });
+        }
+
         if (typeof result === 'undefined') {
           throw new Error(`Function ${fnCall.functionName} did not return anything.`);
         }

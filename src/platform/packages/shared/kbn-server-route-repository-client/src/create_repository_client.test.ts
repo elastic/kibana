@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { createRepositoryClient } from './create_repository_client';
 
 const disabledAuthz = {

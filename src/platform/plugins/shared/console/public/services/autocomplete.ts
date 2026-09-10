@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
-import type { AutoCompleteEntitiesApiResponse } from '../lib/autocomplete_entities/types';
+import type { AutoCompleteEntitiesApiResponse, Field } from '../lib/autocomplete_entities/types';
 import { API_BASE_PATH } from '../../common/constants';
 import {
   Alias,
@@ -20,7 +20,8 @@ import {
   IndexTemplate,
   ComponentTemplate,
 } from '../lib/autocomplete_entities';
-import { DevToolsSettings, Settings } from './settings';
+import type { AutocompleteTermDefinition } from '../lib/autocomplete/components/autocomplete_component';
+import type { DevToolsSettings, Settings } from './settings';
 
 export enum ENTITIES {
   INDICES = 'indices',
@@ -30,6 +31,13 @@ export enum ENTITIES {
   LEGACY_TEMPLATES = 'legacyTemplates',
   DATA_STREAMS = 'dataStreams',
 }
+
+interface EntityProviderContext {
+  indices: string[];
+  types: string[];
+}
+type EntityListProvider = () => AutocompleteTermDefinition[];
+type EntityProvider = Field[] | EntityListProvider;
 
 export class AutocompleteInfo {
   public readonly alias = new Alias();
@@ -45,10 +53,15 @@ export class AutocompleteInfo {
     this.http = http;
   }
 
+  public getEntityProvider(type: ENTITIES.FIELDS, context: EntityProviderContext): Field[];
   public getEntityProvider(
-    type: string,
-    context: { indices: string[]; types: string[] } = { indices: [], types: [] }
-  ) {
+    type: Exclude<ENTITIES, ENTITIES.FIELDS>,
+    context?: EntityProviderContext
+  ): EntityListProvider;
+  public getEntityProvider(
+    type: ENTITIES,
+    context: EntityProviderContext = { indices: [], types: [] }
+  ): EntityProvider {
     switch (type) {
       case ENTITIES.INDICES:
         const includeAliases = true;
@@ -82,6 +95,13 @@ export class AutocompleteInfo {
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   public readonly isLoading$ = this._isLoading$.asObservable();
 
+  /**
+   * Advances after every successful autocomplete_entities refresh, so consumers
+   * can lazily invalidate caches on the same clock as REST autocomplete.
+   */
+  private entitiesRefreshGeneration = 0;
+  public readonly getEntitiesRefreshGeneration = (): number => this.entitiesRefreshGeneration;
+
   public retrieve(settings: Settings, settingsToRetrieve: DevToolsSettings['autocomplete']) {
     this.clearSubscriptions();
     this._isLoading$.next(true);
@@ -92,6 +112,7 @@ export class AutocompleteInfo {
       })
       .then((data) => {
         this.load(data);
+        this.entitiesRefreshGeneration += 1;
         // Schedule next request.
         this.pollTimeoutId = setTimeout(() => {
           // This looks strange/inefficient, but it ensures correct behavior because we don't want to send

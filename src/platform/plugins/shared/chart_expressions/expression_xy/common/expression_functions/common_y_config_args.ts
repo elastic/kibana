@@ -8,7 +8,7 @@
  */
 
 import { strings } from '../i18n';
-import { DataDecorationConfigFn, ReferenceLineDecorationConfigFn } from '../types';
+import type { DataDecorationConfigFn, ReferenceLineDecorationConfigFn } from '../types';
 
 type CommonDecorationConfigFn = DataDecorationConfigFn | ReferenceLineDecorationConfigFn;
 

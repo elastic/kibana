@@ -12,10 +12,11 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import type { Note } from '../../../common/api/timeline';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import { ReqStatus } from '..';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -28,6 +29,8 @@ jest.mock('../../common/hooks/use_app_toasts', () => ({
     addError: mockAddError,
   }),
 }));
+
+jest.mock('../../common/components/user_privileges');
 
 const note: Note = {
   eventId: '1',
@@ -43,6 +46,13 @@ const note: Note = {
 const index = 0;
 
 describe('DeleteNoteButtonIcon', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { crud: true },
+    });
+  });
+
   it('should render the delete icon', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -91,7 +101,35 @@ describe('DeleteNoteButtonIcon', () => {
     expect(mockDispatch).toHaveBeenCalled();
   });
 
-  it('should render error toast if deleting a note fails', () => {
+  it('should render error toast with error message if deleting a note fails', () => {
+    const errorMessage = 'Unauthorized to delete notes';
+    const store = createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
+        status: {
+          ...mockGlobalState.notes.status,
+          deleteNotes: ReqStatus.Failed,
+        },
+        error: {
+          ...mockGlobalState.notes.error,
+          deleteNotes: { message: errorMessage },
+        },
+      },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <DeleteNoteButtonIcon note={note} index={index} />
+      </TestProviders>
+    );
+
+    expect(mockAddError).toHaveBeenCalledWith(new Error(errorMessage), {
+      title: DELETE_NOTE_ERROR,
+    });
+  });
+
+  it('should render error toast with fallback message if error has no message', () => {
     const store = createMockStore({
       ...mockGlobalState,
       notes: {
@@ -113,8 +151,22 @@ describe('DeleteNoteButtonIcon', () => {
       </TestProviders>
     );
 
-    expect(mockAddError).toHaveBeenCalledWith(null, {
+    expect(mockAddError).toHaveBeenCalledWith(new Error('Failed to delete note'), {
       title: DELETE_NOTE_ERROR,
     });
+  });
+
+  it('should not render the icon if user does not have crud privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { crud: false },
+    });
+
+    const { container } = render(
+      <TestProviders>
+        <DeleteNoteButtonIcon note={note} index={index} />
+      </TestProviders>
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

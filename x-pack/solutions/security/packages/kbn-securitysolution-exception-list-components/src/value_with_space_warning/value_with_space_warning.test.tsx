@@ -38,7 +38,7 @@ describe('ValueWithSpaceWarning', () => {
     const container = render(<ValueWithSpaceWarning value="Test" />);
     expect(container.getByTestId('valueWithSpaceWarningTooltip')).toBeInTheDocument();
   });
-  it('should show the tooltip when the icon is clicked', async () => {
+  it('should show the tooltip when the icon is hovered', async () => {
     const container = render(<ValueWithSpaceWarning value="Test" />);
 
     fireEvent.mouseOver(container.getByTestId('valueWithSpaceWarningTooltip'));

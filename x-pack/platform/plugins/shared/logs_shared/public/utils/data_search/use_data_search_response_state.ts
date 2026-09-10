@@ -6,10 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import { Observable } from 'rxjs';
-import { IKibanaSearchRequest } from '@kbn/search-types';
+import type { Observable } from 'rxjs';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 import { useObservableState } from '../use_observable';
-import { ParsedDataSearchResponseDescriptor } from './types';
+import type { ParsedDataSearchResponseDescriptor } from './types';
 
 export const useDataSearchResponseState = <
   Request extends IKibanaSearchRequest,

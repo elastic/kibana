@@ -320,6 +320,7 @@ export const internals: JoiRoot = Joi.extend(
               validatedEntryKey = Joi.attempt(entryKey, args.key, {
                 presence: 'required',
                 stripUnknown: prefs.stripUnknown,
+                context: prefs.context,
               });
             } catch (e) {
               return error('map.key', { entryKey, reason: e });
@@ -330,6 +331,7 @@ export const internals: JoiRoot = Joi.extend(
               validatedEntryValue = Joi.attempt(entryValue, args.value, {
                 presence: 'required',
                 stripUnknown: prefs.stripUnknown,
+                context: prefs.context,
               });
             } catch (e) {
               return error('map.value', { entryKey, reason: e });
@@ -395,6 +397,7 @@ export const internals: JoiRoot = Joi.extend(
               validatedEntryKey = Joi.attempt(entryKey, args.key, {
                 presence: 'required',
                 stripUnknown: prefs.stripUnknown,
+                context: prefs.context,
               });
             } catch (e) {
               return error('record.key', { entryKey, reason: e });
@@ -405,6 +408,7 @@ export const internals: JoiRoot = Joi.extend(
               validatedEntryValue = Joi.attempt(entryValue, args.value, {
                 presence: 'required',
                 stripUnknown: prefs.stripUnknown,
+                context: prefs.context,
               });
             } catch (e) {
               return error('record.value', { entryKey, reason: e });

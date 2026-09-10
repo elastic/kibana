@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
+import { CONNECTOR_ID as OPENAI_CONNECTOR_ID } from '@kbn/connector-schemas/openai';
+import { CONNECTOR_ID as GEMINI_CONNECTOR_ID } from '@kbn/connector-schemas/gemini';
+import { CONNECTOR_ID as BEDROCK_CONNECTOR_ID } from '@kbn/connector-schemas/bedrock';
+import { CONNECTOR_ID as INFERENCE_CONNECTOR_ID } from '@kbn/connector-schemas/inference';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import type { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
 export function registerPreviewScriptedFieldRoute(router: IRouter): void {
   router.post(
@@ -26,7 +26,7 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
           name: schema.string(),
           script: schema.string(),
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          additionalFields: schema.maybe(schema.arrayOf(schema.string())),
+          additionalFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
         }),
       },
     },

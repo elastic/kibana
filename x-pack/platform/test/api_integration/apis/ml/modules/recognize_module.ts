@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   const testDataList = [
     {
       testTitleSuffix: 'for sample logs dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs',
       indexPattern: 'ft_module_sample_logs',
       user: USER.ML_POWERUSER,
       expected: {
@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for apache dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_apache',
       indexPattern: 'ft_module_apache',
       user: USER.ML_POWERUSER,
       expected: {
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for logs dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_logs',
       indexPattern: 'ft_module_logs',
       user: USER.ML_POWERUSER,
       expected: {
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for nginx dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_nginx',
       indexPattern: 'ft_module_nginx',
       user: USER.ML_POWERUSER,
       expected: {
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for sample ecommerce dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_ecommerce',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce',
       indexPattern: 'ft_module_sample_ecommerce',
       user: USER.ML_POWERUSER,
       expected: {
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem auditbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_auditbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_auditbeat',
       indexPattern: 'ft_module_security_auditbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem packetbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_packetbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_packetbeat',
       indexPattern: 'ft_module_security_packetbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem winlogbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_winlogbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_winlogbeat',
       indexPattern: 'ft_module_security_winlogbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for heartbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_heartbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_heartbeat',
       indexPattern: 'ft_module_heartbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for auditbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_auditbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_auditbeat',
       indexPattern: 'ft_module_auditbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for security endpoint dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_endpoint',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_endpoint',
       indexPattern: 'ft_logs-endpoint.events.*',
       user: USER.ML_POWERUSER,
       expected: {
@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for metricbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metricbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_metricbeat',
       indexPattern: 'ft_module_metricbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem clodutrail dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_cloudtrail',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail',
       indexPattern: 'ft_module_security_cloudtrail',
       user: USER.ML_POWERUSER,
       expected: {
@@ -163,8 +163,29 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
+      testTitleSuffix: 'for siem azure activity logs dataset',
+      sourceDataArchive:
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs',
+      indexPattern: 'ft_module_security_azure_activitylogs',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_azure_activitylogs'],
+      },
+    },
+    {
+      testTitleSuffix: 'for siem azure gcp audit dataset',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit',
+      indexPattern: 'ft_module_security_gcp_audit',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_gcp_audit'],
+      },
+    },
+    {
       testTitleSuffix: 'for metrics ui dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metrics_ui',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_metrics_ui',
       indexPattern: 'ft_module_metrics_ui',
       user: USER.ML_POWERUSER,
       expected: {
@@ -174,7 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for apache data stream dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache_data_stream',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_apache_data_stream',
       indexPattern: 'ft_module_apache_data_stream',
       user: USER.ML_POWERUSER,
       expected: {
@@ -184,7 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for nginx data stream dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx_data_stream',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_nginx_data_stream',
       indexPattern: 'ft_module_nginx_data_stream',
       user: USER.ML_POWERUSER,
       expected: {
@@ -194,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for apm transaction dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_apm_transaction',
       indexPattern: 'ft_module_apm_transaction',
       user: USER.ML_POWERUSER,
       expected: {

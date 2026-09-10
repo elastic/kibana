@@ -58,7 +58,7 @@ export const IntegrationsHeader = ({
                   />
                 }
               >
-                <EuiButtonEmpty iconType={'glasses'} className={readOnlyBtnClass} disabled={true}>
+                <EuiButtonEmpty iconType={'readOnly'} className={readOnlyBtnClass} disabled={true}>
                   <FormattedMessage
                     id="xpack.fleet.integrations.header.readOnlyBtn"
                     defaultMessage="Read-only"

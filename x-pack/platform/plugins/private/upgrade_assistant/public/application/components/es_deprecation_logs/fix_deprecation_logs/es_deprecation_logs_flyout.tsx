@@ -12,7 +12,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiCallOut,
   EuiCode,
   EuiFlyoutHeader,
   EuiTitle,
@@ -22,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useAppContext } from '../../../app_context';
@@ -31,7 +31,8 @@ import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges } from '../../../../shared_imports';
 import { uiMetricService, UIM_ES_DEPRECATION_LOGS_PAGE_LOAD } from '../../../lib/ui_metric';
 
 const i18nTexts = {
@@ -121,27 +122,23 @@ const callOut = (
 ) => {
   if (onlyDeprecationLogWritingEnabled) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
+        announceOnMount={false}
         title={i18nTexts.onlyLogWritingEnabledTitle}
-        color="warning"
-        iconType="question"
         data-test-subj="deprecationWarningCallout"
-      >
-        <p>{i18nTexts.onlyLogWritingEnabledBody}</p>
-      </EuiCallOut>
+        text={i18nTexts.onlyLogWritingEnabledBody}
+      />
     );
   }
 
   if (!hasPrivileges && isDeprecationLogIndexingEnabled) {
     return (
-      <EuiCallOut
-        iconType="question"
-        color="warning"
+      <KbnWarningCallout
+        announceOnMount={false}
         title={i18nTexts.deniedPrivilegeTitle}
         data-test-subj="noIndexPermissionsCallout"
-      >
-        <p>{i18nTexts.deniedPrivilegeDescription(privilegesMissing)}</p>
-      </EuiCallOut>
+        text={i18nTexts.deniedPrivilegeDescription(privilegesMissing)}
+      />
     );
   }
 

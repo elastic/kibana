@@ -18,7 +18,7 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../mock/test_providers/test_providers';
-import { PatternRollup } from '../../types';
+import type { PatternRollup } from '../../types';
 import { SummaryActions } from '.';
 import {
   getTotalDocsCount,
@@ -125,7 +125,7 @@ describe('SummaryActions', () => {
 
     await userEvent.click(button);
 
-    expect(addSuccessToast).toBeCalledWith({
+    expect(addSuccessToast).toHaveBeenCalledWith({
       title: 'Copied results to the clipboard',
     });
   });

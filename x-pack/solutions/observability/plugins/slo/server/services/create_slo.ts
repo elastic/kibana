@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   IngestPutPipelineRequest,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   IBasePath,
   IScopedClusterClient,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { addTransactionLabels } from '@kbn/apm-utils';
+import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
@@ -29,21 +31,23 @@ import {
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
-import { Duration, DurationUnit, SLODefinition, StoredSLODefinition } from '../domain/models';
+import type { SLODefinition, StoredSLODefinition } from '../domain/models';
+import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { TransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
+import { getSloApmLabels } from './utils';
 
 export class CreateSLO {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private internalSOClient: SavedObjectsClientContract,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
@@ -55,6 +59,7 @@ export class CreateSLO {
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
+    addTransactionLabels(getSloApmLabels(slo));
     validateSLO(slo);
 
     await Promise.all([
@@ -103,15 +108,29 @@ export class CreateSLO {
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.debug(
-        `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
-      );
+      this.logger.warn('Cannot create the SLO. Rolling back.', {
+        service: { name: 'create_slo' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'creation_failed',
+        },
+        error: err,
+      });
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.warn('Rollback operation failed.', {
+            service: { name: 'create_slo' },
+            labels: {
+              slo_id: slo.id,
+              indicator_type: slo.indicator.type,
+              error_type: 'rollback_failed',
+            },
+            error: rollbackErr,
+          });
         }
       });
 

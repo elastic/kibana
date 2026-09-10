@@ -7,9 +7,10 @@
 
 import { createAction } from 'redux-actions';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
-import type { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
+import type { JobExistResult } from '@kbn/ml-common-types/data_recognizer';
 import { createAsyncAction } from './utils';
-import {
+import type {
   CreateMLJobSuccess,
   DeleteJobResults,
   MonitorIdParam,

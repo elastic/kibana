@@ -6,10 +6,10 @@
  */
 import React, { useState, useCallback } from 'react';
 import { EuiSearchBar, EuiPagination } from '@elastic/eui';
-import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 
 interface SessionViewSearchBarDeps {
   searchQuery: string;
@@ -91,6 +91,9 @@ export const SessionViewSearchBar = ({
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"
+          aria-label={i18n.translate('xpack.sessionView.searchBar.pagination.ariaLabel', {
+            defaultMessage: 'Search results pagination',
+          })}
           css={styles.pagination}
           pageCount={totalMatches}
           activePage={selectedResult}

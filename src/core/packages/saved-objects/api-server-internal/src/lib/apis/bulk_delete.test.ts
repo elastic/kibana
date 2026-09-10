@@ -28,7 +28,7 @@ import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
@@ -463,7 +463,7 @@ describe('#bulkDelete', () => {
       it(`throws an error when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkDelete([obj1], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"')
         );
       });
@@ -477,7 +477,7 @@ describe('#bulkDelete', () => {
         const mockedBulkResponse = undefined;
         // we have to cast here to test the assumption we always get a response.
         client.bulk.mockResponseOnce(mockedBulkResponse as unknown as estypes.BulkResponse);
-        await expect(repository.bulkDelete([obj1], { namespace })).rejects.toThrowError(
+        await expect(repository.bulkDelete([obj1], { namespace })).rejects.toThrow(
           'Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined'
         );
       });

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import type { Connector } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  ConnectorNameAndDescriptionApiLogic,
+import type { HttpSetup } from '@kbn/core/public';
+import type {
   PutConnectorNameAndDescriptionArgs,
   PutConnectorNameAndDescriptionResponse,
 } from '../../api/connector/update_connector_name_and_description_api_logic';
+import { ConnectorNameAndDescriptionApiLogic } from '../../api/connector/update_connector_name_and_description_api_logic';
 import { Status } from '../../../common/types/api';
-import { Actions } from '../../api/api_logic/create_api_logic';
+import type { Actions } from '../../api/api_logic/create_api_logic';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 
@@ -73,7 +74,6 @@ export const ConnectorNameAndDescriptionLogic = kea<
     connector: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setConnector: (_, connector) => connector,
       },
     ],

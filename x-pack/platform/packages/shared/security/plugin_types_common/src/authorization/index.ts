@@ -13,7 +13,10 @@ export type {
   RemoteClusterPrivilege,
   Role,
   RoleKibanaPrivilege,
+  RoleDataSourcePrivilege,
   RoleIndexPrivilege,
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
+  RoleKibanaApplication,
+  RoleTransformError,
 } from './role';

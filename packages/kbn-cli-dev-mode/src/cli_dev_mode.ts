@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import {
@@ -22,17 +22,18 @@ import {
   concatMap,
   takeUntil,
 } from 'rxjs';
-import { CliArgs } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Log, CliLog } from './log';
+import type { Log } from './log';
+import { CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
-import { CliDevConfig } from './config';
+import type { CliDevConfig } from './config';
 
 // signal that emits undefined once a termination signal has been sent
 const exitSignal$ = new Rx.ReplaySubject<undefined>(1);
@@ -58,6 +59,7 @@ export type SomeCliArgs = Pick<
   | 'cache'
   | 'dist'
   | 'basePath'
+  | 'serverless'
 >;
 
 export interface CliDevModeOptions {
@@ -104,11 +106,13 @@ export class CliDevMode {
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
   private readonly optimizer: Optimizer;
+  private readonly serverless: boolean;
   private startTime?: number;
   private subscription?: Rx.Subscription;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
     this.log = log || new CliLog(!!cliArgs.silent);
+    this.serverless = !!cliArgs.serverless;
 
     if (cliArgs.basePath) {
       this.basePathProxy = getBasePathProxyServer({
@@ -149,6 +153,11 @@ export class CliDevMode {
           .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
           .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
+      proxyUrl: this.basePathProxy
+        ? `${config.http.ssl.enabled ? 'https' : 'http'}://${this.basePathProxy.host}:${
+            this.basePathProxy.port
+          }${this.basePathProxy.basePath ?? ''}`
+        : undefined,
     });
 
     this.optimizer = new Optimizer({
@@ -163,6 +172,8 @@ export class CliDevMode {
       watch: cliArgs.watch,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
+      allowlistPluginGroups: config.plugins.allowlistPluginGroups,
+      basePath: this.basePathProxy?.basePath,
     });
   }
 
@@ -234,7 +245,7 @@ export class CliDevMode {
       });
 
       this.subscription.add(() => basePathProxy.stop());
-    } else {
+    } else if (!this.serverless) {
       this.log.warn('no-base-path', '='.repeat(100));
       this.log.warn(
         'no-base-path',
@@ -244,8 +255,10 @@ export class CliDevMode {
     }
 
     this.subscription.add(
-      this.optimizer.run$
+      // the same pattern as: `kibana/packages/kbn-cli-dev-mode/src/dev_server.ts`
+      Rx.concat([undefined], this.watcher.optimizerShouldRestart$())
         .pipe(
+          switchMap(() => this.optimizer.run$),
           // stop the optimizer as soon as we get an exit signal
           takeUntil(exitSignal$)
         )

@@ -8,11 +8,12 @@
 import { createHash } from 'crypto';
 
 import { schema } from '@kbn/config-schema';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
 import type { RouteDefinitionParams } from '..';
 import type { AuthenticationTypeAnalyticsEvent } from '../../analytics';
-import { HTTPAuthenticationProvider, HTTPAuthorizationHeader } from '../../authentication';
+import { HTTPAuthenticationProvider } from '../../authentication';
 import { getDetailedErrorMessage, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -40,7 +41,10 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
       },
       validate: {
         body: schema.nullable(
-          schema.object({ signature: schema.string(), timestamp: schema.number() })
+          schema.object({
+            signature: schema.string({ maxLength: 128 }),
+            timestamp: schema.number(),
+          })
         ),
       },
     },

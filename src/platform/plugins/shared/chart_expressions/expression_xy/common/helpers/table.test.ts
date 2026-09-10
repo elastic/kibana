@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { normalizeTable } from './table';
-import { createSampleDatatableWithRows } from '../__mocks__';
+import { createSampleDatatableWithRows } from '../test_utils';
 
 describe('#normalizeTable', () => {
   it('should convert row values from date string to number if xAccessor related to `date` column', () => {

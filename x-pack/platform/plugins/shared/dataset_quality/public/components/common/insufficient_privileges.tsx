@@ -9,15 +9,14 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiButtonIconProps, EuiButtonIconPropsForButton } from '@elastic/eui';
 import {
   EuiLink,
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiPopover,
   EuiToolTip,
   EuiIcon,
   EuiFlexGroup,
-  EuiButtonIconPropsForButton,
 } from '@elastic/eui';
 
 const insufficientPrivilegesText = i18n.translate(
@@ -66,17 +65,19 @@ export const PrivilegesWarningIconWrapper = ({
       attachToAnchor={true}
       anchorPosition="downCenter"
       button={
-        <EuiButtonIcon
-          data-test-subj={`datasetQualityInsufficientPrivileges-${title}`}
-          aria-label={insufficientPrivilegesText}
-          title={insufficientPrivilegesText}
-          iconType="warning"
-          color={iconColor}
-          onClick={handleButtonClick}
-        />
+        <EuiToolTip content={insufficientPrivilegesText} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`datasetQualityInsufficientPrivileges-${title}`}
+            aria-label={insufficientPrivilegesText}
+            iconType="warning"
+            color={iconColor}
+            onClick={handleButtonClick}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
+      aria-label={insufficientPrivilegesText}
     >
       {insufficientPrivilegesText} {/* <LearnMoreLink /> TODO: Add docs link when available */}
     </EuiPopover>

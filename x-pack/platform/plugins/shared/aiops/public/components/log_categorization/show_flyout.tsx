@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -19,6 +17,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 import { AiopsAppContext, type AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
@@ -32,9 +31,10 @@ export async function showCategorizeFlyout(
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
-  additionalFilter?: CategorizationAdditionalFilter
+  additionalFilter?: CategorizationAdditionalFilter,
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps']
 ): Promise<void> {
-  const { overlays, application, i18n } = coreStart;
+  const { overlays, i18n } = coreStart;
 
   return new Promise((resolve, reject) => {
     try {
@@ -91,15 +91,9 @@ export async function showCategorizeFlyout(
           closeButtonProps: { 'aria-label': 'aiopsCategorizeFlyout' },
           onClose: onFlyoutClose,
           size: 'l',
+          focusTrapProps,
         }
       );
-
-      // Close the flyout when user navigates out of the current plugin
-      application.currentAppId$
-        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-        .subscribe(() => {
-          flyoutSession.close();
-        });
     } catch (error) {
       reject(error);
     }

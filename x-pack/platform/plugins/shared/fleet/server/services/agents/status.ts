@@ -8,13 +8,15 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
   QueryDslQueryContainer,
+  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import { agentStatusesToSummary } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
@@ -22,6 +24,11 @@ import { FleetError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
+
+import {
+  buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 
 import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
@@ -33,7 +40,7 @@ interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase 
 }
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
-const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
+export const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -41,6 +48,7 @@ export async function getAgentStatusById(
 ): Promise<AgentStatus> {
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
+const AGENT_STATUS_TIMEOUT = '3s';
 
 /**
  * getAgentStatusForAgentPolicy
@@ -70,7 +78,11 @@ export async function getAgentStatusForAgentPolicy(
     if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(toElasticsearchQuery(fromKueryExpression(DEFAULT_NAMESPACES_FILTER)));
     } else {
-      clauses.push(toElasticsearchQuery(fromKueryExpression(`namespaces:"${spaceId}"`)));
+      clauses.push(
+        toElasticsearchQuery(
+          fromKueryExpression(`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`)
+        )
+      );
     }
   }
 
@@ -80,19 +92,10 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId
   if (agentPolicyIds) {
-    clauses.push({
-      terms: {
-        policy_id: agentPolicyIds,
-      },
-    });
+    clauses.push(buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds));
   } else if (agentPolicyId) {
-    clauses.push({
-      term: {
-        policy_id: agentPolicyId,
-      },
-    });
+    clauses.push(buildPolicyBaseIdWithFallbackEsFilter(agentPolicyId));
   }
 
   const query =
@@ -141,6 +144,7 @@ export async function getAgentStatusForAgentPolicy(
             },
           },
           ignore_unavailable: true,
+          timeout: AGENT_STATUS_TIMEOUT,
         }),
       { logger }
     );
@@ -194,7 +198,7 @@ export async function getIncomingDataByAgentsId({
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
       index: [
         {
-          names: [dataStreamPattern],
+          names: dataStreamPattern.split(','),
           privileges: ['read'],
         },
       ],
@@ -206,7 +210,7 @@ export async function getIncomingDataByAgentsId({
 
     const searchResult = await retryTransientEsErrors(
       () =>
-        esClient.search({
+        esClient.search<unknown, Record<'agent_ids', { buckets: Array<{ key: string }> }>>({
           index: dataStreamPattern,
           allow_partial_search_results: true,
           _source: returnDataPreview,
@@ -222,7 +226,7 @@ export async function getIncomingDataByAgentsId({
                 },
                 {
                   range: {
-                    '@timestamp': {
+                    'event.ingested': {
                       gte: 'now-5m',
                       lte: 'now',
                     },
@@ -245,19 +249,16 @@ export async function getIncomingDataByAgentsId({
 
     if (!searchResult.aggregations?.agent_ids) {
       return {
-        items: agentsIds.map((id) => {
-          return { [id]: { data: false } };
-        }),
+        items: agentsIds.map((id) => ({ [id]: { data: false } })),
         dataPreview: [],
       };
     }
 
-    // @ts-expect-error aggregation type is not specified
-    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
-      (bucket: any) => bucket.key as string
-    );
-
     const dataPreview = searchResult.hits?.hits || [];
+
+    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
+      (bucket) => bucket.key
+    );
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
@@ -266,6 +267,81 @@ export async function getIncomingDataByAgentsId({
     return { items, dataPreview };
   } catch (error) {
     logger.debug(`Error getting incoming data for agents: ${error}`);
+    throw new FleetError(
+      `Unable to retrieve incoming data for agents due to error: ${error.message}`
+    );
+  }
+}
+
+/**
+ * Identity-free incoming-data check for a single agentless agent whose data streams carry no
+ * queryable agent identity (native OTel documents). The caller must scope `dataStreamPattern` to
+ * the agent's own namespace; see `getAgentDataHandler` for the gate that guarantees this.
+ */
+export async function getIncomingDataByDataStreams({
+  esClient,
+  agentId,
+  dataStreamPattern,
+  returnDataPreview = false,
+}: {
+  esClient: ElasticsearchClient;
+  agentId: string;
+  dataStreamPattern: string;
+  returnDataPreview?: boolean;
+}) {
+  const logger = appContextService.getLogger();
+
+  try {
+    const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+      index: [
+        {
+          names: dataStreamPattern.split(','),
+          privileges: ['read'],
+        },
+      ],
+    });
+
+    if (!hasAllPrivileges) {
+      throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
+    }
+
+    const searchResult = await retryTransientEsErrors(
+      () =>
+        esClient.search({
+          index: dataStreamPattern,
+          // The pattern names concrete data streams that may not exist yet; without this,
+          // Elasticsearch throws index_not_found_exception instead of returning zero hits.
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          _source: returnDataPreview,
+          timeout: '5s',
+          size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
+          terminate_after: returnDataPreview ? undefined : 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    'event.ingested': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      { logger }
+    );
+
+    const dataPreview = searchResult.hits?.hits || [];
+    const total = searchResult.hits.total as SearchTotalHits | undefined;
+    const hasData = (total?.value ?? 0) > 0;
+
+    return { items: [{ [agentId]: { data: hasData } }], dataPreview };
+  } catch (error) {
+    logger.debug(`Error getting incoming data for data streams: ${error}`);
     throw new FleetError(
       `Unable to retrieve incoming data for agents due to error: ${error.message}`
     );

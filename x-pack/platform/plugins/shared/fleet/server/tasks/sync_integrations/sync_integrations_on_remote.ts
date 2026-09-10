@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElasticsearchClient,
-  SavedObjectsClient,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
@@ -38,14 +33,14 @@ const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
 
 export const getFollowerIndex = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<string | undefined> => {
   const indices = await esClient.indices.get(
     {
       index: FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX,
       expand_wildcards: 'all',
     },
-    { signal: abortController.signal }
+    { signal }
   );
 
   const indexNames = Object.keys(indices);
@@ -63,16 +58,17 @@ export const getFollowerIndex = async (
 
 const getSyncedIntegrationsCCRDoc = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   logger: Logger
 ): Promise<SyncIntegrationsData | undefined> => {
-  const index = await getFollowerIndex(esClient, abortController);
+  const index = await getFollowerIndex(esClient, signal);
+  if (!index) return undefined;
 
   const response = await esClient.search(
     {
       index,
     },
-    { signal: abortController.signal }
+    { signal }
   );
   if (response.hits.hits.length === 0) {
     logger.warn(`getSyncedIntegrationsCCRDoc - Sync integration doc not found`);
@@ -82,10 +78,9 @@ const getSyncedIntegrationsCCRDoc = async (
 };
 
 async function getSyncIntegrationsEnabled(
-  soClient: SavedObjectsClient,
   remoteEsHosts: SyncIntegrationsData['remote_es_hosts'] | undefined
 ): Promise<boolean> {
-  const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list();
   const esHosts = outputs.items
     .filter((output) => output.type === 'elasticsearch')
     .flatMap((output) => output.hosts);
@@ -100,15 +95,21 @@ async function getSyncIntegrationsEnabled(
 
 async function installPackageIfNotInstalled(
   savedObjectsClient: SavedObjectsClientContract,
-  pkg: { package_name: string; package_version: string; install_source?: InstallSource },
+  pkg: {
+    package_name: string;
+    package_version: string;
+    install_source?: InstallSource;
+    rolled_back?: boolean;
+  },
   packageClient: PackageClient,
   logger: Logger,
-  abortController: AbortController
+  signal: AbortSignal
 ) {
   const installation = await packageClient.getInstallation(pkg.package_name);
   if (
     installation?.install_status === 'installed' &&
-    semverGte(installation.version, pkg.package_version)
+    semverGte(installation.version, pkg.package_version) &&
+    !pkg.rolled_back
   ) {
     logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} already installed`);
     return;
@@ -144,6 +145,24 @@ async function installPackageIfNotInstalled(
   }
 
   try {
+    if (pkg.rolled_back) {
+      const rollbackResult = await packageClient.rollbackPackage({
+        pkgName: pkg.package_name,
+      });
+      if (rollbackResult.success) {
+        logger.info(
+          `Package ${pkg.package_name} rolled back to previous version ${rollbackResult.version}`
+        );
+      } else {
+        logger.warn(`Package ${pkg.package_name} rollback not successful`);
+      }
+      return;
+    }
+  } catch (error) {
+    logger.error(`Failed to rollback package ${pkg.package_name}, error: ${error}`);
+  }
+
+  try {
     const installResult = await packageClient.installPackage({
       pkgName: pkg.package_name,
       pkgVersion: pkg.package_version,
@@ -155,7 +174,7 @@ async function installPackageIfNotInstalled(
       logger.info(`Package ${pkg.package_name} installed with version ${pkg.package_version}`);
     }
     if (installResult.error instanceof PackageNotFoundError) {
-      if (abortController.signal.aborted) {
+      if (signal.aborted) {
         throw new Error('Task was aborted');
       }
       logger.warn(
@@ -189,7 +208,7 @@ async function installPackageIfNotInstalled(
 
 async function uninstallPackageIfInstalled(
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   pkg: { package_name: string; package_version: string },
   logger: Logger
 ) {
@@ -230,15 +249,14 @@ async function uninstallPackageIfInstalled(
 
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   packageClient: PackageClient,
-  abortController: AbortController,
+  signal: AbortSignal,
   logger: Logger
 ) => {
-  const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController, logger);
+  const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, signal, logger);
 
   const isSyncIntegrationsEnabled = await getSyncIntegrationsEnabled(
-    soClient,
     syncIntegrationsDoc?.remote_es_hosts
   );
 
@@ -252,10 +270,10 @@ export const syncIntegrationsOnRemote = async (
       (integration) => integration.install_status !== 'not_installed'
     ) ?? [];
   for (const pkg of installedIntegrations) {
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
-    await installPackageIfNotInstalled(soClient, pkg, packageClient, logger, abortController);
+    await installPackageIfNotInstalled(soClient, pkg, packageClient, logger, signal);
   }
 
   const uninstalledIntegrations =
@@ -263,7 +281,7 @@ export const syncIntegrationsOnRemote = async (
       (integration) => integration.install_status === 'not_installed'
     ) ?? [];
   for (const pkg of uninstalledIntegrations) {
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     await uninstallPackageIfInstalled(esClient, soClient, pkg, logger);
@@ -272,11 +290,11 @@ export const syncIntegrationsOnRemote = async (
   await clearCustomAssetFailedAttempts(soClient, syncIntegrationsDoc);
 
   for (const customAsset of Object.values(syncIntegrationsDoc?.custom_assets ?? {})) {
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {
-      await installCustomAsset(customAsset, esClient, abortController, logger);
+      await installCustomAsset(customAsset, esClient, signal, logger);
     } catch (error) {
       logger.error(`Failed to install ${customAsset.type} ${customAsset.name}, error: ${error}`);
       await updateCustomAssetFailedAttempts(soClient, customAsset, error, logger);

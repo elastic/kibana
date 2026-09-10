@@ -26,7 +26,15 @@ export * from './platform_selector';
 export { ConfirmForceInstallModal } from './confirm_force_install_modal';
 export { DevtoolsRequestFlyoutButton } from './devtools_request_flyout';
 export { HeaderReleaseBadge, InlineReleaseBadge } from './release_badge';
-export { WithGuidedOnboardingTour } from './with_guided_onboarding_tour';
 export { UninstallCommandFlyout } from './uninstall_command_flyout';
 export { MultipleAgentPoliciesSummaryLine } from './multiple_agent_policy_summary_line';
 export { AgentlessEnrollmentFlyout } from './agentless_enrollment_flyout';
+export type {
+  AgentlessEnrollmentFlyoutProps,
+  AgentlessEnrollmentConnector,
+  AgentlessEnrollmentSelectedInput,
+} from './agentless_enrollment_flyout';
+export { AgentlessStatusDetailsFlyout } from './agentless_status_details_flyout';
+export type { AgentlessStatusDetailsFlyoutProps } from './agentless_status_details_flyout';
+export { DataStreamTypeSelector } from './data_stream_type_selector';
+export type { DataStreamTypeSelectorProps } from './data_stream_type_selector';

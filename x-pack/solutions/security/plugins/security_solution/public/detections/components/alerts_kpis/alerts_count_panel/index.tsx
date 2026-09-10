@@ -10,14 +10,15 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import * as i18n from './translations';
+import { ALERT_DETAILS_TOGGLE_ARIA_LABEL } from '../common/translations';
 import { KpiPanel } from '../common/components';
 import { FieldSelection } from '../common/field_selection';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
@@ -41,8 +42,13 @@ interface AlertsCountPanelProps {
   title?: React.ReactNode;
   isExpanded: boolean;
   setIsExpanded: (status: boolean) => void;
+  /**
+   * Indices to use when fetching the chart data
+   */
+  signalIndexName: string | null;
 }
 const CHART_HEIGHT = 218; // px
+const COLLAPSED_HEIGHT = 64; // px
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -64,6 +70,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     title = i18n.COUNT_TABLE_TITLE,
     isExpanded,
     setIsExpanded,
+    signalIndexName,
   }) => {
     const { to, from } = useGlobalTime();
     // create a unique, but stable (across re-renders) query id
@@ -84,7 +91,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           $toggleStatus={Boolean(isExpanded)}
           data-test-subj="alertsCountPanel"
           hasBorder
-          height={panelHeight}
+          height={isExpanded ? panelHeight : COLLAPSED_HEIGHT}
         >
           <HeaderSection
             alignHeader={alignHeader}
@@ -97,6 +104,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             showInspectButton={chartOptionsContextMenu == null}
             toggleStatus={isExpanded}
             toggleQuery={setIsExpanded}
+            toggleAriaLabel={ALERT_DETAILS_TOGGLE_ARIA_LABEL}
           >
             <FieldSelection
               setStackByField0={setStackByField0}
@@ -114,6 +122,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           </HeaderSection>
           {isExpanded && (
             <VisualizationEmbeddable
+              signalIndexName={signalIndexName}
               data-test-subj="embeddable-alerts-count"
               extraActions={extraActions}
               extraOptions={extraVisualizationOptions}
@@ -121,7 +130,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               height={CHART_HEIGHT}
               id={`${uniqueQueryId}-embeddable`}
               inspectTitle={inspectTitle}
-              scopeId={SourcererScopeName.detections}
+              scopeId={PageScope.alerts}
               stackByField={stackByField0}
               timerange={timerange}
             />

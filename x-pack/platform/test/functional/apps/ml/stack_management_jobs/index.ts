@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const ml = getService('ml');
+
+  describe('machine learning - stack management jobs', function () {
+    this.tags(['ml']);
+    before(async () => {
+      await ml.securityCommon.createMlRoles();
+      await ml.securityCommon.createMlUsers();
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
+    });
+
+    loadTestFile(require.resolve('./synchronize'));
+    loadTestFile(require.resolve('./manage_spaces'));
+    loadTestFile(require.resolve('./import_jobs'));
+    loadTestFile(require.resolve('./export_jobs'));
+  });
+}

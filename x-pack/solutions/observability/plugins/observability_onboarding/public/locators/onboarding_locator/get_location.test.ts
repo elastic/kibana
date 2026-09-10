@@ -7,7 +7,7 @@
 
 import { getLocation } from './get_location';
 import { PLUGIN_ID } from '../../../common';
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 
 describe('getLocation', () => {
   it('should return the correct location with source and query', () => {

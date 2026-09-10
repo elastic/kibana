@@ -7,10 +7,11 @@
 
 import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { ConsoleEvent } from './console_event';
-import { JourneyStep } from '../../../../common/runtime_types/ping';
-import { JourneyState } from '../../state/reducers/journey';
+import type { JourneyStep } from '../../../../common/runtime_types/ping';
+import type { JourneyState } from '../../state/reducers/journey';
 
 interface Props {
   journey: JourneyState;

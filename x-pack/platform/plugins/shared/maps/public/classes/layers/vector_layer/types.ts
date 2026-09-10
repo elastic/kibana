@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { InnerJoin } from '../../joins/inner_join';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import type { InnerJoin } from '../../joins/inner_join';
+import type { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 export interface JoinState {
   dataHasChanged: boolean;

@@ -19,17 +19,17 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { Filter } from '@kbn/es-query';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { GroupSummary } from '@kbn/slo-schema';
+import type { GroupSummary } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { memo, useState } from 'react';
-import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
+import type { GroupByField, SortDirection, SortField, ViewType } from '../../types';
 import { SlosView } from '../slos_view';
-import type { ViewType, GroupByField, SortDirection, SortField } from '../../types';
 import { useGroupName } from './hooks/use_group_name';
 
 interface Props {

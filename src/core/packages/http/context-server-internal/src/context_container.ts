@@ -8,7 +8,7 @@
  */
 
 import { flatten } from 'lodash';
-import { ShallowPromise } from '@kbn/utility-types';
+import type { ShallowPromise } from '@kbn/utility-types';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
 import type {

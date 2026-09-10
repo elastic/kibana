@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpServiceSetup } from '@kbn/core/server';
-import { ISavedObjectsManagement } from '../services';
+import type { HttpServiceSetup } from '@kbn/core/server';
+import type { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerBulkDeleteRoute } from './bulk_delete';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerScrollForCountRoute } from './scroll_count';
 import { registerRelationshipsRoute } from './relationships';
 import { registerGetAllowedTypesRoute } from './get_allowed_types';
+
+// Maximum allowed saved object types in API requests. Currently 149 types registered
+// (see SAVED_OBJECT_TYPES_COUNT in src/core/packages/saved-objects/server-internal/src/object_types/index.ts).
+// Set to 200 to accommodate current types plus headroom for future growth.
+export const SAVED_OBJECT_TYPES_MAX_SIZE = 200 as const;
 
 interface RegisterRouteOptions {
   http: HttpServiceSetup;

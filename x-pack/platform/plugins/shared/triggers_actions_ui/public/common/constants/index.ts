@@ -10,7 +10,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 
 export { VIEW_LICENSE_OPTIONS_LINK } from '@kbn/alerts-ui-shared/src/common/constants';
-export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
+export { builtInAggregationTypes } from './aggregation_types';
 export { loadAllActions, loadActionTypes } from '../../application/lib/action_connector_api';
 export { ConnectorAddModal } from '../../application/sections/action_connector_form';
 export type { ActionConnector } from '../..';
@@ -21,6 +21,8 @@ export * from './action_frequency_types';
 export const PLUGIN_ID = 'triggersActions';
 export const ALERTS_PAGE_ID = 'triggersActionsAlerts';
 export const CONNECTORS_PLUGIN_ID = 'triggersActionsConnectors';
+export const RULES_CAPABILITY_ID = 'triggersActionsRules';
+
 export {
   I18N_WEEKDAY_OPTIONS,
   I18N_WEEKDAY_OPTIONS_DDD,

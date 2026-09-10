@@ -8,21 +8,23 @@
 import React, { Component } from 'react';
 import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
 import {
+  EuiButton,
   EuiButtonIcon,
-  EuiPopover,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiPanel,
+  EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { DRAW_SHAPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import { DRAW_SHAPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
-import { DrawState } from '../../../../common/descriptor_types';
+import type { DrawState } from '../../../../common/descriptor_types';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',
@@ -201,20 +203,24 @@ export class ToolsControl extends Component<Props, State> {
   _renderToolsButton() {
     return (
       <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
-        <EuiButtonIcon
-          className="mapToolbarOverlay__buttonIcon-empty"
-          size="s"
-          color="text"
-          iconType="wrench"
-          onClick={this._togglePopover}
-          aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
+        <EuiToolTip
+          content={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
             defaultMessage: 'Tools',
           })}
-          title={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
-            defaultMessage: 'Tools',
-          })}
-          isDisabled={this.props.disableToolsControl}
-        />
+          disableScreenReaderOutput
+          anchorClassName="mapToolbarOverlay__buttonIcon-empty"
+        >
+          <EuiButtonIcon
+            size="s"
+            color="text"
+            iconType="wrench"
+            onClick={this._togglePopover}
+            aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
+              defaultMessage: 'Tools',
+            })}
+            isDisabled={this.props.disableToolsControl}
+          />
+        </EuiToolTip>
       </EuiPanel>
     );
   }
@@ -229,6 +235,9 @@ export class ToolsControl extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="leftUp"
         data-test-subj="mapToolsControlPopover"
+        aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlPopoverAriaLabel', {
+          defaultMessage: 'Tools',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={this._getDrawPanels()} />
       </EuiPopover>

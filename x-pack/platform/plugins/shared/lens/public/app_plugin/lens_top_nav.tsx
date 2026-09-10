@@ -5,30 +5,38 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
-import { useStore } from 'react-redux';
-import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { useStore } from 'react-redux-v7';
+import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
+import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedStyles, css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiBreakpoint } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { LensAppState, LensAppServices } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../common/constants';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import type { LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
   switchAndCleanDatasource,
   selectIsManaged,
 } from '../state_management';
@@ -40,13 +48,10 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import {
-  DEFAULT_LENS_LAYOUT_DIMENSIONS,
-  ShareableConfiguration,
-  getLocatorParams,
-  getShareURL,
-} from './share_action';
+import type { ShareableConfiguration } from './share_action';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -69,7 +74,7 @@ function getSaveButtonMeta({
             defaultMessage: 'Save and return',
           }),
       emphasize: true,
-      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
+      iconType: contextFromEmbeddable ? 'save' : 'checkCircleFill',
       testId: 'lnsApp_saveAndReturnButton',
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
@@ -310,6 +315,7 @@ function getLensTopNavConfig(options: {
 export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
+  incomingState,
   indicateNoData,
   lensInspector,
   setIsSaveModalVisible,
@@ -317,12 +323,9 @@ export const LensTopNavMenu = ({
   runSave,
   onAppLeave,
   redirectToOrigin,
-  datasourceMap,
-  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
-  initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
   indexPatternService,
@@ -334,18 +337,23 @@ export const LensTopNavMenu = ({
 }: LensTopNavMenuProps) => {
   const {
     data,
-    navigation,
     uiSettings,
     application,
+    chrome,
     share,
+    unifiedSearch,
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
+    getOriginatingAppName,
   } = useKibana<LensAppServices>().services;
+
+  const isChromeNextAppHeader = chrome.getChromeStyle() === 'project';
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     isSaveable,
-    isLinkedToOriginatingApp,
     query,
     activeData,
     savedQuery,
@@ -395,7 +403,6 @@ export const LensTopNavMenu = ({
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -483,15 +490,19 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
   ]);
 
+  const hasShareIntegration = useMemo(() => {
+    if (!share) return false;
+    return share.availableIntegrations('lens', 'export').length > 0;
+  }, [share]);
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
-      closeDataViewEditor.current?.();
     };
   }, []);
 
-  const { AggregateQueryTopNavMenu } = navigation.ui;
+  const { AggregateQuerySearchBar } = unifiedSearch.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const savingToLibraryPermitted = Boolean(
@@ -570,17 +581,25 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
+  // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
+  const isComingFromDashboardView = Boolean(
+    incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+
   const topNavConfig = useMemo(() => {
-    const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
-    const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+    const showReplaceInDashboard = Boolean(
+      !initialInput?.ref_id && contextFromEmbeddable && initialContext?.embeddableId
+    );
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
+      !(showReplaceInDashboard || showReplaceInCanvas) && isComingFromDashboardView;
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -661,30 +680,14 @@ export const LensTopNavMenu = ({
           }),
           config: {
             link: {
-              draftModeCallOut: (
-                <EuiCallOut
-                  color="warning"
-                  title={
-                    <FormattedMessage
-                      id="xpack.lens.app.shareModal.draftModeCallout.title"
-                      defaultMessage="Unsaved changes"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
-                    defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
-                  />
-                </EuiCallOut>
-              ),
+              draftModeCallOut: true,
               delegatedShareUrlHandler: async () => {
                 const { shareableUrl, savedObjectURL } = getShareURL(
                   shortUrlService,
                   shareLocatorParams,
                   { application, data },
                   configuration,
-                  shareUrlEnabled,
-                  isCurrentStateDirty
+                  shareUrlEnabled
                 );
 
                 return !currentDoc?.savedObjectId ? (await shareableUrl)! : savedObjectURL.href;
@@ -700,64 +703,13 @@ export const LensTopNavMenu = ({
             integration: {
               export: {
                 csvDownloadLens: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate(
-                        'xpack.lens.app.exports.csvDownloadLens.warning.title',
-                        {
-                          defaultMessage: 'Unsaved changes',
-                        }
-                      )}
-                    >
-                      {i18n.translate(
-                        'xpack.lens.app.exports.csvDownloadLens.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage:
-                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 imageReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('xpack.lens.app.exports.imageReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'xpack.lens.app.exports.imageReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage:
-                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 pdfReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('xpack.lens.app.exports.pdfReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'xpack.lens.app.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage:
-                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
               },
             },
@@ -785,7 +737,7 @@ export const LensTopNavMenu = ({
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
         export: {
           // Only show the export button if the current user meets the requirements for at least one registered export integration
-          visible: Boolean(share?.availableIntegrations('lens', 'export')?.length),
+          visible: hasShareIntegration,
           enabled: showShareMenu,
           tooltip: () => {
             if (!showShareMenu) {
@@ -832,13 +784,12 @@ export const LensTopNavMenu = ({
                         })
                       : ''),
                   newCopyOnSave: false,
-                  isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   ...(contextFromEmbeddable && { newDescription: initialContext.description }),
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
-                  saveToLibrary: Boolean(initialInput?.savedObjectId),
+                  saveToLibrary: Boolean(initialInput?.ref_id),
                 }
               );
             }
@@ -862,7 +813,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isLinkedToOriginatingApp),
+          visible: Boolean(isComingFromDashboardView),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -914,12 +865,11 @@ export const LensTopNavMenu = ({
         },
       },
     });
-    return [...(additionalMenuEntries || []), ...baseMenuEntries];
+    return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
-    initialInput,
-    isLinkedToOriginatingApp,
-    initialContextIsEmbedded,
+    initialInput?.ref_id,
+    isComingFromDashboardView,
     activeData,
     isSaveable,
     application,
@@ -927,15 +877,12 @@ export const LensTopNavMenu = ({
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    hasShareIntegration,
     layerMetaInfo,
     additionalMenuEntries,
-    lensInspector,
-    title,
     share,
     visualization,
     visualizationMap,
-    shortUrlService,
-    data,
     filters,
     query,
     activeDatasourceId,
@@ -943,9 +890,13 @@ export const LensTopNavMenu = ({
     datasourceMap,
     currentDoc,
     adHocDataViews,
+    data,
     isCurrentStateDirty,
     dataViews.indexPatterns,
+    title,
     defaultLensTitle,
+    shortUrlService,
+    lensInspector,
     onAppLeave,
     runSave,
     setIsSaveModalVisible,
@@ -982,7 +933,7 @@ export const LensTopNavMenu = ({
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBased',
+                newDatasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -1102,32 +1053,24 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          if (isOnTextBasedMode) {
-            dispatch(
-              switchAndCleanDatasource({
-                newDatasourceId: 'formBased',
-                visualizationId: visualization?.activeId,
-                currentIndexPatternId: dataView?.id,
-              })
-            );
-          }
-          dispatchChangeIndexPattern(dataView);
-          setCurrentIndexPattern(dataView);
+  const createNewDataView = useCallback(
+    async (dataView: DataView) => {
+      if (dataView.id) {
+        if (isOnTextBasedMode) {
+          dispatch(
+            switchAndCleanDatasource({
+              newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+              visualizationId: visualization?.activeId,
+              currentIndexPatternId: dataView?.id,
+            })
+          );
         }
-      },
-      allowAdHocDataView: true,
-    });
-  }, [
-    dataViewEditor,
-    dispatch,
-    dispatchChangeIndexPattern,
-    isOnTextBasedMode,
-    visualization?.activeId,
-  ]);
+        dispatchChangeIndexPattern(dataView);
+        setCurrentIndexPattern(dataView);
+      }
+    },
+    [dispatch, dispatchChangeIndexPattern, isOnTextBasedMode, visualization?.activeId]
+  );
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (dataViewSpec: DataViewSpec) => {
@@ -1138,7 +1081,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -1174,7 +1117,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })
@@ -1222,56 +1165,133 @@ export const LensTopNavMenu = ({
 
   const managed = useLensSelector(selectIsManaged);
 
+  const managedBadgeTooltip = i18n.translate('xpack.lens.managedBadgeTooltip', {
+    defaultMessage:
+      'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
+  });
+
+  // AppHeader badges (Chrome Next project). Classic chrome keeps TopNavMenuBadges in the portal.
+  const appHeaderBadges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      isChromeNextAppHeader && managed
+        ? [
+            {
+              label: i18n.translate('xpack.lens.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              }),
+              color: 'primary',
+              tooltip: managedBadgeTooltip,
+              'data-test-subj': 'managedContentBadge',
+            },
+          ]
+        : undefined,
+    [isChromeNextAppHeader, managed, managedBadgeTooltip]
+  );
+
+  const legacyBadges = useMemo(
+    () =>
+      !isChromeNextAppHeader && managed ? [getManagedContentBadge(managedBadgeTooltip)] : undefined,
+    [isChromeNextAppHeader, managed, managedBadgeTooltip]
+  );
+
+  // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
+  // When not coming from a dashboard, omit `back` so chrome can fall back to breadcrumbs.
+  const back = useMemo<AppHeaderBack | undefined>(() => {
+    if (!isComingFromDashboardView || !redirectToOrigin || !incomingState?.originatingApp) {
+      return undefined;
+    }
+
+    return {
+      href: application.getUrlForApp(incomingState.originatingApp, {
+        path: incomingState.originatingPath,
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        redirectToOrigin();
+      },
+      label: getOriginatingAppName() ?? incomingState.originatingApp,
+    };
+  }, [
+    isComingFromDashboardView,
+    redirectToOrigin,
+    incomingState?.originatingApp,
+    incomingState?.originatingPath,
+    application,
+    getOriginatingAppName,
+  ]);
+
   return (
-    <AggregateQueryTopNavMenu
-      setMenuMountPoint={setHeaderActionMenu}
-      popoverBreakpoints={['xs', 's', 'm']}
-      config={topNavConfig}
-      allowSavingQueries
-      badges={
-        managed
-          ? [
-              getManagedContentBadge(
-                i18n.translate('xpack.lens.managedBadgeTooltip', {
-                  defaultMessage:
-                    'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
-                })
-              ),
-            ]
-          : undefined
-      }
-      savedQuery={savedQuery}
-      onQuerySubmit={onQuerySubmitWrapped}
-      onSaved={onSavedWrapped}
-      onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
-      onClearSavedQuery={onClearSavedQueryWrapped}
-      indexPatterns={indexPatterns}
-      query={query}
-      dateRangeFrom={from}
-      dateRangeTo={to}
-      indicateNoData={indicateNoData}
-      showSearchBar={true}
-      dataViewPickerComponentProps={dataViewPickerProps}
-      showDatePicker={
-        indexPatterns.some((ip) => ip.isTimeBased()) ||
-        // always show the timepicker for text based languages
-        isOnTextBasedMode ||
-        Boolean(
-          allLoaded &&
-            activeDatasourceId &&
-            datasourceMap[activeDatasourceId].isTimeBased(
-              datasourceStates[activeDatasourceId].state,
-              dataViews.indexPatterns
+    <>
+      {/*
+        Chrome-owned registration so omitted `back` can fall back to project breadcrumbs.
+        Menu is omitted so setHeaderActionMenu keeps feeding the legacy slot.
+        Only active when Chrome Next + project style; classic keeps portal badges below.
+      */}
+      <ChromeAppHeaderRegistration
+        title={title}
+        back={back}
+        badges={appHeaderBadges}
+        spacing="compact"
+      />
+      <MountPointPortal setMountPoint={setHeaderActionMenu}>
+        <span
+          className="kbnTopNavMenu__wrapper hide-for-sharing"
+          css={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <TopNavMenuBadges badges={legacyBadges} />
+          <TopNavMenuItems config={topNavConfig} popoverBreakpoints={['xs', 's', 'm']} />
+        </span>
+      </MountPointPortal>
+      {/*
+        Do not pass dataTestSubj into SearchBar — that prop overrides the query input's
+        default `queryInput` test subject (used by FTR/Scout). Keep lnsApp_topNav on a wrapper.
+      */}
+      {/*
+        This search bar is the only editing surface for the chart-scoped
+        `state.query` / `state.filters` (persisted with the visualization and
+        AND-ed with dashboard context at render time). The inline flyout editor
+        exposes no equivalent control for form-based charts. In text-based mode
+        the same bar hosts the ES|QL editor instead (dual role of
+        `state.query`, see `LensDocument['state']['query']`).
+      */}
+      <div data-test-subj="lnsApp_topNav" className="hide-for-sharing">
+        <AggregateQuerySearchBar
+          allowSavingQueries
+          savedQuery={savedQuery}
+          onQuerySubmit={onQuerySubmitWrapped}
+          onSaved={onSavedWrapped}
+          onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+          onClearSavedQuery={onClearSavedQueryWrapped}
+          indexPatterns={indexPatterns}
+          query={query}
+          dateRangeFrom={from}
+          dateRangeTo={to}
+          indicateNoData={indicateNoData}
+          dataViewPickerComponentProps={dataViewPickerProps}
+          showQueryInput={true}
+          showDatePicker={
+            indexPatterns.some((ip) => ip.isTimeBased()) ||
+            // always show the timepicker for text based languages
+            isOnTextBasedMode ||
+            Boolean(
+              allLoaded &&
+                activeDatasourceId &&
+                datasourceMap[activeDatasourceId].isTimeBased(
+                  datasourceStates[activeDatasourceId].state,
+                  dataViews.indexPatterns
+                )
             )
-        )
-      }
-      textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      showFilterBar={true}
-      data-test-subj="lnsApp_topNav"
-      screenTitle={'lens'}
-      appName={LENS_APP_NAME}
-      displayStyle="detached"
-      className="hide-for-sharing"
-    />
+          }
+          showFilterBar={true}
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          screenTitle="lens"
+          appName={LENS_APP_NAME}
+          displayStyle="detached"
+        />
+      </div>
+    </>
   );
 };

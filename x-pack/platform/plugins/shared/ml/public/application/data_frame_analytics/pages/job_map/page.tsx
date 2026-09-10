@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
@@ -18,10 +19,12 @@ import { JobMap } from '.';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApi } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
-import { MlPageHeader } from '../../../components/page_header';
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
+import { MlAppHeader } from '../../../components/ml_app_header';
+import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { AnalyticsDetailFlyout } from '../analytics_exploration/components/analytics_detail_flyout';
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -80,7 +83,7 @@ export const Page: FC = () => {
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt showDocsLink />;
+      return <AnalyticsEmptyPrompt showDocsLink iconSize="s" />;
     }
     return (
       <>
@@ -101,7 +104,13 @@ export const Page: FC = () => {
   };
 
   return (
-    <>
+    <JobInfoFlyoutsProvider>
+      <AnalyticsDetailFlyout />
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.dataframe.analyticsMap.title', {
+          defaultMessage: 'Analytics map',
+        })}
+      />
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         selectedId={jobId ?? modelId}
@@ -111,35 +120,6 @@ export const Page: FC = () => {
           setAnalyticsId={onAnalyticsIdChange}
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         />
-      ) : null}
-      {jobId === undefined && modelId === undefined ? (
-        <MlPageHeader>
-          <FormattedMessage
-            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
-            id="xpack.ml.dataframe.analyticsMap.title"
-            defaultMessage="Map for Analytics"
-          />
-        </MlPageHeader>
-      ) : null}
-      {jobId !== undefined && modelId === undefined ? (
-        <MlPageHeader>
-          <FormattedMessage
-            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
-            id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
-            defaultMessage="Map for job ID {jobId}"
-            values={{ jobId }}
-          />
-        </MlPageHeader>
-      ) : null}
-      {modelId !== undefined && jobId === undefined ? (
-        <MlPageHeader>
-          <FormattedMessage
-            data-test-subj="mlPageDataFrameAnalyticsMapTitle"
-            id="xpack.ml.dataframe.analyticsMap.modelIdTitle"
-            defaultMessage="Map for trained model ID {modelId}"
-            values={{ modelId }}
-          />
-        </MlPageHeader>
       ) : null}
 
       <NodeAvailableWarning />
@@ -158,6 +138,6 @@ export const Page: FC = () => {
         getEmptyState()
       )}
       <HelpMenu docLink={helpLink} />
-    </>
+    </JobInfoFlyoutsProvider>
   );
 };

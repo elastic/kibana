@@ -29,32 +29,12 @@ import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
-
-export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.userNotification',
-  { defaultMessage: 'User notification' }
-);
-
-export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetail.notifyUser',
-  {
-    defaultMessage: 'Notify user',
-  }
-);
-
-const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.notificationMessage',
-  {
-    defaultMessage: 'Notification message',
-  }
-);
-
-export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
-  {
-    defaultMessage: 'Customize notification message',
-  }
-);
+import {
+  NOTIFY_USER_SECTION_TITLE,
+  NOTIFY_USER_CHECKBOX_LABEL,
+  NOTIFICATION_MESSAGE_LABEL,
+  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
+} from './shared_translations';
 
 export interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;

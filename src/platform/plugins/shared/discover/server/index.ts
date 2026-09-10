@@ -15,6 +15,7 @@ import type {
   TitleFromLocatorFn,
   QueryFromLocatorFn,
   FiltersFromLocatorFn,
+  TimeFieldNameFromLocatorFn,
 } from './locator';
 
 export interface DiscoverServerPluginStartDeps {
@@ -27,6 +28,7 @@ export interface LocatorServiceScopedClient {
   titleFromLocator: TitleFromLocatorFn;
   queryFromLocator: QueryFromLocatorFn;
   filtersFromLocator: FiltersFromLocatorFn;
+  timeFieldNameFromLocator: TimeFieldNameFromLocatorFn;
 }
 
 export interface DiscoverServerPluginLocatorService {
@@ -38,6 +40,30 @@ export interface DiscoverServerPluginStart {
 }
 
 export { config } from './config';
+export type {
+  DiscoverSessionClassicTab,
+  DiscoverSessionEsqlTab,
+  DiscoverSessionTab,
+  DiscoverSessionPanelOverrides,
+  DiscoverSessionEmbeddableByValueProps,
+  DiscoverSessionEmbeddableByReferenceProps,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableState,
+} from './embeddable';
+export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
+export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
+export type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiEsqlTab,
+  DiscoverSessionApiResponse,
+  DiscoverSessionApiTab,
+  DiscoverSessionApiData,
+  DiscoverSessionApiDataInput,
+  DiscoverSessionSanitizeResponse,
+  DiscoverSessionWarning,
+} from './api/schema';
+export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

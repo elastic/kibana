@@ -8,39 +8,38 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import {
-  Chart,
+import type {
   Datum,
   LayerValue,
-  Partition,
-  Position,
-  Settings,
   TooltipProps,
-  TooltipType,
   SeriesIdentifier,
   PartitionElementEvent,
   SettingsProps,
-  Tooltip,
   TooltipValue,
+  PointerValue,
 } from '@elastic/charts';
+import { Chart, Partition, Position, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LegendToggle } from '@kbn/charts-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import {
+  ChartTooltipFooterMessage,
+  getColumnByAccessor,
+  getFilterDrilldownWarningMessage,
+  getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import {
+} from '@kbn/chart-expressions-common';
+import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -77,7 +76,7 @@ import {
   partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import type { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 import { getMultiFilterCells } from '../utils/filter_helpers';
 
 declare global {
@@ -88,6 +87,7 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
+
 export type PartitionVisComponentProps = Omit<
   PartitionChartProps,
   'navigateToLens' | 'visConfig'
@@ -412,6 +412,28 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const hasTooltipActions =
     interactive && !isEsqlMode && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;
 
+  // Compute warning message for ES|QL computed columns that cannot be filtered.
+  const warningMessage = useMemo(
+    () =>
+      isEsqlMode
+        ? getFilterDrilldownWarningMessage(
+            bucketColumns.map((col) => visData.columns.find((c) => c.id === col.id))
+          )
+        : undefined,
+    [isEsqlMode, bucketColumns, visData.columns]
+  );
+
+  const TooltipFooter = useMemo<
+    | React.ComponentType<{
+        items: Array<TooltipValue<Record<'key', string | number>, SeriesIdentifier>>;
+        header: PointerValue<Record<'key', string | number>> | null;
+      }>
+    | 'default'
+  >(() => {
+    if (!warningMessage) return 'default';
+    return () => <ChartTooltipFooterMessage message={warningMessage} />;
+  }, [warningMessage]);
+
   const tooltip: TooltipProps = {
     ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
@@ -548,7 +570,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 splitColumnAccessor={splitChartColumnAccessor}
                 splitRowAccessor={splitChartRowAccessor}
               />
-              <Tooltip {...tooltip} />
+              <Tooltip {...tooltip} footer={TooltipFooter} />
               <Settings
                 noResults={
                   <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
@@ -576,6 +598,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   );
                 }}
                 legendAction={legendActions}
+                legendActionOnHover={interactive}
                 theme={[
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },
@@ -606,7 +629,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 layout={partitionType}
                 specialFirstInnermostSector={visParams.startFromSecondLargestSlice}
                 valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-                percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
+                percentFormatter={(d: number) => percentFormatter.convertToText(d / 100)}
                 valueGetter={
                   !visParams.labels.show ||
                   visParams.labels.valuesFormat === ValueFormats.VALUE ||
@@ -617,7 +640,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 valueFormatter={(d: number) =>
                   !visParams.labels.show || !visParams.labels.values
                     ? ''
-                    : metricFieldFormatter.convert(d)
+                    : metricFieldFormatter.convertToText(d)
                 }
                 layers={layers}
                 topGroove={!visParams.labels.show ? 0 : undefined}

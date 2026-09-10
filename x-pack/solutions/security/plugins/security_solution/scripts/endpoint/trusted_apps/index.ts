@@ -10,20 +10,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { basename } from 'path';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
 
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
+import { ensureArtifactListExists } from '../common/endpoint_artifact_services';
 
 const defaultLogger = createToolingLogger();
 const separator = '----------------------------------------';
@@ -83,7 +77,7 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
   // and
   // and ensure the trusted apps list is created
   logger.info('setting up Fleet with endpoint and creating trusted apps list');
-  ensureCreateEndpointTrustedAppsList(kbnClient);
+  await ensureArtifactListExists(kbnClient, 'trustedApps');
 
   const randomPolicyId = await randomPolicyIdGenerator(kbnClient, logger);
 
@@ -136,30 +130,4 @@ const createRunLogger = () => {
       },
     },
   });
-};
-
-const ensureCreateEndpointTrustedAppsList = async (kbn: KbnClient) => {
-  const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-    meta: undefined,
-    name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
-    os_types: [],
-    tags: [],
-    type: 'endpoint',
-    namespace_type: 'agnostic',
-  };
-
-  await kbn
-    .request({
-      method: 'POST',
-      path: EXCEPTION_LIST_URL,
-      body: newListDefinition,
-    })
-    .catch((e) => {
-      // Ignore if list was already created
-      if (e.response.status !== 409) {
-        throw e;
-      }
-    });
 };

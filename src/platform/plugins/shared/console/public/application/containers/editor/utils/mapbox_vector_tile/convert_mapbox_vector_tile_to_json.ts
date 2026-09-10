@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VectorTile, VectorTileLayer, VectorTileFeature } from '@mapbox/vector-tile';
+import type { VectorTile, VectorTileLayer } from '@mapbox/vector-tile';
+import { VectorTileFeature } from '@mapbox/vector-tile';
 
 interface MapboxVectorTileJson {
   [key: string]: {};
@@ -27,25 +28,23 @@ export function convertMapboxVectorTileToJson(response: VectorTile) {
         const properties = feature.properties;
         const geometry = feature.loadGeometry()[0];
         const typeName = VectorTileFeature.types[feature.type];
-        let coordinates = [];
 
         const coordinatesArray = [];
         for (const value of geometry) {
           coordinatesArray.push([value.x, value.y]);
         }
 
+        let coordinates: number[] | number[][] | number[][][] = [];
         switch (feature.type) {
           case 1:
-            coordinates.push(geometry[0].x, geometry[0].y);
+            coordinates = [geometry[0].x, geometry[0].y];
             break;
-          case 2: {
+          case 2:
             coordinates = coordinatesArray;
             break;
-          }
-          case 3: {
-            coordinates.push(coordinatesArray);
+          case 3:
+            coordinates = [coordinatesArray];
             break;
-          }
         }
 
         featuresArray.push({

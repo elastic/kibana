@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -71,10 +71,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('logging out of a non-default space redirects to the login page at the server root', async () => {
           await PageObjects.security.login(undefined, undefined, {
-            expectSpaceSelector: true,
+            expectSpaceSelector: false,
           });
 
-          await PageObjects.spaceSelector.clickSpaceCard('some-space');
+          await PageObjects.spaceSelector.expectSpace('default');
+          await PageObjects.spaceSelector.openSpacesNav();
+          await PageObjects.spaceSelector.goToSpecificSpace('some-space');
           await PageObjects.spaceSelector.expectHomePage('some-space');
 
           await PageObjects.security.logout();

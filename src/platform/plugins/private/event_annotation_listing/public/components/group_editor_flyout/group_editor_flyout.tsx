@@ -8,23 +8,24 @@
  */
 
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiToolTip,
   htmlIdGenerator,
   useIsWithinBreakpoints,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import type {
   EventAnnotationConfig,
@@ -111,6 +112,7 @@ export const GroupEditorFlyout = ({
 
   return (
     <EuiFlyout
+      aria-labelledby={flyoutHeadingId}
       onClose={onClose}
       paddingSize="m"
       size="l"
@@ -137,15 +139,22 @@ export const GroupEditorFlyout = ({
                 {selectedAnnotation ? (
                   <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="text"
-                        iconType="sortLeft"
-                        aria-label={i18n.translate('eventAnnotationListing.edit.back', {
+                      <EuiToolTip
+                        content={i18n.translate('eventAnnotationListing.edit.back', {
                           defaultMessage: 'Back',
                         })}
-                        onClick={() => setSelectedAnnotation(undefined)}
-                        data-test-subj="backToGroupSettingsTop"
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          color="text"
+                          iconType="sortLeft"
+                          aria-label={i18n.translate('eventAnnotationListing.edit.back', {
+                            defaultMessage: 'Back',
+                          })}
+                          onClick={() => setSelectedAnnotation(undefined)}
+                          data-test-subj="backToGroupSettingsTop"
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <FormattedMessage

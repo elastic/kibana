@@ -9,13 +9,12 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFilterButton,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPanel,
@@ -30,8 +29,8 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
   logicalCSS,
-  UseEuiTheme,
   mathWithUnits,
+  EuiFormAppend,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,16 +61,6 @@ const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
     &::before {
       display: none;
     }
-  }
-`;
-
-const filterButtonStyle = ({ euiTheme }: UseEuiTheme) => css`
-  padding: 0;
-
-  &,
-  & .euiFilterButton__text {
-    min-width: 0;
-    line-height: 1;
   }
 `;
 
@@ -131,18 +120,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
     [euiTheme.size.m, euiTheme.size.xs]
   );
 
-  const itemStyle = useMemo(
-    () => css`
-      font-size: ${euiTheme.size.m};
-      padding: ${euiTheme.size.s} ${euiTheme.size.m};
-
-      & + & {
-        border-top: 1px solid ${euiTheme.colors.lightestShade};
-      }
-    `,
-    [euiTheme]
-  );
-
   useEffect(() => {
     // calculate counts only if user opened the popover
     if (!isOpen || !allFields?.length) {
@@ -178,6 +155,9 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   return (
     <EuiPopover
       id="unifiedFieldTypeFilter"
+      aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.popoverAriaLabel', {
+        defaultMessage: 'Field type filter',
+      })}
       panelProps={{ css: { width: euiTheme.base * 18 } }}
       panelPaddingSize="none"
       anchorPosition="rightUp"
@@ -186,21 +166,20 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       closePopover={() => setIsOpen(false)}
       css={filterPopoverStyle}
       button={
-        <EuiFilterButton
+        <EuiFormAppend
+          element="button"
+          iconLeft="filter"
+          onClick={() => setIsOpen((value) => !value)}
           aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel', {
             defaultMessage: 'Filter by type',
           })}
-          color="text"
-          isSelected={isOpen}
-          numFilters={selectedFieldTypes.length}
-          hasActiveFilters={!!selectedFieldTypes.length}
-          numActiveFilters={selectedFieldTypes.length}
+          aria-expanded={isOpen}
           data-test-subj={`${testSubj}Toggle`}
-          css={filterButtonStyle}
-          onClick={() => setIsOpen((value) => !value)}
         >
-          <EuiIcon type="filter" />
-        </EuiFilterButton>
+          <EuiNotificationBadge color={!!selectedFieldTypes.length ? 'accent' : 'subdued'}>
+            {selectedFieldTypes.length}
+          </EuiNotificationBadge>
+        </EuiFormAppend>
       }
     >
       <>
@@ -226,6 +205,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
             )}
           </EuiFlexGroup>
         </EuiPopoverTitle>
+        {/* NOTE: This should use an EuiSelectable, EuiContextMenu is for menu actions not selections */}
         {availableFieldTypes.length > 0 ? (
           <EuiContextMenuPanel
             data-test-subj={`${testSubj}Options`}
@@ -253,7 +233,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   key={type}
                   icon={isSelected ? 'check' : 'empty'}
                   data-test-subj={`typeFilter-${type}`}
-                  css={itemStyle}
                   onClick={() => {
                     onChange(
                       selectedFieldTypes.includes(type)

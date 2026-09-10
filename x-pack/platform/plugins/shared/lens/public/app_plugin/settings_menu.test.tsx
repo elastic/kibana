@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderWithReduxStore } from '../mocks';
 import { SettingsMenu } from './settings_menu';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('settings menu', () => {
@@ -40,17 +40,6 @@ describe('settings menu', () => {
       ...rtlRender,
     };
   };
-
-  afterEach(() => {
-    onCloseMock.mockClear();
-  });
-
-  it('should call onClose when popover closes after toggling', async () => {
-    const { toggleAutoApply } = renderSettingsMenu();
-    await toggleAutoApply();
-
-    await waitFor(() => expect(onCloseMock).toHaveBeenCalledTimes(1));
-  });
 
   it('should toggle auto-apply', async () => {
     const { toggleAutoApply, isAutoApplyOn } = renderSettingsMenu();

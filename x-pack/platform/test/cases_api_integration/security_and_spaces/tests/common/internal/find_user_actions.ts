@@ -8,7 +8,11 @@
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+} from '@kbn/cases-plugin/common/constants';
 import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -40,7 +44,6 @@ import {
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -126,10 +129,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.latestAttachments.length).to.be(1);
 
         const attachment = response.latestAttachments[0];
-        expect(attachment.type).to.eql('user');
+        expect(attachment.type).to.eql('comment');
         // just to make TS happy
-        if (attachment.type === 'user') {
-          expect(attachment.comment).to.eql('this is an edited comment');
+        if (attachment.type === 'comment' && 'data' in attachment) {
+          expect(attachment.data?.content).to.eql('this is an edited comment');
         }
         expect(attachment.id).to.eql(response.userActions[1].comment_id);
       });
@@ -290,6 +293,24 @@ export default ({ getService }: FtrProviderContext): void => {
           caseID: theCase.id,
           supertest,
           options: { page: 209, perPage: 100 },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the search term is too long', async () => {
+        await findInternalCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { search: 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1) },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the author is too long', async () => {
+        await findInternalCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { authors: ['a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1)] },
           expectedHttpCode: 400,
         });
       });
@@ -564,7 +585,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: theCase.version,
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               },
             ],
           },
@@ -586,7 +607,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(settingsUserAction.type).to.eql('settings');
         expect(settingsUserAction.action).to.eql('update');
-        expect(settingsUserAction.payload).to.eql({ settings: { syncAlerts: false } });
+        expect(settingsUserAction.payload).to.eql({
+          settings: { syncAlerts: false, extractObservables: false },
+        });
       });
 
       it('retrieves only the severity user actions', async () => {
@@ -701,10 +724,11 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(persistableState.payload.comment.type).to.eql('persistableState');
         expect(persistableState.action).to.eql('create');
 
+        // `actions` folds to `security.endpoint` and is never re-emitted, even here.
         const actions = response.userActions[3] as CommentUserAction;
 
         expect(actions.type).to.eql('comment');
-        expect(actions.payload.comment.type).to.eql('actions');
+        expect(actions.payload.comment.type).to.eql('externalReference');
         expect(actions.action).to.eql('create');
 
         expect(response.userActions[4].type).to.eql('severity');
@@ -778,7 +802,7 @@ export default ({ getService }: FtrProviderContext): void => {
             postCommentUserReq,
             postExternalReferenceESReq,
             persistableStateAttachment,
-            // This one should not show up in the filter for attachments
+            // Folds to `security.endpoint`/`externalReference`, so it DOES show up here.
             postCommentActionsReq,
             // This one should not show up in the filter for attachments
             postCommentAlertReq,
@@ -794,8 +818,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(response.userActions.length).to.be(2);
-        expect(response.latestAttachments.length).to.be(2);
+        expect(response.userActions.length).to.be(3);
+        expect(response.latestAttachments.length).to.be(3);
 
         const externalRefUserAction = response.userActions[0] as CommentUserAction;
 
@@ -808,6 +832,12 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(peristableStateUserAction.type).to.eql('comment');
         expect(peristableStateUserAction.action).to.eql('create');
         expect(peristableStateUserAction.payload.comment.type).to.eql('persistableState');
+
+        const legacyActionsUserAction = response.userActions[2] as CommentUserAction;
+
+        expect(legacyActionsUserAction.type).to.eql('comment');
+        expect(legacyActionsUserAction.action).to.eql('create');
+        expect(legacyActionsUserAction.payload.comment.type).to.eql('externalReference');
       });
 
       describe('filtering on multiple types', () => {
@@ -859,6 +889,170 @@ export default ({ getService }: FtrProviderContext): void => {
           const createCaseUserAction = response.userActions[0];
           expect(createCaseUserAction.type).to.eql('create_case');
           expect(createCaseUserAction.action).to.eql('create');
+        });
+      });
+
+      describe('author filter', () => {
+        it('filters user actions by author username', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              authors: ['elastic'],
+            },
+          });
+
+          for (const userAction of response.userActions) {
+            expect(userAction.created_by.username).to.be('elastic');
+          }
+        });
+
+        it('returns empty results when author does not match', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              authors: ['nonexistent_user'],
+            },
+          });
+
+          expect(response.total).to.be(0);
+          expect(response.userActions.length).to.be(0);
+        });
+      });
+
+      describe('search filter', () => {
+        it('filters user actions by search term in comment payload', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'cool comment',
+            },
+          });
+
+          expect(response.total).to.be(1);
+          expect(response.userActions[0].type).to.eql('comment');
+        });
+
+        it('returns empty results when search term does not match', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'xyz_no_match_term',
+            },
+          });
+
+          expect(response.total).to.be(0);
+          expect(response.userActions.length).to.be(0);
+        });
+
+        it('search is case-insensitive', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'COOL COMMENT',
+            },
+          });
+
+          expect(response.total).to.be(1);
+        });
+
+        it('paginates search results correctly', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          const updatedCase = await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: theCase.id,
+                  version: updatedCase.version,
+                  title: 'This is a cool title',
+                },
+              ],
+            },
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'cool',
+              page: 1,
+              perPage: 1,
+            },
+          });
+
+          expect(response.perPage).to.be(1);
+          expect(response.page).to.be(1);
+          expect(response.total).to.be(2);
+          expect(response.userActions.length).to.be(1);
+        });
+
+        it('combines search and author filters', async () => {
+          const theCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: theCase.id,
+            params: postCommentUserReq,
+          });
+
+          const response = await findInternalCaseUserActions({
+            caseID: theCase.id,
+            supertest,
+            options: {
+              search: 'cool comment',
+              authors: ['elastic'],
+            },
+          });
+
+          expect(response.total).to.be(1);
+          expect(response.userActions[0].type).to.eql('comment');
+          expect(response.userActions[0].created_by.username).to.be('elastic');
         });
       });
 

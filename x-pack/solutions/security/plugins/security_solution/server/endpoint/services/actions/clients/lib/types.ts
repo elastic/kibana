@@ -6,38 +6,46 @@
  */
 
 import type { Readable } from 'stream';
+import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type {
   ActionDetails,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithProcessData,
-  SuspendProcessActionOutputContent,
+  ResponseActionScriptsApiResponse,
+  EndpointActionData,
   GetProcessesActionOutputContent,
+  KillProcessActionOutputContent,
+  LogsEndpointActionResponse,
+  ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionExecuteOutputContent,
+  ResponseActionParametersWithProcessData,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
+  ResponseActionScanOutputContent,
+  ResponseActionScanParameters,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-  EndpointActionData,
-  LogsEndpointActionResponse,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
+  SuspendProcessActionOutputContent,
   UploadedFileInfo,
-  ResponseActionScanOutputContent,
-  ResponseActionScanParameters,
-  ResponseActionRunScriptOutputContent,
-  ResponseActionRunScriptParameters,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
-  UnisolationRouteRequestBody,
-  GetProcessesRequestBody,
-  ResponseActionGetFileRequestBody,
-  ExecuteActionRequestBody,
-  UploadActionApiRequestBody,
-  ScanActionRequestBody,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
-  RunScriptActionRequestBody,
   BaseActionRequestBody,
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  KillProcessRequestBody,
+  ResponseActionGetFileRequestBody,
+  RunScriptActionRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  CancelActionRequestBody,
+  UnisolationRouteRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 export type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -76,25 +84,6 @@ export interface GetFileDownloadMethodResponse {
   stream: Readable;
   fileName: string;
   mimeType?: string;
-}
-
-export interface CustomScript {
-  /**
-   * Unique identifier for the script
-   */
-  id: string;
-  /**
-   * Display name of the script
-   */
-  name: string;
-  /**
-   * Description of what the script does
-   */
-  description: string;
-}
-
-export interface CustomScriptsResponse {
-  data: CustomScript[];
 }
 
 /**
@@ -157,7 +146,9 @@ export interface ResponseActionsClient {
   /**
    * Retrieves a list of all custom scripts for a given agent type - ** not a Response Action **
    */
-  getCustomScripts: () => Promise<CustomScriptsResponse>;
+  getCustomScripts: (
+    options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
+  ) => Promise<ResponseActionScriptsApiResponse>;
 
   /**
    * Retrieve a file for download
@@ -195,6 +186,27 @@ export interface ResponseActionsClient {
   ) => Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   >;
+  /**
+   * Cancel a response action
+   * @param actionRequest
+   * @param options
+   */
+  cancel: (
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>>;
+
+  /**
+   * Generate a memory dump
+   * @param actionRequest
+   * @param options
+   */
+  memoryDump: (
+    actionRequest: OmitUnsupportedAttributes<MemoryDumpActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<
+    ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+  >;
 }
 
 /**
@@ -202,5 +214,5 @@ export interface ResponseActionsClient {
  */
 export type ResponseActionsClientMethods = keyof Omit<
   ResponseActionsClient,
-  'processPendingActions' | 'getFileInfo' | 'getFileDownload'
+  'processPendingActions' | 'getFileInfo' | 'getFileDownload' | 'getCustomScripts'
 >;

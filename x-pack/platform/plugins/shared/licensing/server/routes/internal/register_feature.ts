@@ -6,9 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LicenseType, LICENSE_TYPE } from '../../../common/types';
-import { FeatureUsageServiceSetup } from '../../services';
-import { LicensingRouter } from '../../types';
+import type { LicenseType } from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
+import type { FeatureUsageServiceSetup } from '../../services';
+import type { LicensingRouter } from '../../types';
+import {
+  MAX_LICENSING_FEATURE_ID_LENGTH,
+  MAX_LICENSING_LICENSE_TYPE_LENGTH,
+} from './route_length_limits';
 
 export function registerRegisterFeatureRoute(
   router: LicensingRouter,
@@ -26,23 +31,25 @@ export function registerRegisterFeatureRoute(
       validate: {
         body: schema.arrayOf(
           schema.object({
-            featureName: schema.string(),
+            featureId: schema.string({ maxLength: MAX_LICENSING_FEATURE_ID_LENGTH }),
             licenseType: schema.string({
+              maxLength: MAX_LICENSING_LICENSE_TYPE_LENGTH,
               validate: (value) => {
                 if (!(value in LICENSE_TYPE)) {
                   return `Invalid license type: ${value}`;
                 }
               },
             }),
-          })
+          }),
+          { maxSize: 1000 }
         ),
       },
     },
     async (context, request, response) => {
       const registrations = request.body;
 
-      registrations.forEach(({ featureName, licenseType }) => {
-        featureUsageSetup.register(featureName, licenseType as LicenseType);
+      registrations.forEach(({ featureId, licenseType }) => {
+        featureUsageSetup.register(featureId, licenseType as LicenseType);
       });
 
       return response.ok({

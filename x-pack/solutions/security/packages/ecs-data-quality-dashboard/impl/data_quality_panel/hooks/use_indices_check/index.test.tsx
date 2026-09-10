@@ -12,11 +12,11 @@ import { useIndicesCheck } from '.';
 import * as utilsCheckIndex from '../../utils/check_index';
 import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
 import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
-import { HttpHandler } from '@kbn/core-http-browser';
+import type { HttpHandler } from '@kbn/core-http-browser';
 import { MappingsError } from '../../utils/fetch_mappings';
 import { UnallowedValuesError } from '../../utils/fetch_unallowed_values';
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
-import { UnallowedValueSearchResult } from '../../types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { UnallowedValueSearchResult } from '../../types';
 import { getInitialCheckStateValue } from './reducer';
 
 const getSpies = () => {

@@ -7,14 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiNotificationBadge,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiNotificationBadge } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../../../types';
 import { useGetAutoUpgradeAgentsStatusQuery } from '../../../../../hooks';
@@ -66,16 +59,16 @@ export const ManageAutoUpgradeAgentsBadge: React.FC<Props> = ({
       </EuiFlexItem>
       {hasErrors && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={
               <FormattedMessage
                 id="xpack.fleet.manageAutoUpgradeAgents.failedUpgradeTooltip"
                 defaultMessage="Some agents failed to upgrade, click on Manage to see details."
               />
             }
-          >
-            <EuiIcon type="warning" color="danger" />
-          </EuiToolTip>
+            type="warning"
+            color="danger"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

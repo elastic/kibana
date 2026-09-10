@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionNumericalRange, NumericalRange } from './numerical_range';
+import type { ExpressionFunctionNumericalRange, NumericalRange } from './numerical_range';
 
 export const numericalRangeToAst = (numericalRange: NumericalRange) => {
   return buildExpression([

@@ -13,10 +13,11 @@ import { cloneDeep, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
-import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
-import { ValidationVisOptionsProps } from '../../common';
+import type { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
+import type { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { ValueAxesPanel } from './value_axes_panel';
@@ -289,7 +290,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     updateAxisTitle(updatedSeries);
   }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
 
-  const isTimeViz = aggs?.aggs.some(
+  const isTimeVis = aggs?.aggs.some(
     (agg) =>
       agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
   );
@@ -299,7 +300,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
   const linearOrStackedBars = stateParams.seriesParams.every(
     ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
   );
-  const disableAxisControls = xAxisIsHorizontal && isTimeViz && linearOrStackedBars;
+  const disableAxisControls = xAxisIsHorizontal && isTimeVis && linearOrStackedBars;
 
   return isTabSelected ? (
     <>

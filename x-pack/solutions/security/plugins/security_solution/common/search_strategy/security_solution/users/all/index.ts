@@ -14,7 +14,11 @@ export interface User {
   lastSeen: string;
   domain: string;
   risk?: RiskSeverity;
-  criticality?: string;
+  criticality?: string | null;
+  /** Canonical Entity Store id when the row comes from the entity store users list. */
+  entityId?: string;
+  /** Identity fields for user details URL resolution when entity store data is present. */
+  identityFields?: Record<string, string>;
 }
 
 export interface UsersStrategyResponse extends IEsSearchResponse {

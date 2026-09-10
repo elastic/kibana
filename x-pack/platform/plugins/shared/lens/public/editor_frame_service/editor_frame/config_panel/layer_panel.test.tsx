@@ -9,11 +9,13 @@ import React from 'react';
 import { screen, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { faker } from '@faker-js/faker';
+import { BehaviorSubject } from 'rxjs';
 
 import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { generateId } from '../../../id_generator';
 import {
@@ -24,10 +26,17 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import { LensAppState } from '../../../state_management';
-import type { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
+import type {
+  LensAppState,
+  FramePublicAPI,
+  LensInspector,
+  Visualization,
+  VisualizationConfigProps,
+} from '@kbn/lens-common';
 import { LayerPanel } from './layer_panel';
 import type { LayerPanelProps } from './types';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
+import { onActiveDataChange } from '../../../state_management';
 
 jest.mock('../../../id_generator');
 
@@ -83,19 +92,13 @@ interface RenderLayerPanelOptions {
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
 
-  let mockDatasource = createMockDatasource('testDatasource');
+  let mockDatasource = createMockDatasource('formBased');
 
   function getDefaultProps(): LayerPanelProps {
     return {
       layerId: 'first',
-      visualizationMap: {
-        testVis: mockVisualization,
-      },
       activeVisualization: mockVisualization,
       dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
-      datasourceMap: {
-        testDatasource: mockDatasource,
-      },
       visualizationState: 'state',
       updateVisualization: jest.fn(),
       updateDatasource: jest.fn(),
@@ -114,7 +117,6 @@ describe('LayerPanel', () => {
       onRemoveDimension: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      registerNewLayerRef: jest.fn(),
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
@@ -139,7 +141,18 @@ describe('LayerPanel', () => {
       <LayerPanel {...props} {...propsOverrides} />,
       {
         wrapper: ({ children }) => (
-          <ChildDragDropProvider value={dragDropValue}>{children}</ChildDragDropProvider>
+          <ChildDragDropProvider value={dragDropValue}>
+            <EditorFrameServiceProvider
+              visualizationMap={{
+                testVis: mockVisualization,
+              }}
+              datasourceMap={{
+                formBased: mockDatasource,
+              }}
+            >
+              {children}
+            </EditorFrameServiceProvider>
+          </ChildDragDropProvider>
         ),
       },
       { preloadedState }
@@ -159,29 +172,6 @@ describe('LayerPanel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('layer reset and remove', () => {
-    it('should show the reset button when single layer', async () => {
-      renderLayerPanel();
-      expect(screen.getByRole('button', { name: /clear layer/i })).toBeInTheDocument();
-    });
-
-    it('should show the delete button when single layer', async () => {
-      renderLayerPanel({
-        propsOverrides: { isOnlyLayer: false },
-      });
-      expect(screen.getByRole('button', { name: /delete layer/i })).toBeInTheDocument();
-    });
-
-    it('should call the clear callback when resetting layer', async () => {
-      const cb = jest.fn();
-      renderLayerPanel({
-        propsOverrides: { onRemoveLayer: cb },
-      });
-      await userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
-      expect(cb).toHaveBeenCalled();
-    });
   });
 
   describe('single group', () => {
@@ -500,6 +490,45 @@ describe('LayerPanel', () => {
       expect(updateAll).toHaveBeenCalled();
     });
 
+    it('should pass dimension intent to updateAll when datasource is complete', async () => {
+      (generateId as jest.Mock).mockReturnValue(`newid`);
+      const updateAll = jest.fn();
+      const updateDatasourceAsync = jest.fn();
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [{ ...defaultGroup, accessors: [] }],
+      });
+
+      renderLayerPanel({
+        propsOverrides: {
+          updateAll,
+          updateDatasourceAsync,
+        },
+      });
+
+      await userEvent.click(screen.getByTestId('lns-empty-dimension'));
+      expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
+        expect.objectContaining({ columnId: 'newid' })
+      );
+      const stateFn =
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0].setState;
+
+      const updater = jest.fn().mockReturnValue({ resolved: true });
+      act(() => {
+        stateFn(updater);
+      });
+
+      expect(updateAll).toHaveBeenCalledWith({
+        datasourceId: 'formBased',
+        newDatasourceState: updater,
+        layerId: 'first',
+        groupId: 'a',
+        columnId: 'newid',
+      });
+    });
+
     it('should remove the dimension when the datasource marks it as removed', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -611,7 +640,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
 
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
-      expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: {} });
+      expect(updateDatasource).toHaveBeenCalledWith('formBased', { newState: {} });
     });
 
     it('should display the fake final accessor if present in the group config', async () => {
@@ -1094,6 +1123,162 @@ describe('LayerPanel', () => {
       const droppable = within(dimensionGroups[1]).getAllByTestId('lnsDragDrop-domDroppable')[0];
       fireEvent.dragOver(droppable);
       fireEvent.drop(droppable);
+    });
+  });
+
+  describe('activeData sync', () => {
+    const makeTable = (rows: Datatable['rows'] = []): Datatable =>
+      ({
+        type: 'datatable',
+        columns: [],
+        rows,
+        meta: { type: 'esql' },
+      } as unknown as Datatable);
+
+    const makeLensAdapters = (tables: Record<string, Datatable>) =>
+      ({
+        tables: { tables },
+      } as unknown as ReturnType<LensInspector['getInspectorAdapters']>);
+
+    const makeMultiLayerFrameAPI = (): FramePublicAPI => {
+      const secondDatasource = createMockDatasource('formBased');
+      return {
+        ...createMockFramePublicAPI(),
+        datasourceLayers: {
+          first: mockDatasource.publicAPIMock,
+          second: secondDatasource.publicAPIMock,
+        },
+      } as FramePublicAPI;
+    };
+
+    const lastDispatchedActiveData = (store: { dispatch: jest.Mock }) => {
+      const activeDataCalls = store.dispatch.mock.calls.filter(
+        ([action]) => action?.type === onActiveDataChange.type
+      );
+      return activeDataCalls.at(-1)?.[0].payload.activeData as
+        | Record<string, Datatable>
+        | undefined;
+    };
+
+    const countActiveDataDispatches = (store: { dispatch: jest.Mock }) =>
+      store.dispatch.mock.calls.filter(([action]) => action?.type === onActiveDataChange.type)
+        .length;
+
+    it('does not dispatch onActiveDataChange while dataLoading$ is still emitting true', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const table = makeTable();
+
+      const { store } = renderLayerPanel({
+        propsOverrides: {
+          layerId: 'first',
+          framePublicAPI: makeMultiLayerFrameAPI(),
+          dataLoading$,
+          lensAdapters: makeLensAdapters({ default: table }),
+        },
+      });
+
+      expect(countActiveDataDispatches(store)).toBe(0);
+    });
+
+    it('dispatches onActiveDataChange keyed by the first datasourceLayers id once data finishes loading', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const table = makeTable();
+
+      const { store } = renderLayerPanel({
+        propsOverrides: {
+          layerId: 'first',
+          framePublicAPI: makeMultiLayerFrameAPI(),
+          dataLoading$,
+          // Inspector adapter often emits a single table under a generic key (e.g. "default"),
+          // which the helper re-keys under the default layer id.
+          lensAdapters: makeLensAdapters({ default: table }),
+        },
+      });
+
+      act(() => {
+        dataLoading$.next(false);
+      });
+
+      const activeData = lastDispatchedActiveData(store);
+      expect(activeData).toBeDefined();
+      // Must be keyed by the first datasourceLayers entry (matching WorkspacePanel#onData$),
+      // NOT by the currently selected tab if that happens to differ.
+      expect(Object.keys(activeData ?? {})).toEqual(['first']);
+      expect(activeData?.first).toBe(table);
+    });
+
+    it('does not re-dispatch onActiveDataChange when the selected layer tab changes after data has loaded', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const table = makeTable();
+      const framePublicAPI = makeMultiLayerFrameAPI();
+      const lensAdapters = makeLensAdapters({ default: table });
+      const baseProps: Partial<LayerPanelProps> = {
+        framePublicAPI,
+        dataLoading$,
+        lensAdapters,
+      };
+
+      const { store, rerender } = renderLayerPanel({
+        propsOverrides: { layerId: 'first', ...baseProps },
+      });
+
+      act(() => {
+        dataLoading$.next(false);
+      });
+
+      const dispatchesAfterLoad = countActiveDataDispatches(store);
+      expect(dispatchesAfterLoad).toBe(1);
+      expect(lastDispatchedActiveData(store)).toEqual({ first: table });
+
+      // Simulate the user clicking the "second" layer tab in the config panel.
+      // The activeData in Redux must keep its first-layer key — otherwise the previously
+      // produced table would silently be re-attributed to the newly selected layer.
+      rerender(
+        <LayerPanel
+          {...(props as LayerPanelProps)}
+          {...baseProps}
+          layerId="second"
+          layerIndex={1}
+        />
+      );
+
+      expect(countActiveDataDispatches(store)).toBe(dispatchesAfterLoad);
+    });
+
+    it('preserves per-layer keys when the adapter has multiple tables', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
+      mockVisualization.getConfiguration.mockReturnValue({ groups: [defaultGroup] });
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const firstTable = makeTable([{ a: 1 }]);
+      const secondTable = makeTable([{ a: 2 }]);
+
+      const { store } = renderLayerPanel({
+        propsOverrides: {
+          layerId: 'first',
+          framePublicAPI: makeMultiLayerFrameAPI(),
+          dataLoading$,
+          lensAdapters: makeLensAdapters({ first: firstTable, second: secondTable }),
+        },
+      });
+
+      act(() => {
+        dataLoading$.next(false);
+      });
+
+      expect(lastDispatchedActiveData(store)).toEqual({
+        first: firstTable,
+        second: secondTable,
+      });
     });
   });
   // TODO - test user message display

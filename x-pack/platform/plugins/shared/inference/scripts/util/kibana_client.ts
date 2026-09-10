@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
-import { IncomingMessage } from 'http';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { isAxiosError } from 'axios';
+import type { IncomingMessage } from 'http';
 import { omit, pick } from 'lodash';
 import { from, map, switchMap, throwError } from 'rxjs';
-import { UrlObject, format, parse } from 'url';
+import type { UrlObject } from 'url';
+import { format, parse } from 'url';
 import { inspect } from 'util';
 import { isReadable } from 'stream';
-import {
+import type {
   ChatCompleteAPI,
   OutputAPI,
   ChatCompletionEvent,
-  InferenceTaskError,
   InferenceTaskErrorEvent,
+  ChatCompleteOptions,
+  ChatCompleteAPIResponse,
+} from '@kbn/inference-common';
+import {
+  InferenceTaskError,
   InferenceTaskEventType,
   createInferenceInternalError,
   withoutOutputUpdateEvents,
-  ChatCompleteOptions,
   type InferenceConnector,
-  ChatCompleteAPIResponse,
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createOutputApi } from '../../common/output/create_output_api';
@@ -201,7 +205,14 @@ export class KibanaClient {
               pathname: `/internal/inference/chat_complete/stream`,
             }),
             body,
-            { responseType: 'stream', timeout: 0 }
+            {
+              responseType: 'stream',
+              timeout: 0,
+              headers: {
+                'kbn-xsrf': 'true',
+                'x-elastic-internal-origin': 'foo',
+              },
+            }
           )
         ) as ChatCompleteAPIResponse<TOptions>;
       }
@@ -212,7 +223,13 @@ export class KibanaClient {
             pathname: `/internal/inference/chat_complete`,
           }),
           body,
-          { timeout: 0 }
+          {
+            timeout: 0,
+            headers: {
+              'kbn-xsrf': 'true',
+              'x-elastic-internal-origin': 'foo',
+            },
+          }
         )
         .then((response) => {
           return response.data;
@@ -240,12 +257,10 @@ export class KibanaClient {
   }
 
   async getConnectors() {
-    const connectors: AxiosResponse<{ connectors: InferenceConnector[] }> = await axios.get(
-      this.getUrl({
-        pathname: '/internal/inference/connectors',
-      })
-    );
+    const response = await this.callKibana<{ connectors: InferenceConnector[] }>('GET', {
+      pathname: '/internal/inference/connectors',
+    });
 
-    return connectors.data.connectors;
+    return response.data.connectors;
   }
 }

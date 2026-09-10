@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
+import { useQuery } from '@kbn/react-query';
+import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
+import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
 import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../../../common/hooks/use_error_toast';
-import type { AnomalyBand } from '../pad_anomaly_bands';
+import type { AnomalyBand } from '../../../../../recent_anomalies';
 import {
   usePadAnomalyDataEsqlSource,
   usePadTopAnomalousUsersEsqlSource,
@@ -27,7 +29,7 @@ interface ESQLRawAnomalyRecord extends Record<string, string | number> {
 /**
  * An Anomaly record that ensures consistent timestamps as milliseconds since Epoch time.
  */
-export interface ESQLAnomalyRecord {
+export interface ESQLAnomalyRecord extends Record<string, unknown> {
   '@timestamp': number;
   record_score: number;
   'user.name': string;
@@ -103,7 +105,7 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
       const anomalyRecords = esqlResponseToRecords<ESQLRawAnomalyRecord>(
         (
           await getESQLResults({
-            esqlQuery: padAnomalyDataEsqlSource,
+            esqlQuery: padAnomalyDataEsqlSource, // here
             search,
             signal,
             filter: filterQuery,
@@ -124,6 +126,22 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
     }
   );
 
+  const inspect = useMemo(() => {
+    return {
+      dsl: [
+        JSON.stringify(
+          {
+            index: [ML_ANOMALIES_INDEX],
+            body: prettifyQuery(padAnomalyDataEsqlSource ?? ''),
+          },
+          null,
+          2
+        ),
+      ],
+      response: data ? [JSON.stringify(data, null, 2)] : [],
+    };
+  }, [data, padAnomalyDataEsqlSource]);
+
   useErrorToast(
     i18n.translate(
       'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.queryError',
@@ -140,5 +158,6 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
     isError: isTopUsersError || isAnomaliesError,
     refetch,
     error,
+    inspect,
   };
 };

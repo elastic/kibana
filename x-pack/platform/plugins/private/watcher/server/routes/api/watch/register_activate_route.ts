@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import {
   buildServerWatchStatusModel,
   buildClientWatchStatusModel,
@@ -22,7 +22,7 @@ function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
 }
 
 const paramsSchema = schema.object({
-  watchId: schema.string(),
+  watchId: schema.string({ maxLength: 1000 }),
 });
 
 export function registerActivateRoute({

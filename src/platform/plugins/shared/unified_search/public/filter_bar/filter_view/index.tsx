@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
-import { Filter, isFilterPinned } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FC } from 'react';
+import React from 'react';
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
@@ -91,7 +94,7 @@ export const FilterView: FC<Props> = ({
         ),
       };
 
-  const FilterPill = () => (
+  const filterBadge = (
     <FilterBadge
       filter={filter}
       dataViews={dataViews}
@@ -106,13 +109,11 @@ export const FilterView: FC<Props> = ({
 
   return readOnly ? (
     <EuiToolTip position="bottom" content={title}>
-      <span ref={ref}>
-        <FilterPill />
+      <span ref={ref} tabIndex={0}>
+        {filterBadge}
       </span>
     </EuiToolTip>
   ) : (
-    <span ref={ref}>
-      <FilterPill />
-    </span>
+    <span ref={ref}>{filterBadge}</span>
   );
 };

@@ -6,23 +6,40 @@
  */
 
 import type OpenAI from 'openai';
-import { filter, from, map, mergeMap, Observable, tap } from 'rxjs';
-import {
+import type { Observable, OperatorFunction } from 'rxjs';
+import { catchError, filter, from, map, mergeMap, tap } from 'rxjs';
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+} from '@kbn/inference-common';
+import {
   createInferenceInternalError,
+  createInferenceRequestAbortedError,
 } from '@kbn/inference-common';
 import { tokenCountFromOpenAI, chunkFromOpenAI } from './from_openai';
 import { convertStreamError, type ErrorLine } from './stream_errors';
 import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 
-export function processOpenAIStream() {
+interface ProcessOpenAIStreamOptions {
+  allowNullObjectWithChoices?: boolean;
+}
+
+type CompatibleChatCompletionChunk = Omit<OpenAI.ChatCompletionChunk, 'object'> & {
+  object: OpenAI.ChatCompletionChunk['object'] | null;
+};
+
+export function processOpenAIStream({
+  allowNullObjectWithChoices = false,
+}: ProcessOpenAIStreamOptions = {}): OperatorFunction<
+  string,
+  ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
+> {
   return (source: Observable<string>) => {
     return source.pipe(
       filter((line) => !!line && line !== '[DONE]'),
       map((line) => {
         try {
-          return JSON.parse(line) as OpenAI.ChatCompletionChunk | ErrorLine;
+          return JSON.parse(line) as CompatibleChatCompletionChunk | ErrorLine;
         } catch (e) {
           throw createInferenceInternalError(`Failed to parse line "${line}": ${e.message}`);
         }
@@ -39,18 +56,34 @@ export function processOpenAIStream() {
           throw createTokenLimitReachedError();
         }
       }),
-      filter((line): line is OpenAI.ChatCompletionChunk => {
-        return 'object' in line && line.object === 'chat.completion.chunk';
+      filter((line): line is CompatibleChatCompletionChunk => {
+        return (
+          'object' in line &&
+          (line.object === 'chat.completion.chunk' ||
+            (allowNullObjectWithChoices &&
+              line.object === null &&
+              'choices' in line &&
+              Array.isArray(line.choices)))
+        );
+      }),
+      map((chunk): OpenAI.ChatCompletionChunk => {
+        return { ...chunk, object: 'chat.completion.chunk' };
       }),
       mergeMap((chunk): Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> => {
         const events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> = [];
         if (chunk.usage) {
-          events.push(tokenCountFromOpenAI(chunk.usage));
+          events.push(tokenCountFromOpenAI(chunk.usage, chunk.model));
         }
         if (chunk.choices?.length) {
           events.push(chunkFromOpenAI(chunk));
         }
         return from(events);
+      }),
+      catchError((error) => {
+        if (error.code === 'ECONNRESET' && error.message === 'aborted') {
+          throw createInferenceRequestAbortedError();
+        }
+        throw error;
       })
     );
   };

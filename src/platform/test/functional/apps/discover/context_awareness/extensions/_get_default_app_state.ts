@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_default_app_state.ts
+
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, but drop the 2 "merge and dedup configured default columns"
+ * tests first — that is pure logic in `getPostFetchState`
+ * (discover/public/application/main/state_management/utils/profile_app_state_defaults.ts),
+ * already covered by profile_app_state_defaults.test.ts (`describe('getPostFetchState')`).
+ * Only the dedup-collision case is missing there; add it in Jest instead.
+ * The other 6 tests (row height, breakdown field, reset-on-"New") are genuine UI assertions.
+ */
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, header } = getPageObjects([
+  const { appMenu, common, discover, unifiedFieldList, header } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'unifiedFieldList',
@@ -22,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
@@ -113,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.changeRowHeightValue('Auto');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Auto');
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -195,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.changeRowHeightValue('Auto');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Auto');
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();

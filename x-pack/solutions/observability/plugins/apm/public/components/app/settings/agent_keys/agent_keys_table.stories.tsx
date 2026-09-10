@@ -10,8 +10,10 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApiKey } from '@kbn/security-plugin-types-common';
+import { merge } from 'lodash';
+import { ApmPluginContext } from '../../../../context/apm_plugin/apm_plugin_context';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { mockApmPluginContext } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { AgentKeysTable } from './agent_keys_table';
 
 type Args = ComponentProps<typeof AgentKeysTable>;
@@ -60,13 +62,15 @@ const stories: Meta<Args> = {
   component: AgentKeysTable,
   decorators: [
     (StoryComponent) => {
+      const contextMock = merge({}, mockApmPluginContext, {
+        core: coreMock,
+      }) as unknown as ApmPluginContextValue;
+
       return (
         <KibanaReactContext.Provider>
-          <MockApmPluginContextWrapper
-            value={{ core: coreMock } as unknown as ApmPluginContextValue}
-          >
+          <ApmPluginContext.Provider value={contextMock}>
             <StoryComponent />
-          </MockApmPluginContextWrapper>
+          </ApmPluginContext.Provider>
         </KibanaReactContext.Provider>
       );
     },

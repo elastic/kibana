@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
-import { CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS } from '../common/components/permissions';
-import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
+import { NoPermissionsTooltip } from '../common/components/permissions';
+import {
+  useCanRunTestManually,
+  useCanUsePublicLocations,
+} from '../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import { TEST_NOW_ARIA_LABEL, TEST_SCHEDULED_LABEL } from '../monitor_add_edit/form/run_test_btn';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
@@ -20,7 +29,13 @@ import {
   manualTestRunInProgressSelector,
 } from '../../state/manual_test_runs';
 
-export const RunTestManually = () => {
+export const RunTestManuallyContextItem = ({
+  isRemote = false,
+  isHeartbeat = false,
+}: {
+  isRemote?: boolean;
+  isHeartbeat?: boolean;
+}) => {
   const dispatch = useDispatch();
 
   const { monitor } = useSelectedMonitor();
@@ -28,22 +43,49 @@ export const RunTestManually = () => {
 
   const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
 
+  // Manual test runs are allowed for write users OR run-only (`canRunTestManually`) users.
+  const canRunTestManually = useCanRunTestManually();
+
   const { space } = useKibanaSpace();
 
-  const content = !canUsePublicLocations
-    ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS
-    : testInProgress
-    ? TEST_SCHEDULED_LABEL
-    : TEST_NOW_ARIA_LABEL;
+  const content = testInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_ARIA_LABEL;
 
-  return (
-    <EuiToolTip content={content} key={content}>
-      <EuiButton
+  // Read-only (remote / heartbeat) monitors cannot be triggered locally — manual
+  // test runs are dispatched against the local saved object, which doesn't
+  // exist. Render a disabled item with the matching tooltip, bypassing the
+  // permissions wrapper (which only handles permission/enablement reasons).
+  if (isRemote || isHeartbeat) {
+    return (
+      <EuiContextMenuItem
         data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
-        iconType="beaker"
-        isLoading={!Boolean(monitor) || testInProgress}
-        isDisabled={!canUsePublicLocations}
+        disabled
+        toolTipContent={
+          isHeartbeat ? NOT_AVAILABLE_FOR_HEARTBEAT : NOT_AVAILABLE_FOR_REMOTE_MONITORS
+        }
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="flask" size="s" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>{RUN_TEST_LABEL}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiContextMenuItem>
+    );
+  }
+
+  return (
+    <NoPermissionsTooltip
+      content={content}
+      canEditSynthetics={canRunTestManually}
+      canUsePublicLocations={canUsePublicLocations}
+    >
+      <EuiContextMenuItem
+        data-test-subj="syntheticsRunTestManuallyButton"
+        color="success"
+        disabled={!canUsePublicLocations || !canRunTestManually}
         onClick={() => {
           if (monitor) {
             const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
@@ -57,12 +99,36 @@ export const RunTestManually = () => {
           }
         }}
       >
-        {RUN_TEST_LABEL}
-      </EuiButton>
-    </EuiToolTip>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {testInProgress ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <EuiIcon type="flask" size="s" aria-hidden={true} />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{<span>{RUN_TEST_LABEL}</span>}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiContextMenuItem>
+    </NoPermissionsTooltip>
   );
 };
 
 const RUN_TEST_LABEL = i18n.translate('xpack.synthetics.monitorSummary.runTestManually', {
   defaultMessage: 'Run test manually',
 });
+
+const NOT_AVAILABLE_FOR_REMOTE_MONITORS = i18n.translate(
+  'xpack.synthetics.monitorDetails.actions.notAvailableForRemote',
+  {
+    defaultMessage: 'This action is not available for remote monitors',
+  }
+);
+
+const NOT_AVAILABLE_FOR_HEARTBEAT = i18n.translate(
+  'xpack.synthetics.monitorDetails.actions.runTestNotAvailableForHeartbeat',
+  {
+    defaultMessage:
+      'This monitor is run by Heartbeat / Elastic Agent and is read-only in Synthetics.',
+  }
+);

@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiThemeComputed,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { ChangePointType } from '@kbn/es-types/src';
+import type { ChangePointType } from '@kbn/es-types/src';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import momentTz from 'moment-timezone';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { useTheme } from '../../hooks/use_theme';
 import { SparkPlot } from '../charts/spark_plot';
@@ -131,7 +130,7 @@ function getColumns({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="dot" color={color} />
+                      <EuiIcon type="dot" color={color} aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">{label}</EuiText>
@@ -177,7 +176,7 @@ function getColumns({
                         time: change.time,
                       }),
                       color: getImpactProperties({ impact: change.impact, theme }).color,
-                      icon: <EuiIcon type="dot" />,
+                      icon: <EuiIcon type="dot" aria-hidden={true} />,
                     },
                   ]
                 : []
@@ -204,6 +203,7 @@ function getColumns({
                 overflow: hidden;
                 text-overflow: ellipsis;
               `}
+              tabIndex={0}
             >
               {label}
             </EuiText>
@@ -235,7 +235,14 @@ export function ChangeList({ title, items }: ChangeListProps) {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBasicTable items={items} columns={columns} tableLayout="auto" />
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.observabilityAiAssistant.changesList.tableCaption', {
+            defaultMessage: 'Changes',
+          })}
+          items={items}
+          columns={columns}
+          tableLayout="auto"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

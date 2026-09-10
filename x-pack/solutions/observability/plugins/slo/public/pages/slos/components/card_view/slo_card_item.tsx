@@ -10,16 +10,14 @@ import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
+import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { BurnRateRuleParams } from '../../../../typings';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
@@ -28,7 +26,6 @@ import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
@@ -243,7 +240,7 @@ export function SloCardChart({
                   }}
                 />
               ),
-              icon: () => <EuiIcon type="visGauge" size="l" />,
+              icon: () => <EuiIcon type="chartGauge" size="l" aria-hidden={true} />,
               color: cardColor,
               body: badges,
             },

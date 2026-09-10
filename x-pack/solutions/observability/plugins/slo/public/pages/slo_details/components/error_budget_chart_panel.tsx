@@ -6,61 +6,57 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
+import type { ErrorBudgetEmbeddableState } from '../../../embeddable/slo/error_budget/types';
 import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ChartData } from '../../../typings/slo';
-import { TimeBounds } from '../types';
+import type { ChartData } from '../../../typings/slo';
+import type { TimeBounds } from '../types';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  hideHeaderDurationLabel?: boolean;
 }
 
 export function ErrorBudgetChartPanel({
   data,
   isLoading,
   slo,
-  hideMetadata = false,
   onBrushed,
+  hideHeaderDurationLabel = false,
 }: Props) {
-  const [isMouseOver, setIsMouseOver] = useState(false);
-
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const { embeddable } = useKibana().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
-      const embeddableInput = {
+      const serializedState: ErrorBudgetEmbeddableState = {
+        slo_id: slo.id,
+        slo_instance_id: slo.instanceId,
         title: newTitle,
         description: newDescription,
-        sloId: slo.id,
-        sloInstanceId: slo.instanceId,
       };
 
-      const state = {
-        serializedState: { rawState: embeddableInput },
+      const state: EmbeddablePackageState<ErrorBudgetEmbeddableState> = {
         type: SLO_ERROR_BUDGET_ID,
+        serializedState,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages<ErrorBudgetEmbeddableState>('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -74,32 +70,15 @@ export function ErrorBudgetChartPanel({
         color="transparent"
         hasBorder
         data-test-subj="errorBudgetChartPanel"
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <ErrorBudgetHeader
             slo={slo}
-            isMouseOver={isMouseOver}
+            hideHeaderDurationLabel={hideHeaderDurationLabel}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
-            hideMetadata={hideMetadata}
           />
 
-          <ErrorBudgetChart
-            slo={slo}
-            data={data}
-            isLoading={isLoading}
-            hideMetadata={hideMetadata}
-            onBrushed={onBrushed}
-          />
+          <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} onBrushed={onBrushed} />
         </EuiFlexGroup>
       </EuiPanel>
       {isDashboardAttachmentReady ? (

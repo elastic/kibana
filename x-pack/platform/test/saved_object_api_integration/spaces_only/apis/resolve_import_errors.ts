@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   resolveImportErrorsTestSuiteFactory,
   resolveImportErrorsTestCaseFailures,
@@ -107,16 +107,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   ];
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions } = resolveImportErrorsTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = resolveImportErrorsTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
     if (createNewCopies) {

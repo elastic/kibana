@@ -8,18 +8,16 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { baseEmbeddableMigrations } from './migrate_base_input';
-import { EmbeddableStateWithType } from './types';
+import type { EmbeddableStateWithType } from './types';
 
 export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 
 export const getMigrateFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
-  getEnhancement: (enhancementId: string) => PersistableState
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   const migrateFn: MigrateFunction = (state: SerializableRecord, version: string) => {
-    const enhancements = (state.enhancements as SerializableRecord) || {};
     const factory = getEmbeddableFactory?.(state.type as string);
 
     let updatedInput = baseEmbeddableMigrations[version]
@@ -37,20 +35,6 @@ export const getMigrateFunction = (
         return migrateFn(panel, version);
       });
     }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      const enhancementDefinition = getEnhancement(key);
-      const enchantmentMigrations =
-        typeof enhancementDefinition?.migrations === 'function'
-          ? enhancementDefinition?.migrations()
-          : enhancementDefinition?.migrations || {};
-      const migratedEnhancement = enchantmentMigrations[version]
-        ? enchantmentMigrations[version](enhancements[key] as SerializableRecord)
-        : enhancements[key];
-      (updatedInput.enhancements! as Record<string, {}>)[key] = migratedEnhancement;
-    });
 
     return updatedInput;
   };

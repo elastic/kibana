@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+import type { MetricDescriptor } from '../../../../lib/details/get_metrics';
 
 export const metricSets: {
   advanced: MetricDescriptor[];

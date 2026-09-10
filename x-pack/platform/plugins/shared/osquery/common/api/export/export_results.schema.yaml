@@ -1,0 +1,212 @@
+openapi: 3.0.0
+info:
+  title: Export Results Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    ExportFormat:
+      description: >
+        The output format for the exported file.
+        Use `ndjson` for streaming newline-delimited JSON (recommended for large
+        exports), `json` for a single JSON array (held in memory; suitable for
+        smaller result sets), or `csv` for a comma-separated values file with a
+        header row derived from the ECS mapping.
+      type: string
+      enum:
+        - ndjson
+        - json
+        - csv
+      example: ndjson
+
+    ExportRequestBody:
+      description: >
+        Optional request body for export endpoints. All fields are optional.
+        Omit the body or send `null` or `{}` to export all results without
+        additional filtering.
+      type: object
+      nullable: true
+      properties:
+        kuery:
+          description: >
+            An optional KQL filter appended (with AND) to the base action/schedule
+            filter. The filter is wrapped in parentheses so it cannot override or
+            escape the built-in action_id / schedule_id gate.
+          type: string
+          nullable: true
+          example: 'host.name: "prod-host-1"'
+        agentIds:
+          description: >
+            An optional allowlist of Elastic Agent IDs. When provided, only rows
+            reported by the listed agents are included in the export.
+          type: array
+          nullable: true
+          items:
+            type: string
+          example:
+            - '980a6b73-0b03-4d1e-8915-67c202e4a980'
+            - 'e40fde1c-5729-4885-b0b2-16a42e9332e3'
+        esFilters:
+          description: >
+            An optional array of Elasticsearch / Kibana SearchBar filter objects
+            (the same `esFilters` payload used by the Discover UI). Each filter is
+            applied as an additional AND clause. An invalid filter object causes a
+            400 response rather than silently returning unfiltered data.
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example:
+            - meta:
+                type: phrase
+                key: agent.name
+                params:
+                  query: prod-host-1
+              query:
+                match_phrase:
+                  agent.name: prod-host-1
+
+    ExportNdjsonMetaRow:
+      description: >
+        The first line of an NDJSON export. Contains metadata about the export
+        operation (action ID, original SQL query, timestamp, exporting user, format,
+        and total result count). This line is not a result row.
+      type: object
+      properties:
+        _meta:
+          type: object
+          required:
+            - action_id
+            - timestamp
+            - exported_by
+            - format
+            - total_results
+          properties:
+            action_id:
+              description: The action ID (live query) or schedule ID (scheduled query) that produced the results.
+              type: string
+              example: 'e88d7652-fc3e-4544-b0e0-3d5df2be454c'
+            query:
+              description: The SQL query text, if it could be resolved from action details.
+              type: string
+              nullable: true
+              example: 'SELECT * FROM users;'
+            timestamp:
+              description: ISO 8601 timestamp of when the export was initiated.
+              type: string
+              format: date-time
+              example: '2026-04-30T09:12:00.000Z'
+            exported_by:
+              description: Username of the Kibana user who triggered the export.
+              type: string
+              example: elastic
+            format:
+              $ref: '#/components/schemas/ExportFormat'
+            total_results:
+              description: Total number of result rows included in this export.
+              type: integer
+              example: 64
+            execution_count:
+              description: >
+                For scheduled query exports only: the execution counter of the
+                scheduled run that produced the results.
+              type: integer
+              nullable: true
+              example: 17384
+
+    ExportMetadata:
+      description: >
+        Metadata block produced for every export. Included as `_meta` in the JSON
+        response body and as the first NDJSON line.
+      type: object
+      required:
+        - action_id
+        - timestamp
+        - exported_by
+        - format
+      properties:
+        action_id:
+          description: The action ID (live query) or schedule ID (scheduled query) that produced the results.
+          type: string
+          example: 'e88d7652-fc3e-4544-b0e0-3d5df2be454c'
+        query:
+          description: The SQL query text, if it could be resolved from action details.
+          type: string
+          nullable: true
+          example: 'SELECT * FROM users;'
+        timestamp:
+          description: ISO 8601 timestamp of when the export was initiated.
+          type: string
+          format: date-time
+          example: '2026-04-30T09:12:00.000Z'
+        exported_by:
+          description: Username of the Kibana user who triggered the export.
+          type: string
+          example: elastic
+        format:
+          $ref: '#/components/schemas/ExportFormat'
+        total_results:
+          description: Total number of result rows included in this export.
+          type: integer
+          nullable: true
+          example: 64
+        execution_count:
+          description: >
+            For scheduled query exports only: the execution counter of the
+            scheduled run that produced the results.
+          type: integer
+          nullable: true
+          example: 17384
+        csv_columns:
+          description: >
+            For CSV exports with ECS mapping and zero hits: the column header row
+            so an empty export is not a 0-byte file.
+          type: array
+          nullable: true
+          items:
+            type: string
+
+    ExportJsonResponse:
+      description: >
+        JSON export response body. The `_meta` field contains export metadata;
+        `results` contains all result rows. Prefer `ndjson` for large exports
+        since rows are streamed individually rather than held in memory.
+      type: object
+      required:
+        - _meta
+        - results
+      properties:
+        _meta:
+          $ref: '#/components/schemas/ExportMetadata'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportResultRow'
+
+    ExportResultRow:
+      description: >
+        A single result row from an NDJSON or JSON export. Fields follow the
+        Elastic Common Schema (ECS) mapping defined on the originating query when
+        available; otherwise raw osquery column names are used under the `osquery.*`
+        namespace.
+      type: object
+      additionalProperties: true
+      example:
+        '@timestamp': '2026-04-30T09:11:58.321Z'
+        agent:
+          id: '980a6b73-0b03-4d1e-8915-67c202e4a980'
+          name: prod-host-1
+          type: osquerybeat
+          version: '9.4.0'
+        user:
+          id: '1000'
+          name: ubuntu
+          group:
+            id: '1000'
+        osquery:
+          uid: '1000'
+          gid: '1000'
+          username: ubuntu
+          directory: /home/ubuntu
+          shell: /bin/bash

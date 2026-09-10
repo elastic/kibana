@@ -7,7 +7,7 @@
 
 /* istanbul ignore file */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 import { WS_TELEMETRY_NAME } from '../../collectors/workplace_search/telemetry';
 

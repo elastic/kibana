@@ -23,11 +23,8 @@ import {
 
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
-import {
-  SAVED_OBJECTS_DAILY_TYPE,
-  serializeSavedObjectId,
-  EventLoopDelaysDaily,
-} from '../../saved_objects';
+import type { EventLoopDelaysDaily } from '../../saved_objects';
+import { SAVED_OBJECTS_DAILY_TYPE, serializeSavedObjectId } from '../../saved_objects';
 import { rollDailyData } from '../daily';
 
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
@@ -66,7 +63,7 @@ function createRawEventLoopDelaysDailyDocs() {
     createRawObject(moment()),
     createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(3, 'days')),
+    createRawObject(moment().subtract(2, 'days')),
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
@@ -77,7 +74,8 @@ function createRawEventLoopDelaysDailyDocs() {
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
 }
 
-describe(`daily rollups integration test`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/231367
+describe.skip(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
@@ -113,8 +111,8 @@ describe(`daily rollups integration test`, () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {

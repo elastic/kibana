@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisParams } from '@kbn/visualizations-plugin/common';
+import type { VisParams } from '@kbn/visualizations-common';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 describe('extracting visualization type from vis params', () => {

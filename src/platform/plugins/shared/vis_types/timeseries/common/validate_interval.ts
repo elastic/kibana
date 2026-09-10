@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseInterval, TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { parseInterval } from '@kbn/data-plugin/common';
 import { GTE_INTERVAL_RE } from './interval_regexp';
 import { ValidateIntervalError } from './errors';
 

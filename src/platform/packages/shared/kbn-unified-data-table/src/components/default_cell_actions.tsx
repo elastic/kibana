@@ -7,64 +7,78 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import React, { useContext } from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { UnifiedDataTableContext, DataTableContext } from '../table_context';
+import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import { getIgnoredReason } from '@kbn/discover-utils';
+import type { DataTableContext } from '../table_context';
+import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import { ValueToStringConverter } from '../types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,
   rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
   columnId: EuiDataGridColumnCellActionProps['columnId'],
   mode: '+' | '-',
-  field: DataViewField
+  field: DataViewField,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>
 ) {
   const row = context.getRowByIndex(rowIndex);
 
   if (row && field && context.onFilter) {
     const value = row.flattened[columnId];
     context.onFilter(field, value, mode);
+    dataGridRef?.current?.closeCellPopover();
   }
 }
 
-const esqlMultivalueFilteringDisabled = i18n.translate(
-  'unifiedDataTable.grid.esqlMultivalueFilteringDisabled',
-  {
-    defaultMessage: 'Multivalue filtering is not supported in ES|QL',
-  }
-);
+/**
+ * Elasticsearch did not index this value, so a filter built from it would never
+ * match. Whether that happened is per document, not per column, so it cannot be
+ * decided in `buildCellActions` alongside the other filter checks.
+ */
+function isCellValueIgnored(
+  context: DataTableContext,
+  rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
+  field: DataViewField
+): boolean {
+  const row = context.getRowByIndex(rowIndex);
+  return Boolean(row && getIgnoredReason(field, row.raw._ignored));
+}
 
 export const FilterInBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
-  isPlainRecord,
+  dataGridRef,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
-  isPlainRecord: boolean | undefined;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const filteringDisabled =
-    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
     values: { value: columnId },
   });
 
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
+
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '+', field);
+        onFilterCell(context, rowIndex, columnId, '+', field, dataGridRef);
       }}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={buttonTitle}
-      title={filteringDisabled ? esqlMultivalueFilteringDisabled : buttonTitle}
-      disabled={filteringDisabled}
+      title={buttonTitle}
       data-test-subj="filterForButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterFor', {
@@ -77,29 +91,30 @@ export const FilterInBtn = ({
 export const FilterOutBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
-  isPlainRecord,
+  dataGridRef,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
-  isPlainRecord: boolean | undefined;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const filteringDisabled =
-    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
     values: { value: columnId },
   });
 
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
+
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '-', field);
+        onFilterCell(context, rowIndex, columnId, '-', field, dataGridRef);
       }}
-      iconType="minusInCircle"
+      iconType="minusCircle"
       aria-label={buttonTitle}
-      title={filteringDisabled ? esqlMultivalueFilteringDisabled : buttonTitle}
-      disabled={filteringDisabled}
+      title={buttonTitle}
       data-test-subj="filterOutButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterOut', {
@@ -112,7 +127,8 @@ export const FilterOutBtn = ({
 export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
-  valueToStringConverter: ValueToStringConverter
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -129,7 +145,7 @@ export function buildCopyValueButton(
           toastNotifications,
         });
       }}
-      iconType="copyClipboard"
+      iconType="copy"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
@@ -143,25 +159,33 @@ export function buildCopyValueButton(
 
 export function buildCellActions(
   field: DataViewField,
-  isPlainRecord: boolean | undefined,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  onFilter?: DocViewFilterFn
+  documentsDisplayMode: DocumentsDisplayMode,
+  onFilter?: DocViewFilterFn,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  hideFilteringOnComputedColumns?: boolean
 ) {
+  const shouldShowFilters = shouldShowFieldFilterInOutActions({
+    dataViewField: field,
+    hideFilteringOnComputedColumns,
+    onFilter,
+  });
+
   return [
-    ...(onFilter && field.filterable
+    ...(shouldShowFilters
       ? [
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterInBtn({
               cellActionProps,
               field,
-              isPlainRecord,
+              dataGridRef,
             }),
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterOutBtn({
               cellActionProps,
               field,
-              isPlainRecord,
+              dataGridRef,
             }),
         ]
       : []),
@@ -169,7 +193,8 @@ export function buildCellActions(
       buildCopyValueButton(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
-        valueToStringConverter
+        valueToStringConverter,
+        documentsDisplayMode
       ),
   ];
 }

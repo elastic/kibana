@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentService } from '../../../services';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
-import { isFileAttachmentRequest, isPersistableStateOrExternalReference } from '../../utils';
+import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
+import {
+  isFileAttachmentRequest,
+  isPersistableStateOrExternalReference,
+  isUnifiedPersistableStateOrExternalReference,
+} from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
 export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
@@ -27,11 +32,11 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
     });
   }
 
-  public countOfItemsInRequest(requests: AttachmentRequest[]): number {
-    const totalReferences = requests
-      .filter(isPersistableStateOrExternalReference)
-      .filter((request) => !isFileAttachmentRequest(request));
-
-    return totalReferences.length;
+  public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
+    return requests.filter((request) =>
+      isLegacyAttachmentRequest(request)
+        ? isPersistableStateOrExternalReference(request) && !isFileAttachmentRequest(request)
+        : isUnifiedPersistableStateOrExternalReference(request)
+    ).length;
   }
 }

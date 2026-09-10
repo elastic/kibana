@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { omit, pick } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
-import { SyntheticsMonitor880 } from '../../saved_objects/migrations/monitors/8.8.0';
+import type { SavedObject } from '@kbn/core/server';
+import type { SyntheticsMonitor880 } from '../../saved_objects/migrations/monitors/8.8.0';
 import { secretKeys } from '../../../common/constants/monitor_management';
-import {
-  ConfigKey,
+import type {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types/monitor_management';
+import { ConfigKey } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
 export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecretsAttributes {

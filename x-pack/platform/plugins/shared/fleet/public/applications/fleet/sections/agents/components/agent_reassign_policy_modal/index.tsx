@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
+  EuiComboBox,
   EuiFormRow,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -30,12 +31,16 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
+  agentCount: number;
 }
 
 export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
+  agentCount,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 
@@ -56,14 +61,18 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
     isSingleAgent ? (agents[0] as Agent).policy_id : undefined
   );
 
-  // Select the first policy if not policy is selected
+  const hasInitialized = useRef(!!selectedAgentPolicyId);
+
+  // Select the first policy if no policy is selected on initial load. Not after though, as it will overwrite the selected policy. This is now handled in the onChange
   useEffect(() => {
-    if (!selectedAgentPolicyId && agentPolicies.length) {
+    if (!hasInitialized.current && !selectedAgentPolicyId && agentPolicies.length) {
       setSelectedAgentPolicyId(agentPolicies[0]?.id);
+      hasInitialized.current = true;
     }
-  }, [selectedAgentPolicyId, agentPolicies]);
+  }, [agentPolicies, selectedAgentPolicyId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasInvalidPolicySearch, setHasInvalidPolicySearch] = useState(false);
   async function onSubmit() {
     try {
       setIsSubmitting(true);
@@ -83,12 +92,13 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw res.error;
       }
       setIsSubmitting(false);
-      const successMessage = i18n.translate(
-        'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
-        {
-          defaultMessage: 'Reassigning agent policy',
-        }
-      );
+      const successMessage = isSingleAgent
+        ? i18n.translate('xpack.fleet.agentReassignPolicy.successSingleNotificationTitle', {
+            defaultMessage: 'Reassigning agent policy',
+          })
+        : i18n.translate('xpack.fleet.agentReassignPolicy.successBulkNotificationTitle', {
+            defaultMessage: 'Agent policy reassignment in progress',
+          });
       notifications.toasts.addSuccess(successMessage);
       onClose();
     } catch (error) {
@@ -105,7 +115,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       title={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutTitle"
-          defaultMessage="Assign new agent policy"
+          defaultMessage="Assign new policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       onCancel={onClose}
@@ -117,22 +130,30 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         />
       }
       confirmButtonDisabled={
-        isSubmitting || (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
+        isSubmitting ||
+        !selectedAgentPolicyId ||
+        hasInvalidPolicySearch ||
+        (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
       }
       confirmButtonText={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
-          defaultMessage="Assign policy"
+          defaultMessage="Assign policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       buttonColor="primary"
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       <p>
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutDescription"
-          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
+          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {# agents}} to."
           values={{
-            count: isSingleAgent ? 1 : 0,
+            count: agentCount,
           }}
         />
       </p>
@@ -144,15 +165,41 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
               defaultMessage: 'Agent policy',
             })}
           >
-            <EuiSelect
+            <EuiComboBox
               fullWidth
               isLoading={agentPoliciesRequest.isLoading}
+              // Long agent policy names can otherwise overflow the options list and break the layout
+              truncationProps={{ truncation: 'end' }}
               options={agentPolicies.map((agentPolicy) => ({
-                value: agentPolicy.id,
-                text: agentPolicy.name,
+                key: agentPolicy.id,
+                label: agentPolicy.name,
               }))}
-              value={selectedAgentPolicyId}
-              onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
+              singleSelection
+              isInvalid={hasInvalidPolicySearch}
+              onChange={(newOptions) => {
+                if (newOptions.length) {
+                  setSelectedAgentPolicyId(newOptions[0].key);
+                } else {
+                  setSelectedAgentPolicyId(undefined);
+                }
+              }}
+              onSearchChange={(value, hasMatchingOptions) => {
+                setHasInvalidPolicySearch(!!value && !hasMatchingOptions);
+              }}
+              selectedOptions={
+                selectedAgentPolicyId
+                  ? [
+                      {
+                        key: selectedAgentPolicyId,
+                        label:
+                          agentPolicies.find(
+                            (agentPolicy) => agentPolicy.id === selectedAgentPolicyId
+                          )?.name || '',
+                      },
+                    ]
+                  : []
+              }
+              isClearable={true}
             />
           </EuiFormRow>
         </EuiFlexItem>

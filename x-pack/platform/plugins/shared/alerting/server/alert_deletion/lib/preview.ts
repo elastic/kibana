@@ -6,13 +6,14 @@
  */
 
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { allowedAppCategories, type AlertDeletionContext } from '../alert_deletion_client';
 import { getActiveAlertsQuery, getInactiveAlertsQuery } from '.';
 
 export const previewTask = async (
   context: AlertDeletionContext,
   settings: RulesSettingsAlertDeleteProperties,
-  spaceId: string
+  spaceId: SpaceId
 ) => {
   const esClient = await context.elasticsearchClientPromise;
 
@@ -30,7 +31,11 @@ export const previewTask = async (
     }
   }
 
-  const ruleTypes = context.ruleTypeRegistry.getAllTypesForCategories(categoryIds);
+  const ruleTypes = context.ruleTypeRegistry.getFilteredTypes({
+    categories: categoryIds,
+    excludeInternallyManaged: true,
+  });
+
   const indices = context.getAlertIndicesAlias(ruleTypes, spaceId);
 
   let numAlertsToBeDeleted = 0;

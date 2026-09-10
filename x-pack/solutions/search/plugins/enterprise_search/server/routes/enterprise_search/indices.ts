@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IngestPutPipelineRequest,
   IngestSimulateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -14,12 +14,12 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import type { Connector } from '@kbn/search-connectors';
 import {
   CRAWLER_SERVICE_TYPE,
   deleteConnectorSecret,
   deleteConnectorById,
   updateConnectorIndexName,
-  Connector,
 } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
@@ -28,7 +28,7 @@ import {
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { AlwaysShowPattern } from '../../../common/types/indices';
+import type { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   AttachMlInferencePipelineResponse,
@@ -514,18 +514,22 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
         body: schema.object({
           field_mappings: schema.maybe(
             schema.arrayOf(
-              schema.object({ sourceField: schema.string(), targetField: schema.string() })
+              schema.object({
+                sourceField: schema.string({ maxLength: 1000 }),
+                targetField: schema.string({ maxLength: 1000 }),
+              }),
+              { maxSize: 10000 }
             )
           ),
-          model_id: schema.string(),
+          model_id: schema.string({ maxLength: 512 }),
           pipeline_definition: schema.maybe(
             schema.object({
-              description: schema.maybe(schema.string()),
-              processors: schema.arrayOf(schema.any()),
+              description: schema.maybe(schema.string({ maxLength: 4096 })),
+              processors: schema.arrayOf(schema.any(), { maxSize: 10000 }),
               version: schema.number(),
             })
           ),
-          pipeline_name: schema.string(),
+          pipeline_name: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -596,7 +600,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         body: schema.object({
-          pipeline_name: schema.string(),
+          pipeline_name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
           indexName: schema.string(),
@@ -641,8 +645,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         body: schema.object({
-          index_name: schema.string(),
-          language: schema.maybe(schema.nullable(schema.string())),
+          index_name: schema.string({ maxLength: 255 }),
+          language: schema.maybe(schema.nullable(schema.string({ maxLength: 512 }))),
         }),
       },
     },
@@ -709,10 +713,10 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         body: schema.object({
-          docs: schema.arrayOf(schema.any()),
+          docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
           pipeline: schema.object({
-            description: schema.maybe(schema.string()),
-            processors: schema.arrayOf(schema.any()),
+            description: schema.maybe(schema.string({ maxLength: 4096 })),
+            processors: schema.arrayOf(schema.any(), { maxSize: 10000 }),
           }),
         }),
         params: schema.object({
@@ -777,7 +781,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         body: schema.object({
-          docs: schema.arrayOf(schema.any()),
+          docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
         }),
         params: schema.object({
           indexName: schema.string(),
@@ -900,8 +904,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         body: schema.object({
-          description: schema.maybe(schema.string()),
-          processors: schema.arrayOf(schema.any()),
+          description: schema.maybe(schema.string({ maxLength: 4096 })),
+          processors: schema.arrayOf(schema.any(), { maxSize: 10000 }),
         }),
         params: schema.object({
           indexName: schema.string(),

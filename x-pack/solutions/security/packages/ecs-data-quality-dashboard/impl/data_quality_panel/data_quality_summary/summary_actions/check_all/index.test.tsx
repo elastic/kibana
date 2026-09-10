@@ -17,7 +17,7 @@ import {
 } from '../../../mock/test_providers/test_providers';
 import { mockUnallowedValuesResponse } from '../../../mock/unallowed_values/mock_unallowed_values';
 import { CANCEL, CHECK_ALL } from '../../../translations';
-import { OnCheckCompleted, UnallowedValueRequestItem } from '../../../types';
+import type { OnCheckCompleted, UnallowedValueRequestItem } from '../../../types';
 import { CheckAll } from '.';
 import { EMPTY_STAT } from '../../../constants';
 
@@ -415,7 +415,7 @@ describe('CheckAll', () => {
     });
 
     test('it invokes setIndexToCheck with `null` after all the checks have completed', () => {
-      expect(setIndexToCheck).toBeCalledWith(null);
+      expect(setIndexToCheck).toHaveBeenCalledWith(null);
     });
 
     test('it invokes onCheckAllCompleted after all the checks have completed', () => {
@@ -429,7 +429,7 @@ describe('CheckAll', () => {
       // test each index in the pattern
       indexNames.forEach((indexName) => {
         test(`it invokes setIndexToCheck with the expected value for the '${patternName}' pattern's index, named '${indexName}'`, () => {
-          expect(setIndexToCheck).toBeCalledWith({
+          expect(setIndexToCheck).toHaveBeenCalledWith({
             indexName,
             pattern: patternName,
           });

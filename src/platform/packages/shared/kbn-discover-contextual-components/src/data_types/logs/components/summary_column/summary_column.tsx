@@ -8,23 +8,34 @@
  */
 
 import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import React from 'react';
-import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  RESOURCE_FIELDS,
   type ShouldShowFieldInTableHandler,
   TRACE_FIELDS,
-  getLogDocumentOverview,
+  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
+  getAvailableTraceFields,
 } from '@kbn/discover-utils';
-import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
 import { Resource } from './resource';
 import { Content } from './content';
-import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
+import {
+  createResourceFields,
+  createResourceFieldsWithOtelFallback,
+  formatJsonDocumentForContent,
+  isTraceDocument,
+} from './utils';
 import {
   closeCellActionPopoverText,
   contentLabel,
@@ -74,9 +85,10 @@ const SummaryCell = ({
   const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  const resourceFields = createResourceFields(
+  // For logs, also resolve otel field names directly, even if no alias exists
+  const resourceFields =
     isTracesSummary && isTraceDocument(row)
-      ? {
+      ? createResourceFields({
           row,
           fields: TRACE_FIELDS,
           getAvailableFields: getAvailableTraceFields,
@@ -84,17 +96,15 @@ const SummaryCell = ({
           core,
           share,
           fieldFormats,
-        }
-      : {
+        })
+      : createResourceFieldsWithOtelFallback({
           row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
           dataView,
           core,
           share,
           fieldFormats,
-        }
-  );
+        });
+
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -128,59 +138,82 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
     props;
 
+  const filterAndClosePopover: AllSummaryColumnProps['onFilter'] = useMemo(() => {
+    if (!onFilter) return undefined;
+
+    return (...params) => {
+      onFilter(...params);
+      closePopover();
+    };
+  }, [onFilter, closePopover]);
+
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
 
-  const resourceFields = createResourceFields(
-    isTraceDoc
-      ? {
-          row,
-          fields: TRACE_FIELDS,
-          getAvailableFields: getAvailableTraceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-      : {
-          row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-  );
+  // For logs, also resolve otel field names directly, even if no alias exists
+  const resourceFields = isTraceDoc
+    ? createResourceFields({
+        row,
+        fields: TRACE_FIELDS,
+        getAvailableFields: getAvailableTraceFields,
+        dataView,
+        core,
+        share,
+        fieldFormats,
+      })
+    : createResourceFieldsWithOtelFallback({
+        row,
+        dataView,
+        core,
+        share,
+        fieldFormats,
+      });
+
   const shouldRenderResource = resourceFields.length > 0;
 
-  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(documentOverview, {
+  // Use OTel fallback version that returns the actual field name used
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(row.flattened, {
     includeFormattedValue: true,
   });
+
+  // For formatted JSON values, render as JSON code block
+  // For plain text, use field formatter's convertToReact which handles search highlighting natively
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
+    : {
+        language: 'txt',
+        children: formatFieldStringValueWithHighlights({
+          value: value ?? '',
+          hit: row.raw,
+          fieldFormats,
+          fieldName: field,
+        }),
+      };
   const shouldRenderContent = Boolean(field && value);
 
   const shouldRenderSource = !shouldRenderContent;
 
   return (
     <EuiFlexGroup direction="column" css={{ position: 'relative', width: 580 }}>
-      <EuiButtonIcon
-        aria-label={closeCellActionPopoverText}
-        data-test-subj="docTableClosePopover"
-        iconSize="s"
-        iconType="cross"
-        size="xs"
-        onClick={closePopover}
-        css={{ position: 'absolute', right: 0 }}
-      />
+      <EuiToolTip
+        content={closeCellActionPopoverText}
+        disableScreenReaderOutput
+        anchorProps={{ css: { position: 'absolute', right: 0 } }}
+      >
+        <EuiButtonIcon
+          aria-label={closeCellActionPopoverText}
+          data-test-subj="docTableClosePopover"
+          iconSize="s"
+          iconType="cross"
+          size="xs"
+          onClick={closePopover}
+        />
+      </EuiToolTip>
       {shouldRenderResource && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">
             <span>{isTraceDoc ? traceLabel : resourceLabel}</span>
           </EuiTitle>
-          <Resource fields={resourceFields} onFilter={onFilter} />
+          <Resource fields={resourceFields} onFilter={filterAndClosePopover} />
         </EuiFlexGroup>
       )}
       <EuiFlexGroup direction="column" gutterSize="s">

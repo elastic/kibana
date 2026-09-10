@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { OverlayStart, NotificationsStart } from '@kbn/core/public';
+import type { OverlayStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ITagInternalClient } from '../../services';
-import { TagBulkAction } from '../types';
+import type { ITagInternalClient } from '../../services';
+import type { TagBulkAction } from '../types';
 
 interface GetBulkDeleteActionOptions {
   overlays: OverlayStart;

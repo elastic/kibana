@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
@@ -16,13 +18,13 @@ import type { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugi
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { deriveLensSuggestionFromLensAttributes } from '../../utils/external_vis_context';
 
-import {
+import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
-  UnifiedHistogramSuggestionType,
   UnifiedHistogramVisContext,
 } from '../../types';
+import { UnifiedHistogramSuggestionType } from '../../types';
 
 export function ChartConfigPanel({
   services,
@@ -35,6 +37,7 @@ export function ChartConfigPanel({
   isPlainRecord,
   query,
   onSuggestionContextEdit,
+  isApproximate,
 }: {
   services: UnifiedHistogramServices;
   visContext: UnifiedHistogramVisContext;
@@ -46,11 +49,17 @@ export function ChartConfigPanel({
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
+  isApproximate?: boolean;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
+
+  const isApproximate$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
+  useEffect(() => {
+    isApproximate$.current.next(isApproximate);
+  }, [isApproximate]);
+  const editorParentApi = useRef({ isApproximate$: isApproximate$.current });
 
   const updatePanelState = useCallback<
     ComponentProps<EditLensConfigPanelComponent>['updatePanelState']
@@ -90,7 +99,6 @@ export function ChartConfigPanel({
     [onSuggestionContextEdit, visContext]
   );
 
-  const currentSuggestion = currentSuggestionContext.suggestion;
   const currentSuggestionType = currentSuggestionContext.type;
 
   useEffect(() => {
@@ -113,20 +121,21 @@ export function ChartConfigPanel({
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
-          datasourceId="textBased"
+          hideTextBasedEditor={true}
           hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
+          parentApi={editorParentApi.current}
         />
       );
       setEditLensConfigPanel(panel);
-      previousSuggestion.current = currentSuggestion;
       previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
     }
-    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
-    // rerender the component if the data has changed
-    if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
+    // rerender the component if the data has changed or flyout becomes visible
+    // Note: when suggestion/chart type changes while flyout is visible, it flows through
+    // visContext.attributes props instead of recreating the component (which would reset state)
+    if (isPlainRecord && (dataHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
@@ -135,7 +144,6 @@ export function ChartConfigPanel({
     updatePanelState,
     updateSuggestion,
     isPlainRecord,
-    currentSuggestion,
     query,
     isFlyoutVisible,
     setIsFlyoutVisible,

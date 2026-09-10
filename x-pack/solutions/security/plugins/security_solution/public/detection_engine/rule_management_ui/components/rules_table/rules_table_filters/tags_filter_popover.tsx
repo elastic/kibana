@@ -66,7 +66,7 @@ const TagsFilterPopoverComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       numFilters={tags.length}
       isSelected={isTagPopoverOpen}
@@ -89,6 +89,7 @@ const TagsFilterPopoverComponent = ({
       panelProps={{
         'data-test-subj': 'tags-filter-popover',
       }}
+      aria-label={i18n.TAGS}
     >
       <EuiSelectable
         searchable
@@ -100,9 +101,10 @@ const TagsFilterPopoverComponent = ({
         onChange={handleSelectableOptionsChange}
         emptyMessage={i18n.NO_TAGS_AVAILABLE}
         noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
+        listProps={{ paddingSize: 's' }}
       >
         {(list, search) => (
-          <div style={{ width: TAGS_POPOVER_WIDTH }}>
+          <div css={{ width: TAGS_POPOVER_WIDTH }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </div>

@@ -11,8 +11,8 @@ import { pick } from 'lodash';
 import { logger } from '../../../logger';
 import { hasProp } from '../../../utils/has_prop';
 import { X_LABELS } from '../../known_custom_props';
-import { DocumentNode } from '../types/node';
-import { DocumentNodeProcessor } from './types/document_node_processor';
+import type { DocumentNode } from '../types/node';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Creates a node processor to include only OAS operation objects labeled

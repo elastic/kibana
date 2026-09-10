@@ -63,11 +63,9 @@ export const createMigrationTask =
     logger,
     auditLogger,
   }: Pick<EntityAnalyticsMigrationsParams, 'getStartServices' | 'logger' | 'auditLogger'>) =>
-  () => {
-    let abortController: AbortController;
+  ({ signal }: { signal: AbortSignal }) => {
     return {
       run: async () => {
-        abortController = new AbortController();
         const [coreStart] = await getStartServices();
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace: '*' });
@@ -81,7 +79,7 @@ export const createMigrationTask =
           kibanaVersion: '*',
         });
         const riskScoreResponse = await riskScoreClient.copyTimestampToEventIngestedForRiskScore(
-          abortController.signal
+          signal
         );
         const failures = riskScoreResponse.failures?.map((failure) => failure.cause);
         const hasFailures = failures && failures?.length > 0;
@@ -94,7 +92,6 @@ export const createMigrationTask =
       },
 
       cancel: async () => {
-        abortController.abort();
         logger.debug(`Task cancelled: "${TASK_TYPE}"`);
       },
     };

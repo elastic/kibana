@@ -8,9 +8,9 @@
  */
 
 import { mockPackage } from './env.test.mocks';
-import type { Package } from '@kbn/repo-packages';
 
-import { Env, RawPackageInfo } from './env';
+import type { RawPackageInfo } from './env';
+import { Env } from './env';
 import { getEnvOptions } from './internal_mocks';
 
 const REPO_ROOT = '/test/kibanaRoot';
@@ -149,7 +149,7 @@ test('correctly creates environment with constructor.', () => {
     getEnvOptions({
       cliArgs: { dev: false },
       configs: ['/some/other/path/some-kibana.yml'],
-      repoPackages: ['FakePackage1', 'FakePackage2'] as unknown as Package[],
+      repoPackages: ['FakePackage1', 'FakePackage2'] as any[],
     })
   );
 
@@ -273,7 +273,7 @@ describe('packageInfo.buildShaShort', () => {
       getEnvOptions({
         cliArgs: { dev: false },
         configs: ['/some/other/path/some-kibana.yml'],
-        repoPackages: ['FakePackage1', 'FakePackage2'] as unknown as Package[],
+        repoPackages: ['FakePackage1', 'FakePackage2'] as any[],
       })
     );
 

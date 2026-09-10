@@ -46,3 +46,8 @@ export const EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
     defaultMessage: 'Add this event as context',
   }
 );
+
+export const EVENT_SOURCE_FIELD_DESCRIPTOR = i18n.translate(
+  'xpack.securitySolution.detections.alerts.ancestorsId',
+  { defaultMessage: 'Source event' }
+);

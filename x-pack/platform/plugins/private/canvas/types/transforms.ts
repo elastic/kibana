@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ArgumentConfig } from './arguments';
+import type { ArgumentConfig } from './arguments';
 
 export interface TransformSpec<Arguments = {}> {
   /** The name of the function to create a transform section in the sidebar for */

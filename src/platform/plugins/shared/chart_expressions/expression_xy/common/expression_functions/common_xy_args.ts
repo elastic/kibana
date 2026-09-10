@@ -9,6 +9,7 @@
 
 import {
   EndValues,
+  AreaFillOptions,
   FittingFunctions,
   LEGEND_CONFIG,
   ValueLabelModes,
@@ -16,7 +17,7 @@ import {
   Y_AXIS_CONFIG,
 } from '../constants';
 import { strings } from '../i18n';
-import { LayeredXyVisFn, XyVisFn } from '../types';
+import type { LayeredXyVisFn, XyVisFn } from '../types';
 
 type CommonXYFn = XyVisFn | LayeredXyVisFn;
 
@@ -53,6 +54,11 @@ export const commonXYArgs: CommonXYFn['args'] = {
   fillOpacity: {
     types: ['number'],
     help: strings.getFillOpacityHelp(),
+  },
+  areaFill: {
+    types: ['string'],
+    options: [...Object.values(AreaFillOptions)],
+    help: strings.getFillHelp(),
   },
   hideEndzones: {
     types: ['boolean'],

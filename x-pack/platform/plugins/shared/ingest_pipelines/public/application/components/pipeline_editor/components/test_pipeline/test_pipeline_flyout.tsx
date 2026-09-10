@@ -14,15 +14,16 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import { FormHook } from '../../../../../shared_imports';
-import { Document } from '../../types';
+import type { FormHook } from '../../../../../shared_imports';
+import type { Document } from '../../types';
 
-import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
-import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import { Tabs, OutputTab, DocumentsTab } from './test_pipeline_tabs';
+import type { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
 
 export interface Props {
   onClose: () => void;
@@ -125,19 +126,17 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         {/* Testing error callout */}
         {testingError ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"
                   defaultMessage="Unable to execute pipeline"
                 />
               }
-              color="danger"
-              iconType="warning"
               data-test-subj="pipelineExecutionError"
-            >
-              <p>{testingError.message}</p>
-            </EuiCallOut>
+              text={testingError.message}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}

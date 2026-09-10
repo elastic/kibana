@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ContentReference } from '../../schemas';
-import { ContentReferencesStore, Options } from '../types';
+import type { ContentReference } from '../../schemas';
+import type { ContentReferencesStore, Options } from '../types';
 
 const CONTENT_REFERENCE_ID_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

@@ -10,10 +10,11 @@
 import { getColorAssignments } from './color_assignment';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { LayersFieldFormats } from './layers';
-import { DatatablesWithFormatInfo } from './data_layers';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { LayersFieldFormats } from './layers';
+import type { DatatablesWithFormatInfo } from './data_layers';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 
 describe('color_assignment', () => {
   const tables: Record<string, Datatable> = {
@@ -92,7 +93,7 @@ describe('color_assignment', () => {
         split1: {
           format: { id: 'string' },
           formatter: {
-            convert: (x) => x,
+            convertToText: (x) => x,
           } as FieldFormat,
         },
       },
@@ -102,7 +103,7 @@ describe('color_assignment', () => {
         split2: {
           format: { id: 'string' },
           formatter: {
-            convert: (x) => x,
+            convertToText: (x) => x,
           } as FieldFormat,
         },
       },
@@ -183,7 +184,7 @@ describe('color_assignment', () => {
         },
         layers[1],
       ];
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = formatMock;
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = formatMock;
       const newFormattedDatatables = {
         first: {
           formattedColumns: formattedDatatables.first.formattedColumns,
@@ -205,7 +206,7 @@ describe('color_assignment', () => {
         newFormattedDatatables
       );
 
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (x) => x as string;
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = (x) => x as string;
       expect(formatMock).toHaveBeenCalledWith(complexObject);
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
@@ -272,7 +273,7 @@ describe('color_assignment', () => {
         },
         layers[1],
       ];
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (value: unknown) =>
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = (value: unknown) =>
         (typeof value === 'object' ? 'formatted' : value) as string;
       const newFormattedDatatables = {
         first: {
@@ -295,7 +296,7 @@ describe('color_assignment', () => {
         newFormattedDatatables
       );
 
-      fieldFormats.first.splitSeriesAccessors.split1.formatter.convert = (x) => x as string;
+      fieldFormats.first.splitSeriesAccessors.split1.formatter.convertToText = (x) => x as string;
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
       expect(assignments.palette1.getRank(layers[0].layerId, 'formatted - test1')).toEqual(2);
     });
@@ -320,6 +321,73 @@ describe('color_assignment', () => {
 
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
       expect(assignments.palette1.getRank(layers[0].layerId, 'test2')).toEqual(1);
+    });
+
+    it('should handle multiple split accessors by joining them with separator', () => {
+      const multiSplitTable: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'split1', name: '', meta: { type: 'string' } },
+          { id: 'split2', name: '', meta: { type: 'string' } },
+          { id: 'y1', name: '', meta: { type: 'number' } },
+        ],
+        rows: [
+          { split1: 'A', split2: 'X' },
+          { split1: 'A', split2: 'Y' },
+          { split1: 'B', split2: 'X' },
+        ],
+      };
+
+      const multiSplitFieldFormats = {
+        first: {
+          splitSeriesAccessors: {
+            split1: {
+              format: { id: 'string' },
+              formatter: {
+                convertToText: (x) => x,
+              } as FieldFormat,
+            },
+            split2: {
+              format: { id: 'string' },
+              formatter: {
+                convertToText: (x) => x,
+              } as FieldFormat,
+            },
+          },
+        },
+      } as unknown as LayersFieldFormats;
+
+      const multiSplitFormattedDatatables: DatatablesWithFormatInfo = {
+        first: {
+          table: multiSplitTable,
+          formattedColumns: {},
+          invertedRawValueMap: new Map(multiSplitTable.columns.map((c) => [c.id, new Map()])),
+        },
+      };
+
+      const multiSplitLayer: DataLayerConfig = {
+        ...layers[0],
+        splitAccessors: ['split1', 'split2'],
+        accessors: ['y1'],
+        table: multiSplitTable,
+      };
+
+      const assignments = getColorAssignments(
+        [multiSplitLayer],
+        titles,
+        multiSplitFieldFormats,
+        multiSplitFormattedDatatables
+      );
+
+      expect(assignments.palette1.totalSeriesCount).toEqual(3);
+
+      const expectedSeriesName1 = `A${MULTI_FIELD_KEY_SEPARATOR}X`;
+      const expectedSeriesName2 = `A${MULTI_FIELD_KEY_SEPARATOR}Y`;
+      const expectedSeriesName3 = `B${MULTI_FIELD_KEY_SEPARATOR}X`;
+
+      expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName1)).toEqual(0);
+      expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName2)).toEqual(1);
+      expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName3)).toEqual(2);
     });
   });
 });

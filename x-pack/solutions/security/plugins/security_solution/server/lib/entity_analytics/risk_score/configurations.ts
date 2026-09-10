@@ -22,6 +22,16 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  score_type: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  calculation_run_id: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   calculated_level: {
     type: 'keyword',
     array: false,
@@ -47,9 +57,56 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  // Modifiers applied to the score calculation
+  modifiers: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'modifiers.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'modifiers.subtype': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'modifiers.modifier_value': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'modifiers.contribution': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  // Metadata shape is dynamic per modifier type; use flattened for flexibility
+  'modifiers.metadata': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
   inputs: {
     type: 'object',
     array: true,
+    required: false,
+  },
+  related_entities: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'related_entities.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'related_entities.relationship_type': {
+    type: 'keyword',
+    array: false,
     required: false,
   },
   'inputs.id': {
@@ -151,6 +208,11 @@ export const totalFieldsLimit = 1000;
 export const getIndexPatternDataStream = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
+});
+
+export const getIndexPatternLookup = (namespace: string): IIndexPatternString => ({
+  template: `.entity_analytics.risk_score.lookup-${namespace}-index-template`,
+  alias: `.entity_analytics.risk_score.lookup-${namespace}`,
 });
 
 export type TransformOptions = Omit<TransformPutTransformRequest, 'transform_id'>;

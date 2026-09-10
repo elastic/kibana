@@ -11,11 +11,11 @@ import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
-import { fromSavedSearchAttributes } from '../service/saved_searches_utils';
-import type { SavedSearchAttributes, SavedSearch } from '../types';
-
+import type { SavedSearch } from '../types';
 import type { KibanaContextStartDependencies } from './kibana_context';
 import { getKibanaContextFn } from './kibana_context';
+import { fromDiscoverSessionAttributesToSavedSearch } from '../service/saved_searches_utils';
+import type { DiscoverSessionAttributes } from '../../server';
 
 type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
@@ -49,17 +49,24 @@ describe('kibanaContextFn', () => {
   it('merges and deduplicates queries from different sources', async () => {
     const { fn } = kibanaContextFn;
     startServicesMock.getSavedSearch.mockResolvedValue(
-      fromSavedSearchAttributes(
+      fromDiscoverSessionAttributesToSavedSearch(
         'abc',
         {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: JSON.stringify({
-              query: [],
-            }),
-          },
-        } as SavedSearchAttributes,
+          tabs: [
+            {
+              id: 'test',
+              label: 'Test',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    query: [],
+                  }),
+                },
+              },
+            },
+          ],
+        } as DiscoverSessionAttributes,
         [],
-        undefined,
         {
           getFields: () => ({
             query: [
@@ -91,9 +98,8 @@ describe('kibanaContextFn', () => {
             filter: [],
           }),
         } as unknown as SavedSearch['searchSource'],
-        {} as SavedSearch['sharingSavedObjectProps'],
         false
-      ) as SavedSearch
+      )
     );
     const args = {
       ...emptyArgs,

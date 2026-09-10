@@ -9,7 +9,7 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { buildCounterRateFormula } from './counter_rate_formula';
 import { SUPPORTED_METRICS } from './supported_metrics';
 

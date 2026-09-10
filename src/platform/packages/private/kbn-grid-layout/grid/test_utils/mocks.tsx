@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from '../grid_panel';
 import type { ActiveSectionEvent } from '../grid_section';
@@ -37,23 +39,25 @@ export const mockRenderPanelContents = jest.fn((panelId) => (
 
 export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStateManager>) => {
   return {
-    layoutRef: { current: {} },
-    expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-    isMobileView$: new BehaviorSubject<boolean>(false),
-    gridLayout$: new BehaviorSubject<OrderedLayout>(getSampleOrderedLayout()),
-    proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
-    runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
-      ...gridSettings,
-      columnPixelWidth: 0,
-      keyboardDragTopLimit: 0,
-    }),
-    panelRefs: { current: {} },
-    sectionRefs: { current: {} },
-    headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
     activePanelEvent$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
     activeSectionEvent$: new BehaviorSubject<ActiveSectionEvent | undefined>(undefined),
+    expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
+    gridLayout$: new BehaviorSubject<OrderedLayout>(getSampleOrderedLayout()),
+    headerRefs: { current: {} },
+    isMobileView$: new BehaviorSubject<boolean>(false),
+    layoutRef: { current: {} },
+    layoutUpdated$: new Subject<void>(),
+    panelRefs: { current: {} },
+    proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
+    runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
+      ...gridSettings,
+      columnPixelWidth: 10,
+      keyboardDragTopLimit: 0,
+    }),
+    scrollContainer$: new BehaviorSubject<ScrollContainer>(document.documentElement),
+    sectionRefs: { current: {} },
     ...overrides,
   } as GridLayoutStateManager;
 };

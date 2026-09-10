@@ -11,7 +11,10 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/webhook/constants';
+import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
+import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 export function getConnectorType(): ConnectorTypeModel<
   WebhookConfig,
@@ -19,7 +22,7 @@ export function getConnectorType(): ConnectorTypeModel<
   WebhookActionParams
 > {
   return {
-    id: '.webhook',
+    id: CONNECTOR_ID,
     iconClass: 'logoWebhook',
     selectMessage: i18n.translate('xpack.stackConnectors.components.webhook.selectMessageText', {
       defaultMessage: 'Send a request to a web service.',
@@ -28,20 +31,34 @@ export function getConnectorType(): ConnectorTypeModel<
       defaultMessage: 'Webhook data',
     }),
     validateParams: async (
-      actionParams: WebhookActionParams
+      actionParams: WebhookActionParams,
+      connectorConfig: WebhookConfig | null
     ): Promise<GenericValidationResult<WebhookActionParams>> => {
+      const webhookMethod: WebhookMethods | null = connectorConfig?.method
+        ? connectorConfig.method
+        : null;
       const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;
-      if (!actionParams.body?.length) {
+
+      if (
+        webhookMethod !== null &&
+        ![WebhookMethods.GET, WebhookMethods.DELETE].includes(webhookMethod) &&
+        !actionParams.body?.length
+      ) {
         errors.body.push(translations.BODY_REQUIRED);
       }
+
       return validationResult;
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),
     actionParamsFields: lazy(() => import('./webhook_params')),
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+    },
   };
 }

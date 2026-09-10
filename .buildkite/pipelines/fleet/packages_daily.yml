@@ -3,7 +3,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -13,15 +13,15 @@ steps:
   - command: .buildkite/scripts/steps/fleet/install_all_packages.sh
     label: Install All Packages
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
-      machineType: n2-standard-2
+      machineType: n2-standard-4
     env:
       # ensure that the FTR logs all output for these tests
       DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'
-      # disable downloading a kibana build, this step does not use it
+      # this pipeline has no build step, so skip downloading a pre-built artifact
       KIBANA_BUILD_ID: 'false'
     timeout_in_minutes: 90
 
@@ -31,7 +31,7 @@ steps:
   - label: Post-Build
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

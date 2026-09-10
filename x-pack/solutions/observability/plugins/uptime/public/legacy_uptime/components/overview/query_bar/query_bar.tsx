@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
 import { useGetUrlParams, useUptimeDataView } from '../../../hooks';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
@@ -37,9 +37,7 @@ export const QueryBar = () => {
 
   const {
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
   const { query, setQuery, submitImmediately } = useQueryBar();
 
@@ -59,7 +57,7 @@ export const QueryBar = () => {
       <QueryStringInput
         indexPatterns={dataView ? [dataView] : []}
         nonKqlMode="text"
-        iconType="search"
+        iconType="magnify"
         isClearable={true}
         onChange={(queryN) => {
           if (queryN?.language === SyntaxType.text) {

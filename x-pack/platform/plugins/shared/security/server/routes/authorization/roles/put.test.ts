@@ -10,7 +10,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import { definePutRolesRoutes } from './put';
@@ -495,6 +495,14 @@ describe('PUT role', () => {
               query: `{ "match": { "title": "foo" } }`,
             },
           ],
+          global: {
+            data_source: [
+              {
+                names: ['acme_*'],
+                privileges: ['read', 'manage'],
+              },
+            ],
+          },
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: [
@@ -543,6 +551,14 @@ describe('PUT role', () => {
               ],
               cluster: ['test-cluster-privilege'],
               description: 'test description',
+              global: {
+                data_source: [
+                  {
+                    names: ['acme_*'],
+                    privileges: ['read', 'manage'],
+                  },
+                ],
+              },
               indices: [
                 {
                   field_security: {

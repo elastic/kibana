@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
+import type React from 'react';
+import type {
   UseFormReturn,
   ControllerRenderProps,
   ControllerFieldState,
@@ -14,7 +14,7 @@ import {
   UseControllerProps,
   FieldValues,
 } from 'react-hook-form';
-import {
+import type {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
@@ -22,7 +22,7 @@ import {
   ResponseCheckJSON,
   RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
-import { AlertConfigKey } from './constants';
+import type { AlertConfigKey } from './constants';
 
 export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
 
@@ -34,7 +34,7 @@ export interface Step {
 export type StepMap = Record<FormMonitorType, Step[]>;
 
 export * from '../../../../../common/runtime_types/monitor_management';
-export * from '../../../../../common/types/monitor_validation';
+export type * from '../../../../../common/types/monitor_validation';
 
 export interface FormLocation {
   id: string;
@@ -135,7 +135,6 @@ export interface FieldMap {
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
   [AlertConfigKey.TLS_ENABLED]: FieldMeta<AlertConfigKey.TLS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
-  [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;
   [ConfigKey.WAIT]: FieldMeta<ConfigKey.WAIT>;
   [ConfigKey.USERNAME]: FieldMeta<ConfigKey.USERNAME>;
@@ -163,6 +162,7 @@ export interface FieldMap {
   [ConfigKey.PLAYWRIGHT_OPTIONS]: FieldMeta<ConfigKey.PLAYWRIGHT_OPTIONS>;
   [ConfigKey.SYNTHETICS_ARGS]: FieldMeta<ConfigKey.SYNTHETICS_ARGS>;
   [ConfigKey.IGNORE_HTTPS_ERRORS]: FieldMeta<ConfigKey.IGNORE_HTTPS_ERRORS>;
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: FieldMeta<ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST>;
   [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;
   [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;

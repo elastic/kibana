@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { load, dump } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { ESAssetMetadata } from '../../../../common/types';
+
+import { PackagePolicyValidationError } from '../../../../common/errors';
+
+import { toYaml } from './yaml_utils';
 
 const MANAGED_BY_DEFAULT = 'fleet';
 
@@ -39,25 +43,28 @@ export function appendMetadataToIngestPipeline({
   pipeline: any;
   packageName?: string;
 }): any {
-  const meta = getESAssetMetadata({ packageName });
+  try {
+    const meta = getESAssetMetadata({ packageName });
 
-  if (pipeline.extension === 'yml') {
-    // Convert the YML content to JSON, append the `_meta` value, then convert it back to
-    // YML and return the resulting YML
-    const parsedPipelineContent = load(pipeline.contentForInstallation);
+    if (pipeline.extension === 'yml') {
+      // Convert the YML content to JSON, append the `_meta` value, then convert it back to
+      // YML and return the resulting YML
+      const parsedPipelineContent = parse(pipeline.contentForInstallation);
+      parsedPipelineContent._meta = meta;
+      return {
+        ...pipeline,
+        contentForInstallation: `---\n${toYaml(parsedPipelineContent)}`,
+      };
+    }
+
+    const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
     parsedPipelineContent._meta = meta;
 
     return {
       ...pipeline,
-      contentForInstallation: `---\n${dump(parsedPipelineContent)}`,
+      contentForInstallation: JSON.stringify(parsedPipelineContent),
     };
+  } catch (error) {
+    throw new PackagePolicyValidationError(error);
   }
-
-  const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
-  parsedPipelineContent._meta = meta;
-
-  return {
-    ...pipeline,
-    contentForInstallation: JSON.stringify(parsedPipelineContent),
-  };
 }

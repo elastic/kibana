@@ -12,8 +12,8 @@ import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import StaleAlert from './stale_alert';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { TopAlert } from '../../../typings/alerts';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TopAlert } from '../../../typings/alerts';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../hooks/use_bulk_untrack_alerts');
@@ -51,6 +51,7 @@ describe('Stale alert', () => {
     const staleAlert = render(
       <StaleAlert
         alert={alert}
+        alertIndex=".internal.alerts-observability.apm.alerts-default-000001"
         alertStatus="active"
         rule={ruleMock}
         refetchRule={() => {}}
@@ -75,6 +76,7 @@ describe('Stale alert', () => {
     const staleAlert = render(
       <StaleAlert
         alert={alertUpdated}
+        alertIndex=".internal.alerts-observability.apm.alerts-default-000001"
         alertStatus="active"
         rule={ruleMock}
         refetchRule={() => {}}

@@ -9,8 +9,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { EqlOptions } from '../../../../../common/search_strategy';
-import type { FieldHook } from '../../../../shared_imports';
-import { type FormHook, useFormData } from '../../../../shared_imports';
+import { type FormHook, type FieldHook, useFormData } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../common/types';
 import {
   isEqlRule,
@@ -90,7 +89,6 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
     if (isEsqlRule(ruleType)) {
       esqlQueryRef.current =
         currentQuery?.query?.language === ESQL_QUERY_LANGUAGE ? currentQuery : esqlQueryRef.current;
-
       return;
     }
 
@@ -108,7 +106,9 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
    * string kuery by default.
    */
   useEffect(() => {
-    if (ruleType === previousRuleType || !ruleType) {
+    // Guard against firing on initial mount (previousRuleType === undefined means no prior type
+    // transition has occurred; the form field already holds the correct default value).
+    if (ruleType === previousRuleType || !ruleType || !previousRuleType) {
       return;
     }
 

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -25,12 +25,14 @@ export default ({ getService }: FtrProviderContext) => {
         fieldNames: ['customer_first_name.keyword', 'customer_last_name.keyword'],
         query: { bool: { must: [{ match_all: {} }] } },
         timeFieldName: 'order_date',
+        earliestMs: 1686787200000, // June 15, 2023 12:00:00 AM GMT
+        latestMs: 1686873599000, //  June 15, 2023 11:59:59 PM GMT
       },
       expected: {
         statusCode: 200,
         responseBody: {
-          'customer_first_name.keyword': 46,
-          'customer_last_name.keyword': 183,
+          'customer_first_name.keyword': 42,
+          'customer_last_name.keyword': 98,
         },
       },
     },
@@ -90,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('field_cardinality', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

@@ -5,7 +5,12 @@
 | Name                        | Description                                                                                                                                             |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Duration                    | Displays the duration with automatic unit formatting and the option to show the percentage of the duration relative to a parent (trace or transaction). |
-| Duration distribution chart | Generates a chart visualization from the specified `DurationDistributionChartData` input.                                                                  |
+| Duration distribution chart | Generates a chart visualization from the specified `DurationDistributionChartData` input.                                                               |
+| Http status code            | Renders a badge with the HTTP status code, its description, and a color indicating its category.                                                        |
+| Span icon                   | Displays an icon based on the span type and subtype.                                                                                                    |
+| Timestamp                   | Displays the absolute date and time with timezone, and shows the relative date either as a tooltip or inline.                                           |
+| [TraceWaterfall / TraceWaterfallWithFetching](src/components/trace_waterfall/README.md) | Renders a full APM trace as a virtualized waterfall tree. `TraceWaterfallWithFetching` fetches trace data automatically; `TraceWaterfall` accepts pre-fetched `TraceItem[]` data. |
+| [FocusedTraceWaterfall / FocusedTraceWaterfallWithFetching](src/components/focused_trace_waterfall/README.md) | Renders a contextual subset of a trace centred on a specific document (root → parent → focused span → its descendants). `FocusedTraceWaterfallWithFetching` fetches data automatically; `FocusedTraceWaterfall` accepts pre-fetched data. |
 
 ## Utils
 

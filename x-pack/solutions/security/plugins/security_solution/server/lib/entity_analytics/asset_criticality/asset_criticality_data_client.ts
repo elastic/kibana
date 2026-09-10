@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslFieldAndFormat,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -97,6 +101,7 @@ export class AssetCriticalityDataClient {
           },
         },
         settings: {
+          auto_expand_replicas: '0-1',
           default_pipeline: getIngestPipelineName(this.options.namespace),
         },
       },
@@ -115,11 +120,13 @@ export class AssetCriticalityDataClient {
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
     sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
+    fields,
   }: {
     query: ESFilter;
     size?: number;
     from?: number;
     sort?: SearchRequest['sort'];
+    fields?: (QueryDslFieldAndFormat | string)[];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
@@ -128,6 +135,7 @@ export class AssetCriticalityDataClient {
       size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
+      fields,
       post_filter: {
         bool: {
           must_not: {

@@ -14,80 +14,174 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 /**
  * AI assistant KnowledgeBase.
  */
+export const KnowledgeBaseResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Identify the success of the method execution.
+     */
+    success: z.boolean().optional().describe('Identify the success of the method execution.'),
+  })
+);
 export type KnowledgeBaseResponse = z.infer<typeof KnowledgeBaseResponse>;
-export const KnowledgeBaseResponse = z.object({
-  /**
-   * Identify the success of the method execution.
-   */
-  success: z.boolean().optional(),
-});
 
+export const KnowledgeBaseResponse400 = lazySchema(() =>
+  z.object({
+    /**
+     * The HTTP status code of the error.
+     */
+    statusCode: z.number().optional().describe('The HTTP status code of the error.'),
+    /**
+     * A short description of the error.
+     */
+    error: z.string().optional().describe('A short description of the error.'),
+    /**
+     * A detailed error message.
+     */
+    message: z.string().optional().describe('A detailed error message.'),
+  })
+);
+export type KnowledgeBaseResponse400 = z.infer<typeof KnowledgeBaseResponse400>;
+
+export const KnowledgeBaseReadResponse200 = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates if the ELSER model exists for the KnowledgeBase.
+     */
+    elser_exists: z
+      .boolean()
+      .optional()
+      .describe('Indicates if the ELSER model exists for the KnowledgeBase.'),
+    /**
+     * Indicates if the setup process is available for the KnowledgeBase.
+     */
+    is_setup_available: z
+      .boolean()
+      .optional()
+      .describe('Indicates if the setup process is available for the KnowledgeBase.'),
+    /**
+     * Indicates if the setup process is currently in progress.
+     */
+    is_setup_in_progress: z
+      .boolean()
+      .optional()
+      .describe('Indicates if the setup process is currently in progress.'),
+    /**
+     * Indicates if Security Labs documentation exists in the KnowledgeBase.
+     */
+    security_labs_exists: z
+      .boolean()
+      .optional()
+      .describe('Indicates if Security Labs documentation exists in the KnowledgeBase.'),
+    /**
+     * Indicates if Defend Insights documentation exists in the KnowledgeBase.
+     */
+    defend_insights_exists: z
+      .boolean()
+      .optional()
+      .describe('Indicates if Defend Insights documentation exists in the KnowledgeBase.'),
+    /**
+     * Indicates if user data exists in the KnowledgeBase.
+     */
+    user_data_exists: z
+      .boolean()
+      .optional()
+      .describe('Indicates if user data exists in the KnowledgeBase.'),
+    /**
+     * The status of the product documentation in the KnowledgeBase.
+     */
+    product_documentation_status: z
+      .string()
+      .optional()
+      .describe('The status of the product documentation in the KnowledgeBase.'),
+  })
+);
+export type KnowledgeBaseReadResponse200 = z.infer<typeof KnowledgeBaseReadResponse200>;
+
+export const CreateKnowledgeBaseRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+     */
+    modelId: z
+      .string()
+      .optional()
+      .describe(
+        'ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.'
+      ),
+    /**
+     * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+     */
+    ignoreSecurityLabs: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.'
+      ),
+  })
+);
 export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
-export const CreateKnowledgeBaseRequestQuery = z.object({
-  /**
-   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
-   */
-  modelId: z.string().optional(),
-  /**
-   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
-   */
-  ignoreSecurityLabs: BooleanFromString.optional().default(false),
-});
 export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
 
+export const CreateKnowledgeBaseRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The KnowledgeBase `resource` value.
+     */
+    resource: z.string().describe('The KnowledgeBase `resource` value.'),
+  })
+);
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
-export const CreateKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string().optional(),
-});
 export type CreateKnowledgeBaseRequestParamsInput = z.input<
   typeof CreateKnowledgeBaseRequestParams
 >;
 
+export const CreateKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseResponse);
 export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
-export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
 
+export const GetKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseReadResponse200);
+export type GetKnowledgeBaseResponse = z.infer<typeof GetKnowledgeBaseResponse>;
+export const PostKnowledgeBaseRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+     */
+    modelId: z
+      .string()
+      .optional()
+      .describe(
+        'ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.'
+      ),
+    /**
+     * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+     */
+    ignoreSecurityLabs: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.'
+      ),
+  })
+);
+export type PostKnowledgeBaseRequestQuery = z.infer<typeof PostKnowledgeBaseRequestQuery>;
+export type PostKnowledgeBaseRequestQueryInput = z.input<typeof PostKnowledgeBaseRequestQuery>;
+
+export const PostKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseResponse);
+export type PostKnowledgeBaseResponse = z.infer<typeof PostKnowledgeBaseResponse>;
+
+export const ReadKnowledgeBaseRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The KnowledgeBase `resource` value.
+     */
+    resource: z.string().describe('The KnowledgeBase `resource` value.'),
+  })
+);
 export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
-export const ReadKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string().optional(),
-});
 export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
 
+export const ReadKnowledgeBaseResponse = lazySchema(() => KnowledgeBaseReadResponse200);
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
-export const ReadKnowledgeBaseResponse = z.object({
-  /**
-   * Indicates if the ELSER model exists for the KnowledgeBase.
-   */
-  elser_exists: z.boolean().optional(),
-  /**
-   * Indicates if the setup process is available for the KnowledgeBase.
-   */
-  is_setup_available: z.boolean().optional(),
-  /**
-   * Indicates if the setup process is currently in progress.
-   */
-  is_setup_in_progress: z.boolean().optional(),
-  /**
-   * Indicates if Security Labs documentation exists in the KnowledgeBase.
-   */
-  security_labs_exists: z.boolean().optional(),
-  /**
-   * Indicates if user data exists in the KnowledgeBase.
-   */
-  user_data_exists: z.boolean().optional(),
-  /**
-   * The status of the product documentation in the KnowledgeBase.
-   */
-  product_documentation_status: z.string().optional(),
-});

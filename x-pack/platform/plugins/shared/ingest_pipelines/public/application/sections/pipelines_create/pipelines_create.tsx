@@ -6,14 +6,14 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps, useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
 import { getListPath } from '../../services/navigation';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-import { PipelineForm } from '../../components';
+import { PipelineForm, PipelineAppHeader } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 interface Props {
@@ -31,6 +31,12 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
   const history = useHistory<LocationState>();
 
   const locationSearchParams = useMemo(() => {
+    // Note:
+    // No need to decode the search params as URLSearchParams
+    // does that automatically upon reading them
+    //
+    // For the context on why this note exists
+    // see: https://github.com/elastic/kibana/issues/234500
     return new URLSearchParams(history.location.search);
   }, [history.location.search]);
 
@@ -93,34 +99,13 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.create.pageTitle"
-              defaultMessage="Create pipeline"
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={services.documentation.getCreatePipelineUrl()}
-            target="_blank"
-            iconType="question"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.create.docsButtonLabel"
-              defaultMessage="Create pipeline docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
+      <PipelineAppHeader
+        title={i18n.translate('xpack.ingestPipelines.create.pageTitle', {
+          defaultMessage: 'Create pipeline',
+        })}
+        history={history}
+        docLink={services.documentation.getCreatePipelineUrl()}
       />
-
-      <EuiSpacer size="l" />
 
       <PipelineForm
         defaultValue={formDefaultValue}

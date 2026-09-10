@@ -8,10 +8,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow, EuiIcon, EuiLink } from '@elastic/eui';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { DeprecationTableColumns } from '../../../types';
+import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { DefaultDeprecationFlyout, DefaultDeprecationFlyoutProps } from './flyout';
+import type { DefaultDeprecationFlyoutProps } from './flyout';
+import { DefaultDeprecationFlyout } from './flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -70,7 +71,7 @@ export const DefaultTableRow: React.FunctionComponent<Props> = ({
               deprecation={deprecation}
               actionsTableCell={
                 <EuiLink onClick={() => setShowFlyout(true)} data-test-subj="deprecation-default">
-                  <EuiIcon type="gear" />
+                  <EuiIcon type="gear" aria-hidden={true} />
                 </EuiLink>
               }
             />

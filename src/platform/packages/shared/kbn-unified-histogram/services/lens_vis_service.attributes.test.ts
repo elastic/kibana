@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { getRepresentativeQuery } from '@kbn/lens-common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   dataViewWithTimefieldMock,
@@ -189,6 +191,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 2,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -239,7 +242,7 @@ describe('LensVisService attributes', () => {
                       "breakdown_column": Object {
                         "dataType": "string",
                         "isBucketed": true,
-                        "label": "Top 3 values of extension",
+                        "label": "Top 9 values of extension",
                         "operationType": "terms",
                         "params": Object {
                           "missingBucket": true,
@@ -252,7 +255,7 @@ describe('LensVisService attributes', () => {
                           "parentFormat": Object {
                             "id": "terms",
                           },
-                          "size": 3,
+                          "size": 9,
                         },
                         "scale": "ordinal",
                         "sourceField": "extension",
@@ -340,7 +343,9 @@ describe('LensVisService attributes', () => {
                   "layerId": "unifiedHistogram",
                   "layerType": "data",
                   "seriesType": "bar_stacked",
-                  "splitAccessor": "breakdown_column",
+                  "splitAccessors": Array [
+                    "breakdown_column",
+                  ],
                   "xAccessor": "date_column",
                 },
               ],
@@ -362,6 +367,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 2,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -517,6 +523,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 2,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -676,10 +683,6 @@ describe('LensVisService attributes', () => {
                 },
               },
             ],
-            "query": Object {
-              "esql": "from logstash-* | limit 10
-      | EVAL timestamp=DATE_TRUNC(10 minute, timestamp) | stats results = count(*) by timestamp",
-            },
             "visualization": Object {
               "gridConfig": Object {
                 "isCellLabelVisible": false,
@@ -702,6 +705,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Heat map",
+          "version": 2,
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
@@ -735,6 +739,7 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
+      version: 2,
       references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',
@@ -813,7 +818,7 @@ describe('LensVisService attributes', () => {
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
       esql: `from logstash-* | limit 10
-| EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
     };
     const lensVis = await getLensVisMock({
       filters,
@@ -826,6 +831,6 @@ describe('LensVisService attributes', () => {
       allSuggestions: [], // none available
       isTransformationalESQL: false,
     });
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 });

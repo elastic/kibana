@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { run } from '../../lib/spawn.mjs';
+import { moonRun } from '../../lib/moon.mjs';
+import External from '../../lib/external_packages.js';
+
+import { pnpmInstallDeps, ensurePnpmAvailable, hasYarnInstallLeftovers } from './pnpm.mjs';
+import { sortPackageJson } from './sort_package_json.mjs';
+import { regeneratePackageMap } from './regenerate_package_map.mjs';
+import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
+import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
+import { regeneratePnpmWorkspace } from './regenerate_pnpm_workspace.mjs';
+import { discovery } from './discovery.mjs';
+import { updatePackageJson } from './update_package_json.mjs';
+import { bootstrapBuildkite } from './buildkite.mjs';
+
+const IS_CI = process.env.CI?.match(/(1|true)/i);
+
+/** @type {import('../../lib/command').Command} */
+export const command = {
+  name: 'bootstrap',
+  intro: 'Bootstrap the Kibana repository, installs all dependencies and builds all packages',
+  description: `
+    This command should be run every time you checkout a new revision, or can be used to build all packages
+    once after making a change locally. Package builds are cached remotely so when you don't have local
+    changes build artifacts will be downloaded from the remote cache.
+  `,
+  flagsHelp: `
+    --force-install      Use this flag to force bootstrap to reinstall dependencies. By default pnpm only
+                          touches node_modules when the lockfile or manifests change, so this is rarely
+                          needed, but it can help recover from a corrupted node_modules directory. This
+                          deletes node_modules before installing to guarantee a clean reinstall.
+    --offline            Run the installation process without consulting online resources. This is useful and
+                          sometimes necessary for using bootstrap on an airplane for instance. The local pnpm
+                          store will be used exclusively.
+    --no-validate        By default bootstrap validates the lockfile to check for a handfull of
+                          conditions. If you run into issues with this process locally you can disable it by
+                          passing this flag.
+    --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
+                          settings for local development. Disable this process either pass this flag or set
+                          the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
+                          subsequent distribution build will rebuild them in production mode anyway.
+                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
+    --allow-root         Required supplementary flag if you're running bootstrap as root.
+    --quiet              Prevent logging more than basic success/error messages
+  `,
+  reportTimings: {
+    group: 'scripts/kbn bootstrap',
+    id: 'total',
+  },
+  async run({ args, log, time }) {
+    // verify pnpm is available before doing any expensive work, since we spawn it later
+    ensurePnpmAvailable(log);
+
+    const offline = args.getBooleanValue('offline') ?? false;
+    if (offline) {
+      process.env.CI_STATS_DISABLED = 'true';
+    }
+    const validate = args.getBooleanValue('validate') ?? true;
+    const quiet = args.getBooleanValue('quiet') ?? false;
+    const vscodeConfig =
+      !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
+    let forceInstall = args.getBooleanValue('force-install');
+    if (!forceInstall && hasYarnInstallLeftovers()) {
+      log.warning(
+        'detected a leftover yarn install (node_modules/.yarn-integrity); forcing a clean pnpm reinstall'
+      );
+      forceInstall = true;
+    }
+    const skipPrebuilt =
+      args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
+
+    const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
+
+    // generate the package map and update package.json file, if necessary
+    const [packages] = await Promise.all([
+      time('regenerate package map', async () => {
+        return await regeneratePackageMap(log, packageManifestPaths);
+      }),
+      time('regenerate tsconfig map', async () => {
+        await regenerateTsconfigPaths(tsConfigRepoRels, log);
+      }),
+    ]);
+
+    await Promise.all([
+      time('update package json', async () => {
+        await updatePackageJson(packages, log);
+      }),
+      time('regenerate pnpm workspace', async () => {
+        await regeneratePnpmWorkspace(packages, log);
+      }),
+      time('regenerate tsconfig.base.json', async () => {
+        await regenerateBaseTsconfig(packages, log);
+      }),
+      time('bootstrap .buildkite folder', async () => {
+        await bootstrapBuildkite();
+      }),
+    ]);
+
+    // pnpm reconciles node_modules against the lockfile + manifests on every run, so we always
+    // install. In CI we use --frozen-lockfile to fail loudly if the lockfile is out of date.
+    await time('install dependencies', async () => {
+      await pnpmInstallDeps(log, {
+        offline,
+        quiet,
+        force: forceInstall,
+        frozenLockfile: !!IS_CI,
+      });
+    });
+
+    if (skipPrebuilt) {
+      log.info('skipping pre-built webpack bundles (--no-prebuilt)');
+    } else {
+      await time('prepare webpack bundles for packages', async () => {
+        log.info('pre-build webpack bundles');
+        await moonRun([':build-webpack'], {
+          pipe: !quiet,
+          quiet,
+          noCache: forceInstall,
+        });
+      });
+    }
+
+    await time('sort package json', async () => {
+      await sortPackageJson(log);
+    });
+
+    await Promise.all([
+      validate
+        ? time('validate dependencies', async () => {
+            // now that deps are installed we can import `@kbn/yarn-lock-validator`
+            const { readPnpmLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
+            await validateDependencies(log, await readPnpmLock());
+          })
+        : undefined,
+      vscodeConfig
+        ? time('update vscode config', async () => {
+            // Update vscode settings
+            await run('node', ['scripts/update_vscode_config']);
+            log.success('vscode config updated');
+          })
+        : undefined,
+    ]);
+  },
+};

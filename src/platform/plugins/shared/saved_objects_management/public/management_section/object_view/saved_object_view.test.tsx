@@ -10,7 +10,7 @@
 import { bulkDeleteObjectsMock, bulkGetObjectsMock } from './saved_object_view.test.mocks';
 
 import React from 'react';
-import { ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import {
@@ -25,11 +25,8 @@ import {
 } from '@kbn/core/public/mocks';
 
 import type { SavedObjectWithMetadata } from '../../types';
-import {
-  SavedObjectEdition,
-  SavedObjectEditionProps,
-  SavedObjectEditionState,
-} from './saved_object_view';
+import type { SavedObjectEditionProps, SavedObjectEditionState } from './saved_object_view';
+import { SavedObjectEdition } from './saved_object_view';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));
@@ -63,6 +60,7 @@ describe('SavedObjectEdition', () => {
     uiSettings = uiSettingsServiceMock.createStartContract();
     settings = settingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
+    history.createHref.mockImplementation((location) => location.pathname ?? '/');
     docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
     theme = themeServiceMock.createStartContract();

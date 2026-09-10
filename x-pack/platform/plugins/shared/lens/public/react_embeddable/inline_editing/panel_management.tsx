@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import { LensRuntimeState } from '../types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { LensRuntimeState } from '@kbn/lens-common';
 
 export interface PanelManagementApi {
   // distinguish show and edit capabilities for read only mode

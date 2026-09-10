@@ -8,7 +8,7 @@
  */
 
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // node scripts/functional_tests --config test/api_integration/config.js --grep="Resolve index API"
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertsHistory } from './use_alerts_history';
@@ -169,7 +169,7 @@ describe('useAlertsHistory', () => {
       }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/internal/rac/alerts/find', {
       body:
         '{"size":0,"rule_type_ids":["apm"],"consumers":["foo"],"query":{"bool":{"must":[' +
         '{"term":{"kibana.alert.rule.uuid":"cfd36e60-ef22-11ed-91eb-b7893acacfe2"}},' +
@@ -213,7 +213,7 @@ describe('useAlertsHistory', () => {
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/internal/rac/alerts/find', {
       body:
         '{"size":0,"rule_type_ids":["apm"],"query":{"bool":{"must":[' +
         '{"term":{"kibana.alert.rule.uuid":"cfd36e60-ef22-11ed-91eb-b7893acacfe2"}},' +

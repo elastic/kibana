@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { EditUserPage } from './edit_user_page';
@@ -44,6 +46,27 @@ describe('EditUserPage', () => {
     };
   });
 
+  it('keeps the header and shows a loading body while the user is loading', async () => {
+    coreStart.http.get.mockReturnValue(new Promise(() => {}));
+
+    render(
+      coreStart.rendering.addContext(
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
+      )
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        userMock.username
+      );
+      expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+    });
+  });
+
   it('warns when viewing deactivated user', async () => {
     coreStart.http.get.mockResolvedValueOnce({
       ...userMock,
@@ -51,15 +74,19 @@ describe('EditUserPage', () => {
     });
     coreStart.http.get.mockResolvedValueOnce([]);
 
-    const { findByText } = render(
+    const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/User has been deactivated/i);
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    await findByTestId('userFormAvatar');
   });
 
   it('warns when viewing deprecated user', async () => {
@@ -73,20 +100,19 @@ describe('EditUserPage', () => {
     });
     coreStart.http.get.mockResolvedValueOnce([]);
 
-    const { findByRole, findByText } = render(
+    const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/User is deprecated/i);
     await findByText(/Use .new_user. instead/i);
-
-    fireEvent.click(await findByRole('button', { name: 'Back to users' }));
-
-    expect(history.location.pathname).toBe('/');
+    expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href', '/');
   });
 
   it('warns when viewing built-in user', async () => {
@@ -96,19 +122,18 @@ describe('EditUserPage', () => {
     });
     coreStart.http.get.mockResolvedValueOnce([]);
 
-    const { findByRole, findByText } = render(
+    const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/User is built in/i);
-
-    fireEvent.click(await findByRole('button', { name: 'Back to users' }));
-
-    expect(history.location.pathname).toBe('/');
+    expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href', '/');
   });
 
   it('warns when selecting deprecated role', async () => {
@@ -128,15 +153,18 @@ describe('EditUserPage', () => {
       },
     ]);
 
-    const { findByText } = render(
+    const { findByText, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
     await findByText(/Role .deprecated_role. is deprecated. Use .new_role. instead/i);
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
   });
 
   it('disables form when viewing with readonly privileges', async () => {
@@ -149,15 +177,17 @@ describe('EditUserPage', () => {
       },
     };
 
-    const { findByRole, findAllByRole } = render(
+    const { findAllByRole, findByTestId } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <EditUserPage username={userMock.username} />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <EditUserPage username={userMock.username} />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
-    await findByRole('button', { name: 'Back to users' });
+    await findByTestId(APP_HEADER_TEST_SUBJECTS.back);
 
     const fields = await findAllByRole('textbox');
     expect(fields.length).toBeGreaterThanOrEqual(1);

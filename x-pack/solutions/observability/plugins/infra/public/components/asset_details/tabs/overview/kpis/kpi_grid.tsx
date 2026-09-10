@@ -17,35 +17,38 @@ import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
 import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
+import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
 
 interface Props {
   dataView?: DataView;
-  assetId: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityType: InventoryItemType;
   dateRange: TimeRange;
 }
 
-export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
+export const KPIGrid = ({ entityId, entityType, dataView, dateRange }: Props) => {
   const { reloadRequestTime } = useReloadRequestTimeContext();
+  const { schema } = useAssetDetailsRenderPropsContext();
 
   const filters = useMemo(() => {
     return [
       buildCombinedAssetFilter({
-        field: findInventoryFields(assetType).id,
-        values: [assetId],
+        field: findInventoryFields(entityType).id,
+        values: [entityId],
         dataView,
       }),
     ];
-  }, [dataView, assetId, assetType]);
+  }, [dataView, entityId, entityType]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {assetType === 'host' ? (
+      {entityType === 'host' ? (
         <HostKpiCharts
           dataView={dataView}
           filters={filters}
           dateRange={dateRange}
           lastReloadRequestTime={reloadRequestTime}
+          schema={schema}
         />
       ) : (
         <ContainerKpiCharts

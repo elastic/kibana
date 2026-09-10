@@ -8,5 +8,6 @@
  */
 
 export * from './client';
+export * from './kibana_distributable';
 export * from './types';
-export * from './emitPipeline';
+export * from './utils';

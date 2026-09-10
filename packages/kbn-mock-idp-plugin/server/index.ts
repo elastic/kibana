@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+import { ConfigSchema } from './config';
 
 export type { CreateSAMLResponseParams } from './plugin';
-export { plugin } from './plugin';
+
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { plugin: initPlugin } = await import('./plugin');
+  return initPlugin(initializerContext);
+};
 
 export const config = {
-  schema: schema.object({
-    // The plugin should only be enabled in Serverless.
-    enabled: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: true }),
-      traditional: schema.boolean({ defaultValue: false }),
-      options: { defaultValue: false },
-    }),
-  }),
+  schema: ConfigSchema,
+  exposeToBrowser: { uiam: true },
 };

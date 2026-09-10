@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
-import { FeatureCollection } from 'geojson';
+import { createSelector } from 'reselect-v4';
+import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
@@ -39,14 +39,13 @@ import {
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
-import { MapStoreState } from '../reducers/store';
-import {
+import type { MapStoreState } from '../reducers/store';
+import type {
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
   EMSVectorTileLayerDescriptor,
   EditState,
-  Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   LayerGroupDescriptor,
@@ -56,12 +55,12 @@ import {
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { ISource } from '../classes/sources/source';
-import { IVectorSource } from '../classes/sources/vector_source';
-import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
-import { EMSTMSSource } from '../classes/sources/ems_tms_source';
-import { IRasterSource } from '../classes/sources/raster_source';
-import { ILayer } from '../classes/layers/layer';
+import type { ISource } from '../classes/sources/source';
+import type { IVectorSource } from '../classes/sources/vector_source';
+import type { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
+import type { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import type { IRasterSource } from '../classes/sources/raster_source';
+import type { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
 function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, source: IVectorSource) {
@@ -125,7 +124,7 @@ export function createLayerInstance(
           customIcons,
         });
       default:
-        throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+        throw new Error(`Unrecognized layerType ${(layerDescriptor as { type: string }).type}`);
     }
   } catch (error) {
     return new InvalidLayer(layerDescriptor, error);
@@ -155,12 +154,8 @@ export const getHasLockedTooltips = (state: MapStoreState): boolean => {
   });
 };
 
-export const getMapReady = ({ map }: MapStoreState): boolean => map && map.ready;
-
 export const getMapInitError = ({ map }: MapStoreState): string | null | undefined =>
   map.mapInitError;
-
-export const getGoto = ({ map }: MapStoreState): Goto | null | undefined => map && map.goto;
 
 export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
@@ -176,8 +171,7 @@ export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => m
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
 
-export const getMapZoom = ({ map }: MapStoreState): number =>
-  map.mapState.zoom ? map.mapState.zoom : 0;
+export const getMapZoom = ({ map }: MapStoreState): number => map.mapState.zoom ?? 1;
 
 export const getMapCenter = ({ map }: MapStoreState): MapCenter =>
   map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };
@@ -205,6 +199,8 @@ export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =
 
 export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
   map.mapState.searchSessionMapBuffer;
+
+export const getProjectRouting = ({ map }: MapStoreState) => map.mapState.projectRouting;
 
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
@@ -248,6 +244,7 @@ export const getDataFilters = createSelector(
   getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getProjectRouting,
   getIsReadOnly,
   getExecutionContext,
   (
@@ -261,6 +258,7 @@ export const getDataFilters = createSelector(
     embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
+    projectRouting,
     isReadOnly,
     executionContext
   ) => {
@@ -274,6 +272,7 @@ export const getDataFilters = createSelector(
       filters,
       embeddableSearchContext,
       searchSessionId,
+      projectRouting,
       isReadOnly,
       executionContext,
     };

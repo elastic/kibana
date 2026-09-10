@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -43,23 +46,28 @@ describe('EditRoleMappingPage', () => {
     };
 
     return mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <EditRoleMappingPage
-          action="edit"
-          name={name}
-          roleMappingsAPI={roleMappingsAPI}
-          securityFeaturesAPI={securityFeaturesAPI}
-          rolesAPIClient={rolesAPI}
-          notifications={coreStart.notifications}
-          docLinks={coreStart.docLinks}
-          history={history}
-          readOnly={!coreStart.application.capabilities.role_mappings.save}
-        />
-      </KibanaContextProvider>
+      <MockAppHeaderProvider>
+        <KibanaContextProvider services={coreStart}>
+          <EuiProvider>
+            <EditRoleMappingPage
+              action="edit"
+              name={name}
+              roleMappingsAPI={roleMappingsAPI}
+              securityFeaturesAPI={securityFeaturesAPI}
+              rolesAPIClient={rolesAPI}
+              notifications={coreStart.notifications}
+              docLinks={coreStart.docLinks}
+              history={history}
+              readOnly={!coreStart.application.capabilities.role_mappings.save}
+            />
+          </EuiProvider>
+        </KibanaContextProvider>
+      </MockAppHeaderProvider>
     );
   };
 
   beforeEach(() => {
+    history.createHref.mockImplementation((location) => location.pathname ?? '/');
     rolesAPI = rolesAPIClientMock.create();
     (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
       { name: 'foo_role' },
@@ -415,8 +423,8 @@ describe('EditRoleMappingPage', () => {
     wrapper.update();
 
     // back button
-    const backButton = wrapper.find('button[data-test-subj="roleMappingFormReturnButton"]');
-    expect(backButton).toHaveLength(1);
+    const backButton = wrapper.find(`[data-test-subj="${APP_HEADER_TEST_SUBJECTS.back}"]`);
+    expect(backButton.exists()).toBe(true);
 
     // no save button
     const saveButton = wrapper.find('button[data-test-subj="saveRoleMappingButton"]');
@@ -477,8 +485,8 @@ describe('EditRoleMappingPage', () => {
     wrapper.update();
 
     // back button
-    const backButton = wrapper.find('button[data-test-subj="roleMappingFormReturnButton"]');
-    expect(backButton).toHaveLength(1);
+    const backButton = wrapper.find(`[data-test-subj="${APP_HEADER_TEST_SUBJECTS.back}"]`);
+    expect(backButton.exists()).toBe(true);
 
     // no save button
     const saveButton = wrapper.find('button[data-test-subj="saveRoleMappingButton"]');
@@ -499,7 +507,7 @@ describe('EditRoleMappingPage', () => {
     expect(rulePanels.at(0).props().readOnly).toBeTruthy();
 
     // Lock icon is displayed
-    const lockIcon = wrapper.find('EuiToolTip[data-test-subj="readOnlyRoleMappingTooltip"]');
+    const lockIcon = wrapper.find('EuiIconTip[data-test-subj="readOnlyRoleMappingTooltip"]');
     expect(lockIcon).toHaveLength(1);
   });
 

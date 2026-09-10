@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import {
   convertIntervalToUnit,
   parseInterval,
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
-import { RESTRICTIONS_KEYS, TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
 import {
   TIME_RANGE_DATA_MODES,
   PANEL_TYPES,

@@ -39,7 +39,7 @@ describe('storeHistogram', () => {
     const pid = process.pid;
     const id = serializeSavedObjectId({ date: mockNow, pid, instanceUuid });
 
-    expect(mockInternalRepository.create).toBeCalledWith(
+    expect(mockInternalRepository.create).toHaveBeenCalledWith(
       'event_loop_delays_daily',
       { ...mockHistogram, processId: pid, instanceUuid },
       { id, overwrite: true }
@@ -64,13 +64,13 @@ describe('deleteHistogramSavedObjects', () => {
       Array [
         Array [
           Object {
-            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-3d/d\\"",
+            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-3d\\"",
             "type": "event_loop_delays_daily",
           },
         ],
         Array [
           Object {
-            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-20d/d\\"",
+            "filter": "event_loop_delays_daily.attributes.lastUpdatedAt < \\"now-20d\\"",
             "type": "event_loop_delays_daily",
           },
         ],

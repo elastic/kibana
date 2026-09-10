@@ -9,8 +9,11 @@ import { PassThrough, Readable } from 'stream';
 import type { Logger } from '@kbn/logging';
 import type { Stream } from 'openai/streaming';
 import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
-import type { SmithyStream } from './get_token_count_from_bedrock_converse';
-import { getTokensFromBedrockConverseStream } from './get_token_count_from_bedrock_converse';
+import { getTokensFromBedrockConverseStream } from './get_token_count_from_bedrock_converse_stream';
+import {
+  getTokensFromBedrockClientSend,
+  type SmithyStream,
+} from './get_token_count_from_bedrock_client_send';
 import type { InvokeAsyncIteratorBody } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromInvokeAsyncIterator } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
@@ -58,6 +61,7 @@ export const getGenAiTokenTracking = async ({
   if (hasTelemetryMetadata(validatedParams.subActionParams)) {
     telemetryMetadata = validatedParams.subActionParams.telemetryMetadata;
   }
+
   if (
     (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') ||
     (actionTypeId === '.inference' &&
@@ -112,18 +116,19 @@ export const getGenAiTokenTracking = async ({
     actionTypeId === '.gemini'
   ) {
     try {
-      const { totalTokenCount, promptTokenCount, candidatesTokenCount } =
-        await parseGeminiStreamForUsageMetadata({
-          responseStream: result.data.pipe(new PassThrough()),
-          logger,
-        });
+      const usageMetadata = await parseGeminiStreamForUsageMetadata({
+        responseStream: result.data.pipe(new PassThrough()),
+        logger,
+      });
 
-      return {
-        total_tokens: totalTokenCount,
-        prompt_tokens: promptTokenCount,
-        completion_tokens: candidatesTokenCount,
-        telemetry_metadata: telemetryMetadata,
-      };
+      if (usageMetadata) {
+        return {
+          total_tokens: usageMetadata.totalTokenCount,
+          prompt_tokens: usageMetadata.promptTokenCount,
+          completion_tokens: usageMetadata.candidatesTokenCount,
+          telemetry_metadata: telemetryMetadata,
+        };
+      }
     } catch (e) {
       logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
       logger.error(e);
@@ -133,15 +138,21 @@ export const getGenAiTokenTracking = async ({
 
   // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
   if (
-    validatedParams.subAction === 'invokeStream' &&
+    (validatedParams.subAction === 'invokeStream' ||
+      (actionTypeId === '.inference' &&
+        validatedParams.subAction === 'unified_completion_stream')) &&
     result.data instanceof Readable &&
     actionTypeId !== '.gemini'
   ) {
     try {
+      const body =
+        actionTypeId === '.inference'
+          ? (validatedParams as { subActionParams: { body: InvokeBody } }).subActionParams.body
+          : (validatedParams as { subActionParams: InvokeBody }).subActionParams;
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
         actionTypeId,
-        body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
+        body,
         logger,
       });
       return {
@@ -302,7 +313,7 @@ export const getGenAiTokenTracking = async ({
       usage?: { inputTokens: number; outputTokens: number; totalTokens: number };
     };
     if (tokenStream) {
-      const res = await getTokensFromBedrockConverseStream(tokenStream, logger);
+      const res = await getTokensFromBedrockClientSend(tokenStream, logger);
       return res;
     }
     if (usage) {
@@ -316,6 +327,25 @@ export const getGenAiTokenTracking = async ({
       logger.error('Response from Bedrock converse API did not contain usage object');
       return null;
     }
+  }
+
+  // converseStream response used by InferenceChatModel
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'converseStream') {
+    const { tokenStream } = result.data as unknown as {
+      tokenStream?: Readable;
+    };
+
+    if (tokenStream) {
+      const res = await getTokensFromBedrockConverseStream(tokenStream, logger);
+      if (res) {
+        return {
+          ...res,
+          telemetry_metadata: telemetryMetadata,
+        };
+      }
+    }
+    logger.error('Response from Bedrock converse API did not contain usage object');
+    return null;
   }
 
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAIRaw') {

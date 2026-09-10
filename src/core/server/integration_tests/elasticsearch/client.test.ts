@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import type { AddressInfo } from 'net';
+import { ReplaySubject, firstValueFrom } from 'rxjs';
 
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
   createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { ServiceStatus } from '@kbn/core-status-common';
-import { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import type { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
@@ -35,8 +35,8 @@ describe('elasticsearch clients', () => {
   });
 
   afterAll(async () => {
-    await kibanaServer.stop();
-    await esServer.stop();
+    await kibanaServer?.stop();
+    await esServer?.stop();
   });
 
   it('does not return deprecation warning when x-elastic-product-origin header is set', async () => {
@@ -60,15 +60,16 @@ describe('elasticsearch clients', () => {
   });
 });
 
-function createFakeElasticsearchServer() {
-  const server = http.createServer((req, res) => {
-    // Reply with a 200 and empty response by default (intentionally malformed response)
-    res.writeHead(200);
-    res.end();
+function createFakeElasticsearchServer(): Promise<http.Server> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      // Reply with a 200 and empty response by default (intentionally malformed response)
+      res.writeHead(200);
+      res.end();
+    });
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve(server));
   });
-  server.listen(esTestConfig.getPort());
-
-  return server;
 }
 
 describe('fake elasticsearch', () => {
@@ -77,8 +78,14 @@ describe('fake elasticsearch', () => {
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
-    kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
-    esServer = createFakeElasticsearchServer();
+    esServer = await createFakeElasticsearchServer();
+    kibanaServer = createRootWithCorePlugins({
+      elasticsearch: {
+        hosts: [`http://127.0.0.1:${(esServer.address() as AddressInfo).port}`],
+        healthCheck: { retry: 1 },
+      },
+      status: { allowAnonymous: true },
+    });
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();
@@ -87,8 +94,9 @@ describe('fake elasticsearch', () => {
 
     // give kibanaServer's status Observables enough time to bootstrap
     // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
+    // set healthCheckRetry to 1, for faster testing
     // see https://github.com/elastic/kibana/issues/129754
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   });
 
   afterAll(async () => {
@@ -107,7 +115,7 @@ describe('fake elasticsearch', () => {
   });
 
   test('should fail to start Kibana because of the Product Check Error', async () => {
-    await expect(kibanaServer.start()).rejects.toThrowError(
+    await expect(kibanaServer.start()).rejects.toThrow(
       'The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });

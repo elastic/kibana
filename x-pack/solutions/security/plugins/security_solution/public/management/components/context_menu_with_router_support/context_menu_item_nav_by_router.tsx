@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
+import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -48,11 +49,6 @@ const StyledEuiFlexItem = styled('div')`
   padding-right: ${(props) => props.theme.eui.euiSizeS};
 `;
 
-const StyledEuiText = styled(EuiText)`
-  padding: ${(props) => props.theme.eui.euiSizeM};
-  line-height: ${(props) => props.theme.eui.euiFontSizeM};
-`;
-
 /**
  * Just like `EuiContextMenuItem`, but allows for additional props to be defined which will
  * allow navigation to a URL path via React Router
@@ -65,6 +61,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     textTruncate,
     hoverInfo,
     children,
+    href,
     isNavigationDisabled = false,
     ...otherMenuItemProps
   }) => {
@@ -87,6 +84,21 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       ) : null;
     }, [hoverInfo]);
 
+    const handleItemClick = useCallback<MouseEventHandler>(
+      (ev) => {
+        if (isNavigationDisabled) {
+          return;
+        }
+
+        if (navigateAppId) {
+          handleOnClickViaNavigateToApp(ev);
+        } else if (onClick) {
+          onClick(ev);
+        }
+      },
+      [handleOnClickViaNavigateToApp, isNavigationDisabled, navigateAppId, onClick]
+    );
+
     const content = textTruncate ? (
       <>
         <div
@@ -108,18 +120,11 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       </>
     );
 
-    return isNavigationDisabled ? (
-      <StyledEuiText
-        size="s"
-        className="eui-textTruncate"
-        data-test-subj={otherMenuItemProps['data-test-subj']}
-      >
-        {content}
-      </StyledEuiText>
-    ) : (
+    return (
       <StyledEuiContextMenuItem
         {...otherMenuItemProps}
-        onClick={navigateAppId ? handleOnClickViaNavigateToApp : onClick}
+        onClick={handleItemClick}
+        href={isNavigationDisabled ? undefined : href}
       >
         <EuiFlexGroup alignItems="center" gutterSize="none">
           {content}

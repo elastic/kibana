@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { CorePluginAPluginSetup } from '@kbn/core-plugin-a-plugin/public/plugin';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CorePluginAPluginSetup } from '@kbn/core-plugin-a-plugin/public/plugin';
 
 declare global {
   interface Window {

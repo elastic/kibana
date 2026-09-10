@@ -7,7 +7,8 @@
 
 import { createTestConfig } from '../../common/config';
 
-// eslint-disable-next-line import/no-default-export
+export const EmailMaximumBodyLength = 10000;
+
 export default createTestConfig('security_and_spaces', {
   disabledPlugins: [],
   license: 'trial',
@@ -21,4 +22,6 @@ export default createTestConfig('security_and_spaces', {
     'crowdstrikeConnectorOn',
     'microsoftDefenderEndpointOn',
   ],
+  emailMaximumBodyLength: EmailMaximumBodyLength,
+  indexRefreshInterval: '1s',
 });

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { ConnectorViewIndex } from '@kbn/search-connectors';
 import {
   ConnectorStatus,
   DisplayType,
   FieldType,
   FilteringValidationState,
   SyncStatus,
-  ConnectorViewIndex,
   IngestionStatus,
   IngestionMethod,
 } from '@kbn/search-connectors';
 
-import { ApiViewIndex } from '../types';
+import type { ApiViewIndex } from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,

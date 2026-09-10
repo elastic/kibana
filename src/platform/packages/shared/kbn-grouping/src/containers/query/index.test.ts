@@ -92,13 +92,31 @@ describe('group selector', () => {
       expect(result.query.bool.filter.length).toEqual(2);
     });
 
+    it('Sets unitsCount filter when provided', () => {
+      const result = getGroupingQuery({
+        ...mocktestProps1,
+        unitsCountFilter: {
+          term: { 'kibana.alert.workflow_status': 'open' },
+        },
+      });
+
+      expect(result.aggs.unitsCount).toEqual({
+        filter: { term: { 'kibana.alert.workflow_status': 'open' } },
+        aggs: {
+          filteredUnitsCount: {
+            value_count: { field: 'groupByField' },
+          },
+        },
+      });
+    });
+
     it('groupByField script should contain logic which gets all values of groupByField', () => {
       const scriptResponse = {
         source: dedent(`
           def groupValues = [];
           if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
             groupValues = doc[params['selectedGroup']];
-          }  
+          }
           int count = groupValues.size();
           if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
           else {
@@ -126,7 +144,7 @@ describe('group selector', () => {
           def groupValues = [];
           if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
             groupValues = doc[params['selectedGroup']];
-          }  
+          }
           int count = groupValues.size();
           if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
           else {
@@ -210,6 +228,24 @@ describe('group selector', () => {
           value: 20,
         },
       });
+    });
+
+    it('parseGroupingQuery hoists filteredUnitsCount.value if present', () => {
+      const filteredAggs = {
+        ...groupingAggs,
+        unitsCount: {
+          doc_count: 100,
+          filteredUnitsCount: {
+            value: 42,
+          },
+        },
+      };
+      const result = parseGroupingQuery(
+        'source.ip',
+        mocktestProps1.uniqueValue,
+        filteredAggs as unknown as GroupingAggregation<{}>
+      ) as GroupingAggregation<{}>;
+      expect(result.unitsCount).toEqual({ value: 42 });
     });
 
     it('parseGroupingQuery parses and formats fields witih multiple values', () => {

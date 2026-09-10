@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 
 export const defaultExpression = (): ExpressionAstExpression => ({
   type: 'expression',

@@ -10,7 +10,8 @@
 import { readFile as readFileAsync } from 'fs/promises';
 import { globNamespacePaths, makeAbsolutePath } from '../../utils';
 import { extractI18nMessageDescriptors } from '../../extractors/formatjs';
-import { I18nConfig } from '../../types';
+import { I18N_CALL_PATTERN } from '../../constants';
+import type { I18nConfig } from '../../types';
 
 export interface Params {
   rootPaths: string[];
@@ -49,6 +50,16 @@ export async function* extractUntrackedMessages(rootPath: string, definedPathsFo
   let itter = 1;
   for (const untrackedFilePath of untrackedFiles) {
     const source = await readFileAsync(untrackedFilePath, 'utf8');
+    if (!I18N_CALL_PATTERN.test(source)) {
+      yield {
+        untrackedFilePath,
+        extractedMessages: new Map(),
+        totalChecked: itter,
+        totalToCheck: untrackedFiles.length,
+      };
+      itter++;
+      continue;
+    }
     const extractedMessages = await extractI18nMessageDescriptors(untrackedFilePath, source);
     yield {
       untrackedFilePath,

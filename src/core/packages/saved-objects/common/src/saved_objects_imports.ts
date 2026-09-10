@@ -61,6 +61,38 @@ export interface SavedObjectsImportUnsupportedTypeError {
   type: 'unsupported_type';
 }
 
+// Note: the following two interfaces are not needed until we support importing
+// access control metadata for admins (phase 2 of write-restricted dashboards).
+// To be used once access control is enabled for imports: https://github.com/elastic/kibana/issues/242671
+/**
+ * Represents a failure to import due to missing access control mode metadata.
+ * This metadata is required only for objects that support access control when
+ * an Admin chooses to apply access control on import.
+ * @public
+ */
+// export interface SavedObjectsImportMissingAccessControlModeMetadataError {
+//   type: 'missing_access_control_mode';
+// }
+
+/**
+ * Represents a failure to import due to missing access control owner metadata.
+ * This metadata is required only for objects that support access control when
+ * an Admin chooses to apply access control on import.
+ * @public
+ */
+// export interface SavedObjectsImportMissingAccessControlOwnerMetadataError {
+//   type: 'missing_access_control_owner';
+// }
+
+/**
+ * Represents a failure to import due to unexpected access control metadata.
+ * This metadata is required only for objects that support access control.
+ * @public
+ */
+export interface SavedObjectsImportUnexpectedAccessControlMetadataError {
+  type: 'unexpected_access_control_metadata';
+}
+
 /**
  * Represents a failure to import due to an unknown reason.
  * @public
@@ -98,7 +130,8 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
-    | SavedObjectsImportUnknownError;
+    | SavedObjectsImportUnknownError
+    | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 
 /**

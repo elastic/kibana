@@ -17,9 +17,9 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { getFips } from 'crypto';
-import { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
+import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 
@@ -165,6 +165,7 @@ describe('migration v2', () => {
 
       await root.preboot();
       const setup = await root.setup();
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- integration test: suite gated by getFips() === 0 above
       setup.savedObjects.registerType({
         name: 'foo',
         hidden: false,
@@ -181,6 +182,7 @@ describe('migration v2', () => {
           },
         },
       });
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- integration test: suite gated by getFips() === 0 above
       setup.savedObjects.registerType({
         name: 'bar',
         hidden: false,

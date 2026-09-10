@@ -13,7 +13,7 @@ import { getFindKnowledgeBaseEntriesResultWithSingleHit } from '../../../__mocks
 import { findKnowledgeBaseEntriesRoute } from './find_route';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 const mockUser = {
-  username: 'my_username',
+  username: 'elastic',
   authentication_realm: {
     type: 'my_realm_type',
     name: 'my_realm_name',
@@ -91,7 +91,7 @@ describe('Find Knowledge Base Entries route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `sort_field: Invalid enum value. Expected 'created_at' | 'is_default' | 'title' | 'updated_at', received 'name'`
+        'sort_field: Invalid option: expected one of "created_at"|"is_default"|"title"|"updated_at"'
       );
     });
 

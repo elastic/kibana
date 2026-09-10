@@ -5,59 +5,141 @@
  * 2.0.
  */
 
-import {
+import type {
   AssistantMessage,
+  ChatCompleteCacheControl,
   ChatCompleteCompositeResponse,
+  ChatCompletionReasoning,
   Message,
-  MessageRole,
   Model,
   ToolCall,
   ToolChoice,
   ToolDefinition,
   ToolMessage,
+  UnvalidatedToolCall,
   UserMessage,
+} from '@kbn/inference-common';
+import {
+  MessageRole,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
+import { SpanKind } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
-import { withInferenceSpan } from './with_inference_span';
-import {
-  AssistantMessageEvent,
-  ChoiceEvent,
-  ElasticGenAIAttributes,
+import { withActiveInferenceSpan } from './with_active_inference_span';
+import { getGenAiToolDefinitions } from './gen_ai_tool_definitions';
+import type {
+  GenAIInputMessage,
+  GenAIMessagePart,
+  GenAIOutputMessage,
   GenAISemConvAttributes,
-  GenAISemanticConventions,
-  MessageEvent,
-  SystemMessageEvent,
-  ToolMessageEvent,
-  UserMessageEvent,
+  GenAITextPart,
 } from './types';
-import { flattenAttributes } from './util/flatten_attributes';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 
-function addEvent(span: Span, event: MessageEvent) {
-  if (!span.isRecording()) {
-    return span;
-  }
-  const flattened = flattenAttributes(event.body);
-  return span.addEvent(event.name, {
-    ...flattened,
-    ...event.attributes,
+function buildInputMessages(messages: Message[]): GenAIInputMessage[] {
+  return messages.map((message) => {
+    switch (message.role) {
+      case MessageRole.User:
+        return buildUserInputMessage(message);
+      case MessageRole.Assistant:
+        return buildAssistantInputMessage(message);
+      case MessageRole.Tool:
+        return buildToolInputMessage(message);
+    }
   });
 }
 
-function setChoice(span: Span, { content, toolCalls }: { content: string; toolCalls: ToolCall[] }) {
-  addEvent(span, {
-    name: GenAISemanticConventions.GenAIChoice,
-    body: {
+function buildUserInputMessage(message: UserMessage): GenAIInputMessage {
+  const content =
+    typeof message.content === 'string' ? message.content : JSON.stringify(message.content);
+  return {
+    role: 'user',
+    parts: [{ type: 'text', content }],
+  };
+}
+
+function buildAssistantInputMessage(message: AssistantMessage): GenAIInputMessage {
+  const parts: GenAIMessagePart[] = [];
+  if (message.content) {
+    parts.push({ type: 'text', content: message.content });
+  }
+  if (message.toolCalls) {
+    for (const toolCall of message.toolCalls) {
+      parts.push({
+        type: 'tool_call',
+        id: toolCall.toolCallId,
+        name: toolCall.function.name,
+        arguments:
+          typeof toolCall.function.arguments === 'string'
+            ? toolCall.function.arguments
+            : JSON.stringify(toolCall.function.arguments),
+      });
+    }
+  }
+  return { role: 'assistant', parts };
+}
+
+function buildToolInputMessage(message: ToolMessage): GenAIInputMessage {
+  const response =
+    typeof message.response === 'string' ? message.response : JSON.stringify(message.response);
+  return {
+    role: 'tool',
+    parts: [{ type: 'tool_call_response', id: message.toolCallId, response }],
+  };
+}
+
+function buildSystemInstructions(system: string): GenAITextPart[] {
+  return [{ type: 'text', content: system }];
+}
+
+function buildOutputMessages({
+  content,
+  toolCalls,
+}: {
+  content: string;
+  toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall>;
+}): GenAIOutputMessage[] {
+  const parts: GenAIMessagePart[] = [];
+  if (content) {
+    parts.push({ type: 'text', content });
+  }
+  for (const toolCall of toolCalls) {
+    parts.push({
+      type: 'tool_call',
+      id: toolCall.toolCallId,
+      name: toolCall.function.name,
+      arguments:
+        typeof toolCall.function.arguments === 'string'
+          ? toolCall.function.arguments
+          : JSON.stringify(toolCall.function.arguments),
+    });
+  }
+  return [
+    {
+      role: 'assistant',
       finish_reason: toolCalls.length ? 'tool_calls' : 'stop',
-      index: 0,
-      message: {
-        ...mapAssistantResponse({ content, toolCalls }),
-      },
+      parts,
     },
-  } satisfies ChoiceEvent);
+  ];
+}
+
+function setOutputMessages(
+  span: Span,
+  {
+    content,
+    toolCalls,
+  }: { content: string; toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall> }
+) {
+  if (!span.isRecording()) {
+    return;
+  }
+  span.setAttribute(
+    GenAISemanticConventions.GenAIOutputMessages,
+    JSON.stringify(buildOutputMessages({ content, toolCalls }))
+  );
 }
 
 function setTokens(
@@ -67,10 +149,22 @@ function setTokens(
   if (!span.isRecording()) {
     return;
   }
-  span.setAttributes({
+  const attributes: Record<string, number> = {
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
     [GenAISemanticConventions.GenAIUsageOutputTokens]: completion,
-    [GenAISemanticConventions.GenAIUsageCachedInputTokens]: cached ?? 0,
+  };
+  if (cached != null) {
+    attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
+  }
+  span.setAttributes(attributes);
+}
+
+function setResponseModel(span: Span, { modelName }: { modelName?: string }) {
+  if (!span.isRecording()) {
+    return;
+  }
+  span.setAttributes({
+    [GenAISemanticConventions.GenAIResponseModel]: modelName ?? 'unknown',
   } satisfies GenAISemConvAttributes);
 }
 
@@ -80,68 +174,13 @@ interface InferenceGenerationOptions {
   messages: Message[];
   tools?: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice;
-}
-
-function getUserMessageEvent(message: UserMessage): UserMessageEvent {
-  return {
-    name: GenAISemanticConventions.GenAIUserMessage,
-    body: {
-      content:
-        typeof message.content === 'string' ? message.content : JSON.stringify(message.content),
-      role: 'user',
-    },
-  };
-}
-
-function getAssistantMessageEvent(message: AssistantMessage): AssistantMessageEvent {
-  return {
-    name: GenAISemanticConventions.GenAIAssistantMessage,
-    body: mapAssistantResponse({
-      content: message.content,
-      toolCalls: message.toolCalls,
-    }),
-  };
-}
-
-function getToolMessageEvent(message: ToolMessage): ToolMessageEvent {
-  return {
-    name: GenAISemanticConventions.GenAIToolMessage,
-    body: {
-      role: 'tool',
-      id: message.toolCallId,
-      content:
-        typeof message.response === 'string' ? message.response : JSON.stringify(message.response),
-    },
-  };
-}
-
-function mapAssistantResponse({
-  content,
-  toolCalls,
-}: {
-  content?: string | null;
-  toolCalls?: ToolCall[];
-}) {
-  return {
-    content: content || null,
-    role: 'assistant' as const,
-    tool_calls: toolCalls?.map((toolCall) => {
-      return {
-        function: {
-          name: toolCall.function.name,
-          arguments: JSON.stringify(
-            'arguments' in toolCall.function ? toolCall.function.arguments : {}
-          ),
-        },
-        id: toolCall.toolCallId,
-        type: 'function' as const,
-      };
-    }),
-  };
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
+  reasoning?: ChatCompletionReasoning;
 }
 
 /**
- * Wrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span.
+ * Wrapper around {@link withActiveInferenceSpan} that sets the right attributes for a chat operation span.
  * @param options
  * @param cb
  */
@@ -154,18 +193,48 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, ...attributes } = options;
+  const {
+    system,
+    messages,
+    model,
+    toolChoice,
+    tools,
+    cacheControl,
+    sessionId,
+    reasoning,
+    ...attributes
+  } = options;
 
-  const next = withInferenceSpan(
+  const modelProvider = model?.provider ?? 'unknown';
+  const modelId = model?.id ?? model?.family ?? 'unknown';
+
+  const next = withActiveInferenceSpan(
+    `chat ${modelId}`,
     {
-      name: 'chatComplete',
-      ...attributes,
-      [GenAISemanticConventions.GenAIOperationName]: 'chat',
-      [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
-      [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
-      [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-      [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
-      [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+      kind: SpanKind.CLIENT,
+      attributes: {
+        ...attributes,
+        [GenAISemanticConventions.GenAIOperationName]: 'chat',
+        [GenAISemanticConventions.GenAIRequestModel]: modelId,
+        [GenAISemanticConventions.GenAIProviderName]: modelProvider,
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+        [GenAISemanticConventions.GenAIToolDefinitions]: tools
+          ? JSON.stringify(getGenAiToolDefinitions(tools))
+          : undefined,
+        [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+        ...(cacheControl
+          ? {
+              [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+              [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl
+                ? cacheControl.ttl
+                : undefined,
+            }
+          : {}),
+        ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
+        ...(reasoning?.effort
+          ? { [GenAISemanticConventions.GenAIRequestReasoningLevel]: reasoning.effort }
+          : {}),
+      },
     },
     (span) => {
       if (!span) {
@@ -173,31 +242,16 @@ export function withChatCompleteSpan(
       }
 
       if (system) {
-        addEvent(span, {
-          name: GenAISemanticConventions.GenAISystemMessage,
-          body: {
-            content: system,
-            role: 'system',
-          },
-        } satisfies SystemMessageEvent);
+        span.setAttribute(
+          GenAISemanticConventions.GenAISystemInstructions,
+          JSON.stringify(buildSystemInstructions(system))
+        );
       }
 
-      messages
-        .map((message) => {
-          switch (message.role) {
-            case MessageRole.User:
-              return getUserMessageEvent(message);
-
-            case MessageRole.Assistant:
-              return getAssistantMessageEvent(message);
-
-            case MessageRole.Tool:
-              return getToolMessageEvent(message);
-          }
-        })
-        .forEach((event) => {
-          addEvent(span, event);
-        });
+      span.setAttribute(
+        GenAISemanticConventions.GenAIInputMessages,
+        JSON.stringify(buildInputMessages(messages))
+      );
 
       const result = cb(span);
 
@@ -206,12 +260,13 @@ export function withChatCompleteSpan(
           tap({
             next: (value) => {
               if (isChatCompletionMessageEvent(value)) {
-                setChoice(span, {
+                setOutputMessages(span, {
                   content: value.content,
                   toolCalls: value.toolCalls,
                 });
               } else if (isChatCompletionTokenCountEvent(value)) {
                 setTokens(span, value.tokens);
+                setResponseModel(span, { modelName: value.model });
               }
             },
           })
@@ -220,13 +275,14 @@ export function withChatCompleteSpan(
 
       if (isPromise(result)) {
         return result.then((value) => {
-          setChoice(span, {
+          setOutputMessages(span, {
             content: value.content,
             toolCalls: value.toolCalls,
           });
           if (value.tokens) {
             setTokens(span, value.tokens);
           }
+
           return value;
         });
       }

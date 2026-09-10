@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChangeEvent, SyntheticEvent } from 'react';
+import type { ChangeEvent, SyntheticEvent } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useEditModal } from './use_edit_modal';
 
@@ -37,7 +37,7 @@ describe('useEditModal', () => {
     const preventDefault = jest.fn();
     act(() => onSubmit({ preventDefault } as unknown as SyntheticEvent));
     expect(error).toBeFalsy();
-    expect(onSave).toBeCalled();
-    expect(preventDefault).toBeCalled();
+    expect(onSave).toHaveBeenCalled();
+    expect(preventDefault).toHaveBeenCalled();
   });
 });

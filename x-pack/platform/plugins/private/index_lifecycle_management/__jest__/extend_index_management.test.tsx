@@ -7,10 +7,14 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
+import { useEuiTheme } from '@elastic/eui';
+
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import type { Index } from '../common/types';
 
 import { init } from '../integration_tests/helpers/http_requests';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -21,9 +25,6 @@ import {
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
-import { Index } from '@kbn/index-management-plugin/common';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { useEuiTheme } from '@elastic/eui';
 
 const { httpSetup } = init();
 
@@ -43,13 +44,14 @@ jest.mock('@elastic/eui', () => ({
       themeName: 'EUI_THEME_BOREALIS',
       colors: {
         vis: {
-          euiColorVis1: '#6092C0',
-          euiColorVis2: '#D36086',
-          euiColorVis4: '#CA8EAE',
-          euiColorVis5: '#D6BF57',
-          euiColorVis6: '#B9A888',
-          euiColorVis9: '#E7664C',
+          euiColorVis3: '#BFDBFF',
         },
+        severity: {
+          risk: '#FF995E',
+          warning: '#FCD883',
+          neutral: '#B5E5F2',
+        },
+        backgroundBaseSubdued: '#CAD3E2',
       },
     },
   }),
@@ -64,8 +66,8 @@ const indexWithoutLifecyclePolicy: Index = {
   replica: 1,
   documents: 1,
   documents_deleted: 0,
-  size: '3.4kb',
-  primary_size: '3.4kb',
+  size: 3480,
+  primary_size: 3480,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -84,8 +86,8 @@ const indexWithLifecyclePolicy: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -100,6 +102,7 @@ const indexWithLifecyclePolicy: Index = {
     action_time_millis: 1544187775867,
     step: 'complete',
     step_time_millis: 1544187775867,
+    skip: false,
   },
 };
 
@@ -112,8 +115,8 @@ const indexWithLifecycleError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -133,6 +136,7 @@ const indexWithLifecycleError: Index = {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
     },
+    skip: false,
   },
 };
 const indexWithLifecyclePhaseDefinition: Index = {
@@ -144,8 +148,8 @@ const indexWithLifecyclePhaseDefinition: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -166,6 +170,7 @@ const indexWithLifecyclePhaseDefinition: Index = {
       version: 1,
       modified_date_in_millis: 1544031699844,
     },
+    skip: false,
   },
 };
 const indexWithLifecycleWaitingStep: Index = {
@@ -177,8 +182,8 @@ const indexWithLifecycleWaitingStep: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -199,6 +204,34 @@ const indexWithLifecycleWaitingStep: Index = {
       all_shards_active: false,
       number_of_replicas: 2,
     },
+    skip: false,
+  },
+};
+const indexWithNonExistentPolicyError: Index = {
+  health: 'yellow',
+  status: 'open',
+  name: 'testy3',
+  uuid: 'XL11TLa3Tvq298_dMUzLHQ',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
+  size: 6656,
+  primary_size: 6656,
+  aliases: 'none',
+  isFrozen: false,
+  hidden: false,
+  ilm: {
+    index: 'testy3',
+    managed: true,
+    policy: 'testy',
+    index_creation_date_millis: 1753074916462,
+    step: 'ERROR',
+    step_info: {
+      type: 'illegal_argument_exception',
+      reason: 'policy [testy] does not exist',
+    },
+    skip: false,
   },
 };
 
@@ -217,21 +250,26 @@ describe('extend index management', () => {
       expect(extension).toBeNull();
     });
 
-    test('should return null when no index has lifecycle errors', () => {
+    test('should return null when no index has failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
         indices: [indexWithLifecyclePolicy, indexWithLifecyclePolicy],
       });
       expect(extension).toBeNull();
     });
 
-    test('should return null when not all indices have lifecycle errors', () => {
+    test('should return extension with only indices that have failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
-        indices: [indexWithLifecyclePolicy, indexWithLifecycleError],
+        indices: [
+          indexWithLifecyclePolicy,
+          indexWithLifecycleError,
+          indexWithNonExistentPolicyError,
+        ],
       });
-      expect(extension).toBeNull();
+      expect(extension).toBeDefined();
+      expect(extension).toMatchSnapshot();
     });
 
-    test('should return extension when all indices have lifecycle errors', () => {
+    test('should return extension when all indices have failed step lifecycle errors', () => {
       const extension = retryLifecycleActionExtension({
         indices: [indexWithLifecycleError, indexWithLifecycleError],
       });
@@ -286,7 +324,7 @@ describe('extend index management', () => {
       expect(extension).toBeNull();
     });
 
-    test('should return extension when one index is passed and it does not have lifecycle policy', () => {
+    test('should return extension when one index is passed and it does not have lifecycle policy', async () => {
       const extension = addLifecyclePolicyActionExtension({
         indices: [indexWithoutLifecyclePolicy],
         reloadIndices,
@@ -294,8 +332,12 @@ describe('extend index management', () => {
       });
       expect(extension?.renderConfirmModal).toBeDefined();
       const component = extension!.renderConfirmModal(jest.fn());
-      const rendered = mountWithIntl(component);
-      expect(rendered.exists('.euiModal--confirmation'));
+      renderWithI18n(component);
+
+      // Wait for the async componentDidMount to complete
+      await waitFor(() => {
+        expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -323,11 +365,12 @@ describe('extend index management', () => {
       expect(extension).toMatchSnapshot();
     });
 
-    test('should return action definition when any index has lifecycle error', () => {
+    test('should return action definition when any index has failed step lifecycle error', () => {
       const extension = ilmBannerExtension([
         indexWithoutLifecyclePolicy,
         indexWithLifecyclePolicy,
         indexWithLifecycleError,
+        indexWithNonExistentPolicyError,
       ]);
       const { requestMethod, successMessage, buttonLabel } =
         retryLifecycleActionExtension({
@@ -339,6 +382,15 @@ describe('extend index management', () => {
         buttonLabel,
         indexNames: [indexWithLifecycleError.name],
       });
+    });
+
+    test('should not return action definition when index has lifecycle error other than failed step', () => {
+      const extension = ilmBannerExtension([
+        indexWithoutLifecyclePolicy,
+        indexWithLifecyclePolicy,
+        indexWithNonExistentPolicyError,
+      ]);
+      expect(extension?.action).toBeUndefined();
     });
   });
 
@@ -370,41 +422,45 @@ describe('extend index management', () => {
           index: indexWithLifecyclePolicy,
         });
       expect(shouldRenderTab).toBeTruthy();
-      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecyclePolicy} />);
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+      const { container } = renderWithI18n(
+        <IlmContentComponent index={indexWithLifecyclePolicy} />
+      );
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyStepPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyErrorPanel)).not.toBeInTheDocument();
     });
 
     test('should render an error panel when index has lifecycle error', () => {
-      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleError} />);
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeTruthy();
+      const { container } = renderWithI18n(<IlmContentComponent index={indexWithLifecycleError} />);
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyStepPanel)).not.toBeInTheDocument();
+      expect(screen.getByTestId(policyErrorPanel)).toBeInTheDocument();
     });
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
-      const rendered = mountWithIntl(
+      const { container } = renderWithI18n(
         <IlmContentComponent index={indexWithLifecyclePhaseDefinition} />
       );
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.getByTestId(phaseDefinitionPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(policyStepPanel)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(policyErrorPanel)).not.toBeInTheDocument();
     });
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
-      const rendered = mountWithIntl(<IlmContentComponent index={indexWithLifecycleWaitingStep} />);
-      expect(rendered.render()).toMatchSnapshot();
-      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
-      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeTruthy();
-      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+      const { container } = renderWithI18n(
+        <IlmContentComponent index={indexWithLifecycleWaitingStep} />
+      );
+      expect(container).toMatchSnapshot();
+      expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
+      expect(screen.getByTestId(policyStepPanel)).toBeInTheDocument();
+      expect(screen.queryByTestId(policyErrorPanel)).not.toBeInTheDocument();
     });
   });
 

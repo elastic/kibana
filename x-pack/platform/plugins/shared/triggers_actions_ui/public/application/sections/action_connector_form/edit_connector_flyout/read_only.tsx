@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { Suspense } from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionTypeModel } from '../../../..';
+import type { ActionTypeModel } from '../../../..';
 
 export const ReadOnlyConnectorMessage: React.FC<{
   connectorId: string;
@@ -19,24 +19,25 @@ export const ReadOnlyConnectorMessage: React.FC<{
 }> = ({ connectorId, connectorName, extraComponent, href }) => {
   const ExtraComponent = extraComponent;
   return (
-    <>
-      <EuiText>
+    <EuiText size="s">
+      <p>
         {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.descriptionText', {
           defaultMessage: 'This connector is read-only.',
         })}
-      </EuiText>
-      <EuiLink data-test-subj="read-only-link" href={href} target="_blank">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
-          defaultMessage="Learn more about preconfigured connectors."
-        />
-      </EuiLink>
+      </p>
+      <p>
+        <EuiLink data-test-subj="read-only-link" href={href} target="_blank">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
+            defaultMessage="Learn more about preconfigured connectors."
+          />
+        </EuiLink>
+      </p>
       {ExtraComponent && (
-        <>
-          <EuiSpacer size="m" />
+        <Suspense fallback={null}>
           <ExtraComponent connectorId={connectorId} connectorName={connectorName} />
-        </>
+        </Suspense>
       )}
-    </>
+    </EuiText>
   );
 };

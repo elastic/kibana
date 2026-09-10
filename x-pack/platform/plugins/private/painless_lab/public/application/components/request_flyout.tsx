@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiCodeBlock,
   EuiTabbedContent,
@@ -16,9 +17,10 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Links } from '../../links';
+import type { Links } from '../../links';
 
 interface Props {
   onClose: any;
@@ -33,15 +35,17 @@ export const RequestFlyout: FunctionComponent<Props> = ({
   response,
   links,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={640}>
+    <EuiFlyout onClose={onClose} maxWidth={640} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
           <EuiFlexItem>
             {/* We need an extra div to get out of flex grow */}
             <div>
               <EuiTitle size="m" data-test-subj="painlessLabRequestFlyoutHeader">
-                <h2>
+                <h2 id={flyoutTitleId}>
                   {i18n.translate('xpack.painlessLab.flyoutTitle', {
                     defaultMessage: 'API request',
                   })}

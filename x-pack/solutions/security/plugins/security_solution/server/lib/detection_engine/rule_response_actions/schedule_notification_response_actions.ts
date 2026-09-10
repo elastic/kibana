@@ -63,6 +63,13 @@ export const getScheduleNotificationResponseActionsService =
           if (alertsFromElasticDefend.length > 0) {
             await endpointResponseAction(responseAction, endpointAppContextService, {
               alerts: alertsFromElasticDefend,
+            }).catch((error) => {
+              endpointAppContextService
+                .createLogger('getScheduleNotificationResponseActionsService')
+                .error(
+                  `Unexpected failure of Endpoint automated response actions: ${error.message}`,
+                  { error }
+                );
             });
           }
         }

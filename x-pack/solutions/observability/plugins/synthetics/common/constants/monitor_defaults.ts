@@ -5,27 +5,29 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  CodeEditorMode,
+import type {
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
-  MonitorTypeEnum,
-  FormMonitorType,
   HTTPAdvancedFields,
-  HTTPMethod,
   HTTPSimpleFields,
   ICMPSimpleFields,
-  Mode,
   MonitorDefaults,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  ScreenshotOption,
-  SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
   ThrottlingConfig,
   TLSFields,
+} from '../runtime_types/monitor_management';
+import {
+  CodeEditorMode,
+  MonitorTypeEnum,
+  FormMonitorType,
+  HTTPMethod,
+  Mode,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  ScreenshotOption,
+  SourceType,
   TLSVersion,
   VerificationMode,
 } from '../runtime_types/monitor_management';
@@ -165,6 +167,7 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: '',
   [ConfigKey.JOURNEY_FILTERS_TAGS]: [],
   [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
   [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
 };
 
@@ -294,3 +297,5 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
     ...DEFAULT_TLS_FIELDS,
   },
 };
+
+export const HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS = 30;

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-import { IndexSettings } from '../../../../../../common';
+import { EuiCodeBlock } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import type { IndexSettings } from '../../../../../../common';
 
 interface Props {
   settings: IndexSettings | undefined;
@@ -26,14 +27,13 @@ export const TabSettings: React.FunctionComponent<Props> = ({ settings }) => {
   }
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={
         <FormattedMessage
           id="xpack.idxMgmt.settingsTab.noIndexSettingsTitle"
           defaultMessage="No settings defined."
         />
       }
-      iconType="pin"
       data-test-subj="noSettingsCallout"
       size="s"
     />

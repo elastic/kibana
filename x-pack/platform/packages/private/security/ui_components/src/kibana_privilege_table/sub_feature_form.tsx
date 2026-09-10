@@ -69,7 +69,7 @@ export const SubFeatureForm = (props: Props) => {
         type="info"
         color="subdued"
         content={tooltipContent}
-        anchorProps={{ 'data-test-subj': getTestId('nameTooltip') }}
+        data-test-subj={getTestId('nameTooltip')}
       />
     );
   };
@@ -121,6 +121,17 @@ export const SubFeatureForm = (props: Props) => {
     privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
+    const hasMutuallyExclusiveGroup = groupsWithPrivileges.some(
+      (group) => group.groupType === 'mutually_exclusive'
+    );
+    const hasMutuallyExclusiveSelection = groupsWithPrivileges.some(
+      (group) =>
+        group.groupType === 'mutually_exclusive' &&
+        group.privileges.some((p) => props.selectedFeaturePrivileges.includes(p.id))
+    );
+    const isDisabledByMutuallyExclusiveGroup =
+      hasMutuallyExclusiveGroup && !hasMutuallyExclusiveSelection;
+
     return (
       <div key={index}>
         {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
@@ -146,7 +157,7 @@ export const SubFeatureForm = (props: Props) => {
                 }
               }}
               checked={isGranted}
-              disabled={props.disabled}
+              disabled={props.disabled || isDisabledByMutuallyExclusiveGroup}
             />
           );
         })}
@@ -202,9 +213,14 @@ export const SubFeatureForm = (props: Props) => {
           const privilegesWithoutGroupEntries = props.selectedFeaturePrivileges.filter(
             (sp) => !privilegeGroup.privileges.some((privilege) => privilege.id === sp)
           );
-          // fire on-change with the newly selected privilege
           if (selectedPrivilegeId === NO_PRIVILEGE_VALUE) {
-            props.onChange(privilegesWithoutGroupEntries);
+            const independentPrivilegeIds = groupsWithPrivileges
+              .filter((g) => g.groupType === 'independent')
+              .flatMap((g) => g.privileges.map((p) => p.id));
+
+            props.onChange(
+              privilegesWithoutGroupEntries.filter((sp) => !independentPrivilegeIds.includes(sp))
+            );
           } else {
             props.onChange([...privilegesWithoutGroupEntries, selectedPrivilegeId]);
           }

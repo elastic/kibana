@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
+import { connect } from 'react-redux-v7';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import type { AnyAction } from 'redux-v4';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { MapApp } from './map_app';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
@@ -19,14 +19,16 @@ import {
   getQueryableUniqueIndexPatternIds,
   getTimeFilters,
   hasDirtyState,
+  isMapLoading,
 } from '../../../selectors/map_selectors';
 import { setQuery, setExecutionContext, enableFullScreen, openMapSettings } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../../reducers/store';
+import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
+    isMapLoading: isMapLoading(state),
     isFullScreen: getIsFullScreen(state),
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     isSaveDisabled: hasDirtyState(state),
@@ -47,12 +49,14 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       query,
       timeFilters,
       searchSessionId,
+      projectRouting,
     }: {
       filters?: Filter[];
       query?: Query;
       timeFilters?: TimeRange;
       forceRefresh?: boolean;
       searchSessionId?: string;
+      projectRouting?: ProjectRouting;
     }) => {
       dispatch(
         setQuery({
@@ -61,6 +65,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
           timeFilters,
           forceRefresh,
           searchSessionId,
+          projectRouting,
         })
       );
     },

@@ -11,39 +11,22 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 
+import { PageScope } from '../../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
-import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../../../sourcerer/containers';
-import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 interface FiltersProps {
   filters: Filter[];
 }
 
 export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
-
-  // get the sourcerer `DataViewSpec` for alerts:
-  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.detections);
-
-  // create a `DataView` from the `DataViewSpec`:
-  const { dataView: oldDataView } = useCreateDataView({
-    dataViewSpec: oldSourcererDataView,
-    loading: oldIsLoadingIndexPattern,
-    skip: newDataViewPickerEnabled,
-  });
-
-  const alertsDataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView } = useDataView(PageScope.alerts);
 
   const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
   const searchBarFilters = useMemo(() => {
-    if (!alertsDataView || isEsql) {
+    if (!dataView || isEsql) {
       return filters;
     }
-    const index = alertsDataView.getIndexPattern();
+    const index = dataView.getIndexPattern();
     const filtersWithUpdatedMetaIndex = filters.map((filter) => {
       return {
         ...filter,
@@ -55,9 +38,9 @@ export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
     });
 
     return filtersWithUpdatedMetaIndex;
-  }, [alertsDataView, filters, isEsql]);
+  }, [dataView, filters, isEsql]);
 
-  if (!alertsDataView) {
+  if (!dataView) {
     return null;
   }
 
@@ -65,7 +48,7 @@ export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
 
   return (
     <EuiFlexGroup data-test-subj={'filters'} wrap responsive={false} gutterSize="xs">
-      <FilterItems filters={flattenedFilters} indexPatterns={[alertsDataView]} readOnly />
+      <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />
     </EuiFlexGroup>
   );
 });

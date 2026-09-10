@@ -7,7 +7,7 @@
 
 import { invert } from 'lodash/fp';
 import { v4 } from 'uuid';
-import { Replacements } from '../../schemas';
+import type { Replacements } from '../../schemas';
 
 export const getAnonymizedValue = ({
   currentReplacements,

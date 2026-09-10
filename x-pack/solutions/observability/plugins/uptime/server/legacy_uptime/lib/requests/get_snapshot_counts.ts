@@ -7,9 +7,9 @@
 
 import type { ESFilter } from '@kbn/es-types';
 import { getQueryStringFilter } from './search/get_query_string_filter';
-import { UMElasticsearchQueryFn } from '../adapters';
+import type { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../../common/constants';
-import { Snapshot } from '../../../../common/runtime_types';
+import type { Snapshot } from '../../../../common/runtime_types';
 import { QueryContext } from './search';
 import {
   EXCLUDE_RUN_ONCE_FILTER,

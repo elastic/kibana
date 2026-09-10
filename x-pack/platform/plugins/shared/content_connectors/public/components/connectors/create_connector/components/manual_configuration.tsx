@@ -16,17 +16,19 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  useGeneratedHtmlId,
+  EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { NATIVE_CONNECTOR_DEFINITIONS, NativeConnector } from '@kbn/search-connectors';
+import type { NativeConnector } from '@kbn/search-connectors';
+import { NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 import { ManualConfigurationFlyout } from './manual_configuration_flyout';
 import { useAppContext } from '../../../../app_context';
@@ -65,7 +67,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
     setPopover(false);
   };
   const { selectedConnector, rawName } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [flyoutContent, setFlyoutContent] = useState<'manual_config' | 'client'>();
@@ -181,7 +183,7 @@ GET connector-${rawName}/_search
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="edit"
-      icon="console"
+      icon="commandLine"
       onClick={() => {
         closePopover();
       }}
@@ -208,7 +210,7 @@ GET connector-${rawName}/_search
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="share"
-      icon="console"
+      icon="commandLine"
       onClick={() => {
         setFlyoutContent('client');
         setIsFlyoutVisible(true);
@@ -226,20 +228,32 @@ GET connector-${rawName}/_search
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.contentConnectors.createConnector.finishUpStep.popover.ariaLabel',
+          { defaultMessage: 'More configuration options' }
+        )}
         id={splitButtonPopoverId}
         button={
-          <EuiButtonIcon
-            data-test-subj="enterpriseSearchFinishUpStepButton"
-            display="fill"
-            disabled={isDisabled}
-            size="m"
-            iconType="boxesVertical"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.contentConnectors.createConnector.finishUpStep.euiButtonIcon.moreLabel',
               { defaultMessage: 'More' }
             )}
-            onClick={onButtonClick}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="enterpriseSearchFinishUpStepButton"
+              display="fill"
+              disabled={isDisabled}
+              size="m"
+              iconType="boxesVertical"
+              aria-label={i18n.translate(
+                'xpack.contentConnectors.createConnector.finishUpStep.euiButtonIcon.moreLabel',
+                { defaultMessage: 'More' }
+              )}
+              onClick={onButtonClick}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

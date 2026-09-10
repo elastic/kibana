@@ -8,9 +8,9 @@
  */
 
 import { difference } from 'lodash';
-import { I18nCheckTaskContext, MessageDescriptor } from '../../types';
-import { ErrorReporter } from '../../utils';
-import { TaskReporter } from '../../utils/task_reporter';
+import type { I18nCheckTaskContext, MessageDescriptor } from '../../types';
+import type { ErrorReporter } from '../../utils';
+import type { TaskReporter } from '../../utils/task_reporter';
 import type { GroupedMessagesByNamespace } from './group_messages_by_namespace';
 
 export const removeUnusedTranslations = ({

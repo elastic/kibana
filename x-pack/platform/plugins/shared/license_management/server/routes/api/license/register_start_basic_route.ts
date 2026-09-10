@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { startBasic } from '../../../lib/start_basic';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
 export function registerStartBasicRoute({
@@ -24,7 +24,7 @@ export function registerStartBasicRoute({
           reason: 'Relies on es client for authorization',
         },
       },
-      validate: { query: schema.object({ acknowledge: schema.string() }) },
+      validate: { query: schema.object({ acknowledge: schema.string({ maxLength: 64 }) }) },
     },
     async (ctx, req, res) => {
       const { client } = (await ctx.core).elasticsearch;

@@ -8,7 +8,7 @@
  */
 
 import { expectAssignable, expectNotAssignable } from 'tsd';
-import { PublicMethodsOf } from '../../..';
+import type { PublicMethodsOf } from '../../..';
 
 class Test {
   public name: string = '';

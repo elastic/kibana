@@ -24,6 +24,7 @@ import { coreFeatureFlagsMock } from '@kbn/core/public/mocks';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
@@ -99,14 +100,16 @@ export const StorybookContext: React.FC<{
         Context: function I18nContext({ children }) {
           return <I18nProvider>{children}</I18nProvider>;
         },
+        getConfigLocale: () => 'en',
       },
+      injection: {} as unknown as CoreDiServiceStart,
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),
       settings: getSettings(),
       theme: {
         theme$: EMPTY,
-        getTheme: () => ({ darkMode: false, name: 'amsterdam' }),
+        getTheme: () => ({ darkMode: false, name: 'borealis' }),
       },
       pricing: {} as unknown as PricingServiceStart,
       security: {} as unknown as SecurityServiceStart,
@@ -127,6 +130,7 @@ export const StorybookContext: React.FC<{
           allAgentPolicies: true,
           addAgents: true,
           addFleetServers: true,
+          generateAgentReports: true,
         },
         integrations: {
           all: true,
@@ -142,7 +146,6 @@ export const StorybookContext: React.FC<{
           writeIntegrationPolicies: true,
         },
       },
-      guidedOnboarding: {},
     }),
     [isCloudEnabled]
   );

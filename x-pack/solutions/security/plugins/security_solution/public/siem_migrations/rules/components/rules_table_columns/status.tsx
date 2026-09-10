@@ -8,13 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 import { StatusBadge } from '../status_badge';
-import { TableHeader } from './header';
-import { convertTranslationResultIntoText } from '../../utils/translation_results';
+import { TableHeader } from '../../../common/components';
+import { convertTranslationResultIntoText } from '../../../common/utils';
 
 export const SIEM_MIGRATIONS_STATUS_HEADER_ID = 'siemMigrationsStatusHeader';
 
@@ -44,12 +44,14 @@ export const createStatusColumn = (): TableColumn => {
                 </EuiText>
               ),
               installed: <b>{i18n.INSTALLED_STATUS_TITLE}</b>,
-              translated: <b>{convertTranslationResultIntoText(RuleTranslationResult.FULL)}</b>,
+              translated: (
+                <b>{convertTranslationResultIntoText(MigrationTranslationResult.FULL)}</b>
+              ),
               partiallyTranslated: (
-                <b>{convertTranslationResultIntoText(RuleTranslationResult.PARTIAL)}</b>
+                <b>{convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL)}</b>
               ),
               notTranslated: (
-                <b>{convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE)}</b>
+                <b>{convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE)}</b>
               ),
             }}
           />

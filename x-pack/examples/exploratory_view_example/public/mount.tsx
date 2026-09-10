@@ -7,10 +7,11 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { StartDependencies } from './plugin';
+import type { StartDependencies } from './plugin';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
   async ({ element }: AppMountParameters) => {
@@ -22,7 +23,7 @@ export const mount =
       plugins,
     };
 
-    const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+    const defaultIndexPattern = await plugins.data.dataViews.getDefault();
 
     const i18nCore = core.i18n;
 

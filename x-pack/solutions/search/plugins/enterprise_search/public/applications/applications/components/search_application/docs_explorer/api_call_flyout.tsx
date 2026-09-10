@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
+import type { EuiFocusTrapProps } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -16,8 +17,9 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
+import type { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
@@ -31,6 +33,7 @@ export interface APICallData {
 }
 
 export interface APICallFlyoutProps {
+  focusButtonRef: React.Ref<HTMLButtonElement>;
   lastAPICall: APICallData;
   onClose: () => void;
   searchApplicationName: string;
@@ -40,16 +43,34 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
   onClose,
   lastAPICall,
   searchApplicationName,
+  focusButtonRef,
 }) => {
   const [tab, setTab] = useState<'request' | 'response'>('request');
 
+  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
+    () => ({
+      returnFocus() {
+        if (focusButtonRef && 'current' in focusButtonRef && focusButtonRef.current) {
+          focusButtonRef.current.focus();
+          return false;
+        }
+        return true;
+      },
+    }),
+    [focusButtonRef]
+  );
   const contents = JSON.stringify(lastAPICall[tab], null, 2);
-
+  const flyoutTitleId = useGeneratedHtmlId();
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      aria-labelledby={flyoutTitleId}
+      focusTrapProps={focusTrapProps}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.apiCallFlyout.title"
               defaultMessage="API Call"

@@ -31,8 +31,6 @@ import {
   UPDATE_SOURCE_PROP,
   SET_MOUSE_COORDINATES,
   CLEAR_MOUSE_COORDINATES,
-  SET_GOTO,
-  CLEAR_GOTO,
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
@@ -47,6 +45,7 @@ import {
   UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
   SET_EXECUTION_CONTEXT,
+  SET_PAUSE_SYNC_DATA,
 } from '../../actions/map_action_constants';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -61,13 +60,11 @@ import {
   updateLayerSourceDescriptorProp,
 } from './layer_utils';
 import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './data_request_utils';
-import { MapState } from './types';
+import type { MapState } from './types';
 
 export const DEFAULT_MAP_STATE: MapState = {
   executionContext: { name: APP_ID },
-  ready: false,
   mapInitError: null,
-  goto: null,
   openTooltips: [],
   mapState: {
     zoom: undefined, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
@@ -86,6 +83,7 @@ export const DEFAULT_MAP_STATE: MapState = {
   waitingForMapReadyLayerList: [],
   settings: getDefaultMapSettings(),
   __rollbackSettings: null,
+  __pauseSyncData: false,
 };
 
 export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, any>) {
@@ -135,19 +133,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           ...state.mapState,
           mouseCoordinates: undefined,
         },
-      };
-    case SET_GOTO:
-      return {
-        ...state,
-        goto: {
-          center: action.center,
-          bounds: action.bounds,
-        },
-      };
-    case CLEAR_GOTO:
-      return {
-        ...state,
-        goto: null,
       };
     case SET_MAP_SETTINGS:
       return {
@@ -211,8 +196,15 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
     case MAP_EXTENT_CHANGED:
       return { ...state, mapState: { ...state.mapState, ...action.mapViewContext } };
     case SET_QUERY:
-      const { query, timeFilters, timeslice, filters, searchSessionId, searchSessionMapBuffer } =
-        action;
+      const {
+        query,
+        timeFilters,
+        timeslice,
+        filters,
+        searchSessionId,
+        searchSessionMapBuffer,
+        projectRouting,
+      } = action;
       return {
         ...state,
         mapState: {
@@ -223,11 +215,17 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           filters,
           searchSessionId,
           searchSessionMapBuffer,
+          projectRouting,
         },
       };
     case SET_SELECTED_LAYER:
       const selectedMatch = state.layerList.find((layer) => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: selectedMatch ? action.selectedLayerId : null };
+    case SET_PAUSE_SYNC_DATA:
+      return {
+        ...state,
+        __pauseSyncData: action.pauseSyncData,
+      };
     case UPDATE_LAYER_ORDER:
       return {
         ...state,

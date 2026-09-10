@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiDescriptionList } from '@elastic/eui';
+import { EuiDescriptionList } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IHttpSerializedFetchError } from '../../../state';
+import type { IHttpSerializedFetchError } from '../../../state';
 
 /**
  * Use this component when displaying fetch-related errors.
@@ -40,22 +41,17 @@ export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
     });
   }
   return (
-    <EuiCallOut
-      color="danger"
+    <KbnDangerCallout
       title={i18n.translate('xpack.synthetics.monitorDetail.errorTitle', {
         defaultMessage: 'Error fetching monitor details',
       })}
-      iconType="alert"
+      text={i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.description', {
+        defaultMessage: 'Unable to fetch monitor details',
+      })}
     >
-      <p>
-        {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.description', {
-          defaultMessage: 'Unable to fetch monitor details',
-        })}
-      </p>
-
       {listItems.length > 0 && (
         <EuiDescriptionList compressed type="responsiveColumn" listItems={listItems} />
       )}
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 }

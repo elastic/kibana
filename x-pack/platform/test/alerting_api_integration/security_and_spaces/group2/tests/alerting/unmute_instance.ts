@@ -18,7 +18,6 @@ import {
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createMuteAlertInstanceTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -64,7 +63,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -81,16 +84,9 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
                 statusCode: 403,
               });
               break;
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `Unauthorized to execute actions`,
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
@@ -128,7 +124,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -189,7 +189,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -250,7 +254,11 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
+            .post(
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
+            )
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 

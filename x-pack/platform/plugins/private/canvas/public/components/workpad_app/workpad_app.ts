@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad, isWriteable } from '../../state/selectors/workpad';
 import { WorkpadApp as Component } from './workpad_app.component';
 import { withElementsLoadedTelemetry } from './workpad_telemetry';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
 export { WORKPAD_CONTAINER_ID } from './workpad_app.component';
 

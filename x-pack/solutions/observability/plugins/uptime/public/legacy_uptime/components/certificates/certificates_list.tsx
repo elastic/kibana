@@ -7,13 +7,16 @@
 
 import React from 'react';
 import moment from 'moment';
-import { Direction, EuiBasicTable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { Direction } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
-import { Cert, CertMonitor, CertResult } from '../../../../common/runtime_types';
+import type { Cert, CertMonitor, CertResult } from '../../../../common/runtime_types';
 import { FingerprintCol } from './fingerprint_col';
 import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
+import { useDateFormat } from '../../hooks';
 
 interface Page {
   index: number;
@@ -46,6 +49,8 @@ interface Props {
 }
 
 export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
+  const dateFormatter = useDateFormat();
+
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
   };
@@ -84,7 +89,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       name: labels.VALID_UNTIL_COL,
       field: 'not_after',
       sortable: true,
-      render: (value: string) => moment(value).format('L LT'),
+      render: dateFormatter,
     },
     {
       name: labels.AGE_COL,
@@ -101,6 +106,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
 
   return (
     <EuiBasicTable
+      data-test-subj="uptimeCertificatesTable"
       loading={certificates.loading}
       columns={columns}
       items={certificates?.certs ?? []}
@@ -112,13 +118,10 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
           direction: sort.direction,
         },
       }}
-      noItemsMessage={
-        certificates.loading ? (
-          LOADING_CERTIFICATES
-        ) : (
-          <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
-        )
-      }
+      tableCaption={i18n.translate('xpack.uptime.certificatesList.caption', {
+        defaultMessage: 'Certificates overview',
+      })}
+      noItemsMessage={certificates.loading ? LOADING_CERTIFICATES : NO_CERTS_AVAILABLE}
     />
   );
 };

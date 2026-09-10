@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { DoneInvokeEvent } from 'xstate';
-import {
-  DataStreamDocsStat,
-  DatasetUserPrivileges,
-  NonAggregatableDatasets,
-} from '../../../../common/api_types';
-import {
-  DataStreamDetails,
-  DataStreamStat,
-  DataStreamStatServiceResponse,
-  DataStreamStatType,
-} from '../../../../common/data_streams_stats';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import {
+import type { DataStreamDocsStat, DatasetUserPrivileges } from '../../../../common/api_types';
+import type { DataStreamStat, DataStreamStatType } from '../../../../common/data_streams_stats';
+import type { Integration } from '../../../../common/data_streams_stats/integration';
+import type {
   DataStreamType,
   QualityIndicators,
   TableCriteria,
   TimeRangeConfig,
 } from '../../../../common/types';
-import { DatasetTableSortField } from '../../../hooks';
+import type { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -35,6 +25,10 @@ interface FiltersCriteria {
   qualities: QualityIndicators[];
   types: string[];
   query?: string;
+}
+
+export interface WithAuthorizedDatasetTypes {
+  authorizedDatasetTypes: DataStreamType[];
 }
 
 export interface WithTableOptions {
@@ -54,6 +48,7 @@ export interface WithDataStreamStats {
 
 export interface WithTotalDocs {
   totalDocsStats: DictionaryType<DataStreamDocsStat>;
+  loadedTotalDocsTypes: DataStreamType[];
 }
 
 export interface WithDegradedDocs {
@@ -83,6 +78,7 @@ export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithFailedDocs &
   WithDatasets &
   WithFilters &
+  WithAuthorizedDatasetTypes &
   WithNonAggregatableDatasets &
   Partial<WithIntegrations>;
 
@@ -90,35 +86,47 @@ type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
 
 export type DatasetQualityControllerTypeState =
   | {
-      value: 'stats.datasets.fetching';
+      value: 'initializing';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'stats.datasets.loaded';
+      value: 'initializationFailed';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'stats.docsStats.fetching';
+      value: 'emptyState';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'stats.degradedDocs.fetching';
+      value: 'main.stats.datasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'stats.failedDocs.fetching';
+      value: 'main.stats.datasets.loaded';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'stats.nonAggregatableDatasets.fetching';
+      value: 'main.stats.docsStats.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'integrations.fetching';
+      value: 'main.stats.degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'nonAggregatableDatasets.fetching';
+      value: 'main.stats.failedDocs.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'main.stats.nonAggregatableDatasets.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'main.integrations.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'main.nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -166,10 +174,9 @@ export type DatasetQualityControllerEvent =
       type: 'UPDATE_TYPES';
       types: DataStreamType[];
     }
-  | DoneInvokeEvent<DataStreamDocsStat[]>
-  | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<DataStreamDetails>
-  | DoneInvokeEvent<DataStreamStatServiceResponse>
-  | DoneInvokeEvent<Integration>
-  | DoneInvokeEvent<boolean | null>
-  | DoneInvokeEvent<Error>;
+  | {
+      type: 'UPDATE_FAILURE_STORE';
+      dataStream: DataStreamStat;
+    }
+  | { type: 'SAVE_TOTAL_DOCS_STATS'; data: DataStreamDocsStat[]; dataStreamType: DataStreamType }
+  | { type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED'; error: Error };

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsCategorizeTextAnalyzer,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import moment from 'moment';
 
 const isoTimestampFormat = "YYYY-MM-DD'T'HH:mm:ss.SSS'Z'";
@@ -127,7 +127,6 @@ export const createCategorizationRequestParams = ({
             },
           },
           change: {
-            // @ts-expect-error the official types don't support the change_point aggregation
             change_point: {
               buckets_path: 'histogram>_count',
             },

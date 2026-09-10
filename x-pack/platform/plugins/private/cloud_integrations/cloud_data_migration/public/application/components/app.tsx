@@ -23,10 +23,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import { getAppStyles } from '../../app.styles';
-import { BreadcrumbService } from '../services/breadcrumbs';
+import type { BreadcrumbService } from '../services/breadcrumbs';
 
 interface CloudDataMigrationAppDeps {
   http: CoreStart['http'];
@@ -37,7 +37,7 @@ export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigr
   const basePath = http.basePath.get() ?? '';
   const { euiTheme } = useEuiTheme();
   const listItemProps = {
-    iconType: 'checkInCircleFilled',
+    iconType: 'checkCircleFill',
     iconProps: { color: 'success' },
     wrapText: true,
   };

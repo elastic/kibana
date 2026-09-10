@@ -8,9 +8,9 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { renderHook } from '@testing-library/react';
-import { UnifiedHistogramBucketInterval } from '../../../types';
+import type { UnifiedHistogramBucketInterval } from '../../../types';
 import { useTimeRange } from './use_time_range';
 
 jest.mock('@kbn/datemath', () => ({
@@ -134,6 +134,11 @@ describe('useTimeRange', () => {
           <EuiIconTip
             color="warning"
             content="This interval creates buckets that are too large to show in the selected time range, so it has been scaled to 1 minute."
+            iconProps={
+              Object {
+                "data-test-subj": "unifiedHistogramIntervalWarning",
+              }
+            }
             title="Warning"
             type="warning"
           />
@@ -180,6 +185,11 @@ describe('useTimeRange', () => {
           <EuiIconTip
             color="warning"
             content="This interval creates too many buckets to show in the selected time range, so it has been scaled to 1 minute."
+            iconProps={
+              Object {
+                "data-test-subj": "unifiedHistogramIntervalWarning",
+              }
+            }
             title="Warning"
             type="warning"
           />

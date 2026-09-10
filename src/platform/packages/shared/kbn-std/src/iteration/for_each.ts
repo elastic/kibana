@@ -9,7 +9,7 @@
 
 import { lastValueFrom, defaultIfEmpty } from 'rxjs';
 import { mapWithLimit$ } from './observable';
-import { IterableInput, AsyncMapFn } from './types';
+import type { IterableInput, AsyncMapFn } from './types';
 
 /**
  * Creates a promise which resolves with `undefined` after calling `fn` for each

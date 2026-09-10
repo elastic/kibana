@@ -9,7 +9,7 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TestElasticsearchUtils, createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
   getSupertest,
@@ -23,6 +23,8 @@ import type {
   OutputSOAttributes,
   PackagePolicySOAttributes,
 } from '../types';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 import { useDockerRegistry } from './helpers';
 
@@ -142,25 +144,27 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     await stopServers();
   });
 
-  describe('preconfiguration setup', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/223652
+  // FLAKY: https://github.com/elastic/kibana/issues/223654
+  describe.skip('preconfiguration setup', () => {
     it('sets up Fleet correctly with single Kibana instance', async () => {
       await addRoots(1);
       const [root1Start] = await startRoots();
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
       await expectFleetSetupState(soClient);
     });
 
     it('sets up Fleet correctly when multiple Kibana instances are started at the same time', async () => {
       await addRoots(3);
       const [root1Start] = await startRoots();
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
       await expectFleetSetupState(soClient);
     });
 
     it('sets up Fleet correctly when multiple Kibana instaces are started in serial', async () => {
       const [root1] = await addRoots(1);
       const root1Start = await startAndWaitForFleetSetup(root1);
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
       await expectFleetSetupState(soClient);
 
       const [root2] = await addRoots(1);
@@ -251,10 +255,12 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     ],
   };
 
-  async function expectFleetSetupState(soClient: ISavedObjectsRepository) {
+  async function expectFleetSetupState(soClient: SavedObjectsClientContract) {
     // Assert setup state
+    const agentPolicyType = await getAgentPolicySavedObjectType();
+    const packagePolicyType = await getPackagePolicySavedObjectType();
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: 'ingest-agent-policies',
+      type: agentPolicyType,
       perPage: 10000,
     });
     expect(agentPolicies.saved_objects).toHaveLength(2);
@@ -274,7 +280,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     );
 
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
-      type: 'ingest-package-policies',
+      type: packagePolicyType,
       perPage: 10000,
     });
     expect(packagePolicies.saved_objects).toHaveLength(2);

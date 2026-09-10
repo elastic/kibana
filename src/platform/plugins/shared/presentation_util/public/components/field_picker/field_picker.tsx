@@ -14,15 +14,9 @@ import { comboBoxFieldOptionMatcher, getFieldIconType } from '@kbn/field-utils';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import {
-  EuiFormRow,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiSelectableProps,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiFormRow, EuiSelectable, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
 

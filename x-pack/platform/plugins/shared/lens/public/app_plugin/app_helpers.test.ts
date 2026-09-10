@@ -7,9 +7,10 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
-import { UseNavigateBackToAppProps, useNavigateBackToApp } from './app_helpers';
+import type { UseNavigateBackToAppProps } from './app_helpers';
+import { useNavigateBackToApp } from './app_helpers';
 import { defaultDoc, makeDefaultServices } from '../mocks/services_mock';
-import { LensDocument } from '../persistence';
+import type { LensDocument } from '@kbn/lens-common';
 
 function getLensDocumentMock(someProps?: Partial<LensDocument>) {
   return structuredClone({ ...defaultDoc, ...someProps });
@@ -55,18 +56,18 @@ describe('App helpers', () => {
       });
 
       expect(props.application.navigateToApp).not.toHaveBeenCalled();
-      expect(result.current.shouldShowGoBackToVizEditorModal).toBe(true);
+      expect(result.current.shouldShowGoBackToVisEditorModal).toBe(true);
     });
 
-    it('navigateToVizEditor hides modal and navigates back to Viz editor', () => {
+    it('navigateToVisEditor hides modal and navigates back to Vis editor', () => {
       const props = getDefaultProps();
       const { result } = renderHook(() => useNavigateBackToApp(props));
 
       act(() => {
-        result.current.navigateToVizEditor();
+        result.current.navigateToVisEditor();
       });
 
-      expect(result.current.shouldShowGoBackToVizEditorModal).toBe(false);
+      expect(result.current.shouldShowGoBackToVisEditorModal).toBe(false);
       expect(props.application.navigateToApp).toHaveBeenCalledWith(props.legacyEditorAppName, {
         path: props.legacyEditorAppUrl,
       });

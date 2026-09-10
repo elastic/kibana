@@ -19,12 +19,12 @@ import type {
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
+import type {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { FORMULA_COLUMN } from './configurations/constants';
+import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -135,6 +135,11 @@ export interface UrlFilter {
   notValues?: Array<string | number>;
   wildcards?: string[];
   notWildcards?: string[];
+  // Match documents where `field` has no value (KQL `not field: *`). The
+  // values/wildcards options can't express this: quoted values turn `*` into a
+  // literal, and wildcards are positive-only. Needed to surface docs missing a
+  // field (e.g. location-less Heartbeat pings with no `observer.geo.name`).
+  notExists?: boolean;
 }
 
 export interface ConfigProps {

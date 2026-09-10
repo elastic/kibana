@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Dispatch, SetStateAction, useCallback } from 'react';
-import { BoolQuery, Filter } from '@kbn/es-query';
-import { CriteriaWithPagination } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { Dispatch, SetStateAction } from 'react';
+import { useCallback } from 'react';
+import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { CriteriaWithPagination } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
-import { FindingsBaseURLQuery } from '../../types';
+import type { FindingsBaseURLQuery } from '../../types';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
 
@@ -59,7 +60,7 @@ export const useCloudPostureDataTable = ({
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
 
   const onChangeItemsPerPage = useCallback(
-    (newPageSize: any) => {
+    (newPageSize: number) => {
       setPageSize(newPageSize);
       setUrlQuery({
         pageIndex: 0,
@@ -81,7 +82,7 @@ export const useCloudPostureDataTable = ({
   }, [setUrlQuery]);
 
   const onChangePage = useCallback(
-    (newPageIndex: any) => {
+    (newPageIndex: number) => {
       setUrlQuery({
         pageIndex: newPageIndex,
       });
@@ -90,16 +91,31 @@ export const useCloudPostureDataTable = ({
   );
 
   const onSort = useCallback(
-    (sort: any) => {
+    (sort: string[][]) => {
+      // Check if current sort is still the default [@timestamp, desc]
+      const isCurrentSortDefault =
+        urlQuery.sort?.length === 1 &&
+        urlQuery.sort[0][0] === '@timestamp' &&
+        urlQuery.sort[0][1] === 'desc';
+      const hasMultipleSorts = sort.length > 1;
+      const hasTimestampSort = sort.some(([field]) => field === '@timestamp');
+      let finalSort = sort;
+
+      // If transitioning from default sort and user adds another field,
+      // remove the default @timestamp to avoid confusing multi-field sorting, keeping user-selected sort
+      if (isCurrentSortDefault && hasMultipleSorts && hasTimestampSort) {
+        finalSort = sort.filter(([field]) => field !== '@timestamp');
+      }
+
       setUrlQuery({
-        sort,
+        sort: finalSort,
       });
     },
-    [setUrlQuery]
+    [setUrlQuery, urlQuery.sort]
   );
 
   const setTableOptions = useCallback(
-    ({ page, sort }: any) => {
+    ({ page, sort }: CriteriaWithPagination<object>) => {
       setPageSize(page.size);
       setUrlQuery({
         sort,
@@ -119,7 +135,7 @@ export const useCloudPostureDataTable = ({
   });
 
   const handleUpdateQuery = useCallback(
-    (query: any) => {
+    (query: URLQuery) => {
       setUrlQuery({ ...query, pageIndex: 0 });
     },
     [setUrlQuery]

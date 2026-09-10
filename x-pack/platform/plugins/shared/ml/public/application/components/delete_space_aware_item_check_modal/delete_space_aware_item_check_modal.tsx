@@ -21,12 +21,13 @@ import {
   EuiButton,
   EuiText,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import type {
   CanDeleteMLSpaceAwareItemsResponse,
   MlSavedObjectType,
-} from '../../../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
@@ -242,6 +243,8 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   hasManagedJob,
   onUntagCallback,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
   const [hasUntagged, setHasUntagged] = useState<boolean>(false);
@@ -337,10 +340,14 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   }
 
   return (
-    <EuiModal onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onCloseCallback}
+      data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay"
+    >
       <>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage
               id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
               defaultMessage="Checking space permissions"

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
@@ -48,6 +48,7 @@ export const ProjectMonitorCodec = t.intersection([
     screenshot: ScreenshotOptionCodec,
     tags: t.union([t.string, t.array(t.string)]),
     ignoreHTTPSErrors: t.boolean,
+    certificateErrorSpkiAllowlist: t.union([t.string, t.array(t.string)]),
     playwrightOptions: t.record(t.string, t.unknown),
     filter: t.interface({
       match: t.string,
@@ -65,6 +66,7 @@ export const ProjectMonitorCodec = t.intersection([
     fields: t.record(t.string, t.string),
     'service.name': t.string,
     maintenanceWindows: t.array(t.string),
+    spaces: t.array(t.string),
   }),
 ]);
 

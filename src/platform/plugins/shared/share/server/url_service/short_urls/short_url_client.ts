@@ -8,8 +8,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/server';
-import { ShortUrlRecord } from '.';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { ShortUrlRecord } from '.';
 import type {
   IShortUrlClient,
   ShortUrl,

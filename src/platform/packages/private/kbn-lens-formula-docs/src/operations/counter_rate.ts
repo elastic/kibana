@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDocumentationType } from './types';
+import type { OperationDocumentationType } from './types';
 
 export const COUNTER_RATE_ID = 'counter_rate';
 export const COUNTER_RATE_NAME = i18n.translate('lensFormulaDocs.counterRate', {

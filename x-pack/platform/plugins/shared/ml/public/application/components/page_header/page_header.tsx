@@ -5,34 +5,5 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useContext, useEffect } from 'react';
-import { InPortal, OutPortal } from 'react-reverse-portal';
-import { EuiSkeletonText } from '@elastic/eui';
-import { MlPageControlsContext } from '../ml_page/ml_page';
-
-/**
- * Component for setting the page header content.
- */
-export const MlPageHeader: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
-
-  useEffect(() => {
-    setIsHeaderMounted(true);
-    return () => {
-      setIsHeaderMounted(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <InPortal node={headerPortal}>{children}</InPortal>;
-};
-
-/**
- * Renders content of the {@link MlPageHeader}
- */
-export const MlPageHeaderRenderer: FC = () => {
-  const { headerPortal, isHeaderMounted } = useContext(MlPageControlsContext);
-
-  return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiSkeletonText lines={1} />;
-};
+export { MlAppHeader } from '../ml_app_header';
+export type { MlAppHeaderProps } from '../ml_app_header';

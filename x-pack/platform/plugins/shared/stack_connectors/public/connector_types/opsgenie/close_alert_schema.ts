@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { decodeSchema } from './schema_utils';
+import { decodeSchema } from '../lib/schema_utils';
 
 /**
  * This schema must match the CloseAlertParamsSchema in x-pack/platform/plugins/shared/stack_connectors/server/connector_types/stack/opsgenie/schema.ts

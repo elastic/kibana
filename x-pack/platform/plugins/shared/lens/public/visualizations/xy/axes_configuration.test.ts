@@ -6,9 +6,9 @@
  */
 
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
-import { XYDataLayerConfig } from './types';
+import type { XYDataLayerConfig } from './types';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -225,7 +225,7 @@ describe('axes_configuration', () => {
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],
-    splitAccessor: 'd',
+    splitAccessors: ['d'],
     columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
     xScaleType: 'ordinal',
     isHistogram: false,

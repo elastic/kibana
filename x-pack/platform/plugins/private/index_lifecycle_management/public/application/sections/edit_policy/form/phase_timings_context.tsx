@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, FunctionComponent, useContext } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
-import { FormInternal } from '../types';
+import type { FormInternal } from '../types';
 import { useGlobalFields } from '.';
 
 export interface PhaseTimingConfiguration {
@@ -25,12 +26,16 @@ const getPhaseTimingConfiguration = (
   cold: PhaseTimingConfiguration;
   frozen: PhaseTimingConfiguration;
 } => {
+  const isHotPhaseEnabled = formData?._meta?.hot?.enabled ?? true;
   const isWarmPhaseEnabled = formData?._meta?.warm?.enabled;
   const isColdPhaseEnabled = formData?._meta?.cold?.enabled;
   const isFrozenPhaseEnabled = formData?._meta?.frozen?.enabled;
 
   return {
-    hot: { isFinalDataPhase: !isWarmPhaseEnabled && !isColdPhaseEnabled && !isFrozenPhaseEnabled },
+    hot: {
+      isFinalDataPhase:
+        isHotPhaseEnabled && !isWarmPhaseEnabled && !isColdPhaseEnabled && !isFrozenPhaseEnabled,
+    },
     warm: { isFinalDataPhase: isWarmPhaseEnabled && !isColdPhaseEnabled && !isFrozenPhaseEnabled },
     cold: { isFinalDataPhase: isColdPhaseEnabled && !isFrozenPhaseEnabled },
     frozen: { isFinalDataPhase: isFrozenPhaseEnabled },
@@ -53,6 +58,7 @@ export const PhaseTimingsProvider: FunctionComponent<{ children?: React.ReactNod
   const { deleteEnabled } = useGlobalFields();
   const [formData] = useFormData<FormInternal>({
     watch: [
+      '_meta.hot.enabled',
       '_meta.warm.enabled',
       '_meta.cold.enabled',
       '_meta.frozen.enabled',

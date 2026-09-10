@@ -19,7 +19,7 @@ import {
   useFallbackMetric,
   useValidation,
 } from './utils';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 const { termsAggFilter } = search.aggs;
 const DEFAULT_VALUE = '_key';

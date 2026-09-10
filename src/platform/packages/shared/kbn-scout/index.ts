@@ -7,33 +7,87 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// CLI tools
 export * as cli from './src/cli';
+
+// Test framework
 export {
-  expect,
   test,
   spaceTest,
   lighthouseTest,
+  apiTest,
   globalSetupHook,
+  globalTeardownHook,
   tags,
+} from './src/playwright';
+
+// Fixtures & configuration
+export {
   browserAuthFixture,
+  apiServicesFixture,
+  apiClientFixture,
+  coreWorkerFixtures,
+  esArchiverFixture,
+  networkFixture,
   createPlaywrightConfig,
   createLazyPageObject,
+  extendPlaywrightPage,
 } from './src/playwright';
+
+// Playwright integration
+export { mergeTests, test as playwrightTest } from 'playwright/test';
+
+// Performance monitoring
+export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+// EUI components
+export * from './src/playwright/eui_components';
+
+// Kibana-wide components
+export * from './src/playwright/ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  DataGrid,
+  DiscoverApp,
+  FilterBar,
+  LensApp,
+  QueryBar,
+  UnifiedTabs,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+  ListingTable,
+} from './src/playwright/page_objects';
+export type { ContentListUrlState } from './src/playwright/page_objects';
+
+// Scout core types
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  SynthtraceFixture,
 } from './src/playwright';
 
+// Fixture types
+export type {
+  ApiServicesFixture,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
+  BrowserAuthFixture,
+  NetworkFixture,
+  RequestAuthFixture,
+  SamlAuth,
+  ScoutSpaceParallelFixture,
+  SpaceSolutionView,
+} from './src/playwright';
+
+// Service & configuration types
 export type {
   EsClient,
   KbnClient,
@@ -41,12 +95,24 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';
 
-// re-export from Playwright
-export type { Locator, CDPSession } from 'playwright/test';
-export { mergeTests, test as playwrightTest } from 'playwright/test';
+// Authentication types
+export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type {
+  RoleSessionCredentials,
+  CookieHeader,
+} from './src/playwright/fixtures/scope/worker/core_fixtures';
 
-export { measurePerformance, measurePerformanceAsync } from './src/common';
+// Re-exported Playwright types
+export type { Locator, CDPSession } from 'playwright/test';
+
+// Config-set constants — exported so test files can import instead of redeclaring.
+export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
+export {
+  OTEL_RECEIVER_PORT,
+  OTEL_TEST_PROJECT_ID,
+} from './src/servers/configs/config_sets/security_audit_otel/shared';

@@ -7,7 +7,9 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   CreateRuleRequestBody,
@@ -19,7 +21,6 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
   router.versioned
@@ -29,7 +30,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
 
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
     })
@@ -60,7 +61,6 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
 
           const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-          const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
             const rule = await readRules({
@@ -76,8 +76,6 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             }
           }
 
-          // This will create the endpoint list if it does not exist yet
-          await exceptionsClient?.createEndpointList();
           checkDefaultRuleExceptionListReferences({
             exceptionLists: request.body.exceptions_list,
           });
@@ -89,7 +87,14 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             ruleId: undefined,
           });
 
-          await validateResponseActionsPermissions(ctx.securitySolution, request.body);
+          await validateRuleResponseActions({
+            endpointAuthz: await ctx.securitySolution.getEndpointAuthz(),
+            endpointService: ctx.securitySolution.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: ctx.securitySolution.getSpaceId(),
+            checkOsqueryResponseActionAuthz:
+              ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+          });
 
           const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,

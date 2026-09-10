@@ -6,12 +6,16 @@
  */
 
 import { partition } from 'lodash';
-import type { BulkGetAttachmentsResponse } from '../../../common/types/api';
+import type {
+  BulkGetAttachmentsResponse,
+  BulkGetAttachmentsResponseV2,
+} from '../../../common/types/api';
 import {
   BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRt,
+  BulkGetAttachmentsResponseRtV2,
 } from '../../../common/types/api';
-import { flattenCommentSavedObjects } from '../../common/utils';
+import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
+import { flattenAttachmentSavedObjects } from '../../common/utils';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -21,7 +25,6 @@ import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
-import type { AttachmentAttributes } from '../../../common/types/domain';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 
@@ -29,10 +32,10 @@ type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>
  * Retrieves multiple attachments by id.
  */
 export async function bulkGet(
-  { attachmentIDs, caseID }: BulkGetArgs,
+  { savedObjectIds, caseID }: BulkGetArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<BulkGetAttachmentsResponse> {
+): Promise<BulkGetAttachmentsResponseV2> {
   const {
     services: { attachmentService },
     logger,
@@ -40,7 +43,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
+    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: savedObjectIds });
 
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
@@ -64,11 +67,10 @@ export async function bulkGet(
     });
 
     const res = {
-      attachments: flattenCommentSavedObjects(authorizedAttachments),
+      attachments: flattenAttachmentSavedObjects(authorizedAttachments),
       errors,
     };
-
-    return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
+    return decodeOrThrow(BulkGetAttachmentsResponseRtV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
@@ -86,7 +88,7 @@ interface PartitionedAttachments {
 
 const partitionAttachments = (
   caseId: string,
-  attachments: BulkOptionalAttributes<AttachmentAttributes>
+  attachments: BulkOptionalAttributes<AttachmentAttributesV2>
 ): PartitionedAttachments => {
   const [attachmentsWithoutErrors, errors] = partitionBySOError(attachments.saved_objects);
   const [caseAttachments, invalidAssociationAttachments] = partitionByCaseAssociation(
@@ -101,7 +103,7 @@ const partitionAttachments = (
   };
 };
 
-const partitionBySOError = (attachments: Array<OptionalAttributes<AttachmentAttributes>>) =>
+const partitionBySOError = (attachments: Array<OptionalAttributes<AttachmentAttributesV2>>) =>
   partition(
     attachments,
     (attachment) => attachment.error == null && attachment.attributes != null
@@ -121,7 +123,7 @@ const constructErrors = ({
   const errors: BulkGetAttachmentsResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({ ...generateCaseErrorResponse(soError.error), attachmentId: soError.id });
+    errors.push({ ...generateCaseErrorResponse(soError.error), savedObjectId: soError.id });
   }
 
   for (const attachment of associationErrors) {
@@ -129,7 +131,7 @@ const constructErrors = ({
       error: 'Bad Request',
       message: `Attachment is not attached to case id=${caseId}`,
       status: 400,
-      attachmentId: attachment.id,
+      savedObjectId: attachment.id,
     });
   }
 
@@ -138,7 +140,7 @@ const constructErrors = ({
       error: 'Forbidden',
       message: `Unauthorized to access attachment with owner: "${unauthorizedAttachment.attributes.owner}"`,
       status: 403,
-      attachmentId: unauthorizedAttachment.id,
+      savedObjectId: unauthorizedAttachment.id,
     });
   }
 

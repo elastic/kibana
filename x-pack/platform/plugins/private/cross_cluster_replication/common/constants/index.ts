@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 const platinumLicense: LicenseType = 'platinum';
 

@@ -12,16 +12,17 @@ import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discove
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, mutate, parse } from '@elastic/esql';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { LogsDataSourceProfileProvider } from '../profile';
 
 export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
 
-    (prev, { context }) =>
+    (prev, { context, toolkit }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const { updateESQLQuery, query, setExpandedDoc, isDocViewerEnabled } = params;
+      const { query } = params;
+      const { updateESQLQuery, setExpandedDoc } = toolkit.actions;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)
@@ -40,27 +41,27 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
         : undefined;
 
       const leadingControlClick =
-        (actionName: 'stacktrace' | 'quality_issues') => (props: RowControlRowProps) => {
-          if (!setExpandedDoc) {
-            return;
-          }
-
+        (
+          openDocViewer: NonNullable<typeof setExpandedDoc>,
+          actionName: 'stacktrace' | 'quality_issues'
+        ) =>
+        (props: RowControlRowProps) => {
           context.logOverviewContext$.next({
             recordId: props.record.id,
             initialAccordionSection: actionName,
           });
-          setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
+          openDocViewer(props.record, { initialTabId: 'doc_view_logs_overview' });
         };
 
-      return isDocViewerEnabled
+      return setExpandedDoc
         ? [
             ...additionalControls,
             createDegradedDocsControl({
               enabled: isDegradedDocsControlEnabled,
               addIgnoredMetadataToQuery,
-              onClick: leadingControlClick('quality_issues'),
+              onClick: leadingControlClick(setExpandedDoc, 'quality_issues'),
             }),
-            createStacktraceControl({ onClick: leadingControlClick('stacktrace') }),
+            createStacktraceControl({ onClick: leadingControlClick(setExpandedDoc, 'stacktrace') }),
           ]
         : additionalControls;
     };

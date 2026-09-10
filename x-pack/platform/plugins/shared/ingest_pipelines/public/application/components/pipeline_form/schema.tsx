@@ -10,7 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 import { parseJson, stringifyJson } from '../../lib/utils';
-import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
+import type { FormSchema } from '../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
 const { emptyField, isJsonField, containsCharsField } = fieldValidators;
 const { toInt } = fieldFormatters;
@@ -58,6 +59,15 @@ export const pipelineFormSchema: FormSchema = {
       defaultMessage: 'Version (optional)',
     }),
     formatters: [toInt],
+  },
+  field_access_pattern: {
+    type: FIELD_TYPES.TOGGLE,
+    label: i18n.translate('xpack.ingestPipelines.form.fieldAccessPatternFieldLabel', {
+      defaultMessage: 'Use the flexible field access pattern',
+    }),
+    defaultValue: false,
+    serializer: (value) => (value ? 'flexible' : 'classic'),
+    deserializer: (value) => value === 'flexible',
   },
   _meta: {
     label: i18n.translate('xpack.ingestPipelines.form.metaFieldLabel', {

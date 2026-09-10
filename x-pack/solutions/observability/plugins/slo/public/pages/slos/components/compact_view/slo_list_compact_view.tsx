@@ -4,26 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DefaultItemAction,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
-import { RulesParams } from '@kbn/observability-plugin/public';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { useQueryClient } from '@kbn/react-query';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useQueryClient } from '@tanstack/react-query';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { paths } from '../../../../../common/locators/paths';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
@@ -47,6 +41,10 @@ import {
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
+import {
+  SloBurnRateWindowColumnHeader,
+  type SloBurnRateWindow,
+} from '../common/slo_burn_rate_window_column_header';
 import { SLOGroupings } from '../common/slo_groupings';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
@@ -102,6 +100,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       sloList,
     });
 
+  const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
+  const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
+
   const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
     !!slo.remote && slo.remote.kibanaUrl !== '';
@@ -111,8 +112,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       <>
         {actionName}
         <EuiIcon
-          type="popout"
+          type="external"
           size="s"
+          aria-hidden={true}
           css={{
             marginLeft: '10px',
           }}
@@ -191,7 +193,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       enabled: (slo: SLOWithSummaryResponse) =>
         !!permissions?.hasAllWriteRequested && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        const locator = locators.get<RulesParams>(rulesLocatorID);
+        const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
         locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
       },
     },
@@ -341,7 +343,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         );
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
-            <EuiText size="s">
+            <EuiText size="s" tabIndex={0}>
               <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
                 {slo.name}
               </a>
@@ -442,6 +444,39 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         );
       },
     },
+    {
+      name: (
+        <SloBurnRateWindowColumnHeader
+          burnRateWindow={burnRateWindow}
+          onBurnRateWindowChange={setBurnRateWindow}
+          isPopoverOpen={isBurnRatePopoverOpen}
+          setIsPopoverOpen={setIsBurnRatePopoverOpen}
+          buttonTestSubj="sloListCompactBurnRateWindowSelector"
+          popoverAriaLabel={i18n.translate(
+            'xpack.slo.sloListCompactView.burnRate.windowSelectorAriaLabel',
+            {
+              defaultMessage: 'Select burn rate window',
+            }
+          )}
+          burnRateLabel={i18n.translate('xpack.slo.sloListCompactView.columns.burnRate', {
+            defaultMessage: 'Burn rate',
+          })}
+        />
+      ),
+      width: '160px',
+      render: (slo: SLOWithSummaryResponse) => {
+        if (slo.summary.status === 'NO_DATA') {
+          return NOT_AVAILABLE_LABEL;
+        }
+        const { fiveMinuteBurnRate, oneHourBurnRate, oneDayBurnRate } = slo.summary;
+        const windowValue = {
+          '5m': fiveMinuteBurnRate,
+          '1h': oneHourBurnRate,
+          '1d': oneDayBurnRate,
+        }[burnRateWindow];
+        return <EuiText size="s">{`${numeral(windowValue).format('0.[00]')}x`}</EuiText>;
+      },
+    },
 
     {
       name: 'Actions',
@@ -466,6 +501,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         loading={loading}
         noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
         tableLayout="auto"
+        tableCaption={i18n.translate('xpack.slo.sloListCompactView.tableCaption', {
+          defaultMessage: 'Compact SLO list',
+        })}
       />
       {sloToAddRule ? (
         <RuleFormFlyout

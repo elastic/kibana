@@ -6,7 +6,7 @@
  */
 
 import { _IGNORED } from './es_fields';
-import { DataStreamType, QualityIndicators } from './types';
+import type { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
 export const DATASET_QUALITY_ALL_SIGNALS_ID = 'datasetQuality:all-signals-available';
@@ -20,7 +20,7 @@ export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
 export const DEFAULT_SORT_FIELD = 'title';
 export const DEFAULT_SORT_DIRECTION = 'asc';
 
-export const DEFAULT_QUALITY_ISSUE_SORT_FIELD = 'count';
+export const DEFAULT_QUALITY_ISSUE_SORT_FIELD = 'lastOccurrence';
 export const DEFAULT_QUALITY_ISSUE_SORT_DIRECTION = 'desc';
 
 export const DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD = 'type';
@@ -54,3 +54,4 @@ export const FAILURE_STORE_SELECTOR = '::failures';
 export const DATA_SELECTOR = '::data';
 
 export const FAILURE_STORE_PRIVILEGE = 'read_failure_store';
+export const MANAGE_FAILURE_STORE_PRIVILEGE = 'manage_failure_store';

@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  CoreRequestHandlerContext,
-  CoreSetup,
-  Logger,
-  SECURITY_EXTENSION_ID,
-} from '@kbn/core/server';
+import type { CoreRequestHandlerContext, CoreSetup, Logger } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { FavoritesService, FavoritesLimitExceededError } from './favorites_service';
 import { favoritesSavedObjectType } from './favorites_saved_object';
-import { FavoritesRegistry } from './favorites_registry';
+import type { FavoritesRegistry } from './favorites_registry';
 
 /**
  * @public
@@ -45,6 +41,8 @@ export function registerFavoritesRoutes({
   favoritesRegistry: FavoritesRegistry;
 }) {
   const typeSchema = schema.string({
+    minLength: 1,
+    maxLength: 256,
     validate: (type) => {
       if (!favoritesRegistry.hasType(type)) {
         return `Unknown favorite type: ${type}`;
@@ -79,7 +77,7 @@ export function registerFavoritesRoutes({
       path: '/internal/content_management/favorites/{type}/{id}/favorite',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 256 }),
           type: typeSchema,
         }),
         body: schema.maybe(
@@ -149,7 +147,7 @@ export function registerFavoritesRoutes({
       path: '/internal/content_management/favorites/{type}/{id}/unfavorite',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ minLength: 1, maxLength: 256 }),
           type: typeSchema,
         }),
       },

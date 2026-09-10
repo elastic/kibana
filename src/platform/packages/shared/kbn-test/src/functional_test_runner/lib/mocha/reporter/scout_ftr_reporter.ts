@@ -9,17 +9,16 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ScoutFileInfo } from '@kbn/scout-reporting';
+import { computeTestID } from '@kbn/scout-reporting';
 import {
   datasources,
   ScoutEventsReport,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
   generateTestRunId,
-  getTestIDForTitle,
-  uploadScoutReportEvents,
-  ScoutFileInfo,
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
@@ -28,8 +27,8 @@ import {
   getCodeOwnersEntries,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import { Runner, Test } from '../../../fake_mocha_types';
-import { Config as FTRConfig } from '../../config';
+import type { Runner, Test } from '../../../fake_mocha_types';
+import type { Config as FTRConfig } from '../../config';
 
 /**
  * Configuration options for the Scout Mocha reporter
@@ -66,8 +65,15 @@ export class ScoutFTRReporter {
 
     this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
+
+    const testTarget = ScoutTestTarget.tryFromEnv();
+
     this.baseTestRunInfo = {
       id: this.runId,
+      target: {
+        type: testTarget?.location || 'local',
+        mode: testTarget?.tagWithoutLocation || 'unknown',
+      },
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
         category: config.get('testConfigCategory'),
@@ -92,16 +98,17 @@ export class ScoutFTRReporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
+    const areas = this.getOwnerAreas(fileOwners);
 
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 
@@ -146,7 +153,7 @@ export class ScoutFTRReporter {
         type: test.parent?.root ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.fullTitle()),
+        id: computeTestID(path.relative(REPO_ROOT, test.file || ''), test.fullTitle()),
         title: test.title,
         tags: [],
         file: test.file
@@ -175,7 +182,7 @@ export class ScoutFTRReporter {
         type: test.parent?.root ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.fullTitle()),
+        id: computeTestID(path.relative(REPO_ROOT, test.file || ''), test.fullTitle()),
         title: test.title,
         tags: [],
         file: test.file
@@ -194,10 +201,14 @@ export class ScoutFTRReporter {
     });
   };
 
-  onRunEnd = async () => {
+  onRunEnd = () => {
     /**
      * Root suite execution has ended
      */
+    const passes = this.runner.stats?.passes ?? 0;
+    const failures = this.runner.stats?.failures ?? 0;
+    const pending = this.runner.stats?.pending ?? 0;
+
     this.report.logEvent({
       ...datasources.environmentMetadata,
       reporter: {
@@ -208,16 +219,24 @@ export class ScoutFTRReporter {
         ...this.baseTestRunInfo,
         status: this.runner.stats?.failures === 0 ? 'passed' : 'failed',
         duration: this.runner.stats?.duration || 0,
+        tests: {
+          passes,
+          failures,
+          pending,
+          total: passes + failures + pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);

@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButtonIcon,
+  EuiCheckableCard,
   EuiCode,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCheckableCard,
-  useEuiTheme,
+  EuiLink,
   EuiPopover,
-  EuiButtonIcon,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
-import { IndexWarning, IndexWarningType } from '../../../../../../../../../common/types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { IndexWarning, IndexWarningType } from '@kbn/reindex-service-plugin/common';
 
 export const hasIndexWarning = (
   warnings: IndexWarning[],
@@ -79,14 +81,29 @@ const InfoPopover: React.FunctionComponent<{
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.infoPopoverAriaLabel',
+        { defaultMessage: 'More information' }
+      )}
       button={
-        <EuiButtonIcon
-          display="empty"
-          iconType="info"
-          onClick={onTogglePopover}
-          css={popoverStyles}
-          aria-labelledby={popoverId}
-        />
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.upgradeAssistant.esDeprecations.indices.flyout.warningStep.moreInfoButtonLabel',
+            { defaultMessage: 'More information' }
+          )}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            display="empty"
+            iconType="info"
+            onClick={onTogglePopover}
+            css={popoverStyles}
+            aria-label={i18n.translate(
+              'xpack.upgradeAssistant.esDeprecations.indices.flyout.warningStep.moreInfoButtonLabel',
+              { defaultMessage: 'More information' }
+            )}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

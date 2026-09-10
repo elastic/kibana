@@ -7,21 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-
-const smartFields = [
-  new DataViewField({
-    name: 'content',
-    type: 'smart_field',
-    searchable: false,
-    aggregatable: false,
-  }),
-];
-const fallbackFields = {
-  content: ['message'],
-};
+const recommendedFields = ['message', 'log.level'];
 
 export const additionalFieldGroups = {
-  smartFields,
-  fallbackFields,
+  recommendedFields,
 };

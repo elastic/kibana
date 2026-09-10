@@ -9,10 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
-import { SampleDataUsageTracker } from '../usage/usage';
+import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import type { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller, SAMPLE_DATA_INSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
 
@@ -34,9 +34,9 @@ export function createInstallRoute(
         },
       },
       validate: {
-        params: schema.object({ id: schema.string() }),
+        params: schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) }),
         // TODO validate now as date
-        query: schema.object({ now: schema.maybe(schema.string()) }),
+        query: schema.object({ now: schema.maybe(schema.string({ maxLength: 64 })) }),
       },
     },
     async (context, req, res) => {

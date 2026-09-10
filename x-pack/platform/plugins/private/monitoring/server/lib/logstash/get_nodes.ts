@@ -9,8 +9,8 @@ import moment from 'moment';
 import { createQuery } from '../create_query';
 import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

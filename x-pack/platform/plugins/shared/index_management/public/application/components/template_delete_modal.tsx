@@ -6,13 +6,20 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge, EuiSpacer } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiCheckbox,
+  EuiBadge,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
 import { deleteTemplates } from '../services/api';
-import { notificationService } from '../services/notification';
+import { useServices } from '../app_context';
 
 export const TemplateDeleteModal = ({
   templatesToDelete,
@@ -21,7 +28,10 @@ export const TemplateDeleteModal = ({
   templatesToDelete: Array<{ name: string; isLegacy?: boolean; type?: string }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
+  const { notificationService } = useServices();
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const numTemplatesToDelete = templatesToDelete.length;
 
@@ -86,6 +96,8 @@ export const TemplateDeleteModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteTemplatesConfirmation"
       title={
@@ -162,24 +174,23 @@ export const TemplateDeleteModal = ({
           ))}
         </ul>
         {hasSystemTemplate && (
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutTitle"
                 defaultMessage="Deleting a system template can break Kibana"
               />
             }
-            color="danger"
-            iconType="warning"
             data-test-subj="deleteSystemTemplateCallOut"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutDescription"
                 defaultMessage="System templates are critical for internal operations.
                   If you delete this template, you can’t recover it."
               />
-            </p>
+            }
+          >
             <EuiCheckbox
               id="confirmDeleteTemplatesCheckbox"
               label={
@@ -191,7 +202,7 @@ export const TemplateDeleteModal = ({
               checked={isDeleteConfirmed}
               onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
             />
-          </EuiCallOut>
+          </KbnDangerCallout>
         )}
       </Fragment>
     </EuiConfirmModal>

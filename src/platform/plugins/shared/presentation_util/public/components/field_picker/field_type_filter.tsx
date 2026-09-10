@@ -9,11 +9,11 @@
 
 import React, { useState } from 'react';
 
+import type { EuiFilterButtonProps } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFilterButton,
-  EuiFilterButtonProps,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,7 +48,7 @@ export function FieldTypeFilter({
     <EuiFilterButton
       {...buttonProps}
       data-test-subj="toggleFieldFilterButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       isSelected={isPopoverOpen}
       numFilters={0}
       hasActiveFilters={fieldTypesValue.length > 0}

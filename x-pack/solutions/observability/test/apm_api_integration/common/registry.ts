@@ -7,13 +7,12 @@
 
 import Path from 'path';
 import { castArray, groupBy } from 'lodash';
-import callsites from 'callsites';
 import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-import { kbnTestConfig } from '@kbn/test';
-import { APMFtrConfigName } from '../configs';
-import { FtrProviderContext } from './ftr_provider_context';
+import { getCallsites, kbnTestConfig } from '@kbn/test';
+import type { APMFtrConfigName } from '../configs';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 type ArchiveName =
   | 'apm_8.0.0'
@@ -61,7 +60,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
       throw new Error("Can't add tests when running");
     }
 
-    const frame = maybe(callsites()[1]);
+    const frame = maybe(getCallsites()[1]);
 
     const file = frame?.getFileName();
 

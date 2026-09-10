@@ -11,10 +11,8 @@ import { mockAppDataView, mockDataView } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { buildExistsFilter } from '../utils';
-import { LensAttributes } from '../lens_attributes';
+import type { LensAttributes } from '../lens_attributes';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { sampleMetricFormulaAttribute } from '../test_data/test_formula_metric_attribute';
 import { DataTypes } from '../..';
 
@@ -42,17 +40,8 @@ describe('SingleMetricAttributes', () => {
     selectedMetricField: TRANSACTION_DURATION,
   };
 
-  const lensPluginMockStart = lensPluginMock.createStartContract();
-
-  let formulaHelper: FormulaPublicApi;
-
-  beforeEach(async () => {
-    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
-    lnsAttr = new SingleMetricLensAttributes(
-      [layerConfig],
-      ReportTypes.SINGLE_METRIC,
-      formulaHelper
-    );
+  beforeEach(() => {
+    lnsAttr = new SingleMetricLensAttributes([layerConfig], ReportTypes.SINGLE_METRIC);
   });
 
   it('returns attributes as expected', () => {
@@ -87,9 +76,6 @@ describe('SingleMetricAttributes', () => {
                     label: 'Page load time',
                     operationType: 'median',
                     sourceField: 'transaction.duration.us',
-                    params: {
-                      emptyAsNull: true,
-                    },
                   },
                 },
                 incompleteColumns: {},
@@ -117,11 +103,7 @@ describe('SingleMetricAttributes', () => {
 
   it('returns attributes as expected for percentile operation', () => {
     layerConfig.operationType = '99th';
-    lnsAttr = new SingleMetricLensAttributes(
-      [layerConfig],
-      ReportTypes.SINGLE_METRIC,
-      formulaHelper
-    );
+    lnsAttr = new SingleMetricLensAttributes([layerConfig], ReportTypes.SINGLE_METRIC);
 
     const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual({
@@ -200,11 +182,7 @@ describe('SingleMetricAttributes', () => {
       selectedMetricField: 'monitor_availability',
     };
 
-    lnsAttr = new SingleMetricLensAttributes(
-      [layerConfigFormula],
-      ReportTypes.SINGLE_METRIC,
-      formulaHelper
-    );
+    lnsAttr = new SingleMetricLensAttributes([layerConfigFormula], ReportTypes.SINGLE_METRIC);
 
     const jsonAttr = lnsAttr.getJSON('lnsLegacyMetric');
     expect(jsonAttr).toEqual(sampleMetricFormulaAttribute);

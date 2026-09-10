@@ -20,13 +20,27 @@ import {
   EuiModalHeader,
   EuiModalBody,
   EuiModalHeaderTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
-import { AppContextConsumer, AppDependencies } from '../../../app_context';
-import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
+import type { AppDependencies } from '../../../app_context';
+import { AppContextConsumer } from '../../../app_context';
+import type { TelemetryPluginStart } from '../../../lib/telemetry';
+import { shouldShowTelemetryOptIn } from '../../../lib/telemetry';
+
+const styles = {
+  // EUITODO: Fix modal width/max-width
+  licManagementModal: css`
+    width: 70vw;
+  `,
+  licManagementIeFlex: css`
+    flex-shrink: 0;
+  `,
+};
 
 export interface Props {
   loadTrialStatus: () => void;
@@ -41,8 +55,8 @@ interface State {
 }
 
 export class StartTrial extends Component<Props, State> {
-  cancelRef: any;
-  confirmRef: any;
+  cancelRef = React.createRef<HTMLButtonElement>();
+  confirmRef = React.createRef<HTMLButtonElement>();
 
   state: State = {
     showConfirmation: false,
@@ -76,10 +90,16 @@ export class StartTrial extends Component<Props, State> {
       return null;
     }
 
+    const modalTitleId = htmlIdGenerator()('modalTitle');
+
     return (
-      <EuiModal className="licManagement__modal" onClose={this.cancel}>
+      <EuiModal
+        css={styles.licManagementModal}
+        onClose={this.cancel}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
             <FormattedMessage
               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalTitle"
               defaultMessage="Start your free 30-day trial"
@@ -190,9 +210,9 @@ export class StartTrial extends Component<Props, State> {
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="licManagement__ieFlex">
+            <EuiFlexItem grow={false} css={styles.licManagementIeFlex}>
               <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow={false} className="licManagement__ieFlex">
+                <EuiFlexItem grow={false} css={styles.licManagementIeFlex}>
                   <EuiButtonEmpty
                     data-test-subj="confirmModalCancelButton"
                     onClick={this.cancel}
@@ -204,7 +224,7 @@ export class StartTrial extends Component<Props, State> {
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} className="licManagement__ieFlex">
+                <EuiFlexItem grow={false} css={styles.licManagementIeFlex}>
                   <EuiButton
                     data-test-subj="confirmModalConfirmButton"
                     onClick={this.onStartLicenseTrial}
@@ -266,9 +286,8 @@ export class StartTrial extends Component<Props, State> {
       <AppContextConsumer>
         {(dependencies) => (
           <EuiFlexItem>
-            {this.acknowledgeModal(dependencies!.docLinks)}
+            {dependencies && this.acknowledgeModal(dependencies.docLinks)}
             <EuiCard
-              // @ts-ignore - Known issue from EUI, while they fix their types I've been told that we can just ignore this for now.
               hasBorder
               title={
                 <FormattedMessage

@@ -12,7 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
+import type { OnSaveProps, SaveModalState, SaveResult } from '.';
+import { SavedObjectSaveModalWithSaveResult } from '.';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -29,7 +30,9 @@ export interface OriginSaveModalProps {
   objectType: string;
   onClose: () => void;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
+  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => Promise<SaveResult>;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
+  lastSavedTitle: string;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
@@ -88,8 +91,8 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     }
   };
 
-  const onModalSave = (onSaveProps: OnSaveProps) => {
-    props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
+  const onModalSave = async (onSaveProps: OnSaveProps): Promise<SaveResult> => {
+    return props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
   };
 
   const confirmButtonLabel = returnToOriginMode
@@ -99,9 +102,11 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     : null;
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
+      hasLibraryItemWithTitle={props.hasLibraryItemWithTitle}
       onSave={onModalSave}
       onClose={props.onClose}
+      lastSavedTitle={props.lastSavedTitle}
       title={documentInfo.title}
       showCopyOnSave={documentInfo.id ? true : false}
       initialCopyOnSave={Boolean(documentInfo.id) && returnToOriginMode}

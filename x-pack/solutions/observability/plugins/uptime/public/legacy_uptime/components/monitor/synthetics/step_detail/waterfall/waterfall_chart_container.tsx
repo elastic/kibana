@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { getNetworkEvents } from '../../../../../state/actions/network_events';
 import { networkEventsSelector } from '../../../../../state/selectors';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { extractItems } from './data_formatting';
 import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export const NO_DATA_TEXT = i18n.translate('xpack.uptime.synthetics.stepDetail.waterfallNoData', {
   defaultMessage: 'No waterfall data could be found for this step',
@@ -85,21 +86,21 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
         />
       )}
       {waterfallLoaded && hasEvents && !isWaterfallSupported && (
-        <EuiCallOut
+        <KbnWarningCallout
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.title"
               defaultMessage="Waterfall chart unavailable"
             />
           }
-          color="warning"
-          iconType="question"
-        >
-          <FormattedMessage
-            id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.description"
-            defaultMessage="The waterfall chart cannot be shown. You may be using an older version of the Synthetic Agent. Please check the version and consider upgrading."
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.description"
+              defaultMessage="The waterfall chart cannot be shown. You may be using an older version of the Synthetic Agent. Please check the version and consider upgrading."
+            />
+          }
+        />
       )}
     </>
   );

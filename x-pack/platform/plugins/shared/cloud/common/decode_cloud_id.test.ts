@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { decodeCloudId } from './decode_cloud_id';
 
 describe('Fleet - decodeCloudId', () => {
@@ -85,6 +86,15 @@ describe('Fleet - decodeCloudId', () => {
       expect(decoded?.elasticsearchUrl === test.expectedEsURL).toBe(true);
       expect(decoded?.kibanaUrl === test.expectedKibanaURL).toBe(true);
     }
+  });
+
+  it('exposes the Elasticsearch cluster ID', () => {
+    const decoded = decodeCloudId(
+      'staging:dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      logger
+    );
+
+    expect(decoded?.elasticsearchClusterId).toBe('cec6f261a74bf24ce33bb8811b84294f');
   });
 
   it('returns undefined for invalid formats', () => {

@@ -26,9 +26,13 @@ import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privilege
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
+import { registerSiemRuleMigrationsEnhanceRoute } from './rules/enhance';
+import { registerSiemRuleMigrationsCreateQRadarRulesRoute } from './rules/qradar/create';
+import { registerSiemRuleMigrationsCreateSentinelRulesRoute } from './rules/sentinel/create';
 import { registerSiemRuleMigrationsDeleteRoute } from './delete';
 import { registerSiemRuleMigrationsIntegrationsStatsRoute } from './integrations_stats';
 import { registerSiemRuleMigrationsUpdateRoute } from './update';
+import { registerSiemRuleMigrationsUpdateIndexPatternRoute } from './update_index_pattern';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -46,6 +50,18 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsCreateRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
+
+  /** Qradar */
+  if (config.experimentalFeatures.qradarRulesMigration) {
+    registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
+    registerSiemRuleMigrationsEnhanceRoute(router, logger);
+  }
+
+  /** Sentinel */
+  if (config.experimentalFeatures.sentinelRulesMigration) {
+    registerSiemRuleMigrationsCreateSentinelRulesRoute(router, logger);
+  }
+  /** *******/
   /** *******/
 
   /** Tasks **/
@@ -55,6 +71,7 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsTranslationStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
+  registerSiemRuleMigrationsUpdateIndexPatternRoute(router, logger);
   /** *******/
 
   /** Install */

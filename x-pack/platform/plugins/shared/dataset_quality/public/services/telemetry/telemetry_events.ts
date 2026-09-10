@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { SchemaObject, SchemaValue } from '@elastic/ebt';
+import type { SchemaObject, SchemaValue } from '@elastic/ebt';
 
-import {
+import type {
   DatasetEbtFilter,
   DatasetEbtProps,
   DatasetNavigatedEbtProps,
   DatasetQualityTelemetryEvent,
-  DatasetQualityTelemetryEventTypes,
 } from './types';
+import { DatasetQualityTelemetryEventTypes } from './types';
 
 const dataStreamSchema: SchemaObject<DatasetEbtProps['data_stream']> = {
   properties: {
@@ -288,9 +288,35 @@ const datasetDetailsBreakdownFieldChangedEventType: DatasetQualityTelemetryEvent
   },
 };
 
+const failureStoreUpdatedEventType: DatasetQualityTelemetryEvent = {
+  eventType: DatasetQualityTelemetryEventTypes.FAILURE_STORE_UPDATED,
+  schema: {
+    data_stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the data stream',
+      },
+    },
+    failure_store_enabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether failure store is enabled for the datastream',
+      },
+    },
+    custom_retention_period: {
+      type: 'keyword',
+      _meta: {
+        description: 'Custom retention period if set, otherwise system default applies',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const datasetQualityEbtEvents = {
   datasetNavigatedEventType,
   datasetDetailsOpenedEventType,
   datasetDetailsNavigatedEventType,
   datasetDetailsBreakdownFieldChangedEventType,
+  failureStoreUpdatedEventType,
 };

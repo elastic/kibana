@@ -15,11 +15,13 @@ import {
   ScaleType,
   niceTimeFormatter,
   LineSeries,
+  Tooltip,
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
-import { type MetricTypes, type MetricSeries } from '../../../common/rest_types';
+import type { MetricTypes } from '../../../common/rest_types';
+import type { MetricSeries } from '../../../server/routes/internal/usage_metrics';
 import { formatBytes } from '../../utils/format_bytes';
 
 // TODO: Remove this when we have a title for each metric type
@@ -88,6 +90,11 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
     [idx, popoverOpen, togglePopover]
   );
 
+  // Adjust tooltip items to ensure "Total" series is fully visible up to 8 series (the same number that fits in the side legend without scrolling)
+  // For up to 8 series, add two extra tooltip lines (series.length + 2) so the "Total" entry isn't truncated.
+  // If there are more than 8 series, cap the visible items to 9. Right click will be needed to see all.
+  const maxVisibleTooltipItems = series.length <= 8 ? series.length + 2 : 9;
+
   return (
     <EuiFlexItem grow={false} key={metricType}>
       <EuiPanel hasShadow={false} hasBorder={true} data-test-subj={`${metricType}-chart`}>
@@ -95,6 +102,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
           <h5>{chartKeyToTitleMap[metricType as ChartKey] || metricType}</h5>
         </EuiTitle>
         <Chart size={{ height: 200 }}>
+          <Tooltip maxVisibleTooltipItems={maxVisibleTooltipItems} />
           <Settings
             baseTheme={baseTheme}
             showLegend={true}

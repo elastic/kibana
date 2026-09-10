@@ -7,8 +7,7 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
-  DataStreamMigrationStatus,
+import type {
   DataStreamMigrationWarning,
   DataStreamMetadata,
   DataStreamReindexStatusResponse,
@@ -16,8 +15,9 @@ import {
   DataStreamResolutionType,
   ResponseError,
 } from '../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
 import { readOnlyExecute } from './readonly_state';
 
 const POLL_INTERVAL = 3000;
@@ -160,6 +160,12 @@ export const useMigrationStatus = ({
           return;
         }
 
+        // The request can resolve after unmount; avoid setting state (and scheduling poll timers)
+        // when the hook is no longer mounted.
+        if (!isMounted.current) {
+          return;
+        }
+
         setMigrationState((prevValue: MigrationState) => {
           return getMigrationState(prevValue, data!);
         });
@@ -172,6 +178,10 @@ export const useMigrationStatus = ({
           );
         }
       } catch (error) {
+        if (!isMounted.current) {
+          return;
+        }
+
         setMigrationState((prevValue: MigrationState) => {
           return {
             ...prevValue,
@@ -238,6 +248,10 @@ export const useMigrationStatus = ({
         throw error;
       }
 
+      if (!isMounted.current) {
+        return;
+      }
+
       setMigrationState((prevValue: MigrationState) => {
         return {
           ...prevValue,
@@ -246,6 +260,10 @@ export const useMigrationStatus = ({
         };
       });
     } catch (error) {
+      if (!isMounted.current) {
+        return;
+      }
+
       setMigrationState((prevValue: MigrationState) => {
         // if state is completed, we don't need to update the meta
         if (prevValue.status === DataStreamMigrationStatus.completed) {

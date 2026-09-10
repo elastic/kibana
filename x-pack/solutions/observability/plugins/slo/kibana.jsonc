@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/slo-plugin",
-  "owner": ["@elastic/obs-ux-management-team"],
+  "owner": ["@elastic/nightshift-sre-agent-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -13,6 +13,7 @@
       "aiops",
       "alerting",
       "charts",
+      "contentManagement",
       "dashboard",
       "data",
       "dataViewEditor",
@@ -22,13 +23,14 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "inspector",
       "lens",
       "licensing",
       "observability",
       "observabilityShared",
-      "presentationUtil",
       "ruleRegistry",
       "share",
+      "sloShared",
       "taskManager",
       "triggersActionsUi",
       "uiActions",
@@ -40,20 +42,23 @@
     "optionalPlugins": [
       "cases",
       "cloud",
+      "cps",
       "discover",
-      "embeddableEnhanced",
       "observabilityAIAssistant",
       "security",
       "serverless",
-      "spaces"
+      "spaces",
+      "agentBuilder",
+      "observabilityAgentBuilder"
     ],
     "requiredBundles": [
-      "controls",
       "embeddable",
       "ingestPipelines",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch"
+      "unifiedSearch",
+      "observabilityAgentBuilder",
+      "presentationUtil"
     ]
   }
 }

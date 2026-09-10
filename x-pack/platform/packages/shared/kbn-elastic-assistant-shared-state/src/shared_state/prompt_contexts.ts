@@ -7,7 +7,7 @@
 
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs';
-import { PromptContextTemplate } from '@kbn/elastic-assistant';
+import type { PromptContextTemplate } from '@kbn/elastic-assistant';
 
 export class PromptContextService {
   private readonly stop$ = new ReplaySubject<void>(1);

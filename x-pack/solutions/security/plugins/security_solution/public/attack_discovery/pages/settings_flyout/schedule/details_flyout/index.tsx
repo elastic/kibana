@@ -15,30 +15,38 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiSpacer,
+  isDOMNode,
+  keys,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RuleAction } from '@kbn/alerting-types';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { ConfirmationModal } from '../confirmation_modal';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
-import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
-import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import { getDefaultQuery } from '../../../helpers';
 import { useEditForm } from '../edit_form/use_edit_form';
 import { ScheduleDefinition } from './definition';
 import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
-import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
+import {
+  convertFormDataInBaseSchedule,
+  convertFormDataToWorkflowSchedule,
+} from '../utils/convert_form_data';
+import { PageScope } from '../../../../../data_view_manager/constants';
+import { WithMissingPrivileges } from '../missing_privileges';
 
 interface Props {
   scheduleId: string;
@@ -46,6 +54,19 @@ interface Props {
 }
 
 export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose }) => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const onFormMutated = useCallback(() => setHasUnsavedChanges(true), []);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const onCancel = useCallback(() => {
+    setShowConfirmModal(false); // just close the modal
+  }, []);
+
+  const onDiscard = useCallback(() => {
+    setShowConfirmModal(false);
+    onClose();
+  }, [onClose]);
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryScheduleDetailsFlyoutTitle',
   });
@@ -55,21 +76,25 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const { alertsIndexPattern, http } = useAssistantContext();
+  const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    featureId: 'attack_discovery',
+    settings,
   });
+  const { isWorkflowsEnabled, useGetSchedule, useUpdateSchedule } = useScheduleApi();
+
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =
-    useGetAttackDiscoverySchedule({
+    useGetSchedule({
       id: scheduleId,
     });
 
-  const { sourcererDataView } = useSourcererDataView();
+  const { dataView } = useDataView(PageScope.alerts);
 
   const [isEditing, setIsEditing] = useState(false);
 
   const { mutateAsync: updateAttackDiscoverySchedule, isLoading: isLoadingQuery } =
-    useUpdateAttackDiscoverySchedule();
+    useUpdateSchedule();
 
   const onUpdateSchedule = useCallback(
     async (scheduleData: AttackDiscoveryScheduleSchema) => {
@@ -79,14 +104,27 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
       }
 
       try {
-        const scheduleToUpdate = convertFormDataInBaseSchedule(
+        const convertFn = isWorkflowsEnabled
+          ? convertFormDataToWorkflowSchedule
+          : convertFormDataInBaseSchedule;
+
+        const scheduleToUpdate = convertFn(
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
-          uiSettings
+          uiSettings,
+          dataView
         );
-        await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
+        // `updateAttackDiscoverySchedule` is a union of public/workflow mutation
+        // functions with incompatible parameter types. `isWorkflowsEnabled`
+        // guarantees the correct converter was used above, making this safe.
+        await (
+          updateAttackDiscoverySchedule as (params: {
+            id: string;
+            scheduleToUpdate: typeof scheduleToUpdate;
+          }) => Promise<unknown>
+        )({ id: scheduleId, scheduleToUpdate });
+        setHasUnsavedChanges(false);
         setIsEditing(false);
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -94,10 +132,11 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     },
     [
       aiConnectors,
-      uiSettings,
-      sourcererDataView,
-      scheduleId,
       alertsIndexPattern,
+      dataView,
+      isWorkflowsEnabled,
+      scheduleId,
+      uiSettings,
       updateAttackDiscoverySchedule,
     ]
   );
@@ -108,23 +147,26 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     if (schedule) {
       const params = schedule.params;
       return {
-        name: schedule.name,
-        connectorId: params.apiConfig.connectorId,
+        actions: schedule.actions as RuleAction[],
         alertsSelectionSettings: {
-          query: params.query ?? getDefaultQuery(),
+          end: params.end ?? DEFAULT_END,
           filters: (params.filters as Filter[]) ?? [],
+          query: params.query ?? getDefaultQuery(),
           size: params.size,
           start: params.start ?? DEFAULT_START,
-          end: params.end ?? DEFAULT_END,
         },
+        connectorId: params.apiConfig.connectorId,
         interval: schedule.schedule.interval,
-        actions: schedule.actions as RuleAction[],
+        name: schedule.name,
+        ...(params.workflowConfig != null ? { workflowConfig: params.workflowConfig } : {}),
       };
     }
   }, [schedule]);
   const { editForm, actionButtons: editingActionButtons } = useEditForm({
     initialValue: formInitialValue,
     isLoading,
+    isWorkflowsEnabled,
+    onFormMutated,
     onSave: onUpdateSchedule,
     saveButtonTitle: i18n.SCHEDULE_SAVE_BUTTON_TITLE,
   });
@@ -158,15 +200,18 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="edit"
-              fill
-              size="s"
-              onClick={() => setIsEditing(true)}
-              disabled={isLoading}
-            >
-              {i18n.SCHEDULE_EDIT_BUTTON_TITLE}
-            </EuiButton>
+            <WithMissingPrivileges requireWorkflowsExecute>
+              {(enabled) => (
+                <EuiButton
+                  data-test-subj="edit"
+                  size="m"
+                  onClick={() => setIsEditing(true)}
+                  disabled={isLoading || !enabled}
+                >
+                  {i18n.SCHEDULE_EDIT_BUTTON_TITLE}
+                </EuiButton>
+              )}
+            </WithMissingPrivileges>
           </EuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -178,43 +223,62 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   }, [editButton, editingActionButtons, isEditing]);
 
   const handleCloseButtonClick = useCallback(() => {
-    if (isEditing) {
-      setIsEditing(false);
+    if (hasUnsavedChanges) {
+      setShowConfirmModal(true);
     } else {
       onClose();
+
+      setIsEditing(false);
     }
-  }, [isEditing, onClose]);
+  }, [hasUnsavedChanges, onClose]);
+
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        handleCloseButtonClick();
+      }
+    },
+    [handleCloseButtonClick]
+  );
 
   return (
-    <EuiFlyoutResizable
-      aria-labelledby={flyoutTitleId}
-      data-test-subj="scheduleDetailsFlyout"
-      minWidth={MIN_FLYOUT_WIDTH}
-      onClose={handleCloseButtonClick}
-      outsideClickCloses={!isEditing}
-      paddingSize="m"
-      side="right"
-      size="m"
-      type="overlay"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <Header
-          isEditing={isEditing}
-          isLoading={isLoading}
-          schedule={schedule}
-          titleId={flyoutTitleId}
-        />
-      </EuiFlyoutHeader>
+    <>
+      <EuiFlyoutResizable
+        aria-labelledby={flyoutTitleId}
+        data-test-subj="scheduleDetailsFlyout"
+        minWidth={MIN_FLYOUT_WIDTH}
+        onClose={handleCloseButtonClick}
+        onKeyDown={onKeyDown}
+        outsideClickCloses={!isEditing}
+        paddingSize="m"
+        side="right"
+        size="m"
+        type="overlay"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <Header
+            isEditing={isEditing}
+            isLoading={isLoading}
+            schedule={schedule}
+            titleId={flyoutTitleId}
+          />
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiSpacer size="s" />
-        {content}
-      </EuiFlyoutBody>
+        <EuiFlyoutBody>
+          <EuiSpacer size="s" />
+          {content}
+        </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <Footer closeModal={handleCloseButtonClick} actionButtons={actionButtons} />
-      </EuiFlyoutFooter>
-    </EuiFlyoutResizable>
+        <EuiFlyoutFooter>
+          <Footer closeModal={handleCloseButtonClick} actionButtons={actionButtons} />
+        </EuiFlyoutFooter>
+      </EuiFlyoutResizable>
+
+      {showConfirmModal && <ConfirmationModal onCancel={onCancel} onDiscard={onDiscard} />}
+    </>
   );
 });
 DetailsFlyout.displayName = 'DetailsFlyout';

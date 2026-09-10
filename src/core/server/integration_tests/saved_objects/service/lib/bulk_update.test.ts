@@ -11,13 +11,14 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { pick } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsType, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObject,
+  SavedObjectsType,
+  SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../../migrations/jest_matchers';
-import {
-  getKibanaMigratorTestKit,
-  startElasticsearch,
-} from '../../migrations/kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'bulk_update.test.log');
@@ -167,7 +168,7 @@ describe('SOR - bulk_update API', () => {
       { type: 'my-test-type', id: 'my-id' },
       { type: 'my-other-test-type', id: 'my-other-id' },
     ]);
-    const [doc, otherDoc] = repoV2Docs.saved_objects;
+    const [doc, otherDoc] = repoV2Docs.saved_objects as Array<SavedObject<any>>;
 
     expect(doc.attributes).toEqual({
       count: 12,
@@ -188,7 +189,7 @@ describe('SOR - bulk_update API', () => {
       { type: 'my-test-type', id: 'my-id' },
       { type: 'my-other-test-type', id: 'my-other-id' },
     ]);
-    const [doc1, otherDoc1] = repoV1Docs.saved_objects;
+    const [doc1, otherDoc1] = repoV1Docs.saved_objects as Array<SavedObject<any>>;
 
     expect(doc1.attributes).toEqual({
       count: 11,
@@ -207,7 +208,7 @@ describe('SOR - bulk_update API', () => {
       { type: 'my-test-type', id: 'my-id' },
       { type: 'my-other-test-type', id: 'my-other-id' },
     ]);
-    const [doc2, otherDoc2] = repoV2Docs.saved_objects;
+    const [doc2, otherDoc2] = repoV2Docs.saved_objects as Array<SavedObject<any>>;
 
     expect(doc2.attributes).toEqual({
       count: 14,
@@ -245,7 +246,7 @@ describe('SOR - bulk_update API', () => {
     await repository.create('update-test-type', { foo: 'bar' }, { id: 'my-id' });
 
     let docs = await repository.bulkGet([{ type: 'update-test-type', id: 'my-id' }]);
-    const [doc] = docs.saved_objects;
+    const [doc] = docs.saved_objects as Array<SavedObject<any>>;
 
     expect(doc.attributes).toEqual({
       foo: 'bar',
@@ -256,7 +257,7 @@ describe('SOR - bulk_update API', () => {
     ]);
 
     docs = await repository.bulkGet([{ type: 'update-test-type', id: 'my-id' }]);
-    const [doc1] = docs.saved_objects;
+    const [doc1] = docs.saved_objects as Array<SavedObject<any>>;
 
     expect(doc1.attributes).toEqual({
       foo: 'bar',
@@ -275,7 +276,7 @@ describe('SOR - bulk_update API', () => {
     ]);
 
     docs = await repository.bulkGet([{ type: 'update-test-type', id: 'my-id' }]);
-    const [doc2] = docs.saved_objects;
+    const [doc2] = docs.saved_objects as Array<SavedObject<any>>;
 
     expect(doc2.attributes).toEqual({
       over: '9000',

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { BeatsElasticsearchResponse } from './types';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';

@@ -8,39 +8,41 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type Query, escapeQuotes } from '@kbn/es-query';
+import { type Filter, type Query } from '@kbn/es-query';
+import { convertFiltersToESQLExpression } from './convert_filters_to_esql';
+import { convertQueryToESQLExpression } from './convert_query_to_esql';
 
-const getFilterBySearchText = (query?: Query) => {
-  if (!query) {
+const getFinalWhereClause = (
+  timeFilter?: string,
+  queryFilter?: string,
+  filtersExpression?: string
+) => {
+  const parts = [timeFilter, queryFilter, filtersExpression].filter(Boolean);
+  if (parts.length === 0) {
     return '';
   }
-  const searchTextFunc =
-    query.language === 'kuery' ? 'KQL' : query.language === 'lucene' ? 'QSTR' : '';
-
-  if (searchTextFunc && query.query) {
-    const escapedQuery =
-      typeof query.query === 'string' && query.language === 'lucene'
-        ? escapeQuotes(query.query)
-        : query.query;
-    return `${searchTextFunc}("""${escapedQuery}""")`;
-  }
-  return '';
+  return ` | WHERE ${parts.join(' AND ')}`;
 };
 
-const getFinalWhereClause = (timeFilter?: string, queryFilter?: string) => {
-  if (timeFilter && queryFilter) {
-    return ` | WHERE ${timeFilter} AND ${queryFilter}`;
-  }
-  return timeFilter || queryFilter ? ` | WHERE ${timeFilter || queryFilter}` : '';
-};
+const ALL_REMOTES_WILDCARD = '*:*';
 
 /**
- * Builds an ES|QL query for the provided dataView
- * If there is @timestamp field in the index, we don't add the WHERE clause
- * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
- * @param dataView
+ * Matches every index on every remote cluster. TSDB field metadata surfacing from such a broad
+ * resolution is not a reliable signal that the user wants a time series query.
  */
-export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
+const hasAllClustersWildcard = (indexPattern: string): boolean =>
+  indexPattern.split(',').some((entry) => entry.trim() === ALL_REMOTES_WILDCARD);
+
+/**
+ * Builds an ES|QL query for the provided dataView.
+ * If there is @timestamp field in the index, we don't add the WHERE clause.
+ * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName.
+ * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command.
+ * `*:*` is an exception: it matches every index on every remote cluster, so TSDB field metadata
+ * there is not a reliable signal of time series intent and we fall back to the FROM command.
+ * When a timeFieldName exists, a SORT DESC clause on the dataView timeFieldName is appended.
+ */
+export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?: Filter[]): string {
   const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
@@ -48,8 +50,21 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
       ? `${timeFieldName} >= ?_tstart AND ${timeFieldName} <= ?_tend`
       : '';
 
-  const filterBySearchText = getFilterBySearchText(query);
+  const filterBySearchText = convertQueryToESQLExpression(query);
 
-  const whereClause = getFinalWhereClause(filterByTimeParams, filterBySearchText);
-  return `FROM ${dataView.getIndexPattern()}${whereClause} | LIMIT 10`;
+  const { esqlExpression: filtersExpression } = filters?.length
+    ? convertFiltersToESQLExpression(filters)
+    : { esqlExpression: '' };
+
+  const whereClause = getFinalWhereClause(
+    filterByTimeParams,
+    filterBySearchText,
+    filtersExpression || undefined
+  );
+  const indexPattern = dataView.getIndexPattern();
+  const sourceCommand =
+    dataView.isTSDBMode() && !hasAllClustersWildcard(indexPattern) ? 'TS' : 'FROM';
+  const sortClause = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
+
+  return `${sourceCommand} ${indexPattern}${sortClause}${whereClause}`;
 }

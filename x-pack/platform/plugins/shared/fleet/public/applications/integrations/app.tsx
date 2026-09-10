@@ -12,7 +12,7 @@ import { EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -36,7 +36,7 @@ import { FleetServerFlyout } from '../fleet/components';
 import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
-import { FLEET_ROUTING_PATHS, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
+import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
@@ -156,12 +156,22 @@ export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
-  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isAddIntegrationsPath = !!useRouteMatch(
+    INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy
+  );
   const allowedToAccess =
     authz.integrations.readIntegrationPolicies || authz.integrations.all || authz.fleet.all;
   const missingPrivilegesString = 'MISSING_PRIVILEGES';
 
   if (!allowedToAccess) {
+    return (
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
+        <PermissionsError callingApplication="Integrations" error={missingPrivilegesString} />
+      </ErrorLayout>
+    );
+  }
+
+  if (isAddIntegrationsPath && !authz.integrations.all) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         <PermissionsError callingApplication="Integrations" error={missingPrivilegesString} />

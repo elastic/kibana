@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NotificationsStart, FatalErrorsSetup } from '@kbn/core/public';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { NotificationsStart, FatalErrorsSetup } from '@kbn/core/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 
 let notifications: NotificationsStart | null = null;

@@ -1,682 +1,1087 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
-<section
-  class="emotion-euiPageSection-grow-l-center-transparent"
->
+<DocumentFragment>
   <div
-    class="emotion-euiPageSection__content-l-center"
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
   >
     <div
-      class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
     >
-      <h1
-        class="euiTitle emotion-euiTitle-m"
-      >
-        Upload your license
-      </h1>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiText emotion-euiText-m"
-      >
-        <p>
-          Your license key is a JSON file with a signature attached.
-        </p>
-        <p>
-          Uploading a license will replace your current 
-          <strong />
-           license.
-        </p>
-      </div>
-      <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiForm"
+        class="css-856hcb-titleCluster"
       >
         <div
-          class="euiFilePicker emotion-euiFilePicker-fullWidth"
+          class="css-1cqdmpr-titleGroup"
         >
-          <input
-            aria-describedby="licenseFile-filePicker__prompt"
-            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
-            id="licenseFile"
-            type="file"
-          />
           <div
-            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
-            id="licenseFile-filePicker__prompt"
+            class="css-p0ahs1-wrapper"
           >
             <span
-              aria-hidden="true"
-              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
-              color="primary"
-              data-euiicon-type="importAction"
-            />
-            <span
-              class="euiFilePicker__promptText"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
-              Select or drag your license file
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
             </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
+                </span>
+              </h1>
+            </div>
           </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
+  >
+    <div
+      class="emotion-euiPageSection__content-l-center"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      >
+        <div
+          class="euiText emotion-euiText-m"
+        >
+          <p>
+            Your license key is a JSON file with a signature attached.
+          </p>
+          <p>
+            Uploading a license will replace your current 
+            <strong />
+             license.
+          </p>
         </div>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+          class="euiForm"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFilePicker emotion-euiFilePicker-fullWidth"
           >
-            <a
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="cancelUploadButton"
-              href="/home"
-              rel="noreferrer"
+            <input
+              aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
+              class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+              id="licenseFile"
+              type="file"
+            />
+            <div
+              class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+              id="licenseFile-filePicker__prompt"
             >
               <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                aria-hidden="true"
+                class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                color="text"
+                data-euiicon-type="upload"
+              />
+              <span
+                class="euiFilePicker__promptText"
               >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  Cancel
-                </span>
+                Select or drag your license file
               </span>
-            </a>
+            </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
           >
-            <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-              data-test-subj="uploadLicenseButton"
-              type="button"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <span
-                class="emotion-euiButtonDisplayContent"
+              <a
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="cancelUploadButton"
+                href="/home"
+                rel="noreferrer"
               >
-                Upload
-              </span>
-            </button>
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </a>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                data-test-subj="uploadLicenseButton"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  Upload
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</DocumentFragment>
 `;
 
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
-<section
-  class="emotion-euiPageSection-grow-l-center-transparent"
->
+<DocumentFragment>
   <div
-    class="emotion-euiPageSection__content-l-center"
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
   >
     <div
-      class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
     >
-      <h1
-        class="euiTitle emotion-euiTitle-m"
-      >
-        Upload your license
-      </h1>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiText emotion-euiText-m"
-      >
-        <p>
-          Your license key is a JSON file with a signature attached.
-        </p>
-        <p>
-          Uploading a license will replace your current 
-          <strong />
-           license.
-        </p>
-      </div>
-      <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiForm"
+        class="css-856hcb-titleCluster"
       >
         <div
-          aria-live="assertive"
-          class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-          role="alert"
-          tabindex="-1"
+          class="css-1cqdmpr-titleGroup"
         >
-          <p
-            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-          >
-            Please address the highlighted errors.
-          </p>
           <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiText emotion-euiText-s-euiTextColor-default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                The supplied license has expired.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFilePicker emotion-euiFilePicker-fullWidth"
-        >
-          <input
-            aria-describedby="licenseFile-filePicker__prompt"
-            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
-            id="licenseFile"
-            type="file"
-          />
-          <div
-            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
-            id="licenseFile-filePicker__prompt"
+            class="css-p0ahs1-wrapper"
           >
             <span
-              aria-hidden="true"
-              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
-              color="primary"
-              data-euiicon-type="importAction"
-            />
-            <span
-              class="euiFilePicker__promptText"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
-              Select or drag your license file
-            </span>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <a
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="cancelUploadButton"
-              href="/home"
-              rel="noreferrer"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
                 >
-                  Cancel
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
                 </span>
-              </span>
-            </a>
+              </h1>
+            </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
+  >
+    <div
+      class="emotion-euiPageSection__content-l-center"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      >
+        <div
+          class="euiText emotion-euiText-m"
+        >
+          <p>
+            Your license key is a JSON file with a signature attached.
+          </p>
+          <p>
+            Uploading a license will replace your current 
+            <strong />
+             license.
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiForm"
+        >
+          <div
+            aria-live="assertive"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
+            role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
+            tabindex="-1"
           >
-            <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-              data-test-subj="uploadLicenseButton"
-              type="button"
+            <div
+              class="css-1slkmya-wrapper"
+            >
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        The supplied license has expired.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFilePicker emotion-euiFilePicker-fullWidth"
+          >
+            <input
+              aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
+              class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+              id="licenseFile"
+              type="file"
+            />
+            <div
+              class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+              id="licenseFile-filePicker__prompt"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
+                aria-hidden="true"
+                class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                color="text"
+                data-euiicon-type="upload"
+              />
+              <span
+                class="euiFilePicker__promptText"
               >
-                Upload
+                Select or drag your license file
               </span>
-            </button>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <a
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="cancelUploadButton"
+                href="/home"
+                rel="noreferrer"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </a>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                data-test-subj="uploadLicenseButton"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  Upload
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</DocumentFragment>
 `;
 
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
-<section
-  class="emotion-euiPageSection-grow-l-center-transparent"
->
+<DocumentFragment>
   <div
-    class="emotion-euiPageSection__content-l-center"
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
   >
     <div
-      class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
     >
-      <h1
-        class="euiTitle emotion-euiTitle-m"
-      >
-        Upload your license
-      </h1>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiText emotion-euiText-m"
-      >
-        <p>
-          Your license key is a JSON file with a signature attached.
-        </p>
-        <p>
-          Uploading a license will replace your current 
-          <strong />
-           license.
-        </p>
-      </div>
-      <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiForm"
+        class="css-856hcb-titleCluster"
       >
         <div
-          aria-live="assertive"
-          class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-          role="alert"
-          tabindex="-1"
+          class="css-1cqdmpr-titleGroup"
         >
-          <p
-            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-          >
-            Please address the highlighted errors.
-          </p>
           <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiText emotion-euiText-s-euiTextColor-default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                The supplied license is not valid for this product.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFilePicker emotion-euiFilePicker-fullWidth"
-        >
-          <input
-            aria-describedby="licenseFile-filePicker__prompt"
-            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
-            id="licenseFile"
-            type="file"
-          />
-          <div
-            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
-            id="licenseFile-filePicker__prompt"
+            class="css-p0ahs1-wrapper"
           >
             <span
-              aria-hidden="true"
-              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
-              color="primary"
-              data-euiicon-type="importAction"
-            />
-            <span
-              class="euiFilePicker__promptText"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
-              Select or drag your license file
-            </span>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <a
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="cancelUploadButton"
-              href="/home"
-              rel="noreferrer"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
                 >
-                  Cancel
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
                 </span>
-              </span>
-            </a>
+              </h1>
+            </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
+  >
+    <div
+      class="emotion-euiPageSection__content-l-center"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      >
+        <div
+          class="euiText emotion-euiText-m"
+        >
+          <p>
+            Your license key is a JSON file with a signature attached.
+          </p>
+          <p>
+            Uploading a license will replace your current 
+            <strong />
+             license.
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiForm"
+        >
+          <div
+            aria-live="assertive"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
+            role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
+            tabindex="-1"
           >
-            <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-              data-test-subj="uploadLicenseButton"
-              type="button"
+            <div
+              class="css-1slkmya-wrapper"
+            >
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        The supplied license is not valid for this product.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFilePicker emotion-euiFilePicker-fullWidth"
+          >
+            <input
+              aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
+              class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+              id="licenseFile"
+              type="file"
+            />
+            <div
+              class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+              id="licenseFile-filePicker__prompt"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
+                aria-hidden="true"
+                class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                color="text"
+                data-euiicon-type="upload"
+              />
+              <span
+                class="euiFilePicker__promptText"
               >
-                Upload
+                Select or drag your license file
               </span>
-            </button>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <a
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="cancelUploadButton"
+                href="/home"
+                rel="noreferrer"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </a>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                data-test-subj="uploadLicenseButton"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  Upload
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</DocumentFragment>
 `;
 
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
-<section
-  class="emotion-euiPageSection-grow-l-center-transparent"
->
+<DocumentFragment>
   <div
-    class="emotion-euiPageSection__content-l-center"
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
   >
     <div
-      class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
     >
-      <h1
-        class="euiTitle emotion-euiTitle-m"
-      >
-        Upload your license
-      </h1>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiText emotion-euiText-m"
-      >
-        <p>
-          Your license key is a JSON file with a signature attached.
-        </p>
-        <p>
-          Uploading a license will replace your current 
-          <strong />
-           license.
-        </p>
-      </div>
-      <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiForm"
+        class="css-856hcb-titleCluster"
       >
         <div
-          aria-live="assertive"
-          class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-          role="alert"
-          tabindex="-1"
+          class="css-1cqdmpr-titleGroup"
         >
-          <p
-            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-          >
-            Please address the highlighted errors.
-          </p>
           <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiText emotion-euiText-s-euiTextColor-default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                Error encountered uploading license: Check your license file.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFilePicker emotion-euiFilePicker-fullWidth"
-        >
-          <input
-            aria-describedby="licenseFile-filePicker__prompt"
-            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
-            id="licenseFile"
-            type="file"
-          />
-          <div
-            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
-            id="licenseFile-filePicker__prompt"
+            class="css-p0ahs1-wrapper"
           >
             <span
-              aria-hidden="true"
-              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
-              color="primary"
-              data-euiicon-type="importAction"
-            />
-            <span
-              class="euiFilePicker__promptText"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
-              Select or drag your license file
-            </span>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <a
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="cancelUploadButton"
-              href="/home"
-              rel="noreferrer"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
                 >
-                  Cancel
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
                 </span>
-              </span>
-            </a>
+              </h1>
+            </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
+  >
+    <div
+      class="emotion-euiPageSection__content-l-center"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      >
+        <div
+          class="euiText emotion-euiText-m"
+        >
+          <p>
+            Your license key is a JSON file with a signature attached.
+          </p>
+          <p>
+            Uploading a license will replace your current 
+            <strong />
+             license.
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiForm"
+        >
+          <div
+            aria-live="assertive"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
+            role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
+            tabindex="-1"
           >
-            <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-              data-test-subj="uploadLicenseButton"
-              type="button"
+            <div
+              class="css-1slkmya-wrapper"
+            >
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        Error encountered uploading license: Check your license file.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFilePicker emotion-euiFilePicker-fullWidth"
+          >
+            <input
+              aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
+              class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+              id="licenseFile"
+              type="file"
+            />
+            <div
+              class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+              id="licenseFile-filePicker__prompt"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
+                aria-hidden="true"
+                class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                color="text"
+                data-euiicon-type="upload"
+              />
+              <span
+                class="euiFilePicker__promptText"
               >
-                Upload
+                Select or drag your license file
               </span>
-            </button>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <a
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="cancelUploadButton"
+                href="/home"
+                rel="noreferrer"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </a>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                data-test-subj="uploadLicenseButton"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  Upload
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</DocumentFragment>
 `;
 
 exports[`UploadLicense should display error when ES returns error 1`] = `
-<section
-  class="emotion-euiPageSection-grow-l-center-transparent"
->
+<DocumentFragment>
   <div
-    class="emotion-euiPageSection__content-l-center"
+    class="css-pw0na0-root-root-root-root-root"
+    data-test-subj="appHeader"
   >
     <div
-      class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      class="css-1ti6rga-primaryRow-primaryRow-primaryRow"
     >
-      <h1
-        class="euiTitle emotion-euiTitle-m"
-      >
-        Upload your license
-      </h1>
       <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiText emotion-euiText-m"
-      >
-        <p>
-          Your license key is a JSON file with a signature attached.
-        </p>
-        <p>
-          Uploading a license will replace your current 
-          <strong />
-           license.
-        </p>
-      </div>
-      <div
-        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-      />
-      <div
-        class="euiForm"
+        class="css-856hcb-titleCluster"
       >
         <div
-          aria-live="assertive"
-          class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-          role="alert"
-          tabindex="-1"
+          class="css-1cqdmpr-titleGroup"
         >
-          <p
-            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-          >
-            Please address the highlighted errors.
-          </p>
           <div
-            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-          />
-          <div
-            class="euiText emotion-euiText-s-euiTextColor-default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFilePicker emotion-euiFilePicker-fullWidth"
-        >
-          <input
-            aria-describedby="licenseFile-filePicker__prompt"
-            class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
-            id="licenseFile"
-            type="file"
-          />
-          <div
-            class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
-            id="licenseFile-filePicker__prompt"
+            class="css-p0ahs1-wrapper"
           >
             <span
-              aria-hidden="true"
-              class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
-              color="primary"
-              data-euiicon-type="importAction"
-            />
-            <span
-              class="euiFilePicker__promptText"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
-              Select or drag your license file
-            </span>
-          </div>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <a
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-              data-test-subj="cancelUploadButton"
-              href="/home"
-              rel="noreferrer"
-            >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              <a
+                aria-label="Back to License management"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text-button"
+                data-test-subj="appHeaderBack"
+                href="/"
+                rel="noreferrer"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="sortLeft"
+                />
+              </a>
+            </span>
+            <div
+              class="css-xzqk95-titleWrapper-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
                 >
-                  Cancel
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Upload your license
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Upload your license
+                  </span>
                 </span>
-              </span>
-            </a>
+              </h1>
+            </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
+  >
+    <div
+      class="emotion-euiPageSection__content-l-center"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiPanel--paddingLarge emotion-euiPanel-grow-m-l-subdued"
+      >
+        <div
+          class="euiText emotion-euiText-m"
+        >
+          <p>
+            Your license key is a JSON file with a signature attached.
+          </p>
+          <p>
+            Uploading a license will replace your current 
+            <strong />
+             license.
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiForm"
+        >
+          <div
+            aria-live="assertive"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
+            role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
+            tabindex="-1"
           >
-            <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-              data-test-subj="uploadLicenseButton"
-              type="button"
+            <div
+              class="css-1slkmya-wrapper"
+            >
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-1qkppnb-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFilePicker emotion-euiFilePicker-fullWidth"
+          >
+            <input
+              aria-describedby="licenseFile-filePicker__prompt"
+              aria-label="License file"
+              class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+              id="licenseFile"
+              type="file"
+            />
+            <div
+              class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+              id="licenseFile-filePicker__prompt"
             >
               <span
-                class="emotion-euiButtonDisplayContent"
+                aria-hidden="true"
+                class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                color="text"
+                data-euiicon-type="upload"
+              />
+              <span
+                class="euiFilePicker__promptText"
               >
-                Upload
+                Select or drag your license file
               </span>
-            </button>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <a
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="cancelUploadButton"
+                href="/home"
+                rel="noreferrer"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </a>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                data-test-subj="uploadLicenseButton"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  Upload
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</DocumentFragment>
 `;

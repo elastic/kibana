@@ -9,6 +9,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { CreateUserPage } from './create_user_page';
@@ -46,9 +47,11 @@ describe('CreateUserPage', () => {
 
     const { findByRole, findByLabelText } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <CreateUserPage />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <CreateUserPage />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
@@ -83,9 +86,11 @@ describe('CreateUserPage', () => {
 
     render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <CreateUserPage />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <CreateUserPage />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
 
@@ -108,11 +113,21 @@ describe('CreateUserPage', () => {
 
     const { findAllByText, findByRole, findByLabelText } = render(
       coreStart.rendering.addContext(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <CreateUserPage />
-        </Providers>
+        <MockAppHeaderProvider>
+          <Providers services={coreStart} authc={authc} history={history}>
+            <CreateUserPage />
+          </Providers>
+        </MockAppHeaderProvider>
       )
     );
+
+    // The submit button is not available until a change to the form is made
+    fireEvent.change(await findByLabelText('Username'), {
+      target: { value: 'something' },
+    });
+    fireEvent.change(await findByLabelText('Username'), {
+      target: { value: '' },
+    });
 
     fireEvent.click(await findByRole('button', { name: 'Create user' }));
 

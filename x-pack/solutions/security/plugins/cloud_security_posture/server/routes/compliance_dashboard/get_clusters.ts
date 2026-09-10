@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
   AggregationsTopHitsAggregate,
   SearchHit,
+  OpenPointInTimeResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { Cluster } from '../../../common/types_old';
 import { getPostureStatsFromAggs, failedFindingsAggQuery } from './get_grouped_findings_evaluation';
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
-import { KeyDocCount } from './compliance_dashboard';
+import type { KeyDocCount } from './compliance_dashboard';
 import { getIdentifierRuntimeMapping } from '../../../common/runtime_mappings/get_identifier_runtime_mapping';
 
 export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
@@ -62,6 +64,11 @@ export const getClustersQuery = (
           top_hits: {
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' } }],
+            // Restrict to only the fields consumed by getClustersFromAggs to avoid
+            // fetching full finding documents (which can be large) for every cluster.
+            _source: {
+              includes: ['@timestamp', 'rule.benchmark', 'cloud', 'orchestrator.cluster'],
+            },
           },
         },
         ...failedFindingsAggQuery,
@@ -109,20 +116,34 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 export const getClusters = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string,
+  pit: OpenPointInTimeResponse,
   runtimeMappings: MappingRuntimeFields,
   logger: Logger
 ): Promise<ClusterWithoutTrend[]> => {
   try {
     const queryResult = await esClient.search<unknown, ClustersQueryResult>(
-      getClustersQuery(query, pitId, runtimeMappings)
+      getClustersQuery(query, pit.id, runtimeMappings)
     );
+
+    if (queryResult.pit_id) {
+      pit.id = queryResult.pit_id;
+    }
 
     const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;
     if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
     return getClustersFromAggs(clusters);
   } catch (err) {
+    if (isMaximumResponseSizeExceededError(err)) {
+      // The top_hits payload exceeded elasticsearch.maxResponseSize. This is a data-volume
+      // issue, not a code bug. Throw a 413 so the route handler can log at warn level
+      // (avoiding re-paging on-call engineers) and return an actionable message to the client.
+      const sizeError = new Error(
+        'Too many cluster findings to load. Try reducing the number of monitored accounts or contact support.'
+      ) as Error & { statusCode: number };
+      sizeError.statusCode = 413;
+      throw sizeError;
+    }
     logger.error(`Failed to fetch cluster stats ${err.message}`);
     logger.error(err);
     throw err;

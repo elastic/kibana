@@ -7,28 +7,38 @@
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { IKibanaResponse } from '@kbn/core-http-server';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
-import { TestNowResponse } from '../../../common/types';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type { TestNowResponse } from '../../../common/types';
+import type { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { MONITOR_RUN_MANUALLY_API } from '../../feature';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
-  path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
-  validate: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
-    }),
+  path: SYNTHETICS_API_URLS.TEST_NOW_MONITOR + '/{monitorId}',
+  validate: {},
+  validation: {
+    request: {
+      params: schema.object({
+        monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+      }),
+    },
   },
   handler: async (routeContext) => {
     const { monitorId } = routeContext.request.params;
     return triggerTestNow(monitorId, routeContext);
   },
-  writeAccess: true,
+  // Running a monitor is read-plus-execute (it never mutates the monitor SO), so it
+  // does not require `uptime-write`. Instead it needs EITHER `uptime-write` (so existing
+  // write users keep working, non-breaking) OR the `monitor-run-manually` sub-feature privilege,
+  // which grants manual runs to an otherwise read-only role.
+  writeAccess: false,
+  anyRequiredPrivileges: ['uptime-write', MONITOR_RUN_MANUALLY_API],
+  options: { availability: { since: '9.2.0' } },
 });
 
 export const triggerTestNow = async (
@@ -45,9 +55,6 @@ export const triggerTestNow = async (
 
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
-
-    const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
-      normalizedMonitor.attributes;
 
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
@@ -69,19 +76,11 @@ export const triggerTestNow = async (
       return {
         errors,
         testRunId,
-        schedule,
-        locations,
-        configId: monitorId,
-        monitor: normalizedMonitor.attributes,
       };
     }
 
     return {
       testRunId,
-      schedule,
-      locations,
-      configId: monitorId,
-      monitor: normalizedMonitor.attributes,
     };
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {

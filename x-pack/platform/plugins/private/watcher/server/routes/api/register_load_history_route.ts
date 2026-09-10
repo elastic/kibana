@@ -7,14 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_NAMES } from '../../../common/constants';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item';
 
 const paramsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1000 }),
 });
 
 function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {

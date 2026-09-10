@@ -38,7 +38,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
   const dynamicOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const options = KAFKA_DYNAMIC_FIELDS.map((option) => ({
       label: option,
-      value: option,
+      value: `%{[${option}]}`,
     }));
     return options;
   }, []);
@@ -142,6 +142,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
           data-test-subj={'editOutputFlyout.kafkaTopicsRadioInput'}
           options={kafkaTopicsOptions}
           compressed
+          name="kafkaTopics"
           {...inputs.kafkaTopicsInput.props}
         />
       </EuiFormRow>

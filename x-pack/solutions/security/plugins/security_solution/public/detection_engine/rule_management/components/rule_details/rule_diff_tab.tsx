@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { omit, pick } from 'lodash';
-import stringify from 'json-stable-stringify';
 import {
   EuiSpacer,
   EuiPanel,
@@ -21,7 +20,7 @@ import { normalizeMachineLearningJobIds } from '../../../../../common/detection_
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
-import * as i18n from './json_diff/translations';
+import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -57,10 +56,9 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
    * Another technical property that is used for logic under the hood the user doesn't need to be aware of
    */
   'rule_source',
+  /* Technical property that changes at rule runtime. */
+  'execution_summary',
 ];
-
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  stringify(jsObject, { space: 2 });
 
 /**
  * Normalizes the rule object, making it suitable for comparison with another normalized rule.
@@ -118,25 +116,58 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   return rule;
 };
 
+// Stable default so callers that don't pass `extraHiddenProperties` keep a constant dependency
+// identity and don't recompute the diff memo on every render.
+const NO_EXTRA_HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [];
+
+/**
+ * Computes the stringified `[old, new]` rule sources shown in the diff. Shared so the decision to
+ * *show* a diff (e.g. the agent-builder card's accordion) and the diff that is actually *rendered*
+ * always apply the same hiding/normalization rules.
+ */
+export const getRuleDiffSources = (
+  oldRule: RuleResponse,
+  newRule: RuleResponse,
+  extraHiddenProperties: Array<keyof RuleResponse> = NO_EXTRA_HIDDEN_PROPERTIES
+): [string, string] => {
+  const hiddenProperties = [...HIDDEN_PROPERTIES, ...extraHiddenProperties];
+  const visibleNewRuleProperties = omit(normalizeRule(newRule), ...hiddenProperties);
+  /* Only compare properties that are present in the update. */
+  const visibleOldRuleProperties = pick(
+    normalizeRule(oldRule),
+    Object.keys(visibleNewRuleProperties)
+  );
+
+  return [
+    stringifyWithExpandedEmpties(visibleOldRuleProperties),
+    stringifyWithExpandedEmpties(visibleNewRuleProperties),
+  ];
+};
+
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
-  newRuleLabel?: string;
+  leftDiffSideLabel: string;
+  rightDiffSideLabel: string;
+  leftDiffSideDescription: string;
+  rightDiffSideDescription: string;
+  /** Caller-scoped properties to hide on top of {@link HIDDEN_PROPERTIES}. */
+  extraHiddenProperties?: Array<keyof RuleResponse>;
 }
 
-export const RuleDiffTab = ({ oldRule, newRule, newRuleLabel }: RuleDiffTabProps) => {
-  const [oldSource, newSource] = useMemo(() => {
-    const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
-    const visibleOldRuleProperties = omit(
-      /* Only compare properties that are present in the update. */
-      pick(normalizeRule(oldRule), Object.keys(visibleNewRuleProperties))
-    );
-
-    return [
-      sortAndStringifyJson(visibleOldRuleProperties),
-      sortAndStringifyJson(visibleNewRuleProperties),
-    ];
-  }, [oldRule, newRule]);
+export const RuleDiffTab = ({
+  oldRule,
+  newRule,
+  leftDiffSideLabel,
+  rightDiffSideLabel,
+  leftDiffSideDescription,
+  rightDiffSideDescription,
+  extraHiddenProperties = NO_EXTRA_HIDDEN_PROPERTIES,
+}: RuleDiffTabProps) => {
+  const [oldSource, newSource] = useMemo(
+    () => getRuleDiffSources(oldRule, newRule, extraHiddenProperties),
+    [oldRule, newRule, extraHiddenProperties]
+  );
 
   return (
     <>
@@ -146,24 +177,19 @@ export const RuleDiffTab = ({ oldRule, newRule, newRuleLabel }: RuleDiffTabProps
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
             <EuiIconTip
               color="subdued"
-              content={i18n.CURRENT_VERSION_DESCRIPTION}
+              content={leftDiffSideDescription}
               type="info"
               size="m"
               display="block"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.CURRENT_RULE_VERSION}</h6>
+              <h6>{leftDiffSideLabel}</h6>
             </EuiTitle>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-            <EuiIconTip
-              color="subdued"
-              content={i18n.UPDATED_VERSION_DESCRIPTION}
-              type="info"
-              size="m"
-            />
+            <EuiIconTip color="subdued" content={rightDiffSideDescription} type="info" size="m" />
             <EuiTitle size="xxxs">
-              <h6>{newRuleLabel ?? i18n.ELASTIC_UPDATE_VERSION}</h6>
+              <h6>{rightDiffSideLabel}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>

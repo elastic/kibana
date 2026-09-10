@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React, { useState } from 'react';
-import type { IconType } from '@elastic/eui/src/components/icon';
-import type { Color } from '@elastic/eui/src/components/call_out/call_out';
-import { css } from '@emotion/react';
+import { EuiCallOut, type EuiCallOutProps } from '@elastic/eui';
+import React, { memo } from 'react';
+import { useBoolean } from '@kbn/react-hooks';
 import * as i18n from './translations';
 
 export interface MiniCalloutProps {
-  color?: Color;
+  color?: EuiCallOutProps['color'];
   dismissible?: boolean;
-  iconType: IconType | undefined;
-  title: ReactNode | string;
+  title: EuiCallOutProps['title'];
+  text?: EuiCallOutProps['text'];
+  'data-test-subj'?: string;
 }
 
 /**
@@ -34,74 +24,32 @@ export interface MiniCalloutProps {
  *
  * @param color color for the callout, defaults to 'primary'
  * @param dismissible whether the callout can be dismissed, defaults to 'true'
- * @param iconType icon for the callout
  * @param title ReactNode or string title text to be displayed
- *
- * @constructor
+ * @param text ReactNode or string description text to be displayed
+ * @param dataTestSubj data-test-subj attribute for testing purposes, defaults to 'mini-callout'
  */
-const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
+export const MiniCallout = memo(function MiniCallout({
   color = 'primary',
   dismissible = true,
-  iconType,
   title,
-}: MiniCalloutProps) => {
-  const { euiTheme } = useEuiTheme();
-  const [isDismissed, setIsDismissed] = useState(false);
+  text,
+  'data-test-subj': dataTestSubj = 'mini-callout',
+}: MiniCalloutProps): JSX.Element | null {
+  const [isDismissed, { on: dismiss }] = useBoolean(false);
 
   if (isDismissed) {
     return null;
   }
 
-  const calloutTitle = (
-    <div
-      css={css`
-        width: 97%;
-        margin-left: ${euiTheme.size.s};
-      `}
-    >
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        css={css`
-          display: flex;
-        `}
-      >
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none">
-            <EuiTextColor
-              color="default"
-              css={css`
-                font-weight: ${euiTheme.font.weight.regular};
-              `}
-            >
-              {title}
-            </EuiTextColor>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {dismissible && (
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              css={css`
-                font-weight: ${euiTheme.font.weight.regular};
-              `}
-              onClick={() => setIsDismissed(true)}
-            >
-              {i18n.DISMISS}
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </div>
-  );
-
   return (
-    <EuiCallOut size="s" color={color} data-test-subj="mini-callout">
-      <div style={{ display: 'flex' }}>
-        {iconType && <EuiIcon type={iconType} color={color} />}
-        {calloutTitle}
-      </div>
-    </EuiCallOut>
+    <EuiCallOut
+      size="s"
+      title={title}
+      text={text}
+      color={color}
+      onDismiss={dismissible ? dismiss : undefined}
+      dismissButtonProps={{ 'aria-label': i18n.DISMISS }}
+      data-test-subj={dataTestSubj}
+    />
   );
-};
-
-export const MiniCallout = React.memo(MiniCalloutComponent);
-MiniCallout.displayName = 'MiniCallout';
+});

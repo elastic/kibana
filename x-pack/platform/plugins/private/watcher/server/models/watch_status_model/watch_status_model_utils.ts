@@ -7,7 +7,7 @@
 
 import { forEach, maxBy } from 'lodash';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
-import { ServerWatchStatusModel, ClientWatchStatusModel } from '../../../common/types';
+import type { ServerWatchStatusModel, ClientWatchStatusModel } from '../../../common/types';
 
 // Export for unit tests.
 export const deriveActionStatusTotals = (

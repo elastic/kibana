@@ -51,14 +51,6 @@ const getTestUtils = (
           scheduled_task_id: response.body.scheduled_task_id,
           updated_by: null,
           api_key_owner: null,
-          ...(describeType === 'internal'
-            ? {
-                artifacts: {
-                  dashboards: [],
-                  investigation_guide: { blob: '' },
-                },
-              }
-            : {}),
           api_key_created_by_user: null,
           throttle: '1m',
           notify_when: 'onThrottleInterval',
@@ -179,7 +171,6 @@ const getTestUtils = (
   });
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

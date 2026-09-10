@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -87,7 +87,7 @@ describe('fetch analytics collection data view id', () => {
         dataViewService as unknown as DataViewsService,
         mockCollectionId
       )
-    ).rejects.toThrowError(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+    ).rejects.toThrow(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
     expect(fetchAnalyticsCollections).toHaveBeenCalledWith(mockClient, mockCollectionId);
     expect(dataViewService.find).not.toHaveBeenCalled();
   });

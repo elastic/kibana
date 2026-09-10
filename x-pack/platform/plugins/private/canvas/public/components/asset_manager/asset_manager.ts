@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
+import type { Dispatch } from 'redux-v4';
+import { connect } from 'react-redux-v7';
 import { get } from 'lodash';
 import { encode } from '../../lib';
 // @ts-expect-error untyped local
@@ -16,7 +16,7 @@ import { createAsset, notifyError } from '../../lib/assets';
 import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error untyped local
 import { setAsset } from '../../state/actions/assets';
-import { State, AssetType, CanvasWorkpad } from '../../../types';
+import type { State, AssetType, CanvasWorkpad } from '../../../types';
 
 import { AssetManager as Component } from './asset_manager.component';
 import { getFullWorkpadPersisted } from '../../state/selectors/workpad';

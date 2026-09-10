@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { DataViewsService } from '../../../common';
+import type { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
 import type {
   DataViewsServerPluginStartDependencies,

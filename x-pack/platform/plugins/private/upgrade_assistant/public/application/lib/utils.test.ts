@@ -7,7 +7,7 @@
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
 import { getDeprecationsUpperLimit, getReindexProgressLabel, validateRegExpString } from './utils';
-import { ReindexStep } from '../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 
 describe('validRegExpString', () => {
   it('correctly returns false for invalid strings', () => {

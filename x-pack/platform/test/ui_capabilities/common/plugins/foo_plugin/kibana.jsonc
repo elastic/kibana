@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/foo-plugin",
+  "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "fooPlugin",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "features"
+    ]
+  }
+}

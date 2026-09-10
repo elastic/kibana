@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 
-import { ConfigSchema, ConfigType } from './config';
+import type { ConfigType } from './config';
+import { ConfigSchema } from './config';
 import { getConfigMock, getConfigMockDecoded } from './config.mock';
 
 describe('config_schema', () => {
@@ -21,7 +22,7 @@ describe('config_schema', () => {
       ...getConfigMock(),
     };
     expect(() => ConfigSchema.validate(mock)).toThrow(
-      '[madeUpValue]: definition for this key is missing'
+      "[madeUpValue]: Additional properties are not allowed ('madeUpValue' was unexpected)"
     );
   });
 

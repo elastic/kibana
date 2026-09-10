@@ -137,6 +137,91 @@ describe('hasCapabilities', () => {
         expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
       });
     });
+
+    describe('when there are inner OR groups (AND with inner OR)', () => {
+      // [[f1, { or: [f2, f3] }]] => f1 && (f2 || f3)
+      const requiredCapabilities = [
+        [
+          'requiredCapability.show',
+          { or: ['requiredCapability2.show', 'requiredCapability3.show'] },
+        ],
+      ];
+
+      it('returns true when the AND capability and one of the inner OR capabilities are true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+          requiredCapability2: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns true when the AND capability and the other inner OR capability are true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+          requiredCapability3: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns false when only the AND capability is true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns false when only the inner OR capabilities are true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability2: { show: true },
+          requiredCapability3: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns false when no capabilities are true', () => {
+        expect(hasCapabilities(EMPTY_CAPABILITIES, requiredCapabilities)).toEqual(false);
+      });
+    });
+
+    describe('when there are mixed outer OR and inner OR groups', () => {
+      // [f4, [f1, { or: [f2, f3] }]] => f4 || (f1 && (f2 || f3))
+      const requiredCapabilities = [
+        'requiredCapability4.show',
+        [
+          'requiredCapability.show',
+          { or: ['requiredCapability2.show', 'requiredCapability3.show'] },
+        ],
+      ];
+
+      it('returns true when the outer OR capability is true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability4: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns true when the AND with inner OR group is satisfied', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+          requiredCapability2: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns false when neither outer OR nor inner group is satisfied', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+    });
   });
 });
 
@@ -244,6 +329,51 @@ describe('existCapabilities', () => {
       it('returns false when only one of the AND capabilities exist', () => {
         const capabilities = {
           ...EMPTY_CAPABILITIES,
+          requiredCapability3: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+    });
+
+    describe('when there are inner OR groups (AND with inner OR)', () => {
+      // [[f1, { or: [f2, f3] }]] => f1 && (f2 || f3)
+      const requiredCapabilities = [
+        [
+          'requiredCapability.show',
+          { or: ['requiredCapability2.show', 'requiredCapability3.show'] },
+        ],
+      ];
+
+      it('returns true when the AND capability and one inner OR capability exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+          requiredCapability2: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns true when the AND capability and the other inner OR capability exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+          requiredCapability3: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns false when only the AND capability exists', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns false when only the inner OR capabilities exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability2: { show: false },
           requiredCapability3: { show: false },
         };
         expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(false);

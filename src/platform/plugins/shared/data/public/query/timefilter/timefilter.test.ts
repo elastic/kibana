@@ -11,14 +11,15 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 
 import sinon from 'sinon';
 import moment from 'moment';
-import { TimeRange } from '@kbn/es-query';
-import { AutoRefreshDoneFn, Timefilter } from './timefilter';
-import { Subscription } from 'rxjs';
-import { RefreshInterval } from '../../../common';
+import type { TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-service-server';
+import type { AutoRefreshDoneFn } from './timefilter';
+import { Timefilter } from './timefilter';
+import type { Subscription } from 'rxjs';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
-import { TimefilterConfig } from './types';
+import type { TimefilterConfig } from './types';
 
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 const minRefreshIntervalDefault = 1000;
@@ -439,7 +440,7 @@ describe('calculateBounds', () => {
     };
 
     stubNowTime('not_a_parsable_date');
-    expect(() => timefilter.calculateBounds(timeRange)).toThrowError();
+    expect(() => timefilter.calculateBounds(timeRange)).toThrow();
   });
 });
 
@@ -453,14 +454,14 @@ describe('getAutoRefreshFetch$', () => {
     });
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
 
-    expect(autoRefreshFetch).toBeCalledTimes(0);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(5000);
-    expect(autoRefreshFetch).toBeCalledTimes(1);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
 
     if (doneCb) doneCb();
 
     jest.advanceTimersByTime(1005);
-    expect(autoRefreshFetch).toBeCalledTimes(2);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(2);
   });
 
   test('new getAutoRefreshFetch$ subscription restarts refresh loop', () => {
@@ -472,14 +473,14 @@ describe('getAutoRefreshFetch$', () => {
     });
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
 
-    expect(autoRefreshFetch).toBeCalledTimes(0);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(5000);
-    expect(autoRefreshFetch).toBeCalledTimes(1);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
 
     fetch$.subscribe(autoRefreshFetch);
-    expect(autoRefreshFetch).toBeCalledTimes(1);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(1);
     sub1.unsubscribe();
     jest.advanceTimersByTime(1005);
-    expect(autoRefreshFetch).toBeCalledTimes(2);
+    expect(autoRefreshFetch).toHaveBeenCalledTimes(2);
   });
 });

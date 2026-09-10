@@ -13,11 +13,8 @@ import {
   getFindExceptionListSchemaDecodedMock,
   getFindExceptionListSchemaMock,
 } from './index.mock';
-import {
-  FindExceptionListSchema,
-  FindExceptionListSchemaDecoded,
-  findExceptionListSchema,
-} from '.';
+import type { FindExceptionListSchema, FindExceptionListSchemaDecoded } from '.';
+import { findExceptionListSchema } from '.';
 
 describe('find_exception_list_schema', () => {
   test('it should validate a typical find item request', () => {

@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
-import { TestCase, TestUser, ExpectResponseBody } from './types';
+import type { TestCase, TestUser, ExpectResponseBody } from './types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

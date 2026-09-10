@@ -16,6 +16,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { OverlayBannersService } from './banners';
 import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
+import { SystemFlyoutService } from './flyout/system_flyout_service';
 
 interface StartDeps {
   targetDomElement: HTMLElement;
@@ -31,6 +32,12 @@ export class OverlayService {
   private bannersService = new OverlayBannersService();
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
+  private systemFlyoutService = new SystemFlyoutService();
+
+  public closeAllFlyouts(): void {
+    this.flyoutService.closeAllFlyouts();
+    this.systemFlyoutService.closeAllFlyouts();
+  }
 
   public start({ targetDomElement, ...startDeps }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
@@ -49,9 +56,19 @@ export class OverlayService {
       ...startDeps,
     });
 
+    // Create system flyout container within the main React tree
+    const systemFlyoutElement = document.createElement('div');
+    systemFlyoutElement.setAttribute('data-system-flyouts', 'true');
+    targetDomElement.appendChild(systemFlyoutElement);
+    const systemFlyouts = this.systemFlyoutService.start({
+      targetDomElement: systemFlyoutElement,
+      ...startDeps,
+    });
+
     return {
       banners,
       openFlyout: flyouts.open.bind(flyouts),
+      openSystemFlyout: systemFlyouts.open.bind(systemFlyouts),
       openModal: modals.open.bind(modals),
       openConfirm: modals.openConfirm.bind(modals),
     };

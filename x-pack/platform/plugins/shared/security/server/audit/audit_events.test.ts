@@ -360,6 +360,8 @@ describe('#userLoginEvent', () => {
         },
         "message": "User [user] has logged in using basic provider [name=basic1]",
         "user": Object {
+          "email": "email",
+          "full_name": "full name",
           "id": "uid",
           "name": "user",
           "roles": Array [
@@ -619,6 +621,7 @@ describe('#httpRequestEvent', () => {
             requestId: '123',
             requestUuid: '123e4567-e89b-12d3-a456-426614174000',
             rewrittenUrl: new URL('http://localhost/original/path?query=param'),
+            startTime: Date.now(),
           },
         }),
       })

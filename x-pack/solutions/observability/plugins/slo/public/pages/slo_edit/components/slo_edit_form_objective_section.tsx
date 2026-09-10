@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiCallOut,
   EuiFieldNumber,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -17,9 +16,10 @@ import {
   EuiSelect,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeWindowType } from '@kbn/slo-schema';
+import type { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
@@ -28,7 +28,7 @@ import {
   ROLLING_TIMEWINDOW_OPTIONS,
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
@@ -98,11 +98,12 @@ export function SloEditFormObjectiveSection() {
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         {isServerless && (
-          <EuiCallOut>
-            {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
+          <KbnInfoCallout
+            announceOnMount
+            title={i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
               defaultMessage: 'Initial data backfill is limited to the past 7 days',
             })}
-          </EuiCallOut>
+          />
         )}
         <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
@@ -133,6 +134,9 @@ export function SloEditFormObjectiveSection() {
                     data-test-subj="sloFormTimeWindowTypeSelect"
                     options={TIMEWINDOW_TYPE_OPTIONS}
                     value={field.value}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowType.ariaLabel', {
+                      defaultMessage: 'Time window',
+                    })}
                   />
                 )}
               />
@@ -170,6 +174,9 @@ export function SloEditFormObjectiveSection() {
                         : ROLLING_TIMEWINDOW_OPTIONS
                     }
                     value={field.value}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.ariaLabel', {
+                      defaultMessage: 'Duration',
+                    })}
                   />
                 )}
               />
@@ -179,27 +186,33 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.metric.timeslice' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
-              <p>
+            <KbnWarningCallout
+              announceOnMount
+              title={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.objectiveTitle', {
+                defaultMessage:
+                  "The timeslice metric requires the budgeting method to be set to 'Timeslices' due to the nature of the statistical aggregations.",
+              })}
+              text={
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
-                  defaultMessage="The timeslice metric requires the budgeting method to be set to 'Timeslices' due to the nature of the statistical aggregations. The 'timeslice target' is also ignored in favor of the 'threshold' set in the metric definition above. The 'timeslice window' will set the size of the window the aggregation is performed on."
+                  defaultMessage="The 'timeslice target' is also ignored in favor of the 'threshold' set in the metric definition above. The 'timeslice window' will set the size of the window the aggregation is performed on."
                 />
-              </p>
-            </EuiCallOut>
+              }
+            />
           </EuiFlexItem>
         )}
 
         {indicator === 'sli.synthetics.availability' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
-              <p>
+            <KbnWarningCallout
+              announceOnMount
+              title={
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
                   defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurrences'."
                 />
-              </p>
-            </EuiCallOut>
+              }
+            />
           </EuiFlexItem>
         )}
 
@@ -236,6 +249,9 @@ export function SloEditFormObjectiveSection() {
                     id={budgetingSelect}
                     data-test-subj="sloFormBudgetingMethodSelect"
                     options={BUDGETING_METHOD_OPTIONS}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.budgetingMethod.ariaLabel', {
+                      defaultMessage: 'Budgeting method',
+                    })}
                   />
                 )}
               />
@@ -283,6 +299,9 @@ export function SloEditFormObjectiveSection() {
                     min={0.001}
                     max={99.999}
                     step={0.001}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.targetSlo.ariaLabel', {
+                      defaultMessage: 'Target / SLO (%)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}

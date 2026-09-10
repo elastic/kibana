@@ -83,7 +83,7 @@ describe('Put payload schema', () => {
           kibana: [{ _reserved: ['customApplication1'], spaces: ['*'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0._reserved]: definition for this key is missing"`
+        `"[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)"`
       );
     });
 
@@ -155,7 +155,7 @@ describe('Put payload schema', () => {
           kibana: [{ _reserved: ['customApplication1'], spaces: ['marketing'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0._reserved]: definition for this key is missing"`
+        `"[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)"`
       );
     });
   });
@@ -451,6 +451,67 @@ describe('Put payload schema', () => {
           ],
         },
       }
+    `);
+  });
+
+  test('passes through global.data_source when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          global: {
+            data_source: [
+              {
+                names: ['acme_*'],
+                privileges: ['read', 'manage'],
+              },
+            ],
+          },
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "global": Object {
+            "data_source": Array [
+              Object {
+                "names": Array [
+                  "acme_*",
+                ],
+                "privileges": Array [
+                  "read",
+                  "manage",
+                ],
+              },
+            ],
+          },
+        },
+      }
+    `);
+  });
+
+  test(`doesn't allow unknown global.data_source privileges`, () => {
+    expect(
+      () =>
+        getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+          elasticsearch: {
+            global: {
+              data_source: [
+                {
+                  names: ['acme_*'],
+                  privileges: ['unknown_privilege'],
+                },
+              ],
+            },
+          },
+        })
+      // todo not sure this makes sense
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[elasticsearch.global.data_source.0.privileges.0]: types that failed validation:
+      - [elasticsearch.global.data_source.0.privileges.0.0]: expected value to equal [create]
+      - [elasticsearch.global.data_source.0.privileges.0.1]: expected value to equal [read_metadata]
+      - [elasticsearch.global.data_source.0.privileges.0.2]: expected value to equal [delete]
+      - [elasticsearch.global.data_source.0.privileges.0.3]: expected value to equal [read]
+      - [elasticsearch.global.data_source.0.privileges.0.4]: expected value to equal [manage]"
     `);
   });
 

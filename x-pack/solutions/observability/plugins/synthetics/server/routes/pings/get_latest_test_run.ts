@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Ping } from '../../../common/runtime_types';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Ping } from '../../../common/runtime_types';
 import { getLatestTestRun } from '../../queries/get_latest_test_run';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getLatestTestRunRouteQuerySchema = schema.object({
   from: schema.maybe(schema.string()),
   to: schema.maybe(schema.string()),
   locationLabel: schema.maybe(schema.string()),
+  locationId: schema.maybe(schema.string()),
   monitorId: schema.string(),
+  remoteName: schema.maybe(schema.string({ maxLength: 256 })),
 });
 
 type GetPingsRouteRequest = TypeOf<typeof getLatestTestRunRouteQuerySchema>;
@@ -30,7 +33,8 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
     },
   },
   handler: async ({ syntheticsEsClient, request, response }): Promise<{ ping?: Ping }> => {
-    const { from, to, monitorId, locationLabel } = request.query as GetPingsRouteRequest;
+    const { from, to, monitorId, locationLabel, locationId, remoteName } =
+      request.query as GetPingsRouteRequest;
 
     const getPing = (fromVal: string) => {
       return getLatestTestRun({
@@ -39,6 +43,8 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
         to: to || 'now',
         monitorId,
         locationLabel,
+        locationId,
+        remoteName,
       });
     };
 

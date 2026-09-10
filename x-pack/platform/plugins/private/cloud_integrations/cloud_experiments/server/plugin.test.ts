@@ -12,7 +12,7 @@ import {
   createIndexPatternsStartMock,
   dataViewsService,
 } from '@kbn/data-views-plugin/server/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { config } from './config';
 import { CloudExperimentsPlugin } from './plugin';
 
@@ -37,7 +37,7 @@ describe('Cloud Experiments server plugin', () => {
     test('fails if launch_darkly is not provided in the config and it is a non-dev environment', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
       initializerContext.env.mode.dev = false;
-      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrowError(
+      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
     });

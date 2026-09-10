@@ -11,6 +11,7 @@ import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-cl
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
+import type { Writable } from '@kbn/utility-types';
 import { RGBAImage } from './image_utils';
 import { AbstractLayer, type LayerIcon } from '../layer';
 import {
@@ -19,11 +20,11 @@ import {
   SOURCE_DATA_REQUEST_ID,
   LAYER_TYPE,
 } from '../../../../common/constants';
-import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
-import { DataRequest } from '../../util/data_request';
+import type { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
+import type { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
-import { DataRequestContext } from '../../../actions';
-import { EMSTMSSource } from '../../sources/ems_tms_source';
+import type { DataRequestContext } from '../../../actions';
+import type { EMSTMSSource } from '../../sources/ems_tms_source';
 import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
 import type { SpriteMeta } from '../../sources/ems_tms_source/ems_tms_source';
 
@@ -39,13 +40,14 @@ interface SourceRequestData {
 
 export class EmsVectorTileLayer extends AbstractLayer {
   private readonly _style: EMSVectorTileStyle;
+  protected readonly _descriptor: EMSVectorTileLayerDescriptor;
 
   static createDescriptor(
     options: Partial<EMSVectorTileLayerDescriptor>
   ): EMSVectorTileLayerDescriptor {
     const emsVectorTileLayerDescriptor = super.createDescriptor(
       options
-    ) as EMSVectorTileLayerDescriptor;
+    ) as Writable<EMSVectorTileLayerDescriptor>;
     emsVectorTileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     emsVectorTileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     emsVectorTileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
@@ -61,6 +63,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     layerDescriptor: EMSVectorTileLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
+    this._descriptor = layerDescriptor;
     if (!layerDescriptor.style) {
       const defaultStyle = EMSVectorTileStyle.createDescriptor();
       this._style = new EMSVectorTileStyle(defaultStyle);
@@ -143,9 +146,21 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return `${this.getId()}_${name}`;
   }
 
+  // Returns the tileLayerId that produced the currently-loaded style data. The mb sources,
+  // layers and color filter must all be derived from this value rather than the live
+  // 'getTileLayerId()' (which reflects the global dark mode flag). When the color mode changes,
+  // the flag flips synchronously while the matching light/dark style is still being fetched
+  // asynchronously; using the live value here would namespace the mb source with the new theme
+  // while it still holds the previous theme's layers, leaving the basemap stuck on the old theme
+  // until the next re-sync.
+  _getLoadedTileLayerId() {
+    const loadedTileLayerId = this.getSourceDataRequest()?.getLoadedMeta().tileLayerId;
+    return loadedTileLayerId ?? this.getSource().getTileLayerId();
+  }
+
   _generateMbSourceIdPrefix() {
     const DELIMITTER = '___';
-    return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
+    return `${this.getId()}${DELIMITTER}${this._getLoadedTileLayerId()}${DELIMITTER}`;
   }
 
   _generateMbSourceId(name: string | undefined) {
@@ -392,13 +407,12 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const color = this.getCurrentStyle().getColor();
 
     const colorOperation = TMSService.colorOperationDefaults.find(({ style }) => {
-      return style === this.getSource().getTileLayerId();
+      return style === this._getLoadedTileLayerId();
     });
     if (!colorOperation) return;
     const { operation, percentage } = colorOperation;
 
     const properties = TMSService.transformColorProperties(
-      // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
       mbLayer,
       color,
       operation as unknown as blendMode,
@@ -435,10 +449,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
     const textProperty =
       locale === AUTOSELECT_EMS_LOCALE
-        ? // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
-          TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
-        : // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
-          TMSService.transformLanguageProperty(mbLayer, locale);
+        ? TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
+        : TMSService.transformLanguageProperty(mbLayer, locale);
     if (textProperty !== undefined) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
     }
@@ -494,7 +506,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   getLayerIcon(): LayerIcon {
     return {
-      icon: <EuiIcon size="m" type="grid" />,
+      icon: <EuiIcon size="m" type="grid" aria-hidden={true} />,
       tooltipContent: i18n.translate('xpack.maps.emsVectorTileLayer.layerDescription', {
         defaultMessage: `Reference map provided by Elastic Maps Service (EMS).`,
       }),

@@ -7,15 +7,15 @@
 
 import { firstValueFrom } from 'rxjs';
 import { take, toArray } from 'rxjs';
+import type { LicenseType } from '@kbn/licensing-types';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
-import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';
 import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '@kbn/core/public/mocks';
-import { HttpInterceptor } from '@kbn/core/public';
+import type { HttpInterceptor } from '@kbn/core/public';
 
 const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {
@@ -120,7 +120,7 @@ describe('licensing plugin', () => {
         expect(license.isAvailable).toBe(true);
         expect(license.uid).toBe('saved');
 
-        expect(sessionStorage.getItem).toBeCalledTimes(1);
+        expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
@@ -166,7 +166,7 @@ describe('licensing plugin', () => {
 
         expect(license.uid).toBe('fresh');
 
-        expect(sessionStorage.setItem).toBeCalledTimes(1);
+        expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
 
         expect(sessionStorage.setItem.mock.calls[0][0]).toBe(licensingSessionStorageKey);
         expect(sessionStorage.setItem.mock.calls[0][1]).toMatchInlineSnapshot(

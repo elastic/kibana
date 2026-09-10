@@ -28,7 +28,7 @@ import { APP_ID } from '../../../../common/constants';
 import { getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
-import { ILayer } from '../../../classes/layers/layer';
+import type { ILayer } from '../../../classes/layers/layer';
 import { hasESSourceMethod } from '../../../classes/sources/es_source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 
@@ -126,6 +126,9 @@ export class FilterEditor extends Component<Props, State> {
         closePopover={this._close}
         anchorPosition="leftCenter"
         ownFocus
+        aria-label={i18n.translate('xpack.maps.layerPanel.filterEditor.popoverAriaLabel', {
+          defaultMessage: 'Layer filter',
+        })}
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
@@ -194,7 +197,7 @@ export class FilterEditor extends Component<Props, State> {
         : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
             defaultMessage: 'Set filter',
           });
-    const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
+    const openButtonIcon = query && query.query ? 'pencil' : 'plusCircle';
 
     return (
       <EuiButtonEmpty

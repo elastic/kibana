@@ -6,21 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextColor,
-  EuiToolTip,
-  IconType,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import apacheIconSrc from '../../../assets/apache.svg';
 import dockerIconSrc from '../../../assets/docker.svg';
-import nginxIconSrc from '../../../assets/nginx.svg';
-import mysqlIconSrc from '../../../assets/mysql.svg';
 
 const SUPPORTED_INTEGRATIONS_LIST = [
   'Apache',
@@ -46,17 +35,14 @@ interface SupportedIntegrationItem {
 }
 
 const FEATURED_INTEGRATIONS_LIST: SupportedIntegrationItem[] = [
-  { title: 'Apache', icon: apacheIconSrc },
+  { title: 'Apache', icon: 'logoApache' },
   { title: 'Docker', icon: dockerIconSrc },
-  { title: 'Nginx', icon: nginxIconSrc },
-  { title: 'MySQL', icon: mysqlIconSrc },
-  { title: 'System', icon: 'desktop' },
+  { title: 'Nginx', icon: 'logoNginx' },
+  { title: 'MySQL', icon: 'logoMySQL' },
+  { title: 'System', icon: 'display' },
 ];
 
 export function SupportedIntegrationsList() {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
   const customLogFilesTitle = i18n.translate(
     'xpack.observability_onboarding.autoDetectPanel.supportedIntegrationsList.customIntegrationTitle',
     { defaultMessage: 'Custom .log files' }
@@ -64,8 +50,8 @@ export function SupportedIntegrationsList() {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} css={{ flexWrap: 'wrap' }}>
       {FEATURED_INTEGRATIONS_LIST.map(({ title, icon }) => (
-        <EuiFlexItem grow={false}>
-          <EuiBadge iconType={icon} color="hollow" key={title}>
+        <EuiFlexItem key={title} grow={false}>
+          <EuiBadge iconType={icon} color="hollow">
             {title}
           </EuiBadge>
         </EuiFlexItem>
@@ -87,10 +73,8 @@ export function SupportedIntegrationsList() {
           </EuiText>
         }
       >
-        <EuiBadge color="hollow">
-          <EuiTextColor color={colors.link}>
-            {`+${SUPPORTED_INTEGRATIONS_LIST.length - FEATURED_INTEGRATIONS_LIST.length}`}
-          </EuiTextColor>
+        <EuiBadge color="hollow" tabIndex={0}>
+          {`+${SUPPORTED_INTEGRATIONS_LIST.length - FEATURED_INTEGRATIONS_LIST.length}`}
         </EuiBadge>
       </EuiToolTip>
     </EuiFlexGroup>

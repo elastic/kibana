@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
@@ -15,15 +14,11 @@ import {
   getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
+import type { KQLCustomIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -37,7 +32,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
-      slo
+      slo,
+      this.getProjectRouting(slo)
     );
   }
 
@@ -54,7 +50,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
         bool: {
           filter: [
             getFilterRange(slo, indicator.params.timestampField, this.isServerless),
-            getElasticsearchQueryOrThrow(indicator.params.filter),
+            getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },
       },

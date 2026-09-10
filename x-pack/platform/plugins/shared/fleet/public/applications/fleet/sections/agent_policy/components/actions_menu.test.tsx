@@ -8,6 +8,7 @@ import React from 'react';
 import { userEvent } from '@testing-library/user-event';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../../common/types';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
 import { useAuthz } from '../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
@@ -16,6 +17,10 @@ import { AgentPolicyActionMenu } from './actions_menu';
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   useAuthz: jest.fn(),
+}));
+
+jest.mock('../../../../../hooks/use_can_enable_auto_upgrades', () => ({
+  useCanEnableAutomaticAgentUpgrades: jest.fn(),
 }));
 
 describe('AgentPolicyActionMenu', () => {
@@ -40,6 +45,8 @@ describe('AgentPolicyActionMenu', () => {
         writeIntegrationPolicies: true,
       },
     } as any);
+
+    jest.mocked(useCanEnableAutomaticAgentUpgrades).mockReturnValue(true);
   });
 
   describe('delete action', () => {
@@ -333,6 +340,79 @@ describe('AgentPolicyActionMenu', () => {
 
       const addButton = result.getByTestId('agentPolicyActionMenuAddAgentButton');
       expect(addButton).toHaveAttribute('disabled');
+    });
+  });
+
+  describe('manage auto-upgrade agents', () => {
+    const agentPolicyWithStandardPackagePolicy: AgentPolicy = {
+      ...baseAgentPolicy,
+      package_policies: [
+        {
+          id: 'test-package-policy',
+          is_managed: false,
+          created_at: new Date().toISOString(),
+          created_by: 'test',
+          enabled: true,
+          inputs: [],
+          name: 'test-package-policy',
+          namespace: 'default',
+          policy_id: 'test',
+          policy_ids: ['test'],
+          revision: 1,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+        },
+      ],
+    };
+    it('is enabled if user is authorized', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgentPolicies: true,
+          allAgents: true,
+        },
+        integrations: {
+          writeIntegrationPolicies: true,
+        },
+      } as any);
+
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithStandardPackagePolicy} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      const manageAutoUpgradesButton = result.getByTestId(
+        'agentPolicyActionMenuManageAutoUpgradeAgentsButton'
+      );
+      expect(manageAutoUpgradesButton).not.toHaveAttribute('disabled');
+    });
+    it('is disabled if user is not authorized', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          allAgentPolicies: true,
+          allAgents: false,
+        },
+        integrations: {
+          writeIntegrationPolicies: true,
+        },
+      } as any);
+
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(
+        <AgentPolicyActionMenu agentPolicy={agentPolicyWithStandardPackagePolicy} />
+      );
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      const manageAutoUpgradesButton = result.getByTestId(
+        'agentPolicyActionMenuManageAutoUpgradeAgentsButton'
+      );
+      expect(manageAutoUpgradesButton).toHaveAttribute('disabled');
     });
   });
 });

@@ -9,7 +9,7 @@ import { camelCase } from 'lodash';
 import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
 import { getId } from './get_id';
-import { PositionedElement } from '../../types';
+import type { PositionedElement } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 import { getCanvasNotifyService } from '../services/canvas_notify_service';
 import { getCustomElementService } from '../services/canvas_custom_element_service';

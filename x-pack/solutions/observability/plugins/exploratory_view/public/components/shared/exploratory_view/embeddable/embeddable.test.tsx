@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import Embeddable from './embeddable';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { DataViewState } from '../hooks/use_app_data_view';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DataViewState } from '../hooks/use_app_data_view';
 import { render } from '../rtl_helpers';
 import { AddToCaseAction } from '../header/add_to_case_action';
-import { ActionTypes } from './use_actions';
+import type { ActionTypes } from './use_actions';
 import * as lensHook from './use_embeddable_attributes';
 
 jest.mock('../header/add_to_case_action', () => ({
@@ -171,6 +171,48 @@ describe('Embeddable', () => {
     expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].withDefaultActions).toEqual(
       true
     );
+    expect(
+      (mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].onBeforeBadgesRender()
+    ).toEqual([]);
+  });
+
+  it('forwards onBeforeBadgesRender to the Lens embeddable', () => {
+    const onBeforeBadgesRender = jest.fn((messages) => messages);
+
+    render(
+      <Embeddable
+        caseOwner={mockOwner}
+        customTimeRange={mockTimeRange}
+        dataViewState={mockDataViews}
+        lens={mockLens}
+        reportType={mockReportType}
+        withActions={mockActions}
+        attributes={[]}
+        onBeforeBadgesRender={onBeforeBadgesRender}
+      />
+    );
+
+    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].onBeforeBadgesRender).toBe(
+      onBeforeBadgesRender
+    );
+  });
+
+  it('disables the built-in cases action to avoid a duplicate "Add to case" entry', () => {
+    render(
+      <Embeddable
+        caseOwner={mockOwner}
+        customTimeRange={mockTimeRange}
+        dataViewState={mockDataViews}
+        lens={mockLens}
+        reportType={mockReportType}
+        withActions={mockActions}
+        attributes={[]}
+      />
+    );
+
+    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].disabledActions).toEqual([
+      'embeddable_addToExistingCase',
+    ]);
   });
 
   it('renders AddToCaseAction', () => {

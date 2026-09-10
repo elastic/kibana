@@ -49,6 +49,13 @@ export const CONVERSATIONS_TABLE_COLUMN_CONNECTOR = i18n.translate(
   }
 );
 
+export const CONVERSATIONS_TABLE_COLUMN_SHARING = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.column.sharing',
+  {
+    defaultMessage: 'Sharing',
+  }
+);
+
 export const CONVERSATIONS_TABLE_COLUMN_UPDATED_AT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.column.updatedAt',
   {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, isMatchAllFilter, FILTERS } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isMatchAllFilter, FILTERS } from '@kbn/es-query';
 
 export const mapMatchAll = (filter: Filter) => {
   if (isMatchAllFilter(filter)) {

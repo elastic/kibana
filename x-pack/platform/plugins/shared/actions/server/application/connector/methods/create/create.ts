@@ -7,20 +7,27 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import type { HookServices, ActionResult } from '../../../../types';
+import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
+import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
+import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { validateConnectorId } from '../../../../../common/validate_connector_id';
+import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
 
 export async function create({
   context,
   action: { actionTypeId, name, config, secrets },
   options,
-}: ConnectorCreateParams): Promise<ActionResult> {
+}: ConnectorCreateParams): Promise<Connector> {
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -68,6 +75,8 @@ export async function create({
     );
   }
 
+  ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
@@ -80,6 +89,10 @@ export async function create({
     validateConnector(actionType, { config, secrets });
   }
   context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+
+  if (options?.id) {
+    validateConnectorId(options.id);
+  }
 
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
@@ -115,17 +128,36 @@ export async function create({
       outcome: 'unknown',
     })
   );
+  const authMode = inferAuthMode({
+    authTypeRegistry: context.authTypeRegistry,
+    secrets,
+    config,
+  });
+
+  const configForSave =
+    actionType.source === ACTION_TYPE_SOURCES.spec
+      ? ensureConfigAuthType(
+          validatedActionTypeConfig as Record<string, unknown>,
+          validatedActionTypeSecrets as Record<string, unknown>
+        )
+      : validatedActionTypeConfig;
+
+  const configWithIngress = preserveInboundIngressHashIfNeeded({
+    actionTypeId,
+    config: configForSave as Record<string, unknown>,
+  });
 
   const result = await tryCatch(
     async () =>
-      await context.unsecuredSavedObjectsClient.create(
+      await context.unsecuredSavedObjectsClient.create<RawAction>(
         'action',
         {
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: validatedActionTypeConfig as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configWithIngress,
+          secrets: validatedActionTypeSecrets,
+          ...(authMode !== undefined ? { authMode } : {}),
         },
         { id }
       )
@@ -154,7 +186,31 @@ export async function create({
     }
   }
 
+  // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
+  void invokePostCreateListeners(
+    context.connectorLifecycleListeners,
+    actionTypeId,
+    {
+      connectorId: id,
+      connectorName: name,
+      config,
+      logger: context.logger,
+      request: context.request,
+      services: hookServices,
+      wasSuccessful,
+    },
+    context.logger
+  );
+
   if (!wasSuccessful) {
+    if (SavedObjectsErrorHelpers.isConflictError(result)) {
+      throw Boom.conflict(
+        i18n.translate('xpack.actions.serverSideErrors.connectorIdConflict', {
+          defaultMessage: 'A connector is already using this ID: {id}. Choose a different ID.',
+          values: { id },
+        })
+      );
+    }
     throw result;
   }
 
@@ -167,5 +223,7 @@ export async function create({
     isPreconfigured: false,
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
+    isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
   };
 }

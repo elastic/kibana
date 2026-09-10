@@ -7,7 +7,7 @@
 
 import { ID, ITEM_ID, NAMESPACE_TYPE } from '../../constants/index.mock';
 
-import { ReadExceptionListItemSchema } from '.';
+import type { ReadExceptionListItemSchema } from '.';
 
 export const getReadExceptionListItemSchemaMock = (): ReadExceptionListItemSchema => ({
   id: ID,

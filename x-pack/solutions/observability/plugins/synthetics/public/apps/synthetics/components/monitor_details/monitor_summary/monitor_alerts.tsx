@@ -18,9 +18,10 @@ import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 import { AlertActions } from './alert_actions';
 
 const MONITOR_STATUS_RULE = {
@@ -41,10 +42,10 @@ export const MonitorAlerts = ({
   } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!selectedLocation || !queryIdFilter) {
     return <EuiSkeletonText />;
@@ -65,6 +66,7 @@ export const MonitorAlerts = ({
                   withActions={false}
                   customHeight={'27px'}
                   reportType="single-metric"
+                  dataTypesIndexPatterns={dataTypesIndexPatterns}
                   attributes={[
                     {
                       dataType: 'alerts',
@@ -102,6 +104,7 @@ export const MonitorAlerts = ({
             dataTestSubj="monitorActiveAlertsCount"
             customHeight={'120px'}
             reportType="single-metric"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 dataType: 'alerts',
@@ -128,6 +131,7 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 seriesType: 'area',
@@ -146,9 +150,7 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   ...(locationFilter ?? []),
                 ],
-                color: isAmsterdam
-                  ? euiTheme.colors.vis.euiColorVisBehindText7
-                  : euiTheme.colors.vis.euiColorVis7,
+                color: euiTheme.colors.vis.euiColorVis7,
               },
             ]}
           />
@@ -157,6 +159,7 @@ export const MonitorAlerts = ({
           <ExploratoryViewEmbeddable
             customHeight={'120px'}
             reportType="single-metric"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 dataType: 'alerts',
@@ -183,6 +186,7 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
+            dataTypesIndexPatterns={dataTypesIndexPatterns}
             attributes={[
               {
                 seriesType: 'area',
@@ -201,9 +205,7 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   ...(locationFilter ?? []),
                 ],
-                color: isAmsterdam
-                  ? euiTheme.colors.vis.euiColorVisBehindText0
-                  : euiTheme.colors.vis.euiColorVis0,
+                color: euiTheme.colors.vis.euiColorVis0,
               },
             ]}
           />

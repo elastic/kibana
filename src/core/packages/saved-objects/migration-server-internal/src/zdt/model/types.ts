@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExcludeRetryableEsError } from '../../model/types';
+import type { ExcludeRetryableEsError } from '../../model/types';
 import type { MigratorContext } from '../context';
 import type {
   AllActionStates,

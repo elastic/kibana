@@ -10,8 +10,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters } from '@kbn/core/public';
-import { ManagementApp, ManagementAppDependencies } from './components/management_app';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { ManagementAppDependencies } from './components/management_app';
+import { ManagementApp } from './components/management_app';
 
 export const renderApp = async (
   { history, appBasePath, element, theme$ }: AppMountParameters,

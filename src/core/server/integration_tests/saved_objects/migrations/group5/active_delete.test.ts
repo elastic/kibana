@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   readLog,
   clearLog,
@@ -17,17 +17,15 @@ import {
   currentVersion,
   defaultKibanaIndex,
   startElasticsearch,
-  getAggregatedTypesCount,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
-  getReindexingMigratorTestKit,
   getUpToDateBaselineTypes,
   getCompatibleBaselineTypes,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 
 describe('when upgrading to a new stack version', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -69,11 +67,16 @@ describe('when upgrading to a new stack version', () => {
         await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
       });
 
-      it('the migrator is skipping reindex operation and executing CLEANUP_UNKNOWN_AND_EXCLUDED step', async () => {
+      it('the migrator executes CLEANUP_UNKNOWN_AND_EXCLUDED during a compatible upgrade', async () => {
         const logs = await readLog();
         expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
         expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
-        expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch(
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION.'
+        );
+        expect(logs).toMatch(
+          'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CLEANUP_UNKNOWN_AND_EXCLUDED.'
+        );
         // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true)
         expect(logs).toMatch(
           'Kibana has been configured to discard unknown documents for this migration.'
@@ -148,7 +151,12 @@ describe('when upgrading to a new stack version', () => {
         const logs = await readLog();
         expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
         expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
-        expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch(
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION.'
+        );
+        expect(logs).toMatch(
+          'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CLEANUP_UNKNOWN_AND_EXCLUDED.'
+        );
         expect(logs).toMatch(
           'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
         );
@@ -193,13 +201,18 @@ describe('when upgrading to a new stack version', () => {
         await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
       });
 
-      it('the migrator is skipping reindex operation and executing CLEANUP_UNKNOWN_AND_EXCLUDED step', async () => {
+      it('the migrator executes CLEANUP_UNKNOWN_AND_EXCLUDED during a compatible upgrade', async () => {
         const logs = await readLog();
 
         expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
         expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
         // this step is run only if mappings are compatible but NOT equal
-        expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch(
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION.'
+        );
+        expect(logs).toMatch(
+          'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CLEANUP_UNKNOWN_AND_EXCLUDED.'
+        );
         // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true),
         expect(logs).toMatch(
           'Kibana has been configured to discard unknown documents for this migration.'
@@ -275,7 +288,12 @@ describe('when upgrading to a new stack version', () => {
         const logs = await readLog();
         expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
         expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
-        expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch(
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION.'
+        );
+        expect(logs).toMatch(
+          'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CLEANUP_UNKNOWN_AND_EXCLUDED.'
+        );
         expect(logs).toMatch(
           'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
         );
@@ -290,46 +308,6 @@ describe('when upgrading to a new stack version', () => {
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
         expect(indexContents.hits.hits.length).toEqual(25);
-      });
-    });
-  });
-
-  describe('if the mappings do NOT match (diffMappings() === true) and they are NOT compatible', () => {
-    beforeAll(async () => {
-      esClient = await createBaseline({ documentsPerType: 10 });
-    });
-    afterAll(async () => {
-      await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
-    });
-    beforeEach(async () => {
-      await clearLog();
-    });
-
-    it('the migrator does not skip reindexing', async () => {
-      const { client, runMigrations } = await getReindexingMigratorTestKit();
-
-      await runMigrations();
-
-      const logs = await readLog();
-      expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
-      expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
-      expect(logs).toMatch(
-        'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.'
-      );
-      expect(logs).toMatch('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.');
-      expect(logs).toMatch('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.');
-      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.');
-      expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
-      expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.');
-      expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
-
-      const counts = await getAggregatedTypesCount(client);
-      // for 'complex' objects, we discard second half and also multiples of 100
-      expect(counts).toEqual({
-        basic: 10,
-        complex: 4,
-        old: 10,
-        task: 10,
       });
     });
   });

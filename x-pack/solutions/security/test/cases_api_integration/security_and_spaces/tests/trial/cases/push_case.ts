@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type http from 'http';
 
 import expect from '@kbn/expect';
@@ -228,18 +226,15 @@ export default ({ getService }: FtrProviderContext): void => {
         );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
-          'Released host host-name with comment: comment text\n\nAdded by elastic.',
           `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`,
         ];
 
         /**
          * For each of these comments a request is made:
-         * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
-         * total alerts attach to a case. All other type of comments should be filtered. Specifically,
-         * postCommentAlertReq, postCommentAlertMultipleIdsReq, postExternalReferenceESReq, and persistableStateAttachment
+         * postCommentUserReq and a comment with the total alerts attached to a case.
+         * All other type of comments should be filtered.
          */
-        expect(allCommentRequests.length).be(4);
+        expect(allCommentRequests.length).be(2);
 
         // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
         // there specific order in the results
@@ -625,19 +620,25 @@ export default ({ getService }: FtrProviderContext): void => {
         const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/signals/default');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/cases/signals/default'
+          );
           await deleteAllCaseItems(es);
         });
 
         const attachAlertsAndPush = async ({
           syncAlerts = true,
-        }: { syncAlerts?: boolean } = {}) => {
+          extractObservables = true,
+        }: { syncAlerts?: boolean; extractObservables?: boolean } = {}) => {
           const { postedCase, connector } = await createCaseWithConnector({
-            createCaseReq: { ...getPostCaseRequest(), settings: { syncAlerts } },
+            createCaseReq: {
+              ...getPostCaseRequest(),
+              settings: { syncAlerts, extractObservables },
+            },
             configureReq: {
               closure_type: 'close-by-pushing',
             },

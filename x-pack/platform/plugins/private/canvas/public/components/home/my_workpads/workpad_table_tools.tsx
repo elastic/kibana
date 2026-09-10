@@ -6,17 +6,15 @@
  */
 
 import React, { useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import type { State } from '../../../../types';
 import { useDeleteWorkpads } from '../hooks';
 import { useDownloadWorkpad } from '../../hooks';
 
-import {
-  WorkpadTableTools as Component,
-  Props as ComponentProps,
-} from './workpad_table_tools.component';
+import type { Props as ComponentProps } from './workpad_table_tools.component';
+import { WorkpadTableTools as Component } from './workpad_table_tools.component';
 import { WorkpadsContext } from './my_workpads';
 
 export type Props = Pick<ComponentProps, 'selectedWorkpadIds'>;

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FileKind } from '../../../common/types';
+import type { FileKind } from '../../../common/types';
 
-import { FilesRouter } from '../types';
+import type { FilesRouter } from '../types';
 
 import { enhanceRouter } from './enhance_router';
 

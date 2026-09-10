@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SLODefinition } from '../../../../domain/models';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SLODefinition } from '../../../../domain/models';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
-import { EsSummaryDocument } from '../../../../services/summary_transform_generator/helpers/create_temp_summary';
+import type { EsSummaryDocument } from '../../../../services/summary_transform_generator/helpers/create_temp_summary';
 
 export async function getSloSummary(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
-  instanceId: string
+  instanceId: string,
+  projectRouting?: string
 ) {
   try {
     const res = await esClient.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
       query: {
         bool: {
           filter: [

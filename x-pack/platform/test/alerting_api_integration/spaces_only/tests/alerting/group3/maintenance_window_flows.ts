@@ -16,11 +16,10 @@ import {
   finishMaintenanceWindow,
   getRuleEvents,
   expectNoActionsFired,
-  runSoon,
   expectActionsFired,
 } from './test_helpers';
+import { runSoon } from '../../helpers';
 
-// eslint-disable-next-line import/no-default-export
 export default function maintenanceWindowFlowsTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');

@@ -11,10 +11,10 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { createType, parseLogFile } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
@@ -134,9 +134,6 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     );
 
     expect(mappingMeta).toEqual({
-      indexTypesMap: {
-        '.kibana': ['test_mv'],
-      },
       mappingVersions: {
         test_mv: '10.2.0',
       },

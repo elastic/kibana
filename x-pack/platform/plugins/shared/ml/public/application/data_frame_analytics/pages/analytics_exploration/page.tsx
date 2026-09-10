@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import {
@@ -21,7 +22,7 @@ import { ClassificationExploration } from './components/classification_explorati
 
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApi } from '../../../contexts/kibana';
-import { MlPageHeader } from '../../../components/page_header';
+import { MlAppHeader } from '../../../components/ml_app_header';
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
@@ -111,7 +112,7 @@ export const Page: FC<{
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt showDocsLink />;
+      return <AnalyticsEmptyPrompt showDocsLink iconSize="s" />;
     }
     return (
       <>
@@ -135,6 +136,11 @@ export const Page: FC<{
     <>
       <JobInfoFlyoutsProvider>
         <AnalyticsDetailFlyout />
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.dataframe.analyticsExploration.title', {
+            defaultMessage: 'Results explorer',
+          })}
+        />
         <AnalyticsIdSelectorControls
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           selectedId={jobIdToUse}
@@ -145,36 +151,19 @@ export const Page: FC<{
             setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           />
         ) : null}
-        {jobIdToUse !== undefined && (
-          <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.dataframe.analyticsExploration.titleWithId"
-              defaultMessage="Explore results for job ID {id}"
-              values={{ id: jobIdToUse }}
-            />
-          </MlPageHeader>
-        )}
-        {jobIdToUse === undefined && (
-          <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.dataframe.analyticsExploration.title"
-              defaultMessage="Explore results"
-            />
-          </MlPageHeader>
-        )}
 
         <SavedObjectsWarning onCloseFlyout={refresh} />
 
         {jobIdToUse && analysisTypeToUse ? (
           <div data-test-subj="mlPageDataFrameAnalyticsExploration">
             {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-              <OutlierExploration jobId={jobIdToUse} />
+              <OutlierExploration jobId={jobIdToUse} key={jobIdToUse} />
             )}
             {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-              <RegressionExploration jobId={jobIdToUse} />
+              <RegressionExploration jobId={jobIdToUse} key={jobIdToUse} />
             )}
             {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-              <ClassificationExploration jobId={jobIdToUse} />
+              <ClassificationExploration jobId={jobIdToUse} key={jobIdToUse} />
             )}
           </div>
         ) : (

@@ -98,6 +98,7 @@ export const getRuleTypesInternalResponseBodySchema = schema.arrayOf(
         },
       }
     ),
+    auto_recover_alerts: schema.maybe(schema.boolean()),
     category: schema.string({
       meta: {
         description:
@@ -132,6 +133,12 @@ export const getRuleTypesInternalResponseBodySchema = schema.arrayOf(
     id: schema.string({
       meta: {
         description: 'The unique identifier for the rule type.',
+      },
+    }),
+    is_internally_managed: schema.boolean({
+      meta: {
+        description:
+          'Indicates whether the rule type is internally managed by the system. Rules of this type can not be edited by users.',
       },
     }),
     is_exportable: schema.boolean({

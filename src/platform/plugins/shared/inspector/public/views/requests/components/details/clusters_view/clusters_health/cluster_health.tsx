@@ -9,12 +9,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
-import { useHealthHexCodes } from './gradient';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiHealth, EuiText } from '@elastic/eui';
+import { useHealthHexCodes, type ClusterHealthStatus } from './gradient';
 
 interface Props {
   count?: number;
-  status: string;
+  status: ClusterHealthStatus;
   textProps?: EuiTextProps;
 }
 
@@ -23,6 +24,8 @@ const defaultTextProps: EuiTextProps = {
   color: 'subdued',
 };
 
+export type { ClusterHealthStatus };
+
 export function ClusterHealth({ count, status, textProps = defaultTextProps }: Props) {
   const healthHexCodes = useHealthHexCodes();
   if (typeof count === 'number' && count === 0) {
@@ -30,7 +33,7 @@ export function ClusterHealth({ count, status, textProps = defaultTextProps }: P
   }
 
   let color = 'subdued';
-  let statusLabel = status;
+  let statusLabel: string = status;
   if (status === 'successful') {
     color = healthHexCodes.successful;
     statusLabel = i18n.translate('inspector.requests.clusters.successfulLabel', {

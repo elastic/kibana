@@ -22,18 +22,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { take } from 'lodash/fp';
 import { css } from '@emotion/react';
+import { isLeft } from 'fp-ts/Either';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import type { GetLensAttributes } from '../../../../../common/components/visualization_actions/types';
+import { VisualizationContextMenuActions } from '../../../../../common/components/visualization_actions/types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { VisualizationEmbeddable } from '../../../../../common/components/visualization_actions/visualization_embeddable';
 import { DASHBOARD_TABLE_QUERY_ID, useDashboardTableQuery } from './hooks';
+import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
 
 export const DEFAULT_PAGE_SIZE = 10;
-
-export interface VisualizationStackByOption {
-  text: string;
-  value: string;
-}
 
 export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>({
   stackByField,
@@ -48,12 +46,15 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
 }: {
   title: ReactNode;
   stackByField: string;
-  generateVisualizationQuery: (stackByValue: string) => string;
+  generateVisualizationQuery: (
+    stackByValue: string,
+    timerange: { from: string; to: string }
+  ) => EsqlQueryOrInvalidFields;
   generateTableQuery: (
     sortField: keyof TableItemType,
     sortDirection: 'asc' | 'desc',
     currentPage: number
-  ) => string;
+  ) => EsqlQueryOrInvalidFields;
   columns: Array<EuiBasicTableColumn<TableItemType>>;
   getLensAttributes: GetLensAttributes;
   timerange: { from: string; to: string };
@@ -71,8 +72,8 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   );
 
   const visualizationQuery = useMemo(
-    () => generateVisualizationQuery(stackByField),
-    [generateVisualizationQuery, stackByField]
+    () => generateVisualizationQuery(stackByField, timerange),
+    [generateVisualizationQuery, stackByField, timerange]
   );
 
   const {
@@ -99,17 +100,51 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
     error
   );
 
+  if (isLeft(visualizationQuery)) {
+    return (
+      <EuiCallOut
+        announceOnMount={false}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorTitle"
+            defaultMessage="There was a problem rendering the visualization"
+          />
+        }
+        color="warning"
+        iconType="error"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorMessage"
+          defaultMessage="The following required fields are not present in the Security Data View:"
+        />
+        <EuiSpacer size="s" />
+        <ul>
+          {visualizationQuery.left.invalidFields?.map((field, index) => (
+            <li key={index}>{field}</li>
+          ))}
+        </ul>
+      </EuiCallOut>
+    );
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column" data-test-subj="genericDashboardSections">
         <VisualizationEmbeddable
           stackByField={stackByField}
-          esql={visualizationQuery}
+          esql={visualizationQuery.right}
           data-test-subj="genericDashboardEmbeddableHistogram"
           getLensAttributes={getLensAttributes}
           height={260}
           id="GenericDashboard"
           timerange={timerange}
+          withActions={[
+            VisualizationContextMenuActions.inspect,
+            VisualizationContextMenuActions.addToNewCase,
+            VisualizationContextMenuActions.addToExistingCase,
+            VisualizationContextMenuActions.saveToLibrary,
+            // Excluding VisualizationContextMenuActions.openInLens
+          ]}
         />
       </EuiFlexGroup>
       <EuiSpacer size="l" />
@@ -121,6 +156,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           ) : isError ? (
             <div>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate('xpack.securitySolution.genericDashboard.errorLoadingData', {
                   defaultMessage: 'Error loading data',
                 })}
@@ -160,6 +196,12 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
                     },
                   }}
                   columns={columns}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.genericDashboard.tableCaption',
+                    {
+                      defaultMessage: 'Generic dashboard results table',
+                    }
+                  )}
                 />
               </div>
             </InspectButtonContainer>

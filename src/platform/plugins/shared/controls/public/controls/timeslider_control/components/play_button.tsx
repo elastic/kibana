@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip, UseEuiTheme } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { Observable } from 'rxjs';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { TimeSliderStrings } from './time_slider_strings';
 
@@ -32,15 +33,20 @@ export function PlayButton(props: Props) {
   }
 
   const Button = (
-    <EuiButtonIcon
-      onClick={props.isPaused ? props.onPlay : props.onPause}
-      disabled={props.disablePlayButton}
-      iconType={props.isPaused ? 'playFilled' : 'pause'}
-      size="s"
-      display="fill"
-      aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(props.isPaused)}
-      css={styles.icon}
-    />
+    <EuiToolTip
+      content={TimeSliderStrings.control.getPlayButtonAriaLabel(props.isPaused)}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        onClick={props.isPaused ? props.onPlay : props.onPause}
+        disabled={props.disablePlayButton}
+        iconType={props.isPaused ? 'play' : 'pause'}
+        size="s"
+        display="fill"
+        aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(props.isPaused)}
+        css={styles.icon}
+      />
+    </EuiToolTip>
   );
   return props.disablePlayButton ? (
     <EuiToolTip display="block" content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>

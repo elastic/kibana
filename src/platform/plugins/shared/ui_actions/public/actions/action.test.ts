@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultTrigger } from '@kbn/ui-actions-browser';
-import { ActionExecutionContext, createAction } from '..';
+import type { ActionExecutionContext } from '..';
+import { createAction } from '..';
 
 const sayHelloAction = createAction<{ amICompatible: boolean }>({
   id: 'test',
@@ -20,7 +20,6 @@ const sayHelloAction = createAction<{ amICompatible: boolean }>({
 test('action is not compatible based on context', async () => {
   const isCompatible = await sayHelloAction.isCompatible({
     amICompatible: false,
-    trigger: defaultTrigger,
   } as ActionExecutionContext<{ amICompatible: boolean }>);
   expect(isCompatible).toBe(false);
 });
@@ -28,7 +27,6 @@ test('action is not compatible based on context', async () => {
 test('action is compatible based on context', async () => {
   const isCompatible = await sayHelloAction.isCompatible({
     amICompatible: true,
-    trigger: defaultTrigger,
   } as ActionExecutionContext<{ amICompatible: boolean }>);
   expect(isCompatible).toBe(true);
 });

@@ -14,7 +14,6 @@ interface RuleSpace {
   body: any;
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function createRuleSuggestionValuesTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -68,7 +67,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
               expect(response.statusCode).toEqual(403);
               expect(response.body).toEqual({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               break;

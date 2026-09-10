@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCallOut,
-  EuiSpacer,
-  EuiText,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiIcon } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import type { FieldConfig } from '../../../../../../../shared_imports';
 import {
   getUseField,
   Field,
@@ -25,10 +20,9 @@ import {
   Form,
   TextField,
   fieldValidators,
-  FieldConfig,
 } from '../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../use_is_mounted';
-import { Document } from '../../../../types';
+import type { Document } from '../../../../types';
 
 const UseField = getUseField({ component: Field });
 
@@ -145,15 +139,13 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
     <Form form={form} onSubmit={submitForm}>
       {documentError && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount
             title={i18nTexts.addDocumentErrorMessage}
-            color="danger"
-            iconType="warning"
             data-test-subj="addDocumentError"
             size="s"
-          >
-            <p>{documentError.message}</p>
-          </EuiCallOut>
+            text={documentError.message}
+          />
 
           <EuiSpacer size="m" />
         </>
@@ -194,7 +186,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="success" />
+                <EuiIcon type="check" color="success" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText color="success" data-test-subj="addDocumentSuccess">

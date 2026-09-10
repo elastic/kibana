@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,7 +25,7 @@ export const NoDeprecationIssues: FunctionComponent<Props> = (props) => {
     <EuiText color="success">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" />
+          <EuiIcon type="checkCircleFill" aria-hidden={true} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false} data-test-subj={props['data-test-subj']}>

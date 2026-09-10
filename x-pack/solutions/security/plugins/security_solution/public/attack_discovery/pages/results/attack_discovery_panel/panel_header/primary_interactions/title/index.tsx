@@ -7,11 +7,9 @@
 
 import {
   EuiAccordion,
-  EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -27,9 +25,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { AccordionButton } from '../accordion_button';
 import { Badges } from '../badges';
 import { DetailsFlyout } from '../../../../../settings_flyout/schedule/details_flyout';
-import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../../../../../use_kibana_feature_flags';
+import { ScheduleDetailsButton } from '../../../../../../../detections/components/attacks/schedule_details_button/schedule_details_button';
 import { isAttackDiscoveryAlert } from '../../../../../utils/is_attack_discovery_alert';
+import { useKibana } from '../../../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../../../common/lib/telemetry';
 
 interface Props {
   attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
@@ -52,8 +51,11 @@ const TitleComponent: React.FC<Props> = ({
   setIsSelected,
   showAnonymized = false,
 }) => {
+  const {
+    services: { telemetry },
+  } = useKibana();
+
   const { euiTheme } = useEuiTheme();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const htmlId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryAccordion',
@@ -61,6 +63,10 @@ const TitleComponent: React.FC<Props> = ({
 
   const checkboxId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryCheckbox',
+  });
+
+  const titleId = useGeneratedHtmlId({
+    prefix: 'attackDiscoveryTitle',
   });
 
   const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
@@ -90,7 +96,10 @@ const TitleComponent: React.FC<Props> = ({
 
   const openScheduleDetails = useCallback(() => {
     setScheduleDetailsId(alertRuleUuid);
-  }, [alertRuleUuid]);
+    telemetry.reportEvent(AttacksEventTypes.ScheduleDetailsFlyoutOpened, {
+      source: 'attack_discovery_page',
+    });
+  }, [alertRuleUuid, telemetry]);
 
   const onClose = useCallback(() => setScheduleDetailsId(undefined), []);
 
@@ -106,9 +115,10 @@ const TitleComponent: React.FC<Props> = ({
         replacements={replacements}
         showAnonymized={showAnonymized}
         title={attackDiscovery.title}
+        titleId={titleId}
       />
     );
-  }, [attackDiscovery, replacements, showAnonymized]);
+  }, [attackDiscovery, replacements, showAnonymized, titleId]);
 
   return (
     <>
@@ -122,19 +132,18 @@ const TitleComponent: React.FC<Props> = ({
         responsive={false}
         wrap={true}
       >
-        {attackDiscoveryAlertsEnabled && (
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              checked={isSelected}
-              css={css`
-                display: inline;
-              `}
-              data-test-subj="attackDiscoveryCheckbox"
-              id={checkboxId}
-              onChange={onCheckboxChange}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            aria-labelledby={titleId}
+            checked={isSelected}
+            css={css`
+              display: inline;
+            `}
+            data-test-subj="attackDiscoveryCheckbox"
+            id={checkboxId}
+            onChange={onCheckboxChange}
+          />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiAccordion
@@ -148,23 +157,7 @@ const TitleComponent: React.FC<Props> = ({
           </EuiAccordion>
         </EuiFlexItem>
 
-        {isScheduled && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.SCHEDULED_ATTACK_DISCOVERY}
-              data-test-subj="scheduledTooltip"
-              position="top"
-            >
-              <EuiButtonIcon
-                aria-label={i18n.OPEN_SCHEDULE_DETAILS}
-                data-test-subj="scheduleButton"
-                iconType="calendar"
-                onClick={openScheduleDetails}
-                size="xs"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
+        {isScheduled && <ScheduleDetailsButton onClick={openScheduleDetails} />}
 
         <EuiFlexItem grow={false}>
           <Badges attackDiscovery={attackDiscovery} />

@@ -24,12 +24,13 @@ import {
   EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
+  EndpointDeviceControlLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
-  EndpointExceptionsDetailsUpsellingLazy,
+  AttacksUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
@@ -76,16 +77,14 @@ export const upsellingPages: UpsellingPages = [
     ),
   },
   {
-    pageName: SecurityPageName.exceptions,
-    pli: ProductFeatureKey.endpointExceptions,
-    component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
-    ),
-  },
-  {
     pageName: SecurityPageName.attackDiscovery,
     pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.attacks,
+    pli: ProductFeatureKey.attackDiscovery,
+    component: () => <AttacksUpsellingPageLazy />,
   },
   {
     pageName: SecurityPageName.siemMigrationsRules,
@@ -127,6 +126,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'ruleDetailsEndpointExceptions',
     pli: ProductFeatureKey.endpointExceptions,
     component: RuleDetailsEndpointExceptionsLazy,
+  },
+  {
+    id: 'endpoint_device_control',
+    pli: ProductFeatureKey.endpointTrustedDevices,
+    component: EndpointDeviceControlLazy,
   },
   {
     id: 'endpoint_protection_updates',

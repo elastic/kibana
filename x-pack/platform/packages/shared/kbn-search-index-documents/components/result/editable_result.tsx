@@ -18,10 +18,11 @@ import {
   EuiLoadingSpinner,
   EuiSplitPanel,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 import { ResultFields } from './results_fields';
 
 export interface EditableResultProps {
@@ -56,6 +57,25 @@ export const EditableResult: React.FC<EditableResultProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [documentId, setDocumentId] = React.useState(initialDocId);
   const [index, setIndex] = React.useState(initialIndex);
+  const selectIndexPlaceholder = i18n.translate(
+    'xpack.sharedKbnSearchIndexDocuments.editableResult.selectIndexPlaceholder',
+    {
+      defaultMessage: 'Select index',
+    }
+  );
+  const toggleFieldsLabel = isExpanded
+    ? i18n.translate(
+        'xpack.sharedKbnSearchIndexDocuments.editableResult.collapseFieldsButtonAriaLabel',
+        { defaultMessage: 'Collapse fields' }
+      )
+    : i18n.translate(
+        'xpack.sharedKbnSearchIndexDocuments.editableResult.expandFieldsButtonAriaLabel',
+        { defaultMessage: 'Expand fields' }
+      );
+  const deleteDocumentLabel = i18n.translate(
+    'xpack.sharedKbnSearchIndexDocuments.editableResult.deleteDocumentButtonAriaLabel',
+    { defaultMessage: 'Delete document' }
+  );
   return (
     <EuiSplitPanel.Outer hasBorder={true}>
       <EuiSplitPanel.Inner paddingSize="s" color="plain">
@@ -63,7 +83,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
           {leftSideItem && <EuiFlexItem grow={false}>{leftSideItem}</EuiFlexItem>}
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem grow={5}>
                 <EuiFieldText
                   data-test-subj="editableResultDocumentId"
                   value={documentId}
@@ -83,15 +103,11 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                 />
               </EuiFlexItem>
               {hasIndexSelector && (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={5}>
                   <EuiComboBox
                     data-test-subj="editableResultIndexSelector"
-                    placeholder={i18n.translate(
-                      'xpack.sharedKbnSearchIndexDocuments.editableResult.selectIndexPlaceholder',
-                      {
-                        defaultMessage: 'Select index',
-                      }
-                    )}
+                    placeholder={selectIndexPlaceholder}
+                    aria-label={selectIndexPlaceholder}
                     singleSelection={{ asPlainText: true }}
                     options={indices.map((i) => ({ label: i, value: 'index' }))}
                     isClearable={false}
@@ -118,34 +134,47 @@ export const EditableResult: React.FC<EditableResultProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                {error && <EuiIcon type="warning" color="danger" />}
+                {error && (
+                  <EuiIcon
+                    type="warning"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.sharedKbnSearchIndexDocuments.editableResult.warningIconAriaLabel',
+                      { defaultMessage: 'Error' }
+                    )}
+                  />
+                )}
                 {!error &&
                   hasIndexSelector &&
                   (isLoading ? (
                     <EuiLoadingSpinner />
                   ) : (
-                    <EuiButtonIcon
-                      size="xs"
-                      iconType={isExpanded ? 'fold' : 'unfold'}
-                      color="primary"
-                      aria-label={isExpanded ? 'Collapse fields' : 'Expand fields'}
-                      onClick={() => {
-                        if (onExpand && !isExpanded) {
-                          onExpand();
-                        }
-                        setIsExpanded(!isExpanded);
-                      }}
-                    />
+                    <EuiToolTip content={toggleFieldsLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType={isExpanded ? 'fold' : 'unfold'}
+                        color="primary"
+                        aria-label={toggleFieldsLabel}
+                        onClick={() => {
+                          if (onExpand && !isExpanded) {
+                            onExpand();
+                          }
+                          setIsExpanded(!isExpanded);
+                        }}
+                      />
+                    </EuiToolTip>
                   ))}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  onClick={onDeleteDocument}
-                  aria-label="Delete document"
-                  data-test-subj="editableResultDeleteButton"
-                />
+                <EuiToolTip content={deleteDocumentLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    onClick={onDeleteDocument}
+                    aria-label={deleteDocumentLabel}
+                    data-test-subj="editableResultDeleteButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -164,7 +193,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText color="danger" size="xs">
-                <EuiIcon type="warning" />
+                <EuiIcon type="warning" aria-hidden={true} />
                 &nbsp;
                 {error}
               </EuiText>

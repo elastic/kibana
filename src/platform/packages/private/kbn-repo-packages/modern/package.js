@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { inspect } = require('util');
 const Path = require('path');
 
 const { readPackageJson } = require('./parse_package_json');
@@ -21,7 +20,12 @@ const { readPackageManifest } = require('./parse_package_manifest');
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
- * Representation of a Bazel Package in the Kibana repository
+ * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
+ */
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplaceai', 'vectordb'];
+
+/**
+ * Representation of a Package in the Kibana repository
  * @class
  */
 class Package {
@@ -149,7 +153,6 @@ class Package {
 
   /**
    * Does this package expose a plugin, is it of one of the plugin types?
-   * @readonly
    * @returns {this is import('./types').PluginPackage}
    */
   isPlugin() {
@@ -158,7 +161,6 @@ class Package {
 
   /**
    * Returns the group to which this package belongs
-   * @readonly
    * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
    */
   getGroup() {
@@ -167,7 +169,6 @@ class Package {
 
   /**
    * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
-   * @readonly
    * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
    */
   getVisibility() {
@@ -196,9 +197,7 @@ class Package {
       dir.startsWith('x-pack/platform/test/') ||
       dir.startsWith('x-pack/solutions/search/test/') ||
       dir.startsWith('x-pack/solutions/observability/test/') ||
-      dir.startsWith('x-pack/solutions/security/test/') ||
-      dir.startsWith('x-pack/test/');
-
+      dir.startsWith('x-pack/solutions/security/test/');
     return {
       oss,
       example,
@@ -231,31 +230,35 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/chat/')) {
-      group = 'chat';
+    } else if (dir.startsWith('x-pack/solutions/workplaceai/')) {
+      group = 'workplaceai';
+      visibility = 'private';
+    } else if (dir.startsWith('x-pack/solutions/vectordb/')) {
+      group = 'vectordb';
       visibility = 'private';
     } else {
       // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'chat'].includes(group)
-        ? 'private'
-        : this.manifest.visibility ?? 'shared';
+      // KIBANA_SOLUTIONS - List of Kibana solutions
+      const isSolution = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group));
+      if (!isSolution && !['platform', 'common'].includes(group)) {
+        throw new Error(
+          `Detected unknown group: ${group}, this module's definition of KIBANA_SOLUTIONS is probably outdated.`
+        );
+      }
+      visibility = isSolution ? 'private' : this.manifest.visibility ?? 'shared';
     }
 
     return { group, visibility };
   }
 
   /**
-   * Custom inspect handler so that logging variables in scripts/generate doesn't
-   * print all the BUILD.bazel files
+   * Custom inspect handler
    */
-  [inspect.custom]() {
+  [Symbol.for('nodejs.util.inspect.custom')]() {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
   }
 }
 
-module.exports = {
-  Package,
-};
+exports.Package = Package;

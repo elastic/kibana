@@ -42,9 +42,13 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../metrics_explorer/components/helpers/calculate_domain';
 import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 
 interface Props {
@@ -55,23 +59,23 @@ interface Props {
 
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
   const { sourceId, source } = useSourceContext();
-  const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, nodeType, accountId, region, preferredSchema } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
-  const { filterQueryAsJson } = useWaffleFiltersContext();
+  const { filterQuery } = useWaffleFiltersContext();
   const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
 
-  const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
-    filterQueryAsJson,
-    [metric],
+  const { loading, error, startTime, endTime, timeseries, reload } = useTimeline({
+    kuery: filterQuery.query,
+    metrics: [metric],
     nodeType,
     sourceId,
     currentTime,
     accountId,
     region,
     interval,
-    isVisible
-  );
+    shouldReload: isVisible,
+  });
 
   const anomalyMetricName = useMemo((): Metric | undefined => {
     const metricType = metric.type;
@@ -100,20 +104,29 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     metric: anomalyMetricName,
   };
 
-  const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(anomalyParams, {
-    active: nodeType === 'host',
-  });
+  const effectiveSchema = preferredSchema ?? DEFAULT_SCHEMA;
+
+  const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
+    { ...anomalyParams, schema: effectiveSchema },
+    {
+      active: nodeType === 'host',
+    }
+  );
   const { metricsK8sAnomalies } = useMetricsK8sAnomaliesResults(anomalyParams, {
     active: nodeType === 'pod',
   });
 
   const anomalies = useMemo(() => {
+    if (effectiveSchema === 'semconv') {
+      return;
+    }
+
     if (nodeType === 'host') {
       return metricsHostsAnomalies;
     } else if (nodeType === 'pod') {
       return metricsK8sAnomalies;
     }
-  }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
+  }, [effectiveSchema, nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
   const metricLabel = toMetricOpt(metric.type, nodeType)?.textLC;
   const metricPopoverLabel = toMetricOpt(metric.type, nodeType)?.text;
@@ -141,12 +154,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   };
 
   const dataDomain = timeseries ? calculateDomain(timeseries, [chartMetric], false) : null;
-  const domain = dataDomain
-    ? {
-        max: dataDomain.max * 1.1, // add 10% headroom.
-        min: dataDomain.min,
-      }
-    : { max: 0, min: 0 };
+  const domain = dataDomain ? applyHeadroomToDomain(dataDomain) : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
     ([elementEvent]) => {
@@ -175,7 +183,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     return (
       <TimelineContainer>
         <EuiEmptyPrompt
-          iconType="visArea"
+          iconType="chartArea"
           title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
           actions={
             <EuiButton data-test-subj="infraTimelineButton" color="primary" fill onClick={reload}>
@@ -223,7 +231,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
+                  <EuiIcon
+                    color={colorTransformer(chartMetric.color)}
+                    type={'dot'}
+                    aria-hidden={true}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size={'xs'}>
@@ -236,26 +248,29 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{
-                    backgroundColor: euiTheme.colors.backgroundFilledAccent,
-                    height: 5,
-                    width: 10,
-                  }}
-                />
-                <EuiFlexItem>
-                  <EuiText size={'xs'}>
-                    <FormattedMessage
-                      id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
-                      defaultMessage="Anomaly detected"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {effectiveSchema !== 'semconv' ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
+                  <EuiFlexItem
+                    grow={false}
+                    style={{
+                      backgroundColor: euiTheme.colors.backgroundFilledAccent,
+                      height: 5,
+                      width: 10,
+                    }}
+                  />
+
+                  <EuiFlexItem>
+                    <EuiText size="xs">
+                      <FormattedMessage
+                        id="xpack.infra.inventoryTimeline.legend.anomalyLabel"
+                        defaultMessage="Anomaly detected"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </TimelineHeader>

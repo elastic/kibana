@@ -6,13 +6,62 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import {
-  DOCUMENT_TYPE_ALERT,
-  DOCUMENT_TYPE_EVENT,
-} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import type { EsQuery, GraphEdge, OriginEventId } from './types';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntities, fetchEntityRelationships } from './fetch_entity_relationships_graph';
+import {
+  regroupEvents,
+  enrichEventDocData,
+  regroupRelationships,
+  enrichRelationshipDocData,
+  enrichEntityRecords,
+} from './parse_records';
+import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { resolveEntitiesIndexName, addValuesToSet } from './utils';
+import type {
+  EsQuery,
+  EntityId,
+  OriginEventId,
+  EventEdge,
+  EventEsqlRow,
+  RelationshipEdge,
+  RelationshipEsqlRow,
+  EntityRecord,
+} from './types';
 
+export interface FetchGraphParams {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  start: string | number;
+  end: string | number;
+  originEventIds: OriginEventId[];
+  showUnknownTarget: boolean;
+  indexPatterns: string[];
+  spaceId: string;
+  esQuery?: EsQuery;
+  entityIds?: EntityId[];
+  pinnedIds?: string[];
+  projectRouting?: ProjectRouting;
+  integrationRuntimeEvalsEnabled?: boolean;
+}
+
+export interface FetchGraphResult {
+  events: EventEdge[];
+  relationships: RelationshipEdge[];
+  entities: EntityRecord[];
+}
+
+const emptyEventsResult: EsqlToRecords<EventEsqlRow> = { columns: [], records: [] };
+const emptyRelationshipsResult: EsqlToRecords<RelationshipEsqlRow> = { columns: [], records: [] };
+const emptyEntitiesResult: EsqlToRecords<EntityRecord> = { columns: [], records: [] };
+
+/**
+ * Fetches graph data including both events and entity relationships.
+ * Orchestrates parallel fetching of events from logs/alerts and relationships from entity store.
+ * After fetching, performs a single consolidated enrichment query and re-groups results
+ * by type/subtype, restoring the previous LOOKUP JOIN behavior in a CPS-safe way.
+ */
 export const fetchGraph = async ({
   esClient,
   logger,
@@ -20,115 +69,122 @@ export const fetchGraph = async ({
   end,
   originEventIds,
   showUnknownTarget,
+  indexPatterns,
+  spaceId,
   esQuery,
-}: {
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  start: string | number;
-  end: string | number;
-  originEventIds: OriginEventId[];
-  showUnknownTarget: boolean;
-  esQuery?: EsQuery;
-}): Promise<EsqlToRecords<GraphEdge>> => {
-  const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `FROM logs-* METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-// Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isOriginAlert = isOrigin AND ${
-    originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
-      : 'false'
-  }
-// Aggregate document's data for popover expansion and metadata enhancements
-// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
-// but it flattens the data and we lose the structure
-| EVAL docType = CASE (_index LIKE "*.alerts-security.alerts-*", "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
-| EVAL docData = CONCAT("{",
-    "\\"id\\":\\"", _id, "\\"",
-    ",\\"type\\":\\"", docType, "\\"",
-    ",\\"index\\":\\"", _index, "\\"",
-  "}")
-| STATS badge = COUNT(*),
-  docs = VALUES(docData),
-  ips = VALUES(related.ip),
-  // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
-    BY actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
-      isOrigin,
-      isOriginAlert
-| LIMIT 1000
-| SORT isOrigin DESC, action`;
+  entityIds,
+  pinnedIds,
+  projectRouting,
+  integrationRuntimeEvalsEnabled,
+}: FetchGraphParams): Promise<FetchGraphResult> => {
+  // Only fetch events when originEventIds or esQuery are provided
+  const hasOriginEventIds = originEventIds.length > 0;
+  const hasEsQuery =
+    !!esQuery?.bool.filter?.length ||
+    !!esQuery?.bool.must?.length ||
+    !!esQuery?.bool.should?.length ||
+    !!esQuery?.bool.must_not?.length;
 
-  logger.trace(`Executing query [${query}]`);
+  const hasEntityIds = entityIds && entityIds.length > 0;
 
-  const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  return await esClient.asCurrentUser.helpers
-    .esql({
-      columnar: false,
-      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
-      query,
-      // @ts-ignore - types are not up to date
-      params: [
-        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
-        ...originEventIds
-          .filter((originEventId) => originEventId.isAlert)
-          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
-      ],
-    })
-    .toRecords<GraphEdge>();
+  // Single index resolution upfront (null when no live index), reused by all
+  // entity-store-backed fetches and the downstream enrichment query. Runs in parallel
+  // with the events fetch since events hit logs/alerts indices and don't depend on it.
+  const [eventsResult, entityStoreIndexName] = await Promise.all([
+    hasOriginEventIds || hasEsQuery
+      ? fetchEvents({
+          esClient,
+          logger,
+          start,
+          end,
+          originEventIds,
+          showUnknownTarget,
+          indexPatterns,
+          spaceId,
+          esQuery,
+          pinnedIds,
+          projectRouting,
+          integrationRuntimeEvalsEnabled,
+        }).catch((error) => {
+          logger.error(`Failed to fetch events: ${error.message}`);
+          throw error;
+        })
+      : Promise.resolve(emptyEventsResult),
+    resolveEntitiesIndexName(esClient, logger, spaceId),
+  ]);
+
+  // Relationships and pinned entities both require the entity store index.
+  const relationshipsPromise = hasEntityIds
+    ? fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds,
+        entityStoreIndexName,
+        pinnedIds,
+      }).catch((error) => {
+        logger.error(`Failed to fetch entity relationships: ${error.message}`);
+        throw error;
+      })
+    : Promise.resolve(emptyRelationshipsResult);
+
+  // We fetch the entities just in case they don't have any relationships. We would still like to see them in the graph.
+  // These entities suppose to be pinned anyway. So there's no worry that they might be part of a group.
+  const entitiesPromise = hasEntityIds
+    ? fetchEntities({
+        esClient,
+        logger,
+        entityIds,
+        entityStoreIndexName,
+      }).catch((error) => {
+        logger.error(`Failed to fetch entities: ${error.message}`);
+        throw error;
+      })
+    : Promise.resolve(emptyEntitiesResult);
+
+  const [relationshipsResult, entitiesResult] = await Promise.all([
+    relationshipsPromise,
+    entitiesPromise,
+  ]);
+
+  logger.trace(
+    `Fetched [events: ${eventsResult.records.length}] [relationships: ${relationshipsResult.records.length}]`
+  );
+
+  // Collect all entity IDs for a single consolidated enrichment query
+  const allEntityIds = new Set<string>();
+  for (const r of eventsResult.records) {
+    addValuesToSet(allEntityIds, r.actorEntityId, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetEntityId, { dropEmpty: true });
+  }
+  for (const r of relationshipsResult.records) {
+    // actorIds / targetIds are the multi-value sets of same-type actors/targets merged in the
+    // ES|QL STATS (targetId is no longer a STATS group key — see fetch_entity_relationships_graph).
+    addValuesToSet(allEntityIds, r.actorIds, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetIds, { dropEmpty: true });
+  }
+  for (const r of entitiesResult.records) {
+    if (r.id) allEntityIds.add(r.id);
+  }
+
+  const enrichmentMap =
+    allEntityIds.size > 0
+      ? await fetchEntityEnrichment({
+          esClient,
+          logger,
+          entityIds: [...allEntityIds],
+          entityStoreIndexName,
+        }).catch((error) => {
+          logger.error(`Failed to enrich entities: ${error.message}`);
+          throw error;
+        })
+      : new Map<string, EntityEnrichmentFields>();
+
+  return {
+    events: enrichEventDocData(regroupEvents(eventsResult.records, enrichmentMap), enrichmentMap),
+    relationships: enrichRelationshipDocData(
+      regroupRelationships(relationshipsResult.records, enrichmentMap),
+      enrichmentMap
+    ),
+    entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),
+  };
 };
-
-const buildDslFilter = (
-  eventIds: string[],
-  showUnknownTarget: boolean,
-  start: string | number,
-  end: string | number,
-  esQuery?: EsQuery
-) => ({
-  bool: {
-    filter: [
-      {
-        range: {
-          '@timestamp': {
-            gte: start,
-            lte: end,
-          },
-        },
-      },
-      ...(showUnknownTarget
-        ? []
-        : [
-            {
-              exists: {
-                field: 'target.entity.id',
-              },
-            },
-          ]),
-      {
-        bool: {
-          should: [
-            ...(esQuery?.bool.filter?.length ||
-            esQuery?.bool.must?.length ||
-            esQuery?.bool.should?.length ||
-            esQuery?.bool.must_not?.length
-              ? [esQuery]
-              : []),
-            {
-              terms: {
-                'event.id': eventIds,
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ],
-  },
-});

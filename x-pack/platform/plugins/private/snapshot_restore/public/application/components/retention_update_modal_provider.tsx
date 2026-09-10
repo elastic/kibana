@@ -20,12 +20,13 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useCore, useServices, useToastNotifications } from '../app_context';
-import { Frequency, CronEditor } from '../../shared_imports';
+import type { Frequency } from '../../shared_imports';
+import { CronEditor } from '../../shared_imports';
 import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
 import { updateRetentionSchedule } from '../services/http';
 
@@ -150,7 +151,8 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
         <EuiModalBody>
           {saveError && (
             <Fragment>
-              <EuiCallOut
+              <KbnDangerCallout
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionErrorTitle"
@@ -158,11 +160,12 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                   />
                 }
                 role="alert"
-                color="danger"
-                iconType="warning"
-              >
-                {saveError.data && saveError.data.message ? <p>{saveError.data.message}</p> : null}
-              </EuiCallOut>
+                text={
+                  saveError.data && saveError.data.message ? (
+                    <p>{saveError.data.message}</p>
+                  ) : undefined
+                }
+              />
               <EuiSpacer size="m" />
             </Fragment>
           )}
@@ -201,6 +204,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                 fullWidth
               >
                 <EuiFieldText
+                  isInvalid={isInvalid}
                   defaultValue={retentionSchedule}
                   fullWidth
                   onChange={(e) => setRetentionSchedule(e.target.value)}

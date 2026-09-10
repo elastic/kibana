@@ -22,7 +22,7 @@ describe('validateParsedContent', () => {
 
   it('should return valid and invalid data based on row validation', () => {
     const data = [
-      ['user1', 'extra_field'], // invalid
+      ['user1', 'label', 'extra_field'], // invalid
       ['user2'], // valid
     ];
 
@@ -33,7 +33,7 @@ describe('validateParsedContent', () => {
       invalid: [data[0]],
       errors: [
         {
-          message: 'Expected 1 column, got 2',
+          message: 'Expected 1 or 2 columns, got 3',
           index: 1,
         },
       ],

@@ -39,8 +39,13 @@ describe('useGetCaseUserActionsStats', () => {
         ...initialData,
         data: {
           total: 20,
+          totalDeletions: 0,
           totalComments: 10,
+          totalCommentDeletions: 0,
+          totalCommentCreations: 10,
+          totalHiddenCommentUpdates: 0,
           totalOtherActions: 10,
+          totalOtherActionDeletions: 0,
         },
         isError: false,
         isLoading: false,

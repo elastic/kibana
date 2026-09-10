@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
+
 import type { ProcedureName } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
@@ -16,14 +18,18 @@ import { create } from './create';
 import { update } from './update';
 import { deleteProc } from './delete';
 import { search } from './search';
-import { mSearch } from './msearch';
+import { getMSearch } from './msearch';
 
-export const procedures: { [key in ProcedureName]: ProcedureDefinition<Context, any, any> } = {
+export const getProcedures = (
+  logger: Logger
+): {
+  [key in ProcedureName]: ProcedureDefinition<Context, any, any>;
+} => ({
   get,
   bulkGet,
   create,
   update,
   delete: deleteProc,
   search,
-  mSearch,
-};
+  mSearch: getMSearch(logger),
+});

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions, ColumnHeaderType, VIEW_SELECTION } from '../../common/types';
+import type { ColumnHeaderOptions, ColumnHeaderType } from '../../common/types';
+import { VIEW_SELECTION } from '../../common/types';
 import {
   DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,

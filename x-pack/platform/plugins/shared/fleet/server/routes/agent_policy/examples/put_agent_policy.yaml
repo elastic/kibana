@@ -1,0 +1,43 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putAgentPolicyRequestExample:
+          description: 'Update an agent policy'
+          value:
+            name: 'Updated agent policy'
+            namespace: 'default'
+            description: 'An updated agent policy description'
+            monitoring_enabled:
+              - 'logs'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putAgentPolicyExample:
+            description: 'The updated agent policy'
+            value:
+              item:
+                id: 'agent-policy-id-1'
+                name: 'Updated agent policy'
+                namespace: 'default'
+                description: 'An updated agent policy description'
+                is_managed: false
+                is_protected: false
+                status: 'active'
+                revision: 2
+                updated_at: '2024-01-15T11:00:00.000Z'
+                updated_by: 'user1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

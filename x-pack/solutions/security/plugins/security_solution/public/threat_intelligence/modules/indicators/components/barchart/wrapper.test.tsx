@@ -17,6 +17,7 @@ import {
   DROPDOWN_TEST_ID,
 } from './test_ids';
 import moment from 'moment';
+import { ScreenReaderAnnouncementsProvider } from '../../containers/screen_reader_a11y';
 
 jest.mock('../../../query_bar/hooks/use_filters');
 
@@ -28,15 +29,17 @@ describe('<IndicatorsBarChartWrapper />', () => {
     it('should render barchart and field selector dropdown', () => {
       const { getByTestId, getAllByText } = render(
         <TestProvidersComponent>
-          <IndicatorsBarChartWrapper
-            dateRange={{ max: moment(), min: moment() }}
-            series={[]}
-            field={mockField}
-            onFieldChange={jest.fn()}
-            timeRange={mockTimeRange}
-            isFetching={false}
-            isLoading={false}
-          />
+          <ScreenReaderAnnouncementsProvider>
+            <IndicatorsBarChartWrapper
+              dateRange={{ max: moment(), min: moment() }}
+              series={[]}
+              field={mockField}
+              onFieldChange={jest.fn()}
+              timeRange={mockTimeRange}
+              isFetching={false}
+              isLoading={false}
+            />
+          </ScreenReaderAnnouncementsProvider>
         </TestProvidersComponent>
       );
 
@@ -48,21 +51,23 @@ describe('<IndicatorsBarChartWrapper />', () => {
 
   describe('when loading for the first time', () => {
     it('should render progress indicator', () => {
-      const { queryByRole, getByTestId } = render(
+      const { container, getByTestId } = render(
         <TestProvidersComponent>
-          <IndicatorsBarChartWrapper
-            dateRange={{ max: moment(), min: moment() }}
-            series={[]}
-            field={mockField}
-            onFieldChange={jest.fn()}
-            timeRange={mockTimeRange}
-            isFetching={false}
-            isLoading={true}
-          />
+          <ScreenReaderAnnouncementsProvider>
+            <IndicatorsBarChartWrapper
+              dateRange={{ max: moment(), min: moment() }}
+              series={[]}
+              field={mockField}
+              onFieldChange={jest.fn()}
+              timeRange={mockTimeRange}
+              isFetching={false}
+              isLoading={true}
+            />
+          </ScreenReaderAnnouncementsProvider>
         </TestProvidersComponent>
       );
 
-      expect(queryByRole('progressbar')).toBeInTheDocument();
+      expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
       expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
     });
   });
@@ -71,15 +76,17 @@ describe('<IndicatorsBarChartWrapper />', () => {
     it('should render progress indicator', () => {
       const component = render(
         <TestProvidersComponent>
-          <IndicatorsBarChartWrapper
-            dateRange={{ max: moment(), min: moment() }}
-            series={[]}
-            field={mockField}
-            onFieldChange={jest.fn()}
-            timeRange={mockTimeRange}
-            isFetching={true}
-            isLoading={false}
-          />
+          <ScreenReaderAnnouncementsProvider>
+            <IndicatorsBarChartWrapper
+              dateRange={{ max: moment(), min: moment() }}
+              series={[]}
+              field={mockField}
+              onFieldChange={jest.fn()}
+              timeRange={mockTimeRange}
+              isFetching={true}
+              isLoading={false}
+            />
+          </ScreenReaderAnnouncementsProvider>
         </TestProvidersComponent>
       );
 

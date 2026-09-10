@@ -7,36 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './attribute_builder/types';
+export * from './config_builder';
 
-export type {
-  MetricLayerOptions,
-  MetricLayerConfig,
-  XYLayerOptions,
-  XYDataLayerConfig,
-  XYReferenceLinesLayerConfig,
-  XYVisualOptions,
-  XYLayerConfig,
-  ChartTypes,
-  ChartModel,
-  XYChartModel,
-  MetricChartModel,
-} from './attribute_builder/visualization_types';
-
-export {
-  FormulaColumn,
-  MetricChart,
-  MetricLayer,
-  StaticColumn,
-  XYChart,
-  XYDataLayer,
-  XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer,
-  METRIC_ID,
-  METRIC_TREND_LINE_ID,
-  XY_ID,
-  XY_DATA_ID,
-  XY_REFERENCE_LINE_ID,
-} from './attribute_builder/visualization_types';
-
-export { LensAttributesBuilder } from './attribute_builder/lens_attributes_builder';
+export { stripUndefined } from './config_builder/transforms/charts/utils';

@@ -7,13 +7,14 @@
 
 export { isReservedSpace } from './is_reserved_space';
 export {
+  ALL_SPACES_ID,
+  UNKNOWN_SPACE,
   MAX_SPACE_INITIALS,
   SPACE_SEARCH_COUNT_THRESHOLD,
   ENTER_SPACE_PATH,
-  DEFAULT_SPACE_ID,
   API_VERSIONS,
 } from './constants';
-export { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
+export { getRouteUrlForSpace } from './get_spaced_route_url';
 export type {
   Space,
   GetAllSpacesOptions,
@@ -21,4 +22,10 @@ export type {
   GetSpaceResult,
   SolutionView,
 } from './types/latest';
-export { spaceV1 } from './types';
+export type { spaceV1 } from './types';
+export type {
+  CompleteInitialSolutionSetupRequest,
+  CompleteInitialSolutionSetupResponse,
+  GetInitialSolutionSetupResponse,
+  InitialSolutionSetupView,
+} from './types/initial_solution_setup';

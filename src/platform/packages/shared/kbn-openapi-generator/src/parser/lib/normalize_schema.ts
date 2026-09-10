@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { URL } from 'node:url';
 import { traverseObject } from './helpers/traverse_object';
 import { hasRef } from './helpers/has_ref';

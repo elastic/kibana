@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import type { ESSearchClient } from '../../../lib/metrics/types';
 
 interface EventDatasetHit {
   _source: {

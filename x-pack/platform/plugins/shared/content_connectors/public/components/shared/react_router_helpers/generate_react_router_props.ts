@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import type { EuiSideNavItemType } from '@elastic/eui';
 
-import { HttpSetup, ScopedHistory } from '@kbn/core/public';
-import { letBrowserHandleEvent, createHref, ReactRouterProps, CreateHrefOptions } from '.';
+import type { HttpSetup, ScopedHistory } from '@kbn/core/public';
+import type { ReactRouterProps, CreateHrefOptions } from '.';
+import { letBrowserHandleEvent, createHref } from '.';
 
 /**
  * Generates the `href` and `onClick` props for React-Router-friendly links

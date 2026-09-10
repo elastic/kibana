@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { TrackApplicationViewComponent } from './track_application_view_component';
-import { IApplicationUsageTracker } from '../../plugin';
+import type { IApplicationUsageTracker } from '../../plugin';
 import { fireEvent, render } from '@testing-library/react';
 
 describe('TrackApplicationViewComponent', () => {

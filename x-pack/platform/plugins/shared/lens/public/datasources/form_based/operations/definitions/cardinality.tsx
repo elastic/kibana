@@ -7,22 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
+import {
+  toEsqlRegistry,
+  ofNameCardinality,
+  cardinalityEsqlMeta,
+  getSafeName,
+} from '@kbn/lens-common';
+import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -42,31 +47,6 @@ const supportedTypes = new Set([
 const SCALE = 'ratio';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
-  return adjustTimeScaleLabelSuffix(
-    i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
-      defaultMessage: 'Unique count of {name}',
-      values: {
-        name,
-      },
-    }),
-    undefined,
-    undefined,
-    undefined,
-    timeShift,
-    undefined,
-    reducedTimeRange
-  );
-}
-
-export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof CARDINALITY_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
-}
-
 export const cardinalityOperation: OperationDefinition<
   CardinalityIndexPatternColumn,
   'field',
@@ -77,11 +57,7 @@ export const cardinalityOperation: OperationDefinition<
   displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
-  getSerializedFormat() {
-    return {
-      id: 'number',
-    };
-  },
+  ...cardinalityEsqlMeta,
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
@@ -111,18 +87,20 @@ export const cardinalityOperation: OperationDefinition<
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  filterable: true,
   shiftable: true,
-  canReduceTimeRange: true,
   getDefaultLabel: (column, columns, indexPattern) =>
-    ofName(
+    ofNameCardinality(
       getSafeName(column.sourceField, indexPattern),
       column.timeShift,
       column.reducedTimeRange
     ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
+      label: ofNameCardinality(
+        field.displayName,
+        previousColumn?.timeShift,
+        previousColumn?.reducedTimeRange
+      ),
       dataType: 'number',
       operationType: CARDINALITY_ID,
       sourceField: field.name,
@@ -132,11 +110,9 @@ export const cardinalityOperation: OperationDefinition<
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
-        emptyAsNull:
-          previousColumn &&
-          isColumnOfType<CardinalityIndexPatternColumn>('unique_count', previousColumn)
-            ? previousColumn.params?.emptyAsNull
-            : !columnParams?.usedInMath,
+        emptyAsNull: hasOperationType(previousColumn, 'unique_count')
+          ? getBooleanParam(previousColumn, 'emptyAsNull')
+          : !columnParams?.usedInMath,
       },
     };
   },
@@ -145,7 +121,8 @@ export const cardinalityOperation: OperationDefinition<
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+    euiTheme,
+  }: ParamEditorProps<CardinalityIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -160,7 +137,7 @@ export const cardinalityOperation: OperationDefinition<
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}
@@ -180,10 +157,7 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
-  toESQL: (column, columnId) => {
-    if (column.params?.emptyAsNull || column.timeShift) return;
-    return `COUNT_DISTINCT(${column.sourceField})`;
-  },
+  toESQL: toEsqlRegistry[CARDINALITY_ID],
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
       id: columnId,
@@ -205,7 +179,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
+      label: ofNameCardinality(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
   },

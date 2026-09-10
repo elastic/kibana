@@ -186,7 +186,7 @@ export const vulnerabilitiesLatestMock = [
       region: 'eu-west-1',
       account: {
         name: 'elastic-security-cloud-security-gcp',
-        id: '704479110758',
+        id: '704479110759',
       },
     },
     '@timestamp': (Date.now() - 249200000).toString(),

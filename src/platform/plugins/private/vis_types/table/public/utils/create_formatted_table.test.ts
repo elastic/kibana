@@ -15,9 +15,9 @@ jest.mock('../services', () => ({
   })),
 }));
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { AggTypes } from '../../common';
-import { TableVisConfig } from '../types';
+import type { TableVisConfig } from '../types';
 import { createFormattedTable } from './create_formatted_table';
 
 const visConfig: TableVisConfig = {
@@ -76,7 +76,7 @@ describe('createFormattedTable', () => {
   it('should add total sum to numeric columns', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convert: jest.fn((number) => number),
+      convertToText: jest.fn((number) => number),
     }));
     const output = createFormattedTable(table, visConfig);
 
@@ -85,7 +85,7 @@ describe('createFormattedTable', () => {
         filterable: false,
         formatter: {
           allowsNumericalAggregations: true,
-          convert: expect.any(Function),
+          convertToText: expect.any(Function),
         },
         title: 'Count',
         sumTotal: 7,
@@ -103,7 +103,7 @@ describe('createFormattedTable', () => {
   it('should add total average to numeric columns', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convert: jest.fn((number) => number),
+      convertToText: jest.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.AVG });
 
@@ -112,7 +112,7 @@ describe('createFormattedTable', () => {
         filterable: false,
         formatter: {
           allowsNumericalAggregations: true,
-          convert: expect.any(Function),
+          convertToText: expect.any(Function),
         },
         title: 'Count',
         sumTotal: 7,
@@ -130,7 +130,7 @@ describe('createFormattedTable', () => {
   it('should find min value as total', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convert: jest.fn((number) => number),
+      convertToText: jest.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.MIN });
 
@@ -139,7 +139,7 @@ describe('createFormattedTable', () => {
         filterable: false,
         formatter: {
           allowsNumericalAggregations: true,
-          convert: expect.any(Function),
+          convertToText: expect.any(Function),
         },
         title: 'Count',
         sumTotal: 7,
@@ -157,7 +157,7 @@ describe('createFormattedTable', () => {
   it('should find max value as total', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convert: jest.fn((number) => number),
+      convertToText: jest.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.MAX });
 
@@ -166,7 +166,7 @@ describe('createFormattedTable', () => {
         filterable: false,
         formatter: {
           allowsNumericalAggregations: true,
-          convert: expect.any(Function),
+          convertToText: expect.any(Function),
         },
         title: 'Count',
         sumTotal: 7,
@@ -184,7 +184,7 @@ describe('createFormattedTable', () => {
   it('should add rows count as total', () => {
     mockDeserialize.mockImplementationOnce(() => ({
       allowsNumericalAggregations: true,
-      convert: jest.fn((number) => number),
+      convertToText: jest.fn((number) => number),
     }));
     const output = createFormattedTable(table, { ...visConfig, totalFunc: AggTypes.COUNT });
 
@@ -193,7 +193,7 @@ describe('createFormattedTable', () => {
         filterable: false,
         formatter: {
           allowsNumericalAggregations: true,
-          convert: expect.any(Function),
+          convertToText: expect.any(Function),
         },
         title: 'Count',
         sumTotal: 7,

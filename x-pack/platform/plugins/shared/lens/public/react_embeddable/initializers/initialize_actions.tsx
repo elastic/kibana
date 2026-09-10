@@ -5,49 +5,41 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core-capabilities-common';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import {
-  AggregateQuery,
-  EsQueryConfig,
-  Filter,
-  Query,
-  TimeRange,
-  isOfQueryType,
-} from '@kbn/es-query';
-import {
-  PublishingSubject,
-  StateComparators,
+  apiPublishesProjectRouting,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import {
-  DynamicActionsSerializedState,
-  EmbeddableDynamicActionsManager,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
 import { partition } from 'lodash';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { TracksOverlays, tracksOverlays } from '@kbn/presentation-containers';
-import React from 'react';
-import { Visualization } from '../..';
-import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
-import { TableInspectorAdapter } from '../../editor_frame_service/types';
-
-import { Datasource, IndexPatternMap } from '../../types';
-import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { isTextBasedLanguage } from '../helper';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type {
+  Datasource,
+  IndexPatternMap,
+  TableInspectorAdapter,
+  Visualization,
   GetStateType,
-  IntegrationCallbacks,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
+import type { DrilldownsManager, HasDrilldowns } from '@kbn/embeddable-plugin/public';
+import { getRepresentativeQuery, isTextBasedAttributes } from '@kbn/lens-common';
+import {
+  combineQueryAndFilters,
+  findDataViewByIndexPatternId,
+  getLayerMetaInfo,
+} from '../../app_plugin/show_underlying_data';
+
+import { getMergedSearchContext } from '../expressions/merged_search_context';
+import type { LensEmbeddableStartServices } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
-import { mountInlinePanel } from '../mount';
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
@@ -115,7 +107,7 @@ function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
-  const dataViewSpec = dataViews[meta.id]!.spec;
+  const dataViewSpec = findDataViewByIndexPatternId(meta.id, dataViews)?.spec;
 
   return {
     dataViewSpec,
@@ -168,12 +160,17 @@ function loadViewUnderlyingDataArgs(
     ? parentApi
     : { filters$: undefined, query$: undefined, timeRange$: undefined };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
       filters: filters$?.getValue(),
       query: query$?.getValue(),
       timeRange: timeRange$?.getValue(),
+      projectRouting: projectRouting$?.getValue(),
     },
     searchContextApi.timeRange$,
     parentApi,
@@ -186,6 +183,13 @@ function loadViewUnderlyingDataArgs(
   if (!mergedSearchContext.timeRange) {
     return;
   }
+
+  // The ES|QL query of a text-based document lives on the authoritative
+  // text-based layer, not in the merged search context (the legacy
+  // `state.query` copy is dropped at read time), so source it structurally.
+  const representativeQuery = isTextBasedAttributes(activeAttributes)
+    ? getRepresentativeQuery(activeAttributes)
+    : undefined;
 
   const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
     activeDatasource,
@@ -200,7 +204,9 @@ function loadViewUnderlyingDataArgs(
       navLinks: capabilities.navLinks,
       discover_v2: capabilities.discover_v2,
     },
-    query: mergedSearchContext.query,
+    query: representativeQuery
+      ? [...mergedSearchContext.query, representativeQuery]
+      : mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],
     timeRange: mergedSearchContext.timeRange,
     esQueryConfig: getEsQueryConfig(uiSettings),
@@ -251,22 +257,18 @@ export function initializeActionApi(
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
-  dynamicActionsManager?: EmbeddableDynamicActionsManager
+  drilldownsManager: DrilldownsManager
 ): {
-  api: ViewInDiscoverCallbacks &
-    HasDynamicActions &
-    Pick<IntegrationCallbacks, 'mountInlineFlyout'>;
+  api: ViewInDiscoverCallbacks & Partial<HasDrilldowns>;
   anyStateChange$: Observable<void>;
-  getComparators: () => StateComparators<DynamicActionsSerializedState>;
-  getLatestState: () => DynamicActionsSerializedState;
+  getComparators: () => DrilldownsManager['comparators'];
+  getLatestState: () => ReturnType<DrilldownsManager['getLatestState']>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
 } {
-  const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
-
   return {
     api: {
-      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsManager?.api ?? {}),
+      ...(drilldownsManager?.api ?? {}),
       ...createViewUnderlyingDataApis(
         getLatestState,
         internalApi,
@@ -274,35 +276,17 @@ export function initializeActionApi(
         parentApi,
         services
       ),
-      mountInlineFlyout: (
-        Component: React.ComponentType,
-        overlayTracker?: TracksOverlays,
-        options: {
-          dataTestSubj?: string;
-          uuid?: string;
-          container?: HTMLElement | null;
-        } = {}
-      ) => {
-        mountInlinePanel(
-          <Component />,
-          services.coreStart,
-          overlayTracker ?? (tracksOverlays(parentApi) ? parentApi : undefined),
-          { uuid, ...options }
-        );
-      },
     },
-    anyStateChange$: dynamicActionsManager?.anyStateChange$ ?? new BehaviorSubject(undefined),
+    anyStateChange$: drilldownsManager.anyStateChange$,
     getComparators: () => ({
-      ...(dynamicActionsManager?.comparators ?? {
-        enhancements: 'skip',
-      }),
+      ...drilldownsManager.comparators,
     }),
-    getLatestState: () => dynamicActionsManager?.getLatestState() ?? {},
+    getLatestState: drilldownsManager.getLatestState,
     cleanup: () => {
-      maybeStopDynamicActions?.stopDynamicActions();
+      drilldownsManager.cleanup();
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
-      dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+    reinitializeState: (lastSaved?: LensWireAPIConfig) => {
+      drilldownsManager.reinitializeState(lastSaved ?? {});
     },
   };
 }

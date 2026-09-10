@@ -9,7 +9,7 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { KibanaContext } from '@kbn/data-plugin/public';
+import type { KibanaContext } from '@kbn/data-plugin/public';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES } from '../common/constants';

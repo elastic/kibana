@@ -8,7 +8,7 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { useValueWithSpaceWarning } from './use_value_with_space_warning';
 
 interface ValueWithSpaceWarningProps {
@@ -28,12 +28,14 @@ export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
   });
   if (!showSpaceWarningIcon || !value) return null;
   return (
-    <EuiToolTip position="top" content={warningText}>
-      <EuiIcon
-        data-test-subj="valueWithSpaceWarningTooltip"
-        type={tooltipIconType}
-        color="warning"
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      position="top"
+      content={warningText}
+      iconProps={{
+        'data-test-subj': 'valueWithSpaceWarningTooltip',
+      }}
+      type={tooltipIconType}
+      color="warning"
+    />
   );
 };

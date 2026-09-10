@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import type { CasesRouter } from '../../types';
+import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 import { createCasesRoute } from './create_cases_route';
 import { registerRoutes } from './register_routes';
 import type { CaseRoute } from './types';
@@ -80,27 +80,32 @@ describe('registerRoutes', () => {
     const simulateRequest = async ({
       method,
       path,
-      context = { cases: {} },
+      context = { cases: {} } as CasesRequestHandlerContext,
       headers = {},
     }: {
       method: keyof Pick<CasesRouter, 'get' | 'post'>;
       path: string;
-      context?: Record<string, unknown>;
-      headers?: Record<string, unknown>;
+      context?: CasesRequestHandlerContext;
+      headers?: Record<string, string>;
     }) => {
+      const registeredRoute = router[method] as jest.Mock;
       const [, registeredRouteHandler] =
-        // @ts-ignore
-        router[method].mock.calls.find((call) => {
+        registeredRoute.mock.calls.find((call) => {
           return call[0].path === path;
         }) ?? [];
 
-      const result = await registeredRouteHandler(
-        context,
-        { headers },
-        { customError, badRequest }
-      );
+      if (!registeredRouteHandler) return;
 
-      return result;
+      const fakeRequest = httpServerMock.createKibanaRequest({
+        headers,
+        path,
+        method,
+      });
+
+      return registeredRouteHandler(context, fakeRequest, {
+        customError,
+        badRequest,
+      });
     };
 
     return {
@@ -126,7 +131,7 @@ describe('registerRoutes', () => {
     });
   };
 
-  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, unknown>) => {
+  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, string>) => {
     const { simulateRequest } = initApi([
       ...routes,
       createCasesRoute({
@@ -167,7 +172,7 @@ describe('registerRoutes', () => {
         const [method, path] = endpoint;
 
         expect(router[method]).toHaveBeenCalledTimes(1);
-        expect(router[method]).toBeCalledWith(
+        expect(router[method]).toHaveBeenCalledWith(
           { path, validate: expect.anything() },
           expect.anything()
         );
@@ -221,7 +226,7 @@ describe('registerRoutes', () => {
       await simulateRequest({
         method: 'get',
         path: '/foo/{case_id}',
-        headers: { 'kbn-version': '8.2.0', referer: 'https://example.com' },
+        headers: { 'kbn-version': '8.2.0', [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana' },
       });
       expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'GET /foo/{case_id}',
@@ -280,7 +285,7 @@ describe('registerRoutes', () => {
     it('does NOT log the deprecation message if it is a kibana request', async () => {
       await initAndSimulateDeprecationEndpoint({
         'kbn-version': '8.2.0',
-        referer: 'https://example.com',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
       });
 
       expect(logger.warn).not.toHaveBeenCalled();
@@ -299,13 +304,13 @@ describe('registerRoutes', () => {
     it('logs the error', async () => {
       await initAndSimulateError();
 
-      expect(logger.error).toBeCalledWith('API error');
+      expect(logger.error).toHaveBeenCalledWith('API error');
     });
 
     it('returns an error response', async () => {
       await initAndSimulateError();
 
-      expect(customError).toBeCalledWith({
+      expect(customError).toHaveBeenCalledWith({
         body: expect.anything(),
         headers: {},
         statusCode: 500,
@@ -317,10 +322,10 @@ describe('registerRoutes', () => {
       await simulateRequest({
         method: 'get',
         path: '/foo/{case_id}',
-        context: {},
+        context: {} as CasesRequestHandlerContext,
       });
 
-      expect(badRequest).toBeCalledWith({
+      expect(badRequest).toHaveBeenCalledWith({
         body: 'RouteHandlerContext is not registered for cases',
       });
     });

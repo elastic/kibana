@@ -58,7 +58,7 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
         isTransformListRowWithStats(item) &&
         !isReauthorizeActionDisabled([item], canStartStopTransform, transformNodes),
       description: reauthorizeActionNameText,
-      icon: 'alert',
+      icon: 'warning',
       type: 'icon',
       color: 'warning',
       onClick: (item: TransformListRow) => openModal([item]),

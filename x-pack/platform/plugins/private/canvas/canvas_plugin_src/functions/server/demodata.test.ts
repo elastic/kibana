@@ -6,7 +6,7 @@
  */
 
 import { demodata } from './demodata';
-import { ExpressionValueFilter } from '../../../types';
+import type { ExpressionValueFilter } from '../../../types';
 
 const nullFilter: ExpressionValueFilter = {
   type: 'filter',
@@ -37,6 +37,6 @@ describe('demodata', () => {
   it('invalid set', () => {
     expect(() => {
       fn(nullFilter, { type: 'foo' }, context);
-    }).toThrowError("Invalid data set: 'foo', use 'ci' or 'shirts'.");
+    }).toThrow("Invalid data set: 'foo', use 'ci' or 'shirts'.");
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatInstanceType } from '../types';
+import type { FieldFormatInstanceType } from '../types';
 
 import {
   BoolFormat,
@@ -43,7 +43,6 @@ export const baseFormatters: FieldFormatInstanceType[] = [
   StaticLookupFormat,
   StringFormat,
   TruncateFormat,
-  // @ts-expect-error upgrade typescript v5.1.6
   UrlFormat,
   HistogramFormat,
 ];

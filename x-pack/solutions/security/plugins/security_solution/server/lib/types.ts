@@ -27,12 +27,12 @@ export type ShardError = Partial<{
   node: string;
   reason: Partial<{
     type: string;
-    reason: string;
+    reason: string | null;
     index_uuid: string;
     index: string;
     caused_by: Partial<{
       type: string;
-      reason: string;
+      reason: string | null;
     }>;
   }>;
 }>;

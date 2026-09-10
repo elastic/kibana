@@ -10,12 +10,13 @@
 import React from 'react';
 import { sortBy } from 'lodash';
 
-import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
+import type { EuiSideNavItemType } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import type { AppMountParameters } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { ManagementApp, ManagementSection } from '../../utils';
+import type { ManagementApp, ManagementSection } from '../../utils';
 
-import { ManagementItem } from '../../utils/management_item';
+import type { ManagementItem } from '../../utils/management_item';
 
 interface ManagementSidebarNavProps {
   sections: ManagementSection[];
@@ -84,7 +85,7 @@ export const managementSidebarNav = ({
       id: item.id,
       name: item.tip ? <HeaderWrapper text={item.title} tip={item.tip} /> : item.title,
       isSelected: item.id === selectedId,
-      icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
+      icon: iconType ? <EuiIcon type={iconType} size="m" aria-hidden={true} /> : undefined,
       'data-test-subj': item.id,
       ...customParams,
     };

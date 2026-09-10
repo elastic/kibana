@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import {
   ALERT_ATTACK_DISCOVERY_USERS_NOT_EXISTS_KQL,
   EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL,
@@ -15,8 +15,7 @@ import {
   getUserFilter,
   getUserNameOrId,
 } from '.';
-
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 describe('getCombinedFilter', () => {
   describe('getSharedFilter', () => {
@@ -119,16 +118,72 @@ describe('getCombinedFilter', () => {
   describe('getAdditionalFilter', () => {
     it('returns the additional filter joined with an AND when filter is defined', () => {
       const result = getAdditionalFilter('foo: "bar"');
+
       expect(result).toBe(' AND foo: "bar"');
     });
 
     it('returns an empty string when filter is undefined', () => {
       const result = getAdditionalFilter(undefined);
+
       expect(result).toBe('');
+    });
+
+    it('returns an empty string when filter is an empty string', () => {
+      const result = getAdditionalFilter('');
+      expect(result).toBe('');
+    });
+
+    it('returns an empty string when filter is whitespace only', () => {
+      const result = getAdditionalFilter('   ');
+      expect(result).toBe('');
+    });
+
+    it('returns an empty string when filter is newline or tab only', () => {
+      const result = getAdditionalFilter('\n\t');
+      expect(result).toBe('');
+    });
+
+    it('preserves the surrounding whitespace when filter contains content', () => {
+      const result = getAdditionalFilter('  foo  ');
+      expect(result).toBe(' AND   foo  ');
     });
   });
 
   describe('getCombinedFilter', () => {
+    describe('when includeAllAuthors is true', () => {
+      it('returns only the additional filter when filter is defined', () => {
+        const authenticatedUser = {
+          username: 'test_user',
+          profile_uid: '123',
+        } as AuthenticatedUser;
+
+        const result = getCombinedFilter({
+          authenticatedUser,
+          filter: 'foo: "bar"',
+          shared: false,
+          includeAllAuthors: true,
+        });
+
+        expect(result).toBe('foo: "bar"');
+      });
+
+      it('returns empty string when filter is undefined', () => {
+        const authenticatedUser = {
+          username: 'test_user',
+          profile_uid: '123',
+        } as AuthenticatedUser;
+
+        const result = getCombinedFilter({
+          authenticatedUser,
+          filter: undefined,
+          shared: false,
+          includeAllAuthors: true,
+        });
+
+        expect(result).toBe('');
+      });
+    });
+
     describe('when shared is undefined', () => {
       const shared = undefined;
 
@@ -243,6 +298,58 @@ describe('getCombinedFilter', () => {
           `(${EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL} OR ${ALERT_ATTACK_DISCOVERY_USERS_NOT_EXISTS_KQL}) AND foo: "bar"`
         );
       });
+    });
+
+    it('returns id when username is undefined', () => {
+      const authenticatedUser = {
+        username: undefined,
+        profile_uid: 'abc',
+      } as unknown as AuthenticatedUser;
+
+      const result = getUserNameOrId(authenticatedUser);
+
+      expect(result).toBe('id: "abc"');
+    });
+
+    it('returns empty string for getUserFilter when authenticatedUser is missing profile_uid and username', () => {
+      const authenticatedUser = {} as unknown as AuthenticatedUser;
+      const result = getUserFilter({ authenticatedUser, shared: true });
+
+      expect(result).toBe('');
+    });
+
+    it('returns the correct filter when filter is empty string', () => {
+      const authenticatedUser = {
+        username: 'test_user',
+        profile_uid: '123',
+      } as AuthenticatedUser;
+      const filter = '';
+      const result = getCombinedFilter({ authenticatedUser, filter, shared: false });
+
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" })`);
+    });
+
+    it('returns correct filter when filter is whitespace', () => {
+      const authenticatedUser = {
+        username: 'test_user',
+        profile_uid: '123',
+      } as AuthenticatedUser;
+      const filter = ' ';
+      const result = getCombinedFilter({ authenticatedUser, filter, shared: false });
+
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" })`);
+    });
+
+    it('returns correct filter when shared is null', () => {
+      const authenticatedUser = {
+        username: 'test_user',
+        profile_uid: '123',
+      } as AuthenticatedUser;
+      const filter = undefined;
+      const shared = null as unknown as boolean;
+      const result = getCombinedFilter({ authenticatedUser, filter, shared });
+
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" })`);
     });
   });
 });

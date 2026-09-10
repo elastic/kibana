@@ -8,11 +8,12 @@
  */
 
 import { ServerShortUrlClientFactory } from './short_url_client_factory';
-import { UrlService, LocatorDefinition } from '../../../common/url_service';
+import type { LocatorDefinition } from '../../../common/url_service';
+import { UrlService } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { MemoryShortUrlStorage } from './storage/memory_short_url_storage';
-import { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { UrlServiceError } from '../error';
 
 const setup = () => {
@@ -150,7 +151,7 @@ describe('ServerShortUrlClient', () => {
             url: '/app/test#foo/bar/baz',
           },
         })
-      ).rejects.toThrowError(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
+      ).rejects.toThrow(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
     });
 
     test('updates "accessCount" and "accessDate" on URL resolution by slug', async () => {
@@ -198,7 +199,7 @@ describe('ServerShortUrlClient', () => {
     test('throws when fetching non-existing short URL', async () => {
       const { client } = setup();
 
-      await expect(() => client.get('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')).rejects.toThrowError(
+      await expect(() => client.get('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')).rejects.toThrow(
         new Error(`No short url with id "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"`)
       );
     });
@@ -215,7 +216,7 @@ describe('ServerShortUrlClient', () => {
       });
       await client.delete(shortUrl1.data.id);
 
-      await expect(() => client.get(shortUrl1.data.id)).rejects.toThrowError(
+      await expect(() => client.get(shortUrl1.data.id)).rejects.toThrow(
         new Error(`No short url with id "${shortUrl1.data.id}"`)
       );
     });

@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 
 export interface WaitForDelayParams {
   delayInSec: number;
@@ -18,7 +18,8 @@ export const waitForDelay = ({
   delayInSec,
 }: WaitForDelayParams): TaskEither.TaskEither<never, 'wait_succeeded'> => {
   return () => {
-    return delay(delayInSec)
+    // we need to use the standard setTimeout here, this way we can alter its behavior with jest.useFakeTimers()
+    return new Promise((resolve) => setTimeout(resolve, delayInSec * 1000))
       .then(() => Either.right('wait_succeeded' as const))
       .catch((err) => {
         // will never happen
@@ -26,6 +27,3 @@ export const waitForDelay = ({
       });
   };
 };
-
-const delay = (delayInSec: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, delayInSec * 1000));

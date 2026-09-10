@@ -7,23 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import {
-  ExpressionFunctionKibana,
-  ExpressionFunctionKibanaContext,
-  QueryState,
-  aggregateQueryToAst,
-  queryToAst,
-  filtersToAst,
-  timerangeToAst,
-} from '..';
+import type { ExpressionFunctionKibana, ExpressionFunctionKibanaContext, QueryState } from '..';
+import { aggregateQueryToAst, queryToAst, filtersToAst, timerangeToAst } from '..';
 
 interface Args extends QueryState {
   timeFieldName?: string;
   inputQuery?: Query;
   titleForInspector?: string;
   descriptionForInspector?: string;
+  ignoreGlobalFilters?: boolean;
 }
 
 /**
@@ -44,6 +39,7 @@ export function textBasedQueryStateToExpressionAst({
   timeFieldName,
   titleForInspector,
   descriptionForInspector,
+  ignoreGlobalFilters,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -63,6 +59,7 @@ export function textBasedQueryStateToExpressionAst({
       timeField: timeFieldName,
       titleForInspector,
       descriptionForInspector,
+      ignoreGlobalFilters,
     });
 
     if (esql) {

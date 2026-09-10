@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import React, { memo, useEffect } from 'react';
 import { SOURCE_COLUMN } from './columns';
 

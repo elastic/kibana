@@ -10,7 +10,7 @@
 export { initTransform } from './object_transform';
 
 export {
-  getTransforms as getContentManagmentServicesTransforms,
+  getTransforms as getContentManagementServicesTransforms,
   compile as compileServiceDefinitions,
 } from './content_management_services_versioning';
 

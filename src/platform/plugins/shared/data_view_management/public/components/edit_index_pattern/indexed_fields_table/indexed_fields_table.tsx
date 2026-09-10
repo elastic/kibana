@@ -8,12 +8,12 @@
  */
 
 import React, { Component } from 'react';
-import { createSelector } from 'reselect';
-import { OverlayStart } from '@kbn/core/public';
-import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
+import { createSelector } from 'reselect-v4';
+import type { OverlayStart } from '@kbn/core/public';
+import type { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
-import { IndexedFieldItem } from './types';
-import { StartServices } from '../../../types';
+import type { IndexedFieldItem } from './types';
+import type { StartServices } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];

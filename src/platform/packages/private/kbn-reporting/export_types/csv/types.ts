@@ -8,7 +8,7 @@
  */
 
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
+import type { ReportingServerPluginSetup } from '@kbn/reporting-server';
 
 /**
  * Needed because of CsvSearchSourceImmediateExportType

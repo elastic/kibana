@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { FileJSON } from '../../../common';
+import type { TestEnvironmentUtils } from '../../test_utils';
+import { setupIntegrationEnvironment } from '../../test_utils';
 import type { rt } from '../file_kind/create';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File HTTP API', () => {
   let testHarness: TestEnvironmentUtils;
@@ -332,7 +333,10 @@ describe('File HTTP API', () => {
     });
 
     test('it downloads a publicly shared file', async () => {
-      const { id } = await createFile();
+      const { id } = await createFile({
+        name: 'myfilename.pdf',
+        mimeType: 'application/pdf',
+      });
 
       const {
         body: { token },
@@ -356,7 +360,7 @@ describe('File HTTP API', () => {
         .expect(200);
 
       const { body: buffer, header } = await request
-        // By providing a file name like "myfilename.pdf" we imply that we want a pdf
+        // "myfilename.pdf" has a mime type that matches the metadata
         .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
         .set('x-elastic-internal-origin', 'files-test')
         .buffer()
@@ -365,6 +369,237 @@ describe('File HTTP API', () => {
       expect(header['content-type']).toEqual('application/pdf');
       expect(header['content-disposition']).toEqual('attachment; filename=myfilename.pdf');
       expect(buffer.toString('utf8')).toEqual('test');
+    });
+
+    test('validates file extension in public download', async () => {
+      const { id } = await createFile({
+        name: 'document.pdf',
+        mimeType: 'application/pdf',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('pdf content')
+        .expect(200);
+
+      // Try public download with wrong extension (txt extension for PDF file)
+      const result = await request
+        .get(root, `/api/files/public/blob/document.txt?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(400);
+
+      expect(result.body.message).toBe('File extension does not match file type');
+    });
+
+    test('allows public download with matching file extension', async () => {
+      const { id } = await createFile({
+        name: 'image.png',
+        mimeType: 'image/png',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('image data')
+        .expect(200);
+
+      // Public download with correct extension should work
+      const { body: buffer, header } = await request
+        .get(root, `/api/files/public/blob/image.png?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .buffer()
+        .expect(200);
+
+      expect(header['content-type']).toEqual('image/png');
+      expect(header['content-disposition']).toEqual('attachment; filename=image.png');
+      expect(buffer.toString('utf8')).toEqual('image data');
+    });
+
+    test('allows public download with no file extension', async () => {
+      const { id } = await createFile({
+        name: 'README',
+        mimeType: 'text/plain',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('readme content')
+        .expect(200);
+
+      // Public download without extension should work (no validation performed)
+      const response = await request
+        .get(root, `/api/files/public/blob/README?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .buffer()
+        .expect(200);
+
+      expect(response.header['content-type']).toEqual('text/plain; charset=utf-8');
+      expect(response.text).toEqual('readme content');
+    });
+
+    test('handles case insensitive extensions in public download', async () => {
+      const { id } = await createFile({
+        name: 'image.jpg',
+        mimeType: 'image/jpeg',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('jpeg data')
+        .expect(200);
+
+      // Both JPG and JPEG extensions should work for image/jpeg MIME type
+      await request
+        .get(root, `/api/files/public/blob/image.JPG?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+
+      await request
+        .get(root, `/api/files/public/blob/image.jpeg?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(200);
+    });
+
+    test('handles Unicode filenames in public download validation', async () => {
+      const { id } = await createFile({
+        name: 'файл.txt',
+        mimeType: 'text/plain',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('text content')
+        .expect(200);
+
+      // Unicode filename with correct extension should work
+      const encodedFilename = encodeURIComponent('файл.txt');
+      const response = await request
+        .get(root, `/api/files/public/blob/${encodedFilename}?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .buffer()
+        .expect(200);
+
+      expect(response.header['content-type']).toMatch(/^text\/plain(; charset=utf-8)?$/);
+
+      // For text content with .buffer(), use response.text instead of response.body
+      expect(response.text).toEqual('text content');
+
+      // Wrong extension should still be rejected
+      const encodedWrongFilename = encodeURIComponent('файл.pdf');
+      await request
+        .get(root, `/api/files/public/blob/${encodedWrongFilename}?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(400);
+    });
+
+    test('does not leak information in public download error messages', async () => {
+      const { id } = await createFile({
+        name: 'secret.json',
+        mimeType: 'application/json',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('{"secret": "data"}')
+        .expect(200);
+
+      // Try download with wrong extension
+      const result = await request
+        .get(root, `/api/files/public/blob/secret.xml?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(400);
+
+      // Should not reveal MIME type or expected extensions
+      expect(result.body.message).toBe('File extension does not match file type');
+      expect(result.body.message).not.toContain('json');
+      expect(result.body.message).not.toContain('application/json');
+    });
+
+    test('prevents MIME type manipulation through URL filename', async () => {
+      const { id } = await createFile({
+        name: 'safe-document.pdf',
+        mimeType: 'application/pdf',
+      });
+
+      const {
+        body: { token },
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
+        .send('PDF content')
+        .expect(200);
+
+      // Extension validation blocks dangerous mismatched downloads
+      await request
+        .get(root, `/api/files/public/blob/malicious-script.html?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(400); // Correctly blocked!
     });
   });
 });

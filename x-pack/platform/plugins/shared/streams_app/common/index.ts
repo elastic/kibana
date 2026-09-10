@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Streams } from '@kbn/streams-schema';
+export type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 
 interface EntityBase {
   type: string;

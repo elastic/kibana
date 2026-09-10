@@ -7,30 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Os from 'os';
+
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
-const batchSize = 250;
-const maxParallelism = 8;
+import { eslintBinPath } from './eslint_bin_path';
+
+const maxParallelism = Math.max(1, Os.cpus().length - 1);
+// ARG_MAX on macOS is 1MB; cap batch size to stay well under it on low-core machines.
+const maxBatchSize = 4000;
 
 run(
   async ({ log, flags }) => {
     const bail = !!(flags.bail || false);
 
-    const { batches, files } = getLintableFileBatches();
+    const { batches, files } = getLintableFileBatches(flags._, maxParallelism);
     log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
 
-    const eslintArgs =
-      // Unexpected will contain anything meant for ESLint directly, like `--fix`
-      flags.unexpected
-        // ESLint has no cache by default
-        .concat([flags.cache ? '--cache' : '--no-cache']);
+    const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
+
+    // ESLint has no cache by default
     log.info(
       `Running ESLint with args: ${pretty({
-        args: eslintArgs,
-        batchSize,
+        args: eslintArgs.concat(flags._),
         maxParallelism,
       })}`
     );
@@ -52,33 +54,35 @@ run(
   {
     description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
     flags: {
-      boolean: ['bail', 'cache'],
+      boolean: ['bail', 'cache', 'fix'],
       default: {
         bail: false,
         cache: true, // Enable caching by default
       },
-      allowUnexpected: true,
       help: `
         --bail            Stop on the first linting error
         --no-cache        Disable ESLint caching
+        --fix             Fix files
       `,
     },
   }
 );
 
-function getLintableFileBatches() {
+function getLintableFileBatches(filePatterns: string[], workerCount: number) {
   const files = execa
-    .sync('git', ['ls-files'], {
+    .sync('git', ['ls-files', ...filePatterns], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
     })
     .stdout.trim()
     .split('\n')
     .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
+  const batchSize = Math.min(Math.ceil(files.length / workerCount), maxBatchSize);
   const batches = [];
   for (let i = 0; i < files.length; i += batchSize) {
     batches.push(files.slice(i, i + batchSize));
   }
+
   return { batches, files };
 }
 
@@ -100,7 +104,7 @@ async function lintFileBatch({
   log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
 
   const timeBefore = Date.now();
-  const args = ['scripts/eslint'].concat(eslintArgs).concat(batch);
+  const args = [eslintBinPath, '--quiet', ...eslintArgs, ...batch];
   const { stdout, stderr, exitCode } = await execa('node', args, {
     cwd: REPO_ROOT,
     env: {

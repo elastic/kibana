@@ -11,13 +11,15 @@ import React from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ShardFailureTable } from './shard_failure_table';
 
@@ -27,12 +29,24 @@ interface Props {
 }
 
 export function ShardFailureFlyout({ failures, onClose }: Props) {
+  const flyoutTitleId = useGeneratedHtmlId();
+  const backButtonLabel = i18n.translate('inspector.requests.clusters.shards.backButtonLabel', {
+    defaultMessage: 'Back',
+  });
+
   return (
-    <EuiFlyout onClose={onClose} ownFocus={false} hideCloseButton={true}>
+    <EuiFlyout
+      onClose={onClose}
+      ownFocus={false}
+      hideCloseButton={true}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h1>
-            <EuiButtonIcon iconType="sortLeft" onClick={onClose} />
+          <h1 id={flyoutTitleId}>
+            <EuiToolTip content={backButtonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon iconType="sortLeft" onClick={onClose} aria-label={backButtonLabel} />
+            </EuiToolTip>
             {i18n.translate('inspector.requests.clusters.shards.flyoutTitle', {
               defaultMessage:
                 '{failedShardCount} failed {failedShardCount, plural, one {shard} other {shards}}',
@@ -48,9 +62,7 @@ export function ShardFailureFlyout({ failures, onClose }: Props) {
 
       <EuiFlyoutFooter>
         <EuiButtonEmpty iconType="sortLeft" onClick={onClose} flush="left">
-          {i18n.translate('inspector.requests.clusters.shards.backButtonLabel', {
-            defaultMessage: 'Back',
-          })}
+          {backButtonLabel}
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
     </EuiFlyout>

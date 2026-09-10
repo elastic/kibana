@@ -7,10 +7,10 @@
 
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/config';
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
   testFiles: [require.resolve('./tests/common/index_common_trial')],
   publicBaseUrl: true,
+  indexRefreshInterval: '1s',
 });

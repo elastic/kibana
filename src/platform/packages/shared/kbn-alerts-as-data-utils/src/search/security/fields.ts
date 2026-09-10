@@ -13,7 +13,9 @@ import {
   ALERT_SEVERITY,
   ALERT_RULE_PARAMETERS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
 
 const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
@@ -50,6 +52,8 @@ export const ALERT_EVENTS_FIELDS = [
   'kibana.alert.ancestors.index',
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   'kibana.alert.workflow_status',
+  ALERT_WORKFLOW_USER,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_TAGS,
   'kibana.alert.group.id',
   'kibana.alert.original_time',
@@ -75,6 +79,8 @@ export const ALERT_EVENTS_FIELDS = [
   'event.category',
   'host.name',
   'user.name',
+  'user.id',
+  'user.email',
   'source.ip',
   'destination.ip',
   'message',
@@ -142,6 +148,9 @@ export const ALERT_EVENTS_FIELDS = [
   'host.os.family',
   'host.os.name',
   'host.id',
+  'host.hostname',
+  'host.domain',
+  'host.mac',
   'host.ip',
   'registry.key',
   'registry.path',

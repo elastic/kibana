@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery } from '../../es/queries/kql_query';
 
 export async function getSlosForEntity({

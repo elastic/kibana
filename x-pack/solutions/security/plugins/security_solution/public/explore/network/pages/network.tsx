@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../data_view_manager/constants';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -40,13 +40,11 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../common/components/page_loader';
 
@@ -78,6 +76,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { tabName } = useParams<{ tabName: string }>();
 
     const canUseMaps = kibana.services.application.capabilities.maps_v2.show;
+    const { uiSettings } = kibana.services;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {
@@ -86,25 +85,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       return globalFilters;
     }, [tabName, globalFilters]);
 
-    const {
-      indicesExist: oldIndicesExist,
-      selectedPatterns: oldSelectedPatterns,
-      sourcererDataView: oldSourcererDataView,
-    } = useSourcererDataView();
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-    const { dataView, status } = useDataView();
-    const { dataViewSpec } = useDataViewSpec();
-    const experimentalSelectedPatterns = useSelectedPatterns();
-
-    const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-    const indicesExist = newDataViewPickerEnabled
-      ? !!dataView?.matchedIndices?.length
-      : oldIndicesExist;
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const { dataView, status } = useDataView(PageScope.explore);
+    const selectedPatterns = useSelectedPatterns(dataView);
+    const indicesExist = dataView.hasMatchedIndices();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -130,23 +113,31 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
     );
 
-    const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config: getEsQueryConfig(kibana.services.uiSettings),
-      dataViewSpec: sourcererDataView,
-      queries: [query],
-      filters: globalFilters,
-    });
+    const [filterQuery, kqlError] = useMemo(
+      () =>
+        convertToBuildEsQuery({
+          config: getEsQueryConfig(uiSettings),
+          dataView,
+          queries: [query],
+          filters: globalFilters,
+        }),
+      [uiSettings, dataView, query, globalFilters]
+    );
 
-    const [tabsFilterQuery] = convertToBuildEsQuery({
-      config: getEsQueryConfig(kibana.services.uiSettings),
-      dataViewSpec: sourcererDataView,
-      queries: [query],
-      filters: tabsFilters,
-    });
+    const [tabsFilterQuery] = useMemo(
+      () =>
+        convertToBuildEsQuery({
+          config: getEsQueryConfig(uiSettings),
+          dataView,
+          queries: [query],
+          filters: tabsFilters,
+        }),
+      [uiSettings, dataView, query, tabsFilters]
+    );
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
-    if (newDataViewPickerEnabled && status === 'pristine') {
+    if (status === 'pristine') {
       return <PageLoader />;
     }
 
@@ -156,7 +147,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal>
-              <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+              <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -194,7 +185,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent from={from} to={to} />
               </Display>
 
-              {capabilitiesFetched && !isInitializing && sourcererDataView ? (
+              {capabilitiesFetched && !isInitializing ? (
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
@@ -206,7 +197,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
-                    dataViewSpec={sourcererDataView}
                     indexNames={selectedPatterns}
                     setQuery={setQuery}
                     type={networkModel.NetworkType.page}

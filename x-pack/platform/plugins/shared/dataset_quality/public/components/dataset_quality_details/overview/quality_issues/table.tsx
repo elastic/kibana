@@ -10,9 +10,10 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import React from 'react';
 import {
   overviewDegradedFieldsTableLoadingText,
+  qualityIssuesTableCaption,
   qualityIssuesTableNoData,
 } from '../../../../../common/translations';
-import { useQualityIssues } from '../../../../hooks/use_quality_issues';
+import { useQualityIssues } from '../../../../hooks';
 import { getQualityIssuesColumns } from './columns';
 
 export const QualityIssuesTable = () => {
@@ -26,9 +27,11 @@ export const QualityIssuesTable = () => {
     expandedDegradedField,
     openDegradedFieldFlyout,
   } = useQualityIssues();
+
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
+
   const columns = getQualityIssuesColumns({
     dateFormatter,
     isLoading: isDegradedFieldsLoading,
@@ -38,6 +41,7 @@ export const QualityIssuesTable = () => {
 
   return (
     <EuiBasicTable
+      tableCaption={qualityIssuesTableCaption}
       tableLayout="fixed"
       columns={columns}
       items={renderedItems ?? []}

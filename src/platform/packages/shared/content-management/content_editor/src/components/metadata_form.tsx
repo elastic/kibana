@@ -10,18 +10,12 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTextArea,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
 import type { Field, MetadataFormState } from './use_metadata_form';
-import type { SavedObjectsReference, Services } from '../services';
+import type { Services } from '../services';
 
 interface Props {
   form: MetadataFormState & {
@@ -29,7 +23,6 @@ interface Props {
   };
   isReadonly: boolean;
   readonlyReason: string;
-  tagsReferences: SavedObjectsReference[];
   TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
 }
@@ -38,7 +31,6 @@ const isFormFieldValid = (field: Field) => !Boolean(field.errors?.length);
 
 export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
   form,
-  tagsReferences,
   TagList,
   TagSelector,
   isReadonly,
@@ -61,7 +53,12 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
   return (
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
-      {isReadonly && <EuiCallOut size="s" title={readonlyReason} iconType="info" />}
+      {isReadonly && (
+        <>
+          <KbnInfoCallout size="s" title={readonlyReason} announceOnMount={false} />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiFormRow
         label={i18n.translate('contentManagement.contentEditor.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',
@@ -69,6 +66,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         error={title.errors}
         isInvalid={!isFormFieldValid(title)}
         fullWidth
+        isDisabled={isReadonly}
       >
         <EuiFieldText
           isInvalid={!isFormFieldValid(title)}
@@ -94,6 +92,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         error={description.errors}
         isInvalid={!isFormFieldValid(description)}
         fullWidth
+        isDisabled={isReadonly}
       >
         <EuiTextArea
           isInvalid={!isFormFieldValid(description)}
@@ -107,7 +106,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
         />
       </EuiFormRow>
 
-      {TagList && isReadonly && tagsReferences.length > 0 && (
+      {TagList && isReadonly && tags.value.length > 0 && (
         <>
           <EuiSpacer />
           <EuiFormRow
@@ -115,8 +114,9 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
               defaultMessage: 'Tags',
             })}
             fullWidth
+            isDisabled={isReadonly}
           >
-            <TagList references={tagsReferences} />
+            <TagList tagIds={tags.value} />
           </EuiFormRow>
         </>
       )}

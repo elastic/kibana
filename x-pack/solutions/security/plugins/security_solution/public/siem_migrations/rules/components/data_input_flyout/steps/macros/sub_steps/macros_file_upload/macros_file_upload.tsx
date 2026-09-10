@@ -8,36 +8,37 @@
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
-import type { RuleMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { FILE_UPLOAD_ERROR } from '../../../../translations';
+import type { EuiFilePickerRef } from '@elastic/eui';
+import { UploadFileButton } from '../../../../../../../common/components';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
+import {
+  parseContent,
+  useParseFileInput,
+  type SplunkRow,
+} from '../../../../../../../common/hooks/use_parse_file_input';
+import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import type { SPLUNK_MACROS_COLUMNS } from '../../../../constants';
-import { useParseFileInput, type SplunkRow } from '../../../common/use_parse_file_input';
-import { UploadFileButton } from '../../../common/upload_file_button';
 import * as i18n from './translations';
 
 type SplunkMacroResult = Partial<Record<(typeof SPLUNK_MACROS_COLUMNS)[number], string>>;
 
 export interface MacrosFileUploadProps {
-  createResources: (resources: RuleMigrationResourceData[]) => void;
+  createResources: (resources: SiemMigrationResourceData[]) => void;
   apiError?: string;
   isLoading?: boolean;
 }
 export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
-    const [macrosToUpload, setMacrosToUpload] = useState<RuleMigrationResourceData[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const [macrosToUpload, setMacrosToUpload] = useState<SiemMigrationResourceData[]>([]);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const createMacros = useCallback(() => {
       filePickerRef.current?.removeFiles();
       createResources(macrosToUpload);
     }, [createResources, macrosToUpload]);
 
-    const onFileParsed = useCallback((content: Array<SplunkRow<SplunkMacroResult>>) => {
-      const macros = content.map(formatMacroRow);
+    const onFileParsed = useCallback((content: string) => {
+      const macros = parseContent(content).map(formatMacroRow);
       setMacrosToUpload(macros);
     }, []);
 
@@ -66,7 +67,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow
             helpText={
-              <EuiText color="danger" size="xs">
+              <EuiText color="danger" size="xs" data-test-subj="macrosFileUploadError">
                 {error}
               </EuiText>
             }
@@ -74,8 +75,9 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
             fullWidth
           >
             <EuiFilePicker
+              isInvalid={error != null}
               id="macrosFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
@@ -95,7 +97,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="macrosUploadFileButton">
               <UploadFileButton
                 onClick={createMacros}
                 isLoading={showLoader}
@@ -110,15 +112,15 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
 );
 MacrosFileUpload.displayName = 'MacrosFileUpload';
 
-const formatMacroRow = (row: SplunkRow<SplunkMacroResult>): RuleMigrationResourceData => {
+const formatMacroRow = (row: SplunkRow<SplunkMacroResult>): SiemMigrationResourceData => {
   if (!isPlainObject(row.result)) {
     throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
   }
-  const macroResource: Partial<RuleMigrationResourceData> = {
+  const macroResource: Partial<SiemMigrationResourceData> = {
     type: 'macro',
     name: row.result.title,
     content: row.result.definition,
   };
   // resource document format validation delegated to API
-  return macroResource as RuleMigrationResourceData;
+  return macroResource as SiemMigrationResourceData;
 };

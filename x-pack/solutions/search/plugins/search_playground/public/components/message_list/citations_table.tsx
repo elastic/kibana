@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { AIMessage as AIMessageType, Doc } from '../../types';
+import type { AIMessage as AIMessageType, Doc } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 
 type CitationsTableProps = Pick<AIMessageType, 'citations'>;
@@ -45,6 +45,10 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate(
+        'xpack.searchPlayground.chat.message.assistant.citations.tableCaption',
+        { defaultMessage: 'Assistant response citations' }
+      )}
       columns={[
         {
           field: 'metadata._id',
@@ -67,7 +71,9 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
                 data-test-subj={`expandButton-${citation.metadata._id}`}
                 onClick={() => toggleDetails(citation)}
                 iconType={
-                  itemIdToExpandedRowMapValues[citation.metadata._id] ? 'arrowDown' : 'arrowRight'
+                  itemIdToExpandedRowMapValues[citation.metadata._id]
+                    ? 'chevronSingleDown'
+                    : 'chevronSingleRight'
                 }
               >
                 {i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.snippet', {

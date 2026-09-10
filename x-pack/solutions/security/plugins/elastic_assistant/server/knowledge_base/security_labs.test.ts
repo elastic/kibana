@@ -7,8 +7,8 @@
 
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
-import globby from 'globby';
+import { parse } from 'yaml';
+import { globbySync } from 'globby';
 import {
   decryptSecurityLabsContent,
   ENCODED_FILE_MICROMATCH_PATTERN,
@@ -19,10 +19,10 @@ const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
 describe('Security labs content', () => {
   const directoryPath = path.join(__dirname, 'security_labs');
-  const plainTextFiles: string[] = globby.sync(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
+  const plainTextFiles: string[] = globbySync(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
     cwd: directoryPath,
   });
-  const encodedFiles: string[] = globby.sync(ENCODED_FILE_MICROMATCH_PATTERN, {
+  const encodedFiles: string[] = globbySync(ENCODED_FILE_MICROMATCH_PATTERN, {
     cwd: directoryPath,
   });
 
@@ -45,7 +45,7 @@ describe('Security labs content', () => {
         const split = content.split('---');
         const yamlString = split[1];
         const article = split[2];
-        const parsed = yaml.load(yamlString) as {
+        const parsed = parse(yamlString) as {
           slug: string;
           title: string;
           date: string;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import {
   getESSystemIndicesMigrationStatus,
   startESSystemIndicesMigration,
@@ -16,6 +16,7 @@ import {
 export function registerSystemIndicesMigrationRoutes({
   router,
   lib: { handleEsError },
+  current,
 }: RouteDependencies) {
   // GET status of the system indices migration
   router.get(
@@ -29,7 +30,7 @@ export function registerSystemIndicesMigrationRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },
@@ -62,7 +63,7 @@ export function registerSystemIndicesMigrationRoutes({
         },
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },

@@ -8,14 +8,24 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const RESTORE_AND_EXECUTE = true;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+
+  // Console consumes `load_from` once and then removes it from the URL. `navigateToApp` expects
+  // the final URL to still start with the requested one and reloads the page when it does not,
+  // and every reload appended the request again. Load the URL exactly once instead.
+  const loadFromDataUri = async (dataUri: string) => {
+    const { origin, pathname } = new URL(await browser.getCurrentUrl());
+    // `browser.get` adds a `_t` timestamp, which forces a full page load even when only the hash changes.
+    await browser.get(`${origin}${pathname}#/console/shell?load_from=${dataUri}`);
+  };
 
   describe('text input', function testTextInput() {
     before(async () => {
@@ -25,27 +35,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.console.openConsole();
-      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.clearEditorText();
     });
 
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
-        await PageObjects.common.navigateToApp('console', {
-          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q',
-        });
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(`GET _search`);
+        await PageObjects.console.sleepForDebouncePeriod(1000);
+
+        await loadFromDataUri('data:text/plain,BYUwNmD2Q'); // "hello" compressed
 
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
-          expect(actualRequest.trim()).to.eql('hello');
+          // The data should be appended after the existing text
+          expect(actualRequest.trim()).to.eql('GET _search\nhello');
         });
       });
 
       describe('with invalid data', () => {
         it('shows a toast error', async () => {
-          await PageObjects.common.navigateToApp('console', {
-            hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2',
-          });
+          await loadFromDataUri('data:text/plain,BYUwNmD2');
 
           await retry.try(async () => {
             expect(await toasts.getCount()).to.equal(1);
@@ -54,24 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // not yet implemented for monaco https://github.com/elastic/kibana/issues/186001
-    describe.skip('copy/pasting cURL commands into the console', () => {
-      it('should convert cURL commands into the console request format', async () => {
-        await PageObjects.console.enterText(
-          `\n curl -XGET "http://localhost:9200/_search?pretty" -d'\n{"query": {"match_all": {}}}'`
-        );
-        await PageObjects.console.copyRequestsToClipboard();
-        await PageObjects.console.clearEditorText();
-        await PageObjects.console.pasteClipboardValue();
-        await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getEditorText();
-          expect(actualRequest.trim()).to.eql('GET /_search?pretty\n {"query": {"match_all": {}}}');
-        });
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/193895
-    describe.skip('console history', () => {
+    describe('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.enterText(request);
         await PageObjects.console.clickPlay();

@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
@@ -20,12 +20,8 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
-import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageScope } from '../../data_view_manager/constants';
+import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface UseCreateTimelineParams {
   /**
@@ -54,22 +50,8 @@ export const useCreateTimeline = ({
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
 
-  const { id: oldDataViewId, patternList: oldSelectedPatterns } = useSelector(
-    sourcererSelectors.defaultDataView
-  ) ?? { id: '', patternList: [] };
-
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.default);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
-
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
-    [experimentalDataView?.id, newDataViewPickerEnabled, oldDataViewId]
-  );
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
+  const { id: defaultDataViewId, indexPatterns: selectedPatterns } = useSecurityDefaultPatterns();
+  const dataViewId = useMemo(() => defaultDataViewId ?? '', [defaultDataViewId]);
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
@@ -97,16 +79,8 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         fallbackPatterns: selectedPatterns,
-        scope: DataViewManagerScopeName.timeline,
+        scope: PageScope.timeline,
       });
-
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: dataViewId,
-          selectedPatterns,
-        })
-      );
 
       dispatch(
         timelineActions.createTimeline({

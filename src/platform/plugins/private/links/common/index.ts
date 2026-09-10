@@ -7,4 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { APP_ICON, APP_NAME, CONTENT_ID, DISPLAY_NAME, LATEST_VERSION } from './constants';
+export type {
+  LinksByValueState,
+  LinksByReferenceState,
+  LinksEmbeddableState,
+} from './embeddable/types';
+export {
+  APP_ICON,
+  APP_NAME,
+  DISPLAY_NAME,
+  LINKS_EMBEDDABLE_TYPE,
+  LINKS_LIBRARY_TYPE,
+} from './constants';

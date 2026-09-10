@@ -10,17 +10,18 @@
 import { Chart, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayerTypes } from '../../../common/constants';
-import {
+import type {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
   ExtendedReferenceLineDecorationConfig,
   ReferenceLineArgs,
   ReferenceLineConfig,
 } from '../../../common/types';
-import { ReferenceLines, ReferenceLinesProps } from './reference_lines';
+import type { ReferenceLinesProps } from './reference_lines';
+import { ReferenceLines } from './reference_lines';
 import { ReferenceLineLayer } from './reference_line_layer';
 import { ReferenceLine } from './reference_line';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
@@ -99,7 +100,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {
@@ -173,8 +174,8 @@ describe('ReferenceLines', () => {
         <ReferenceLines
           {...defaultProps}
           formatters={{
-            yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
-            yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
+            yAccessorLeftFirstId: { convertToText: convertLeft } as unknown as FieldFormat,
+            yAccessorRightFirstId: { convertToText: convertRight } as unknown as FieldFormat,
           }}
           layers={createLayers(
             [
@@ -225,7 +226,7 @@ describe('ReferenceLines', () => {
 
       expect(convertLeft).toHaveBeenCalled();
       expect(convertRight).toHaveBeenCalled();
-      expect(defaultProps.xAxisFormatter.convert).not.toHaveBeenCalled();
+      expect(defaultProps.xAxisFormatter.convertToText).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -548,7 +549,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {

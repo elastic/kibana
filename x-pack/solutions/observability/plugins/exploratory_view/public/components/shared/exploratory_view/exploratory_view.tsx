@@ -15,8 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from './hooks/use_kibana';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
@@ -116,8 +116,8 @@ export function ExploratoryView({
                       data-test-subj="o11yExploratoryViewButton"
                       size="xs"
                       {...(hiddenPanel === 'chartPanel'
-                        ? { iconType: 'arrowRight' }
-                        : { iconType: 'arrowDown' })}
+                        ? { iconType: 'chevronSingleRight' }
+                        : { iconType: 'chevronSingleDown' })}
                       onClick={() => onChange('chartPanel')}
                     >
                       {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
@@ -160,7 +160,7 @@ export function ExploratoryView({
           }}
         </ResizableContainer>
         {hiddenPanel === 'seriesPanel' && (
-          <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
+          <ShowPreview onClick={() => onChange('seriesPanel')} iconType="chevronSingleUp">
             {PREVIEW_LABEL}
           </ShowPreview>
         )}

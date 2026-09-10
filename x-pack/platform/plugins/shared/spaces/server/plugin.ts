@@ -8,7 +8,6 @@
 import type { Observable } from 'rxjs';
 import { map, take } from 'rxjs';
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -16,14 +15,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
-import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
+import { InitialSolutionSetupService } from './initial_solution_setup/initial_solution_setup_service';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
@@ -34,28 +30,19 @@ import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './space
 import { SpacesClientService } from './spaces_client';
 import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 import { SpacesService } from './spaces_service';
-import type { SpacesRequestHandlerContext } from './types';
-import { getUiSettings } from './ui_settings';
+import type {
+  SpacesPluginSetupDeps,
+  SpacesPluginStartDeps,
+  SpacesRequestHandlerContext,
+} from './types';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
 import { SpacesLicenseService } from '../common/licensing';
 
-export interface PluginsSetup {
-  features: FeaturesPluginSetup;
-  licensing: LicensingPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  home?: HomeServerPluginSetup;
-  cloud?: CloudSetup;
-}
-
-export interface PluginsStart {
-  features: FeaturesPluginStart;
-}
-
 /**
  * Setup contract for the Spaces plugin.
  */
-export interface SpacesPluginSetup {
+export interface SpacesPluginSetupApi {
   /**
    * Service for interacting with spaces.
    */
@@ -89,7 +76,7 @@ export interface SpacesPluginSetup {
 /**
  * Start contract for the Spaces plugin.
  */
-export interface SpacesPluginStart {
+export interface SpacesPluginStartApi {
   /** Service for interacting with spaces. */
   spacesService: SpacesServiceStart;
 
@@ -102,7 +89,13 @@ export interface SpacesPluginStart {
 }
 
 export class SpacesPlugin
-  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+  implements
+    Plugin<
+      SpacesPluginSetupApi,
+      SpacesPluginStartApi,
+      SpacesPluginSetupDeps,
+      SpacesPluginStartDeps
+    >
 {
   private readonly config$: Observable<ConfigType>;
 
@@ -131,13 +124,13 @@ export class SpacesPlugin
     );
   }
 
-  public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
+  public setup(
+    core: CoreSetup<SpacesPluginStartDeps>,
+    plugins: SpacesPluginSetupDeps
+  ): SpacesPluginSetupApi {
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
-    core.uiSettings.registerGlobal(getUiSettings());
 
-    const spacesServiceSetup = this.spacesService.setup({
-      basePath: core.http.basePath,
-    });
+    const spacesServiceSetup = this.spacesService.setup();
 
     const getSpacesService = () => {
       if (!this.spacesServiceStart) {
@@ -156,19 +149,27 @@ export class SpacesPlugin
     const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
 
     let defaultSolution;
+    let initialSolutionSetupEnabled = false;
 
     this.config$.pipe(take(1)).subscribe((config) => {
       defaultSolution = config.defaultSolution;
+      initialSolutionSetupEnabled = config.initialSolutionSetup?.enabled ?? false;
     });
 
+    const solution = plugins.cloud?.onboarding?.defaultSolution || defaultSolution;
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    const eligible = initialSolutionSetupEnabled && !solution;
+    const initialSolutionSetup = new InitialSolutionSetupService(eligible);
+    const getSavedObjects = async () => (await core.getStartServices())[0].savedObjects;
     this.defaultSpaceService = new DefaultSpaceService();
     this.defaultSpaceService.setup({
       coreStatus: core.status,
-      getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
+      getSavedObjects,
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
-      solution: plugins.cloud?.onboarding?.defaultSolution || defaultSolution,
+      solution,
+      solutionSetupRequired: eligible,
     });
 
     initSpacesViewsRoutes({
@@ -185,22 +186,43 @@ export class SpacesPlugin
       getStartServices: core.getStartServices,
       getSpacesService,
       usageStatsServicePromise,
-      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
+      isServerless,
+      packageInfo: this.initializerContext.env.packageInfo,
     });
 
     initInternalSpacesApi({
       router,
       getSpacesService,
+      initialSolutionSetup,
     });
 
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
       getSpacesService,
-      getFeatures: async () => (await core.getStartServices())[1].features,
+      getCoreStartServices: core.getStartServices,
+      initialSolutionSetup,
     });
 
     setupCapabilities(core, getSpacesService, this.log);
+
+    if (plugins.cps?.getCpsEnabled()) {
+      plugins.features.registerElasticsearchFeature({
+        id: 'project_routing',
+        privileges: [
+          {
+            requiredClusterPrivileges: ['cluster:admin/project_routing/put'],
+            ui: ['manage_space_default'],
+          },
+          {
+            requiredClusterPrivileges: ['cluster:monitor/project_routing/get'],
+            // This will become read_project_routing after it is created in ES
+            // requiredClusterPrivileges: ['read_project_routing'],
+            ui: ['read_space_default'],
+          },
+        ],
+      });
+    }
 
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
@@ -226,11 +248,10 @@ export class SpacesPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart) {
-    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
+  public start(core: CoreStart, plugins: SpacesPluginStartDeps) {
+    const spacesClientStart = this.spacesClientService.start(core, plugins.features, plugins.cps);
 
     this.spacesServiceStart = this.spacesService.start({
-      basePath: core.http.basePath,
       spacesClientService: spacesClientStart,
     });
 

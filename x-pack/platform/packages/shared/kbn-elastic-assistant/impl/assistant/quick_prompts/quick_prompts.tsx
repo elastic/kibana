@@ -13,11 +13,13 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 
 import { css } from '@emotion/react';
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { QUICK_PROMPTS_TAB } from '../settings/const';
@@ -138,13 +140,16 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
             {quickPrompts.overflow.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
                   button={
-                    <EuiButtonIcon
-                      color={'primary'}
-                      iconType={'boxesHorizontal'}
-                      onClick={toggleOverflowPopover}
-                      aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
-                    />
+                    <EuiToolTip content={i18n.QUICK_PROMPT_OVERFLOW_ARIA} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        color={'primary'}
+                        iconType={'boxesVertical'}
+                        onClick={toggleOverflowPopover}
+                        aria-label={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isOverflowPopoverOpen}
                   closePopover={closeOverflowPopover}

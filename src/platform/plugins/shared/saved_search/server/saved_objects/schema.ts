@@ -7,23 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { DataGridDensity, DiscoverTabType, HistogramPercentileValue } from '@kbn/discover-utils';
+import { FunctionNames } from '@kbn/esql-language';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_DISCOVER_SESSION_COLUMNS,
+  MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
   VIEW_MODE,
 } from '../../common';
+import { extractTabsTransformFnV13 } from '../../common/service/extract_tabs';
+import { LEGACY_MODEL_REMOVED_ATTRIBUTES } from './schema_legacy';
 
-const SCHEMA_SEARCH_BASE = schema.object({
-  // General
-  title: schema.string(),
-  description: schema.string({ defaultValue: '' }),
+/**
+ * Follow this pattern to update the tab attributes schema in a non-breaking way:
+ *
+ * const SCHEMA_TAB_ATTRIBUTES_VNEXT = SCHEMA_TAB_ATTRIBUTES_VPREV.extends({
+ *   // New tab attributes should be added here
+ * });
+ *
+ * const SCHEMA_TAB_VNEXT = SCHEMA_TAB_VPREV.extends({
+ *   attributes: SCHEMA_TAB_ATTRIBUTES_VNEXT,
+ * });
+ *
+ * export const SCHEMA_DISCOVER_SESSION_VNEXT = SCHEMA_DISCOVER_SESSION_VPREV.extends({
+ *   tabs: schema.arrayOf(SCHEMA_TAB_VNEXT, { minSize: 1, maxSize: 25 }),
+ * });
+ *
+ * Also update SCHEMA_TAB_LATEST and SCHEMA_DISCOVER_SESSION_LATEST with the new schemas:
+ *
+ * export const SCHEMA_TAB_LATEST = SCHEMA_TAB_VNEXT;
+ * export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_VNEXT;
+ */
+
+const SCHEMA_TAB_ATTRIBUTES_V13 = schema.object({
+  // Layout
+  hideChart: schema.boolean({ defaultValue: false }),
+  hideTable: schema.boolean({ defaultValue: false }),
 
   // Data grid
-  columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  columns: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+    maxSize: MAX_DISCOVER_SESSION_COLUMNS,
+  }),
   sort: schema.oneOf(
     [
-      schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),
+      schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 }), {
+        maxSize: MAX_DISCOVER_SESSION_COLUMNS,
+      }),
       schema.arrayOf(schema.string(), { maxSize: 2 }),
     ],
     { defaultValue: [] }
@@ -41,12 +76,45 @@ const SCHEMA_SEARCH_BASE = schema.object({
     },
     { defaultValue: {} }
   ),
+  headerRowHeight: schema.maybe(schema.number()),
   rowHeight: schema.maybe(schema.number()),
   rowsPerPage: schema.maybe(schema.number()),
+  sampleSize: schema.maybe(
+    schema.number({
+      min: MIN_SAVED_SEARCH_SAMPLE_SIZE,
+      max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
+    })
+  ),
+  density: schema.maybe(
+    schema.oneOf([
+      schema.literal(DataGridDensity.COMPACT),
+      schema.literal(DataGridDensity.EXPANDED),
+      schema.literal(DataGridDensity.NORMAL),
+    ])
+  ),
 
   // Chart
-  hideChart: schema.boolean({ defaultValue: false }),
   breakdownField: schema.maybe(schema.string()),
+  visContext: schema.maybe(
+    schema.oneOf([
+      // existing value
+      schema.object({
+        // unified histogram state
+        suggestionType: schema.string(),
+        requestData: schema.object({
+          dataViewId: schema.maybe(schema.string()),
+          timeField: schema.maybe(schema.string()),
+          timeInterval: schema.maybe(schema.string()),
+          breakdownField: schema.maybe(schema.string()),
+        }),
+        // lens attributes
+        attributes: schema.recordOf(schema.string(), schema.any()),
+      }),
+      // cleared previous value
+      schema.object({}),
+    ])
+  ),
+  chartInterval: schema.maybe(schema.string()),
 
   // Search
   kibanaSavedObjectMeta: schema.object({
@@ -54,6 +122,7 @@ const SCHEMA_SEARCH_BASE = schema.object({
   }),
   isTextBasedQuery: schema.boolean({ defaultValue: false }),
   usesAdHocDataView: schema.maybe(schema.boolean()),
+  controlGroupJson: schema.maybe(schema.string()),
 
   // Time
   timeRestore: schema.maybe(schema.boolean()),
@@ -74,65 +143,167 @@ const SCHEMA_SEARCH_BASE = schema.object({
   viewMode: schema.maybe(
     schema.oneOf([
       schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
-      schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
-    ])
-  ),
-  hideAggregatedPreview: schema.maybe(schema.boolean()),
-
-  // Legacy
-  hits: schema.maybe(schema.number()),
-  version: schema.maybe(schema.number()),
-});
-
-export const SCHEMA_SEARCH_V8_8_0 = SCHEMA_SEARCH_BASE;
-
-export const SCHEMA_SEARCH_MODEL_VERSION_1 = SCHEMA_SEARCH_BASE.extends({
-  sampleSize: schema.maybe(
-    schema.number({
-      min: MIN_SAVED_SEARCH_SAMPLE_SIZE,
-      max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
-    })
-  ),
-});
-
-export const SCHEMA_SEARCH_MODEL_VERSION_2 = SCHEMA_SEARCH_MODEL_VERSION_1.extends({
-  headerRowHeight: schema.maybe(schema.number()),
-});
-
-export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.extends({
-  visContext: schema.maybe(
-    schema.oneOf([
-      // existing value
-      schema.object({
-        // unified histogram state
-        suggestionType: schema.string(),
-        requestData: schema.object({
-          dataViewId: schema.maybe(schema.string()),
-          timeField: schema.maybe(schema.string()),
-          timeInterval: schema.maybe(schema.string()),
-          breakdownField: schema.maybe(schema.string()),
-        }),
-        // lens attributes
-        attributes: schema.recordOf(schema.string(), schema.any()),
-      }),
-      // cleared previous value
-      schema.object({}),
-    ])
-  ),
-});
-
-export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.extends({
-  viewMode: schema.maybe(
-    schema.oneOf([
-      schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
       schema.literal(VIEW_MODE.PATTERN_LEVEL),
       schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
     ])
   ),
+  hideAggregatedPreview: schema.maybe(schema.boolean()),
 });
 
-export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.extends({
-  density: schema.maybe(
-    schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
-  ),
+const SCHEMA_TAB_V13 = schema.object({
+  id: schema.string(),
+  label: schema.string(),
+  attributes: SCHEMA_TAB_ATTRIBUTES_V13,
 });
+
+export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
+  title: schema.string(),
+  description: schema.string({ defaultValue: '' }),
+  tabs: schema.arrayOf(SCHEMA_TAB_V13, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
+  esqlApproximation: schema.maybe(schema.boolean()),
+});
+
+const SCHEMA_TAB_V14 = SCHEMA_TAB_V13.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V14,
+});
+
+export const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V14, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+const SCHEMA_JSON_MODE_SETTINGS_V15 = schema.object({
+  hideNulls: schema.maybe(schema.boolean()),
+  wrapLines: schema.maybe(schema.boolean()),
+});
+
+const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
+  documentsDisplayMode: schema.maybe(
+    schema.oneOf([schema.literal('table'), schema.literal('json')])
+  ),
+  jsonModeSettings: schema.maybe(SCHEMA_JSON_MODE_SETTINGS_V15),
+});
+
+const SCHEMA_TAB_V15 = SCHEMA_TAB_V14.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V15,
+});
+
+export const SCHEMA_DISCOVER_SESSION_V15 = SCHEMA_DISCOVER_SESSION_V14.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V15, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+// Tab type payloads, keyed by `type`.
+// Absent `tabTypeState` means DiscoverTabType.Default.
+const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
+  schema.literal(`${FunctionNames.AVG}`),
+  schema.literal(`${FunctionNames.SUM}`),
+  schema.literal(`${FunctionNames.MIN}`),
+  schema.literal(`${FunctionNames.MAX}`),
+]);
+
+const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
+  schema.literal(`${HistogramPercentileValue.P50}`),
+  schema.literal(`${HistogramPercentileValue.P75}`),
+  schema.literal(`${HistogramPercentileValue.P90}`),
+  schema.literal(`${HistogramPercentileValue.P95}`),
+  schema.literal(`${HistogramPercentileValue.P99}`),
+]);
+
+const SCHEMA_TAB_TYPE_STATE_V16 = schema.oneOf([
+  schema.object({
+    type: schema.literal(DiscoverTabType.Metrics),
+    dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      maxSize: MAX_METRICS_TAB_DIMENSIONS,
+    }),
+    searchTerm: schema.string({ maxLength: 1000 }),
+    counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
+  }),
+]);
+
+const SCHEMA_TAB_ATTRIBUTES_V16 = SCHEMA_TAB_ATTRIBUTES_V15.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V16),
+});
+
+const SCHEMA_TAB_V16 = SCHEMA_TAB_V15.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V16,
+});
+
+const SCHEMA_DISCOVER_SESSION_V16 = SCHEMA_DISCOVER_SESSION_V15.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V16, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+const SCHEMA_JSON_MODE_SETTINGS_V17 = SCHEMA_JSON_MODE_SETTINGS_V15.extends({
+  defaultRenderedNodes: schema.maybe(schema.number({ min: 10, max: 200 })),
+});
+
+const SCHEMA_TAB_ATTRIBUTES_V17 = SCHEMA_TAB_ATTRIBUTES_V16.extends({
+  jsonModeSettings: schema.maybe(SCHEMA_JSON_MODE_SETTINGS_V17),
+});
+
+const SCHEMA_TAB_V17 = SCHEMA_TAB_V16.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V17,
+});
+
+const SCHEMA_DISCOVER_SESSION_V17 = SCHEMA_DISCOVER_SESSION_V16.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V17, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+// Add new model versions here, which automatically registers them
+export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
+  13: {
+    changes: [
+      {
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) => typeSafeGuard(extractTabsTransformFnV13),
+      },
+      {
+        type: 'data_removal',
+        removedAttributePaths: LEGACY_MODEL_REMOVED_ATTRIBUTES,
+      },
+    ],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V13.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V13,
+    },
+  },
+  14: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V14.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V14,
+    },
+  },
+  15: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V15.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V15,
+    },
+  },
+  16: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V16.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V16,
+    },
+  },
+  17: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V17.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V17,
+    },
+  },
+};
+
+// Set constants to the latest schemas, which updates derived types and content management
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V17;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V17;
+
+export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;
+export type DiscoverSessionAttributes = TypeOf<typeof SCHEMA_DISCOVER_SESSION_LATEST>;

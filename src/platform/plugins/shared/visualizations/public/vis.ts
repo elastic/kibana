@@ -18,16 +18,17 @@
  */
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
-import { Assign } from '@kbn/utility-types';
+import type { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
+import type { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { VisParams } from '@kbn/visualizations-common';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
-import { BaseVisType } from './vis_types';
-import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
+import type { BaseVisType } from './vis_types';
+import type { SerializedVis, SerializedVisData } from '../common/types';
 
 export type { SerializedVis, SerializedVisData };
 
@@ -59,7 +60,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams extends VisParams = VisParams> {
-  public readonly type: BaseVisType<TVisParams>;
+  public type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
@@ -68,25 +69,11 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
   public readonly uiState: PersistedState;
 
-  constructor(visType: string, visState: SerializedVis<TVisParams> = {} as any) {
-    this.type = this.getType(visType);
+  constructor(visType: BaseVisType<TVisParams>, visState: SerializedVis<TVisParams> = {} as any) {
+    this.type = visType;
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
-  }
-
-  private getType(visType: string) {
-    const type = getTypes().get<TVisParams>(visType);
-    if (!type) {
-      const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
-        defaultMessage: 'Invalid visualization type "{visType}"',
-        values: {
-          visType,
-        },
-      });
-      throw new Error(errorMessage);
-    }
-    return type;
   }
 
   private getParams(params: VisParams) {
@@ -108,8 +95,18 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
-      // @ts-ignore
-      this.type = this.getType(state.type);
+      const newVisType = await getTypes().get<TVisParams>(state.type);
+      if (!newVisType) {
+        throw new Error(
+          i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+            defaultMessage: 'Invalid visualization type "{visType}"',
+            values: {
+              visType: state.type,
+            },
+          })
+        );
+      }
+      this.type = newVisType;
       typeChanged = true;
     }
     if (state.title !== undefined) {
@@ -173,7 +170,7 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
   clone(): Vis<TVisParams> {
     const { data, ...restOfSerialized } = this.serialize();
-    const vis = new Vis<TVisParams>(this.type.name, restOfSerialized as any);
+    const vis = new Vis<TVisParams>(this.type, restOfSerialized as any);
     vis.setState({ ...restOfSerialized, data: {} });
     const aggs = this.data.indexPattern
       ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)

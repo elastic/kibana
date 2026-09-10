@@ -13,7 +13,7 @@ import { memoize, isFinite } from 'lodash';
 import type { Maybe } from '@kbn/apm-types-shared';
 import { asDecimalOrInteger, asInteger, NOT_AVAILABLE_LABEL } from './numeric';
 
-type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
+export type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
 type DurationTimeUnit = TimeUnit | 'microseconds';
 
 interface FormatterOptions {
@@ -148,6 +148,33 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
   },
   (max, threshold) => `${max}_${threshold}`
 );
+
+export function asMillisecondDuration(value: Maybe<number>) {
+  return convertTo({
+    unit: 'milliseconds',
+    microseconds: value as number,
+  }).formatted;
+}
+
+export function asTransactionRate(value: Maybe<number>) {
+  if (value === null || value === undefined || !isFinite(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
+  let displayedValue: string;
+  if (value === 0) {
+    displayedValue = '0';
+  } else if (value <= 0.1) {
+    displayedValue = '< 0.1';
+  } else {
+    displayedValue = asDecimalOrInteger(value);
+  }
+
+  return i18n.translate('apmUiShared.formatters.transactionRateLabel', {
+    defaultMessage: '{displayedValue} tpm',
+    values: { displayedValue },
+  });
+}
 
 export function asDuration(
   value: Maybe<number>,

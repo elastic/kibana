@@ -10,7 +10,7 @@
 import type { PhrasesFilter, Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { getPhrasesDisplayValue, mapPhrases } from './map_phrases';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrases()', () => {
@@ -54,7 +54,7 @@ describe('filter manager utilities', () => {
 
     test('with formatter', () => {
       const filter = { meta: { params: ['hello', 1, 'world'] } } as PhrasesFilter;
-      const formatter = { convert: (val) => `formatted ${val}` } as FieldFormat;
+      const formatter = { convertToText: (val) => `formatted ${val}` } as FieldFormat;
       const result = getPhrasesDisplayValue(filter, formatter);
       expect(result).toMatchInlineSnapshot(`"formatted hello, formatted 1, formatted world"`);
     });
