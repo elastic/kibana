@@ -13,10 +13,22 @@ import {
   METRICS_INDEX_PREFIX,
 } from '../../constants';
 
-// Wildcards, comma lists, cross-cluster prefixes (`remote:index`) and source
-// selectors (`index::failures`) all name a scope that cannot be mechanically
-// mapped onto a single exemplars data stream.
-const NON_CONCRETE_SOURCE_CHARS = /[*,:\s]/;
+/**
+ * Wildcards, comma lists, cross-cluster prefixes (`remote:index`) and source
+ * selectors (`index::failures`) all name a scope that cannot be mapped onto
+ * a single exemplars data stream.
+ */
+function includesNonConcreteChars(metricsIndex: string) {
+  return (
+    metricsIndex.includes('*') ||
+    metricsIndex.includes(',') ||
+    metricsIndex.includes(':') ||
+    metricsIndex.includes(' ') ||
+    metricsIndex.includes('\t') ||
+    metricsIndex.includes('\n') ||
+    metricsIndex.includes('\r')
+  );
+}
 
 /**
  * Maps an OTel metrics data stream onto its parallel exemplars data stream, or returns
@@ -27,7 +39,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
     return undefined;
   }
 
-  if (NON_CONCRETE_SOURCE_CHARS.test(metricsIndex)) {
+  if (includesNonConcreteChars(metricsIndex)) {
     return undefined;
   }
 
@@ -36,7 +48,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
 
   // Require the full `metrics-<dataset>-<namespace>` shape: without a namespace the
   // derived name cannot match the `exemplars-*.otel-*` template pattern.
-  if (namespaceSeparatorIndex <= 0 || namespaceSeparatorIndex === suffix.length - 1) {
+  if (namespaceSeparatorIndex === -1 || namespaceSeparatorIndex === suffix.length - 1) {
     return undefined;
   }
 

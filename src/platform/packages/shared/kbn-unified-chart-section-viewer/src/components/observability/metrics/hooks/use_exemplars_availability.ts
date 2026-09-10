@@ -21,12 +21,11 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 /**
  * Asks Elasticsearch which metrics have exemplars. `LIMIT 0` returns column metadata
- * and no rows, so the answer is the column list and the request is near-free.
+ * and no rows, so the answer is the column list, which is very fast.
  *
- * This detection step is mandatory rather than an optimization: querying an exemplars
- * stream that does not exist, or a metric column that is absent from it, is an HTTP 400
- * and not an empty result. Most metrics have no exemplars, so without this probe the
- * common case would surface as a chart error.
+ * This detection step is mandatory: querying an exemplars stream that does not exist,
+ * or a metric column that is absent from it, will trigger a 400 error. Many metrics have
+ * no exemplars, so without this we will see chart errors.
  *
  * The `metrics.*` wildcard is tolerant of matching nothing, so the probe itself only
  * fails when no exemplars data stream exists at all - one failure for the whole grid.
@@ -46,17 +45,17 @@ export interface UseExemplarsAvailabilityParams {
 export interface UseExemplarsAvailabilityResult {
   /**
    * Names of the metric fields that have exemplars. Empty while the probe is in
-   * flight, when the flag is off, and when the probe failed.
+   * flight, when the flag is off, and if the probe failed.
    */
   availableMetrics: Set<string>;
   /**
-   * `true` only when the probe request itself failed. Distinguishes "we could not ask"
-   * from "we asked and this metric has no exemplars", which must not look like an error.
+   * `true` only when the probe request itself failed. Distinguishes "could not ask"
+   * from "asked and this metric has no exemplars", which should not look like an error.
    */
   hasProbeFailed: boolean;
 }
 
-// Module-scope constants: consumers rebuild Lens props off this value's identity, so a
+// Module-scope sentinels: consumers rebuild Lens props off these values' identity, so a
 // fresh object per render would re-trigger a rebuild on every render.
 const NOTHING_AVAILABLE: UseExemplarsAvailabilityResult = Object.freeze({
   availableMetrics: new Set<string>(),
@@ -177,7 +176,7 @@ const fetchMetricsWithExemplars = async ({
 }: ProbeParams): Promise<Set<string>> => {
   // Deliberately no `signal`: the request is shared by every chart in the grid via the
   // cache above, so binding it to one consumer's lifetime would cancel it for the others.
-  // `useAbortableAsync`'s own signal still governs whether a landed result is applied.
+  // `useAbortableAsync`'s own signal still controls whether a landed result is applied.
   //
   // Deliberately no `timeRange` or `filters` either: this asks a schema question ("which
   // metric columns exist here?"), and a filter on a field the exemplars stream does not

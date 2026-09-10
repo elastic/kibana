@@ -16,8 +16,9 @@ import type { ParsedMetricItem } from '../../../types';
 /** Column holding the exemplar timestamp. Also the sort and time-filter field. */
 const TIMESTAMP_FIELD = '@timestamp';
 /**
- * Trace correlation columns. Preferred over the `trace.id` / `span.id` aliases, which
- * resolve too but add an alias-resolution assumption for no benefit.
+ * Trace correlation columns. `trace_id` and `span_id` are mapped to ECS-compliant
+ * equivalents `trace.id` and `span.id`, but referencing the native field names skips
+ * this alias resolution.
  */
 const TRACE_ID_FIELD = 'trace_id';
 const SPAN_ID_FIELD = 'span_id';
@@ -25,8 +26,8 @@ const SPAN_ID_FIELD = 'span_id';
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
   /**
-   * Verbatim ES|QL fragments lifted from the user's own `WHERE` commands, re-piped so
-   * the exemplars honour the same dimension filters as the metric chart.
+   * Verbatim ES|QL fragments from the user's own `WHERE` commands, re-piped so
+   * the exemplars include the same dimension filters as the metric chart.
    */
   whereStatements?: string[];
   /**
@@ -34,6 +35,9 @@ interface CreateExemplarsQueryParams {
    * {@link createESQLQuery}, so the exemplars scope matches the chart's scope.
    */
   originalSource?: string;
+  /**
+   * Optionally specify the LIMIT value.
+   */
   maxRows?: number;
 }
 
@@ -74,10 +78,6 @@ export function createExemplarsQuery({
     }
   }
 
-  // Passthrough mappings duplicate every dimension (`trace.id` and `trace_id`,
-  // `http.route` and `attributes.http.route`, ...), so an unprojected exemplars row
-  // carries 157 columns and the flyout would list each dimension twice. Project
-  // explicitly from the metric's declared dimensions instead.
   const baseColumns = [TIMESTAMP_FIELD, metricName, TRACE_ID_FIELD, SPAN_ID_FIELD];
   const keepColumns = [
     TIMESTAMP_FIELD,
@@ -90,8 +90,6 @@ export function createExemplarsQuery({
   ];
   query.pipe(`KEEP ${keepColumns.join(', ')}`);
 
-  // Without an explicit limit ES|QL applies `LIMIT 1000` and, with no sort, returns an
-  // arbitrary subset that changes on every refresh.
   query.pipe(`SORT ${TIMESTAMP_FIELD} DESC`);
   query.pipe(`LIMIT ${maxRows}`);
 
