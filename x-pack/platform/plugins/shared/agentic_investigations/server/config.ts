@@ -18,7 +18,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
  * plugin to the plugin system, so `setup` is never called.
  */
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
 });
 
 export type AgenticInvestigationsConfig = TypeOf<typeof configSchema>;
