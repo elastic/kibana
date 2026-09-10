@@ -13,6 +13,7 @@ import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/o
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
+import { createFeatureIdentificationSkill } from './feature_identification';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 import {
@@ -82,6 +83,7 @@ export const registerSignificantEventsSkills = async ({
     knowledgeIndicatorsManagementSkill,
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
+    createFeatureIdentificationSkill(memoryToolsOptions),
     ...(streamsKIsOnboardingClient && maintenanceService
       ? [
           createKiIdentificationManagementSkill({

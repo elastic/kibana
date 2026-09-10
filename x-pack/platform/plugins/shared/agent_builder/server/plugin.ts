@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
@@ -15,6 +22,7 @@ import {
   MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import { createConversationPublicClient } from './services/conversation/conversation_public_client';
+import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -44,6 +52,9 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
+import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
+import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
@@ -65,6 +76,8 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private readonly conversationEventBus = createConversationEventBus();
+  private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -151,10 +164,54 @@ export class AgentBuilderPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
+    this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      return coreStart.uiSettings
+        .asScopedToClient(soClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    };
+
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+
+    registerConversationWorkflowSteps(setupDeps.workflowsExtensions, {
+      getConversationClient: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Conversation service not available — plugin has not started');
+        }
+        return services.conversations.getScopedClient({ request });
+      },
+      getAgentRegistry: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Agents service not available — plugin has not started');
+        }
+        return services.agents.getRegistry({ request });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
+
+    registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
+      getAttachmentClient: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Attachment client not available — plugin has not started');
+        }
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return createAttachmentPublicClient({
+          request,
+          conversationsService: services.conversations,
+          attachmentsService: services.attachments,
+          coreStart,
+          spaces: startDeps.spaces,
+        });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -221,6 +278,9 @@ export class AgentBuilderPlugin
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
         registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
+        registerAiIndexResolver: serviceSetups.agents.registerAiIndexResolver.bind(
+          serviceSetups.agents
+        ),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
@@ -291,7 +351,15 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      conversationEventBus: this.conversationEventBus,
     });
+
+    registerConversationWorkflowEventBridge(
+      this.conversationEventBus,
+      startDeps.workflowsExtensions,
+      this.logger,
+      this.isExperimentalEnabled!
+    );
 
     const {
       tools,
@@ -302,6 +370,7 @@ export class AgentBuilderPlugin
       plugins,
       conversations,
       conversationTemplates,
+      attachments,
     } = startServices;
     const runner = runnerFactory.getRunner();
 
@@ -349,6 +418,16 @@ export class AgentBuilderPlugin
           const agentRegistry = await agents.getRegistry({ request });
           return createConversationPublicClient({ client, agentRegistry });
         },
+      },
+      attachments: {
+        getScopedClient: async ({ request }) =>
+          createAttachmentPublicClient({
+            request,
+            conversationsService: conversations,
+            attachmentsService: attachments,
+            coreStart,
+            spaces,
+          }),
       },
       conversationTemplates,
     };

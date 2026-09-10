@@ -12,6 +12,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyPackagePolicyInputVarField: jest.fn(() => null),
+  DataStreamTypeSelector: jest.fn(() => null),
+  useGetDataStreams: jest.fn(() => ({ data: undefined })),
 }));
 
 import { ServiceFieldsForm } from './service_fields_form';

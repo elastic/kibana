@@ -40,6 +40,5 @@ export const highlightCommand: ICommand = {
       'FROM books | HIGHLIGHT "hobbit" ON title, description WITH { "pre_tags": ["<b>"], "post_tags": ["</b>"], "number_of_fragments": 3, "fragment_size": 150 }',
     ],
     preview: true,
-    hidden: true,
   },
 };

@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { conversationStepRegistry, type ConversationStepDeps } from './registry';
+import { attachmentStepRegistry, type AttachmentStepDeps } from './attachment_registry';
+import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
+
+export function registerConversationWorkflowSteps(
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  deps: ConversationStepDeps
+) {
+  workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+
+  for (const factory of conversationStepRegistry) {
+    workflowsExtensions.registerStepDefinition(factory(deps));
+  }
+}
+
+export function registerAttachmentWorkflowSteps(
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  deps: AttachmentStepDeps
+) {
+  for (const factory of attachmentStepRegistry) {
+    workflowsExtensions.registerStepDefinition(factory(deps));
+  }
+}
