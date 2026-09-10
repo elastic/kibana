@@ -183,10 +183,6 @@ const discoverSessionDefaultTabTypeStateSchema = z
 
 const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
 
-const histogramPercentileSchema = z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
-  description: 'Percentile displayed for histogram metric fields.',
-});
-
 const discoverSessionMetricsTabTypeStateSchema = z
   .object({
     type: z.literal(`${DiscoverTabType.Metrics}`).meta({
@@ -209,7 +205,9 @@ const discoverSessionMetricsTabTypeStateSchema = z
     gauge_aggregation: simpleAggregationSchema.meta({
       description: 'Aggregation applied to gauge metric fields.',
     }),
-    histogram_percentile: histogramPercentileSchema,
+    histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
+      description: 'Percentile displayed for histogram metric fields.',
+    }),
   })
   .strict();
 
