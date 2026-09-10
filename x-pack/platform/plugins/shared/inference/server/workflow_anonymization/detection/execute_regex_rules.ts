@@ -12,10 +12,13 @@ type CompiledRule =
   | { engine: 're2'; pattern: ReturnType<typeof RE2JS.compile> }
   | { engine: 'native'; pattern: RegExp };
 
-function compileRule(rawPattern: string): CompiledRule {
+function compileRule(rawPattern: string, re2Only = false): CompiledRule {
   try {
     return { engine: 're2', pattern: RE2JS.compile(rawPattern) };
-  } catch {
+  } catch (err) {
+    if (re2Only) {
+      throw err instanceof Error ? err : new Error(String(err));
+    }
     // RE2 does not support lookahead, lookbehind, or backreferences. Fall back to
     // native RegExp. ReDoS protection is provided by the Piscina worker timeout and
     // per-task abort via AbortSignal.
@@ -83,16 +86,21 @@ function findSpans(
  * The Piscina worker timeout and per-task AbortSignal provide ReDoS protection for
  * native RegExp patterns.
  *
+ * When `re2Only` is true, native RegExp fallback is disabled and any non-RE2 pattern
+ * throws immediately. Use this on the synchronous (non-worker) path where there is no
+ * timeout to contain catastrophic backtracking.
+ *
  * Zero-length matches advance one character and continue scanning; they do not
  * terminate the search for that field.
  *
- * Throws only when a pattern is invalid in both RE2 and native RegExp syntax.
+ * Throws only when a pattern is invalid in both RE2 and native RegExp syntax (or in
+ * RE2 alone when `re2Only` is true).
  */
-export const executeRegexRules = ({
-  rules,
-  records,
-}: PiiRegexWorkerTaskPayload): PiiRegexMatch[] => {
-  const compiled = rules.map((rule) => compileRule(rule.pattern));
+export const executeRegexRules = (
+  { rules, records }: PiiRegexWorkerTaskPayload,
+  { re2Only = false }: { re2Only?: boolean } = {}
+): PiiRegexMatch[] => {
+  const compiled = rules.map((rule) => compileRule(rule.pattern, re2Only));
   const results: PiiRegexMatch[] = [];
 
   for (let ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
@@ -101,7 +109,7 @@ export const executeRegexRules = ({
     for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
       const record = records[recordIndex];
       for (const [recordKey, value] of Object.entries(record)) {
-        if (typeof value !== 'string' || value.length === 0) {
+        if (value.length === 0) {
           continue;
         }
 

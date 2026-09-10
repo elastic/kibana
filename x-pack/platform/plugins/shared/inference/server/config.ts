@@ -24,5 +24,5 @@ export const configSchema = schema.object({
 export type InferenceConfig = TypeOf<typeof configSchema>;
 
 export type AnonymizationWorkerConfig = InferenceConfig['workers']['anonymization'];
-// Placeholder until merged with 06-inference-anon-config which adds the split workers.workflowAnonymization block.
+// TODO(#288762): replace with workers.workflowAnonymization block once that PR lands.
 export type WorkflowAnonymizationWorkerConfig = AnonymizationWorkerConfig;
