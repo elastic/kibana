@@ -63,6 +63,7 @@ steps:
         prbot:release note labels
         prbot:update required
         security/snyk (Application Experience)
+        buildkite/docs-build-pr
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
