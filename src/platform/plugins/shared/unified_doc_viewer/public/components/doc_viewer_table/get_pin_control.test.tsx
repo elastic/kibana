@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { FieldRow } from './field_row';
+import type { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
 import { buildFieldRowMock } from './field_row.mocks';
 import { userEvent } from '@testing-library/user-event';

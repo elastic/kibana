@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldRow } from './field_row';
+import type { FieldRow } from './field_row';
 
 export function getCellPositionAfterPinToggle({
   field,
