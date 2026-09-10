@@ -178,14 +178,12 @@ export function buildPackageVars(
     const { method } = agentCredentials;
     if (method === 'direct_access_keys' || method === 'temporary_keys') {
       if (agentCredentials.access_key_id && agentCredentials.secret_access_key) {
-        if (pkgVarNames.has('access_key_id'))
-          vars.access_key_id = agentCredentials.access_key_id;
+        if (pkgVarNames.has('access_key_id')) vars.access_key_id = agentCredentials.access_key_id;
         if (pkgVarNames.has('secret_access_key'))
           vars.secret_access_key = agentCredentials.secret_access_key;
       }
       if (method === 'temporary_keys' && agentCredentials.session_token) {
-        if (pkgVarNames.has('session_token'))
-          vars.session_token = agentCredentials.session_token;
+        if (pkgVarNames.has('session_token')) vars.session_token = agentCredentials.session_token;
       }
     } else if (method === 'shared_credentials') {
       if (agentCredentials.shared_credential_file && pkgVarNames.has('shared_credential_file'))

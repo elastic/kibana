@@ -154,7 +154,13 @@ async function buildInstancePackagePolicy(
   inputs: Record<string, unknown>;
 }> {
   const { instance, service } = target;
-  const { globalRegion, storedServiceVars, authenticateAndDeployStep, pkgVersion, agentCredentials } = opts;
+  const {
+    globalRegion,
+    storedServiceVars,
+    authenticateAndDeployStep,
+    pkgVersion,
+    agentCredentials,
+  } = opts;
 
   // Var lookup: instanceId first; fall back to serviceId for sessions predating instance keying.
   // Same legacy fallback as deploy_groups.ts:169-174.
@@ -222,7 +228,12 @@ async function buildInstancePackagePolicy(
 
   const pkgVarNames = getPackageVarNames(pkgInfo);
   // staticKeys may be undefined if the user chose a different credential method.
-  const vars = buildPackageVars(globalRegion, authenticateAndDeployStep.staticKeys, pkgVarNames, agentCredentials);
+  const vars = buildPackageVars(
+    globalRegion,
+    authenticateAndDeployStep.staticKeys,
+    pkgVarNames,
+    agentCredentials
+  );
 
   // Disable all inputs from other policy templates in the package. Fleet's simplified-to-legacy
   // expansion (simplifiedPackagePolicytoNewPackagePolicy → packageToPackagePolicy) adds ALL policy
