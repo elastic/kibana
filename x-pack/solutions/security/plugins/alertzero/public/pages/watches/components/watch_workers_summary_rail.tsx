@@ -13,7 +13,15 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { css, keyframes } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Worker } from '@kbn/alertzero-common';
 import * as i18n from '../settings_translations';
 import * as watchesI18n from '../translations';
@@ -128,20 +136,8 @@ export const WatchWorkersSummaryRail = React.memo(function WatchWorkersSummaryRa
         top: ${euiTheme.size.l};
       `,
       heading: css`
-        display: block;
-        padding-bottom: 8px;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-      `,
-      cards: css`
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      `,
-      nameRow: css`
-        padding-bottom: 10px;
-        margin-bottom: 10px;
-        border-bottom: ${euiTheme.border.thin};
       `,
       statusDot: (dotColor: WorkerStatus['dotColor']) => css`
         width: 8px;
@@ -149,11 +145,6 @@ export const WatchWorkersSummaryRail = React.memo(function WatchWorkersSummaryRa
         border-radius: 50%;
         background: ${euiTheme.colors[dotColor]};
         flex-shrink: 0;
-      `,
-      statusLabel: css`
-        font-size: 11px;
-        line-height: 1.2;
-        color: ${euiTheme.colors.textSubdued};
       `,
       card: (isActive: boolean) => css`
         display: block;
@@ -179,68 +170,64 @@ export const WatchWorkersSummaryRail = React.memo(function WatchWorkersSummaryRa
 
   return (
     <aside css={styles.aside} data-test-subj="alertZeroWatchWorkersRail">
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong css={styles.heading}>{i18n.WORKERS_RAIL_HEADING}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <div css={styles.cards}>
-          {workers.map((worker) => {
-            const name = workerName(worker.id, worker.name);
-            const status = resolveStatus(worker);
-            const isActive = worker.id === activeWorkerId;
-            return (
-              <EuiFlexItem key={worker.id} grow={false}>
-                <EuiPanel
-                  hasBorder
-                  hasShadow={false}
-                  paddingSize="none"
-                  element="button"
-                  type="button"
-                  color="transparent"
-                  onClick={() => onSelectWorker(worker.id)}
-                  aria-current={isActive ? 'true' : undefined}
-                  aria-label={i18n.railGoToWorker(name)}
-                  data-test-subj={`alertZeroWatchWorkerSummary-${worker.id}`}
-                  css={styles.card(isActive)}
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                    wrap={false}
-                    css={styles.nameRow}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <span aria-hidden css={styles.statusDot(status.dotColor)} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <EuiText size="s">
-                        <strong css={styles.workerNameStrong(worker.enabled)}>{name}</strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <span css={styles.statusLabel}>{status.label}</span>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <DataLine
-                    label={i18n.RAIL_LAST_RUN}
-                    value={
-                      worker.lastRun != null
-                        ? formatRelativeTime(worker.lastRun)
-                        : watchesI18n.NOT_RUN_YET
-                    }
-                  />
-                  <DataLine
-                    label={i18n.RAIL_AUTONOMY}
-                    value={i18n.autonomyLevelName(worker.settings.autonomy)}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            );
-          })}
-        </div>
+      <EuiText size="xs" color="subdued">
+        <strong css={styles.heading}>{i18n.WORKERS_RAIL_HEADING}</strong>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+        {workers.map((worker) => {
+          const name = workerName(worker.id, worker.name);
+          const status = resolveStatus(worker);
+          const isActive = worker.id === activeWorkerId;
+          return (
+            <EuiFlexItem key={worker.id} grow={false}>
+              <EuiPanel
+                hasBorder
+                hasShadow={false}
+                paddingSize="none"
+                element="button"
+                type="button"
+                color="transparent"
+                onClick={() => onSelectWorker(worker.id)}
+                aria-current={isActive ? 'true' : undefined}
+                aria-label={i18n.railGoToWorker(name)}
+                data-test-subj={`alertZeroWatchWorkerSummary-${worker.id}`}
+                css={styles.card(isActive)}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+                  <EuiFlexItem grow={false}>
+                    <span aria-hidden css={styles.statusDot(status.dotColor)} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow>
+                    <EuiText size="s">
+                      <strong css={styles.workerNameStrong(worker.enabled)}>{name}</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {status.label}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiHorizontalRule margin="none" />
+                <EuiSpacer size="s" />
+                <DataLine
+                  label={i18n.RAIL_LAST_RUN}
+                  value={
+                    worker.lastRun != null
+                      ? formatRelativeTime(worker.lastRun)
+                      : watchesI18n.NOT_RUN_YET
+                  }
+                />
+                <DataLine
+                  label={i18n.RAIL_AUTONOMY}
+                  value={i18n.autonomyLevelName(worker.settings.autonomy)}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     </aside>
   );

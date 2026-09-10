@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Use of this file is governed by the
- * Elastic License 2.0.
- */
-
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {

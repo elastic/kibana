@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Use of this file is governed by the
- * Elastic License 2.0.
- */
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -135,12 +129,6 @@ export const WatchDetailPage: React.FC = () => {
           grid-template-columns: minmax(0, 1fr);
         }
       `,
-      workersColumn: css`
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.m};
-        min-width: 0;
-      `,
       railColumn: css`
         min-width: 0;
         @media (max-width: ${RAIL_NARROW_BREAKPOINT_PX}px) {
@@ -229,28 +217,29 @@ export const WatchDetailPage: React.FC = () => {
 
     return (
       <div css={layoutStyles.twoColumn}>
-        <div css={layoutStyles.workersColumn}>
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
           {members.map((worker) => (
-            <section
-              key={worker.id}
-              id={workerSectionDomId(worker.id)}
-              css={[
-                layoutStyles.workerSection,
-                pulsingWorkerId === worker.id
-                  ? workerPanelPulseCss(euiTheme.colors.primary)
-                  : undefined,
-              ]}
-              data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-            >
-              <WorkerSettingsPanel
-                worker={worker}
-                isAccordion={isMultiWorker}
-                isExpanded={!collapsedWorkerIds.has(worker.id)}
-                onToggle={handleToggleWorker}
-              />
-            </section>
+            <EuiFlexItem key={worker.id} grow={false}>
+              <section
+                id={workerSectionDomId(worker.id)}
+                css={[
+                  layoutStyles.workerSection,
+                  pulsingWorkerId === worker.id
+                    ? workerPanelPulseCss(euiTheme.colors.primary)
+                    : undefined,
+                ]}
+                data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
+              >
+                <WorkerSettingsPanel
+                  worker={worker}
+                  isAccordion={isMultiWorker}
+                  isExpanded={!collapsedWorkerIds.has(worker.id)}
+                  onToggle={handleToggleWorker}
+                />
+              </section>
+            </EuiFlexItem>
           ))}
-        </div>
+        </EuiFlexGroup>
         <div css={layoutStyles.railColumn}>
           <WatchWorkersSummaryRail
             workers={members}
