@@ -199,6 +199,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
           deployErrors:
             rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
           onboardingDeploymentId: rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
+          ecfStacks: rest.ecfStacks ?? prev?.ecfStacks,
         });
       }
     },
@@ -220,6 +221,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
           Object.entries(prev?.deployErrors ?? {}).filter(([id]) => id !== instanceId)
         ),
         onboardingDeploymentId: prev?.onboardingDeploymentId,
+        ecfStacks: prev?.ecfStacks,
       });
     },
     [setPersistedDetectAndReviewStep]
