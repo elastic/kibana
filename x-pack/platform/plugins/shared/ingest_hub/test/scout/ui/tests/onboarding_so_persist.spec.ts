@@ -92,7 +92,11 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
       (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(url.pathname),
       (route) =>
         route.request().method() === 'PUT'
-          ? route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ item: { id: 'dep-e2e-001' } }) })
+          ? route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({ item: { id: 'dep-e2e-001' } }),
+            })
           : route.continue()
     );
     await page.route(
