@@ -155,7 +155,10 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
+              </>
             )}
           </>
         </RuleMigrationDataInputWrapper>
@@ -176,6 +179,11 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center" gutterSize="l" responsive>
+              {selectedTranslationStats && (
+                <EuiFlexItem grow>
+                  <MigrationStatsBadges translationStats={selectedTranslationStats} />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem
                 grow={false}
                 css={css`
@@ -189,11 +197,6 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
                   onMigrationIdChange={onMigrationIdChange}
                 />
               </EuiFlexItem>
-              {selectedTranslationStats && (
-                <EuiFlexItem grow>
-                  <MigrationStatsBadges translationStats={selectedTranslationStats} />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </>
         )}

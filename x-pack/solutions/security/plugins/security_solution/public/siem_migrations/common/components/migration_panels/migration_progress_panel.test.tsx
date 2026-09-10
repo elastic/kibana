@@ -70,12 +70,20 @@ describe('MigrationProgressPanel', () => {
           );
         });
 
+        it('should render progress description', () => {
+          expect(screen.getByText(/Processing migration of 6 items/)).toBeInTheDocument();
+        });
+
         it('should render spinner', () => {
           expect(screen.queryByTestId(`${type}MigrationSpinner`)).toBeInTheDocument();
         });
 
         it('should not render progress bar', () => {
           expect(screen.queryByTestId(`${type}MigrationProgressBar`)).not.toBeInTheDocument();
+        });
+
+        it('should render read more', () => {
+          expect(screen.getByTestId(`${type}MigrationReadMore`)).toBeInTheDocument();
         });
       });
     });
@@ -92,8 +100,12 @@ describe('MigrationProgressPanel', () => {
 
         it('should render description text correctly', () => {
           expect(screen.getByTestId(`${type}MigrationDescription`)).toHaveTextContent(
-            'Translating items'
+            'Translating...'
           );
+        });
+
+        it('should render progress description', () => {
+          expect(screen.getByText(/Processing migration of 26 items/)).toBeInTheDocument();
         });
 
         it('should render spinner', () => {
@@ -102,6 +114,10 @@ describe('MigrationProgressPanel', () => {
 
         it('should render progress bar', () => {
           expect(screen.queryByTestId(`${type}MigrationProgressBar`)).toBeInTheDocument();
+        });
+
+        it('should render read more', () => {
+          expect(screen.getByTestId(`${type}MigrationReadMore`)).toBeInTheDocument();
         });
       });
     });
@@ -118,7 +134,10 @@ describe('MigrationProgressPanel', () => {
       renderMigrationProgressPanel(stats, 'rule');
 
       screen.getByTestId('stopMigrationButton').click();
-      expect(mockStopMigration).toHaveBeenCalledWith({ migrationId: stats.id });
+      expect(mockStopMigration).toHaveBeenCalledWith({
+        migrationId: stats.id,
+        vendor: stats.vendor,
+      });
     });
 
     it('should show loading state when stopping migration', async () => {
