@@ -5,8 +5,24 @@ version: "1"
 # Installed once globally: enrichment is content-only and space-blind, so it
 # selects all pending reports regardless of `space_id` (analyst-paste and
 # future custom-source reports included). HTTP calls to the enrich routes are
-# routed through the `default` space (a fixed real space) rather than the
-# install-time `workflow.spaceId` (`*`).
+# routed through a fixed real space (`routeSpaceId`, currently `default`)
+# rather than the install-time `workflow.spaceId` (`*`, which is not a real
+# space and produces an invalid `/s/*/...` route).
+#
+# MVP tradeoff, not just a routing detail: the enrich routes resolve their LLM
+# connector via the inference feature registry (`resolveScopedModel`), which
+# reads a per-space saved object (Stack Management > Model Settings,
+# `namespaceType: 'single'') scoped to whatever space the request is routed
+# through. Pinning `routeSpaceId` to `default` means every report in the
+# deployment is enriched using only the `default` space's Model Settings,
+# regardless of which space the report is tagged to. That's an accepted MVP
+# simplification (sources are global-only for now too), not an oversight.
+#
+# Future per-space model settings: once reports need distinct model config per
+# owning space, `routeSpaceId` has to stop being a single top-level constant
+# and instead resolve per-report inside `extract_each_report`, from that
+# report's own `space_id` field (already stamped by the ingest adapters), not
+# from `workflow.spaceId`.
 # The LLM steps do not name an inference endpoint. Each route resolves its own
 # model through the inference feature registry, so operators pick the models in
 # Stack Management > Model Settings rather than by editing this workflow.
@@ -28,8 +44,10 @@ steps:
   - name: set_route_space
     type: data.set
     with:
-      # Fixed real space for kibana.request paths. Must not be `workflow.spaceId`
-      # (`*`) when this workflow is installed globally.
+      # MVP: hardcoded to a fixed real space, not resolved per report. See the
+      # file header for why (`workflow.spaceId` is `*` here, and the model
+      # resolved via this route's space is a deployment-wide choice for now,
+      # not a per-report one).
       routeSpaceId: "default"
 
   - name: load_pending_reports
