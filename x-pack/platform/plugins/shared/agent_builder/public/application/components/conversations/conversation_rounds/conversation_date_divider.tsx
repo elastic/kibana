@@ -26,9 +26,10 @@ const formatDividerDate = (date: string): string => {
     });
   }
   if (m.isSame(now, 'year')) {
-    return m.format('dddd, MMMM D');
+    // Use locale-aware 'LL' token so day/month ordering respects the active locale.
+    return m.format('dddd, LL');
   }
-  return m.format('MMMM D, YYYY');
+  return m.format('LL');
 };
 
 export const ConversationDateDivider: React.FC<{ date: string }> = ({ date }) => {
