@@ -1809,20 +1809,24 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
         _target = _te * n_evaluators * reps
     # Ask golden from the driver first: by the time the gate runs, this unit's
     # VM is already parked, so the ssh path below reaches a deallocated host.
-    # Poll toward the target: golden's OTel flush lags the eval process by
-    # ~3-7 min (see the trace-evaluator comment above), and the LAST
-    # experiment's docs land last as a single burst. A "count stopped growing"
-    # stop condition is wrong here -- 2026-09-10 dense canary: the dense
-    # example's 13 docs landed as one burst AFTER several stable 117 reads, so
-    # a stable-below-target poll returned 117 while golden already held 130.
-    # Poll until the count reaches the target or the window elapses.
+    # Poll toward the target: score docs reach golden through the live OTel
+    # batch exporter, and a full experiment's batch can sit in the queue with
+    # retry backoff far longer than the documented 3-7 min trace lag.
+    # Measured 2026-09-10 (three dense canary runs): the dense example's 13
+    # docs carried @timestamp 03:34-03:35 (evaluator completion) but were NOT
+    # indexed by 03:43 and WERE indexed by 03:55 -- a 10-20 min delivery lag.
+    # "Count stopped growing" is also wrong: the batch lands as one burst
+    # after several stable reads. Poll until the count reaches the target or
+    # a 25-min window elapses (covers the observed lag with headroom; on a
+    # genuine shortfall the sweep burns 25 idle minutes per unit, acceptable
+    # because units gate in parallel).
     def _count_to_target():
         n = _golden_count_local(exec_id)
         if n is None:
             return None
-        deadline = time.time() + 8 * 60  # FLUSH_WINDOW: covers the documented 3-7 min lag
+        deadline = time.time() + 25 * 60
         while _target is not None and n < _target and time.time() < deadline:
-            time.sleep(20)
+            time.sleep(30)
             n = _golden_count_local(exec_id)
             if n is None:
                 return None
