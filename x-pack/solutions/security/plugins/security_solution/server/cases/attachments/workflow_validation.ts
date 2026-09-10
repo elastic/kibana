@@ -13,9 +13,7 @@ const getSelectedIds = (
   inputs: Record<string, unknown>,
   field: 'alertIds' | 'documents'
 ): string[] => {
-  const event = isPlainObject(inputs.event)
-    ? (inputs.event as Record<string, unknown>)
-    : undefined;
+  const event = isPlainObject(inputs.event) ? (inputs.event as Record<string, unknown>) : undefined;
   const pairs = event?.[field];
   if (!Array.isArray(pairs)) {
     return [];
@@ -46,7 +44,12 @@ export const validateAlertWorkflowTargets = ({
   if (selectedIds.length === 0) {
     throw Boom.badRequest('Alert attachment workflow origins require selected alert inputs.');
   }
-  if (!targetsMatch(targets.map(({ id }) => id), selectedIds)) {
+  if (
+    !targetsMatch(
+      targets.map(({ id }) => id),
+      selectedIds
+    )
+  ) {
     throw Boom.badRequest('Alert workflow origin targets must match the selected alerts.');
   }
 };
@@ -59,7 +62,12 @@ export const validateEventWorkflowTargets = ({
   if (selectedIds.length === 0) {
     throw Boom.badRequest('Event attachment workflow origins require selected document inputs.');
   }
-  if (!targetsMatch(targets.map(({ id }) => id), selectedIds)) {
+  if (
+    !targetsMatch(
+      targets.map(({ id }) => id),
+      selectedIds
+    )
+  ) {
     throw Boom.badRequest('Event workflow origin targets must match the selected documents.');
   }
 };
