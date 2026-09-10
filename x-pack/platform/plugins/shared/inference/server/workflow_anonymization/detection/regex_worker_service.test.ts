@@ -126,7 +126,7 @@ describe('PiiRegexWorkerService', () => {
       service = new PiiRegexWorkerService(createTestConfig(), logger);
       jest
         .spyOn((service as any).worker, 'run')
-        .mockRejectedValueOnce(new Error('Task queue is at capacity'));
+        .mockRejectedValueOnce(new Error('Task queue is at limit'));
 
       await expect(service.run(IP_PAYLOAD)).rejects.toThrow('queue at capacity');
     });
@@ -135,7 +135,7 @@ describe('PiiRegexWorkerService', () => {
       service = new PiiRegexWorkerService(createTestConfig(), logger);
       jest
         .spyOn((service as any).worker, 'run')
-        .mockRejectedValueOnce(new Error('Task queue is at capacity'));
+        .mockRejectedValueOnce(new Error('Task queue is at limit'));
 
       const results = await service.run(IP_PAYLOAD, 'allow_unsafe');
 
