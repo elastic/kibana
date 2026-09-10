@@ -13,6 +13,7 @@ import type {
   InferenceGetResponse,
   InferenceInferenceEndpointInfo,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import type { InferenceFeatureRegistryStartContract } from '@kbn/search-inference-endpoints/server';
 import {
   AGENT_BUILDER_INFERENCE_FEATURE_ID,
@@ -29,15 +30,10 @@ interface DerivedRecommendations {
   fast?: string[];
 }
 
-type EndpointMetadata = {
-  heuristics?: {
-    properties?: string[];
-    release_date?: string;
-    end_of_life_date?: string;
-  };
+type EndpointMetadata = EisInferenceEndpointMetadata & {
   capability?: string;
   family?: string;
-} & Record<string, unknown>;
+};
 
 interface EndpointWithMetadata extends InferenceInferenceEndpointInfo {
   metadata: EndpointMetadata;
