@@ -272,6 +272,7 @@ export const reportRoundTelemetry = ({
         modelProvider,
         round: roundTotals,
         roundCount,
+        conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
       });
     }
   } catch (error) {
