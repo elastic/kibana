@@ -7,8 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
@@ -28,20 +26,12 @@ export type ConnectorCredentialResolution = ConnectorCredentialEnv | { errorMess
 
 export interface ConnectorCredentialDeps {
   actions?: ActionsPluginStart;
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
-  /** Mirrors the ESO setup contract flag; secrets cannot be decrypted without an encryption key. */
-  canEncrypt: boolean;
-  spaces?: SpacesPluginStart;
 }
 
 export type ResolveConnectorCredentials = (
   connectorId: string,
   callContext: SandboxCallContext
 ) => Promise<ConnectorCredentialResolution>;
-
-interface RawConnectorAttributes {
-  secrets?: Record<string, unknown>;
-}
 
 const toEnvKey = (segment: string): string =>
   segment
@@ -98,7 +88,8 @@ export const redactSecrets = (text: string, secretValues: readonly string[]): st
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
  * Deny by default: the connector must be on the agent allow-list and the current user must be
- * allowed to read and execute it in the current space.
+ * allowed to read and execute it in the current space. Only preconfigured (kibana.yml)
+ * connectors are supported: their secrets are held in memory by the actions plugin.
  */
 export const createConnectorCredentialResolver =
   ({
@@ -109,7 +100,7 @@ export const createConnectorCredentialResolver =
     logger: Logger;
   }): ResolveConnectorCredentials =>
   async (connectorId, callContext) => {
-    const { actions, encryptedSavedObjects, canEncrypt, spaces } = getDeps();
+    const { actions } = getDeps();
 
     if (!actions) {
       return { errorMessage: 'Connectors are not available in this deployment' };
@@ -151,32 +142,13 @@ export const createConnectorCredentialResolver =
       return { errorMessage: `Not authorized to use connector '${connectorId}': ${err}` };
     }
 
-    let secrets: Record<string, unknown>;
     const inMemoryConnector = actions.inMemoryConnectors.find(({ id }) => id === connectorId);
-    if (inMemoryConnector) {
-      secrets = inMemoryConnector.secrets ?? {};
-    } else {
-      if (!encryptedSavedObjects || !canEncrypt) {
-        return {
-          errorMessage:
-            'Connector credentials cannot be decrypted: the Encrypted Saved Objects plugin is ' +
-            'unavailable or xpack.encryptedSavedObjects.encryptionKey is not set',
-        };
-      }
-      try {
-        const spaceId = spaces?.spacesService.getSpaceId(request);
-        const rawConnector = await encryptedSavedObjects
-          .getClient({ includedHiddenTypes: ['action'] })
-          .getDecryptedAsInternalUser<RawConnectorAttributes>(
-            'action',
-            connectorId,
-            spaceId && spaceId !== 'default' ? { namespace: spaceId } : {}
-          );
-        secrets = rawConnector.attributes.secrets ?? {};
-      } catch (err) {
-        logger.warn(`Failed to decrypt secrets for connector ${connectorId}: ${err}`);
-        return { errorMessage: `Failed to load credentials for connector '${connectorId}'` };
-      }
+    if (!inMemoryConnector) {
+      return {
+        errorMessage:
+          `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
+          `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
+      };
     }
 
     logger.debug(
@@ -187,6 +159,6 @@ export const createConnectorCredentialResolver =
       connectorId,
       actionTypeId: connector.actionTypeId,
       config: connector.config ?? {},
-      secrets,
+      secrets: inMemoryConnector.secrets ?? {},
     });
   };

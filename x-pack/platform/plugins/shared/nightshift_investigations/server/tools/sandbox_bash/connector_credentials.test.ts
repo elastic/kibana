@@ -11,8 +11,6 @@ import {
   actionsClientMock,
   actionsAuthorizationMock,
 } from '@kbn/actions-plugin/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { SandboxCallContext } from './tool_utils';
 import {
   buildConnectorEnv,
@@ -35,7 +33,7 @@ const createConnector = (overrides: Record<string, unknown> = {}) => ({
   name: 'My GitHub',
   actionTypeId: '.github',
   config: { apiUrl: 'https://api.github.com', owner: 'elastic' },
-  isPreconfigured: false,
+  isPreconfigured: true,
   isDeprecated: false,
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
@@ -45,19 +43,13 @@ const createConnector = (overrides: Record<string, unknown> = {}) => ({
 const setup = ({
   connector = createConnector(),
   secrets = { token: TOKEN },
-  canEncrypt = true,
-  spaceId = 'default',
-  inMemory = false,
+  inMemory = true,
   withActions = true,
-  withEso = true,
 }: {
   connector?: ReturnType<typeof createConnector>;
   secrets?: Record<string, unknown>;
-  canEncrypt?: boolean;
-  spaceId?: string;
   inMemory?: boolean;
   withActions?: boolean;
-  withEso?: boolean;
 } = {}) => {
   const actionsClient = actionsClientMock.create();
   actionsClient.get.mockResolvedValue(connector as any);
@@ -67,30 +59,12 @@ const setup = ({
   actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
   actions.inMemoryConnectors = inMemory ? [{ ...connector, secrets } as any] : [];
 
-  const esoClient = encryptedSavedObjectsMock.createClient();
-  esoClient.getDecryptedAsInternalUser.mockResolvedValue({
-    id: CONNECTOR_ID,
-    type: 'action',
-    references: [],
-    attributes: { secrets },
-  });
-  const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
-  encryptedSavedObjects.getClient.mockReturnValue(esoClient);
-
-  const spaces = spacesMock.createStart();
-  (spaces.spacesService.getSpaceId as jest.Mock).mockReturnValue(spaceId);
-
   const resolve = createConnectorCredentialResolver({
-    getDeps: () => ({
-      actions: withActions ? actions : undefined,
-      encryptedSavedObjects: withEso ? encryptedSavedObjects : undefined,
-      canEncrypt,
-      spaces,
-    }),
+    getDeps: () => ({ actions: withActions ? actions : undefined }),
     logger: loggingSystemMock.createLogger(),
   });
 
-  return { resolve, actions, actionsClient, authorization, esoClient, encryptedSavedObjects };
+  return { resolve, actions, actionsClient, authorization };
 };
 
 describe('buildConnectorEnv', () => {
@@ -130,8 +104,8 @@ describe('redactSecrets', () => {
 });
 
 describe('createConnectorCredentialResolver', () => {
-  it('injects decrypted secrets and config for an allow-listed connector', async () => {
-    const { resolve, authorization, esoClient } = setup();
+  it('injects in-memory secrets and config for an allow-listed preconfigured connector', async () => {
+    const { resolve, authorization } = setup();
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
@@ -149,33 +123,25 @@ describe('createConnectorCredentialResolver', () => {
       operation: 'execute',
       actionTypeId: '.github',
     });
-    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith('action', CONNECTOR_ID, {});
   });
 
-  it('scopes decryption to the current space when not default', async () => {
-    const { resolve, esoClient } = setup({ spaceId: 'team-a' });
-
-    await resolve(CONNECTOR_ID, createCallContext());
-
-    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith('action', CONNECTOR_ID, {
-      namespace: 'team-a',
-    });
-  });
-
-  it('uses in-memory secrets for preconfigured connectors without touching ESO', async () => {
-    const { resolve, esoClient } = setup({
-      connector: createConnector({ isPreconfigured: true }),
-      inMemory: true,
+  it('rejects connectors that are not preconfigured', async () => {
+    const { resolve } = setup({
+      connector: createConnector({ isPreconfigured: false }),
+      inMemory: false,
     });
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
-    expect('env' in result && result.env.CONNECTOR_SECRET_TOKEN).toBe(TOKEN);
-    expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      errorMessage: expect.stringContaining(
+        `Connector '${CONNECTOR_ID}' is not a preconfigured connector`
+      ),
+    });
   });
 
   it('denies connectors outside the agent allow-list before any lookup', async () => {
-    const { resolve, actionsClient, esoClient } = setup();
+    const { resolve, actionsClient } = setup();
 
     const result = await resolve('other-connector', createCallContext());
 
@@ -185,7 +151,6 @@ describe('createConnectorCredentialResolver', () => {
       ),
     });
     expect(actionsClient.get).not.toHaveBeenCalled();
-    expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 
   it('denies by default when the agent has no connectors', async () => {
@@ -197,7 +162,7 @@ describe('createConnectorCredentialResolver', () => {
   });
 
   it('fails when the user cannot read the connector', async () => {
-    const { resolve, actionsClient, esoClient } = setup();
+    const { resolve, actionsClient } = setup();
     actionsClient.get.mockRejectedValue(new Error('Unauthorized to get actions'));
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
@@ -205,11 +170,10 @@ describe('createConnectorCredentialResolver', () => {
     expect(result).toEqual({
       errorMessage: expect.stringContaining(`Failed to resolve connector '${CONNECTOR_ID}'`),
     });
-    expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 
   it('fails when the user is not allowed to execute the connector type', async () => {
-    const { resolve, authorization, esoClient } = setup();
+    const { resolve, authorization } = setup();
     authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized to execute'));
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
@@ -217,7 +181,6 @@ describe('createConnectorCredentialResolver', () => {
     expect(result).toEqual({
       errorMessage: expect.stringContaining(`Not authorized to use connector '${CONNECTOR_ID}'`),
     });
-    expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 
   it('rejects system connectors', async () => {
@@ -233,26 +196,6 @@ describe('createConnectorCredentialResolver', () => {
 
     expect(await resolve(CONNECTOR_ID, createCallContext())).toEqual({
       errorMessage: 'Connectors are not available in this deployment',
-    });
-  });
-
-  it('fails when secrets cannot be decrypted (no encryption key)', async () => {
-    const { resolve, esoClient } = setup({ canEncrypt: false });
-
-    const result = await resolve(CONNECTOR_ID, createCallContext());
-
-    expect(result).toEqual({ errorMessage: expect.stringContaining('cannot be decrypted') });
-    expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
-  });
-
-  it('does not leak decryption errors or secret material in the error message', async () => {
-    const { resolve, esoClient } = setup();
-    esoClient.getDecryptedAsInternalUser.mockRejectedValue(new Error(`boom ${TOKEN}`));
-
-    const result = await resolve(CONNECTOR_ID, createCallContext());
-
-    expect(result).toEqual({
-      errorMessage: `Failed to load credentials for connector '${CONNECTOR_ID}'`,
     });
   });
 });

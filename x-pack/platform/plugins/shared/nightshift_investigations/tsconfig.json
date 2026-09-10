@@ -31,7 +31,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
-    "@kbn/actions-plugin",
-    "@kbn/encrypted-saved-objects-plugin"
+    "@kbn/actions-plugin"
   ]
 }

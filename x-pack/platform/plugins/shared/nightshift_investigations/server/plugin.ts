@@ -75,8 +75,6 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
-  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
-  private canEncrypt = false;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -88,7 +86,6 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
-    this.canEncrypt = plugins.encryptedSavedObjects?.canEncrypt ?? false;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -140,12 +137,7 @@ export class NightshiftInvestigationsPlugin
 
         // Start deps are read lazily: tools are registered in setup() but only run after start().
         const resolveConnectorCredentials = createConnectorCredentialResolver({
-          getDeps: () => ({
-            actions: this.actionsStart,
-            encryptedSavedObjects: this.encryptedSavedObjectsStart,
-            canEncrypt: this.canEncrypt,
-            spaces: this.spaces,
-          }),
+          getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
 
@@ -237,7 +229,6 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
     this.actionsStart = plugins.actions;
-    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

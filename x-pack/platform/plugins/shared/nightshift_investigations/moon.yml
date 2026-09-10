@@ -43,7 +43,6 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/encrypted-saved-objects-plugin'
 tags:
   - plugin
   - prod
