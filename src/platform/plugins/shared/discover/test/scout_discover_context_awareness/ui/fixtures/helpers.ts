@@ -21,6 +21,20 @@ async function waitForSurroundingDocs(page: ScoutPage) {
 }
 
 /**
+ * Resolves with the message of the next native dialog, then dismisses it. Call this *before* the
+ * click that raises the dialog: with nothing listening Playwright dismisses dialogs on its own, so
+ * the message would already be gone by the time it could be read.
+ */
+export function captureNextDialogMessage(page: ScoutPage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    page.once('dialog', (dialog) => {
+      const message = dialog.message();
+      dialog.dismiss().then(() => resolve(message), reject);
+    });
+  });
+}
+
+/**
  * Opens the Surrounding documents page for the first row and reloads it. The reload matters: it
  * forces the page to resolve its profile from the URL alone, instead of inheriting whatever
  * Discover had already resolved before the client-side transition.
@@ -35,4 +49,13 @@ export async function openSurroundingDocs(page: ScoutPage, dataGrid: DataGrid) {
 
   await page.reload();
   await waitForSurroundingDocs(page);
+
+  // The "Load more" controls render while the predecessor/successor searches are still in flight,
+  // so the grid keeps re-rendering past that point and rows hovered too early get detached. Gate on
+  // the table itself reporting loaded before touching a cell.
+  await dataGrid.waitForDocTableRendered();
+
+  // Park the pointer so a hover left over from before the reload cannot leave a column tooltip
+  // covering the first row.
+  await page.mouse.move(0, 0);
 }
