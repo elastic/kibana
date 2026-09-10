@@ -8,6 +8,7 @@
 import type { DataSourceWithSecrets } from '../../common/datasource_types';
 import {
   applyAuthenticationModeToDataSource,
+  getAuthenticationMethodDocumentationUrl,
   getCreateDataSourceAuthenticationOptions,
   getDefaultAuthenticationMode,
   showsAuthenticationCredentialFields,
@@ -19,6 +20,28 @@ describe('create_data_source_flyout_authentication', () => {
       expect(getDefaultAuthenticationMode('azure')).toBe('federated_identity');
       expect(getDefaultAuthenticationMode('s3')).toBe('federated_identity');
       expect(getDefaultAuthenticationMode('gcs')).toBe('federated_identity');
+    });
+  });
+
+  describe('getAuthenticationMethodDocumentationUrl', () => {
+    it('returns S3 setup docs for each authentication mode', () => {
+      expect(
+        getAuthenticationMethodDocumentationUrl('s3', 'federated_identity')
+      ).toBe(
+        'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-federated-identity'
+      );
+      expect(getAuthenticationMethodDocumentationUrl('s3', 'access_and_secret_keys')).toBe(
+        'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-static-credentials'
+      );
+      expect(getAuthenticationMethodDocumentationUrl('s3', 'anonymous')).toBe(
+        'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-quickstart#quickstart'
+      );
+    });
+
+    it('returns undefined for non-S3 data source types', () => {
+      expect(
+        getAuthenticationMethodDocumentationUrl('gcs', 'federated_identity')
+      ).toBeUndefined();
     });
   });
 

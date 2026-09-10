@@ -19,6 +19,10 @@ import {
 import { css } from '@emotion/react';
 
 import type { FederatedIdentitySetupMethod } from './federated_identity_setup_values';
+import {
+  federatedIdentityInlineFlexGroupCss,
+  federatedIdentitySetupMethodCardItemCss,
+} from './federated_identity_responsive_layout';
 
 const fullWidthCardStyle = css`
   width: 100%;
@@ -48,9 +52,9 @@ export function FederatedIdentitySetupMethodCards({
   return (
     <fieldset aria-label={legend} data-test-subj="federatedIdentitySetupMethodCards">
       <legend className="euiScreenReaderOnly">{legend}</legend>
-      <EuiFlexGroup gutterSize="s" responsive={false}>
+      <EuiFlexGroup gutterSize="s" responsive={false} css={federatedIdentityInlineFlexGroupCss}>
         {options.map((option) => (
-          <EuiFlexItem key={option.id}>
+          <EuiFlexItem key={option.id} css={federatedIdentitySetupMethodCardItemCss}>
             <FederatedIdentitySetupMethodCard
               groupName={groupName}
               option={option}

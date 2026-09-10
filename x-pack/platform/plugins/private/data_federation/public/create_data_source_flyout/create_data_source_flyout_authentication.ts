@@ -58,10 +58,43 @@ const getFederatedIdentityAuthenticationDescription = (dataSourceType: DataSourc
       return i18n.translate(
         'xpack.dataFederation.createFlyout.authentication.federatedIdentityDescription.s3',
         {
-          defaultMessage: 'Elastic assumes an IAM role you grant read access. No keys are stored.',
+          defaultMessage:
+            'No credentials are stored. AWS trusts the identity Elastic issues for your project or deployment.',
         }
       );
   }
+};
+
+const S3_AUTHENTICATION_METHOD_DOCS_URLS: Partial<
+  Record<CreateDataSourceAuthenticationMode, string>
+> = {
+  federated_identity:
+    'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-federated-identity',
+  access_and_secret_keys:
+    'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-static-credentials',
+  anonymous:
+    'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-quickstart#quickstart',
+};
+
+/** Documentation URL for the selected authentication method (S3 only for now). */
+export const getAuthenticationMethodDocumentationUrl = (
+  dataSourceType: DataSourceType,
+  mode: CreateDataSourceAuthenticationMode
+): string | undefined => {
+  if (dataSourceType !== 's3') {
+    return undefined;
+  }
+  return S3_AUTHENTICATION_METHOD_DOCS_URLS[mode];
+};
+
+export const getAuthenticationMethodDescription = (
+  dataSourceType: DataSourceType,
+  mode: CreateDataSourceAuthenticationMode
+): string => {
+  const option = getCreateDataSourceAuthenticationOptions(dataSourceType).find(
+    (entry) => entry.value === mode
+  );
+  return option?.description ?? '';
 };
 
 const getStoredCredentialsAuthenticationDescription = (dataSourceType: DataSourceType): string => {
@@ -176,16 +209,6 @@ export const createDataSourceFlyoutAuthenticationRecommendedBadge = (): string =
 export const createDataSourceFlyoutAuthenticationTitle = (): string =>
   i18n.translate('xpack.dataFederation.createFlyout.authentication.title', {
     defaultMessage: 'Authentication',
-  });
-
-export const createDataSourceFlyoutAuthenticationHelpAriaLabel = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.helpAriaLabel', {
-    defaultMessage: 'Open authentication documentation',
-  });
-
-export const createDataSourceFlyoutAuthenticationDocumentationLabel = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.documentationButton', {
-    defaultMessage: 'Documentation',
   });
 
 export const getAnonymousAuthenticationDescription = (dataSourceType: DataSourceType): string => {

@@ -9,10 +9,10 @@ import React, { useMemo } from 'react';
 import type { EuiSpacerProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
@@ -21,16 +21,16 @@ import {
 
 import type { DataSourceType } from '../../common/datasource_types';
 import {
-  createDataSourceFlyoutAuthenticationDocumentationLabel,
-  createDataSourceFlyoutAuthenticationHelpAriaLabel,
   createDataSourceFlyoutAuthenticationLabel,
   createDataSourceFlyoutAuthenticationRecommendedBadge,
   createDataSourceFlyoutAuthenticationTitle,
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
-  getAnonymousAuthenticationDescription,
+  getAuthenticationMethodDescription,
+  getAuthenticationMethodDocumentationUrl,
   getCreateDataSourceAuthenticationOptions,
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
+import { mainTranslations } from '../main_i18n';
 
 const AuthenticationOptionLabel = ({
   text,
@@ -52,8 +52,54 @@ const AuthenticationOptionLabel = ({
   </EuiFlexGroup>
 );
 
-const DATA_FEDERATION_AUTH_DOCS_URL =
-  'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-sources#authentication';
+const CreateDataSourceFlyoutAuthenticationMethodDescription = ({
+  dataSourceType,
+  authenticationMode,
+}: {
+  dataSourceType: DataSourceType;
+  authenticationMode: CreateDataSourceAuthenticationMode;
+}) => {
+  const description = useMemo(
+    () => getAuthenticationMethodDescription(dataSourceType, authenticationMode),
+    [authenticationMode, dataSourceType]
+  );
+  const documentationUrl = getAuthenticationMethodDocumentationUrl(
+    dataSourceType,
+    authenticationMode
+  );
+
+  if (!description) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiText
+        size="s"
+        color="subdued"
+        data-test-subj={`createDataSourceFlyoutAuthenticationDescription-${authenticationMode}`}
+      >
+        <p>
+          {description}
+          {documentationUrl ? (
+            <>
+              {' '}
+              <EuiLink
+                href={documentationUrl}
+                target="_blank"
+                external
+                data-test-subj={`createDataSourceFlyoutAuthenticationLearnMore-${authenticationMode}`}
+              >
+                {mainTranslations.docsLink}
+              </EuiLink>
+            </>
+          ) : null}
+        </p>
+      </EuiText>
+    </>
+  );
+};
 
 export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
@@ -100,27 +146,9 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
   return (
     <>
       <EuiSpacer size={leadingSpacerSize} />
-      <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>{createDataSourceFlyoutAuthenticationTitle()}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="documentation"
-            iconSide="left"
-            href={DATA_FEDERATION_AUTH_DOCS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={createDataSourceFlyoutAuthenticationHelpAriaLabel()}
-            data-test-subj="createDataSourceFlyoutAuthenticationHelpLink"
-          >
-            {createDataSourceFlyoutAuthenticationDocumentationLabel()}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="s">
+        <h3>{createDataSourceFlyoutAuthenticationTitle()}</h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow label={createDataSourceFlyoutAuthenticationLabel()} fullWidth>
         <EuiSuperSelect
@@ -131,18 +159,10 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
           data-test-subj="createDataSourceFlyoutAuthentication"
         />
       </EuiFormRow>
-      {authenticationMode === 'anonymous' ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText
-            size="s"
-            color="subdued"
-            data-test-subj="createDataSourceFlyoutAuthenticationAnonymousDescription"
-          >
-            <p>{getAnonymousAuthenticationDescription(dataSourceType)}</p>
-          </EuiText>
-        </>
-      ) : null}
+      <CreateDataSourceFlyoutAuthenticationMethodDescription
+        dataSourceType={dataSourceType}
+        authenticationMode={authenticationMode}
+      />
     </>
   );
 }

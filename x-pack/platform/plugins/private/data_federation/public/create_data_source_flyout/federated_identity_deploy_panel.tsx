@@ -20,6 +20,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import {
+  federatedIdentityDeployActionItemCss,
+  federatedIdentityDeployCopyItemCss,
+  federatedIdentityInlineFlexGroupCss,
+} from './federated_identity_responsive_layout';
+
 export function FederatedIdentityDeployPanel({
   title,
   description,
@@ -62,8 +68,8 @@ export function FederatedIdentityDeployPanel({
       css={deployPanelCss}
       data-test-subj={`${testSubjPrefix}DeployPanel`}
     >
-      <EuiFlexGroup responsive={false} gutterSize="xl" alignItems="flexStart">
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="l" responsive={false} css={federatedIdentityInlineFlexGroupCss}>
+        <EuiFlexItem css={federatedIdentityDeployCopyItemCss}>
           <EuiTitle size="xs">
             <h4>{title}</h4>
           </EuiTitle>
@@ -72,7 +78,7 @@ export function FederatedIdentityDeployPanel({
             <p>{description}</p>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem css={federatedIdentityDeployActionItemCss}>
           <EuiButton
             color="primary"
             iconType="popout"

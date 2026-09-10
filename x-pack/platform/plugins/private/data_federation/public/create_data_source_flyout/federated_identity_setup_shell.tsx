@@ -23,7 +23,8 @@ export function FederatedIdentitySetupShell({
   testSubjPrefix,
   children,
 }: {
-  description: string;
+  /** Shown above setup method cards when provided (omitted for S3; see Preferred method copy). */
+  description?: string;
   oneClickLabel?: string;
   oneClickIcon?: IconType;
   testSubjPrefix: string;
@@ -57,10 +58,14 @@ export function FederatedIdentitySetupShell({
 
   return (
     <>
-      <EuiText size="s" color="subdued">
-        <p>{description}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
+      {description ? (
+        <>
+          <EuiText size="s" color="subdued">
+            <p>{description}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <FederatedIdentitySetupMethodCards
         options={setupMethodOptions}
         selectedMethod={setupMethod}

@@ -13,7 +13,6 @@ import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import { CreateDataSourceFlyoutTypeSettingsAzure } from './create_data_source_flyout_type_settings_azure';
 import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
-import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutTypeSettings({
   dataSourceType,
@@ -24,10 +23,6 @@ export function CreateDataSourceFlyoutTypeSettings({
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  if (dataSourceType === 's3') {
-    return <CreateDataSourceFlyoutTypeSettingsS3 control={control} unregister={unregister} />;
-  }
-
   if (dataSourceType === 'gcs') {
     return <CreateDataSourceFlyoutTypeSettingsGcs control={control} unregister={unregister} />;
   }
@@ -41,11 +36,20 @@ export function CreateDataSourceFlyoutTypeSettings({
 /**
  * Type-specific connection fields shown directly on the flyout form.
  */
+const DATA_SOURCE_TYPES_WITH_TYPE_SETTINGS: ReadonlySet<DataSourceType> = new Set([
+  'gcs',
+  'azure',
+]);
+
 export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   dataSourceType: DataSourceType;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
+  if (!DATA_SOURCE_TYPES_WITH_TYPE_SETTINGS.has(props.dataSourceType)) {
+    return null;
+  }
+
   return (
     <>
       <EuiSpacer size="m" />

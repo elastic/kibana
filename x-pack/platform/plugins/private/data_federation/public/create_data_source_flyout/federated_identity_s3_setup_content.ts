@@ -19,12 +19,6 @@ import type { FederatedIdentitySetupValues } from './federated_identity_setup_va
 const AWS_CLOUDFORMATION_LAUNCH_URL =
   'https://console.aws.amazon.com/cloudformation/home#/stacks/create/review';
 
-export const getS3FederatedIdentityDescription = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.s3.federated.description', {
-    defaultMessage:
-      'No credentials are stored. AWS trusts the identity Elastic issues for your project or deployment.',
-  });
-
 export const getS3FederatedIdentityManualIntro = () =>
   i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.intro', {
     defaultMessage:

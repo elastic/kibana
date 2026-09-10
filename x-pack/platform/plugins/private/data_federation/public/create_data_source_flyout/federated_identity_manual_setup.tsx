@@ -173,7 +173,7 @@ function FederatedIdentityManualSetupStepRow({
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem css={{ minWidth: 0 }}>
         <EuiTitle size="xs">
           <h4>
             <EuiScreenReaderOnly>

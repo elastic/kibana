@@ -151,8 +151,12 @@ describe('DataSourceStep', () => {
 
     expect(queryByTestId('createDataSourceFlyoutS3AccessKey')).toBeNull();
     expect(
-      getByTestId('createDataSourceFlyoutAuthenticationAnonymousDescription')
+      getByTestId('createDataSourceFlyoutAuthenticationDescription-anonymous')
     ).toHaveTextContent('must allow anonymous public read access');
+    expect(getByTestId('createDataSourceFlyoutAuthenticationLearnMore-anonymous')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-quickstart#quickstart'
+    );
   });
 
   it('does not create a data source while required fields are missing', async () => {

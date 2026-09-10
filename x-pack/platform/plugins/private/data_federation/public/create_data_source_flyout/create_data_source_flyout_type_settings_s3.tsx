@@ -18,7 +18,6 @@ import { FederatedIdentityDeployPanel } from './federated_identity_deploy_panel'
 import { FederatedIdentityManualSetup } from './federated_identity_manual_setup';
 import {
   getS3FederatedIdentityDeployConfig,
-  getS3FederatedIdentityDescription,
   getS3FederatedIdentityManualIntro,
   getS3FederatedIdentityManualSteps,
   getS3FederatedIdentityRoleArnHelp,
@@ -26,50 +25,6 @@ import {
 } from './federated_identity_s3_setup_content';
 import { FederatedIdentitySetupShell } from './federated_identity_setup_shell';
 import { resolveFederatedIdentitySetupValues } from './federated_identity_setup_values';
-
-export function CreateDataSourceFlyoutTypeSettingsS3({
-  control,
-  unregister,
-}: {
-  control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
-}) {
-  const { field: endpointField } = useController({
-    name: 'settings.endpoint',
-    control,
-  });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.endpoint');
-    };
-  }, [unregister]);
-
-  return (
-    <EuiFormRow
-      label={createDataSourceFlyoutStrings.optionalFieldLabel(
-        i18n.translate('xpack.dataFederation.createFlyout.s3.fields.endpoint', {
-          defaultMessage: 'Endpoint',
-        })
-      )}
-      helpText={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.endpointHelp', {
-        defaultMessage:
-          'Override the default Amazon S3 endpoint to connect through a proxy or an S3-compatible service.',
-      })}
-      fullWidth
-    >
-      <EuiFieldText
-        data-test-subj="createDataSourceFlyoutS3Endpoint"
-        fullWidth
-        autoComplete="off"
-        value={endpointField.value}
-        onChange={(e) => endpointField.onChange(e.target.value)}
-        name={endpointField.name}
-        inputRef={endpointField.ref}
-      />
-    </EuiFormRow>
-  );
-}
 
 export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
   control,
@@ -206,7 +161,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   return (
     <>
       <FederatedIdentitySetupShell
-        description={getS3FederatedIdentityDescription()}
         oneClickLabel={i18n.translate(
           'xpack.dataFederation.createFlyout.s3.federated.setupMethod.cloudFormation',
           {
