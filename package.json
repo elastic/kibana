@@ -970,6 +970,7 @@
     "@kbn/observability-ai-assistant-management-plugin": "workspace:*",
     "@kbn/observability-ai-assistant-plugin": "workspace:*",
     "@kbn/observability-alert-details": "workspace:*",
+    "@kbn/observability-alerting-plugin": "workspace:*",
     "@kbn/observability-alerting-test-data": "workspace:*",
     "@kbn/observability-fixtures-plugin": "workspace:*",
     "@kbn/observability-get-padded-alert-time-range-util": "workspace:*",
