@@ -499,7 +499,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
   // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
   try {
-    await context.hooks.run(HookLifecycle.afterRound, {
+    await context.hooks.run(HookLifecycle.afterExecution, {
       request,
       abortSignal,
       agentId,

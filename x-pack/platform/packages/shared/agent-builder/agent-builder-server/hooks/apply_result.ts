@@ -11,7 +11,7 @@ import {
   type BeforeAgentHookContext,
   type BeforeToolCallHookContext,
   type AfterToolCallHookContext,
-  type AfterRoundHookContext,
+  type AfterExecutionHookContext,
   type HookHandlerResult,
 } from './types';
 
@@ -45,10 +45,10 @@ export function applyAfterToolCallResult(
   return { ...context, toolReturn: result.toolReturn };
 }
 
-export function applyAfterRoundResult(
-  context: AfterRoundHookContext,
-  _result: void | HookHandlerResult<HookLifecycle.afterRound>
-): AfterRoundHookContext {
+export function applyAfterExecutionResult(
+  context: AfterExecutionHookContext,
+  _result: void | HookHandlerResult<HookLifecycle.afterExecution>
+): AfterExecutionHookContext {
   return context;
 }
 
@@ -66,5 +66,5 @@ export const applyHookResultByLifecycle: ApplyHookResultByLifecycle = {
   [HookLifecycle.beforeAgent]: applyBeforeAgentResult,
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
   [HookLifecycle.afterToolCall]: applyAfterToolCallResult,
-  [HookLifecycle.afterRound]: applyAfterRoundResult,
+  [HookLifecycle.afterExecution]: applyAfterExecutionResult,
 };

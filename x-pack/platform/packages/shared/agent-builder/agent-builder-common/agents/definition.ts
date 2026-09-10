@@ -128,9 +128,9 @@ export interface AgentConfiguration {
   workflow_ids?: string[];
 
   /**
-   * Optional list of workflow IDs. When set, these workflows run after the agent finishes a round.
+   * Optional list of workflow IDs. When set, these workflows run after the agent finishes each execution.
    */
-  post_round_workflow_ids?: string[];
+  post_execution_workflow_ids?: string[];
 
   /**
    * Optional list of plugin IDs assigned to this agent.

@@ -9,38 +9,38 @@ import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { InternalSetupServices, InternalStartServices } from '../../services';
-import { runAfterRoundWorkflows } from './run_after_round_workflows';
+import { runAfterExecutionWorkflows } from './run_after_execution_workflows';
 
-export interface RegisterAfterRoundWorkflowsHookDeps {
+export interface RegisterAfterExecutionWorkflowsHookDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;
   logger: Logger;
   getInternalServices: () => InternalStartServices;
 }
 
 /**
- * Registers the after-round hook that runs the agent's configured post-round workflows
- * as a fire-and-forget side effect after each conversation round completes. When workflows
+ * Registers the after-execution hook that runs the agent's configured post-execution workflows
+ * as a fire-and-forget side effect after each conversation execution completes. When workflows
  * management is not available, registration is skipped.
  */
-export function registerAfterRoundWorkflowsHook(
+export function registerAfterExecutionWorkflowsHook(
   serviceSetups: InternalSetupServices,
-  deps: RegisterAfterRoundWorkflowsHookDeps
+  deps: RegisterAfterExecutionWorkflowsHookDeps
 ): void {
   if (!deps.workflowsManagement) {
-    deps.logger.debug('After-round workflows hook skipped: workflows management not available');
+    deps.logger.debug('After-execution workflows hook skipped: workflows management not available');
     return;
   }
 
   const workflowApi = deps.workflowsManagement.management;
-  const logger = deps.logger.get('afterRoundWorkflows');
+  const logger = deps.logger.get('afterExecutionWorkflows');
 
   serviceSetups.hooks.register({
-    id: 'after-round-workflows',
+    id: 'after-execution-workflows',
     hooks: {
-      [HookLifecycle.afterRound]: {
+      [HookLifecycle.afterExecution]: {
         mode: HookExecutionMode.nonBlocking,
         handler: (context) =>
-          runAfterRoundWorkflows({
+          runAfterExecutionWorkflows({
             context,
             workflowApi,
             getInternalServices: deps.getInternalServices,

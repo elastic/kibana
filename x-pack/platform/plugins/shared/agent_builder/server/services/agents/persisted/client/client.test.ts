@@ -263,7 +263,7 @@ describe('AgentClient', () => {
     });
   });
 
-  describe('post-round workflow configuration', () => {
+  describe('post-execution workflow configuration', () => {
     const toolsService = {
       getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
     };
@@ -287,19 +287,19 @@ describe('AgentClient', () => {
       });
     };
 
-    const buildCreateProfile = (postRoundWorkflowIds?: string[]) => ({
+    const buildCreateProfile = (postExecutionWorkflowIds?: string[]) => ({
       id: 'agent-1',
       name: 'Agent 1',
       description: 'desc',
       configuration: {
         tools: [],
-        ...(postRoundWorkflowIds !== undefined
-          ? { post_round_workflow_ids: postRoundWorkflowIds }
+        ...(postExecutionWorkflowIds !== undefined
+          ? { post_execution_workflow_ids: postExecutionWorkflowIds }
           : {}),
       },
     });
 
-    const buildDoc = (postRoundWorkflowIds?: string[]) => ({
+    const buildDoc = (postExecutionWorkflowIds?: string[]) => ({
       _id: 'agent-1',
       _source: {
         id: 'agent-1',
@@ -312,8 +312,8 @@ describe('AgentClient', () => {
         access_control: { access_mode: 'public', entries: [] },
         config: {
           tools: [],
-          ...(postRoundWorkflowIds !== undefined
-            ? { post_round_workflow_ids: postRoundWorkflowIds }
+          ...(postExecutionWorkflowIds !== undefined
+            ? { post_execution_workflow_ids: postExecutionWorkflowIds }
             : {}),
         },
         created_at: '2020-01-01T00:00:00.000Z',
@@ -322,17 +322,17 @@ describe('AgentClient', () => {
     });
 
     describe('create', () => {
-      it('rejects a non-admin attaching post_round_workflow_ids', async () => {
+      it('rejects a non-admin attaching post_execution_workflow_ids', async () => {
         const nonAdminClient = await buildClient(false);
         mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
         await expect(nonAdminClient.create(buildCreateProfile(['wf-1']) as never)).rejects.toThrow(
-          'Only administrators can configure post-round workflows.'
+          'Only administrators can configure post-execution workflows.'
         );
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
-      it('allows a non-admin to create without post_round_workflow_ids', async () => {
+      it('allows a non-admin to create without post_execution_workflow_ids', async () => {
         const nonAdminClient = await buildClient(false);
         mockEsClient.search
           .mockResolvedValueOnce({ hits: { hits: [] } })
@@ -343,7 +343,7 @@ describe('AgentClient', () => {
         expect(mockEsClient.index).toHaveBeenCalledTimes(1);
       });
 
-      it('allows an admin to attach post_round_workflow_ids', async () => {
+      it('allows an admin to attach post_execution_workflow_ids', async () => {
         const adminClient = await buildClient(true);
         mockEsClient.search
           .mockResolvedValueOnce({ hits: { hits: [] } })
@@ -356,35 +356,35 @@ describe('AgentClient', () => {
     });
 
     describe('update', () => {
-      it('rejects a non-admin changing post_round_workflow_ids', async () => {
+      it('rejects a non-admin changing post_execution_workflow_ids', async () => {
         const nonAdminClient = await buildClient(false);
         mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
 
         await expect(
           nonAdminClient.update('agent-1', {
-            configuration: { post_round_workflow_ids: ['wf-2'] },
+            configuration: { post_execution_workflow_ids: ['wf-2'] },
           } as never)
-        ).rejects.toThrow('Only administrators can configure post-round workflows.');
+        ).rejects.toThrow('Only administrators can configure post-execution workflows.');
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
-      it('allows a non-admin to echo back the unchanged post_round_workflow_ids', async () => {
+      it('allows a non-admin to echo back the unchanged post_execution_workflow_ids', async () => {
         const nonAdminClient = await buildClient(false);
         mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
 
         await nonAdminClient.update('agent-1', {
-          configuration: { post_round_workflow_ids: ['wf-1'] },
+          configuration: { post_execution_workflow_ids: ['wf-1'] },
         } as never);
 
         expect(mockEsClient.index).toHaveBeenCalledTimes(1);
       });
 
-      it('allows an admin to change post_round_workflow_ids', async () => {
+      it('allows an admin to change post_execution_workflow_ids', async () => {
         const adminClient = await buildClient(true);
         mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
 
         await adminClient.update('agent-1', {
-          configuration: { post_round_workflow_ids: ['wf-2'] },
+          configuration: { post_execution_workflow_ids: ['wf-2'] },
         } as never);
 
         expect(mockEsClient.index).toHaveBeenCalledTimes(1);

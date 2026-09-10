@@ -834,18 +834,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             direction="row"
             gutterSize="xl"
             alignItems="flexStart"
-            aria-labelledby="post-round-workflow-section-title"
+            aria-labelledby="post-execution-workflow-section-title"
           >
             <EuiFlexItem grow={1}>
               <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
                 <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                   <EuiIcon type="flag" aria-hidden={true} />
                   <EuiTitle size="xs">
-                    <h2 id="post-round-workflow-section-title">
+                    <h2 id="post-execution-workflow-section-title">
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.postRoundWorkflowTitle',
+                        'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowTitle',
                         {
-                          defaultMessage: 'Post-round workflow',
+                          defaultMessage: 'Post-execution workflow',
                         }
                       )}
                     </h2>
@@ -853,7 +853,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 </EuiFlexGroup>
                 <EuiText size="s" color="subdued">
                   {i18n.translate(
-                    'xpack.agentBuilder.agents.form.settings.postRoundWorkflowDescription',
+                    'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowDescription',
                     {
                       defaultMessage:
                         'Runs once after the agent finishes responding. Cannot change the response.',
@@ -866,7 +866,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
-                  'xpack.agentBuilder.agents.form.settings.postRoundWorkflowLabel',
+                  'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowLabel',
                   {
                     defaultMessage: 'Workflows',
                   }
@@ -879,18 +879,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 helpText={
                   !isAdmin
                     ? i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.postRoundWorkflowAdminOnlyReason',
+                        'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowAdminOnlyReason',
                         {
-                          defaultMessage: 'Only administrators can configure post-round workflows.',
+                          defaultMessage: 'Only administrators can configure post-execution workflows.',
                         }
                       )
                     : undefined
                 }
-                isInvalid={!!formState.errors.configuration?.post_round_workflow_ids}
-                error={formState.errors.configuration?.post_round_workflow_ids?.message}
+                isInvalid={!!formState.errors.configuration?.post_execution_workflow_ids}
+                error={formState.errors.configuration?.post_execution_workflow_ids?.message}
               >
                 <WorkflowPicker
-                  name="configuration.post_round_workflow_ids"
+                  name="configuration.post_execution_workflow_ids"
                   singleSelection={false}
                   isDisabled={isFormDisabled || !isAdmin}
                 />

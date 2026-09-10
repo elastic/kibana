@@ -118,24 +118,24 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
           <EuiSpacer size="m" />
           <EuiPanel hasBorder paddingSize="l">
             <EuiTitle size="xxs">
-              <h4>{flyoutLabels.postRoundWorkflowTitle}</h4>
+              <h4>{flyoutLabels.postExecutionWorkflowTitle}</h4>
             </EuiTitle>
             <EuiText size="xs" color="subdued">
-              {flyoutLabels.postRoundWorkflowDescription}
+              {flyoutLabels.postExecutionWorkflowDescription}
             </EuiText>
             <EuiSpacer size="s" />
             <EuiFormRow
-              label={flyoutLabels.postRoundWorkflowLabel}
+              label={flyoutLabels.postExecutionWorkflowLabel}
               labelAppend={
                 <EuiText size="xs" color="subdued">
                   {labels.common.optional}
                 </EuiText>
               }
-              helpText={!isAdmin ? flyoutLabels.postRoundWorkflowAdminOnlyReason : undefined}
+              helpText={!isAdmin ? flyoutLabels.postExecutionWorkflowAdminOnlyReason : undefined}
               fullWidth
             >
               <WorkflowPicker
-                name="configuration.post_round_workflow_ids"
+                name="configuration.post_execution_workflow_ids"
                 singleSelection={false}
                 isDisabled={!isAdmin}
               />

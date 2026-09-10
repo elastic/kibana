@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AfterRoundHookContext } from '@kbn/agent-builder-server';
+import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import {
   ConversationRoundStatus,
   isToolCallStep,
@@ -17,24 +17,24 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AfterRoundWorkflowParams } from './types';
+import type { AfterExecutionWorkflowParams } from './types';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
-export interface RunAfterRoundWorkflowsParams {
-  context: AfterRoundHookContext;
+export interface RunAfterExecutionWorkflowsParams {
+  context: AfterExecutionHookContext;
   workflowApi: WorkflowApi;
   getInternalServices: () => InternalStartServices;
   logger: Logger;
 }
 
-export const runAfterRoundWorkflows = async ({
+export const runAfterExecutionWorkflows = async ({
   context,
   workflowApi,
   getInternalServices,
   logger,
-}: RunAfterRoundWorkflowsParams): Promise<void> => {
-  const workflowIds = context.agentConfiguration.post_round_workflow_ids ?? [];
+}: RunAfterExecutionWorkflowsParams): Promise<void> => {
+  const workflowIds = context.agentConfiguration.post_execution_workflow_ids ?? [];
   if (!workflowIds.length) {
     return;
   }
@@ -61,7 +61,7 @@ export const runAfterRoundWorkflows = async ({
     params: step.params as Record<string, unknown>,
   }));
 
-  const workflowParams: AfterRoundWorkflowParams = {
+  const workflowParams: AfterExecutionWorkflowParams = {
     prompt: round.input.message ?? '',
     response: round.response.message ?? '',
     round_id: round.id,
@@ -81,7 +81,7 @@ export const runAfterRoundWorkflows = async ({
     });
 
     if (!result.success) {
-      logger.error(`Post-round workflow "${workflowId}" failed to execute: ${result.error}`);
+      logger.error(`Post-execution workflow "${workflowId}" failed to execute: ${result.error}`);
       continue;
     }
 
@@ -89,7 +89,7 @@ export const runAfterRoundWorkflows = async ({
     if (execution.status === ExecutionStatus.FAILED) {
       const workflowName = execution.workflow_name ?? execution.workflow_id;
       logger.error(
-        `Post-round workflow "${workflowName}" execution failed: ${
+        `Post-execution workflow "${workflowName}" execution failed: ${
           execution.error_message ?? 'unknown error'
         }`
       );
@@ -97,7 +97,7 @@ export const runAfterRoundWorkflows = async ({
     }
 
     logger.debug(
-      `Post-round workflow execution finished: ${execution.workflow_id} (${execution.execution_id})`
+      `Post-execution workflow execution finished: ${execution.workflow_id} (${execution.execution_id})`
     );
   }
 };

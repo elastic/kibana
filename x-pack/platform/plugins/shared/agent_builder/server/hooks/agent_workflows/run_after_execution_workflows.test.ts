@@ -15,7 +15,7 @@ import {
   type ConversationRound,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { runAfterRoundWorkflows } from './run_after_round_workflows';
+import { runAfterExecutionWorkflows } from './run_after_execution_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
@@ -30,9 +30,9 @@ jest.mock('../../utils/spaces', () => ({
 const executeWorkflowMock = jest.mocked(executeWorkflow);
 const getCurrentSpaceIdMock = jest.mocked(getCurrentSpaceId);
 
-type RunAfterRoundWorkflowsParams = Parameters<typeof runAfterRoundWorkflows>[0];
-type WorkflowApi = RunAfterRoundWorkflowsParams['workflowApi'];
-type GetInternalServices = RunAfterRoundWorkflowsParams['getInternalServices'];
+type RunAfterExecutionWorkflowsParams = Parameters<typeof runAfterExecutionWorkflows>[0];
+type WorkflowApi = RunAfterExecutionWorkflowsParams['workflowApi'];
+type GetInternalServices = RunAfterExecutionWorkflowsParams['getInternalServices'];
 
 const makeRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',
@@ -47,7 +47,7 @@ const makeRound = (overrides: Partial<ConversationRound> = {}): ConversationRoun
   ...overrides,
 });
 
-describe('runAfterRoundWorkflows', () => {
+describe('runAfterExecutionWorkflows', () => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
 
@@ -71,11 +71,11 @@ describe('runAfterRoundWorkflows', () => {
   };
 
   const createContext = (
-    overrides: Partial<RunAfterRoundWorkflowsParams['context']> = {}
-  ): RunAfterRoundWorkflowsParams['context'] => ({
+    overrides: Partial<RunAfterExecutionWorkflowsParams['context']> = {}
+  ): RunAfterExecutionWorkflowsParams['context'] => ({
     request,
     round: makeRound(),
-    agentConfiguration: { tools: [], post_round_workflow_ids: ['wf-1'] },
+    agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1'] },
     agentId: 'agent-1',
     conversationId: 'conv-1',
     ...overrides,
@@ -96,24 +96,24 @@ describe('runAfterRoundWorkflows', () => {
   });
 
   describe('early-exit guards', () => {
-    it('does nothing when post_round_workflow_ids is empty', async () => {
+    it('does nothing when post_execution_workflow_ids is empty', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
-        agentConfiguration: { tools: [], post_round_workflow_ids: [] },
+        agentConfiguration: { tools: [], post_execution_workflow_ids: [] },
       });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
 
-    it('does nothing when post_round_workflow_ids is undefined', async () => {
+    it('does nothing when post_execution_workflow_ids is undefined', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
         agentConfiguration: { tools: [] },
       });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
@@ -124,7 +124,7 @@ describe('runAfterRoundWorkflows', () => {
         round: makeRound({ status: ConversationRoundStatus.inProgress }),
       });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
@@ -135,7 +135,7 @@ describe('runAfterRoundWorkflows', () => {
         round: makeRound({ status: ConversationRoundStatus.awaitingPrompt }),
       });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
@@ -143,7 +143,7 @@ describe('runAfterRoundWorkflows', () => {
     it('does nothing when the workflows UI setting is disabled', async () => {
       const { workflowApi, getInternalServices } = createDeps({ uiEnabled: false });
 
-      await runAfterRoundWorkflows({
+      await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,
@@ -163,7 +163,7 @@ describe('runAfterRoundWorkflows', () => {
       });
       const context = createContext({ round, agentId: 'ag-1', conversationId: 'cv-1' });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -184,7 +184,7 @@ describe('runAfterRoundWorkflows', () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({ agentId: undefined, conversationId: undefined });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<string, unknown>;
       expect(params).not.toHaveProperty('agent_id');
@@ -207,7 +207,7 @@ describe('runAfterRoundWorkflows', () => {
       };
       const round = makeRound({ steps: [toolCallStep, reasoningStep] as any });
 
-      await runAfterRoundWorkflows({
+      await runAfterExecutionWorkflows({
         context: createContext({ round }),
         workflowApi,
         getInternalServices,
@@ -230,11 +230,11 @@ describe('runAfterRoundWorkflows', () => {
         execution: { ...completedExecution, workflow_id: 'wf-2' },
       });
       const context = createContext({
-        agentConfiguration: { tools: [], post_round_workflow_ids: ['wf-1', 'wf-2'] },
+        agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1', 'wf-2'] },
       });
 
       await expect(
-        runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger })
+        runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger })
       ).resolves.toBeUndefined();
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
@@ -257,7 +257,7 @@ describe('runAfterRoundWorkflows', () => {
       });
 
       await expect(
-        runAfterRoundWorkflows({
+        runAfterExecutionWorkflows({
           context: createContext(),
           workflowApi,
           getInternalServices,
@@ -281,7 +281,7 @@ describe('runAfterRoundWorkflows', () => {
         },
       });
 
-      await runAfterRoundWorkflows({
+      await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,
@@ -303,7 +303,7 @@ describe('runAfterRoundWorkflows', () => {
         },
       });
 
-      await runAfterRoundWorkflows({
+      await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,
@@ -318,7 +318,7 @@ describe('runAfterRoundWorkflows', () => {
     it('logs at debug level on success', async () => {
       const { workflowApi, getInternalServices } = createDeps();
 
-      await runAfterRoundWorkflows({
+      await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,
@@ -343,10 +343,10 @@ describe('runAfterRoundWorkflows', () => {
         });
 
       const context = createContext({
-        agentConfiguration: { tools: [], post_round_workflow_ids: ['wf-a', 'wf-b'] },
+        agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-a', 'wf-b'] },
       });
 
-      await runAfterRoundWorkflows({ context, workflowApi, getInternalServices, logger });
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
 
       expect(executeWorkflowMock).toHaveBeenCalledTimes(2);
       expect(executeWorkflowMock).toHaveBeenNthCalledWith(
@@ -362,7 +362,7 @@ describe('runAfterRoundWorkflows', () => {
     it('calls executeWorkflow with waitForCompletion: true', async () => {
       const { workflowApi, getInternalServices } = createDeps();
 
-      await runAfterRoundWorkflows({
+      await runAfterExecutionWorkflows({
         context: createContext(),
         workflowApi,
         getInternalServices,

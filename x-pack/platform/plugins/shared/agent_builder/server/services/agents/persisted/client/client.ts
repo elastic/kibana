@@ -81,7 +81,7 @@ const workflowIdsEqual = (a: string[], b: string[]): boolean =>
   a.length === b.length && a.every((id, index) => id === b[index]);
 
 /**
- * Guards changes to an agent's workflow IDs (pre-execution or post-round).
+ * Guards changes to an agent's workflow IDs (pre-execution or post-execution).
  */
 const assertCanConfigureWorkflows = ({
   nextWorkflowIds,
@@ -458,10 +458,10 @@ class AgentClientImpl implements AgentClient {
       errorMessage: 'Only administrators can configure pre-execution workflows.',
     });
     assertCanConfigureWorkflows({
-      nextWorkflowIds: profile.configuration.post_round_workflow_ids,
+      nextWorkflowIds: profile.configuration.post_execution_workflow_ids,
       currentWorkflowIds: [],
       isAdmin: this.user.isAdmin,
-      errorMessage: 'Only administrators can configure post-round workflows.',
+      errorMessage: 'Only administrators can configure post-execution workflows.',
     });
 
     await this.validateAgentToolSelection(profile.configuration.tools);
@@ -530,10 +530,10 @@ class AgentClientImpl implements AgentClient {
       errorMessage: 'Only administrators can configure pre-execution workflows.',
     });
     assertCanConfigureWorkflows({
-      nextWorkflowIds: profileUpdate.configuration?.post_round_workflow_ids,
-      currentWorkflowIds: currentConfig?.post_round_workflow_ids,
+      nextWorkflowIds: profileUpdate.configuration?.post_execution_workflow_ids,
+      currentWorkflowIds: currentConfig?.post_execution_workflow_ids,
       isAdmin: this.user.isAdmin,
-      errorMessage: 'Only administrators can configure post-round workflows.',
+      errorMessage: 'Only administrators can configure post-execution workflows.',
     });
 
     if (profileUpdate.configuration?.tools) {

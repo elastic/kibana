@@ -49,7 +49,7 @@ export interface SettingsSectionProps {
   currentInstructions: string;
   showWorkflowSection: boolean;
   workflowIds: string[];
-  postRoundWorkflowIds: string[];
+  postExecutionWorkflowIds: string[];
   canEditAgent: boolean;
   onOpenEditFlyout: () => void;
   agentId: string;
@@ -60,7 +60,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   currentInstructions,
   showWorkflowSection,
   workflowIds,
-  postRoundWorkflowIds,
+  postExecutionWorkflowIds,
   canEditAgent,
   onOpenEditFlyout,
   agentId,
@@ -83,7 +83,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   `;
 
   const hasWorkflows = workflowIds.length > 0;
-  const hasPostRoundWorkflows = postRoundWorkflowIds.length > 0;
+  const hasPostExecutionWorkflows = postExecutionWorkflowIds.length > 0;
 
   return (
     <>
@@ -260,15 +260,15 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                             <EuiText
                               size="s"
                               color={
-                                hasPostRoundWorkflows ? 'textPrimary' : euiTheme.colors.textDisabled
+                                hasPostExecutionWorkflows ? 'textPrimary' : euiTheme.colors.textDisabled
                               }
                             >
-                              {overviewLabels.postRoundWorkflowTitle}
+                              {overviewLabels.postExecutionWorkflowTitle}
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem
                             grow={false}
-                            css={hasPostRoundWorkflows ? undefined : textDisabledStyles}
+                            css={hasPostExecutionWorkflows ? undefined : textDisabledStyles}
                           >
                             <EuiIcon type="info" size="s" aria-hidden={true} />
                           </EuiFlexItem>
@@ -276,10 +276,10 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiBadge
-                          color={hasPostRoundWorkflows ? 'success' : 'default'}
-                          data-test-subj="agentOverviewPostRoundWorkflowsBadge"
+                          color={hasPostExecutionWorkflows ? 'success' : 'default'}
+                          data-test-subj="agentOverviewPostExecutionWorkflowsBadge"
                         >
-                          {hasPostRoundWorkflows
+                          {hasPostExecutionWorkflows
                             ? overviewLabels.enabledBadge
                             : overviewLabels.notSetBadge}
                         </EuiBadge>

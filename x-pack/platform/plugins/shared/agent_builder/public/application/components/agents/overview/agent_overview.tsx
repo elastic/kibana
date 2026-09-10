@@ -169,7 +169,7 @@ export const AgentOverview: React.FC = () => {
           currentInstructions={agent.configuration?.instructions ?? ''}
           showWorkflowSection={showWorkflowSection}
           workflowIds={agent.configuration?.workflow_ids ?? []}
-          postRoundWorkflowIds={agent.configuration?.post_round_workflow_ids ?? []}
+          postExecutionWorkflowIds={agent.configuration?.post_execution_workflow_ids ?? []}
           canEditAgent={canEditAgent}
           onOpenEditFlyout={() => setIsEditFlyoutOpen(true)}
           agentId={agent.id}

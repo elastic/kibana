@@ -18,10 +18,10 @@ export interface BeforeAgentWorkflowOutput {
 }
 
 /**
- * Inputs passed to a post-round workflow. The round has already been returned to the user,
+ * Inputs passed to a post-execution workflow. The execution has already been returned to the user,
  * so the workflow's output is ignored.
  */
-export interface AfterRoundWorkflowParams {
+export interface AfterExecutionWorkflowParams {
   prompt: string;
   response: string;
   conversation_id?: string;

@@ -336,7 +336,7 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
-                  post_round_workflow_ids: schema.maybe(
+                  post_execution_workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
                         maxLength: 512,
@@ -486,7 +486,7 @@ export function registerAgentRoutes({
                         { maxSize: 100 }
                       )
                     ),
-                    post_round_workflow_ids: schema.maybe(
+                    post_execution_workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({
                           maxLength: 512,
