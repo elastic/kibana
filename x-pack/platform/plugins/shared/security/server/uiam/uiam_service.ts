@@ -410,7 +410,6 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
-  #dispatcherWithoutClientCertificate: Agent | undefined;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -619,9 +618,7 @@ export class UiamService implements UiamServicePublic {
           Authorization: authorization.toString(),
         },
         body: JSON.stringify(body),
-        dispatcher: includeClientAuthentication
-          ? this.#dispatcher
-          : this.#getDispatcherWithoutClientCertificate(),
+        dispatcher: this.#dispatcher,
       };
 
       const response = await UiamService.#parseUiamResponse(
@@ -1161,22 +1158,15 @@ export class UiamService implements UiamServicePublic {
 
   /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
-   *
-   * @param includeClientCertificate Whether to present Kibana's own mTLS client certificate. Server
-   * verification is unaffected either way.
    */
-  #createFetchDispatcher(includeClientCertificate = true) {
+  #createFetchDispatcher() {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
 
     const readFile = (file: string) => readFileSync(file, 'utf8');
 
     // Read client certificate and key for mTLS from PEM files.
-    const cert =
-      includeClientCertificate && this.#config.ssl.certificate
-        ? readFile(this.#config.ssl.certificate)
-        : undefined;
-    const key =
-      includeClientCertificate && this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
+    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
+    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
@@ -1207,20 +1197,6 @@ export class UiamService implements UiamServicePublic {
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
       },
     });
-  }
-
-  /**
-   * Returns the dispatcher for the rare request that must not present Kibana's own mTLS client
-   * certificate, created on first use since virtually every request presents it. Without a
-   * certificate configured there is nothing to withhold, so the main dispatcher (and its connection
-   * pool) is reused.
-   */
-  #getDispatcherWithoutClientCertificate() {
-    if (!this.#config.ssl.certificate) {
-      return this.#dispatcher;
-    }
-
-    return (this.#dispatcherWithoutClientCertificate ??= this.#createFetchDispatcher(false));
   }
 
   /**

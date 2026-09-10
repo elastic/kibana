@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
@@ -29,7 +30,7 @@ export function createQueryService(responseFormat: EsqlConfig['responseFormat'] 
       run: {
         alerts: { max: 10000 },
         maxGroupsPerExecution: 10000,
-        query: { maxResponseSize: 50 * 1024 * 1024 },
+        query: { maxResponseSize: ByteSizeValue.parse('50mb') },
       },
     },
     esql: { responseFormat },
