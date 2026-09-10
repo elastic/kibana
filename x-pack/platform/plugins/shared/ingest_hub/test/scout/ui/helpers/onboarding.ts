@@ -48,6 +48,7 @@ export async function navigateToOnboardingStep(
     authenticateAndDeployStep?: {
       connectorId?: string;
       authMethod?: 'identity_federation' | 'static_keys';
+    };
     /** Seed detectAndReviewStep session state to simulate post-deploy conditions. */
     detectAndReviewStep?: {
       policyIdsByInstance?: Record<string, string>;
