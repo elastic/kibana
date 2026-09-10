@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -27,14 +27,12 @@ import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import {
   useWorkerScrollSpy,
   WatchWorkersSummaryRail,
-  workerPanelPulseCss,
   workerSectionDomId,
 } from './components/watch_workers_summary_rail';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
 
 const RAIL_NARROW_BREAKPOINT_PX = 1020;
-const WORKER_PULSE_MS = 1200;
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
@@ -63,12 +61,6 @@ export const WatchDetailPage: React.FC = () => {
   // the summary rail. Both reset when navigating to another Watch.
   const [collapsedWorkerIds, setCollapsedWorkerIds] = useState<Set<string>>(() => new Set());
   const [activeWorkerId, setActiveWorkerId] = useState<string | null>(null);
-  const [pulsingWorkerId, setPulsingWorkerId] = useState<string | null>(null);
-
-  // Clear the previous pulse's timer when a new one starts or the component unmounts, so a stale
-  // close cannot cancel the current pulse mid-flight.
-  const pulseTimeoutRef = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(pulseTimeoutRef.current), []);
 
   useEffect(() => {
     setCollapsedWorkerIds(new Set());
@@ -90,28 +82,6 @@ export const WatchDetailPage: React.FC = () => {
     if (isOpen) {
       setActiveWorkerId(workerId);
     }
-  }, []);
-
-  const focusWorkerFromRail = useCallback((workerId: string) => {
-    setActiveWorkerId(workerId);
-    setCollapsedWorkerIds((current) => {
-      const next = new Set(current);
-      next.delete(workerId);
-      return next;
-    });
-    setPulsingWorkerId(workerId);
-    window.clearTimeout(pulseTimeoutRef.current);
-    pulseTimeoutRef.current = window.setTimeout(
-      () => setPulsingWorkerId((current) => (current === workerId ? null : current)),
-      WORKER_PULSE_MS
-    );
-    // Defer the scroll until the expanded accordion content has committed, so the target's height
-    // is final before smooth-scrolling.
-    requestAnimationFrame(() => {
-      document
-        .getElementById(workerSectionDomId(workerId))
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   }, []);
 
   useWorkerScrollSpy(workerIds, isMultiWorker, setActiveWorkerId);
@@ -222,12 +192,7 @@ export const WatchDetailPage: React.FC = () => {
             <EuiFlexItem key={worker.id} grow={false}>
               <section
                 id={workerSectionDomId(worker.id)}
-                css={[
-                  layoutStyles.workerSection,
-                  pulsingWorkerId === worker.id
-                    ? workerPanelPulseCss(euiTheme.colors.primary)
-                    : undefined,
-                ]}
+                css={layoutStyles.workerSection}
                 data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
               >
                 <WorkerSettingsPanel
@@ -241,11 +206,7 @@ export const WatchDetailPage: React.FC = () => {
           ))}
         </EuiFlexGroup>
         <div css={layoutStyles.railColumn}>
-          <WatchWorkersSummaryRail
-            workers={members}
-            activeWorkerId={effectiveActiveWorkerId}
-            onSelectWorker={focusWorkerFromRail}
-          />
+          <WatchWorkersSummaryRail workers={members} activeWorkerId={effectiveActiveWorkerId} />
         </div>
       </div>
     );

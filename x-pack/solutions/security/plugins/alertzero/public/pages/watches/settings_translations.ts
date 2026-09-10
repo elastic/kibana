@@ -515,12 +515,6 @@ export const RAIL_AUTONOMY = i18n.translate('xpack.alertzero.watches.settings.ra
   defaultMessage: 'Autonomy',
 });
 
-export const railGoToWorker = (workerName: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.rail.goToWorker', {
-    defaultMessage: 'Go to {workerName} settings',
-    values: { workerName },
-  });
-
 export const WORKERS_EMPTY_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.workers.empty.title',
   {

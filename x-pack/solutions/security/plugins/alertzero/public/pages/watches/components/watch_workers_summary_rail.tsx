@@ -12,7 +12,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,20 +30,6 @@ import { formatRelativeTime } from './format_relative_time';
 
 /** DOM id for the scroll-to target of a Worker section in the settings column. */
 export const workerSectionDomId = (workerId: string): string => `worker-section-${workerId}`;
-
-/**
- * One-shot highlight applied to a Worker section after the summary rail scrolls to it, so the
- * destination is obvious when several Workers are stacked.
- */
-export const workerPanelPulseCss = (primary: string) => {
-  const pulse = keyframes`
-    0% { box-shadow: 0 0 0 2px ${primary}; }
-    100% { box-shadow: 0 0 0 2px transparent; }
-  `;
-  return css`
-    animation: ${pulse} 1.2s ease-out;
-  `;
-};
 
 interface WorkerStatus {
   label: string;
@@ -114,7 +100,6 @@ function DataLine({ label, value }: { label: string; value: string }) {
 interface WatchWorkersSummaryRailProps {
   workers: Worker[];
   activeWorkerId: string | null;
-  onSelectWorker: (workerId: string) => void;
 }
 
 /**
@@ -125,7 +110,6 @@ interface WatchWorkersSummaryRailProps {
 export const WatchWorkersSummaryRail = React.memo(function WatchWorkersSummaryRail({
   workers,
   activeWorkerId,
-  onSelectWorker,
 }: WatchWorkersSummaryRailProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -147,19 +131,8 @@ export const WatchWorkersSummaryRail = React.memo(function WatchWorkersSummaryRa
         flex-shrink: 0;
       `,
       card: (isActive: boolean) => css`
-        display: block;
-        width: 100%;
         padding: 14px 16px;
-        text-align: left;
-        cursor: pointer;
         border-color: ${isActive ? euiTheme.colors.primary : euiTheme.border.color};
-        &:hover {
-          border-color: ${euiTheme.colors.primary};
-        }
-        &:focus-visible {
-          outline: 2px solid ${euiTheme.colors.primary};
-          outline-offset: 2px;
-        }
       `,
       workerNameStrong: (enabled: boolean) => css`
         color: ${enabled ? undefined : euiTheme.colors.textSubdued};
@@ -185,12 +158,8 @@ export const WatchWorkersSummaryRail = React.memo(function WatchWorkersSummaryRa
                 hasBorder
                 hasShadow={false}
                 paddingSize="none"
-                element="button"
-                type="button"
                 color="transparent"
-                onClick={() => onSelectWorker(worker.id)}
                 aria-current={isActive ? 'true' : undefined}
-                aria-label={i18n.railGoToWorker(name)}
                 data-test-subj={`alertZeroWatchWorkerSummary-${worker.id}`}
                 css={styles.card(isActive)}
               >
