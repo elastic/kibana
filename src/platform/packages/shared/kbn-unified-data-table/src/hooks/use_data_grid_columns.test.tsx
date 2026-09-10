@@ -36,7 +36,7 @@ describe('useColumns', () => {
     expect(result.current.onSetColumns).toBeInstanceOf(Function);
   });
 
-  test('should skip _source column', () => {
+  test('should keep _source column when other columns exist', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
@@ -44,7 +44,7 @@ describe('useColumns', () => {
       });
     });
 
-    expect(result.current.columns).toEqual(['Time']);
+    expect(result.current.columns).toEqual(['Time', '_source']);
   });
 
   test('should return empty columns array', () => {

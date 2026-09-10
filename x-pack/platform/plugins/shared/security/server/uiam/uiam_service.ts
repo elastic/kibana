@@ -59,6 +59,24 @@ export interface GrantUiamApiKeyRequestBody {
 }
 
 /**
+ * Options that control how the grant request itself is authenticated to UIAM.
+ */
+export interface GrantUiamApiKeyOptions {
+  /**
+   * Whether to present Kibana's shared secret header alongside the granting credential. UIAM
+   * authenticates the credential and Kibana independently, and requires the two to agree: an
+   * internal API key or a session token must arrive with the shared secret, while an external
+   * (organization) API key must arrive without it, so that internal credentials that leak cannot
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails the
+   * grant. The mTLS client certificate is always presented when configured, regardless of this
+   * option.
+   *
+   * Defaults to `true`, which is correct for everything except an external API key.
+   */
+  includeClientAuthentication?: boolean;
+}
+
+/**
  * Represents the response from granting an API key via UIAM.
  */
 export interface GrantUiamApiKeyResponse {
@@ -133,13 +151,13 @@ interface UiamErrorDetails {
 }
 
 /**
- * Telemetry `errorType` for an OAuth token exchange that Kibana itself rejected
+ * Telemetry `oauthErrorType` for an OAuth token exchange that Kibana itself rejected
  * as opposed to a failure reported by UIAM.
  */
 const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
 
 /**
- * Telemetry `errorType` for an OAuth token exchange failure that carries no
+ * Telemetry `oauthErrorType` for an OAuth token exchange failure that carries no
  * recognizable classification.
  */
 const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
@@ -201,11 +219,13 @@ export interface UiamServicePublic {
    * Grants an API key using the UIAM service.
    * @param authorization The HTTP authorization header containing scheme and credentials.
    * @param params The parameters for creating the API key (name and optional expiration).
+   * @param options The options that control how the grant request itself is authenticated to UIAM.
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
-    params: GrantUiamAPIKeyParams
+    params: GrantUiamAPIKeyParams,
+    options?: GrantUiamApiKeyOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -494,7 +514,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -506,7 +525,7 @@ export class UiamService implements UiamServicePublic {
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
           `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
-          { errorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
+          { oauthErrorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
@@ -518,7 +537,7 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
         outcome: 'failure',
-        errorType: UiamService.#getOAuthTokenExchangeErrorType(err),
+        ...UiamService.#getOAuthTokenExchangeErrorAttributes(err),
       });
 
       this.#logger.error(
@@ -532,7 +551,11 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
+  async grantApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: GrantUiamAPIKeyParams,
+    { includeClientAuthentication = true }: GrantUiamApiKeyOptions = {}
+  ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
     );
@@ -552,20 +575,22 @@ export class UiamService implements UiamServicePublic {
           },
         },
       };
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify(body),
+        dispatcher: this.#dispatcher,
+      };
 
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: authorization.toString(),
-          },
-          body: JSON.stringify(body),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, requestOptions)
       );
 
       this.#logger.debug(`Successfully granted API key with id ${response.id}`);
@@ -1141,13 +1166,19 @@ export class UiamService implements UiamServicePublic {
     throw err;
   }
 
-  static #getOAuthTokenExchangeErrorType(err: unknown): string {
+  static #getOAuthTokenExchangeErrorAttributes(err: unknown): {
+    oauthErrorType: string;
+    oauthErrorCode: string | undefined;
+  } {
     if (!Boom.isBoom(err)) {
-      return OAUTH_UNKNOWN_ERROR_TYPE;
+      return { oauthErrorType: OAUTH_UNKNOWN_ERROR_TYPE, oauthErrorCode: undefined };
     }
 
     const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
 
-    return err.data?.errorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE;
+    return {
+      oauthErrorType: err.data?.oauthErrorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE,
+      oauthErrorCode: payload?.error?.code,
+    };
   }
 }

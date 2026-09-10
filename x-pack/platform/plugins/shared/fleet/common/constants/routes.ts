@@ -71,8 +71,16 @@ export const EPM_API_ROUTES = {
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  HAS_DATA_PATTERN: `${DATA_STREAM_API_ROOT}/data`,
   DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
+
+/**
+ * Validates a `logs-<dataset>-*` or `metrics-<dataset>-*` wildcard index pattern, as accepted by
+ * the `dataStreams` query param of `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`. Callers should use
+ * this to drop patterns the route would reject before making the request.
+ */
+export const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-\*$/;
 
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
@@ -123,6 +131,11 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
   UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+};
+
+// IaC Provisioner API routes
+export const IAC_PROVISIONER_API_ROUTES = {
+  RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
 };
 
 // Kubernetes Manifest API routes

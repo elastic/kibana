@@ -6,8 +6,8 @@
  */
 
 /**
- * Fallback deadline for `getSampleDocumentsEsql` / `getDiverseSampleDocuments` /
- * `getEsqlColumnSchema` callers with no better-informed timing budget of their
- * own. Callers with a real deadline should derive their own signal instead.
+ * Fallback deadline for `getSampleDocumentsEsql` / `getEsqlColumnSchema` callers
+ * with no better-informed timing budget of their own. Callers with a real
+ * deadline should derive their own signal instead.
  */
 export const DEFAULT_ESQL_QUERY_TIMEOUT_MS = 30_000;

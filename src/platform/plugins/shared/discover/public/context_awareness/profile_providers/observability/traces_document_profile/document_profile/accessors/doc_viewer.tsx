@@ -10,10 +10,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  GenAiTabImpression,
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
   hasGenAiData,
 } from '@kbn/apm-ui-shared';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import {
   TRACES_DOC_VIEWER_EBT_ELEMENTS,
   UnifiedDocViewerObservabilityTracesGenAi,
@@ -27,7 +29,8 @@ import type { DocViewerExtensionParams } from '../../../../../types';
 export const createGetDocViewer =
   (
     indexes: ObservabilityIndexes,
-    profileId: string
+    profileId: string,
+    reportEvent: AnalyticsServiceStart['reportEvent']
   ): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev, { toolkit }) =>
   (params: DocViewerExtensionParams) => {
@@ -59,7 +62,16 @@ export const createGetDocViewer =
               defaultMessage: 'GenAI',
             }),
             order: 5,
-            prepend: <GenAiTechnicalPreviewBadge />,
+            prepend: (
+              <>
+                <GenAiTabImpression
+                  reportEvent={reportEvent}
+                  element={TRACES_DOC_VIEWER_EBT_ELEMENTS.TABS}
+                  resourceId={params.record.id}
+                />
+                <GenAiTechnicalPreviewBadge />
+              </>
+            ),
             ebt: {
               action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
               element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TABS,

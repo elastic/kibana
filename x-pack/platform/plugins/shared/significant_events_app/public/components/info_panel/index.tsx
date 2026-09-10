@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 
 interface InfoPanelProps {
-  title: string;
+  title: React.ReactNode;
   headerRightContent?: React.ReactNode;
   children: React.ReactNode;
 }

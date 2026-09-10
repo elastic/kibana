@@ -66,6 +66,7 @@ export {
   type PublishesTimeRange,
   type PublishesTimeslice,
   type PublishesUnifiedSearch,
+  type PublishesWritableTimeRange,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
 export {
@@ -79,6 +80,10 @@ export {
   apiPublishesApproximation,
   type PublishesApproximation,
 } from './interfaces/fetch/publishes_approximation';
+export {
+  type PublishesFetchOnlyVisible,
+  apiPublishesFetchOnlyVisible,
+} from './interfaces/fetch/fetch_only_visible';
 export {
   apiHasAppContext,
   type EmbeddableAppContext,
@@ -232,6 +237,7 @@ export {
   childrenUnsavedChanges$,
   DEBOUNCE_TIME as CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
 } from './interfaces/containers/container_state/children_unsaved_changes';
+export { childrenLatestState$ } from './interfaces/containers/container_state/children_latest_state';
 
 export {
   initializeStateApi,

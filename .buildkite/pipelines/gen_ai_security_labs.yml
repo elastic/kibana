@@ -12,15 +12,22 @@ steps:
 
   - wait
 
+  # Always run this step: resolve_reusable_kibana_build.sh picks a recent
+  # kibana-on-merge distributable (≤36h) when KIBANA_BUILD_ID is unset, then
+  # build_kibana.sh short-circuits. Falls back to a full build if none found.
+  # Shared with gen_ai_product_docs.yml. Force a rebuild with KIBANA_REUSE_BUILD=false
+  # or pin a build by setting KIBANA_BUILD_ID on the Buildkite build.
   - label: '🧑‍🏭 Build Kibana Distribution'
-    command: .buildkite/scripts/steps/build_kibana.sh
+    command: |
+      set -euo pipefail
+      source .buildkite/scripts/steps/gen_ai/resolve_reusable_kibana_build.sh
+      .buildkite/scripts/steps/build_kibana.sh
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-8
     key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - wait
 

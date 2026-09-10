@@ -5,24 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { RuleDetailsRoute } from '../routes/rule_details_route';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const RulesApp = () => {
+const SequenceBuilderPage = lazy(() =>
+  import('../pages/sequence_builder_page').then((m) => ({ default: m.SequenceBuilderPage }))
+);
+
+const SequenceBuilderFallback = () => (
+  <EuiLoadingSpinner
+    size="xl"
+    style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}
+  />
+);
+
+export const RulesApp = ({ basePath = '' }: { basePath?: string }) => {
   return (
     <RequireAlertingPrivilege
       features={['rules']}
       pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', { defaultMessage: 'Rules' })}
     >
       <Routes>
-        <Route exact path="/:ruleId">
+        <Route exact path={`${basePath}/sequence/create`}>
+          <Suspense fallback={<SequenceBuilderFallback />}>
+            <SequenceBuilderPage />
+          </Suspense>
+        </Route>
+
+        <Route exact path={`${basePath}/:ruleId`}>
           <RuleDetailsRoute />
         </Route>
-        <Route exact path="/">
+        <Route exact path={`${basePath}/`}>
           <RulesListPage />
         </Route>
       </Routes>

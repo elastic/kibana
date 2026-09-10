@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
+import type { AddressInfo } from 'net';
 import { ReplaySubject, firstValueFrom } from 'rxjs';
 
 import type { Root } from '@kbn/core-root-server-internal';
@@ -21,8 +21,7 @@ import {
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 
-// Failing: See https://github.com/elastic/kibana/issues/171294
-describe.skip('elasticsearch clients', () => {
+describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
 
@@ -69,24 +68,24 @@ function createFakeElasticsearchServer(): Promise<http.Server> {
       res.end();
     });
     server.on('error', reject);
-    server.listen(esTestConfig.getPort(), () => resolve(server));
+    server.listen(0, '127.0.0.1', () => resolve(server));
   });
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/171295
-describe.skip('fake elasticsearch', () => {
+describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
+    esServer = await createFakeElasticsearchServer();
     kibanaServer = createRootWithCorePlugins({
       elasticsearch: {
+        hosts: [`http://127.0.0.1:${(esServer.address() as AddressInfo).port}`],
         healthCheck: { retry: 1 },
       },
       status: { allowAnonymous: true },
     });
-    esServer = await createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();
@@ -116,7 +115,7 @@ describe.skip('fake elasticsearch', () => {
   });
 
   test('should fail to start Kibana because of the Product Check Error', async () => {
-    await expect(kibanaServer.start()).rejects.toThrowError(
+    await expect(kibanaServer.start()).rejects.toThrow(
       'The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });

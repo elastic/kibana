@@ -10,7 +10,10 @@ import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
-import type { SyncTaskState } from './sync_private_locations_monitors_task';
+import {
+  DEFAULT_MAX_CLEANUP_RETRIES,
+  type SyncTaskState,
+} from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
 
 export async function cleanUpDuplicatedPackagePolicies(
@@ -30,9 +33,15 @@ export async function cleanUpDuplicatedPackagePolicies(
     debugLog('Skipping cleanup of duplicated package policies as it has already been done once');
     return { performCleanupSync };
   } else if (taskState.maxCleanUpRetries <= 0) {
-    debugLog('Skipping cleanup of duplicated package policies as max retries have been reached');
+    // `warn`, not `debug`: this is cleanup giving up, and the caller still gets a
+    // success response. Leave the spent budget on the state so the exhaustion is
+    // visible — `resetSyncPrivateCleanUpState` restores it when cleanup is
+    // explicitly requested again.
+    logger.warn(
+      `[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached. ` +
+        `Request cleanup again to retry.`
+    );
     taskState.hasAlreadyDoneCleanup = true;
-    taskState.maxCleanUpRetries = 3;
     return { performCleanupSync };
   }
   debugLog('Starting cleanup of duplicated package policies');
@@ -109,15 +118,36 @@ export async function cleanUpDuplicatedPackagePolicies(
         serverSetup
       );
     }
-    taskState.hasAlreadyDoneCleanup = true;
-    taskState.maxCleanUpRetries = 3;
+    if (performCleanupSync) {
+      // A follow-up sync is required (extras deleted, or expected policies are
+      // missing). Leave hasAlreadyDoneCleanup unset so the next run re-checks
+      // and re-attempts the recreate.
+      //
+      // Only charge the retry budget when this pass made no progress of its own,
+      // i.e. it deleted nothing and is waiting on a recreate that has not landed.
+      // That is the case the budget exists for — a permanently failing recreate
+      // must stop instead of running cleanup every interval. A pass that deleted
+      // policies did real work, and charging it drained the budget during ordinary
+      // churn: three such passes (15 minutes) left the budget at 0, and the next
+      // cleanup — including one explicitly requested through the API — was skipped
+      // while still answering 200.
+      const madeNoProgress = packagePoliciesToDelete.length === 0;
+      if (madeNoProgress) {
+        taskState.maxCleanUpRetries -= 1;
+      }
+    } else {
+      taskState.hasAlreadyDoneCleanup = true;
+      taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
+    }
     return { performCleanupSync };
   } catch (e) {
     taskState.maxCleanUpRetries -= 1;
     if (taskState.maxCleanUpRetries <= 0) {
-      debugLog('Skipping cleanup of duplicated package policies as max retries have been reached');
+      logger.warn(
+        `[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as max retries have been reached. ` +
+          `Request cleanup again to retry.`
+      );
       taskState.hasAlreadyDoneCleanup = true;
-      taskState.maxCleanUpRetries = 3;
     }
     logger.error(
       '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',

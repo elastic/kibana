@@ -1,0 +1,111 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ComponentType } from 'react';
+import type { IconType } from '@elastic/eui';
+import type {
+  Conversation,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '../attachments';
+
+/**
+ * Props shared by conversation details tabs, headers, and footers.
+ */
+export interface ConversationTemplateDetailsFlyoutRenderProps {
+  /** The conversation the flyout is showing. */
+  conversation: Conversation;
+  /** Whether the flyout was opened by the chat's details button rather than the public API. */
+  isOpenedFromChat: boolean;
+}
+
+/**
+ * A reusable conversation flyout tab, registered once and referenced by id from any
+ * number of template UI definitions.
+ */
+export interface ConversationTemplateTabDefinition {
+  /** Localized display label for the tab. */
+  label: string;
+  /**
+   * Tab body. Rendered as a component so it may use hooks.
+   *
+   * Must be self-contained: capture your plugin's services in a closure at registration and
+   * mount any providers you need inside this component. The flyout can render outside any
+   * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
+   */
+  content: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+}
+
+export interface ConversationTemplateBriefCardRenderProps {
+  conversation: ConversationWithoutRoundsWithPermissions;
+}
+
+/** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */
+export interface ConversationTemplateUIContext {
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
+  /** Opens the sidebar using the existing conversation navigation behavior. */
+  openSidebarConversation: (conversationId: string) => void;
+  /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
+  openFullscreenConversation: (options: {
+    conversationId: string;
+    agentId: string;
+  }) => Promise<void>;
+}
+
+/**
+ * UI contributions for a conversation template. Tabs are referenced by id and resolved
+ * at render time, so registration order across plugins does not matter.
+ */
+export interface ConversationTemplateUIDefinition {
+  /** Localized display name for the template, shown in the conversation UI (e.g. title badge). */
+  name: string;
+  /** Optional icon shown alongside the name. */
+  icon?: IconType;
+  /** Tab ids rendered in this order. Ids with no registered tab are skipped. */
+  tabs: readonly string[];
+  /** Self-contained card component; capture solution services and providers at registration. */
+  briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /** Optional flyout content; capture capabilities from the template registration context. */
+  detailsFlyout?: {
+    /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
+    header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
+    footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+  };
+}
+
+/**
+ * Public API for registering conversation template UI.
+ *
+ * Tab ids are a global keyspace — prefix them with your plugin or solution name
+ * (e.g. `security.entities`). Duplicate registration of a tab id or template id throws.
+ */
+export interface ConversationTemplateServiceStartContract {
+  /**
+   * Register a reusable flyout tab with a callback invoked once with Agent Builder capabilities.
+   */
+  registerTab(
+    tabId: string,
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateTabDefinition
+  ): void;
+  /**
+   * Resolve a registered tab, if any.
+   */
+  getTab(tabId: string): ConversationTemplateTabDefinition | undefined;
+  /**
+   * Register template UI with a callback invoked once with Agent Builder capabilities.
+   */
+  registerTemplateUIDefinition(
+    templateId: string,
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateUIDefinition
+  ): void;
+  /**
+   * Resolve the UI definition for a template, if one has been registered.
+   */
+  getTemplateUIDefinition(templateId: string): ConversationTemplateUIDefinition | undefined;
+}

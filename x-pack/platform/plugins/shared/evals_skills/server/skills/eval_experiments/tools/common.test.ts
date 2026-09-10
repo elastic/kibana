@@ -8,6 +8,7 @@
 import type { GeneratedExperimentRun } from '@kbn/evals-plugin/server';
 import {
   EvalExperimentConfigError,
+  assertDatasetsVisible,
   buildResultsLink,
   buildWorkflowLink,
   evalExperimentConfigSchema,
@@ -138,7 +139,7 @@ describe('buildResultsLink', () => {
   it('links single runs to the experiment detail page', () => {
     const link = buildResultsLink('', 'default', singleRun, ['w1']);
     const url = new URL(`http://host${link}`);
-    expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
+    expect(url.pathname).toBe('/app/evals/experiments/x1');
     expect(url.searchParams.get('execution_id')).toBe('e1');
     expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1']);
   });
@@ -146,7 +147,7 @@ describe('buildResultsLink', () => {
   it('links cross-model runs to the run overview and honors base path + space', () => {
     const link = buildResultsLink('/base', 'team-a', crossModelRun, ['w1', 'w2']);
     const url = new URL(`http://host${link}`);
-    expect(url.pathname).toBe('/base/s/team-a/app/management/ai/evals/runs');
+    expect(url.pathname).toBe('/base/s/team-a/app/evals/runs');
     expect(url.searchParams.getAll('execution_id')).toEqual(['launch::c1', 'launch::c2']);
     expect(url.searchParams.getAll('connector')).toEqual(['c1', 'c2']);
     expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1', 'w2']);
@@ -170,7 +171,7 @@ describe('buildResultsLink', () => {
   it('links dataset-fanout runs to the experiment detail page, not the run overview', () => {
     const link = buildResultsLink('', 'default', datasetFanoutRun, ['w1', 'w2']);
     const url = new URL(`http://host${link}`);
-    expect(url.pathname).toBe('/app/management/ai/evals/experiments/x1');
+    expect(url.pathname).toBe('/app/evals/experiments/x1');
     expect(url.searchParams.get('execution_id')).toBe('e1');
     expect(url.searchParams.getAll('workflow_execution_id')).toEqual(['w1', 'w2']);
   });
@@ -185,5 +186,46 @@ describe('buildWorkflowLink', () => {
     expect(buildWorkflowLink('/base', 'team-a', 'wf 1')).toBe(
       '/base/s/team-a/app/workflows/wf%201'
     );
+  });
+});
+
+describe('assertDatasetsVisible', () => {
+  const createDatasetService = (visibleBySpace: Record<string, string[]>) => {
+    const getClient = jest.fn(({ spaceId }: { spaceId: string }) => ({
+      datasetExists: async (datasetId: string) =>
+        (visibleBySpace[spaceId] ?? []).includes(datasetId),
+    }));
+
+    return {
+      datasetService: { getClient } as unknown as Parameters<
+        typeof assertDatasetsVisible
+      >[0]['datasetService'],
+      getClient,
+    };
+  };
+
+  it('passes the datasets the space can see', async () => {
+    const { datasetService, getClient } = createDatasetService({ marketing: ['d1', 'd2'] });
+
+    await expect(
+      assertDatasetsVisible({ datasetService, spaceId: 'marketing', datasetIds: ['d1', 'd2'] })
+    ).resolves.toBeUndefined();
+
+    expect(getClient).toHaveBeenCalledWith({ spaceId: 'marketing' });
+  });
+
+  it('names every dataset the space cannot see', async () => {
+    const { datasetService } = createDatasetService({ marketing: ['d1'], sales: ['d2', 'd3'] });
+
+    const rejection = assertDatasetsVisible({
+      datasetService,
+      spaceId: 'marketing',
+      datasetIds: ['d1', 'd2', 'd3'],
+    });
+
+    // The ids exist, just not here: the message has to say so, or the answer
+    // reads as the datasets having been deleted.
+    await expect(rejection).rejects.toBeInstanceOf(EvalExperimentConfigError);
+    await expect(rejection).rejects.toThrow(/not found in this space: d2, d3/);
   });
 });

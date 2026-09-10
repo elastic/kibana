@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/agent-builder-elastic-ai-index-ki-types",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared"
+}

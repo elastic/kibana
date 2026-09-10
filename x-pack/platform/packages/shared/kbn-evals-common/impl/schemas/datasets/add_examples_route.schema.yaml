@@ -18,6 +18,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
       requestBody:
         required: true
         content:
@@ -27,8 +28,20 @@ paths:
               properties:
                 examples:
                   type: array
+                  # Keep in sync with MAX_EXAMPLES_PER_DATASET in constants.ts
+                  maxItems: 10000
                   items:
                     $ref: '#/components/schemas/AddExamplesPayload'
+                source:
+                  type: string
+                  enum:
+                    - import
+                on_duplicate:
+                  type: string
+                  enum:
+                    - error
+                    - skip
+                  default: error
               required:
                 - examples
       responses:
@@ -41,8 +54,11 @@ paths:
                 properties:
                   added:
                     type: integer
+                  skipped_duplicates:
+                    type: integer
                 required:
                   - added
+                  - skipped_duplicates
         '404':
           description: Dataset not found
           content:

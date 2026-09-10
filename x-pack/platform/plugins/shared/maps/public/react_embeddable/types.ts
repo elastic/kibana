@@ -18,6 +18,7 @@ import type {
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
   PublishesWritableTitle,
+  PublishesRendered,
 } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import type { LayerDescriptor } from '../../common/descriptor_types';
@@ -40,7 +41,8 @@ export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   PublishesProjectRoutingOverrides &
   PublishesWritableTitle &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapByReferenceState, MapByValueState> & {
+  HasLibraryTransforms<MapByReferenceState, MapByValueState> &
+  PublishesRendered & {
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;

@@ -65,6 +65,14 @@ describe('AsyncDomainEventBus', () => {
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(event);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({ labels: { event_type: 'foo' } })
+      );
+      const debugMessage = (mockLogger.debug as jest.Mock).mock.calls.at(-1)![0] as () => string;
+      expect(debugMessage()).toBe('Published domain event');
+      expect(debugMessage()).not.toContain('world');
+      expect(debugMessage()).not.toContain('payload');
     });
 
     it('dispatches handlers asynchronously so publish() returns before handlers run', async () => {

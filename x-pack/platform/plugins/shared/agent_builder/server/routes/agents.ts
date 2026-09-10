@@ -94,7 +94,7 @@ const AI_INDICES_NOT_ENABLED_MESSAGE =
  * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
  * registered by the `agentBuilderSml` plugin, a required dependency of `agentBuilder`.
  */
-const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
+export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
   const { uiSettings } = await ctx.core;
   return Boolean(await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID));
 };
@@ -123,7 +123,7 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   {
     meta: {
       description:
-        '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+        '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
     },
   }
 );
@@ -336,6 +336,18 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
+                  post_execution_workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        maxLength: 512,
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
@@ -469,6 +481,18 @@ export function registerAgentRoutes({
                           meta: {
                             description:
                               'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
+                    post_execution_workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          maxLength: 512,
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.',
                           },
                         }),
                         { maxSize: 100 }

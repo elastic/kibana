@@ -8,33 +8,16 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { isEqual } from 'lodash';
 import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
 
 /**
- * Makes sure the current state is not referencing the source column when using the fields api
- * @param state
- * @param uiSettings
+ * Uses app/URL columns when present, otherwise falling back to the configured default columns.
  */
 export function handleSourceColumnState<TState extends { columns?: string[] }>(
   state: TState,
   uiSettings: IUiSettingsClient
 ): TState {
-  if (!state.columns) {
-    return state;
-  }
-  const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
-
-  // filter out the source column
-  let cleanedColumns = state.columns.filter((column) => column !== '_source');
-  if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
-    cleanedColumns = defaultColumns;
-    // defaultColumns could still contain _source
-    cleanedColumns = cleanedColumns.filter((column) => column !== '_source');
-  }
-
-  return {
-    ...state,
-    columns: cleanedColumns,
-  };
+  return !state.columns || state.columns.length > 0
+    ? state
+    : { ...state, columns: uiSettings.get(DEFAULT_COLUMNS_SETTING) };
 }
