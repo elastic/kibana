@@ -16,7 +16,10 @@ import type {
   FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import {
+  getEntityDefinitionWithoutId,
+  type EntityDefinitionOptions,
+} from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   esqlIsNotNullOrEmpty,
@@ -440,9 +443,9 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   outputColumn: string,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  { withTypeId = true, options }: { withTypeId?: boolean; options?: EntityDefinitionOptions } = {}
 ): string {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType, options);
   const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 

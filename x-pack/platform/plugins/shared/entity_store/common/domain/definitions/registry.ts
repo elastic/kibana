@@ -7,12 +7,19 @@
 
 import assert from 'assert';
 
-import type { EntityType } from './entity_schema';
-import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
+import {
+  EntityType,
+  type EntityDefinitionWithoutId,
+  type ManagedEntityDefinition,
+} from './entity_schema';
 import { hostEntityDefinition } from './host';
-import { userEntityDefinition } from './user';
+import { buildUserEntityDefinition, userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
+
+export interface EntityDefinitionOptions {
+  excludedUserNames?: string[];
+}
 
 const entitiesDefinitionRegistry = {
   host: hostEntityDefinition,
@@ -24,8 +31,12 @@ const entitiesDefinitionRegistry = {
 export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
   `security_${entityType}_${space}`;
 
-export function getEntityDefinition(type: EntityType, namespace: string): ManagedEntityDefinition {
-  const definition = getEntityDefinitionWithoutId(type);
+export function getEntityDefinition(
+  type: EntityType,
+  namespace: string,
+  options?: EntityDefinitionOptions
+): ManagedEntityDefinition {
+  const definition = getEntityDefinitionWithoutId(type, options);
 
   return {
     ...definition,
@@ -34,7 +45,13 @@ export function getEntityDefinition(type: EntityType, namespace: string): Manage
   };
 }
 
-export function getEntityDefinitionWithoutId(type: EntityType): EntityDefinitionWithoutId {
+export function getEntityDefinitionWithoutId(
+  type: EntityType,
+  options?: EntityDefinitionOptions
+): EntityDefinitionWithoutId {
+  if (type === EntityType.enum.user && options?.excludedUserNames?.length) {
+    return buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames });
+  }
   const definition = entitiesDefinitionRegistry[type];
   assert(definition, `No entity description found for type: ${type}`);
 

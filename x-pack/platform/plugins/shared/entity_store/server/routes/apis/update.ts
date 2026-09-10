@@ -16,9 +16,11 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
 import { enforceEntityStorePrivileges } from './utils/check_entity_store_privileges';
+import { MAX_EXCLUDED_USER_NAMES } from '../../domain/saved_objects';
 
 const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
+  logExtraction: LogExtractionUpdadeSchema.optional(),
+  excludedUserNames: z.array(z.string()).max(MAX_EXCLUDED_USER_NAMES).optional(),
 });
 
 export function registerUpdate(router: EntityStorePluginRouter) {
@@ -65,7 +67,10 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         if (forbidden) return forbidden;
 
         try {
-          await logsExtractionClient.updateConfig(req.body.logExtraction);
+          await logsExtractionClient.updateConfig(
+            req.body.logExtraction,
+            req.body.excludedUserNames
+          );
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return res.notFound({ body: { message: 'Entity store is not installed' } });
