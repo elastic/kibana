@@ -15,12 +15,12 @@ import {
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   validateKIQueries,
 } from '@kbn/nightshift-ai';
-import { getSourcesForStream } from '@kbn/streams-schema';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
+import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
   'platform.sig_events.ki_queries_validate';
@@ -77,14 +77,15 @@ export const createValidateQueriesTool = ({
         });
 
         const stream = await scopedClients.streamsClient.getStream(targetId);
+        const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];
-        const [{ hits: features }, { [targetId]: existingLinks }] = await Promise.all([
-          kiClient.getFeatures(targetId, {
+        const [{ hits: features }, { [target.id]: existingLinks }] = await Promise.all([
+          kiClient.getFeatures(target.id, {
             id: featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
-          kiClient.getStreamToQueryLinksMap([targetId]),
+          kiClient.getStreamToQueryLinksMap([target.id]),
         ]);
         const existingQueries = existingLinks.map(({ query }) => ({
           id: query.id,
@@ -99,7 +100,7 @@ export const createValidateQueriesTool = ({
           AbortSignal.timeout(TOOL_EXECUTION_TIMEOUT_MS),
         ]);
         const validationContext = await createQueryValidationContext({
-          sources: getSourcesForStream(stream),
+          sources: target.sources,
           esClient: scopedClients.streamDataEsClient,
           existingQueries,
           signal,

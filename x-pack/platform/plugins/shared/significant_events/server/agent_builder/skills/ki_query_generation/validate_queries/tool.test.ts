@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import {
   createQueryValidationContext,
@@ -34,14 +35,24 @@ const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof va
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as StreamsServer;
-  const stream = { name: 'logs.test' };
+  const stream: Streams.QueryStream.Definition = {
+    name: 'logs.test',
+    description: 'Test logs',
+    type: 'query',
+    updated_at: new Date().toISOString(),
+    query: {
+      view: '$.logs.test',
+      esql: 'FROM $.logs.test',
+    },
+  };
   const streamDataEsClient = { esql: { query: jest.fn() } };
+  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getStreamToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       licensing: {},
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      streamsClient: { getStream },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getFeatures,
         getStreamToQueryLinksMap,
@@ -123,7 +134,7 @@ describe('ki_queries_validate tool', () => {
     expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(false);
   });
 
-  it('resolves stream sources, queries KI state, and returns validated results', async () => {
+  it('resolves an analysis target, queries KI state, and returns validated results', async () => {
     const result = await invokeHandler(
       createTool(),
       { target_id: 'logs.test', queries: [candidate] },
@@ -133,13 +144,14 @@ describe('ki_queries_validate tool', () => {
       throw new Error('Expected a standard tool result');
     }
 
+    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
       id: ['feature-1'],
       excludedType: ['log_samples'],
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        sources: ['logs.test', 'logs.test.*'],
+        sources: ['$.logs.test'],
         esClient: streamDataEsClient,
         existingQueries: [
           expect.objectContaining({

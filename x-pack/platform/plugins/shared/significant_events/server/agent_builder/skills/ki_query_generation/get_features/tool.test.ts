@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
@@ -19,10 +20,25 @@ jest.mock('../../../../routes/utils/assert_significant_events_access', () => ({
 describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as StreamsServer;
+  const stream: Streams.WiredStream.Definition = {
+    name: 'logs.test',
+    description: 'Test logs',
+    updated_at: new Date().toISOString(),
+    type: 'wired',
+    ingest: {
+      lifecycle: { inherit: {} },
+      processing: { steps: [], updated_at: new Date().toISOString() },
+      settings: {},
+      failure_store: { inherit: {} },
+      wired: { fields: {}, routing: [] },
+    },
+  };
+  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       licensing: {},
+      streamsClient: { getStream },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     } as unknown as RouteHandlerScopedClients;
   }) as unknown as jest.MockedFunction<GetScopedClients>;
@@ -63,7 +79,7 @@ describe('ki_features_get tool', () => {
     expect(tool.schema.safeParse({ target_id: 'logs.test', limit: 101 }).success).toBe(false);
   });
 
-  it('loads and compacts features', async () => {
+  it('loads features for an authorized target', async () => {
     const result = await invokeHandler(
       createTool(),
       {
@@ -78,6 +94,7 @@ describe('ki_features_get tool', () => {
       throw new Error('Expected a standard tool result');
     }
 
+    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['entity'],
       minConfidence: 70,
@@ -99,25 +116,23 @@ describe('ki_features_get tool', () => {
         },
       },
     ]);
-    const firstResult = result.results[0];
-    if (firstResult.type !== 'other') throw new Error('Expected other result');
-    const data = firstResult.data as { features: Array<Record<string, unknown>>; count: number };
-    expect(data.features[0]).not.toHaveProperty('run_id');
-    expect(data.features[0]).not.toHaveProperty('stream_name');
   });
 
-  it('returns an Agent Builder error result', async () => {
-    getFeatures.mockRejectedValueOnce(new Error('feature lookup failed'));
+  it('does not read internally stored features when target authorization fails', async () => {
+    getStream.mockRejectedValueOnce(new Error('insufficient privileges'));
 
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test' },
+      { target_id: 'logs.restricted' },
       createMockToolContext()
     );
     if (!('results' in result)) {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(result.results).toEqual([{ type: 'error', data: { message: 'feature lookup failed' } }]);
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(result.results).toEqual([
+      { type: 'error', data: { message: 'insufficient privileges' } },
+    ]);
   });
 });

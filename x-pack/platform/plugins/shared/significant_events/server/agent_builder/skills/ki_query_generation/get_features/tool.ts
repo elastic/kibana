@@ -18,6 +18,7 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../../routes/utils/assert_significant_events_access';
+import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
@@ -57,8 +58,10 @@ export const createGetFeaturesTool = ({
           server,
           licensing: scopedClients.licensing,
         });
+        const stream = await scopedClients.streamsClient.getStream(targetId);
+        const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const { hits } = await kiClient.getFeatures(targetId, {
+        const { hits } = await kiClient.getFeatures(target.id, {
           type: featureTypes,
           minConfidence,
           limit,
