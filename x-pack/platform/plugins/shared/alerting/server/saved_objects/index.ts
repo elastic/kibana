@@ -267,6 +267,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'multiple-isolated',
     management: {
+      icon: 'warning',
       importableAndExportable: true,
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
         const { attributes } = ruleTemplateSavedObject;

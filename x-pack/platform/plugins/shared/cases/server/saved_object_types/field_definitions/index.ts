@@ -59,7 +59,7 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
     importableAndExportable: true,
     visibleInManagement: false,
     getTitle: (so) => so.attributes.name,
-    icon: 'casesApp',
+    icon: 'briefcase',
     // Case export bundles field definitions itself (getTemplatesAndFieldDefinitionsForCases),
     // which already strips legacyKey before returning them — this transform is defense-in-depth
     // for a direct/API-driven export of this type by id, bypassing that bundling path.
