@@ -7,12 +7,12 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { PiiRegexWorkerService } from './regex_worker_service';
-import type { AnonymizationWorkerConfig } from '../../config';
+import type { WorkflowAnonymizationWorkerConfig } from '../../config';
 import type { PiiRegexWorkerTaskPayload } from './types';
 
 function createTestConfig(
-  overrides: Partial<AnonymizationWorkerConfig> = {}
-): AnonymizationWorkerConfig {
+  overrides: Partial<WorkflowAnonymizationWorkerConfig> = {}
+): WorkflowAnonymizationWorkerConfig {
   return {
     enabled: true,
     minThreads: 1,
@@ -21,7 +21,7 @@ function createTestConfig(
     idleTimeout: { asMilliseconds: () => 30_000 },
     taskTimeout: { asMilliseconds: () => 15_000 },
     ...overrides,
-  } as AnonymizationWorkerConfig;
+  } as WorkflowAnonymizationWorkerConfig;
 }
 
 const IP_PAYLOAD: PiiRegexWorkerTaskPayload = {
@@ -39,7 +39,7 @@ describe('PiiRegexWorkerService', () => {
   });
 
   afterEach(async () => {
-    await (service as any).worker?.destroy({ force: true });
+    await service?.stop();
   });
 
   it('executes rules through the worker pool and returns matches', async () => {
@@ -119,5 +119,31 @@ describe('PiiRegexWorkerService', () => {
 
     await expect(service.run(badPayload)).rejects.toThrow();
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  describe('worker queue at capacity', () => {
+    it('throws a distinct "queue at capacity" error distinguishable from rule errors', async () => {
+      service = new PiiRegexWorkerService(createTestConfig(), logger);
+      jest
+        .spyOn((service as any).worker, 'run')
+        .mockRejectedValueOnce(new Error('Task queue is at capacity'));
+
+      await expect(service.run(IP_PAYLOAD)).rejects.toThrow('queue at capacity');
+    });
+
+    it('logs and returns [] in allow_unsafe mode when queue is at capacity', async () => {
+      service = new PiiRegexWorkerService(createTestConfig(), logger);
+      jest
+        .spyOn((service as any).worker, 'run')
+        .mockRejectedValueOnce(new Error('Task queue is at capacity'));
+
+      const results = await service.run(IP_PAYLOAD, 'allow_unsafe');
+
+      expect(results).toEqual([]);
+      expect(logger.error).toHaveBeenCalledWith(
+        'PII regex detection failed; proceeding without anonymization',
+        expect.objectContaining({ error: expect.anything() })
+      );
+    });
   });
 });

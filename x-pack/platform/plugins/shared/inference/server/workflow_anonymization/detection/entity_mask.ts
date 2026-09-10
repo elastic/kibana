@@ -29,6 +29,10 @@ export const generateEntityToken = (
   value: string,
   hashLength = DEFAULT_HASH_LENGTH
 ): string => {
+  if (!entityClass) {
+    throw new Error('entityClass must be a non-empty string');
+  }
+
   const clampedLen =
     Number.isFinite(hashLength) && hashLength > 0
       ? Math.min(Math.floor(hashLength), MAX_HASH_LENGTH)

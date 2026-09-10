@@ -6,7 +6,6 @@
  */
 
 export { assertRe2Compilable } from './assert_re2_compilable';
-export { executeRegexRules } from './execute_regex_rules';
 export { generateEntityToken } from './entity_mask';
 export { PiiRegexWorkerService } from './regex_worker_service';
 export type {
