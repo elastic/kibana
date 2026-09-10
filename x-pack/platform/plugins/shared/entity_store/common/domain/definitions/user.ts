@@ -90,22 +90,8 @@ export function buildUserEntityDefinition(
           whenClauses: [
             // early match local namespace so we don't override IDP ones
             {
-              condition: {
-                and: [
-                  // contains valid local user.name and host.id
-                  localNamespaceGate,
-                  {
-                    or: [
-                      // Rule of Host-Authoritative Source Exclusion
-                      // If it's asset, with host.id + user.name, it's asset.
-                      { field: 'event.kind', includes: 'asset' },
-
-                      // Or it's not an IDP event
-                      { not: idpGate },
-                    ],
-                  },
-                ],
-              },
+              // contains valid local user.name and host.id
+              condition: localNamespaceGate,
               then: USER_ENTITY_NAMESPACE.Local,
             },
             {
