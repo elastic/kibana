@@ -23,7 +23,10 @@ export const canManageRunQuotas = async ({
   }
 
   const result = await authz.checkPrivilegesWithRequest(request).globally({
-    kibana: [authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.manage)],
+    kibana: [
+      authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.manage),
+      authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.configure),
+    ],
   });
   return result.hasAllRequested;
 };
@@ -36,6 +39,8 @@ export const assertCanManageRunQuotas = async ({
   server: SignificantEventsServer;
 }): Promise<void> => {
   if (!(await canManageRunQuotas({ request, server }))) {
-    throw Boom.forbidden('Managing run limits requires Nightshift manage in all spaces');
+    throw Boom.forbidden(
+      'Managing run limits requires Nightshift manage and Nightshift configure in all spaces'
+    );
   }
 };

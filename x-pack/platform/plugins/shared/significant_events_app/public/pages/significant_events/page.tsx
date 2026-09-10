@@ -72,7 +72,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const { canShow, canManage } = getNightshiftCapabilities(nightshift);
+  const { canShow, canManage, canConfigure } = getNightshiftCapabilities(nightshift);
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -220,7 +220,10 @@ export function SignificantEventsPage() {
     ],
     [tab, router]
   );
-  const tabs = allTabs;
+  const tabs = useMemo(
+    () => allTabs.filter((item) => item.id !== 'settings' || canConfigure),
+    [allTabs, canConfigure]
+  );
 
   if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
@@ -287,7 +290,7 @@ export function SignificantEventsPage() {
                       'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                   })}
                 </p>
-                {canManage && (
+                {canManage && canConfigure && (
                   <EuiButton
                     href={router.link('/{tab}', { path: { tab: 'settings' } })}
                     color="danger"
@@ -315,14 +318,14 @@ export function SignificantEventsPage() {
                 })}
               >
                 <p>
-                  {canManage
+                  {canManage && canConfigure
                     ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
                           'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                       })
                     : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
                         defaultMessage:
-                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with Nightshift manage must resume activity from Settings.',
+                          'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Nightshift Manage engines privilege must resume activity from Settings.',
                       })}
                 </p>
                 {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
@@ -333,7 +336,7 @@ export function SignificantEventsPage() {
                     })}
                   </p>
                 )}
-                {canManage && (
+                {canManage && canConfigure && (
                   <EuiButton
                     href={router.link('/{tab}', { path: { tab: 'settings' } })}
                     color="warning"
@@ -360,7 +363,7 @@ export function SignificantEventsPage() {
           )}
           {tab === 'detections' && <DetectionsTab />}
           {tab === 'significant_events' && <SignificantEventsTab />}
-          {tab === 'settings' && <SettingsTab />}
+          {tab === 'settings' && canConfigure && <SettingsTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

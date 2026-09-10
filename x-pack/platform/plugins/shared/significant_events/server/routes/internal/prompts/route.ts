@@ -21,7 +21,7 @@ export const setStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({
@@ -60,7 +60,7 @@ export const resetStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),

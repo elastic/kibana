@@ -34,7 +34,7 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({

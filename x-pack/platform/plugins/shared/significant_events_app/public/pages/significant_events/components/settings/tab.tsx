@@ -86,9 +86,10 @@ export function SettingsTab() {
   const nightshiftCapabilities = getNightshiftCapabilities(
     core.application.capabilities.nightshift
   );
-  const { canManage } = nightshiftCapabilities;
+  const { canManage, canConfigure } = nightshiftCapabilities;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditSettings = canManage && canSaveAdvancedSettings;
+  const canConfigureEngines = canManage && canConfigure;
+  const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
   // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
 
@@ -296,7 +297,7 @@ export function SettingsTab() {
                 'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
-                    'Editing these settings requires the Nightshift "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                    'Editing these settings requires the Nightshift "Manage engines" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
                 }
               )}
             </p>
@@ -304,7 +305,7 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canManage} />
+      <MaintenanceSection canManage={canConfigureEngines} />
 
       <EuiSpacer />
 

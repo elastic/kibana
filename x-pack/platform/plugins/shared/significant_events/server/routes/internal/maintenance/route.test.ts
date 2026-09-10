@@ -52,7 +52,7 @@ describe('cleanup workflow bootstrap route', () => {
     await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
 
     expect(route.security.authz).toEqual({
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     });
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({
       server: params.server,

@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
   NIGHTSHIFT_UI_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 
@@ -42,5 +43,35 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         savedObject: { all: [], read: [] },
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.nightshift.featureRegistry.configureSubFeatureName', {
+          defaultMessage: 'Manage engines',
+        }),
+        description: i18n.translate(
+          'xpack.nightshift.featureRegistry.configureSubFeatureDescription',
+          {
+            defaultMessage: 'Pause activity, edit settings, and manage limits.',
+          }
+        ),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+                name: i18n.translate('xpack.nightshift.featureRegistry.configurePrivilegeName', {
+                  defaultMessage: 'Manage engines',
+                }),
+                includeIn: 'none',
+                api: [NIGHTSHIFT_API_PRIVILEGES.configure],
+                ui: [NIGHTSHIFT_UI_PRIVILEGES.configure],
+                savedObject: { all: [], read: [] },
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 }
