@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -16,15 +16,22 @@ import {
   KiVerificationInputError,
   KiVerificationService,
 } from '../ki_verification';
-import type { KiVerifierWorkflowRunner } from '../ki_verification';
+import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
+
+/** What custom verifier workflows need; absent when the workflows management plugin is not available. */
+export interface WorkflowVerifierStepDependencies {
+  workflowsManagement: KiVerifierWorkflowRunner;
+  /** Whether the request may execute workflows in the space, mirroring the run route's privilege. */
+  checkExecutePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+}
 
 export const createVerifyKiStepDefinition = (
   coreSetup: CoreSetup,
   logger: Logger,
   analyticsService: ContextEngineAnalyticsService,
-  workflowsManagement?: KiVerifierWorkflowRunner
+  workflowVerifierDeps?: WorkflowVerifierStepDependencies
 ) => {
   const service = new KiVerificationService(createKiVerifierRegistry());
 
@@ -43,11 +50,26 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const verifiers = context.input.verifiers?.map((entry) => {
+      const entries = context.input.verifiers ?? [];
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const hasWorkflowVerifiers = entries.some((entry) => typeof entry !== 'string');
+      if (
+        hasWorkflowVerifiers &&
+        workflowVerifierDeps &&
+        !(await workflowVerifierDeps.checkExecutePrivilege(fakeRequest, spaceId))
+      ) {
+        throw new ExecutionError({
+          type: 'PermissionError',
+          message: 'Insufficient privileges to execute workflows as KI verifiers',
+        });
+      }
+
+      const auditLogger = coreStart.security.audit.asScoped(fakeRequest);
+      const verifiers = entries.map((entry): string | KiVerifier => {
         if (typeof entry === 'string') {
           return entry;
         }
-        if (!workflowsManagement) {
+        if (!workflowVerifierDeps) {
           throw new ExecutionError({
             type: 'FeatureDisabledError',
             message:
@@ -55,9 +77,10 @@ export const createVerifyKiStepDefinition = (
           });
         }
         return createWorkflowVerifier(entry, {
-          workflowsManagement,
+          workflowsManagement: workflowVerifierDeps.workflowsManagement,
           request: fakeRequest,
-          spaceId: context.contextManager.getContext().workflow.spaceId,
+          spaceId,
+          auditLogger,
         });
       });
 
@@ -71,7 +94,7 @@ export const createVerifyKiStepDefinition = (
               esClient: context.contextManager.getScopedEsClient(),
               logger,
               abortSignal: context.abortSignal,
-              verifiers,
+              verifiers: context.input.verifiers === undefined ? undefined : verifiers,
             });
           } catch (error) {
             if (error instanceof KiVerificationInputError) {

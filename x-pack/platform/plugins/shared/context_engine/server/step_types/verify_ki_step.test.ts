@@ -60,6 +60,7 @@ describe('verify_ki workflow step', () => {
   let esClient: EsClientMock;
   let telemetry: ReturnType<typeof mockKiStepTelemetry>;
   let workflowsManagement: jest.Mocked<KiVerifierWorkflowRunner>;
+  let checkExecutePrivilege: jest.Mock;
 
   const setContextEngineEnabled = (isEnabled: boolean) => {
     uiSettingsGet.mockResolvedValue(isEnabled);
@@ -81,6 +82,7 @@ describe('verify_ki workflow step', () => {
       getWorkflowExecution: jest.fn(),
       cancelWorkflowExecution: jest.fn(),
     };
+    checkExecutePrivilege = jest.fn().mockResolvedValue(true);
   });
 
   const makeDefinition = (withWorkflows = true) =>
@@ -88,7 +90,7 @@ describe('verify_ki workflow step', () => {
       coreSetup,
       telemetry.logger,
       telemetry.analyticsService,
-      withWorkflows ? workflowsManagement : undefined
+      withWorkflows ? { workflowsManagement, checkExecutePrivilege } : undefined
     );
 
   const runHandler = async (
@@ -467,6 +469,45 @@ describe('verify_ki workflow step', () => {
         verifiersRun: 2,
         failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow'],
       });
+    });
+
+    it('checks the execute privilege in the executing space before dispatching', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(
+        completedWith({ passed: true }) as never
+      );
+
+      await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii' }] });
+
+      expect(checkExecutePrivilege).toHaveBeenCalledWith({ headers: {} }, 'space-a');
+    });
+
+    it('throws a permission error and dispatches nothing when execute is denied', async () => {
+      setContextEngineEnabled(true);
+      checkExecutePrivilege.mockResolvedValue(false);
+
+      const thrown = await runHandler(
+        { attributes: { esql: validEsql } },
+        { verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID, { workflow_id: 'no-pii' }] }
+      ).catch((error) => error);
+
+      expect(thrown).toBeInstanceOf(ExecutionError);
+      expect(thrown.type).toBe('PermissionError');
+      expect(workflowsManagement.executeWorkflow).not.toHaveBeenCalled();
+      expect(telemetry.analyticsService.reportKiVerification).not.toHaveBeenCalled();
+    });
+
+    it('skips the execute privilege check when only built-ins are listed', async () => {
+      setContextEngineEnabled(true);
+      checkExecutePrivilege.mockResolvedValue(false);
+
+      const output = await runHandler(
+        { attributes: { esql: validEsql } },
+        { verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID] }
+      );
+
+      expect(checkExecutePrivilege).not.toHaveBeenCalled();
+      expect(output.passed).toBe(true);
     });
 
     it('throws when a workflow verifier is listed but workflowsManagement is unavailable', async () => {

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/core-security-server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -33,16 +34,18 @@ const execution = (
 
 describe('createWorkflowVerifier', () => {
   let workflowsManagement: jest.Mocked<KiVerifierWorkflowRunner>;
+  let auditLogger: jest.Mocked<AuditLogger>;
   let context: KiVerifierContext;
 
   const makeVerifier = (definition: Partial<Parameters<typeof createWorkflowVerifier>[0]> = {}) =>
     createWorkflowVerifier(
       { workflow_id: 'my-verifier', ...definition },
-      { workflowsManagement, request, spaceId }
+      { workflowsManagement, request, spaceId, auditLogger }
     );
 
   beforeEach(() => {
     jest.useFakeTimers();
+    auditLogger = { log: jest.fn(), enabled: true, includeSavedObjectNames: false };
     workflowsManagement = {
       executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: executionId }),
       getWorkflowExecution: jest.fn(),
@@ -257,10 +260,30 @@ describe('createWorkflowVerifier', () => {
       expect(outcome.passed === false && outcome.reason.length).toBeLessThan(5000);
     });
 
-    it('propagates executeWorkflow errors', async () => {
+    it('propagates executeWorkflow errors and audits the failed run', async () => {
       workflowsManagement.executeWorkflow.mockRejectedValue(new Error('workflow not found'));
 
       await expect(makeVerifier().verify({}, context)).rejects.toThrow('workflow not found');
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'KI verifier failed to run workflow [id=my-verifier]',
+          event: expect.objectContaining({ action: 'workflow_run', outcome: 'failure' }),
+          error: { code: 'Error', message: 'workflow not found' },
+        })
+      );
+    });
+
+    it('audits a dispatched run with its execution id', async () => {
+      completed({ passed: true });
+
+      await makeVerifier().verify({}, context);
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `KI verifier ran workflow [id=my-verifier] [executionId=${executionId}]`,
+          event: expect.objectContaining({ action: 'workflow_run', outcome: 'success' }),
+        })
+      );
     });
 
     it('throws before dispatching when already aborted', async () => {

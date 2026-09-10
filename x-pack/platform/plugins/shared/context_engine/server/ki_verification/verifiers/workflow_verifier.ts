@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AuditEvent, AuditLogger } from '@kbn/core-security-server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -60,7 +61,34 @@ export interface WorkflowVerifierDependencies {
   workflowsManagement: KiVerifierWorkflowRunner;
   request: KibanaRequest;
   spaceId: string;
+  /** Records each verifier workflow run, mirroring the workflow run HTTP route's audit event. */
+  auditLogger?: AuditLogger;
 }
+
+/** Audit action id shared with the workflows management run route. */
+export const WORKFLOW_RUN_AUDIT_ACTION = 'workflow_run';
+
+const workflowRunAuditEvent = (
+  workflowId: string,
+  { executionId, error }: { executionId?: string; error?: unknown }
+): AuditEvent => ({
+  message:
+    error !== undefined
+      ? `KI verifier failed to run workflow [id=${workflowId}]`
+      : `KI verifier ran workflow [id=${workflowId}] [executionId=${executionId}]`,
+  event: {
+    action: WORKFLOW_RUN_AUDIT_ACTION,
+    category: ['database'],
+    type: ['change'],
+    outcome: error !== undefined ? 'failure' : 'success',
+  },
+  ...(error !== undefined && {
+    error:
+      error instanceof Error
+        ? { code: error.name, message: error.message }
+        : { code: 'Unknown', message: String(error) },
+  }),
+});
 
 const fail = (reason: string): KiVerifierOutcome => ({
   passed: false,
@@ -121,7 +149,7 @@ const toOutcome = (workflowId: string, execution: WorkflowExecutionDto): KiVerif
  */
 export const createWorkflowVerifier = (
   { workflow_id: workflowId, timeout_sec: timeoutSec, applies_to: appliesTo }: KiVerifierWorkflow,
-  { workflowsManagement, request, spaceId }: WorkflowVerifierDependencies
+  { workflowsManagement, request, spaceId, auditLogger }: WorkflowVerifierDependencies
 ): KiVerifier => {
   const timeoutMs = (timeoutSec ?? DEFAULT_KI_VERIFIER_TIMEOUT_SEC) * 1000;
 
@@ -137,14 +165,21 @@ export const createWorkflowVerifier = (
     async verify(ki, { abortSignal }) {
       abortSignal?.throwIfAborted();
 
-      const { workflowExecutionId } = await workflowsManagement.executeWorkflow({
-        workflowId,
-        inputs: { ki },
-        request,
-        spaceId,
-        waitForCompletion: false,
-        triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
-      });
+      let workflowExecutionId: string;
+      try {
+        ({ workflowExecutionId } = await workflowsManagement.executeWorkflow({
+          workflowId,
+          inputs: { ki },
+          request,
+          spaceId,
+          waitForCompletion: false,
+          triggeredBy: WORKFLOW_VERIFIER_TRIGGERED_BY,
+        }));
+      } catch (error) {
+        auditLogger?.log(workflowRunAuditEvent(workflowId, { error }));
+        throw error;
+      }
+      auditLogger?.log(workflowRunAuditEvent(workflowId, { executionId: workflowExecutionId }));
       const cancel = () =>
         workflowsManagement
           .cancelWorkflowExecution(workflowExecutionId, spaceId, request)
