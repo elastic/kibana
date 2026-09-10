@@ -11,7 +11,11 @@ import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-comm
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
-import type { PanelAuthoringNote, PanelContentAttempt } from '../resolve_panel';
+import type {
+  InlinePanelOperationType,
+  PanelAuthoringNote,
+  PanelContentAttempt,
+} from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 
 export type ResolveCustomContentTemplate = (params: {
@@ -26,7 +30,10 @@ export type ResolveCustomContentTemplate = (params: {
  * Turns a visualization attachment id into panel content. Injected like the other resolvers so the
  * generate core stays free of store access. Synchronous because the attachment state is in memory.
  */
-export type ResolveAttachmentPanel = (attachmentId: string) => PanelContentAttempt;
+export type ResolveAttachmentPanel = (
+  attachmentId: string,
+  operationType: InlinePanelOperationType
+) => PanelContentAttempt;
 
 export interface OperationExecutionContext {
   logger: Logger;

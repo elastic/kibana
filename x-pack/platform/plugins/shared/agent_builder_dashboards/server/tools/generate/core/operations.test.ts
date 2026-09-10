@@ -2438,11 +2438,112 @@ describe('add_controls / remove_controls operations', () => {
         resolveAttachmentPanel,
       });
 
-      expect(resolveAttachmentPanel).toHaveBeenCalledWith('att-1');
+      expect(resolveAttachmentPanel).toHaveBeenCalledWith('att-1', 'add_panels');
       expect(result.failures).toHaveLength(0);
       expect(result.dashboardData.panels).toEqual([
         expect.objectContaining({ type: 'lens', config: { type: 'lnsXY' } }),
       ]);
+    });
+
+    // add_section takes the same panel inputs as add_panels, so it needs the same resolver wired
+    // in. Without it the materializer throws, which fails the whole dashboard rather than a panel.
+    it('adds an attachment panel inside a new section', async () => {
+      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+        type: 'success',
+        panelContent: { type: 'lens', config: { type: 'lnsXY' } },
+      });
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+        operations: [
+          {
+            operation: 'add_section',
+            title: 'Overview',
+            grid: { y: 0 },
+            panels: [
+              {
+                source: 'attachment',
+                attachment_id: 'att-1',
+                grid: { x: 0, y: 0, w: 24, h: 10 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolveAttachmentPanel,
+      });
+
+      expect(resolveAttachmentPanel).toHaveBeenCalledWith('att-1', 'add_section');
+      expect(result.failures).toHaveLength(0);
+      expect(getSections(result.dashboardData.panels)).toHaveLength(1);
+    });
+
+    it('keeps the section when an attachment inside it cannot be resolved', async () => {
+      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+        type: 'failure',
+        failure: { type: 'add_section', identifier: 'att-missing', error: 'not found' },
+      });
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+        operations: [
+          {
+            operation: 'add_section',
+            title: 'Overview',
+            grid: { y: 0 },
+            panels: [
+              {
+                source: 'attachment',
+                attachment_id: 'att-missing',
+                grid: { x: 0, y: 0, w: 24, h: 10 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolveAttachmentPanel,
+      });
+
+      expect(result.failures).toEqual([
+        expect.objectContaining({ type: 'add_section', identifier: 'att-missing' }),
+      ]);
+      expect(getSections(result.dashboardData.panels)).toHaveLength(1);
+    });
+
+    it('places the resolvable panels when one attachment in the batch fails', async () => {
+      const resolveAttachmentPanel = jest.fn((attachmentId: string) =>
+        attachmentId === 'att-missing'
+          ? ({
+              type: 'failure',
+              failure: { type: 'add_panels', identifier: attachmentId, error: 'not found' },
+            } as const)
+          : ({
+              type: 'success',
+              panelContent: { type: 'lens', config: { type: 'lnsXY' } },
+            } as const)
+      );
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+        operations: [
+          {
+            operation: 'add_panels',
+            panels: [
+              { source: 'attachment', attachment_id: 'att-1', grid: { x: 0, y: 0, w: 24, h: 10 } },
+              {
+                source: 'attachment',
+                attachment_id: 'att-missing',
+                grid: { x: 24, y: 0, w: 24, h: 10 },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolveAttachmentPanel,
+      });
+
+      expect(result.failures).toHaveLength(1);
+      expect(result.dashboardData.panels).toHaveLength(1);
     });
 
     it('records a failure and skips the panel when the attachment cannot be resolved', async () => {

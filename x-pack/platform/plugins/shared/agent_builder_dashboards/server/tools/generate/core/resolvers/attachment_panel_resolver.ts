@@ -15,8 +15,11 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE, toEsqlQueryState } from '@kbn/custom-content-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import {
+  createPanelFailureResult,
+  type InlinePanelOperationType,
+  type PanelContentAttempt,
+} from '../resolve_panel';
 import type { PanelContent } from '../operations/panels';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
@@ -50,9 +53,8 @@ export const createAttachmentPanelResolver = ({
 }: {
   attachments: AttachmentStateManager;
 }) => {
-  return (attachmentId: string): PanelContentAttempt => {
-    const fail = (error: string) =>
-      createPanelFailureResult(DASHBOARD_OPERATION_FAILURE_TYPES.addPanels, attachmentId, error);
+  return (attachmentId: string, operationType: InlinePanelOperationType): PanelContentAttempt => {
+    const fail = (error: string) => createPanelFailureResult(operationType, attachmentId, error);
 
     const record = attachments.getAttachmentRecord(attachmentId);
     if (!record) {

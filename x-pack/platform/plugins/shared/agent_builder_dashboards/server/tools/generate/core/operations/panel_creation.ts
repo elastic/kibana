@@ -15,6 +15,7 @@ import {
 import type { PanelFailure } from '../utils';
 import { getErrorMessage } from '../utils';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import type { InlinePanelOperationType } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
 import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './types';
 import {
@@ -192,7 +193,7 @@ export const createPanelInputMaterializer = ({
 }: {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
-  operationType: DashboardOperation['operation'];
+  operationType: InlinePanelOperationType;
   failures: PanelFailure[];
   resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
@@ -214,7 +215,7 @@ export const createPanelInputMaterializer = ({
       if (!resolveAttachmentPanel) {
         throw new Error('Attachment panel resolver is required for attachment-source panels.');
       }
-      const resolved = resolveAttachmentPanel(item.attachment_id);
+      const resolved = resolveAttachmentPanel(item.attachment_id, operationType);
       if (resolved.type === 'failure') {
         failures.push(resolved.failure);
         return undefined;
