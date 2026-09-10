@@ -2426,9 +2426,6 @@ importers:
       '@kbn/management-settings-utilities':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/utilities
-      '@kbn/management-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/management_test_plugin
       '@kbn/mapbox-gl':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-mapbox-gl
@@ -3614,6 +3611,9 @@ importers:
       '@kbn/ui-actions-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ui_actions
+      '@kbn/ui-ai-components':
+        specifier: workspace:*
+        version: link:src/platform/kbn-ui/ai-components
       '@kbn/ui-app-header':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/app-header
@@ -7319,6 +7319,8 @@ importers:
 
   src/dev: {}
 
+  src/platform/kbn-ui/ai-components: {}
+
   src/platform/kbn-ui/app-header: {}
 
   src/platform/kbn-ui/app-menu: {}
@@ -8492,8 +8494,6 @@ importers:
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
 
   src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
-
-  src/platform/test/plugin_functional/plugins/management_test_plugin: {}
 
   src/platform/test/plugin_functional/plugins/rendering_plugin: {}
 
