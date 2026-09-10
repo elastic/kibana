@@ -11,8 +11,9 @@ paths:
       description: >-
         Batch-retrieve an experiment's traces without one call per trace. The
         trace ids are resolved through the experiment's score documents (never
-        by searching traces-* on experiment attributes), then all the page's
-        spans are fetched from traces-* in a single query. A trace whose spans
+        by searching traces-* on experiment attributes), then the page's spans
+        are fetched from traces-* with one msearch item per trace, so one
+        trace's span volume cannot starve the others. A trace whose spans
         have already aged out of traces-* is still returned as a reference
         with empty spans, so callers can distinguish an expired trace from a
         run that was never traced (which has no reference at all).

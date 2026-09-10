@@ -80,7 +80,6 @@ export const registerGetExperimentTracesRoute = ({
           const aggregationResponse = await evalsContext.evaluationScoreService.search({
             query,
             size: 0,
-            track_total_hits: true,
             aggs: buildExperimentTracesAggregation(role),
           });
 

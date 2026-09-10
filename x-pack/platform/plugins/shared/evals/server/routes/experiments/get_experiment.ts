@@ -20,11 +20,18 @@ import {
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
 } from '@kbn/evals-common';
+import type { Model, ScoreMetadata } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import type { EvalDocSource } from './types';
+
+interface EvalDocSource {
+  '@timestamp'?: string;
+  experiment_name?: string;
+  task?: { model?: Partial<Model> };
+  metadata?: Partial<ScoreMetadata>;
+}
 
 export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned

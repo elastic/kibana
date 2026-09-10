@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from './spaces';
+import { MAX_SCORES_PER_QUERY } from '../constants';
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -335,13 +336,6 @@ export const buildStatsAggregation = () => ({
 // Experiment runs (example x repetition) pagination
 // ---------------------------------------------------------------------------
 
-/**
- * Ceiling on the distinct runs a single aggregation reports, matching
- * MAX_SCORES_PER_QUERY: an experiment cannot have more runs than score
- * documents, and the score endpoints already stop at that many documents.
- */
-const MAX_RUNS_PER_QUERY = 10_000;
-
 export interface ExperimentRunKey {
   dataset_id: string;
   dataset_name: string;
@@ -353,7 +347,7 @@ export interface ExperimentRunKey {
 }
 
 export interface ExperimentRunsPage {
-  /** Distinct runs matching the query, exact up to {@link MAX_RUNS_PER_QUERY}. */
+  /** Distinct runs matching the query, exact up to {@link MAX_SCORES_PER_QUERY}. */
   total: number;
   /** The requested page window, in dataset name / example index / repetition order. */
   runs: ExperimentRunKey[];
@@ -370,7 +364,7 @@ export interface ExperimentRunsPage {
 export const buildExperimentRunsAggregation = () => ({
   runs: {
     composite: {
-      size: MAX_RUNS_PER_QUERY,
+      size: MAX_SCORES_PER_QUERY,
       sources: [
         { dataset_name: { terms: { field: 'example.dataset.name' } } },
         { dataset_id: { terms: { field: 'example.dataset.id' } } },
@@ -400,7 +394,7 @@ interface ExperimentRunsAggregations {
 /**
  * Parses {@link buildExperimentRunsAggregation} into the run keys of the
  * requested page and the exact total. The composite enumerates every run in
- * one response (bounded by {@link MAX_RUNS_PER_QUERY}), so the page is a
+ * one response (bounded by {@link MAX_SCORES_PER_QUERY}), so the page is a
  * slice and the total is the bucket count.
  */
 export const parseExperimentRunsAggregation = (
@@ -463,14 +457,6 @@ export const SCORES_SORT_ORDER: SortField[] = [
 // Experiment traces (resolved through score documents) pagination
 // ---------------------------------------------------------------------------
 
-/**
- * Ceiling on the distinct trace ids a single aggregation enumerates per role,
- * matching MAX_SCORES_PER_QUERY: an experiment cannot reference more task
- * traces than runs, nor more evaluator traces than score documents, and the
- * score endpoints already stop at that many documents.
- */
-const MAX_TRACES_PER_QUERY = 10_000;
-
 export type ExperimentTraceRole = 'task' | 'evaluator';
 
 export interface ExperimentTraceReference {
@@ -481,7 +467,7 @@ export interface ExperimentTraceReference {
 }
 
 export interface ExperimentTracesPage {
-  /** Distinct traces matching the query, exact up to {@link MAX_TRACES_PER_QUERY} per role. */
+  /** Distinct traces matching the query, exact up to {@link MAX_SCORES_PER_QUERY} per role. */
   total: number;
   /** The requested page window: task traces first, then evaluator traces by evaluator name. */
   traces: ExperimentTraceReference[];
@@ -493,13 +479,16 @@ export interface ExperimentTracesPage {
  * repeated on every one of its score documents (one per evaluator), so the
  * composite bucket doubles as deduplication; documents without a trace id
  * (tracing disabled) are skipped entirely. Evaluator traces sort by evaluator
- * name first, keeping one evaluator's traces contiguous across pages.
+ * name first, keeping one evaluator's traces contiguous across pages. Each
+ * role is bounded by {@link MAX_SCORES_PER_QUERY}: an experiment cannot
+ * reference more task traces than runs, nor more evaluator traces than score
+ * documents.
  */
 export const buildExperimentTracesAggregation = (role?: ExperimentTraceRole) => ({
   ...(role !== 'evaluator' && {
     task_traces: {
       composite: {
-        size: MAX_TRACES_PER_QUERY,
+        size: MAX_SCORES_PER_QUERY,
         sources: [{ trace_id: { terms: { field: 'task.trace_id' } } }],
       },
     },
@@ -507,7 +496,7 @@ export const buildExperimentTracesAggregation = (role?: ExperimentTraceRole) => 
   ...(role !== 'task' && {
     evaluator_traces: {
       composite: {
-        size: MAX_TRACES_PER_QUERY,
+        size: MAX_SCORES_PER_QUERY,
         sources: [
           { evaluator_name: { terms: { field: 'evaluator.name' } } },
           { trace_id: { terms: { field: 'evaluator.trace_id' } } },
@@ -525,7 +514,7 @@ interface ExperimentTracesAggregations {
 /**
  * Parses {@link buildExperimentTracesAggregation} into the trace references
  * of the requested page and the exact total. Each composite enumerates every
- * trace of its role in one response (bounded by {@link MAX_TRACES_PER_QUERY}),
+ * trace of its role in one response (bounded by {@link MAX_SCORES_PER_QUERY}),
  * so the page is a slice over the concatenation: task traces, then evaluator
  * traces.
  */
