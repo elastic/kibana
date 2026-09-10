@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { loadMitreArtifact } from '@kbn/security-mitre-attack-server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { secNoneV1 } from '../../../config/privileges/roles';
 import {
   seedMitreEntities,
   deleteAllMitreEntities,
@@ -23,6 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const mitreAttackApi = getService('mitreAttackApi');
   const es = getService('es');
   const log = getService('log');
+  const securitySolutionUtils = getService('securitySolutionUtils');
 
   describe('@ess @serverless GET /internal/mitre/entities', () => {
     before(async () => {
@@ -506,6 +508,30 @@ export default ({ getService }: FtrProviderContext) => {
       it('rejects an empty types string with 400', async () => {
         const { status } = await mitreAttackApi.getEntities({ types: '' });
         expect(status).to.eql(400);
+      });
+    });
+
+    describe('authorization', () => {
+      let noAccessUserApi: ReturnType<typeof mitreAttackApi.withRoleScopedAgent>;
+
+      before(async () => {
+        noAccessUserApi = mitreAttackApi.withRoleScopedAgent(
+          await securitySolutionUtils.createSuperTestWithCustomRole(secNoneV1)
+        );
+      });
+
+      after(async () => {
+        await securitySolutionUtils.cleanUpCustomRoles();
+      });
+
+      it('returns entities for a user with neither rules nor security privileges', async () => {
+        const mockTactic = createMitreTactic();
+        await seedMitreEntities(es, [mockTactic]);
+
+        const { body, status } = await noAccessUserApi.getEntities();
+
+        expect(status).to.eql(200);
+        expect(body.tactics.map((t: { id: string }) => t.id)).to.eql([mockTactic.id]);
       });
     });
   });

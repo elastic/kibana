@@ -56,11 +56,12 @@ describe('registerGetEntitiesRoute', () => {
       expect(routeConfig.access).toBe('internal');
     });
 
-    it('requires securitySolution privilege', () => {
+    it('opts out of authorization with a documented reason', () => {
       registerRoute();
       const routeConfig = router.versioned.get.mock.calls[0][0];
       expect(routeConfig.security?.authz).toEqual({
-        requiredPrivileges: ['securitySolution'],
+        enabled: false,
+        reason: expect.stringContaining('public MITRE ATT&CK reference data'),
       });
     });
   });

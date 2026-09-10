@@ -25,7 +25,9 @@ export const registerGetEntitiesRoute = (
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          enabled: false,
+          reason:
+            'Serves publicly available MITRE reference data bundled with Kibana, any authenticated user may read it',
         },
       },
     })

@@ -71,7 +71,7 @@ In `setup()`, the plugin registers a `mitreAttack` request handler context via `
 | `types` | comma-separated or array of `'tactic'`, `'technique'`, `'subtechnique'` (max 3) | all | Filter by entity type |
 | `status` | `'active'` \| `'all'` | `'active'` | `'all'` includes revoked and deprecated entities |
 
-**Authorization:** requires the `securitySolution` Kibana privilege.
+**Authorization:** the route opts out of authorization (`authz: { enabled: false }`) with a documented reason. It serves public MITRE reference data bundled with Kibana, holds no user or tenant data, and is consumed by features whose privileges differ, so gating on any single privilege would deny legitimate callers. Requests are still authenticated.
 
 **404 when flag off:** the route is only registered when `managedSourceEnabled: true`. Requests when the flag is off receive a 404 rather than a 403, because the route does not exist at all. A request that arrives after the flag is on but before `start()` has finished returns 503, signalling that the client is not yet ready and the caller should retry.
 

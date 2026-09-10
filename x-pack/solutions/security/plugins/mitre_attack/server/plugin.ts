@@ -72,14 +72,16 @@ export class MitreAttackPlugin implements Plugin<MitreAttackServerSetup, MitreAt
       this.logger.error(`Unexpected error during MITRE ATT&CK data population: ${err.message}`);
     });
 
-    this.mitreDataClient = createMitreAttackDataClient({
+    const mitreDataClient = createMitreAttackDataClient({
       savedObjectsRepository,
       logger: this.logger,
       dataService: this.dataService,
     });
 
+    this.mitreDataClient = mitreDataClient;
+
     return {
-      getMitreDataClient: () => this.mitreDataClient,
+      getMitreDataClient: () => mitreDataClient,
     };
   }
 

@@ -15,16 +15,16 @@ export interface MitreAttackServerStart {
    * Returns the data client for querying indexed MITRE ATT&CK entities.
    * Present only when `xpack.mitreAttack.managedSourceEnabled` is true.
    */
-  getMitreDataClient?: () => MitreAttackDataClient | undefined;
+  getMitreDataClient?: () => MitreAttackDataClient;
 }
 
 /**
  * Request handler context for the mitreAttack plugin.
  *
  * Shape differs from the start contract: the start contract encodes "flag off" as method absence
- * (getMitreDataClient is optional); the request context always has the method because routes are
- * only registered when the flag is on, but the method may return undefined during the
- * setup-to-start window before the data client is ready.
+ * and always returns a client when present, since it is only built once start() has created one.
+ * The request context always has the method because routes are registered in setup(), but it may
+ * return undefined for a request arriving in the setup-to-start window.
  */
 export interface MitreAttackApiRequestHandlerContext {
   getMitreDataClient: () => MitreAttackDataClient | undefined;
