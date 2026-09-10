@@ -89,18 +89,25 @@ const pickBestPerFamily = (
   endpoints: InferenceInferenceEndpointInfo[],
   capabilities: string[]
 ): string[] => {
-  const byFamily = new Map<string, InferenceInferenceEndpointInfo>();
-  const candidates = endpoints.filter((ep) =>
-    capabilities.includes(getMetadata(ep)?.capability ?? '')
-  );
-  for (const endpoint of candidates) {
-    const family = getMetadata(endpoint)!.family!;
-    const current = byFamily.get(family);
+  const allowedCapabilities = new Set(capabilities);
+  const bestByFamily = new Map<string, InferenceInferenceEndpointInfo>();
+
+  for (const endpoint of endpoints) {
+    const metadata = getMetadata(endpoint);
+
+    if (metadata?.family == null || !allowedCapabilities.has(metadata.capability ?? '')) {
+      continue;
+    }
+
+    const { family } = metadata;
+    const current = bestByFamily.get(family);
+
     if (!current || isNewer(endpoint, current)) {
-      byFamily.set(family, endpoint);
+      bestByFamily.set(family, endpoint);
     }
   }
-  return [...byFamily.values()].map((endpoint) => endpoint.inference_id);
+
+  return Array.from(bestByFamily.values(), (endpoint) => endpoint.inference_id);
 };
 
 /**
