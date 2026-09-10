@@ -13,6 +13,14 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import type { EsVersion, Config } from '../../functional_test_runner';
 import { FunctionalTestRunner } from '../../functional_test_runner';
 
+/**
+ * Exit code of `scripts/functional_tests` when the run completed and the only reason for the
+ * nonzero exit is failing tests/hooks, all of which are in the JUnit report. Any other error
+ * (config, server start/stop, runner, reporter) exits with 1, so CI can tell whether the JUnit
+ * failures fully explain the exit. Referenced by `.buildkite/scripts/steps/test/ftr_configs.sh`.
+ */
+export const FTR_TEST_FAILURES_EXIT_CODE = 11;
+
 export async function runFtr(options: {
   log: ToolingLog;
   config: Config;
@@ -25,7 +33,8 @@ export async function runFtr(options: {
   const failureCount = await ftr.run(options.signal, options.retry);
   if (failureCount > 0) {
     throw createFailError(
-      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
+      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`,
+      { exitCode: FTR_TEST_FAILURES_EXIT_CODE }
     );
   }
 }

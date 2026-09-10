@@ -114,10 +114,15 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-  # Only sound when the whole config ran (no --bail): every failure must be inspected.
+  # Only sound when the whole config ran (no --bail) and FTR exited with the code it reserves for
+  # "tests failed, nothing else went wrong" (FTR_TEST_FAILURES_EXIT_CODE in
+  # src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_ftr.ts). Any other nonzero
+  # code means a runner/server/config error that the JUnit report does not describe.
   if [[ $lastCode -ne 0 ]]; then
     if [[ -n "$BAIL_ARG" ]]; then
       skipped_on_main_skipped "$config" "--bail is on, config did not run to completion"
+    elif [[ $lastCode -ne 11 ]]; then
+      skipped_on_main_skipped "$config" "exit code $lastCode is not the test-failures code (11); a runner error occurred"
     elif skipped_on_main_applicable; then
       junitArgs=()
       while IFS= read -r junitFile; do
