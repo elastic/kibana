@@ -33,14 +33,14 @@ const pipeline = {
   steps: [
     {
       label: 'LLM Evals: suite owner Slack notify',
-      command: 'true',
+      command: 'exit 1',
       notify: [
         {
           slack: {
             channels: [slackChannel],
             message: `${message}${footer}`,
           },
-          if: 'step.outcome == "passed"',
+          if: 'step.outcome == "hard_failed"',
         },
       ],
     },
