@@ -72,7 +72,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
     const { run } = pluginConfigAccessor.get<PluginConfig>().rules;
-    this.maxQueryResponseSize = run.query.maxResponseSize;
+    this.maxQueryResponseSize = run.query.maxResponseSize.getValueInBytes();
     this.maxActiveGroups = run.alerts.max;
   }
 

@@ -11,7 +11,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { ExecutionHistoryPage } from '../pages/execution_history_page/execution_history_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const ExecutionHistoryApp = () => {
+export const ExecutionHistoryApp = ({ basePath = '' }: { basePath?: string }) => {
   return (
     <RequireAlertingPrivilege
       features={['executionHistory']}
@@ -20,7 +20,7 @@ export const ExecutionHistoryApp = () => {
       })}
     >
       <Routes>
-        <Route exact path="/">
+        <Route exact path={`${basePath}/`}>
           <ExecutionHistoryPage />
         </Route>
       </Routes>
