@@ -221,7 +221,21 @@ export async function identifyKIQueries({
             };
           }
           // Reload authoritative features because Agent Builder tool calls cannot share closure state.
-          const features = await getFeatures();
+          let features: Feature[];
+          try {
+            features = await getFeatures();
+          } catch (error) {
+            toolUsage.add_queries.failures += 1;
+            toolUsage.add_queries.latency_ms += Date.now() - startTime;
+            const errorMessage = getErrorMessage(error);
+            logger.warn(`Failed to fetch stream features for query validation: ${errorMessage}`);
+            return {
+              response: {
+                queries: [],
+                error: errorMessage,
+              },
+            };
+          }
           const {
             results: queryValidationResults,
             acceptedQueries,
