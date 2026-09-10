@@ -102,6 +102,54 @@ describe('utils', () => {
       expect(result.metadata.description).toBe('Existing desc');
     });
 
+    it('clears tags when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.metadata.tags).toBeUndefined();
+    });
+
+    it('preserves existing tags when update omits them', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('sets tags when update provides a value', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['old'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: ['prod', 'infra'] },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
     it('clears state_transition when update sends null (immediate mode)', () => {
       const existing = createRuleSoAttributes({
         state_transition: { pending_count: 3 },
