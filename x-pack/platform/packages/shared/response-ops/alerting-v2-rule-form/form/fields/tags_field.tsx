@@ -14,7 +14,7 @@ import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { useRuleFormMeta, useRuleFormServices } from '../contexts';
 import { useFetchRuleTags } from '../hooks/use_fetch_rule_tags';
-import { OPTIONAL_LABEL } from '../translations';
+import { OPTIONAL_LABEL } from '../optional_field_label';
 
 export const validateTags = (value?: string[]): true | string => {
   if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {

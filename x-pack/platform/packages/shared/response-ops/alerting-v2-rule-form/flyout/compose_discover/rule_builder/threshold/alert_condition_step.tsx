@@ -63,7 +63,7 @@ import {
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
-import { OPTIONAL_LABEL } from '../../../../form/translations';
+import { OPTIONAL_LABEL } from '../../../../form/optional_field_label';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
@@ -700,7 +700,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.filterLabel', {
                   defaultMessage: 'Filter',
                 })}
-                labelAppend={<EuiText size="xs">{OPTIONAL_LABEL}</EuiText>}
+                labelAppend={OPTIONAL_LABEL}
                 fullWidth
               >
                 <EuiFieldText

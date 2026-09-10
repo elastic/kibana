@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const OPTIONAL_LABEL = i18n.translate('xpack.alertingV2.ruleForm.optionalLabel', {
-  defaultMessage: 'optional',
-});
+export const OPTIONAL_LABEL = (
+  <EuiText size="xs" color="subdued">
+    {i18n.translate('xpack.alertingV2.ruleForm.optionalLabel', {
+      defaultMessage: 'optional',
+    })}
+  </EuiText>
+);
