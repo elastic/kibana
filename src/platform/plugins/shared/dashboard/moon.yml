@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/ui-ai-components'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/deeplinks-analytics'
   - '@kbn/react-kibana-context-render'

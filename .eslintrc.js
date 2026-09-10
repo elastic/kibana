@@ -3157,6 +3157,7 @@ module.exports = {
               '!@kbn/ui-chrome-layout',
               '!@kbn/ui-app-menu',
               '!@kbn/ui-favorite-button',
+              '!@kbn/ui-ai-components',
             ],
           },
         ],

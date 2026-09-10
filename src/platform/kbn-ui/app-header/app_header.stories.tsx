@@ -13,6 +13,7 @@ import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
 import { EuiPageTemplate } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout';
 import type {
   AppHeaderBack,
   AppHeaderBadge,
@@ -33,6 +34,8 @@ interface ComposedHeaderStoryProps {
   showBadges: boolean;
   secondaryContent: 'description' | 'metadata' | 'none';
   showFavorite: boolean;
+  showShare: boolean;
+  showEnhance: boolean;
   showMenu: boolean;
 }
 
@@ -114,6 +117,8 @@ const ComposedHeader = ({
   showBadges,
   secondaryContent,
   showFavorite,
+  showShare,
+  showEnhance,
   showMenu,
 }: ComposedHeaderStoryProps) => {
   const [title, setTitle] = useState(initialTitle);
@@ -150,6 +155,20 @@ const ComposedHeader = ({
             ? {
                 status: 'unfavorited',
                 onToggle: action('favorite'),
+              }
+            : undefined
+        }
+        share={
+          showShare
+            ? {
+                onClick: action('share'),
+              }
+            : undefined
+        }
+        experimentalDashboardAiAction={
+          showEnhance
+            ? {
+                onClick: action('enhance'),
               }
             : undefined
         }
@@ -202,6 +221,8 @@ const meta: Meta<ComposedHeaderStoryProps> = {
     showBadges: true,
     secondaryContent: 'metadata',
     showFavorite: true,
+    showShare: false,
+    showEnhance: false,
     showMenu: true,
   },
 };
@@ -225,7 +246,64 @@ export const TitleOnly: Story = {
     showBadges: false,
     secondaryContent: 'none',
     showFavorite: false,
+    showShare: false,
+    showEnhance: false,
     showMenu: false,
+  },
+};
+
+export const TitleActionsShareFavoriteEnhance: Story = {
+  args: {
+    showBack: false,
+    showTabs: false,
+    showBadges: false,
+    secondaryContent: 'none',
+    showFavorite: true,
+    showShare: true,
+    showEnhance: true,
+    showMenu: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Title actions after the title: Share, Favorite, then Enhance, then the app menu. ' +
+          'At m / l / xl the Enhance control is labeled; at s / xs it is icon-only.',
+      },
+    },
+  },
+};
+
+export const NarrowEnhanceIconOnly: Story = {
+  render: (args) => (
+    <div
+      id={APP_MAIN_SCROLL_CONTAINER_ID}
+      css={css`
+        width: 480px;
+      `}
+    >
+      <ComposedHeader {...args} />
+    </div>
+  ),
+  args: {
+    width: 480,
+    showBack: false,
+    showTabs: false,
+    showBadges: false,
+    secondaryContent: 'none',
+    showFavorite: true,
+    showShare: true,
+    showEnhance: true,
+    showMenu: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Same title actions at a narrow application width (`s` / `xs`). Enhance is icon-only ' +
+          'with a tooltip; aria-label stays "Enhance".',
+      },
+    },
   },
 };
 
