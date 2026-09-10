@@ -443,9 +443,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isActivityConfigDisabled(
-                          scheduledDiscovery.draft.enabled
-                        )}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -475,9 +473,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isActivityConfigDisabled(
-                          scheduledDiscovery.draft.enabled
-                        )}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -504,9 +500,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isActivityConfigDisabled(
-                          scheduledDiscovery.draft.enabled
-                        )}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -537,9 +531,7 @@ export function SettingsTab() {
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                         max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={isActivityConfigDisabled(
-                          scheduledDiscovery.draft.enabled
-                        )}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -569,9 +561,7 @@ export function SettingsTab() {
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
                         max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                        disabled={isActivityConfigDisabled(
-                          scheduledDiscovery.draft.enabled
-                        )}
+                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
                       />
                     </EuiFormRow>
                   </>
@@ -795,9 +785,7 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_EXTRACTION_INTERVAL_HOURS}
-                        disabled={isActivityConfigDisabled(
-                          continuousExtraction.draft.enabled
-                        )}
+                        disabled={isActivityConfigDisabled(continuousExtraction.draft.enabled)}
                       />
                     </EuiFormRow>
                   </>
