@@ -28,6 +28,7 @@ import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import type { MlApi } from '../ml_api_service';
+import { getIsMlCpsEnabled } from '../ml_server_info';
 
 export interface ResultResponse {
   success: boolean;
@@ -67,7 +68,7 @@ export interface ScheduledEventsByBucket extends ResultResponse {
   events: Record<string, any>;
 }
 
-export function resultsServiceRxProvider(mlApi: MlApi, isMlCpsEnabled: boolean) {
+export function resultsServiceRxProvider(mlApi: MlApi) {
   return {
     getMetricData(
       index: string,
@@ -82,6 +83,7 @@ export function resultsServiceRxProvider(mlApi: MlApi, isMlCpsEnabled: boolean) 
       intervalMs: number,
       datafeedConfig?: Datafeed
     ): Observable<MetricData> {
+      const isMlCpsEnabled = getIsMlCpsEnabled();
       const scriptFields = datafeedConfig?.script_fields;
       const aggFields = getDatafeedAggregations(datafeedConfig);
       const projectRouting = datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;

@@ -16,6 +16,7 @@ import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs
 
 import type { MlApi } from '../ml_api_service';
 import type { ResultResponse } from './result_service_rx';
+import { getIsMlCpsEnabled } from '../ml_server_info';
 
 export interface ScoresByBucketResults extends ResultResponse {
   cardinality: number;
@@ -38,7 +39,7 @@ export interface RecordMaxScoreByTimeResults extends ResultResponse {
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
  */
-export function resultsServiceProvider(mlApi: MlApi, isMlCpsEnabled: boolean) {
+export function resultsServiceProvider(mlApi: MlApi) {
   return {
     // Obtains the maximum bucket anomaly scores by job ID and time.
     // Pass an empty array or ['*'] to search over all job IDs.
@@ -264,6 +265,7 @@ export function resultsServiceProvider(mlApi: MlApi, isMlCpsEnabled: boolean) {
       projectRouting?: string
     ): Promise<EventRateDataResults> {
       return new Promise((resolve, reject) => {
+        const isMlCpsEnabled = getIsMlCpsEnabled();
         const obj: EventRateDataResults = { success: true, total: 0, results: {} };
 
         // Build the criteria to use in the bool filter part of the request.

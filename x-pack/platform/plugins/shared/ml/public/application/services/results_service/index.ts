@@ -9,7 +9,6 @@ import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
 import type { MlApi } from '../ml_api_service';
 import { useMlApi } from '../../contexts/kibana';
-import { getIsMlCpsEnabled } from '../ml_server_info';
 
 export type MlResultsService = ReturnType<typeof resultsServiceProvider> &
   ReturnType<typeof resultsServiceRxProvider>;
@@ -24,11 +23,9 @@ let mlResultsService: MlResultsService;
 export function mlResultsServiceProvider(mlApi: MlApi) {
   if (mlResultsService) return mlResultsService;
 
-  const isMlCpsEnabled = getIsMlCpsEnabled();
-
   mlResultsService = {
-    ...resultsServiceProvider(mlApi, isMlCpsEnabled),
-    ...resultsServiceRxProvider(mlApi, isMlCpsEnabled),
+    ...resultsServiceProvider(mlApi),
+    ...resultsServiceRxProvider(mlApi),
   };
 
   return mlResultsService;

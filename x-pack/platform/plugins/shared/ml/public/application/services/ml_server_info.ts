@@ -17,6 +17,7 @@ let defaults: MlServerDefaults = {
   datafeeds: {},
 };
 let limits: MlServerLimits = {};
+let loaded = false;
 
 const cloudInfo: CloudInfo = {
   cloudId: null,
@@ -38,6 +39,7 @@ export async function loadMlServerInfo(mlApi: MlApi) {
     cloudInfo.isCloudTrial = resp.isCloudTrial === true;
     cloudInfo.deploymentId = !resp.cloudId ? null : extractDeploymentId(resp.cloudId);
     cloudInfo.isMlCpsEnabled = resp.isMlCpsEnabled;
+    loaded = true;
     return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
     return { defaults, limits, cloudId: cloudInfo };
@@ -70,6 +72,10 @@ export function getCloudDeploymentId(): string | null {
 
 export function getIsMlCpsEnabled(): boolean {
   return cloudInfo.isMlCpsEnabled;
+}
+
+export function isMlServerInfoLoaded(): boolean {
+  return loaded;
 }
 
 export function extractDeploymentId(cloudId: string) {
