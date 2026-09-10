@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
@@ -20,7 +20,7 @@ export const getUiamClientAuthentication = (
   request: KibanaRequest
 ): UiamClientAuthentication | undefined => {
   const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-  if (authorization?.scheme.toLowerCase() !== 'bearer') {
+  if (authorization?.scheme.toLowerCase() !== 'bearer' || !isUiamCredential(authorization)) {
     return undefined;
   }
 

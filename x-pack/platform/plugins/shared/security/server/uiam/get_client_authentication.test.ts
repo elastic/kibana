@@ -40,6 +40,16 @@ describe('getUiamClientAuthentication', () => {
     }
   );
 
+  it('uses Kibana client authentication for non-UIAM bearer tokens', () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'Bearer some_non_uiam_token',
+        'x-client-authentication': 'upstream-secret',
+      },
+    });
+    expect(getUiamClientAuthentication(request)).toBeUndefined();
+  });
+
   it('uses Kibana client authentication for internally created bearer tokens', () => {
     const request = httpServerMock.createFakeKibanaRequest({
       headers: { authorization: 'Bearer essu_token' },
