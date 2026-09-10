@@ -85,12 +85,17 @@ SUITE_PROFILES = {
         "cli_suite": "attack-discovery-agent-builder",
         "gate_suite_id": "attack-discovery-agent-builder",
         "vm_prefix": "orca-ad",
-        # 9 datasets x 1 example each, MEASURED from a completed canary run
-        # (orca-ad-openai-gpt-5-4, 2026-09-02, "9 passed"): 117 score docs over
-        # 9 datasets x 13 evaluators. Source-counting src/dataset.ts gives 5 and
-        # misses the scenario-registry + clean-profile specs entirely -- two
-        # separate wrong answers before the live run settled it.
-        "n_examples": 9,
+        # 10 datasets x 1 example each, MEASURED from a completed dense canary
+        # (orca-base-builder-v7, feat/ad-dense-seed-profile @ 5303a12a6, 2026-09-10,
+        # "10 passed (21.2m)"): 130 score docs over 10 datasets x 13 evaluators.
+        # The 10th is the dense-profile spec (dense_profile_live_retrieval.spec.ts),
+        # which seeds 95 alerts and runs live-retrieval; its final answer confirms
+        # ~100 alerts analysed (4 chains, 16 rules, 194K input tokens) --
+        # magnitude-comparable to the reference artifact's 95. Source-counting
+        # src/dataset.ts gives 5 and misses the scenario-registry specs entirely.
+        # REQUIRES orca-eval-base-v7 (baked from ad-dense merged with this branch):
+        # v5 has no dense spec, so a v5 VM would emit 117 and fail this gate.
+        "n_examples": 10,
         # Uniform grid (every dataset runs all 13 evaluators), so the
         # examples x evaluators product is exact.
         "gate": "exact",
@@ -1356,7 +1361,7 @@ def self_test() -> int:
 
         # Doc-count gate: expected docs are per-suite, counted from the datasets.
         check("persona n_examples", SUITE_PROFILES["security-persona-matrix"]["n_examples"], 21)
-        check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 9)
+        check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 10)
         # AD ignores PERSONA_MATRIX_SHARD (measured 2026-09-08: 24/24 units
         # exported the full 117-doc grid under per-shard execution_ids), so
         # its gate must not slice the expectation by shard.
