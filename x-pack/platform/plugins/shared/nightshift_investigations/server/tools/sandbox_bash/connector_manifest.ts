@@ -6,70 +6,13 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
-import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import type { AgentConnector } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxApiClient } from './grpc_client';
 import type { SandboxCallContext } from './tool_utils';
-import { HTTP_CONNECTOR_TYPE_ID, renderHttpConnectorSection } from './http_connector_adapter';
 
-const renderElasticsearchSection = (): string => `## elasticsearch (synthetic — always available)
-
-Queries the Elasticsearch cluster this Kibana is connected to, running as the current user.
-Elasticsearch RBAC applies.
-
-### esql
-Run an ES|QL query. Returns an array of JSON objects.
-Params: \`{"query": "FROM index | LIMIT 10", "limit": 100}\`
-
-### resolve_index
-List indices matching a wildcard. Params: \`{"pattern": "logs-*"}\`
-
-### get_mapping
-Return field types (field_caps). Params: \`{"pattern": "logs-*", "fields": "*"}\``;
-
-const renderConnectorSection = (connector: AgentConnector): string => {
-  if (connector.actionTypeId === HTTP_CONNECTOR_TYPE_ID) {
-    return renderHttpConnectorSection(connector.name, connector.id);
-  }
-
-  const spec = getConnectorSpec(connector.actionTypeId);
-  const lines: string[] = [
-    `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`,
-  ];
-
-  if (!spec) {
-    lines.push(
-      '',
-      '*Sub-actions are not documented for this connector type. Probe with a test call to discover available sub-actions.*'
-    );
-    return lines.join('\n');
-  }
-
-  const toolActions = Object.entries(spec.actions ?? {}).filter(([name]) =>
-    isToolAction(spec, name)
-  );
-
-  if (toolActions.length === 0) {
-    lines.push('', '*No tool sub-actions available for this connector type.*');
-    return lines.join('\n');
-  }
-
-  for (const [name, action] of toolActions) {
-    lines.push('', `### ${name}`);
-    if (action.description) lines.push(action.description);
-    if (action.scope) lines.push(`Scope: ${action.scope}`);
-    try {
-      const paramSchema = formatSchemaForLlm(action.input);
-      if (paramSchema) lines.push(`Params schema: ${paramSchema}`);
-    } catch {
-      // formatSchemaForLlm may throw for complex schemas — skip gracefully
-    }
-  }
-
-  return lines.join('\n');
-};
+const renderConnectorSection = (connector: AgentConnector): string =>
+  `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
 
 export const writeConnectorManifest = async ({
   conversationId,
@@ -89,19 +32,27 @@ export const writeConnectorManifest = async ({
   const sections: string[] = [
     '# Sandbox Connectors',
     '',
-    'Use `sandbox-cb` to call connectors from bash:',
+    'Connector credentials are never stored in this sandbox. To use a connector, pass its id as the',
+    '`connector_id` parameter of the bash tool. For that single command only, the environment contains:',
+    '',
+    '- `CONNECTOR_ID`, `CONNECTOR_TYPE`',
+    '- `CONNECTOR_CONFIG_<KEY>` for each connector setting (e.g. `CONNECTOR_CONFIG_APIURL`)',
+    '- `CONNECTOR_SECRET_<KEY>` for each credential (e.g. `CONNECTOR_SECRET_TOKEN`, `CONNECTOR_SECRET_APIKEY`)',
+    '',
+    'Keys are upper-cased with non-alphanumerics replaced by `_`. Discover the names available for a connector with:',
     '```bash',
-    'sandbox-cb --connector-id <id> --sub-action <name> --sub-action-params \'{"key":"value"}\'',
+    'env | grep ^CONNECTOR_ | cut -d= -f1',
     '```',
-    'Exit 0: JSON on stdout. Exit 1: error on stderr. Exit 2: transport error.',
-    '',
-    '---',
-    '',
-    renderElasticsearchSection(),
+    'Then call the service directly, e.g.:',
+    '```bash',
+    'curl -sS -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."',
+    '```',
+    'Never print, log, or write credential values to files; they are redacted from command output.',
+    'Only the connectors listed below can be requested.',
   ];
 
   if (connectors.length === 0) {
-    sections.push('', '---', '', '*(No third-party connectors are assigned to this agent.)*');
+    sections.push('', '---', '', '*(No connectors are assigned to this agent.)*');
   } else {
     for (const connector of connectors) {
       sections.push('', '---', '', renderConnectorSection(connector));

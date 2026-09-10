@@ -823,7 +823,11 @@ export class SandboxApiClient {
 
 // ---------------------------------------------------------------------------
 // SandboxConnectionManager — wraps SandboxApiClient with per-conversation
-// initialization (workspace restore + connector credential seeding).
+// initialization (workspace restore + connector manifest write).
+//
+// Commands run over the unary RunCommand RPC only. Kibana never serves connector
+// callbacks from inside the sandbox: connector credentials are resolved in Kibana
+// and injected into a single command's environment by the bash tool instead.
 // ---------------------------------------------------------------------------
 
 type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
@@ -835,9 +839,6 @@ export class SandboxConnectionManager {
     conversationId: string,
     callContext: SandboxCallContext
   ) => Promise<void>;
-  private readonly createCallbackHandler?: (
-    callContext: SandboxCallContext
-  ) => (req: ConnectorCallbackRequest) => Promise<ConnectorCallbackResult>;
   /** Tracks conversations that have been initialized (restore + manifest write). */
   private readonly initialized = new Map<string, Promise<void>>();
   /** conversationId → JSON.stringify(allowedConnectorIds) for manifest refresh detection. */
@@ -849,18 +850,13 @@ export class SandboxConnectionManager {
     config,
     logger,
     writeManifest,
-    createCallbackHandler,
   }: {
     config: SandboxConfig;
     logger: Logger;
     writeManifest?: (conversationId: string, callContext: SandboxCallContext) => Promise<void>;
-    createCallbackHandler?: (
-      callContext: SandboxCallContext
-    ) => (req: ConnectorCallbackRequest) => Promise<ConnectorCallbackResult>;
   }) {
     this.logger = logger;
     this.writeManifest = writeManifest;
-    this.createCallbackHandler = createCallbackHandler;
     this.apiClient = new SandboxApiClient({
       host: config.sandbox_api_host,
       port: config.sandbox_api_port,
@@ -878,30 +874,9 @@ export class SandboxConnectionManager {
   ): Promise<RunCommandResult> {
     await this.ensureInitialized(conversationId, callContext);
     await this.maybeRefreshManifest(conversationId, callContext);
-    const handler =
-      this.createCallbackHandler?.(callContext) ??
-      (() =>
-        Promise.resolve({
-          status: 'error' as const,
-          error_message: 'Connector callbacks not configured',
-        }));
-    return this.withUnavailableReset(conversationId, async () => {
-      try {
-        return await this.apiClient.runCommandBidi(conversationId, params, handler);
-      } catch (err) {
-        // Fall back to non-bidi RunCommand when the server doesn't implement RunCommandBidi.
-        // Connector callbacks are not supported in this mode.
-        if (
-          err &&
-          typeof err === 'object' &&
-          'code' in err &&
-          (err as { code: number }).code === grpc.status.UNIMPLEMENTED
-        ) {
-          return this.apiClient.runCommand(conversationId, params);
-        }
-        throw err;
-      }
-    });
+    return this.withUnavailableReset(conversationId, () =>
+      this.apiClient.runCommand(conversationId, params)
+    );
   }
 
   async statFiles(

@@ -39,7 +39,7 @@ import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_to
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
-import { createConnectorCallbackHandler } from './tools/sandbox_bash/connector_callbacks';
+import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -75,6 +75,8 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
+  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
+  private canEncrypt = false;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -86,6 +88,7 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerSetup {
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
+    this.canEncrypt = plugins.encryptedSavedObjects?.canEncrypt ?? false;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
@@ -118,9 +121,10 @@ export class NightshiftInvestigationsPlugin
 
       const config = this.ctx.config.get();
       if (config.sandbox) {
+        const sandboxLogger = this.logger.get('sandbox_bash_tool');
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
-          logger: this.logger.get('sandbox_bash_tool'),
+          logger: sandboxLogger,
           writeManifest: (conversationId, callContext) =>
             writeConnectorManifest({
               conversationId,
@@ -129,18 +133,21 @@ export class NightshiftInvestigationsPlugin
               getActionsClient: this.actionsStart
                 ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
                 : undefined,
-              logger: this.logger.get('sandbox_bash_tool'),
+              logger: sandboxLogger,
             }),
-          createCallbackHandler: (callContext) => (cb) =>
-            createConnectorCallbackHandler({
-              getActionsClient: this.actionsStart
-                ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
-                : undefined,
-              logger: this.logger.get('sandbox_bash_tool'),
-            })(callContext, cb),
         });
         this.sandboxConnectionManager = connectionManager;
-        const sandboxLogger = this.logger.get('sandbox_bash_tool');
+
+        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        const resolveConnectorCredentials = createConnectorCredentialResolver({
+          getDeps: () => ({
+            actions: this.actionsStart,
+            encryptedSavedObjects: this.encryptedSavedObjectsStart,
+            canEncrypt: this.canEncrypt,
+            spaces: this.spaces,
+          }),
+          logger: sandboxLogger.get('connector_credentials'),
+        });
 
         const workspaceManager = new WorkspaceManager({
           config: config.sandbox,
@@ -153,7 +160,11 @@ export class NightshiftInvestigationsPlugin
         );
 
         plugins.agentBuilder.tools.register(
-          createSandboxBashTool({ connectionManager, logger: sandboxLogger })
+          createSandboxBashTool({
+            connectionManager,
+            resolveConnectorCredentials,
+            logger: sandboxLogger,
+          })
         );
         plugins.agentBuilder.tools.register(
           createSandboxViewFileTool({ connectionManager, logger: sandboxLogger })
@@ -226,6 +237,7 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
     this.actionsStart = plugins.actions;
+    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

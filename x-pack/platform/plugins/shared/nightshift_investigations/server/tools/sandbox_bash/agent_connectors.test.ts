@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { SandboxCallContext } from './tool_utils';
 import { listAgentConnectors } from './agent_connectors';
@@ -15,7 +15,6 @@ const SECRET_WEBHOOK_URL = 'https://hooks.slack.example/T000/B000/super-secret-t
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
   request: {} as KibanaRequest,
   allowedConnectorIds,
-  esClient: {} as IScopedClusterClient,
 });
 
 const createConnector = ({

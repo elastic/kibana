@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 
@@ -28,16 +28,14 @@ export const resolveAbsolutePath = (filePath: string): string => {
 
 export interface SandboxCallContext {
   request: KibanaRequest;
+  /** Per-agent connector allow-list; credentials are never injected for connectors outside it. */
   allowedConnectorIds: readonly string[];
-  esClient: IScopedClusterClient;
 }
 
 export const getSandboxCallContext = (context: {
   request: KibanaRequest;
   agentConfiguration?: AgentConfiguration;
-  esClient: IScopedClusterClient;
 }): SandboxCallContext => ({
   request: context.request,
   allowedConnectorIds: context.agentConfiguration?.connector_ids ?? [],
-  esClient: context.esClient,
 });

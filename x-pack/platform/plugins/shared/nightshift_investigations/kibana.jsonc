@@ -16,6 +16,7 @@
     "optionalPlugins": [
       "actions",
       "agentBuilder",
+      "encryptedSavedObjects",
       "ruleRegistry",
       "searchInferenceEndpoints",
       "spaces",
