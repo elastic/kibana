@@ -7,13 +7,9 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  ALERT_EPISODE_STATUS,
-  type BulkCreateEpisodeAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type BulkActivateEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateEpisodeAlertActions } from './bulk_create_alert_actions';
+import { bulkActivateEpisodeActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 
@@ -33,17 +29,16 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     // Mirror isCompatible: on a mixed selection, only reopen the episodes
     // that are currently inactive.
-    const items: BulkCreateEpisodeAlertActionBody = episodes
+    const items: BulkActivateEpisodeActionItem[] = episodes
       .filter((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE)
       .map((ep) => ({
         episode_id: ep['episode.id'],
-        action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
         reason: i18n.RESOLVE_ACTION_REASON,
       }));
     if (!items.length) return;
 
     try {
-      const response = await bulkCreateEpisodeAlertActions(deps.http, items);
+      const response = await bulkActivateEpisodeActions(deps.http, items);
       deps.notifications.toasts.add(successOrPartialToast(response));
       onSuccess?.();
     } catch {

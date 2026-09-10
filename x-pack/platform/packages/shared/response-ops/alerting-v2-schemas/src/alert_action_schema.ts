@@ -226,63 +226,151 @@ export type CreateDeactivateEpisodeActionBody = z.infer<
   typeof createDeactivateEpisodeActionBodySchema
 >;
 
-export const bulkCreateSeriesAlertActionItemBodySchema = createSeriesAlertActionBodySchema
-  .and(
-    z
-      .object({
-        group_hash: z
-          .string()
-          .min(1)
-          .max(256)
-          .describe('Hash identifying the alert episode series to apply the action to.'),
-      })
-      .strict()
-      .describe('Series-level alert action payload with series identifier for bulk requests.')
-  )
-  .meta({ id: 'alerting_bulk_create_series_action_item' });
-export type BulkCreateSeriesAlertActionItemBody = z.infer<
-  typeof bulkCreateSeriesAlertActionItemBodySchema
->;
+// Bulk endpoints are verb-specific (`_bulk_tag`, `_bulk_ack`, ...) so each
+// body is an `{ items: [...] }` envelope of one item shape: the single-route
+// body fields plus the series/episode identifier. The envelope leaves room
+// for future request-level fields (e.g. dry_run) without a breaking change.
+const bulkGroupHashSchema = z
+  .string()
+  .min(1)
+  .max(256)
+  .describe('Hash identifying the alert episode series to apply the action to.');
 
-export const bulkCreateSeriesAlertActionBodySchema = z
-  .array(bulkCreateSeriesAlertActionItemBodySchema)
-  .min(1, 'At least one action must be provided')
-  .max(MAX_BULK_ITEMS, `Cannot process more than ${MAX_BULK_ITEMS} actions in a single request`)
-  .describe(
-    `Request body for bulk create series-level alert actions. Array of 1 to ${MAX_BULK_ITEMS} actions, each with group_hash and action payload.`
-  )
-  .meta({ id: 'alerting_bulk_create_series_actions_request' });
-export type BulkCreateSeriesAlertActionBody = z.infer<typeof bulkCreateSeriesAlertActionBodySchema>;
+const bulkEpisodeIdSchema = z
+  .string()
+  .min(1)
+  .max(ID_MAX_LENGTH)
+  .describe('Identifier of the alert episode to apply the action to.');
 
-export const bulkCreateEpisodeAlertActionItemBodySchema = createEpisodeAlertActionBodySchema
-  .and(
-    z
-      .object({
-        episode_id: z
-          .string()
-          .min(1)
-          .max(ID_MAX_LENGTH)
-          .describe('Identifier of the alert episode to apply the action to.'),
-      })
-      .strict()
-      .describe('Episode-level alert action payload with episode identifier for bulk requests.')
-  )
-  .meta({ id: 'alerting_bulk_create_episode_action_item' });
-export type BulkCreateEpisodeAlertActionItemBody = z.infer<
-  typeof bulkCreateEpisodeAlertActionItemBodySchema
->;
+const makeBulkActionBodySchema = <TItem extends z.ZodType>(itemSchema: TItem, verb: string) =>
+  z
+    .object({
+      items: z
+        .array(itemSchema)
+        .min(1, 'At least one action must be provided')
+        .max(
+          MAX_BULK_ITEMS,
+          `Cannot process more than ${MAX_BULK_ITEMS} actions in a single request`
+        )
+        .describe(`List of 1 to ${MAX_BULK_ITEMS} ${verb} actions to create.`),
+    })
+    .strict();
 
-export const bulkCreateEpisodeAlertActionBodySchema = z
-  .array(bulkCreateEpisodeAlertActionItemBodySchema)
-  .min(1, 'At least one action must be provided')
-  .max(MAX_BULK_ITEMS, `Cannot process more than ${MAX_BULK_ITEMS} actions in a single request`)
-  .describe(
-    `Request body for bulk create episode-level alert actions. Array of 1 to ${MAX_BULK_ITEMS} actions, each with episode_id and action payload.`
-  )
-  .meta({ id: 'alerting_bulk_create_episode_actions_request' });
-export type BulkCreateEpisodeAlertActionBody = z.infer<
-  typeof bulkCreateEpisodeAlertActionBodySchema
->;
+export const bulkTagSeriesActionItemSchema = tagActionSchema
+  .omit({ action_type: true })
+  .extend({ group_hash: bulkGroupHashSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_tag_series_item' });
+export type BulkTagSeriesActionItem = z.infer<typeof bulkTagSeriesActionItemSchema>;
+
+export const bulkTagSeriesActionBodySchema = makeBulkActionBodySchema(
+  bulkTagSeriesActionItemSchema,
+  'tag'
+).meta({ id: 'alerting_bulk_tag_series_request' });
+export type BulkTagSeriesActionBody = z.infer<typeof bulkTagSeriesActionBodySchema>;
+
+export const bulkSnoozeSeriesActionItemSchema = snoozeActionSchema
+  .omit({ action_type: true })
+  .extend({ group_hash: bulkGroupHashSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_snooze_series_item' });
+export type BulkSnoozeSeriesActionItem = z.infer<typeof bulkSnoozeSeriesActionItemSchema>;
+
+export const bulkSnoozeSeriesActionBodySchema = makeBulkActionBodySchema(
+  bulkSnoozeSeriesActionItemSchema,
+  'snooze'
+).meta({ id: 'alerting_bulk_snooze_series_request' });
+export type BulkSnoozeSeriesActionBody = z.infer<typeof bulkSnoozeSeriesActionBodySchema>;
+
+export const bulkUnsnoozeSeriesActionItemSchema = unsnoozeActionSchema
+  .omit({ action_type: true })
+  .extend({ group_hash: bulkGroupHashSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_unsnooze_series_item' });
+export type BulkUnsnoozeSeriesActionItem = z.infer<typeof bulkUnsnoozeSeriesActionItemSchema>;
+
+export const bulkUnsnoozeSeriesActionBodySchema = makeBulkActionBodySchema(
+  bulkUnsnoozeSeriesActionItemSchema,
+  'unsnooze'
+).meta({ id: 'alerting_bulk_unsnooze_series_request' });
+export type BulkUnsnoozeSeriesActionBody = z.infer<typeof bulkUnsnoozeSeriesActionBodySchema>;
+
+export const bulkAckEpisodeActionItemSchema = ackEpisodeActionSchema
+  .omit({ action_type: true })
+  .extend({ episode_id: bulkEpisodeIdSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_ack_episodes_item' });
+export type BulkAckEpisodeActionItem = z.infer<typeof bulkAckEpisodeActionItemSchema>;
+
+export const bulkAckEpisodeActionBodySchema = makeBulkActionBodySchema(
+  bulkAckEpisodeActionItemSchema,
+  'ack'
+).meta({ id: 'alerting_bulk_ack_episodes_request' });
+export type BulkAckEpisodeActionBody = z.infer<typeof bulkAckEpisodeActionBodySchema>;
+
+export const bulkUnackEpisodeActionItemSchema = unackEpisodeActionSchema
+  .omit({ action_type: true })
+  .extend({ episode_id: bulkEpisodeIdSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_unack_episodes_item' });
+export type BulkUnackEpisodeActionItem = z.infer<typeof bulkUnackEpisodeActionItemSchema>;
+
+export const bulkUnackEpisodeActionBodySchema = makeBulkActionBodySchema(
+  bulkUnackEpisodeActionItemSchema,
+  'unack'
+).meta({ id: 'alerting_bulk_unack_episodes_request' });
+export type BulkUnackEpisodeActionBody = z.infer<typeof bulkUnackEpisodeActionBodySchema>;
+
+export const bulkAssignEpisodeActionItemSchema = assignEpisodeActionSchema
+  .omit({ action_type: true })
+  .extend({ episode_id: bulkEpisodeIdSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_assign_episodes_item' });
+export type BulkAssignEpisodeActionItem = z.infer<typeof bulkAssignEpisodeActionItemSchema>;
+
+export const bulkAssignEpisodeActionBodySchema = makeBulkActionBodySchema(
+  bulkAssignEpisodeActionItemSchema,
+  'assign'
+).meta({ id: 'alerting_bulk_assign_episodes_request' });
+export type BulkAssignEpisodeActionBody = z.infer<typeof bulkAssignEpisodeActionBodySchema>;
+
+export const bulkActivateEpisodeActionItemSchema = activateActionSchema
+  .omit({ action_type: true })
+  .extend({ episode_id: bulkEpisodeIdSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_activate_episodes_item' });
+export type BulkActivateEpisodeActionItem = z.infer<typeof bulkActivateEpisodeActionItemSchema>;
+
+export const bulkActivateEpisodeActionBodySchema = makeBulkActionBodySchema(
+  bulkActivateEpisodeActionItemSchema,
+  'activate'
+).meta({ id: 'alerting_bulk_activate_episodes_request' });
+export type BulkActivateEpisodeActionBody = z.infer<typeof bulkActivateEpisodeActionBodySchema>;
+
+export const bulkDeactivateEpisodeActionItemSchema = deactivateActionSchema
+  .omit({ action_type: true })
+  .extend({ episode_id: bulkEpisodeIdSchema })
+  .strict()
+  .meta({ id: 'alerting_bulk_deactivate_episodes_item' });
+export type BulkDeactivateEpisodeActionItem = z.infer<typeof bulkDeactivateEpisodeActionItemSchema>;
+
+export const bulkDeactivateEpisodeActionBodySchema = makeBulkActionBodySchema(
+  bulkDeactivateEpisodeActionItemSchema,
+  'deactivate'
+).meta({ id: 'alerting_bulk_deactivate_episodes_request' });
+export type BulkDeactivateEpisodeActionBody = z.infer<typeof bulkDeactivateEpisodeActionBodySchema>;
+
+/**
+ * Internal item shapes consumed by the alert actions client. Routes inject
+ * the fixed `action_type` of their verb into each request item before
+ * calling the client, so these are not request schemas.
+ */
+export type BulkCreateSeriesAlertActionItemBody = CreateSeriesAlertActionBody & {
+  group_hash: string;
+};
+export type BulkCreateEpisodeAlertActionItemBody = CreateEpisodeAlertActionBody & {
+  episode_id: string;
+};
 
 /**
  * Union of every alert action body across both scopes. Used by the

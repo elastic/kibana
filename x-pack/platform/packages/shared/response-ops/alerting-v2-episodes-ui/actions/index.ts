@@ -8,8 +8,14 @@
 export type * from './types';
 export * from './create_episode_actions';
 export {
-  bulkCreateEpisodeAlertActions,
-  bulkCreateSeriesAlertActions,
+  bulkAckEpisodeActions,
+  bulkActivateEpisodeActions,
+  bulkAssignEpisodeActions,
+  bulkDeactivateEpisodeActions,
+  bulkSnoozeSeriesActions,
+  bulkTagSeriesActions,
+  bulkUnackEpisodeActions,
+  bulkUnsnoozeSeriesActions,
 } from './bulk_create_alert_actions';
 export { createAckAction } from './ack';
 export { createUnackAction } from './unack';

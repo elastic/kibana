@@ -63,9 +63,7 @@ describe('createAckAction', () => {
 
   it('execute: POSTs per-episode ACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest
-      .spyOn(bulk, 'bulkCreateEpisodeAlertActions')
-      .mockResolvedValue({ affected_count: 2, errors: [] });
+    jest.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createAckAction(deps).execute({
       episodes: [
@@ -74,9 +72,9 @@ describe('createAckAction', () => {
       ],
       onSuccess,
     });
-    expect(bulk.bulkCreateEpisodeAlertActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', action_type: 'ack' },
-      { episode_id: 'e2', action_type: 'ack' },
+    expect(bulk.bulkAckEpisodeActions).toHaveBeenCalledWith(deps.http, [
+      { episode_id: 'e1' },
+      { episode_id: 'e2' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -84,7 +82,7 @@ describe('createAckAction', () => {
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateEpisodeAlertActions').mockRejectedValue(new Error('network error'));
+    jest.spyOn(bulk, 'bulkAckEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
     await createAckAction(deps).execute({
       episodes: [makeEpisode()],

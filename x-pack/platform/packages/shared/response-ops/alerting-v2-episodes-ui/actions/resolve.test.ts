@@ -65,16 +65,16 @@ describe('createResolveAction', () => {
   it('execute: POSTs per-episode DEACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest
-      .spyOn(bulk, 'bulkCreateEpisodeAlertActions')
+      .spyOn(bulk, 'bulkDeactivateEpisodeActions')
       .mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createResolveAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
       onSuccess,
     });
-    expect(bulk.bulkCreateEpisodeAlertActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', action_type: 'deactivate', reason: expect.any(String) },
-      { episode_id: 'e2', action_type: 'deactivate', reason: expect.any(String) },
+    expect(bulk.bulkDeactivateEpisodeActions).toHaveBeenCalledWith(deps.http, [
+      { episode_id: 'e1', reason: expect.any(String) },
+      { episode_id: 'e2', reason: expect.any(String) },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -83,7 +83,7 @@ describe('createResolveAction', () => {
   it('execute: on a mixed selection only POSTs items for the non-INACTIVE episodes', async () => {
     const deps = makeDeps();
     jest
-      .spyOn(bulk, 'bulkCreateEpisodeAlertActions')
+      .spyOn(bulk, 'bulkDeactivateEpisodeActions')
       .mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createResolveAction(deps).execute({
@@ -93,15 +93,15 @@ describe('createResolveAction', () => {
       ],
       onSuccess,
     });
-    expect(bulk.bulkCreateEpisodeAlertActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', action_type: 'deactivate', reason: expect.any(String) },
+    expect(bulk.bulkDeactivateEpisodeActions).toHaveBeenCalledWith(deps.http, [
+      { episode_id: 'e1', reason: expect.any(String) },
     ]);
     expect(onSuccess).toHaveBeenCalled();
   });
 
   it('execute: an all-INACTIVE selection is a no-op', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateEpisodeAlertActions');
+    jest.spyOn(bulk, 'bulkDeactivateEpisodeActions');
     const onSuccess = jest.fn();
     await createResolveAction(deps).execute({
       episodes: [
@@ -110,13 +110,13 @@ describe('createResolveAction', () => {
       ],
       onSuccess,
     });
-    expect(bulk.bulkCreateEpisodeAlertActions).not.toHaveBeenCalled();
+    expect(bulk.bulkDeactivateEpisodeActions).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateEpisodeAlertActions').mockRejectedValue(new Error('network error'));
+    jest.spyOn(bulk, 'bulkDeactivateEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
     await createResolveAction(deps).execute({
       episodes: [makeEpisode()],

@@ -104,7 +104,9 @@ export const getSnoozeSeriesActionUrl = (groupHash: string) =>
 export const getUnsnoozeSeriesActionUrl = (groupHash: string) =>
   getSeriesActionUrl(groupHash, '_unsnooze');
 
-export const BULK_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_action`;
+export const BULK_TAG_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_tag`;
+export const BULK_SNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_snooze`;
+export const BULK_UNSNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_unsnooze`;
 
 const getEpisodeActionUrl = (episodeId: string, suffix: string) =>
   `${EPISODES_API_PATH}/${encodeURIComponent(episodeId)}/${suffix}`;
@@ -119,7 +121,11 @@ export const getActivateEpisodeActionUrl = (episodeId: string) =>
 export const getDeactivateEpisodeActionUrl = (episodeId: string) =>
   getEpisodeActionUrl(episodeId, '_deactivate');
 
-export const BULK_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_action`;
+export const BULK_ACK_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_ack`;
+export const BULK_UNACK_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_unack`;
+export const BULK_ASSIGN_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_assign`;
+export const BULK_ACTIVATE_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_activate`;
+export const BULK_DEACTIVATE_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_deactivate`;
 
 export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
