@@ -9,7 +9,6 @@ import { css } from '@emotion/react';
 import React from 'react';
 import type { ComponentProps } from 'react';
 import {
-  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +19,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -29,9 +27,9 @@ import {
   type InvestigationDiscoverParams,
 } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
-import { NightshiftMarkIcon } from './nightshift_mark_icon';
 import type { GetInvestigationResponse } from '../../../common';
 import { InvestigationRunStatusBadge } from './investigation_run_status_badge';
+import { formatDate, formatDuration } from './utils';
 
 /**
  * Bridges `GetInvestigationResponse` (where `summary` and `hypotheses` are optional —
@@ -63,37 +61,6 @@ export interface InvestigationDetailFlyoutProps {
   getQueryHref?: (params: InvestigationDiscoverParams) => string | undefined;
 }
 
-const formatDate = (iso: string): string => {
-  const d = new Date(iso);
-  return isNaN(d.getTime())
-    ? i18n.translate('xpack.nightshiftInvestigations.flyout.unknownTime', {
-        defaultMessage: 'Unknown time',
-      })
-    : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-};
-
-const formatDuration = (startedAt: string, endedAt: string): string => {
-  const ms = new Date(endedAt).getTime() - new Date(startedAt).getTime();
-  const mins = Math.max(0, Math.round(ms / 60_000));
-  if (mins < 60) {
-    return i18n.translate('xpack.nightshiftInvestigations.flyout.durationMinutes', {
-      defaultMessage: '{mins} min',
-      values: { mins },
-    });
-  }
-  const hrs = Math.floor(mins / 60);
-  const rem = mins % 60;
-  return rem > 0
-    ? i18n.translate('xpack.nightshiftInvestigations.flyout.durationHoursMinutes', {
-        defaultMessage: '{hrs}h {rem}m',
-        values: { hrs, rem },
-      })
-    : i18n.translate('xpack.nightshiftInvestigations.flyout.durationHours', {
-        defaultMessage: '{hrs}h',
-        values: { hrs },
-      });
-};
-
 function SectionTitle({ children }: { children: React.ReactNode }): React.ReactElement {
   return (
     <EuiTitle size="xs">
@@ -116,7 +83,6 @@ export function InvestigationDetailFlyout({
   onClickCapture,
   getQueryHref,
 }: InvestigationDetailFlyoutProps): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
   const primaryText = investigation
     ? getPrimaryText(investigation)
     : i18n.translate('xpack.nightshiftInvestigations.flyout.loading', {
@@ -293,34 +259,7 @@ export function InvestigationDetailFlyout({
           <h2>{primaryText}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              color="default"
-              css={css`
-                .euiBadge__text {
-                  align-items: center;
-                  display: inline-flex;
-                  flex-wrap: nowrap;
-                  gap: ${euiTheme.size.xs};
-                  line-height: 1;
-                }
-              `}
-            >
-              <NightshiftMarkIcon inline size={14} />
-              <span>
-                {i18n.translate('xpack.nightshiftInvestigations.flyout.badge.investigationLabel', {
-                  defaultMessage: 'Investigation',
-                })}
-              </span>
-            </EuiBadge>
-          </EuiFlexItem>
-          {investigation && (
-            <EuiFlexItem grow={false}>
-              <InvestigationRunStatusBadge status={investigation.status} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {investigation && <InvestigationRunStatusBadge status={investigation.status} />}
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="xs">
           {investigation ? formatDate(investigation.created_at) : ''}
