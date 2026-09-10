@@ -321,6 +321,11 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
 
     try {
       const instrumentation = await resolveInstrumentation.mutateAsync(traceId.trim());
+      // Checked before the judge call, so an edit during the probe costs no model invocation
+      // and cannot raise an error against a draft that has since changed.
+      if (isStaleRun()) {
+        return;
+      }
       const resolvedProfile =
         instrumentation.recommended_instrumentation?.profile ??
         instrumentation.profiles.find((profile) =>

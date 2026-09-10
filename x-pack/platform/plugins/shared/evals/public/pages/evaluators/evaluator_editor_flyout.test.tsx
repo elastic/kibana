@@ -445,6 +445,60 @@ describe('EvaluatorEditorFlyout', () => {
       expect(testMutateAsync).not.toHaveBeenCalled();
     });
 
+    it('abandons the run when the draft changes during the profile probe', async () => {
+      let resolveProbe: (value: unknown) => void = () => {};
+      resolveMutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveProbe = resolve;
+          })
+      );
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalled());
+
+      setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
+      resolveProbe({
+        recommended_instrumentation: { profile: 'elastic-inference' },
+        profiles: [],
+      });
+
+      // No judge is invoked for a draft that is no longer on screen.
+      await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalledTimes(1));
+      expect(testMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('raises no instrumentation error for a draft the user has since edited', async () => {
+      let resolveProbe: (value: unknown) => void = () => {};
+      resolveMutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveProbe = resolve;
+          })
+      );
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+      await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalled());
+
+      setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
+      resolveProbe({ recommended_instrumentation: null, profiles: [] });
+
+      await waitFor(() =>
+        expect(
+          screen.queryByText('No supported instrumentation profile could resolve this trace.')
+        ).not.toBeInTheDocument()
+      );
+      expect(testMutateAsync).not.toHaveBeenCalled();
+    });
+
     it('discards a result for a draft the user has since edited', async () => {
       let resolveTest: (value: unknown) => void = () => {};
       testMutateAsync.mockImplementationOnce(

@@ -41,6 +41,15 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
     ...judge,
     evidence: [...judge.evidence].sort(),
     reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
+    output: {
+      ...judge.output,
+      // Order is kept: it is the order a reader sees. Only a blank description is
+      // normalized, since the form omits one and the API accepts an empty string.
+      scores: judge.output.scores.map(({ description, ...score }) => ({
+        ...score,
+        ...(description?.trim() ? { description: description.trim() } : {}),
+      })),
+    },
   });
 
   return isEqual(normalize(a), normalize(b));

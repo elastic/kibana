@@ -402,6 +402,45 @@ describe('EvaluatorDefinitionClient', () => {
       expect(docs.size).toBe(sizeAfterCreate);
     });
 
+    it('treats a blank score description as no description', async () => {
+      const { client, docs } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: {
+          ...JUDGE,
+          output: { scores: [{ name: 'tone', type: 'number', description: '  ' }] },
+        },
+      });
+      const sizeAfterCreate = docs.size;
+
+      // The form omits a blank description, so it would otherwise read as a change.
+      const unchanged = await client.update('tone', {
+        judge: { ...JUDGE, output: { scores: [{ name: 'tone', type: 'number' }] } },
+      });
+
+      expect(unchanged.version).toBe('1.0.0');
+      expect(docs.size).toBe(sizeAfterCreate);
+    });
+
+    it('still writes when a score description changes in substance', async () => {
+      const { client } = createClient();
+      await client.create({
+        name: 'tone',
+        description: 'Tone',
+        judge: { ...JUDGE, output: { scores: [{ name: 'tone', type: 'number' }] } },
+      });
+
+      const updated = await client.update('tone', {
+        judge: {
+          ...JUDGE,
+          output: { scores: [{ name: 'tone', type: 'number', description: 'Be strict' }] },
+        },
+      });
+
+      expect(updated.version).toBe('1.1.0');
+    });
+
     it('still writes when the evidence set itself changes', async () => {
       const { client } = createClient();
       await client.create({
