@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleProvider } from '../rule_context';
+import { getQueryOverflowHeight } from '../utils';
 import { RuleConditions } from './rule_conditions';
 
 jest.mock('@kbn/alerting-plugin/common', () => ({
@@ -381,5 +382,16 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Events');
     expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
+  });
+});
+
+describe('getQueryOverflowHeight', () => {
+  it('matches the form: undefined through 5 lines, 240px after that', () => {
+    const fiveLines = Array.from({ length: 5 }, (_, i) => `line ${i + 1}`).join('\n');
+    const sixLines = `${fiveLines}\nline 6`;
+
+    expect(getQueryOverflowHeight('')).toBeUndefined();
+    expect(getQueryOverflowHeight(fiveLines)).toBeUndefined();
+    expect(getQueryOverflowHeight(sixLines)).toBe(240);
   });
 });

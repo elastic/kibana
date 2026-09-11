@@ -20,6 +20,7 @@ import {
   formatRecoveryDelay,
   formatRecoveryStrategy,
   getDisplayQueryParts,
+  getQueryOverflowHeight,
   getRecoverEsqlSegment,
 } from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
@@ -46,7 +47,13 @@ const ConditionQueryBlock = ({
       <h3>{title}</h3>
     </EuiTitle>
     <EuiSpacer size="s" />
-    <EuiCodeBlock language="esql" isCopyable paddingSize="s" data-test-subj={dataTestSubj}>
+    <EuiCodeBlock
+      language="esql"
+      isCopyable
+      paddingSize="s"
+      overflowHeight={getQueryOverflowHeight(query)}
+      data-test-subj={dataTestSubj}
+    >
       {query || EMPTY_VALUE}
     </EuiCodeBlock>
   </>
@@ -135,6 +142,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
                 language="esql"
                 isCopyable
                 paddingSize="s"
+                overflowHeight={getQueryOverflowHeight(recoveryCondition)}
                 data-test-subj="alertingV2RuleDetailsRecoveryConditionQuery"
               >
                 {recoveryCondition}

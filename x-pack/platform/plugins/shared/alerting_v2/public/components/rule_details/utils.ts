@@ -25,6 +25,9 @@ const OR_OPERATOR_LABEL = i18n.translate('xpack.alertingV2.ruleDetails.delayConn
   defaultMessage: 'or',
 });
 
+const QUERY_OVERFLOW_MAX_VISIBLE_LINES = 5;
+const QUERY_OVERFLOW_HEIGHT = 240;
+
 /**
  * Builds a human-readable delay string from a count, timeframe, and operator.
  *
@@ -172,6 +175,16 @@ export function getDisplayQueryParts(query: Query): {
   }
 
   return { baseQuery: query.breach.query };
+}
+
+export function getQueryOverflowHeight(query: string): number | undefined {
+  if (!query.trim()) {
+    return undefined;
+  }
+
+  return query.split('\n').length > QUERY_OVERFLOW_MAX_VISIBLE_LINES
+    ? QUERY_OVERFLOW_HEIGHT
+    : undefined;
 }
 
 const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
