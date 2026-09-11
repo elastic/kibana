@@ -1997,7 +1997,7 @@
     "@octokit/rest": "22.0.1",
     "@parcel/watcher": "2.5.1",
     "@playwright/test": "1.62.1",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.6.3",
     "@redocly/cli": "2.35.1",
     "@rsdoctor/rspack-plugin": "1.6.1",
     "@rspack/core": "2.1.8",
