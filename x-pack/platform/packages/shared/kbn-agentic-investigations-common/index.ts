@@ -20,9 +20,23 @@ export { type ConversationsActionsGroupProps } from './src/components/conversati
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
 
 export {
-  ConversationDetailsFlyout,
-  type ConversationDetailsFlyoutProps,
-} from './src/components/details/details_flyout';
+  ConversationDetailsFlyoutHeader,
+  type ConversationDetailsFlyoutHeaderProps,
+} from './src/components/details/flyout_header';
+export {
+  ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
+} from './src/components/details/flyout_footer';
+export {
+  InvestigationHeaderBlocks,
+  type InvestigationHeaderBlocksProps,
+} from './src/components/details/header_blocks';
+export {
+  AttachmentsTab,
+  type AttachmentsTabProps,
+  OverviewTab,
+  TimelineTab,
+} from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export { TimelineEventList } from './src/components/timeline/timeline_event_list';
