@@ -40,7 +40,7 @@ export const buildViewExecutionText = (executionHref: string, rendering: ToMount
  * multi-case endpoint. The server owns `event.caseIds`; the client passes the
  * authorized case ids in `body.caseIds` and the server injects them into the event.
  *
- * The panel's built-in success toast must be suppressed (`showSuccessToast={false}`)
+ * The panel's built-in success toast is suppressed automatically by `RunCaseWorkflowModal`
  * because this executor owns all toasting. On API error it rethrows so the
  * panel can show its own error toast.
  */

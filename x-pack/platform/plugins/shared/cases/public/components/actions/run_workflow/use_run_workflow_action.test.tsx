@@ -175,12 +175,5 @@ describe('useRunWorkflowAction', () => {
       expect(typeof modalProps.sortWorkflow).toBe('function');
     });
 
-    it('sets showSuccessToast=false so the executor always owns the success toast', () => {
-      const { result } = renderAction();
-      act(() => {
-        (result.current.getAction([basicCase]).onClick as () => void)();
-      });
-      expect(result.current.modalProps.showSuccessToast).toBe(false);
-    });
   });
 });

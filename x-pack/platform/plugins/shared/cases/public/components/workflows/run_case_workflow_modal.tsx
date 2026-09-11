@@ -15,7 +15,7 @@ import * as i18n from './translations';
 interface RunCaseWorkflowModalProps
   extends Pick<
     RunWorkflowPanelProps,
-    'inputs' | 'runWorkflow' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'showSuccessToast'
+    'inputs' | 'runWorkflow' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute'
   > {
   onClose: () => void;
   /** Ref to the button that opened this modal; when set, focus is returned to it on close. */
@@ -26,6 +26,10 @@ interface RunCaseWorkflowModalProps
  * Modal wrapper around `RunWorkflowPanel` for the case detail view and the
  * cases list page. Provides a standard "Select workflow" header and returns
  * focus to the trigger button on close when `focusButtonRef` is supplied.
+ *
+ * The Cases executors always own the success toast (they include the "View
+ * execution" link), so `showSuccessToast` is hardcoded to `false` here —
+ * callers must not pass it.
  */
 export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   inputs,
@@ -34,7 +38,6 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   filterWorkflow,
   onClose,
   onExecute,
-  showSuccessToast,
   focusButtonRef,
 }) => {
   const focusTrapProps = useFocusButtonTrap(focusButtonRef);
@@ -58,7 +61,8 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
           filterWorkflow={filterWorkflow}
           onClose={onClose}
           onExecute={onExecute}
-          showSuccessToast={showSuccessToast}
+          // Cases executors own the success toast (includes "View execution" link)
+          showSuccessToast={false}
         />
       </EuiModalBody>
     </EuiModal>

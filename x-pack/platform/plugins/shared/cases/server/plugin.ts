@@ -583,6 +583,17 @@ export class CasePlugin
             clientSource: 'rest_api',
           });
         },
+        getCasesWorkflowRunContext: async () => {
+          const [{ savedObjects }] = await core.getStartServices();
+          const coreContext = await context.core;
+
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
+            savedObjectsService: savedObjects,
+            clientSource: 'rest_api',
+          });
+        },
       };
     };
   };
