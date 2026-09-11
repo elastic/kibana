@@ -19,18 +19,21 @@
  * Use the three exported helpers together to reconstruct DataViewSpec field state.
  */
 
-import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { type DataViewSpec, RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
-import type {
-  AsCodeCompositeRuntimeField,
-  AsCodeDataViewSpec,
-  AsCodeFieldSettings,
-  AsCodeRuntimeField,
-  AsCodeSavedCompositeRuntimeField,
-  AsCodeSavedDataView,
-  AsCodeSavedFieldSettings,
-  AsCodeSavedRuntimeField,
+import type { DataViewSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import {
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+  type AsCodeCompositeRuntimeField,
+  type AsCodeDataViewSpec,
+  type AsCodeFieldFormat,
+  type AsCodeFieldSettings,
+  type AsCodeRuntimeField,
+  type AsCodeSavedCompositeRuntimeField,
+  type AsCodeSavedDataView,
+  type AsCodeSavedFieldSettings,
+  type AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
+import { camelCase } from 'lodash';
+import { isDurationFormat, isHistogramFormat, camelCaseKeys, isColorFormat } from './utils';
 
 export function isRuntimeField(
   field: AsCodeFieldSettings | AsCodeSavedFieldSettings
@@ -92,14 +95,19 @@ export function toStoredFieldFormats(
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
   for (const [name, field] of Object.entries(fieldSettings)) {
     if ('format' in field && field.format) {
-      fieldFormats[name] = { id: field.format.type, params: field.format.params };
+      const params = toStoredFieldFormatParams(field.format);
+      fieldFormats[name] = {
+        id: field.format.type,
+        ...(params ? { params } : {}),
+      };
     }
     if (!isCompositeRuntimeField(field)) continue;
     for (const [subName, subField] of Object.entries(field.fields)) {
       if ('format' in subField && subField.format) {
+        const params = toStoredFieldFormatParams(subField.format);
         fieldFormats[`${name}.${subName}`] = {
           id: subField.format.type,
-          params: subField.format.params,
+          ...(params ? { params } : {}),
         };
       }
     }
@@ -107,10 +115,56 @@ export function toStoredFieldFormats(
   return fieldFormats;
 }
 
+export function toStoredFieldFormatParams(
+  format: AsCodeFieldFormat
+): NonNullable<DataViewSpec['fieldFormats']>[string]['params'] | undefined {
+  if (!('params' in format) || !format.params || Object.keys(format.params).length === 0) {
+    return undefined;
+  }
+
+  if (isDurationFormat(format)) {
+    const outputFormat = format.params.output_format
+      ? camelCase(format.params.output_format)
+      : undefined;
+
+    return {
+      ...camelCaseKeys(format.params),
+      ...(outputFormat ? { outputFormat } : {}),
+    };
+  }
+
+  if (isHistogramFormat(format)) {
+    return {
+      id: format.params.format,
+      params: {
+        pattern: format.params.pattern,
+      },
+    };
+  }
+
+  if (isColorFormat(format)) {
+    const params = camelCaseKeys(format.params);
+
+    if (format.params.field_type !== 'boolean') {
+      return params;
+    }
+
+    return {
+      ...params,
+      colors: format.params.colors.map((color) => ({
+        ...color,
+        boolean: color.boolean.toString(),
+      })),
+    };
+  }
+
+  return camelCaseKeys(format.params);
+}
+
 /**
  * Convert as-code `field_settings` to the `fieldAttrs` entry of a DataViewSpec.
- * Indexed field settings without attrs are skipped. Runtime fields and composite runtime subfields
- * always produce an entry (possibly empty) to preserve current stored shape.
+ * Only fields with at least one attribute (`customLabel`, `customDescription`, or `count`) produce
+ * an entry.
  * Composite subfields are written under the fully-qualified `parent.child` key.
  *
  * @param fieldSettings Map of field name → indexed overrides or inline runtime definition
@@ -120,32 +174,34 @@ export function toStoredFieldAttributes(
   fieldSettings: AsCodeDataViewSpec['field_settings'] | AsCodeSavedDataView['field_settings'] = {}
 ): DataViewSpec['fieldAttrs'] {
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
+
+  const assignAttrs = (key: string, field: AsCodeFieldSettings | AsCodeSavedFieldSettings) => {
+    const attrs = buildFieldAttrs(field);
+    if (Object.keys(attrs).length > 0) {
+      fieldAttrs[key] = attrs;
+    }
+  };
+
   for (const [name, field] of Object.entries(fieldSettings)) {
-    if (isRuntimeField(field)) {
-      if (!isCompositeRuntimeField(field)) {
-        fieldAttrs[name] = {
-          ...(field.custom_label && { customLabel: field.custom_label }),
-          ...(field.custom_description && { customDescription: field.custom_description }),
-          ...getPopularity(field),
-        };
-      } else {
-        for (const [subName, subField] of Object.entries(field.fields)) {
-          fieldAttrs[`${name}.${subName}`] = {
-            ...(subField.custom_label && { customLabel: subField.custom_label }),
-            ...(subField.custom_description && { customDescription: subField.custom_description }),
-            ...getPopularity(subField),
-          };
-        }
+    if (isCompositeRuntimeField(field)) {
+      for (const [subName, subField] of Object.entries(field.fields)) {
+        assignAttrs(`${name}.${subName}`, subField);
       }
-    } else if ('custom_label' in field || 'custom_description' in field || 'popularity' in field) {
-      fieldAttrs[name] = {
-        ...(field.custom_label && { customLabel: field.custom_label }),
-        ...(field.custom_description && { customDescription: field.custom_description }),
-        ...getPopularity(field),
-      };
+    } else {
+      assignAttrs(name, field);
     }
   }
+
   return fieldAttrs;
+}
+
+function buildFieldAttrs(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {
+  return {
+    ...('custom_label' in field && field.custom_label && { customLabel: field.custom_label }),
+    ...('custom_description' in field &&
+      field.custom_description && { customDescription: field.custom_description }),
+    ...getPopularity(field),
+  };
 }
 
 function getPopularity(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {

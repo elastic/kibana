@@ -54,7 +54,7 @@ describe('changeAgentPrivilegeLevel', () => {
     (getAgentById as jest.Mock).mockRejectedValue(new Error(`Agent ${agentId} does not exist`));
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
-    ).rejects.toThrowError(`Agent ${agentId} does not exist`);
+    ).rejects.toThrow(`Agent ${agentId} does not exist`);
   });
 
   it('should return early if the agent is already unprivileged', async () => {
@@ -72,7 +72,7 @@ describe('changeAgentPrivilegeLevel', () => {
     } as any);
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Cannot remove root privilege. Privilege level change is supported from version 9.3.0.'
     );
   });
@@ -96,7 +96,7 @@ describe('changeAgentPrivilegeLevel', () => {
 
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `Agent agent-id is on policy ${policyId}, which contains integrations that require root privilege: Package 2`
     );
   });
@@ -181,6 +181,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
   const mockedAgent: Agent = {
     id: 'agent-123',
     policy_id: 'policy-0001',
+    policy_base_id: 'policy-0001',
     last_checkin: new Date().toISOString(),
     components: [],
     local_metadata: {

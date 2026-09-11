@@ -19,8 +19,7 @@ import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/consta
 import type { SLODefinition } from '../domain/models/slo';
 import { computeHealth, type SLOHealth } from '../domain/services/compute_health';
 import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { DefaultSummaryTransformManager } from './summay_transform_manager';
-import type { DefaultTransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 
 interface RepairActionsGroup {
   slo: SLODefinition;
@@ -32,8 +31,8 @@ export class RepairSLO {
     private logger: Logger,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLODefinitionRepository,
-    private transformManager: DefaultTransformManager,
-    private summaryTransformManager: DefaultSummaryTransformManager
+    private transformManager: TransformManager,
+    private summaryTransformManager: TransformManager
   ) {}
 
   public async execute(params: RepairParams): Promise<RepairActionsGroupResult[]> {

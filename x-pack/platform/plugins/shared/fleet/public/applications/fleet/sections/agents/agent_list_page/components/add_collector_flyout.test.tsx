@@ -91,6 +91,7 @@ describe('AddCollectorFlyout', () => {
     mockedUseStartServices.mockReturnValue({
       cloud: { isCloudEnabled: false },
       docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+      application: { capabilities: { api_keys: { save: true } } },
     } as any);
     mockedUseGetCreateApiKey.mockReturnValue({
       apiKey: undefined,
@@ -328,6 +329,37 @@ describe('AddCollectorFlyout', () => {
         expect(component.getByText('Create API key').closest('button')).toBeDisabled();
       });
     });
+
+    it('disables the Create API key button and shows tooltip when user lacks api_keys.save permission', async () => {
+      mockedUseStartServices.mockReturnValue({
+        cloud: { isCloudEnabled: false },
+        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+        application: { capabilities: { api_keys: { save: false } } },
+      } as any);
+
+      const component = renderFlyout();
+
+      const btn = await waitFor(() => {
+        const b = component.getByText('Create API key').closest('button');
+        // hasAriaDisabled renders aria-disabled="true" (not native disabled), preserving
+        // focusability and letting EUI apply pointer-events:none via CSS so the tooltip
+        // anchor span receives hover events in real browsers.
+        expect(b).toHaveAttribute('aria-disabled', 'true');
+        return b;
+      });
+
+      // In jsdom, CSS pointer-events:none is not enforced. Fire mouseOver on the EuiToolTip
+      // anchor span (button's direct parent) to simulate real-browser tooltip hover.
+      fireEvent.mouseOver(btn!.parentElement!);
+
+      await waitFor(() => {
+        expect(
+          component.getByText(
+            "You don't have permission to create API keys. Contact your administrator."
+          )
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('TLS configuration', () => {
@@ -342,6 +374,7 @@ describe('AddCollectorFlyout', () => {
       mockedUseStartServices.mockReturnValue({
         cloud: { isCloudEnabled: false },
         docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+        application: { capabilities: { api_keys: { save: true } } },
       } as any);
 
       const component = renderFlyout();
@@ -356,6 +389,7 @@ describe('AddCollectorFlyout', () => {
       mockedUseStartServices.mockReturnValue({
         cloud: { isCloudEnabled: true },
         docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+        application: { capabilities: { api_keys: { save: true } } },
       } as any);
 
       const component = renderFlyout();
@@ -561,6 +595,73 @@ describe('AddCollectorFlyout', () => {
         expect(yaml).not.toContain('tags:');
         expect(yaml).not.toContain('deployment:');
       });
+    });
+  });
+
+  describe('runtime selector', () => {
+    beforeEach(() => {
+      mockedSendGetOneAgentPolicy.mockResolvedValue({
+        data: { item: { id: 'opamp' } },
+      } as any);
+      mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+        data: { items: [{ api_key: 'test-token' }] },
+      } as any);
+    });
+
+    it('defaults to Elastic Agent with ./otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
+    });
+
+    it('Elastic Agent filter button is active by default', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      const elasticAgentBtn = component.getByText('Elastic Agent').closest('button');
+      const otelContribBtn = component.getByText('OTel Contrib Collector').closest('button');
+
+      expect(elasticAgentBtn).toHaveAttribute('aria-pressed', 'true');
+      expect(otelContribBtn).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('switching to OTel Contrib Collector shows otelcol-contrib command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol-contrib --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+    });
+
+    it('switching back to Elastic Agent restores otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+      fireEvent.click(component.getByText('Elastic Agent'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
     });
   });
 

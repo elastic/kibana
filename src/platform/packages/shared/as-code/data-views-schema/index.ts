@@ -12,6 +12,7 @@ export {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from './src/data_views/constants';
 export { AS_CODE_ESQL_DATA_SOURCE_TYPE } from './src/constants';
+export { RUNTIME_FIELD_COMPOSITE_TYPE } from './src/runtime_fields/common';
 export {
   dataViewReferenceSchema,
   dataViewSchema,
@@ -23,6 +24,10 @@ export type {
   AsCodeCompositeRuntimeField,
   AsCodeRuntimeBaseField,
   AsCodeFieldSettings,
+  AsCodeFieldFormat,
+  AsCodeDurationFormat,
+  AsCodeHistogramFormat,
+  AsCodeColorFormat,
   AsCodeDataView,
   AsCodeDataViewReference,
   AsCodeDataViewSpec,
@@ -34,3 +39,6 @@ export type {
   AsCodeSavedDataView,
   AsCodeSavedFieldSettings,
 } from './src/types';
+
+// Schemas that are needed individually
+export { formatSchema } from './src/field_settings/formats/format_schema';

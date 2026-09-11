@@ -140,4 +140,34 @@ describe('useObservedHostFields', () => {
       undefined, // Agent status doesn't implement getValues
     ]);
   });
+
+  it('omits the anomalies field when hideAnomalies is true', () => {
+    const { result } = renderHook(() => useObservedHostFields(mockObservedHostData, true), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.map(({ label }) => label)).toEqual([
+      'Host ID',
+      'First seen',
+      'Last seen',
+      'IP addresses',
+      'MAC addresses',
+      'Platform',
+      'Operating system',
+      'Family',
+      'Version',
+      'Architecture',
+      'Cloud provider',
+      'Region',
+      'Instance ID',
+      'Machine type',
+      'Endpoint integration policy',
+      'Policy Status',
+      'Endpoint version',
+      'Agent status',
+    ]);
+    expect(
+      result.current.find(({ label }) => label === 'Max anomaly score by job')
+    ).toBeUndefined();
+  });
 });

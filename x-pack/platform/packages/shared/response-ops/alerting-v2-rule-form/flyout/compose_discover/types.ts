@@ -8,19 +8,17 @@
 import type React from 'react';
 import type { FieldPath, UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
+import type { FormValues, RecoveryStrategy } from '../../form/types';
 import type { BuilderState } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
-
-export type RecoveryType = 'default' | 'custom' | 'none';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
 export type StepId =
   | 'alertCondition'
   | 'builderCondition'
-  | 'recoveryCondition'
+  | 'outcome'
   | 'details'
   | 'notifications';
 
@@ -38,12 +36,11 @@ export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
-  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
-  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {
@@ -73,10 +70,7 @@ export interface StepDefinition {
  * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
-  mode: ComposeDiscoverMode;
   step: number;
-  /** 'default' = no_breach; 'custom' = query; 'none' = no recovery (persists as 'none'). */
-  recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
@@ -90,14 +84,13 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType; isBuilderMode?: boolean }
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
   | { type: 'GO_BACK'; isBuilderMode?: boolean }
-  | { type: 'OPEN_CHILD'; isAlert: boolean }
-  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
+  | { type: 'OPEN_CHILD'; isAlert: boolean; focusedTab?: QueryTab }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean; focusedTab?: QueryTab }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
   | { type: 'INVALIDATE_QUERY' }

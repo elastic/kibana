@@ -9,14 +9,30 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { LicenseContext } from '../../../../context/license/license_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import type { ContextualServiceMapSectionProps } from './contextual_service_map_section';
 import { ContextualServiceMapSection } from './contextual_service_map_section';
+import { APM_EBT_ACTIONS } from '../../ebt_constants';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
+
+const mockServiceMapEmbeddable = jest.fn((_props: unknown) => (
+  <div data-test-subj="mockServiceMapEmbeddable" />
+));
 
 jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
-  ServiceMapEmbeddable: () => <div data-test-subj="mockServiceMapEmbeddable" />,
+  ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
+}));
+
+const mockGetServiceMapUrl = jest.fn(
+  (_core: unknown, _params?: unknown) => '/app/apm#/service-map?rangeFrom=now-15m&rangeTo=now'
+);
+
+jest.mock('../../../../embeddable/service_map/get_service_map_url', () => ({
+  getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
+    mockGetServiceMapUrl(...args),
 }));
 
 const defaultProps: ContextualServiceMapSectionProps = {
@@ -55,6 +71,10 @@ function renderSection(
 }
 
 describe('ContextualServiceMapSection', () => {
+  beforeEach(() => {
+    mockGetServiceMapUrl.mockClear();
+  });
+
   it('renders the map section when platinum license and service map are available', () => {
     renderSection();
 
@@ -63,6 +83,47 @@ describe('ContextualServiceMapSection', () => {
     expect(screen.getByTestId('apmContextualServiceMapExploreInServiceMap')).toBeInTheDocument();
     expect(screen.getByTestId('contextualServiceMapControls')).toBeInTheDocument();
     expect(screen.getByTestId('mockServiceMapEmbeddable')).toBeInTheDocument();
+  });
+
+  it('forwards flyoutOptions to the service map embeddable', () => {
+    const flyoutOptions = {
+      transactionType: 'request',
+      latencyAggregationType: LatencyAggregationType.p95,
+    };
+    renderSection({ flyoutOptions });
+
+    expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({ flyoutOptions })
+    );
+  });
+
+  it('instruments the Explore in Service map link with EBT click attributes', () => {
+    renderSection();
+
+    const exploreLink = screen.getByTestId('apmContextualServiceMapExploreInServiceMap');
+    expect(exploreLink).toHaveAttribute('data-ebt-action', APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP);
+    expect(exploreLink).toHaveAttribute(
+      'data-ebt-element',
+      SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK
+    );
+    expect(exploreLink).not.toHaveAttribute('data-ebt-detail');
+  });
+
+  it('passes filterPills through to the Explore in Service map URL', () => {
+    const filterPills = [
+      { field: 'transaction.type', value: 'request' },
+      { field: 'transaction.name', value: 'GET /api' },
+    ];
+
+    renderSection({ filterPills });
+
+    expect(mockGetServiceMapUrl).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        serviceName: 'opbeans-node',
+        filterPills,
+      })
+    );
   });
 
   it('renders the license prompt without map controls when license is insufficient', () => {

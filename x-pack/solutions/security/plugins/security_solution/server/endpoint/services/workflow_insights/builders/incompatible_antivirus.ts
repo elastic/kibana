@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { posix, win32 } from 'path';
+
 import moment from 'moment';
 import { uniqBy } from 'lodash';
 
@@ -18,6 +20,7 @@ import type { SupportedHostOsType } from '../../../../../common/endpoint/constan
 import type { BuildWorkflowInsightParams } from '.';
 
 import { FILE_EVENTS_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
+import { MAX_NAME_LENGTH } from '../../../../../common/api/endpoint/workflow_insights/workflow_insights';
 import {
   WorkflowInsightActionType,
   WorkflowInsightCategory,
@@ -27,6 +30,29 @@ import {
 import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
 import type { FileEventDoc } from '../helpers';
 import { getValidCodeSignature, groupEndpointIdsByOS } from '../helpers';
+
+const getFileBasename = (filePath: string, os: string): string => {
+  const basename = os === 'windows' ? win32.basename(filePath) : posix.basename(filePath);
+  return basename.length > 0 ? basename : filePath;
+};
+
+const clampToMaxNameLength = (name: string): string => name.slice(0, MAX_NAME_LENGTH);
+
+const deriveRemediationName = (
+  filePath: string,
+  os: string,
+  processName?: string
+): string | undefined => {
+  if (typeof processName === 'string' && processName) {
+    const nameFromProcess = clampToMaxNameLength(processName);
+    if (nameFromProcess.length > 0) {
+      return nameFromProcess;
+    }
+  }
+  // filePath is unbounded (Windows long paths can reach ~32k chars), so clamp unconditionally
+  const nameFromPath = clampToMaxNameLength(getFileBasename(filePath, os));
+  return nameFromPath.length > 0 ? nameFromPath : undefined;
+};
 
 export async function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
@@ -39,7 +65,10 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
 
   const insightsPromises = defendInsights.map(
     async (defendInsight: DefendInsight): Promise<SecurityWorkflowInsight[]> => {
-      const uniqueFilePathsInsights = uniqBy(defendInsight.events, 'value');
+      // A non-string or blank path derives no name, and the artifact validator requires minLength: 1
+      const uniqueFilePathsInsights = uniqBy(defendInsight.events, 'value').filter(
+        (event) => typeof event.value === 'string' && event.value.trim().length > 0
+      );
       const eventIds = Array.from(new Set(uniqueFilePathsInsights.map((event) => event.id)));
 
       const codeSignaturesHits = (
@@ -79,9 +108,14 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
       const createRemediation = (
         filePath: string,
         os: string,
+        processName?: string,
         signatureField?: string,
         signatureValue?: string
-      ): SecurityWorkflowInsight => {
+      ): SecurityWorkflowInsight | undefined => {
+        const remediationName = deriveRemediationName(filePath, os, processName);
+        if (!remediationName) {
+          return undefined;
+        }
         return {
           '@timestamp': currentTime,
           // TODO add i18n support
@@ -108,13 +142,13 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             notes: {
               llm_model: model ?? '',
             },
-            display_name: defendInsight.group,
+            display_name: remediationName,
           },
           remediation: {
             exception_list_items: [
               {
                 list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
-                name: defendInsight.group,
+                name: remediationName,
                 description: 'Suggested by Automatic Troubleshooting',
                 entries: [
                   {
@@ -144,21 +178,24 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
       };
 
       return Object.keys(osEndpointIdsMap).flatMap((os): SecurityWorkflowInsight[] => {
-        return uniqueFilePathsInsights.map((insight) => {
+        return uniqueFilePathsInsights.flatMap((insight): SecurityWorkflowInsight[] => {
           const { value: filePath, id } = insight;
 
           if (codeSignaturesHits.length) {
             const codeSignatureSearchHit = codeSignaturesHits.find((hit) => hit._id === id);
 
             if (codeSignatureSearchHit) {
+              const processName = codeSignatureSearchHit._source?.process?.name;
               const signature = getValidCodeSignature(os, codeSignatureSearchHit._source);
-              if (signature) {
-                return createRemediation(filePath, os, signature.field, signature.value);
-              }
+              const remediation = signature
+                ? createRemediation(filePath, os, processName, signature.field, signature.value)
+                : createRemediation(filePath, os, processName);
+              return remediation ? [remediation] : [];
             }
           }
 
-          return createRemediation(filePath, os);
+          const remediation = createRemediation(filePath, os);
+          return remediation ? [remediation] : [];
         });
       });
     }

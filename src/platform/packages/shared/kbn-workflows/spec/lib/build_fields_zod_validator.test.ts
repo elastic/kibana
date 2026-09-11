@@ -66,6 +66,18 @@ describe('convertJsonSchemaToZod', () => {
     expect(zodSchema).toBeDefined();
   });
 
+  it('should preserve and validate schema-valued additional properties', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: 'object',
+      properties: { name: { type: 'string' } },
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 42 }).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 'not a number' }).success).toBe(false);
+  });
+
   it('should convert a nested object schema to Zod', () => {
     const jsonSchema: JSONSchema7 = {
       type: 'object',
@@ -416,11 +428,14 @@ describe('buildFieldsZodValidator', () => {
           {
             last_event_timestamp: '2024-01-01T00:00:00Z',
             rule_id: 'rule-1',
+            source: 'internal',
+            space_id: 'default',
             group_hash: 'hash-1',
             episode_id: 'episode-1',
             episode_status: 'active',
           },
         ],
+        rules: {},
       },
     });
     expect(valid.success).toBe(true);

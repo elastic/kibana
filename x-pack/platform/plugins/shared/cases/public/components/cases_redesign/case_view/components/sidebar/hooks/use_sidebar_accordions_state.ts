@@ -9,12 +9,17 @@ import { useCallback } from 'react';
 import { LOCAL_STORAGE_KEYS } from '../../../../../../../common/constants';
 import { useCasesLocalStorage } from '../../../../../../common/use_cases_local_storage';
 
-export type SidebarAccordionId = 'attributes' | 'templateFields' | 'connectors';
+export type SidebarAccordionId =
+  | 'attributes'
+  | 'legacyCustomFields'
+  | 'templateFields'
+  | 'connectors';
 
 export type SidebarAccordionsState = Record<SidebarAccordionId, boolean>;
 
 const DEFAULT_ACCORDIONS_STATE: SidebarAccordionsState = {
   attributes: true,
+  legacyCustomFields: false,
   templateFields: true,
   connectors: true,
 };

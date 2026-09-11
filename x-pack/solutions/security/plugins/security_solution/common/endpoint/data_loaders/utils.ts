@@ -12,7 +12,7 @@ import type { Flags } from '@kbn/dev-cli-runner';
 import moment from 'moment/moment';
 import type { Space } from '@kbn/spaces-plugin/common';
 import type { KbnClient } from '@kbn/test';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { EndpointError } from '../errors';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
@@ -193,6 +193,6 @@ export const fetchActiveSpaceId = memoize(async (kbnClient: KbnClient): Promise<
       method: 'GET',
       path: `/internal/spaces/_active_space`,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.id);
 });

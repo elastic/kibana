@@ -13,21 +13,18 @@ import { EuiLink } from '@elastic/eui';
 describe('PipelinesTable component', () => {
   let props;
   let clonePipeline;
-  let createPipeline;
   let onDeleteSelectedPipelines;
   let onSelectionChange;
   let openPipeline;
 
   beforeEach(() => {
     clonePipeline = jest.fn();
-    createPipeline = jest.fn();
     onDeleteSelectedPipelines = jest.fn();
     onSelectionChange = jest.fn();
     openPipeline = jest.fn();
 
     props = {
       clonePipeline,
-      createPipeline,
       isReadOnly: false,
       isSelectable: true,
       message: null,
@@ -49,12 +46,6 @@ describe('PipelinesTable component', () => {
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('[iconType="copy"]').first().simulate('click');
     expect(clonePipeline).toHaveBeenCalled();
-  });
-
-  it('calls createPipeline on create button clicked', () => {
-    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('button[data-test-subj="btnAdd"]').simulate('click');
-    expect(createPipeline).toHaveBeenCalled();
   });
 
   it('calls delete prompt on delete click', () => {

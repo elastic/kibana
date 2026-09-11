@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
@@ -54,7 +54,11 @@ export const InferenceEndpoints: React.FC = () => {
 
   if (isLoading) {
     return (
-      <EuiPageTemplate.Section alignment="center" data-test-subj="inferenceEndpointsLoading">
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        alignment="center"
+        data-test-subj="inferenceEndpointsLoading"
+      >
         <EuiLoadingSpinner size="l" />
       </EuiPageTemplate.Section>
     );
@@ -74,7 +78,12 @@ export const InferenceEndpoints: React.FC = () => {
   return (
     <>
       <ExternalInferenceHeader canManage={canManage} onFlyoutOpen={onFlyoutOpen} />
-      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        className="eui-yScroll"
+        data-test-subj="inferenceManagementPage"
+      >
         <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
       {canManage && isAddInferenceFlyoutOpen && (

@@ -18,6 +18,8 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-workflows-library
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/i18n'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

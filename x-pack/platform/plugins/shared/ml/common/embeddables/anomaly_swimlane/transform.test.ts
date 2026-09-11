@@ -13,7 +13,7 @@ import { transformOut } from './transform_out';
 describe('anomaly swim lane embeddable transforms', () => {
   describe('schema', () => {
     it('accepts an overall swim lane', () => {
-      const state = anomalySwimLaneEmbeddableStateSchema.validate({
+      const state = anomalySwimLaneEmbeddableStateSchema.parse({
         job_ids: ['job-1'],
         swimlane_type: 'overall',
       });
@@ -25,7 +25,7 @@ describe('anomaly swim lane embeddable transforms', () => {
     });
 
     it('accepts a view-by swim lane', () => {
-      const state = anomalySwimLaneEmbeddableStateSchema.validate({
+      const state = anomalySwimLaneEmbeddableStateSchema.parse({
         job_ids: ['job-1', 'job-2'],
         swimlane_type: 'viewBy',
         view_by: 'airline',
@@ -46,7 +46,7 @@ describe('anomaly swim lane embeddable transforms', () => {
 
     it('rejects an empty job_ids array', () => {
       expect(() =>
-        anomalySwimLaneEmbeddableStateSchema.validate({
+        anomalySwimLaneEmbeddableStateSchema.parse({
           job_ids: [],
           swimlane_type: 'overall',
         })
@@ -55,7 +55,7 @@ describe('anomaly swim lane embeddable transforms', () => {
 
     it('rejects a view-by swim lane without view_by', () => {
       expect(() =>
-        anomalySwimLaneEmbeddableStateSchema.validate({
+        anomalySwimLaneEmbeddableStateSchema.parse({
           job_ids: ['job-1'],
           swimlane_type: 'viewBy',
         })
@@ -64,7 +64,7 @@ describe('anomaly swim lane embeddable transforms', () => {
 
     it('rejects an unknown swimlane_type', () => {
       expect(() =>
-        anomalySwimLaneEmbeddableStateSchema.validate({
+        anomalySwimLaneEmbeddableStateSchema.parse({
           job_ids: ['job-1'],
           swimlane_type: 'somethingElse',
         })

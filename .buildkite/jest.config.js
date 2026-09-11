@@ -8,16 +8,20 @@
  */
 
 const { createJsWithTsEsmPreset } = require('ts-jest');
+const { dirname } = require('node:path');
 
 const tsJestTransformCfg = createJsWithTsEsmPreset().transform;
 
 /** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: require.resolve('jest-environment-node', { paths: [dirname(process.argv[1])] }),
   transform: {
     ...tsJestTransformCfg,
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook)/)',
+    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams)/)',
   ],
+  moduleNameMapper: {
+    '^unicorn-magic/node$': '<rootDir>/node_modules/unicorn-magic/node.js',
+  },
 };

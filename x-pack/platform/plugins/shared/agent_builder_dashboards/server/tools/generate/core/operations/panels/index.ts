@@ -11,7 +11,8 @@ import type { PanelTypeDefinition } from './panel_type';
 import {
   visPanelConfigInputSchema,
   visPanelDefinition,
-  panelRequestSchema,
+  lensPanelRequestSchema,
+  vegaPanelRequestSchema,
   editPanelRequestInputSchema,
   type VisPanelResolutionRequest,
 } from './vis';
@@ -20,6 +21,12 @@ import {
   markdownPanelDefinition,
   editMarkdownPanelConfigInputSchema,
 } from './markdown';
+import {
+  customContentPanelConfigInputSchema,
+  customContentPanelDefinition,
+  editCustomContentPanelConfigInputSchema,
+} from './custom_content';
+import { attachmentPanelInputSchema } from './attachment_source';
 
 /**
  * Panel registry barrel.
@@ -40,7 +47,10 @@ import {
  * resolvable type is additive and needs no operation-handler changes.
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
+export { attachmentPanelInputSchema } from './attachment_source';
+export type { AttachmentPanelInput } from './attachment_source';
 export type { PanelContent } from './panel_type';
+export type { CustomContentPanelConfig } from './custom_content';
 
 /**
  * A `source: 'config'` panel adds a panel from an already-resolved config passed
@@ -51,6 +61,7 @@ export type { PanelContent } from './panel_type';
 const configPanelInputSchema = z.discriminatedUnion('type', [
   visPanelConfigInputSchema,
   markdownPanelConfigInputSchema,
+  customContentPanelConfigInputSchema,
 ]);
 
 export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
@@ -60,6 +71,7 @@ export type PanelType = ConfigPanelInput['type'];
 export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
   vis: visPanelDefinition,
   markdown: markdownPanelDefinition,
+  custom_content: customContentPanelDefinition,
 };
 
 const sectionIdField = z
@@ -75,8 +87,13 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
     markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    customContentPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   ]),
-  panelRequestSchema.extend({ sectionId: sectionIdField }),
+  z.discriminatedUnion('renderer', [
+    lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
+    vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
+  ]),
+  attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -84,7 +101,8 @@ export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
-  panelRequestSchema,
+  z.discriminatedUnion('renderer', [lensPanelRequestSchema, vegaPanelRequestSchema]),
+  attachmentPanelInputSchema,
 ]);
 
 /**
@@ -98,7 +116,10 @@ export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
 /** A single panel item accepted by `edit_panels` (targets an existing panel by id). */
 export const editPanelItemSchema = z.discriminatedUnion('source', [
   editPanelRequestInputSchema,
-  editMarkdownPanelConfigInputSchema,
+  z.discriminatedUnion('type', [
+    editMarkdownPanelConfigInputSchema,
+    editCustomContentPanelConfigInputSchema,
+  ]),
 ]);
 
 export type EditPanelItem = z.infer<typeof editPanelItemSchema>;

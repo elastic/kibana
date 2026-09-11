@@ -47,8 +47,8 @@ export const CASES_READ_ROLE: KibanaRole = observabilityRole({
 
 /**
  * No observability privileges at all — only `discover: ['all']`. Mirrors the FTR
- * "no observability privileges" role and is expected to hit the cases feature
- * 403 page.
+ * "no observability privileges" role and is expected to see Application unavailable
+ * when navigating to the Observability app.
  */
 export const NO_CASES_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
@@ -151,6 +151,20 @@ export const ALERTS_ONLY_ROLE: KibanaRole = {
     {
       base: [],
       feature: { observabilityAlerts: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const INVESTIGATE_ALERT_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.alerts-observability.*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { observabilityAlerts: ['read'], agentBuilder: ['all'] },
       spaces: ['*'],
     },
   ],

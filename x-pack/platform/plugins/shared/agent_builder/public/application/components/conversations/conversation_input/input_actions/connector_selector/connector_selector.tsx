@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -142,28 +142,36 @@ const manageConnectorsAriaLabel = i18n.translate(
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
   const { write: hasWritePrivilege } = useUiPrivileges();
+  const manageButtonProps = {
+    size: 's' as const,
+    iconType: 'gear',
+    color: 'text' as const,
+    'aria-label': manageConnectorsAriaLabel,
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
+      detail: 'connector',
+    }),
+  };
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            size="s"
-            iconType="gear"
-            color="text"
-            aria-label={manageConnectorsAriaLabel}
-            href={manageConnectorsUrl}
-            disabled={!hasWritePrivilege}
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
-              detail: 'connector',
-            })}
-          >
-            <FormattedMessage
-              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
-              defaultMessage="Manage"
-            />
-          </EuiButtonEmpty>
+          {hasWritePrivilege ? (
+            <EuiButton {...manageButtonProps} href={manageConnectorsUrl}>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          ) : (
+            <EuiButton {...manageButtonProps} disabled>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
@@ -331,6 +339,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   return (
     <EuiPopover
+      aria-label={selectableAriaLabel}
       panelProps={{ css: selectorPopoverPanelStyles }}
       button={
         <ConnectorPopoverButton
@@ -343,7 +352,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      anchorPosition="upLeft"
     >
       <EuiSelectable
         id={connectorSelectId}

@@ -20,7 +20,6 @@ describe('EisPromotionalCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-eis-promo-callout`;
   const ctaLink = 'https://example.com';
-  const direction: EisPromotionalCalloutProps['direction'] = 'row';
   const mockOnDismissPromo = jest.fn();
 
   const renderEisPromotionalCallout = (props?: Partial<EisPromotionalCalloutProps>) => {
@@ -30,7 +29,6 @@ describe('EisPromotionalCallout', () => {
           promoId={promoId}
           ctaLink={ctaLink}
           isCloudEnabled={true}
-          direction={direction}
           {...props}
         />
       </EuiThemeProvider>
@@ -65,7 +63,7 @@ describe('EisPromotionalCallout', () => {
   it('calls onDismissPromo when dismiss button is clicked', () => {
     renderEisPromotionalCallout();
 
-    const dismissButton = screen.getByTestId('euiDismissCalloutButton');
+    const dismissButton = screen.getByTestId(`${dataId}-dismiss`);
     fireEvent.click(dismissButton);
 
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);

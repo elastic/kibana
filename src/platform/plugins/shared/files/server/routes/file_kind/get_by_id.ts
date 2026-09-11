@@ -12,6 +12,7 @@ import type { FileJSON, FileKind } from '../../../common/types';
 import type { FilesClient } from '../../../common/files_client';
 import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
+import { fileId } from '../common_schemas';
 import { getById } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
 
@@ -19,7 +20,7 @@ export const method = 'get' as const;
 
 const rt = {
   params: schema.object({
-    id: schema.string(),
+    id: fileId,
   }),
 };
 

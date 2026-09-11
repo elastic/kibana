@@ -14,8 +14,16 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { IpCellRenderer } from './ip_cell_renderer';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -66,6 +74,7 @@ jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', 
 
 const mockServices = {
   overlays: { openSystemFlyout: mockOpenSystemFlyout },
+  telemetry: { reportEvent: mockReportEvent },
 } as unknown as StartServices;
 const mockStore = {} as SecurityAppStore;
 
@@ -93,6 +102,7 @@ const baseProps: DataGridCellValueElementProps = {
 describe('IpCellRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: new Promise<void>(() => {}) });
   });
 
   it('should render a single IP as a clickable link', () => {
@@ -112,6 +122,13 @@ describe('IpCellRenderer', () => {
 
     await userEvent.click(getByTestId('one-discover-ip-link'));
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.NETWORK,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+    });
   });
 
   it('should render multiple IPs as separate links', () => {

@@ -13,8 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBasicTable,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -45,7 +45,7 @@ import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } fr
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { UpdateIndexPatternForm } from './update_index_pattern';
-import { EmptyMigration, SearchField } from '../../../common/components';
+import { EmptyMigration, MemoizedBasicTable, SearchField } from '../../../common/components';
 import {
   UtilityBar,
   UtilityBarGroup,
@@ -360,11 +360,31 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
+      openedMigrationRuleId,
     } = useMigrationRuleDetailsFlyout({
       isLoading: isRulesLoading,
+      migrationRules,
       getMigrationRuleData,
       ruleActionsFactory,
     });
+
+    const { euiTheme } = useEuiTheme();
+    // Stable identity: never changes with selection, so EuiBasicTable rows are not
+    // re-rendered when the opened rule changes. Each row is tagged with its id; the
+    // highlight is applied purely via CSS on the wrapper below.
+    const rowProps = useCallback((rule: RuleMigrationRule) => ({ 'data-rule-id': rule.id }), []);
+    // Only this wrapper re-renders when the opened rule changes; the table body stays put.
+    const highlightCss = useMemo(
+      () =>
+        openedMigrationRuleId
+          ? {
+              [`.euiTableRow[data-rule-id="${openedMigrationRuleId}"]`]: {
+                backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+              },
+            }
+          : undefined,
+      [openedMigrationRuleId, euiTheme.colors.backgroundBaseInteractiveSelect]
+    );
 
     const rulesColumns = useMigrationRulesTableColumns({
       disableActions: isTableLoading,
@@ -442,18 +462,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                     </UtilityBar>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiBasicTable<RuleMigrationRule>
-                  loading={isTableLoading}
-                  items={migrationRules}
-                  pagination={pagination}
-                  sorting={sorting}
-                  onChange={onTableChange}
-                  selection={tableSelection}
-                  itemId={'id'}
-                  data-test-subj={'rules-translation-table'}
-                  columns={rulesColumns}
-                  tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
-                />
+                <div css={highlightCss}>
+                  <MemoizedBasicTable<RuleMigrationRule>
+                    loading={isTableLoading}
+                    items={migrationRules}
+                    pagination={pagination}
+                    sorting={sorting}
+                    onChange={onTableChange}
+                    selection={tableSelection}
+                    itemId={'id'}
+                    rowProps={rowProps}
+                    data-test-subj={'rules-translation-table'}
+                    columns={rulesColumns}
+                    tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
+                  />
+                </div>
               </>
             )
           }

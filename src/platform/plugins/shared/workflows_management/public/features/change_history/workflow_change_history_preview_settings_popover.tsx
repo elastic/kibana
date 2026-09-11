@@ -381,7 +381,7 @@ export const WorkflowChangeHistoryPreviewSettingsPopover = ({
         <EuiToolTip content={settingsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             size="s"
-            iconType="controlsHorizontal"
+            iconType="controls"
             color="primary"
             data-test-subj="workflowChangeHistoryPreviewSettingsButton"
             onClick={() => onIsOpenChange(!isOpen)}

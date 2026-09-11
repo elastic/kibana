@@ -31,22 +31,23 @@ export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
   config,
+  docLinks,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
   padInstallRoute(router, logger, config);
   padGetStatusRoute(router, logger, config);
-  initPrivilegeMonitoringEngineRoute(router, logger, config);
-  scheduleNowMonitoringEngineRoute(router, logger, config);
-  deletePrivilegeMonitoringEngineRoute(router, logger);
-  healthCheckPrivilegeMonitoringRoute(router, logger);
-  privilegesCheckPrivilegeMonitoringRoute(router, logger, getStartServices);
-  searchPrivilegeMonitoringIndicesRoute(router, logger);
-  createPrivilegeMonitoringIndicesRoute(router, logger);
-  createUserRoute(router, logger);
-  deleteUserRoute(router, logger);
-  listUsersRoute(router, logger);
-  updateUserRoute(router, logger);
-  uploadUsersCSVRoute(router, logger, config);
-  disablePrivilegeMonitoringEngineRoute(router, logger);
-  registerMonitoringEntitySourceRoutes(router, logger, config);
+  initPrivilegeMonitoringEngineRoute(router, logger, config, docLinks);
+  scheduleNowMonitoringEngineRoute(router, logger, config, docLinks);
+  deletePrivilegeMonitoringEngineRoute(router, logger, config, docLinks);
+  healthCheckPrivilegeMonitoringRoute(router, logger, config, docLinks);
+  privilegesCheckPrivilegeMonitoringRoute(router, logger, getStartServices, config, docLinks);
+  searchPrivilegeMonitoringIndicesRoute(router, logger, config, docLinks);
+  createPrivilegeMonitoringIndicesRoute(router, logger, config, docLinks);
+  createUserRoute(router, logger, config, docLinks);
+  deleteUserRoute(router, logger, config, docLinks);
+  listUsersRoute(router, logger, config, docLinks);
+  updateUserRoute(router, logger, config, docLinks);
+  uploadUsersCSVRoute(router, logger, config, docLinks);
+  disablePrivilegeMonitoringEngineRoute(router, logger, config, docLinks);
+  registerMonitoringEntitySourceRoutes(router, logger, config, docLinks);
 };

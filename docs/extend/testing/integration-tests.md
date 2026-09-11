@@ -116,7 +116,7 @@ To get the highest confidence in code that uses the Saved Objects client, write 
 2. Create a fixtures archive: `node scripts/es_archiver save <path> [index patterns...]`
 3. Load fixtures in your test: `esArchiver.load('path from root of repo')`
 
-_todo: fully worked out example_
+A fully worked example will be added in a future update.
 
 ## Saved object model versions [integration-tests-model-versions]
 

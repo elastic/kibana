@@ -11,54 +11,68 @@ import type {
   ConverseInput,
   Conversation,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
+  ConversationRoundAuthor,
+  InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 export const executeAgent$ = ({
   agentId,
   executionId,
   request,
-  capabilities,
   structuredOutput,
   outputSchema,
   runAgent,
   conversation,
   nextInput,
   origin,
+  author,
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
   maxContentLength,
+  reasoningLevel,
   browserApiTools,
   configurationOverrides,
   action,
   executionMode,
+  interactivity,
+  parentExecutionId,
+  projectRouting,
+  roundId,
 }: {
   agentId: string;
   executionId: string;
   request: KibanaRequest;
-  capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   runAgent: RunAgentFn;
   conversation?: Conversation;
   nextInput: ConverseInput;
   origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
+  reasoningLevel?: ChatCompletionReasoningEffort;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  interactivity?: InteractivityConfigInput;
+  parentExecutionId?: string;
+  projectRouting?: string;
+  roundId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -69,18 +83,23 @@ export const executeAgent$ = ({
       defaultConnectorId,
       telemetryMetadata,
       maxContentLength,
+      reasoningLevel,
       executionMode,
+      interactive: interactivity,
+      parentExecutionId,
+      projectRouting,
       agentParams: {
         nextInput,
         conversation,
         origin,
-        capabilities,
+        author,
         browserApiTools,
         configurationOverrides,
         structuredOutput,
         outputSchema,
         action,
         executionId,
+        roundId,
       },
       onEvent: (event) => {
         observer.next(event);

@@ -228,9 +228,7 @@ test.describe(
       });
 
       await test.step('Verify navigated to error detail page', async () => {
-        await expect(
-          page.getByTestId('breadcrumb last').getByText(testData.EDOT_ERROR_MESSAGE)
-        ).toBeVisible({
+        await expect(page.getByRole('heading', { name: /Error group/ })).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });

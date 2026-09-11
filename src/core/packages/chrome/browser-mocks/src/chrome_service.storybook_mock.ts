@@ -19,10 +19,13 @@ type ChromeStorybookStart = Pick<
   InternalChromeStart,
   'getBadge$' | 'getBreadcrumbsBadges$' | 'getHelpExtension$'
 > & {
-  next: Pick<InternalChromeStart['next'], 'getFeedbackHandler$'>;
+  help: Pick<InternalChromeStart['help'], 'getFeedbackHandler$' | 'getNewsfeedHandler$'>;
+  next: Pick<InternalChromeStart['next'], 'getFeedbackHandler$' | 'getNewsfeedHandler$'>;
   componentDeps: {
     basePath: Pick<InternalChromeStart['componentDeps']['basePath'], 'get' | 'prepend'>;
     legacyActionMenu$: InternalChromeStart['componentDeps']['legacyActionMenu$'];
+    capabilities: Pick<InternalChromeStart['componentDeps']['capabilities'], 'navLinks'>;
+    docTitleParts$: InternalChromeStart['componentDeps']['docTitleParts$'];
   };
 };
 
@@ -31,11 +34,13 @@ type ChromeStorybookStart = Pick<
  *
  * Unlike {@link chromeServiceMock}, this does not use `jest`, so it can run in the Storybook
  * runtime. It implements only the surface Chrome-owned React components read when rendered
- * under `ChromeServiceProvider` (base path, the legacy action menu, the feedback handler,
- * and the badge/help observables); everything else is intentionally omitted behind a
+ * under `ChromeServiceProvider` (base path, the legacy action menu, capabilities, the feedback
+ * handler, and the badge/help observables); everything else is intentionally omitted behind a
  * single cast.
  */
 export const createChromeStorybookStart = (): InternalChromeStart => {
+  const getFeedbackHandler$ = () => new BehaviorSubject<(() => void) | undefined>(undefined);
+  const getNewsfeedHandler$ = () => new BehaviorSubject(undefined);
   const start: ChromeStorybookStart = {
     componentDeps: {
       basePath: {
@@ -43,9 +48,18 @@ export const createChromeStorybookStart = (): InternalChromeStart => {
         prepend: (path: string) => path,
       },
       legacyActionMenu$: new BehaviorSubject(undefined),
+      capabilities: {
+        navLinks: { integrations: true },
+      },
+      docTitleParts$: new BehaviorSubject<readonly string[]>(['Elastic']),
+    },
+    help: {
+      getFeedbackHandler$,
+      getNewsfeedHandler$,
     },
     next: {
-      getFeedbackHandler$: () => new BehaviorSubject<(() => void) | undefined>(undefined),
+      getFeedbackHandler$,
+      getNewsfeedHandler$,
     },
     getBadge$: () => new BehaviorSubject<ChromeBadge | undefined>(undefined),
     getBreadcrumbsBadges$: () => new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]),

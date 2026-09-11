@@ -8,7 +8,7 @@
 import { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import type { StatusResponse } from '@kbn/core-status-common';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 
 export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
   // We DO NOT use `kbnClient.status.get()` here because the `kbnClient` passed on input could be our enhanced
@@ -20,7 +20,7 @@ export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusRes
       path: '/api/status',
     })
     .then(({ data }) => data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 /**
  * Checks to see if Kibana/ES is running in serverless mode

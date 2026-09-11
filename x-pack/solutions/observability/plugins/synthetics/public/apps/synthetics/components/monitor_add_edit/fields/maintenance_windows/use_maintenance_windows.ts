@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux-v7';
-import { useEffect } from 'react';
-import {
-  getMaintenanceWindowsAction,
-  selectMaintenanceWindowsState,
-} from '../../../../state/maintenance_windows';
+import { useFetchAllMaintenanceWindows } from '../../../../hooks';
 
 export function useMaintenanceWindows() {
-  const dispatch = useDispatch();
-  const { isLoading, data } = useSelector(selectMaintenanceWindowsState);
-
-  useEffect(() => {
-    dispatch(getMaintenanceWindowsAction.get());
-  }, [dispatch]);
+  const { isLoading, data } = useFetchAllMaintenanceWindows();
 
   return {
     isLoading,

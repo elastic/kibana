@@ -31,7 +31,7 @@ describe('getExpandAction', () => {
   describe('when isExpanded is true', () => {
     const isExpanded = () => true;
 
-    it('returns an action with arrowDown icon', () => {
+    it('returns an action with chevronSingleDown icon', () => {
       // When
       const { icon } = setup({ isExpanded });
 
@@ -56,7 +56,7 @@ describe('getExpandAction', () => {
   describe('when isExpanded is false', () => {
     const isExpanded = () => false;
 
-    it('returns an action with arrowRight icon', () => {
+    it('returns an action with chevronSingleRight icon', () => {
       // When
       const { icon } = setup({ isExpanded });
 

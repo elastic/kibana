@@ -19,7 +19,7 @@ export const journey = new Journey({
       )
     );
     await kibanaPage.waitForHeader();
-    await page.waitForSelector('[data-test-subj="discoverDocTable"][data-render-complete="true"]');
+    await page.waitForSelector('[data-test-subj="discoverDocTable"][data-table-loaded="true"]');
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
   .step('Expand a document', async ({ page }) => {

@@ -19,8 +19,10 @@
     "@kbn/es-query",
     "@kbn/react-query",
     "@kbn/search-types",
+    "@kbn/alerting-v2-browser-shared",
     "@kbn/alerting-v2-schemas",
     "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-utils",
     "@kbn/yaml-rule-editor",
     "@kbn/core-application-browser-mocks",
     "@kbn/react-hooks",
@@ -38,10 +40,10 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/core-di-browser",
     "@kbn/core-di",
-    "@kbn/announcement-banner",
     "@kbn/kibana-react-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-ui-settings-browser-mocks"
   ]
 }

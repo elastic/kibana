@@ -22,10 +22,10 @@ import type {
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { GroupTakeActionItems } from './types';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { InspectButton } from '../../../common/components/inspect';
@@ -157,7 +157,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     services: { uiSettings },
   } = useKibana();
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {

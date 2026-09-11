@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { NormalizedAuthType } from '@kbn/connector-specs';
-import { authTypeSpecs } from '@kbn/connector-specs';
+import { authTypeSpecs } from '@kbn/connector-specs/server';
 import type { AuthTypeRegistry } from './auth_type_registry';
 
 export function registerAuthTypes(registry: AuthTypeRegistry) {

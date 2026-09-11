@@ -21,6 +21,7 @@ import { MAX_PER_PAGE } from './update_risk_score_mappings';
 export const cleanupLegacyRiskEngine = async ({
   logger,
   getStartServices,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   try {
     const [coreStart, startPlugins] = await getStartServices();
@@ -39,7 +40,7 @@ export const cleanupLegacyRiskEngine = async ({
     const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
       type: riskEngineConfigurationTypeName,
       perPage: MAX_PER_PAGE,
-      namespaces: ['*'],
+      namespaces: spaceId ? [spaceId] : ['*'],
     });
 
     if (savedObjectsResponse.saved_objects.length === 0) {

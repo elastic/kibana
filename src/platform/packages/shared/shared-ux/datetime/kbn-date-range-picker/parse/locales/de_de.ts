@@ -29,15 +29,19 @@ import type { LocaleGrammar } from '../locale_grammar';
  */
 export const DE_DE_GRAMMAR: LocaleGrammar = {
   nowKeyword: 'jetzt',
-  delimiters: ['bis'],
+  delimiters: [{ text: 'bis' }],
   namedRanges: {
     heute: { start: 'now/d', end: 'now/d' },
     gestern: { start: 'now-1d/d', end: 'now-1d/d' },
     morgen: { start: 'now+1d/d', end: 'now+1d/d' },
     'diese woche': { start: 'now/w', end: 'now/w' },
+    'diese woche bis jetzt': { start: 'now/w', end: 'now' },
     'diesen monat': { start: 'now/M', end: 'now/M' },
     'dieser monat': { start: 'now/M', end: 'now/M' },
+    'diesen monat bis jetzt': { start: 'now/M', end: 'now' },
+    'dieser monat bis jetzt': { start: 'now/M', end: 'now' },
     'dieses jahr': { start: 'now/y', end: 'now/y' },
+    'dieses jahr bis jetzt': { start: 'now/y', end: 'now' },
     'letzte woche': { start: 'now-1w/w', end: 'now-1w/w' },
     'letzten monat': { start: 'now-1M/M', end: 'now-1M/M' },
     'letzter monat': { start: 'now-1M/M', end: 'now-1M/M' },

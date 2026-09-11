@@ -13,8 +13,12 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
+import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createBadRequestError,
+  normalizeInteractive,
+} from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentExecutionService,
@@ -26,6 +30,7 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
+import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -71,19 +76,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     useTaskManager,
     abortSignal,
     metadata,
+    interactive,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const interactivity = normalizeInteractive(interactive, mode);
 
     const executionClient = this.createExecutionClient();
-
-    if (providedExecutionId) {
-      const existing = await executionClient.peek(providedExecutionId);
-      if (existing) {
-        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
-      }
-    }
 
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments,
@@ -93,15 +93,47 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const execution = await executionClient.create({
-      executionMode: mode,
-      executionId,
-      agentId,
-      spaceId,
-      agentParams: validatedParams,
-      parentExecutionId: params.parentExecutionId,
-      metadata,
-    });
+    let execution: AgentExecution;
+    try {
+      execution = await executionClient.create({
+        executionMode: mode,
+        executionId,
+        agentId,
+        spaceId,
+        agentParams: validatedParams,
+        parentExecutionId: params.parentExecutionId,
+        metadata,
+        interactivity,
+      });
+    } catch (err) {
+      if (isVersionConflictError(err)) {
+        if (metadata?.execution_idempotency_key) {
+          this.logger.debug(
+            `Duplicate idempotency key detected, returning existing execution ${executionId}`
+          );
+
+          // Repairs executions left in `scheduled` when the original delivery
+          // failed before scheduling the task.
+          const existing = await executionClient.peek(executionId);
+
+          if (existing?.status === ExecutionStatus.scheduled) {
+            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+              request,
+              cloneApiKey: true,
+            });
+          }
+
+          return {
+            executionId,
+            events$: this.followExecution(executionId),
+          };
+        }
+
+        throw createBadRequestError(`Execution with id ${executionId} already exists`);
+      }
+
+      throw err;
+    }
 
     // Wire up external abort signal to execution abort
     if (abortSignal) {
@@ -119,7 +151,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (useScheduledTask) {
       return this.executeWithScheduledTask({ executionId, agentId, request });
     } else {
-      return this.executeLocally({ execution, request });
+      return this.executeLocally({ execution, request, interactivity });
     }
   }
 
@@ -162,6 +194,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
+  private buildRunAgentTask(executionId: string) {
+    return {
+      id: `agent-${executionId}`,
+      taskType: taskTypes.runAgent,
+      params: { executionId },
+      scope: ['agent-builder'],
+      enabled: true,
+      state: {},
+    };
+  }
+
   private async executeWithScheduledTask({
     executionId,
     agentId,
@@ -171,17 +214,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     agentId: string;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    await this.deps.taskManager.schedule(
-      {
-        id: `agent-${executionId}`,
-        taskType: taskTypes.runAgent,
-        params: { executionId },
-        scope: ['agent-builder'],
-        enabled: true,
-        state: {},
-      },
-      { request }
-    );
+    // ensureScheduled tolerates the task already existing: a concurrent idempotent
+    // replay may have re-issued this schedule while repairing a stuck execution.
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+      request,
+      cloneApiKey: true,
+    });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
@@ -198,9 +236,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async executeLocally({
     execution,
     request,
+    interactivity,
   }: {
     execution: AgentExecution;
     request: ExecuteAgentParams['request'];
+    interactivity: InteractivityConfig;
   }): Promise<ExecuteAgentResult> {
     const { executionId } = execution;
     const executionClient = this.createExecutionClient();
@@ -229,6 +269,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         deps: this.deps,
         request,
         execution,
+        interactivity,
         abortSignal: abortMonitor.getSignal(),
       });
 

@@ -19,16 +19,16 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
-  groupBy: null,
+  group_by: null,
   tags: null,
-  groupingMode: null,
+  grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: false },
-  createdBy: 'elastic_uid',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'elastic_uid',
-  updatedAt: '2026-01-02T00:00:00.000Z',
+  snoozed_until: null,
+  auth: { owner: 'elastic', created_by_user: false },
+  created_by: 'elastic_uid',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'elastic_uid',
+  updated_at: '2026-01-02T00:00:00.000Z',
   ...overrides,
 });
 
@@ -42,32 +42,32 @@ const renderCell = (canWrite: boolean) =>
         onEdit={jest.fn()}
         onClone={jest.fn()}
         onDelete={jest.fn()}
-        onEnable={jest.fn()}
-        onDisable={jest.fn()}
-        onSnooze={jest.fn()}
-        onCancelSnooze={jest.fn()}
         onUpdateApiKey={jest.fn()}
-        isStateLoading={false}
       />
     </I18nProvider>
   );
 
 describe('ActionPolicyActionsCell', () => {
   describe('when the user has write privilege', () => {
-    it('renders the view details, edit, and more actions affordances', () => {
+    it('renders the edit and more actions affordances', () => {
       renderCell(true);
 
-      expect(screen.getByTestId('actionPolicyViewDetailsButton')).toBeInTheDocument();
       expect(screen.getByLabelText('Edit this action policy')).toBeInTheDocument();
       expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+    });
+
+    it('does not render a standalone view details button (the name link covers it)', () => {
+      renderCell(true);
+
+      expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
     });
   });
 
   describe('when the user only has read privilege', () => {
-    it('renders only the view details affordance', () => {
+    it('renders no write affordances', () => {
       renderCell(false);
 
-      expect(screen.getByTestId('actionPolicyViewDetailsButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     });

@@ -3,14 +3,17 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-visualizations-server",
     "@kbn/agent-builder-visualizations-common",
+    "@kbn/custom-content-common",
+    "@kbn/custom-content-server",
     "@kbn/agent-builder-server",
     "@kbn/controls-constants",
     "@kbn/dashboard-plugin",
@@ -33,8 +36,13 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/esql-utils",
     "@kbn/presentation-publishing",
+    "@kbn/scout",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/ui-callout",
+    "@kbn/files-plugin",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": ["target/**/*"]
 }

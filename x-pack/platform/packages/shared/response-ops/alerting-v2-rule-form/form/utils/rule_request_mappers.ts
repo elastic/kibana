@@ -137,10 +137,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
   const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
-  const noDataStrategy =
-    formValues.kind === 'alert' && formValues.noDataStrategy
-      ? formValues.noDataStrategy
-      : undefined;
+  const noDataStrategy = formValues.noDataStrategy;
 
   return {
     metadata: mapMetadata(metadata),

@@ -8,9 +8,12 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiCallOut, EuiTitle } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import {
   EPISODES_KPIS_ACKNOWLEDGED,
   EPISODES_KPIS_ALERTS_COUNT,
@@ -24,14 +27,25 @@ import {
   EPISODES_KPIS_UNASSIGNED_ALERTS,
 } from '../../translations';
 
+interface EpisodesKpisServices {
+  expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
+  userProfile: CoreStart['userProfile'];
+  http: HttpStart;
+}
+
 export interface EpisodesKpisProps {
-  services: AlertEpisodesKibanaServices;
+  services: EpisodesKpisServices;
   filterState: EpisodesFilterState;
   timeRange: TimeRange;
 }
 
 export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisProps) => {
-  const { data, isLoading, isError } = useEpisodesKpisQuery({ services, filterState, timeRange });
+  const { data, isLoading, isError } = useEpisodesKpisQuery({
+    services,
+    filterState,
+    timeRange,
+  });
 
   if (isError) {
     return (

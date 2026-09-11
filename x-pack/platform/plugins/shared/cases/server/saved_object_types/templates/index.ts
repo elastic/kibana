@@ -111,6 +111,15 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
     2: modelVersion2,
     3: modelVersion3,
   },
+  management: {
+    // Ride along with case export/import; not listed/exported on their own in the SO Management UI.
+    // importableAndExportable must be a static property (SO types are registered unconditionally),
+    // so templates are always importable/exportable regardless of xpack.cases.templates.enabled.
+    importableAndExportable: true,
+    visibleInManagement: false,
+    getTitle: (so) => so.attributes.name,
+    icon: 'casesApp',
+  },
 };
 
 // NOTE: maintain type "connection" with Domain Schema

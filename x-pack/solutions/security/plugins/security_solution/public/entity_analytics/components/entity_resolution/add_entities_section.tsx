@@ -41,6 +41,7 @@ import {
   LAST_SEEN_COLUMN,
   RISK_SCORE_COLUMN,
   ACTIONS_COLUMN,
+  ADD_ENTITIES_TABLE_CAPTION,
 } from './translations';
 import {
   ADD_ENTITIES_SECTION_TEST_ID,
@@ -122,7 +123,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="expand"
+                    iconType="maximize"
                     color="primary"
                     aria-label={EXPAND_ENTITY_BUTTON}
                     onClick={() => onEntityNameClick?.(entity)}
@@ -247,6 +248,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         )}
         <EuiBasicTable
           data-test-subj={ADD_ENTITIES_TABLE_TEST_ID}
+          tableCaption={ADD_ENTITIES_TABLE_CAPTION}
           items={records}
           columns={columns}
           loading={isLoading}

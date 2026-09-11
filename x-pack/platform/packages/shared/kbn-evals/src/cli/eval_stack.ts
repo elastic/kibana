@@ -14,10 +14,12 @@ import { scoutEvalsArgs } from './prompts';
 import {
   isServiceRunning,
   isScoutStale,
+  isEdotStale,
   startService,
   stopService,
   connectorsHash,
   scoutEnvHash,
+  edotEnvHash,
   tailLog,
   isEdotDockerRunning,
 } from './services';
@@ -108,14 +110,19 @@ export interface EnsureEdotOptions {
 
 /**
  * Ensures the EDOT collector is running (exports traces to the configured ES),
- * reusing an existing instance when one is already up.
+ * reusing an existing instance unless it points at a different Elasticsearch.
  */
 export const ensureEdot = async ({
   repoRoot,
   log,
   elasticsearchHost,
 }: EnsureEdotOptions): Promise<void> => {
-  if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
+  const staleCheck = isEdotStale(repoRoot, elasticsearchHost);
+
+  if (staleCheck.stale) {
+    log.warning(`[edot] EDOT collector is stale (${staleCheck.reason}). Restarting...`);
+    await stopService(repoRoot, 'edot', log);
+  } else if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
     log.info('[edot] EDOT collector already running -- reusing');
     return;
   }
@@ -126,6 +133,7 @@ export const ensureEdot = async ({
     log.info(`[edot] EDOT collector will export to: ${elasticsearchHost}`);
   }
   startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log, {
+    envHash: edotEnvHash(elasticsearchHost),
     env: elasticsearchHost ? { ELASTICSEARCH_HOST: elasticsearchHost } : undefined,
   });
 

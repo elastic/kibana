@@ -35,11 +35,20 @@ jest.mock('./use_query_execution', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: {}, isLoading: false }),
+  useDataFields: () => ({
+    data: {
+      '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+    },
+    isLoading: false,
+  }),
+}));
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
 }));
 
 jest.mock('../../form/contexts/rule_form_context', () => ({
@@ -47,6 +56,7 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
     http: {},
     data: { search: { search: jest.fn() } },
     dataViews: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
     lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
   }),
 }));
@@ -64,7 +74,11 @@ jest.mock('./compose_discover_tabs', () => {
 });
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="mockCodeEditor">{value}</pre>,
+  CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
+    <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
+      {value}
+    </pre>
+  ),
   ESQL_LANG_ID: 'esql',
 }));
 
@@ -100,6 +114,13 @@ describe('QuerySandbox', () => {
     expect(screen.getByTestId('querySandbox')).toBeInTheDocument();
   });
 
+  it('renders the editor and results panels', () => {
+    renderSandbox();
+    expect(screen.getByTestId('querySandboxEditorPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxResultsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxEditorResizeHandle')).toBeInTheDocument();
+  });
+
   it('renders the search button', () => {
     renderSandbox();
     expect(screen.getByTestId('querySandboxRunQuery')).toBeInTheDocument();
@@ -116,6 +137,7 @@ describe('QuerySandbox', () => {
     expect(screen.getByTestId('mockCodeEditor')).toHaveTextContent(
       'FROM logs-* | STATS count() BY host.name'
     );
+    expect(screen.getByTestId('mockCodeEditor')).toHaveAttribute('data-theme', 'esql');
     expect(screen.queryByTestId('mockComposeDiscoverTabs')).not.toBeInTheDocument();
   });
 
@@ -332,7 +354,7 @@ describe('QuerySandbox', () => {
   });
 
   describe('headerActions', () => {
-    it('renders headerActions in the query header row when provided', () => {
+    it('renders headerActions in the in-editor toolbar when provided', () => {
       renderSandbox({
         headerActions: <button data-test-subj="customHeaderAction">Split</button>,
       });

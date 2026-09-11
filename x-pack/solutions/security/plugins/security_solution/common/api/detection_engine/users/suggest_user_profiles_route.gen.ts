@@ -21,7 +21,12 @@ export const SuggestUserProfilesRequestQuery = lazySchema(() =>
     /**
      * Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email
      */
-    searchTerm: z.string().optional(),
+    searchTerm: z
+      .string()
+      .optional()
+      .describe(
+        'Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email'
+      ),
   })
 );
 export type SuggestUserProfilesRequestQuery = z.infer<typeof SuggestUserProfilesRequestQuery>;

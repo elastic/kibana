@@ -9,13 +9,14 @@ import React from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AlertEpisode } from '../../queries/episodes_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
 import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
-import { getNonEmptyGroupingFields, parseEpisodeDataJson } from '../../utils/episode_grouping_data';
+import { getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
 
 export interface RelatedAlertEpisodeProps {
   episode: AlertEpisode;

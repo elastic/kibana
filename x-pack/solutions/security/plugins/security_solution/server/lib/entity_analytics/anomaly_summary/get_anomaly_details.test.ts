@@ -55,9 +55,12 @@ let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 let esClient: ElasticsearchClient;
 let mockMl: MlPluginSetup;
 
+const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
+
 const defaultParams = {
   entityId: 'user:alice',
   entityType: 'user' as const,
+  entityRecord: mockEntityRecord,
   request,
 };
 

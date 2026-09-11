@@ -29,19 +29,6 @@ describe('EbtTelemetryClient', () => {
     client = new EbtTelemetryClient(analyticsService);
   });
 
-  describe('startTrackingEndpointLatency', () => {
-    it('does not track latency for endpoints not in the allow list', () => {
-      const finishTracking = client.startTrackingEndpointLatency({
-        name: 'test-stream',
-        endpoint: 'GET /api/streams/not-allowed',
-      });
-
-      finishTracking();
-
-      expect(analyticsService.reportEvent).not.toHaveBeenCalled();
-    });
-  });
-
   describe('trackSignificantEventsQueriesGenerated', () => {
     it('tracks significant events queries generated events', () => {
       client.trackSignificantEventsQueriesGenerated({
@@ -65,6 +52,7 @@ describe('EbtTelemetryClient', () => {
             latency_ms: 100,
           },
         },
+        external_content_tool_continuations: 3,
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -90,6 +78,7 @@ describe('EbtTelemetryClient', () => {
               latency_ms: 100,
             },
           },
+          external_content_tool_continuations: 3,
         }
       );
     });
@@ -100,13 +89,16 @@ describe('EbtTelemetryClient', () => {
       client.trackSignificantEventsDetectionScan({
         took_ms: 42,
         duration_ms: 120,
-        rules_scanned: 24,
+        rules_requested: 24,
+        rules_scanned: 18,
         critical_rule_count: 4,
         default_rule_count: 20,
         alerting_engine: 'v2',
         alerts_source_index: '.rule-events',
-        lookback: 'now-30m',
-        bucket_interval: '30s',
+        lookback: 'now-40m',
+        bucket_interval: '1m',
+        default_lookback: 'now-125m',
+        default_bucket_interval: '5m',
         space_id: 'default',
       });
 
@@ -115,13 +107,16 @@ describe('EbtTelemetryClient', () => {
         {
           took_ms: 42,
           duration_ms: 120,
-          rules_scanned: 24,
+          rules_requested: 24,
+          rules_scanned: 18,
           critical_rule_count: 4,
           default_rule_count: 20,
           alerting_engine: 'v2',
           alerts_source_index: '.rule-events',
-          lookback: 'now-30m',
-          bucket_interval: '30s',
+          lookback: 'now-40m',
+          bucket_interval: '1m',
+          default_lookback: 'now-125m',
+          default_bucket_interval: '5m',
           space_id: 'default',
         }
       );

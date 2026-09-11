@@ -101,8 +101,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const spaceId = useSpaceId();
 
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
   const { dataView, status } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const selectedDataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
   useEffect(() => {

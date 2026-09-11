@@ -12,7 +12,9 @@ import {
   isFunctionExpression,
   isIdentifier,
   isInlineCast,
+  isList,
   isParamLiteral,
+  singleItems,
 } from '@elastic/esql';
 import type {
   ESQLAst,
@@ -21,13 +23,13 @@ import type {
   ESQLColumn,
   ESQLFunction,
   ESQLIdentifier,
+  ESQLSingleAstItem,
 } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
 import { isTypeConversionFunction } from '../functions';
 import { FunctionDefinitionTypes } from '../../../../..';
 import { getLocationInfo } from '../../../registry/location';
-import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { Location } from '../../../registry/types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
@@ -41,6 +43,15 @@ import type {
 import { resolveArgumentTypes } from '../expressions';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
+
+const getArgumentsToValidate = (
+  args: ESQLAstItem[]
+): Array<{ argument: ESQLSingleAstItem; index: number }> =>
+  [...singleItems(args)].flatMap((argument, index) =>
+    isList(argument)
+      ? argument.values.map((value) => ({ argument: value, index }))
+      : [{ argument, index }]
+  );
 
 export function validateFunction({
   fn,
@@ -123,7 +134,7 @@ class FunctionValidator {
     // Return early so the source-incompatibility error takes priority over the generic
     // "not allowed here" check below — the location may technically match, but the function
     // is invalid regardless because the pipeline source is TS.
-    if (isTimeseriesSourceCommand(this.ast) && this.definition.tsdbCompatible === false) {
+    if (this.isTimeseriesSource && this.definition.tsdbCompatible === false) {
       this.report(errors.tsdbIncompatibleFunction(this.fn));
       return;
     }
@@ -203,12 +214,11 @@ class FunctionValidator {
 
     // Validate column arguments
     const columnsToValidate: Array<ESQLColumn | ESQLIdentifier> = [];
-    const flatArgs = this.fn.args.flat();
+    const flatArgs = getArgumentsToValidate(this.fn.args);
     const skipUnsupportedOrConflictingColumnValidation = isTypeConversionFunction(
       this.definition.name
     );
-    for (let i = 0; i < flatArgs.length; i++) {
-      const arg = flatArgs[i];
+    for (const { argument: arg, index: i } of flatArgs) {
       if (
         (isColumn(arg) || isIdentifier(arg)) &&
         !(this.definition.name === '=' && i === 0) && // don't validate left-hand side of assignment
@@ -255,9 +265,8 @@ class FunctionValidator {
       ? this.definition?.name
       : undefined;
 
-    const flatArgs = this.fn.args.flat();
-    for (let i = 0; i < flatArgs.length; i++) {
-      const rawArg = flatArgs[i];
+    const flatArgs = getArgumentsToValidate(this.fn.args);
+    for (const { argument: rawArg, index: i } of flatArgs) {
       const arg = removeInlineCasts(rawArg);
 
       if (this.expectsAggregationAt(i)) {
@@ -311,7 +320,7 @@ class FunctionValidator {
     if (
       this.definition?.locationsAvailable.includes(Location.STATS_TIMESERIES) &&
       locationId === Location.STATS &&
-      isTimeseriesSourceCommand(this.ast)
+      this.isTimeseriesSource
     ) {
       return true;
     }
@@ -319,11 +328,21 @@ class FunctionValidator {
     return false;
   }
 
+  /** Whether the function belongs to a TS pipeline. */
+  private get isTimeseriesSource(): boolean {
+    return this.context.isTimeseriesSource === true;
+  }
+
   /**
    * Gets information about the location of the current function
    */
   private get location(): { displayName: string; id: Location } {
-    return getLocationInfo(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
+    return getLocationInfo(
+      this.fn,
+      this.parentCommand,
+      this.isTimeseriesSource,
+      !!this.parentAggFunction
+    );
   }
 
   /**

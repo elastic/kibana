@@ -10,6 +10,7 @@ import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
 
+import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { getMissingIndexPrivilegesInternalRoute } from './get_missing_privileges';
 import { getMissingWorkflowsPrivileges } from './get_missing_workflows_privileges';
 import * as helpers from '../../helpers';
@@ -212,6 +213,17 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
 
     beforeEach(() => {
       mockEsClient.security.hasPrivileges.mockResolvedValue({ body: allIndexPrivilegesGranted });
+    });
+
+    it('reads the workflows feature flag with a true default', async () => {
+      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(true);
+
+      await getHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockContext.core.featureFlags.getBooleanValue).toHaveBeenCalledWith(
+        ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
+        true
+      );
     });
 
     it('does not evaluate workflows privileges when the workflows feature flag is OFF', async () => {

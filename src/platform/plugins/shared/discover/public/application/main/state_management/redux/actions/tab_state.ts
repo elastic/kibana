@@ -9,6 +9,8 @@
 
 import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
   type AggregateQuery,
@@ -23,29 +25,37 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getDefaultSort,
 } from '@kbn/discover-utils';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  DISCOVER_QUERY_MODE_KEY,
+} from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkability,
+  getExpandedDocRef,
+} from '../../../utils/expanded_doc';
+import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
   type InternalStateThunkAction,
   type TabActionPayload,
-  transitionedFromEsqlToDataView,
-  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import {
   ProfileStateType,
   type ProfileStateDefinition,
   type ProfileStateDefaultsHandling,
-  type ProfileStateMutationOptions,
-} from '../../../../../context_awareness';
+} from '../../../../../../common/context_awareness';
+import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
   selectCurrentProfileUrlState,
-  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileStateDefinition,
   selectTabRuntimeState,
 } from '../runtime_state';
 import type {
@@ -61,9 +71,10 @@ export interface RawAppStatePayload {
   appState: DiscoverAppState;
   /**
    * Marks app state changes that come from URL syncing or other internal updates
-   * instead of direct user actions. These updates skip profile state snapshot
-   * syncing so they do not overwrite restorable profile state. This should
-   * rarely be needed outside of URL syncing and specific edge cases.
+   * instead of direct user actions. These updates skip profile app state
+   * snapshot syncing so they do not overwrite restorable profile app state
+   * defaults. This should rarely be needed outside of URL syncing and specific
+   * edge cases.
    */
   isSystemTriggered?: boolean;
 }
@@ -85,12 +96,12 @@ export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
-export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+export const syncProfileAppStateSnapshot: InternalStateThunkActionCreator<
   [TabActionPayload<{ appState?: DiscoverAppState }>]
 > = (payload) =>
-  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+  function syncProfileAppStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
-    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+    dispatch(internalStateSlice.actions.syncProfileAppStateSnapshot({ ...payload, profileId }));
   };
 
 /**
@@ -103,6 +114,43 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     if (hasStateChanges) {
       dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
+  };
+
+type ExpandedDocPayload = TabActionPayload<{
+  expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner?: string;
+  initialDocViewerTabId?: string;
+  initialDocViewerTabState?: object;
+  shouldUpdateUrl?: boolean;
+}>;
+
+/** Sets the expanded document and synchronizes its URL reference. */
+export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
+  function setExpandedDocThunkFn(dispatch, getState) {
+    const { shouldUpdateUrl = true, ...expandedDocPayload } = payload;
+
+    dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
+
+    if (!shouldUpdateUrl) {
+      return;
+    }
+
+    const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
+    const { appState } = selectTab(getState(), tabId);
+
+    // The restore path cannot reconstruct documents from cascade grids.
+    const nextExpandedDocRef =
+      expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER &&
+      getExpandedDocLinkability(appState.query, expandedDoc) === ExpandedDocLinkability.Linkable
+        ? getExpandedDocRef(expandedDoc)
+        : undefined;
+
+    // Avoid adding URL history when closing a flyout that never wrote a reference.
+    if (isEqual(appState.expandedDoc, nextExpandedDocRef)) {
+      return;
+    }
+
+    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
   };
 
 /**
@@ -123,7 +171,7 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
 
     if (!payload.isSystemTriggered) {
       dispatch(
-        syncProfileStateSnapshot({
+        syncProfileAppStateSnapshot({
           tabId: payload.tabId,
           appState: mergedAppState,
         })
@@ -219,7 +267,7 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
     }
   };
 
-type ProfileStatePayload<TState extends object> = TabActionPayload<{
+type ProfileStatePayload<TState extends SerializableRecord> = TabActionPayload<{
   profileStateDefinition: ProfileStateDefinition<TState>;
   profileState: TState;
   historyMethod?: ProfileStateMutationOptions['historyMethod'];
@@ -236,7 +284,7 @@ const URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Url]);
 /**
  * Updates tab profile state for provided definition, and optionally pushes to URL history
  */
-export const setProfileState = <TState extends object>(
+export const setProfileState = <TState extends SerializableRecord>(
   payload: ProfileStatePayload<TState>
 ): InternalStateThunkAction =>
   function setProfileStateThunkFn(
@@ -274,7 +322,7 @@ export const setProfileState = <TState extends object>(
       stateTypes,
       defaultsHandling,
     }: {
-      profileState: object | undefined;
+      profileState: SerializableRecord | undefined;
       stateTypes: Set<ProfileStateType>;
       defaultsHandling?: ProfileStateDefaultsHandling;
     }) => {
@@ -286,11 +334,11 @@ export const setProfileState = <TState extends object>(
       });
     };
 
-    const dispatchProfileState = (profileState: object | undefined) => {
+    const dispatchProfileState = (profileState: SerializableRecord | undefined) => {
       dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
     };
 
-    const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
+    const profileUrlStateDefinition = selectCurrentProfileStateDefinition(
       runtimeStateManager,
       tabId
     );
@@ -394,9 +442,9 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
-    // Mark all profile state fields to reset when transitioning to data view mode
+    // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -413,6 +461,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: {
             language: 'kuery',
             query: '',
@@ -427,7 +476,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       })
     );
 
-    dispatch(transitionedFromEsqlToDataView({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'classic',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**
@@ -437,10 +489,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
-    // Mark all profile state fields to reset when transitioning to ES|QL mode
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
+    // Mark all profile app state default fields to reset when transitioning to ES|QL mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -459,6 +511,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: { esql: queryString },
           filters: [],
           dataSource: {
@@ -473,7 +526,10 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
 
-    dispatch(transitionedFromDataViewToEsql({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'esql',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**

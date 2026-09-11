@@ -5,22 +5,56 @@ responses:
       application/json:
         examples:
           listConversationsResponseExample:
-            description: "Example response containing the list of conversations with all agents"
+            description: "Example response returning the first page of conversations for all agents"
             value:
+              pagination:
+                total: 128
+                page: 1
+                per_page: 1000
               results:
               - id: bcc176c5-38f6-40be-be0c-898e34fa1480
                 agent_id: elastic-ai-agent
                 user:
                   username: elastic
                 title: General Greeting
+                permissions:
+                  rename: true
+                  delete: true
                 created_at: "2025-09-19T17:45:39.554Z"
                 updated_at: "2025-09-19T17:45:39.554Z"
+          listConversationsPinnedExample:
+            description: "Example response filtered to pinned conversations only"
+            value:
+              pagination:
+                total: 3
+                page: 1
+                per_page: 1000
+              results:
+              - id: a1b2c3d4-1234-5678-abcd-000000000001
+                agent_id: elastic-ai-agent
+                user:
+                  username: elastic
+                title: Important reference conversation
+                pinned: true
+                permissions:
+                  rename: true
+                  delete: true
+                created_at: "2025-08-01T10:00:00.000Z"
+                updated_at: "2025-09-20T08:30:00.000Z"
 x-codeSamples:
 - lang: curl
   source: |
     curl \
-      -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
-      -H "Authorization: ApiKey ${API_KEY}"
+      -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&sort_order=desc" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "elastic-api-version: 2023-10-31"
+- lang: curl
+  label: "Filter to pinned conversations"
+  source: |
+    curl \
+      -X GET "${KIBANA_URL}/api/agent_builder/conversations?pinned=true" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "elastic-api-version: 2023-10-31"
 - lang: Console
   source: |
-    GET kbn://api/agent_builder/conversations
+    GET kbn://api/agent_builder/conversations?page=1&sort_order=desc

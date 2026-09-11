@@ -26,6 +26,7 @@ export interface TagsListProps {
   ignoreEmpty?: boolean;
   disableExpand?: boolean;
   prependChildren?: React.ReactNode;
+  maxWidth?: number | string;
 }
 
 const MININUM_TAGS_TO_DISPLAY = 3;
@@ -47,6 +48,7 @@ const TagsList = ({
   color = 'hollow',
   disableExpand = false,
   prependChildren,
+  maxWidth = 400,
 }: TagsListProps) => {
   const [toDisplay, setToDisplay] = useState(numberOfTagsToDisplay);
 
@@ -64,7 +66,16 @@ const TagsList = ({
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 400 }} alignItems="center">
+    <EuiFlexGroup
+      wrap
+      gutterSize="xs"
+      responsive={false}
+      css={{
+        maxWidth,
+        ...(maxWidth === '100%' ? { width: '100%', minWidth: 0 } : {}),
+      }}
+      alignItems="center"
+    >
       {prependChildren}
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary

@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/maps
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/maps-ems-plugin'
   - '@kbn/inspector-plugin'
   - '@kbn/data-plugin'
@@ -63,6 +64,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/custom-integrations-plugin'
   - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/shared-ux-router'
   - '@kbn/content-management-plugin'
   - '@kbn/core-saved-objects-api-server'
@@ -106,6 +108,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/cps-utils'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

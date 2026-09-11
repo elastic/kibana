@@ -50,6 +50,7 @@ export {
   EndpointSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
   AgentBuilderConnectorFeatureId,
+  ContextEngineConnectorFeatureId,
   AlertingConnectorFeature,
   CasesConnectorFeature,
   UptimeConnectorFeature,
@@ -60,6 +61,7 @@ export {
   EndpointSecurityConnectorFeature,
   WorkflowsConnectorFeature,
   AgentBuilderConnectorFeature,
+  ContextEngineConnectorFeature,
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,
@@ -77,6 +79,11 @@ export { validateEmptyStrings } from './validate_empty_strings';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
+export {
+  buildInboundEventsPath,
+  buildInboundEventsUrl,
+  INBOUND_EVENTS_TOKEN_MAX_LENGTH,
+} from './inbound_events';
 export const ACTIONS_FEATURE_ID = 'actions';
 
 export const DEFAULT_MICROSOFT_EXCHANGE_URL = 'https://login.microsoftonline.com';

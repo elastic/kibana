@@ -22,6 +22,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { userSelectedNotesForDeletion } from '../../../../notes';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
@@ -36,7 +37,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
@@ -54,7 +55,8 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { dataView } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
@@ -64,7 +66,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const handleClick = useCallback(() => {
     const indexName = selectedPatterns.join(',');
     if (enableNewFlyout) {
-      openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+      openDocumentFlyoutFromPattern({
+        documentId: eventId,
+        indexName,
+        origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+      });
     } else {
       openFlyout({
         right: {

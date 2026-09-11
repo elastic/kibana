@@ -13,17 +13,24 @@ import { SearchButton } from './search_button';
 import { AiButtonSlot } from './ai_button_slot';
 import { HelpButton } from './help_button';
 import { ChromeNextGlobalHeaderShell } from './global_header_shell';
-import { useContextSwitcher, useUserMenu } from '../../shared/chrome_hooks';
+import { useContextSwitcher, useProjectPicker, useUserMenu } from '../../shared/chrome_hooks';
+import { ChromeNextPageAnnouncer } from '../../shared/header_page_announcer';
 
-export const ChromeNextGlobalHeader = React.memo(() => (
-  <ChromeNextGlobalHeaderShell
-    logo={<ChromeNextGlobalHeaderLogo />}
-    search={<SearchButton />}
-    actions={<AiButtonSlot />}
-    help={<HelpButton />}
-    switcher={useContextSwitcher()}
-    userMenu={useUserMenu()}
-  />
-));
+export const ChromeNextGlobalHeader = React.memo(() => {
+  return (
+    <>
+      <ChromeNextPageAnnouncer />
+      <ChromeNextGlobalHeaderShell
+        logo={<ChromeNextGlobalHeaderLogo />}
+        search={<SearchButton />}
+        actions={<AiButtonSlot />}
+        help={<HelpButton />}
+        switcher={useContextSwitcher()}
+        projectPicker={useProjectPicker()}
+        userMenu={useUserMenu()}
+      />
+    </>
+  );
+});
 
 ChromeNextGlobalHeader.displayName = 'ChromeNextGlobalHeader';

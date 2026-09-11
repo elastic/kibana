@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 
 export const saveApmServerSchemaRoute = defineRoute<void>()({
   endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
-  params: z.object({
-    body: z.object({
-      schema: z.record(z.string(), z.unknown()),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        schema: z.record(z.string(), z.unknown()),
+      }),
+    })
+  ),
 });

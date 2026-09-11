@@ -299,6 +299,7 @@ export const AgentResponseSchema = schema.object({
   default_api_key: schema.maybe(schema.string()),
   default_api_key_id: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
+  policy_base_id: schema.maybe(schema.string()),
   policy_revision: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   last_checkin: schema.maybe(schema.string()),
   last_checkin_status: schema.maybe(
@@ -839,6 +840,12 @@ export const GetActionStatusRequestSchema = {
     ),
     latest: schema.maybe(
       schema.number({ meta: { description: 'Return only the latest N actions' } })
+    ),
+    scheduledOnly: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'Return only actions whose start_time is in the future' },
+      })
     ),
     errorSize: schema.number({
       defaultValue: 5,

@@ -15,6 +15,7 @@ jest.mock('@kbn/code-owners', () => ({
 import type { CodeOwnersEntry, Team } from '@kbn/code-owners';
 import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
 import {
+  findConnectorSpecsOwnershipIssues,
   findUnrecognizedTeams,
   getCodeownersTeams,
   getRegistryGithubTeams,
@@ -26,7 +27,8 @@ const mockGetCodeOwnersEntries = jest.mocked(getCodeOwnersEntries);
 const team = (id: string, githubTeam?: string): Team =>
   ({ id, name: id, github: { team: githubTeam } } as Team);
 
-const entry = (teams: string[]): CodeOwnersEntry => ({ teams } as CodeOwnersEntry);
+const entry = (teams: string[], pattern = '*'): CodeOwnersEntry =>
+  ({ pattern, teams } as CodeOwnersEntry);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -90,6 +92,71 @@ describe('findUnrecognizedTeams', () => {
     expect(findUnrecognizedTeams(codeowners, registry)).toEqual([
       'elastic/alpha-team',
       'elastic/zeta-team',
+    ]);
+  });
+});
+
+describe('findConnectorSpecsOwnershipIssues', () => {
+  it('accepts connector directories with explicit Elastic team owners', () => {
+    const rootEntries = [
+      { name: 'github', isDirectory: true },
+      { name: 'atlassian', isDirectory: true },
+    ];
+    const codeownersEntries = [
+      entry(
+        ['elastic/workchat-eng'],
+        'src/platform/packages/shared/kbn-connector-specs/src/specs/github/**'
+      ),
+      entry(
+        ['elastic/workchat-eng'],
+        'src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/**'
+      ),
+    ];
+
+    expect(findConnectorSpecsOwnershipIssues(rootEntries, codeownersEntries)).toEqual([]);
+  });
+
+  it('reports missing owners, non-Elastic owners, and files at the specs root', () => {
+    const rootEntries = [
+      { name: 'github', isDirectory: true },
+      { name: 'unowned_connector', isDirectory: true },
+      { name: 'unexpected.ts', isDirectory: false },
+    ];
+    const codeownersEntries = [
+      entry(['someuser'], 'src/platform/packages/shared/kbn-connector-specs/src/specs/github/**'),
+    ];
+
+    expect(findConnectorSpecsOwnershipIssues(rootEntries, codeownersEntries)).toEqual([
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/github/** must explicitly assign an @elastic team',
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/unexpected.ts must be inside a connector directory, not at the specs root',
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/unowned_connector/** must explicitly assign an @elastic team',
+    ]);
+  });
+
+  it('does not accept a broad specs owner in place of an exact connector entry', () => {
+    const rootEntries = [{ name: 'github', isDirectory: true }];
+    const codeownersEntries = [
+      entry(
+        ['elastic/workchat-eng'],
+        'src/platform/packages/shared/kbn-connector-specs/src/specs/**'
+      ),
+    ];
+
+    expect(findConnectorSpecsOwnershipIssues(rootEntries, codeownersEntries)).toEqual([
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/github/** must explicitly assign an @elastic team',
+    ]);
+  });
+
+  it('uses the first matching entry from the reversed CODEOWNERS list', () => {
+    const rootEntries = [{ name: 'github', isDirectory: true }];
+    const pattern = 'src/platform/packages/shared/kbn-connector-specs/src/specs/github/**';
+    mockGetCodeOwnersEntries.mockReturnValue([
+      entry(['someuser'], pattern),
+      entry(['elastic/workchat-eng'], pattern),
+    ]);
+
+    expect(findConnectorSpecsOwnershipIssues(rootEntries, mockGetCodeOwnersEntries())).toEqual([
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/github/** must explicitly assign an @elastic team',
     ]);
   });
 });

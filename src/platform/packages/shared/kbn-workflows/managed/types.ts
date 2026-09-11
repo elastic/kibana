@@ -13,7 +13,7 @@ export interface ManagedWorkflowManagement {
   enablement: 'enforced' | 'restorable';
 }
 
-export const MANAGED_WORKFLOW_SELECTORS = ['rule_action'] as const;
+export const MANAGED_WORKFLOW_SELECTORS = ['rule_action', 'watch'] as const;
 export const MANAGED_WORKFLOW_SOLUTIONS = ['security'] as const;
 
 export type ManagedWorkflowSelector = (typeof MANAGED_WORKFLOW_SELECTORS)[number];

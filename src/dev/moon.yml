@@ -33,7 +33,7 @@ dependsOn:
   - '@kbn/utils'
   - '@kbn/optimizer'
   - '@kbn/peggy'
-  - '@kbn/babel-transform'
+  - '@kbn/swc-config'
   - '@kbn/import-resolver'
   - '@kbn/find-used-node-modules'
   - '@kbn/ts-projects'
@@ -50,7 +50,7 @@ dependsOn:
   - '@kbn/dot-text'
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/rspack-optimizer'
   - '@kbn/dev-validation-runner'
 tags:

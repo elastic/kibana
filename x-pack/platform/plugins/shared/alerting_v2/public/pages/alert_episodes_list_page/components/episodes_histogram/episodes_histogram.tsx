@@ -26,24 +26,47 @@ import {
   UnifiedHistogramChart,
   UnifiedBreakdownFieldSelector,
 } from '@kbn/unified-histogram';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
-import {
-  buildEpisodesHistogramQuery,
-  type EpisodesFilterState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
-import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
+import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EPISODES_HISTOGRAM_CAP_WARNING,
   EPISODES_HISTOGRAM_QUERY_ERROR,
   EPISODES_HISTOGRAM_RETRY,
 } from '../../translations';
 
+interface EpisodesHistogramServices {
+  application: ApplicationStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  expressions: ExpressionsStart;
+  fieldFormats: FieldFormatsStart;
+  http: HttpStart;
+  lens: LensPublicStart;
+  spaces: SpacesPluginStart;
+  storage: Storage;
+  uiActions: UiActionsStart;
+  uiSettings: IUiSettingsClient;
+}
+
 export interface EpisodesHistogramProps {
-  services: AlertEpisodesKibanaServices;
+  services: EpisodesHistogramServices;
   dataView: DataView | undefined;
   filterState: EpisodesFilterState;
   timeRange: TimeRange;
@@ -87,7 +110,7 @@ export const EpisodesHistogram = ({
     error,
     refetch,
   } = useEpisodesHistogramQuery({
-    services: { expressions: services.expressions, spaces: services.spaces },
+    services: { expressions: services.expressions, spaces: services.spaces, http: services.http },
     filterState,
     timeRange,
     bucketInterval,

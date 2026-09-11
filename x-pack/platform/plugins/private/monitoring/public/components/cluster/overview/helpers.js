@@ -104,7 +104,7 @@ export function ClusterItemContainer(props) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} size="l" />
+              <EuiIcon type={icon} size="l" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle>

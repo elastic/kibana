@@ -101,9 +101,14 @@ export interface MetricRecorder {
 
 /**
  * Factory contract that creates a fresh {@link MetricCollector} for each
- * pipeline run. Injected into the pipeline so tests can override the source
- * of `executionId` / `startedAt`.
+ * pipeline run.
+ *
+ * `executionId` is supplied by the caller (the pipeline threads Task Manager's
+ * `RunContext.executionUuid`) so the collector shares a single execution
+ * identity with the rest of the run instead of minting its own. `startedAt`
+ * remains an internal seam (see {@link MetricCollectorFactory}) so tests can
+ * stamp deterministic timing.
  */
 export interface MetricCollectorFactoryContract {
-  create(): MetricCollector;
+  create(params: { executionId: string }): MetricCollector;
 }

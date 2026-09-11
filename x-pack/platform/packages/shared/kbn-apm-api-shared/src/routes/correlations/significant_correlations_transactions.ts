@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { LatencyCorrelation } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -20,25 +20,27 @@ export interface SignificantCorrelationsResponse {
 export const significantCorrelationsTransactionsRoute =
   defineRoute<SignificantCorrelationsResponse>()({
     endpoint: 'POST /internal/apm/correlations/significant_correlations/transactions',
-    params: z.object({
-      body: z
-        .object({
-          serviceName: z.string().optional(),
-          transactionName: z.string().optional(),
-          transactionType: z.string().optional(),
-          durationMin: z.coerce.number().optional(),
-          durationMax: z.coerce.number().optional(),
-        })
-        .merge(environmentSchema)
-        .merge(kuerySchema)
-        .merge(rangeSchema)
-        .extend({
-          fieldValuePairs: z.array(
-            z.object({
-              fieldName: z.string(),
-              fieldValue: z.union([z.string(), z.coerce.number()]),
-            })
-          ),
-        }),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        body: z
+          .object({
+            serviceName: z.string().optional(),
+            transactionName: z.string().optional(),
+            transactionType: z.string().optional(),
+            durationMin: z.coerce.number().optional(),
+            durationMax: z.coerce.number().optional(),
+          })
+          .merge(environmentSchema)
+          .merge(kuerySchema)
+          .merge(rangeSchema)
+          .extend({
+            fieldValuePairs: z.array(
+              z.object({
+                fieldName: z.string(),
+                fieldValue: z.union([z.string(), z.coerce.number()]),
+              })
+            ),
+          }),
+      })
+    ),
   });

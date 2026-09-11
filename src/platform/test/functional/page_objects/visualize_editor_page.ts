@@ -354,13 +354,23 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleAccordion(id: string, toState = 'true') {
-    const toggle = await this.find.byCssSelector(`button[aria-controls="${id}"]`);
-    const toggleOpen = await toggle.getAttribute('aria-expanded');
-    this.log.debug(`toggle ${id} expand = ${toggleOpen}`);
-    if (toggleOpen !== toState) {
+    const selector = `button[aria-controls="${id}"]`;
+    // The sidebar reflows while a neighbouring accordion is still animating, so a click issued
+    // right after another toggle can land on shifted content and never reach the button.
+    // Re-check the state and click again instead of waiting on a single click.
+    await this.retry.try(async () => {
+      const toggle = await this.find.byCssSelector(selector);
+      const toggleOpen = await toggle.getAttribute('aria-expanded');
+      this.log.debug(`toggle ${id} expand = ${toggleOpen}`);
+      if (toggleOpen === toState) {
+        return;
+      }
       this.log.debug(`toggle ${id} click()`);
       await toggle.click();
-    }
+      await this.retry.waitForWithTimeout(`accordion ${id} to be ${toState}`, 2000, async () => {
+        return (await toggle.getAttribute('aria-expanded')) === toState;
+      });
+    });
   }
 
   public async toggleOpenEditor(index: number, toState = 'true') {

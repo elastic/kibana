@@ -69,14 +69,19 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              icon,
+              icon: 'home',
               link: SEARCH_HOMEPAGE,
-              renderAs: 'home',
-              title,
+              title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                defaultMessage: 'Home',
+              }),
             },
             {
               icon: 'productAgent',
               link: 'agent_builder',
+            },
+            {
+              icon: 'sparkles',
+              link: 'context_engine',
             },
             {
               icon: 'productDiscover',

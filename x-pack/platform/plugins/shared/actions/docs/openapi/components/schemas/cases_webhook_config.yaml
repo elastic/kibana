@@ -35,7 +35,7 @@ properties:
       The REST API HTTP request method to create a case comment in the
       third-party system. Valid values are `patch`, `post`, and `put`.
     default: put
-    enum: 
+    enum:
       - patch
       - post
       - put
@@ -96,7 +96,10 @@ properties:
   hasAuth:
     $ref: 'has_auth.yaml'
   headers:
-    type: string
+    type: object
+    nullable: true
+    additionalProperties:
+      type: string
     description: >
       A set of key-value pairs sent as headers with the request URLs for the
       create case, update case, get case, and create comment methods.
@@ -137,5 +140,3 @@ properties:
       The URL to view the case in the external system. You can use variables to
       add the external system ID or external system title to the URL.
     example: https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
-
-

@@ -15,7 +15,8 @@ export {
   type ImageComponent,
 } from './icon_to_data_url';
 export { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
-export { HardcodedIcons } from './hardcoded_icons';
+export { getMaskableIconUrl } from './get_maskable_icon_url';
+export { HardcodedIconDataUrls, HardcodedIcons } from './hardcoded_icons';
 export { ParallelIcon } from './parallel_icon';
 export {
   resolveRegisteredStepIcon,

@@ -11,11 +11,15 @@ import { useQuery } from '@kbn/react-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
-import { buildEpisodesHistogramQuery, type EpisodesFilterState } from '../queries/episodes_query';
+import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { fetchFromSource } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import {
   generateTimeBuckets,
   computeOverlapCounts,
@@ -24,10 +28,16 @@ import {
 } from '../utils/histogram_utils';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
+interface HistogramQueryData {
+  rows: HistogramEpisodeRow[];
+  isCapHit: boolean;
+}
+
 export interface UseEpisodesHistogramQueryOptions {
   services: {
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
+    http: HttpStart;
   };
   filterState: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -50,34 +60,57 @@ export const useEpisodesHistogramQuery = ({
   bucketInterval,
   breakdownField,
 }: UseEpisodesHistogramQueryOptions): UseEpisodesHistogramQueryResult => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
 
   const {
-    data: rawEpisodes,
+    data: queryResult,
     isLoading,
     error,
     refetch,
-  } = useQuery<HistogramEpisodeRow[], Error>({
+  } = useQuery<HistogramQueryData, Error>({
     // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
-    queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
+    queryKey: queryKeys.histogram(
+      spaceId,
+      filterState,
+      timeRange,
+      breakdownField,
+      additionalEpisodesDataSource?.id
+    ),
     queryFn: async ({ signal }) => {
-      const query = buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print(
-        'basic'
-      );
-      return executeEsqlQuery<HistogramEpisodeRow>({
-        expressions: services.expressions,
-        query,
-        input: {
-          type: 'kibana_context' as const,
-          esqlVariables: [],
-          ...(timeRange ? { timeRange } : {}),
-        },
-        abortSignal: signal,
-      });
+      const [v2Rows, sourceHistograms] = await Promise.all([
+        executeEsqlQuery<HistogramEpisodeRow>({
+          expressions: services.expressions,
+          query: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
+          input: {
+            type: 'kibana_context' as const,
+            esqlVariables: [],
+            ...(timeRange ? { timeRange } : {}),
+          },
+          abortSignal: signal,
+        }),
+        fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.fetchHistogram?.({
+            services,
+            filterState,
+            timeRange,
+            breakdownField,
+            abortSignal: signal,
+          })
+        ),
+      ]);
+
+      return {
+        rows: [...v2Rows, ...sourceHistograms.results.flatMap(({ rows }) => rows)],
+        isCapHit:
+          v2Rows.length >= HISTOGRAM_EPISODE_LIMIT ||
+          sourceHistograms.results.some(({ isCapHit }) => isCapHit),
+      };
     },
   });
 
-  const isCapHit = (rawEpisodes?.length ?? 0) >= HISTOGRAM_EPISODE_LIMIT;
+  const isCapHit = queryResult?.isCapHit ?? false;
+  const rawEpisodes = queryResult?.rows;
 
   const table = useMemo<Datatable | undefined>(() => {
     if (!rawEpisodes) return undefined;

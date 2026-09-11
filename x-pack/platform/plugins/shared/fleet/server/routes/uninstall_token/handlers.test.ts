@@ -19,6 +19,7 @@ import type {
 import type {
   GetUninstallTokenRequest,
   GetUninstallTokensMetadataResponse,
+  RotateUninstallTokenRequest,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -31,15 +32,23 @@ import {
   type GetUninstallTokenRequestSchema,
   type GetUninstallTokensMetadataRequestSchema,
   GetUninstallTokenResponseSchema,
+  RotateUninstallTokenResponseSchema,
 } from '../../types/rest_spec/uninstall_token';
 
 import { createAgentPolicyMock } from '../../../common/mocks';
 
-import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
+import {
+  getUninstallTokenHandler,
+  getUninstallTokensMetadataHandler,
+  rotateUninstallTokenHandler,
+} from './handlers';
 
 const getUninstallTokenHandlerWithErrorHandler = withDefaultErrorHandler(getUninstallTokenHandler);
 const getUninstallTokensMetadataHandlerWithErrorHandler = withDefaultErrorHandler(
   getUninstallTokensMetadataHandler
+);
+const rotateUninstallTokenHandlerWithErrorHandler = withDefaultErrorHandler(
+  rotateUninstallTokenHandler
 );
 
 jest.mock('../../services/agent_policy');
@@ -221,6 +230,81 @@ describe('uninstall token handlers', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: { message: 'something happened' },
+      });
+    });
+  });
+
+  describe('rotateUninstallTokenHandler', () => {
+    const agentPolicyId = 'policy-id-1';
+    const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+
+    let generateTokenForPolicyIdMock: jest.Mock;
+    let request: KibanaRequest<RotateUninstallTokenRequest['params']>;
+
+    beforeEach(async () => {
+      const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
+      generateTokenForPolicyIdMock = uninstallTokenService.generateTokenForPolicyId as jest.Mock;
+
+      request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId },
+      });
+    });
+
+    it('should rotate the token and return a success message for a protected policy', async () => {
+      mockAgentPolicyService.get.mockResolvedValue(
+        createAgentPolicyMock({ id: agentPolicyId, is_protected: true })
+      );
+      generateTokenForPolicyIdMock.mockResolvedValue(undefined);
+
+      await rotateUninstallTokenHandlerWithErrorHandler(context, request, response);
+
+      expect(generateTokenForPolicyIdMock).toHaveBeenCalledWith(agentPolicyId, true);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { message: 'Uninstall token rotated successfully.' },
+      });
+      const validateResp = RotateUninstallTokenResponseSchema.validate({
+        message: 'Uninstall token rotated successfully.',
+      });
+      expect(validateResp).toEqual({ message: 'Uninstall token rotated successfully.' });
+    });
+
+    it('should return 404 when the agent policy does not exist', async () => {
+      mockAgentPolicyService.get.mockResolvedValue(null);
+
+      await rotateUninstallTokenHandlerWithErrorHandler(context, request, response);
+
+      expect(generateTokenForPolicyIdMock).not.toHaveBeenCalled();
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: `Agent policy not found with id ${agentPolicyId}` },
+      });
+    });
+
+    it('should return 400 when the policy does not have tamper protection enabled', async () => {
+      mockAgentPolicyService.get.mockResolvedValue(
+        createAgentPolicyMock({ id: agentPolicyId, is_protected: false })
+      );
+
+      await rotateUninstallTokenHandlerWithErrorHandler(context, request, response);
+
+      expect(generateTokenForPolicyIdMock).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: expect.stringContaining('does not have tamper protection enabled'),
+        },
+      });
+    });
+
+    it('should return internal error when the token service throws', async () => {
+      mockAgentPolicyService.get.mockResolvedValue(
+        createAgentPolicyMock({ id: agentPolicyId, is_protected: true })
+      );
+      generateTokenForPolicyIdMock.mockRejectedValue(Error('token generation failed'));
+
+      await rotateUninstallTokenHandlerWithErrorHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'token generation failed' },
       });
     });
   });

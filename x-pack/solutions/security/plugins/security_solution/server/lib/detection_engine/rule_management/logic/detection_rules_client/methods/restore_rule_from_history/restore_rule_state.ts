@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import { convertAlertingRuleToRuleResponse } from '../../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../../mergers/apply_rule_update';
@@ -31,42 +32,50 @@ export async function restoreRuleState({
   snapshotRule,
   restoredRevisionTimestamp,
 }: RestoreRuleStateParams): Promise<RestoreRuleFromHistoryResult> {
-  await validateMlAuth(mlAuthz, existingRule.type);
-
-  const ruleWithUpdates = await applyRuleUpdate({
-    prebuiltRuleAssetClient,
-    existingRule,
-    ruleUpdate: snapshotRule,
-  });
-
-  const ruleToSave = { ...ruleWithUpdates, enabled: existingRule.enabled };
-
-  const existingAlertingRule = convertRuleResponseToAlertingRule(existingRule, actionsClient);
-  const newAlertingRule = convertRuleResponseToAlertingRule(ruleToSave, actionsClient);
-
-  if (isEqual(existingAlertingRule, newAlertingRule)) {
-    return { rule: existingRule, no_change: true, restoredRevisionTimestamp };
-  }
-
-  validateFieldWritePermissions(
+  return withSecuritySpan(
     {
-      exceptions_list: ruleToSave.exceptions_list,
-      note: ruleToSave.note,
-      investigation_fields: ruleToSave.investigation_fields,
-      enabled: ruleToSave.enabled,
+      name: 'DetectionRulesClient.restoreRuleFromHistory.restoreRuleState',
+      labels: { solution: 'security' },
     },
-    rulesAuthz
+    async () => {
+      await validateMlAuth(mlAuthz, existingRule.type);
+
+      const ruleWithUpdates = await applyRuleUpdate({
+        prebuiltRuleAssetClient,
+        existingRule,
+        ruleUpdate: snapshotRule,
+      });
+
+      const ruleToSave = { ...ruleWithUpdates, enabled: existingRule.enabled };
+
+      const existingAlertingRule = convertRuleResponseToAlertingRule(existingRule, actionsClient);
+      const newAlertingRule = convertRuleResponseToAlertingRule(ruleToSave, actionsClient);
+
+      if (isEqual(existingAlertingRule, newAlertingRule)) {
+        return { rule: existingRule, no_change: true, restoredRevisionTimestamp };
+      }
+
+      validateFieldWritePermissions(
+        {
+          exceptions_list: ruleToSave.exceptions_list,
+          note: ruleToSave.note,
+          investigation_fields: ruleToSave.investigation_fields,
+          enabled: ruleToSave.enabled,
+        },
+        rulesAuthz
+      );
+
+      const updatedRule = await rulesClient.update({
+        id: existingRule.id,
+        data: newAlertingRule,
+        changeTracking: {
+          action: SecurityRuleChangeTrackingAction.ruleRestore,
+          metadata: { restoredFromChangeId: changeId, restoredFromRevision: snapshotRule.revision },
+          refresh: 'wait_for',
+        },
+      });
+
+      return { rule: convertAlertingRuleToRuleResponse(updatedRule), restoredRevisionTimestamp };
+    }
   );
-
-  const updatedRule = await rulesClient.update({
-    id: existingRule.id,
-    data: newAlertingRule,
-    changeTracking: {
-      action: SecurityRuleChangeTrackingAction.ruleRestore,
-      metadata: { restoredFromChangeId: changeId, restoredFromRevision: snapshotRule.revision },
-      refresh: 'wait_for',
-    },
-  });
-
-  return { rule: convertAlertingRuleToRuleResponse(updatedRule), restoredRevisionTimestamp };
 }

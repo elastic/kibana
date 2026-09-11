@@ -7,8 +7,6 @@
 
 export { ActionPolicyExecutionHistoryClient } from './action_policy_execution_history_client';
 export type {
-  ListExecutionHistoryParams,
+  ListExecutionHistoryArgs,
   ListExecutionHistoryResult,
-  CountNewEventsSinceParams,
-  CountNewEventsSinceResult,
 } from './action_policy_execution_history_client';

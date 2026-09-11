@@ -1713,6 +1713,36 @@ describe('Observability AI Assistant client', () => {
       );
     });
   });
+  describe('when completing a conversation in non-streaming mode', () => {
+    describe('when the conversation is not found', () => {
+      it('rejects getConversation() without hanging or throwing an uncaughtException', async () => {
+        client = createClient();
+
+        inferenceClientMock.chatComplete.mockImplementation(
+          () =>
+            new Observable((subscriber) => {
+              llmSimulator = createLlmSimulator(subscriber);
+            })
+        );
+
+        const { getConversation } = client.complete({
+          connectorId: 'foo',
+          messages: [user('Hello')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          conversationId: 'does-not-exist',
+          persist: true,
+        });
+
+        await expect(getConversation()).rejects.toThrow('Conversation not found');
+
+        expect(loggerMock.error).toHaveBeenCalledWith(
+          expect.objectContaining({ message: 'Conversation not found' })
+        );
+      });
+    });
+  });
+
   describe('when duplicating a conversation', () => {
     beforeEach(async () => {
       client = createClient();

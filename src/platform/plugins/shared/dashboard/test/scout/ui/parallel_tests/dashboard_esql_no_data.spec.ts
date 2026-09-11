@@ -41,16 +41,18 @@ spaceTest.describe(
         await spaceTest.step('opens a new ES|QL-backed dashboard', async () => {
           await page.testSubj.click('tryESQLLink');
           await pageObjects.dashboard.waitForRenderComplete();
-          // The breadcrumb is prefixed with "Editing " when the dashboard is in edit mode,
+          // The title is prefixed with "Editing " when the dashboard is in edit mode,
           // which is the state the "Try ES|QL" flow lands users in.
-          await expect(page.testSubj.locator('breadcrumb last')).toContainText('New Dashboard');
+          await expect(pageObjects.dashboard.getAppTitle()).toContainText('New Dashboard');
           await expect(page.testSubj.locator('lnsVisualizationContainer')).toBeVisible();
         });
 
         await spaceTest.step('seeds the inline editor with the default ES|QL query', async () => {
           await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
           const codeEditor = new KibanaCodeEditorWrapper(page);
-          await expect.poll(() => codeEditor.getCodeEditorValue()).toBe('FROM logs*');
+          await expect
+            .poll(() => codeEditor.getCodeEditorValue())
+            .toBe('FROM logs* | SORT @timestamp DESC');
         });
       }
     );

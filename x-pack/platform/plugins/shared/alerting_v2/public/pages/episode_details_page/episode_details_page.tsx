@@ -22,47 +22,51 @@ import {
   useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AppHeaderMetadataItems } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useService } from '@kbn/core-di-browser';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
-import { AlertEpisodeLifecycleHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section';
 import { AlertEpisodeTrendChartSection } from '@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section';
-import { AlertEpisodeSeverityHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section';
+import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
+import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
-import { UserCapabilities } from '../../services/user_capabilities';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
   getEpisodeHeaderTabs,
   type EpisodeDetailsMainPanel,
 } from './utils/get_episode_header_tabs';
-import { EpisodeTimelineTab } from './components/episode_timeline_tab';
+import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
 
 interface EpisodeRouteParams {
@@ -90,6 +94,8 @@ export function EpisodeDetailsPage() {
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
+  const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
+
   const {
     data: episode,
     isLoading: isLoadingEpisode,
@@ -114,24 +120,53 @@ export function EpisodeDetailsPage() {
     services: { expressions: services.expressions, spaces: services.spaces },
   });
 
+  const { isFlapping } = useEpisodeFlapping({
+    episodeId,
+    services: { data, spaces },
+  });
+
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
-  const tags = useMemo(() => groupAction?.tags ?? [], [groupAction]);
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
-  const episodeBreadcrumbTitle =
-    showRuleDependentUi && ruleState.rule.metadata.name
-      ? ruleState.rule.metadata.name
-      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+  const episodeData = parseEpisodeDataJson(episode?.episode_data);
+  const episodeDataRuleName =
+    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
+  const loadedRuleName = showRuleDependentUi ? ruleState.rule.metadata.name : undefined;
+  const episodeRuleName = loadedRuleName ?? episodeDataRuleName;
+  const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+  const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
+
+  useEpisodeAutoAttach(
+    episode,
+    {
+      ruleName: episodeRuleName,
+      groupingFields,
+    },
+    {
+      chrome: useService(CoreStart('chrome')),
+      agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+        | AgentBuilderPluginStart
+        | undefined,
+    }
+  );
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
   const actualMainPanel: EpisodeDetailsMainPanel =
-    mainPanel === 'metadata' && !showRuleDependentUi ? 'overview' : mainPanel;
+    (mainPanel === 'metadata' && !showRuleDependentUi) ||
+    (mainPanel === 'action_policy_history' && !canReadExecutionHistory)
+      ? 'overview'
+      : mainPanel;
 
   const actualSidebarPanel: EpisodeDetailsSidebarPanel =
     sidebarPanel === 'runbook' && !showRuleDependentUi ? 'episode_details' : sidebarPanel;
+
+  // The overview tab is the only one showing the sidebar, and there the two
+  // columns share a single scroll container so they scroll together. The other
+  // tabs scroll inside their own panel.
+  const isOverviewPanel = actualMainPanel === 'overview';
 
   const detailsServices = useMemo(
     () => ({
@@ -203,9 +238,10 @@ export function EpisodeDetailsPage() {
       getEpisodeHeaderTabs({
         actualMainPanel,
         showRuleDependentUi,
+        showActionPolicyHistory: canReadExecutionHistory,
         onSelect: setMainPanel,
       }),
-    [actualMainPanel, showRuleDependentUi]
+    [actualMainPanel, showRuleDependentUi, canReadExecutionHistory]
   );
 
   const headerBadges = useMemo(
@@ -213,11 +249,11 @@ export function EpisodeDetailsPage() {
       getEpisodeHeaderBadges({
         status: episode?.['episode.status'],
         severity: episode?.severity,
-        tags,
         episodeAction,
         groupAction,
+        isFlapping,
       }),
-    [episode, tags, episodeAction, groupAction]
+    [episode, episodeAction, groupAction, isFlapping]
   );
 
   const headerMenu = useMemo(
@@ -229,8 +265,6 @@ export function EpisodeDetailsPage() {
       }),
     [applicableActions, episode, invalidateEpisodeQueries]
   );
-
-  const ruleDescription = showRuleDependentUi ? ruleState.rule.metadata.description : undefined;
 
   const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
 
@@ -273,9 +307,6 @@ export function EpisodeDetailsPage() {
         gutterSize="s"
         css={css`
           flex-grow: 0;
-          ${largeMediaQuery} {
-            padding: ${euiTheme.size.l};
-          }
         `}
       >
         <EuiFlexItem grow={false}>
@@ -307,27 +338,8 @@ export function EpisodeDetailsPage() {
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      <EuiHorizontalRule
-        css={css`
-          ${largeMediaQuery} {
-            margin-block: 0;
-            margin-inline: ${euiTheme.size.l};
-          }
-          inline-size: unset;
-        `}
-      />
-      <div
-        css={css`
-          min-height: 0;
-
-          ${largeMediaQuery} {
-            flex: 1;
-            overflow-y: auto;
-            padding: ${euiTheme.size.l};
-          }
-        `}
-        data-test-subj="alertingV2EpisodeDetailsSidebarBody"
-      >
+      <EuiHorizontalRule />
+      <div data-test-subj="alertingV2EpisodeDetailsSidebarBody">
         {actualSidebarPanel === 'runbook' ? (
           <AlertEpisodeRunbookSection episodeId={episodeId} services={detailsServices} />
         ) : (
@@ -351,15 +363,12 @@ export function EpisodeDetailsPage() {
   const sidebarPanelInner = (
     <EuiSplitPanel.Inner
       grow={false}
-      paddingSize="none"
+      paddingSize="l"
       css={css`
         display: flex;
         flex-direction: column;
-        min-height: 0;
-        ${logicalCSS('padding-top', euiTheme.size.l)}
 
         ${largeMediaQuery} {
-          ${logicalCSS('padding-top', '0')}
           flex-shrink: 0;
           flex-basis: 400px;
           min-width: 40px;
@@ -372,20 +381,6 @@ export function EpisodeDetailsPage() {
       {sidebar}
     </EuiSplitPanel.Inner>
   );
-
-  // AppHeaderMetadata bolds `label` (it's meant to be the key of a label/value pair) and renders
-  // `value` at a lighter weight, so the description is passed as `value` with an empty `label`
-  // to get the lighter weight without touching the shared app-header component.
-  const metadata = ruleDescription
-    ? ([
-        {
-          type: 'text',
-          label: '',
-          value: ruleDescription,
-          'data-test-subj': 'alertingV2EpisodeDetailsHeaderDescription',
-        },
-      ] as AppHeaderMetadataItems)
-    : undefined;
 
   return (
     <KibanaPageTemplate
@@ -403,7 +398,6 @@ export function EpisodeDetailsPage() {
       <AppHeader
         sticky={false}
         title={episodeBreadcrumbTitle}
-        metadata={metadata}
         back={{
           href: episodesListHref,
           label: i18n.EPISODES_LIST_BACK_LABEL,
@@ -413,7 +407,6 @@ export function EpisodeDetailsPage() {
         tabs={headerTabs}
         spacing="bleed"
       />
-      <EuiSpacer size="m" />
       {isLoading ? (
         <KibanaPageTemplate.Section grow>
           <CenterJustifiedSpinner />
@@ -425,6 +418,10 @@ export function EpisodeDetailsPage() {
           restrictWidth={false}
           css={css`
             min-height: 0;
+            // The app header pulls itself up by its border width so following
+            // content can overlap its bottom border. Nothing here needs that
+            // overlap, so give the pixel back.
+            margin-block-start: ${euiTheme.border.width.thin};
           `}
           contentProps={{
             css: css`
@@ -438,8 +435,10 @@ export function EpisodeDetailsPage() {
             hasBorder={false}
             hasShadow={false}
             css={css`
+              ${logicalCSS('margin-horizontal', `-${euiTheme.size.base}`)}
+
               ${largeMediaQuery} {
-                height: 100%;
+                ${isOverviewPanel ? 'overflow-y: auto; min-height: 100%' : 'height: 100%;'}
               }
             `}
           >
@@ -472,39 +471,30 @@ export function EpisodeDetailsPage() {
               `}
             >
               {actualMainPanel === 'timeline' ? (
-                <EpisodeTimelineTab
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+                  <AlertEpisodeTimelineSection
+                    episodeId={episodeId}
+                    groupHash={groupHash}
+                    services={{ data, spaces, userProfile: services.userProfile }}
+                  />
+                </EuiPanel>
+              ) : actualMainPanel === 'action_policy_history' ? (
+                <EpisodeActionPolicyHistoryTab
                   episodeId={episodeId}
-                  groupHash={groupHash}
-                  services={{ data, spaces, userProfile: services.userProfile }}
+                  episodeStart={episode?.first_timestamp}
                 />
               ) : actualMainPanel === 'metadata' ? (
-                <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+                  <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
+                </EuiPanel>
               ) : (
-                <EuiPanel
-                  hasBorder={false}
-                  hasShadow={false}
-                  paddingSize="l"
-                  css={css`
-                    ${smallMediaQuery} {
-                      ${logicalCSS('padding-horizontal', '0')}
-                    }
-                    ${largeMediaQuery} {
-                      height: 100%;
-                      overflow-y: auto;
-                      ${logicalCSS('padding-left', '0')}
-                    }
-                  `}
-                >
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
                     <AlertEpisodeTrendChartSection
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodeLifecycleHeatmapSection
-                      episodeId={episodeId}
-                      services={detailsServices}
-                    />
-                    <AlertEpisodeSeverityHeatmapSection
+                    <AlertEpisodeTimelineHeatmapsSection
                       episodeId={episodeId}
                       services={detailsServices}
                     />
@@ -513,7 +503,7 @@ export function EpisodeDetailsPage() {
                 </EuiPanel>
               )}
             </EuiSplitPanel.Inner>
-            {sidebarPanelInner}
+            {isOverviewPanel ? sidebarPanelInner : null}
           </EuiSplitPanel.Outer>
         </KibanaPageTemplate.Section>
       )}

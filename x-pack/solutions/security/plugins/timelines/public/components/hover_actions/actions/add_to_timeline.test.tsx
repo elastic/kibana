@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
@@ -149,7 +150,7 @@ describe('add to timeline', () => {
       </TestProviders>
     );
 
-    fireEvent.mouseOver(screen.getByRole('button'));
+    await userEvent.hover(screen.getByRole('button'));
 
     expect(await screen.findByText(PRESS)).toBeInTheDocument();
   });
@@ -183,7 +184,7 @@ describe('add to timeline', () => {
 
       fireEvent.click(getButton());
 
-      expect(mockStartDragToTimeline).toBeCalled();
+      expect(mockStartDragToTimeline).toHaveBeenCalled();
     });
 
     test('it does NOT start dragging to timeline when a `draggableId` is NOT provided', () => {
@@ -195,7 +196,7 @@ describe('add to timeline', () => {
 
       fireEvent.click(getButton());
 
-      expect(mockStartDragToTimeline).not.toBeCalled();
+      expect(mockStartDragToTimeline).not.toHaveBeenCalled();
     });
 
     test('it dispatches a single `addProviderToTimeline` action when a single, non-array `dataProvider` is provided', () => {
@@ -284,7 +285,7 @@ describe('add to timeline', () => {
 
       fireEvent.click(getButton());
 
-      expect(onClick).toBeCalled();
+      expect(onClick).toHaveBeenCalled();
     });
   });
 
@@ -353,7 +354,7 @@ describe('add to timeline', () => {
           );
         });
 
-        expect(mockStartDragToTimeline).toBeCalled();
+        expect(mockStartDragToTimeline).toHaveBeenCalled();
       });
     });
 
@@ -421,7 +422,7 @@ describe('add to timeline', () => {
           );
         });
 
-        expect(mockStartDragToTimeline).not.toBeCalled();
+        expect(mockStartDragToTimeline).not.toHaveBeenCalled();
       });
     });
   });

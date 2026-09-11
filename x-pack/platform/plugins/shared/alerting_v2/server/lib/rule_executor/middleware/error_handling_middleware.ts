@@ -7,11 +7,14 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
-import type { PipelineStateStream } from '../types';
+import type { PipelineStateStream, RulePipelineState } from '../types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { isRuleExecutionCancellationError } from '../../execution_context';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { isEsqlUserError } from '../../errors/esql_user_error';
 
 /**
  * Middleware that provides centralized error handling for all steps.
@@ -23,7 +26,11 @@ import {
 export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'error_handling';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public execute(
     ctx: RuleExecutionMiddlewareContext,
@@ -31,19 +38,24 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
     input: PipelineStateStream
   ): PipelineStateStream {
     const stream = next(input);
-    const self = this;
+    const fallbackLogger = this.logger;
 
     return (async function* () {
+      let latestState: RulePipelineState | undefined;
+
       try {
         for await (const result of stream) {
+          latestState = result.state;
           yield result;
         }
       } catch (error) {
-        self.logger.error({
-          error,
-          type: 'StepExecutionError',
-          code: ctx.step.name,
-        });
+        if (!isRuleExecutionCancellationError(error)) {
+          (latestState?.logger ?? fallbackLogger).withLabels({ step: ctx.step.name }).error({
+            message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
+            error,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          });
+        }
 
         throw error;
       }

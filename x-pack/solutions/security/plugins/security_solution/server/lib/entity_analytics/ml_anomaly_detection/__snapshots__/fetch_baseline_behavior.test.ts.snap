@@ -42,8 +42,14 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "entity_id": "user:alice",
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "user.name": "alice",
+                },
+              },
+            ],
           },
         },
         Object {
@@ -60,14 +66,6 @@ Object {
           },
         },
       ],
-    },
-  },
-  "runtime_mappings": Object {
-    "entity_id": Object {
-      "script": Object {
-        "source": "",
-      },
-      "type": "keyword",
     },
   },
   "size": 0,
@@ -104,8 +102,14 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "entity_id": "user:alice",
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "user.name": "alice",
+                },
+              },
+            ],
           },
         },
         Object {
@@ -125,12 +129,6 @@ Object {
         "source": "emit(doc['@timestamp'].value.getDayOfWeekEnum().getValue() % 7)",
       },
       "type": "long",
-    },
-    "entity_id": Object {
-      "script": Object {
-        "source": "",
-      },
-      "type": "keyword",
     },
     "hour_of_day": Object {
       "script": Object {

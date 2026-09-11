@@ -17,7 +17,9 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/app-header
 dependsOn:
-  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-capabilities-common'
+  - '@kbn/app-menu'
+  - '@kbn/ui-app-header'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-context-mocks'

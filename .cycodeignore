@@ -120,6 +120,7 @@ src/platform/test
 typings
 x-pack/examples
 x-pack/packages/ai-infra/product-doc-artifact-builder
+x-pack/packages/ai-infra/security-labs-artifact-builder
 x-pack/packages/kbn-synthetics-private-location
 x-pack/platform/packages/shared/kbn-ai-tools-cli
 x-pack/platform/packages/shared/kbn-data-forge

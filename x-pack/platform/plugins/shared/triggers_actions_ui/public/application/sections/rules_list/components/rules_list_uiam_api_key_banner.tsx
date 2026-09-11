@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { useEuiTheme, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const RulesListUiamApiKeyBanner = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
-      <EuiCallOut
-        color="primary"
+      <KbnInfoCallout
         size="m"
-        iconType="info"
         data-test-subj="rulesListUiamApiKeyBanner"
         title={
           <FormattedMessage
@@ -23,6 +25,9 @@ export const RulesListUiamApiKeyBanner = () => {
             defaultMessage="UIAM API key rollout for rules"
           />
         }
+        css={css`
+          margin-block-start: ${euiTheme.size.base};
+        `}
       >
         <p>
           <FormattedMessage
@@ -30,7 +35,7 @@ export const RulesListUiamApiKeyBanner = () => {
             defaultMessage="Elastic is improving alerting security in Serverless projects. Elasticsearch API keys are being replaced with a newer, role-based format that improves access control. No action from you is required."
           />
         </p>
-      </EuiCallOut>
+      </KbnInfoCallout>
       <EuiSpacer size="s" />
     </>
   );

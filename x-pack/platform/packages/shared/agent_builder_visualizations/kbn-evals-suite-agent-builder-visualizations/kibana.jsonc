@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-agent-builder-visualizations",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "private"
+}

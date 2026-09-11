@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 export interface ToSignificantEventSeedParams {
   /** A discovery the investigator produced in a prior cycle. */
-  discovery: Partial<Discovery>;
+  discovery: Partial<SignificantEvent>;
   /** Unique event_uuid to stamp on the seed document. */
   eventUuid: string;
 }
@@ -32,7 +32,6 @@ export function canonicalSignificantEventFromGroundTruth({
   return {
     '@timestamp': now,
     event_uuid: eventUuid,
-    discovery_id: discovery.discovery_id,
     event_id: discovery.event_id ?? eventUuid,
     status: 'open',
     severity: discovery.severity ?? '40-medium',

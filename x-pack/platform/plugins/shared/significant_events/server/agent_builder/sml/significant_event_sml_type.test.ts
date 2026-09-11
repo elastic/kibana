@@ -8,7 +8,8 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
+import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
 import { EventService } from '../../lib/significant_events/events/event_service';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
@@ -20,7 +21,6 @@ jest.mock('../../lib/significant_events/events/event_service', () => ({
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_uuid: 'event-1',
-  discovery_id: 'discovery-1',
   event_id: 'payment-outage',
   workflow_execution_id: 'workflow-1',
   status: 'open',
@@ -62,6 +62,14 @@ describe('createSignificantEventSmlType', () => {
     );
   });
 
+  it('equals SIGNIFICANT_EVENT_KI_TYPE', () => {
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+    });
+
+    expect(smlType.id).toBe(SIGNIFICANT_EVENT_KI_TYPE);
+  });
+
   it('lists significant events for SML indexing', async () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
@@ -101,7 +109,7 @@ describe('createSignificantEventSmlType', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        type: SIGNIFICANT_EVENT_SML_TYPE,
+        type: SIGNIFICANT_EVENT_KI_TYPE,
         title: 'Payment outage',
       })
     );
@@ -120,7 +128,7 @@ describe('createSignificantEventSmlType', () => {
       logger: loggingSystemMock.createLogger(),
     });
     expect(permissions).toEqual({
-      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      kibana: { privileges: { name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`] } },
     });
   });
 
@@ -133,16 +141,23 @@ describe('createSignificantEventSmlType', () => {
       smlType.toAttachment(
         {
           id: 'chunk-1',
-          type: SIGNIFICANT_EVENT_SML_TYPE,
+          type: SIGNIFICANT_EVENT_KI_TYPE,
           title: 'Payment outage',
           origin_id: 'payment-outage',
-          origin: { uri: `${SIGNIFICANT_EVENT_SML_TYPE}://payment-outage` },
+          origin: { uri: `${SIGNIFICANT_EVENT_KI_TYPE}://payment-outage` },
           content: 'Payment outage',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
-          spaces: ['default'],
           permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
+            kibana: {
+              privileges: [
+                {
+                  space: 'default',
+                  name: [`ai_index:${SIGNIFICANT_EVENT_KI_TYPE}/read`],
+                  count: 1,
+                },
+              ],
+            },
           },
           ingestion_method: 'manual',
         },

@@ -7,11 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import {
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
-  asCodeIdSchema,
-} from '@kbn/as-code-shared-schemas';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
@@ -22,7 +18,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
+import type { LensUpdateIn, LensSavedObject } from '../../../content_management/zod';
 
 import type { RegisterAPIRouteFn } from '../../types';
 import type { LensUpdateResponseBody } from './types';
@@ -31,7 +27,6 @@ import {
   lensUpdateRequestParamsSchema,
   lensUpdateResponseBodySchema,
 } from './schema';
-import { findInvalidDurationFormat } from '../../../../common/transforms/ga_schema_validator';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
@@ -53,8 +48,8 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -102,22 +97,10 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const requestBodyData = req.body;
         if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
           throw new Error('visualizationType is required');
-        }
-
-        const { core } = await ctx.resolve(['core']);
-        const useGASchemas = await core.featureFlags.getBooleanValue(
-          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
-        );
-
-        // Enforce the active duration unit names for the current flag state (GA or legacy).
-        const durationError = findInvalidDurationFormat(req.body, useGASchemas);
-        if (durationError) {
-          return res.badRequest({ body: { message: durationError } });
         }
 
         // TODO fix IContentClient to type this client based on the actual
@@ -140,7 +123,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         if (createdNew) {
           try {
-            asCodeIdSchema.validate(req.params.id);
+            asCodeIdSchema.parse(req.params.id);
           } catch (error) {
             return res.badRequest({ body: { message: error.message } });
           }
@@ -148,7 +131,9 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         try {
           const { result } = await client.update(req.params.id, data, options);
-          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
+          const responseItem = lensUpdateResponseBodySchema.parse(
+            getLensResponseItem(builder, result.item)
+          );
 
           if (createdNew) {
             return res.created<LensUpdateResponseBody>({

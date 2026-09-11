@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import {
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-
-const MEMORY_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-] as const;
+import { MEMORY_WORKFLOW_IDS } from '../../../lib/maintenance/managed_workflow_targets';
 
 export const installMemoryWorkflows = async ({
   client,
@@ -27,7 +15,7 @@ export const installMemoryWorkflows = async ({
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
   const results = await Promise.allSettled(
-    MEMORY_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: DEFAULT_SPACE_ID }))
+    MEMORY_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
   );
 
   const failures = results.flatMap((result, index) =>

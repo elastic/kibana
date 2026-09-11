@@ -17,7 +17,7 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ActionsContextMenuProps {
   items: ContextMenuItemNavByRouterProps[];
-  /** Default icon is `boxesHorizontal` */
+  /** Default icon is `boxesVertical` */
   icon?: EuiIconProps['type'];
   'data-test-subj'?: string;
   /** If menu button should be disabled   */

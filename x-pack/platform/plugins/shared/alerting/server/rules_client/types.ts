@@ -8,10 +8,12 @@
 import type { KueryNode } from '@kbn/es-query';
 import type {
   Logger,
+  KibanaRequest,
   SavedObjectsClientContract,
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  AnalyticsServiceStart,
 } from '@kbn/core/server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -39,6 +41,7 @@ import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
 import type { IScopedChangeTrackingService } from './lib/change_tracking';
+import type { ApiKeyType } from '../task_runner/types';
 
 export type {
   BulkEditOperation,
@@ -65,6 +68,14 @@ export type {
 
 export interface RulesClientContext {
   readonly logger: Logger;
+  /**
+   * The request that this rules client is scoped to. On rule write paths it is
+   * passed to rule-type-defined params authorizers so that authorization can be
+   * resolved against the acting user's privileges. In background/task contexts
+   * this is a fake request built from the rule's stored API key, which carries
+   * a snapshot of the rule owner's privileges.
+   */
+  readonly request: KibanaRequest;
   readonly getUserName: () => Promise<string | null>;
   readonly spaceId: string;
   readonly namespace?: string;
@@ -114,8 +125,16 @@ export interface RulesClientContext {
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly shouldGrantUiam?: boolean;
+  readonly apiKeyType?: ApiKeyType;
   readonly isServerless: boolean;
   readonly featureFlags: FeatureFlagsStart;
+  /**
+   * Used to report EBT events (e.g. rule create telemetry). Optional on the context so the
+   * many hand-constructed test contexts across the codebase aren't forced to wire it. In
+   * production it is always provided by {@link RulesClientFactory}. Consumers must fail open
+   * (try/catch) around any `reportEvent` call, since telemetry must never break rule operations.
+   */
+  readonly analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
@@ -143,7 +162,15 @@ export type CreateAPIKeyResult =
   | {
       apiKeysEnabled: true;
       result?: SecurityPluginGrantAPIKeyResult;
-      uiamResult?: SecurityPluginGrantAPIKeyResult;
+      // `id` is absent for user-created Cloud (UIAM) API keys, which are raw `essu_`
+      // credentials with no key id; alerting never invalidates them. `external` carries
+      // UIAM's verdict (`AuthenticatedUser.api_key.internal === false`) on whether the key
+      // is an external (user-created Cloud) API key; external keys must not be presented
+      // to Elasticsearch with the UIAM shared secret.
+      uiamResult?: Omit<SecurityPluginGrantAPIKeyResult, 'id'> & {
+        id?: string;
+        external?: boolean;
+      };
     };
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }

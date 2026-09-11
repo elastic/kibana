@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/utility-types'
   - '@kbn/es-query'
   - '@kbn/i18n'
@@ -70,6 +71,8 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/ui-ai-components'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/deeplinks-analytics'
   - '@kbn/react-kibana-context-render'
@@ -87,6 +90,7 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/core-rendering-browser'
   - '@kbn/grid-layout'
+  - '@kbn/rxjs-history'
   - '@kbn/ui-actions-browser'
   - '@kbn/esql-types'
   - '@kbn/saved-objects-tagging-plugin'
@@ -109,15 +113,13 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
+  - '@kbn/as-code-export-flyout-component'
   - '@kbn/scout'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
-  - '@kbn/code-editor-mock'
-  - '@kbn/monaco'
-  - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-utils'
   - '@kbn/as-code-shared-transforms'
@@ -131,6 +133,8 @@ dependsOn:
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/ui-callout'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod
@@ -147,6 +151,7 @@ fileGroups:
     - test/scout_oas_schema/**/*
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

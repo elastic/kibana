@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isCommittedQueryValid } from './committed_query_validation';
+import { isCommittedQueryValid, validateCommittedQuery } from './committed_query_validation';
 
 describe('committed query validation', () => {
   describe('isCommittedQueryValid', () => {
@@ -29,14 +29,14 @@ describe('committed query validation', () => {
       ).toBe(true);
     });
 
-    it('returns false for a base-only alert persisted as standalone', () => {
+    it('returns true for a standalone alert query without an explicit alert condition (conditionless rule)', () => {
       expect(
         isCommittedQueryValid(
           { format: 'standalone', breach: { query: 'FROM logs-*' } },
           'alert',
           true
         )
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it('returns true for a signal rule with a non-empty standalone query', () => {
@@ -58,20 +58,63 @@ describe('committed query validation', () => {
         )
       ).toBe(false);
     });
+  });
 
-    it('matches submit and step-navigation semantics for alert rules', () => {
-      const invalidQuery = {
-        format: 'composed' as const,
-        base: 'FROM logs-*',
-        breach: { segment: '' },
-      };
-      expect(isCommittedQueryValid(invalidQuery, 'alert', true)).toBe(false);
+  describe('validateCommittedQuery', () => {
+    it('returns true for a valid composed alert query', () => {
+      expect(
+        validateCommittedQuery(
+          { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          'alert',
+          true
+        )
+      ).toBe(true);
     });
 
-    it('matches submit and step-navigation semantics for signal rules', () => {
-      expect(
-        isCommittedQueryValid({ format: 'standalone', breach: { query: '' } }, 'signal', true)
-      ).toBe(false);
+    it('returns true when the alert query has no alert condition (conditionless rule)', () => {
+      const result = validateCommittedQuery(
+        { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+        'alert',
+        true
+      );
+      expect(result).toBe(true);
+    });
+
+    it('returns an error string when the query is not committed', () => {
+      const result = validateCommittedQuery(
+        { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+        'alert',
+        false
+      );
+      expect(typeof result).toBe('string');
+    });
+
+    it('returns an error string for an empty signal query', () => {
+      const result = validateCommittedQuery(
+        { format: 'standalone', breach: { query: '' } },
+        'signal',
+        true
+      );
+      expect(typeof result).toBe('string');
+    });
+
+    it('returns an error string when a composed alert query has no base or segment', () => {
+      const result = validateCommittedQuery(
+        { format: 'composed', base: '', breach: { segment: '' } },
+        'alert',
+        true
+      );
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/query/i);
+    });
+
+    it('returns true for a standalone alert query with no WHERE clause (conditionless rule)', () => {
+      const result = validateCommittedQuery(
+        { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        'alert',
+        true
+      );
+      expect(result).toBe(true);
     });
   });
 });

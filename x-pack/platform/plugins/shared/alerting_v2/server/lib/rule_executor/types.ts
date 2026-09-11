@@ -5,32 +5,38 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
+
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { RuleExecutionCounter } from './metrics/counters';
+import type { ActiveAlertGroupHash } from './queries';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
-  spaceId: string;
+  spaceId: SpaceId;
 }
 
 export interface RuleExecutionInput {
   readonly ruleId: string;
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
   readonly scheduledAt: string;
   readonly executionContext: ExecutionContext;
 }
 
 export interface RulePipelineState {
   readonly input: RuleExecutionInput;
+  /** Bound per-execution logger (subsystem + rule/space/task labels). */
+  readonly logger: LoggerServiceContract;
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
-  readonly dataPresentGroupHashes?: ReadonlySet<string>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
+  readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

@@ -67,3 +67,8 @@ export const Default: StoryObj = {
   name: 'default',
   render: () => <ControlledModal items={BASE_ITEMS} />,
 };
+
+export const EmptyHiddenList: StoryObj = {
+  name: 'empty list',
+  render: () => <ControlledModal items={BASE_ITEMS.map((item) => ({ ...item, hidden: false }))} />,
+};

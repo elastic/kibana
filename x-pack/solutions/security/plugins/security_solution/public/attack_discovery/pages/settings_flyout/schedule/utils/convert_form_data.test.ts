@@ -533,6 +533,65 @@ describe('convertFormDataToWorkflowSchedule', () => {
     });
   });
 
+  it('adds workflow_config on conversion while preserving all unrelated schedule fields (1.0 → 2.0 on mutation)', () => {
+    // Represents a legacy (1.0) schedule being edited/saved through the 2.0 workflow
+    // path: it must GAIN workflow_config without losing name/interval/actions/api_config.
+    const result = convertFormDataToWorkflowSchedule(
+      {
+        name: 'legacy schedule being converted',
+        connectorId: 'c1',
+        alertsSelectionSettings: {
+          end: 'now',
+          filters: [],
+          query: { query: 'host.name: *', language: 'kuery' },
+          size: 42,
+          start: 'now-24h',
+        },
+        interval: '30m',
+        actions: [
+          {
+            actionTypeId: '.slack',
+            group: 'default',
+            id: 'connector-123',
+            params: { message: 'hi' },
+            uuid: 'action-uuid',
+          } as RuleAction,
+        ],
+        workflowConfig: {
+          alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalWorkflowsEnabled: false,
+          defaultRetrievalEnabled: true,
+          skillEnabled: true,
+          validationWorkflowId: 'default',
+        },
+      },
+      '.alert-*',
+      {
+        actionTypeId: '.gen-ai',
+        id: 'c1',
+        name: 'c1',
+        apiProvider: 'openai',
+      } as unknown as AIConnector,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
+    );
+
+    // Unrelated fields preserved
+    expect(result.name).toBe('legacy schedule being converted');
+    expect(result.schedule).toEqual({ interval: '30m' });
+    expect(result.actions).toHaveLength(1);
+    expect(result.actions[0]).toEqual(expect.objectContaining({ id: 'connector-123' }));
+    expect(result.params.api_config).toEqual(expect.objectContaining({ connector_id: 'c1' }));
+    expect(result.params.size).toBe(42);
+    expect(result.params.query).toEqual({ query: 'host.name: *', language: 'kuery' });
+
+    // AND the 2.0 discriminator is added
+    expect(result.params.workflow_config).toEqual(
+      expect.objectContaining({ default_retrieval_enabled: true, skill_enabled: true })
+    );
+  });
+
   it('does not include workflow_config when workflowConfig is undefined', () => {
     const result = convertFormDataToWorkflowSchedule(
       {

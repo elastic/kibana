@@ -21,18 +21,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
-import {
-  RUNBOOK_ARTIFACT_TYPE,
-  ARTIFACT_VALUE_LIMITS,
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-} from '@kbn/alerting-v2-constants';
+import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import type { FormValues } from '../types';
+import { getRunbookContent } from '../utils/artifact_data';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
-const RUNBOOK_MAX_LENGTH =
-  ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
-const createRunbookArtifactId = () =>
-  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const RUNBOOK_MAX_LENGTH = RUNBOOK_CONTENT_LIMIT;
 
 export interface RunbookFieldProps {
   isOpen: boolean;
@@ -50,7 +45,7 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
   const runbookArtifact = runbookArtifacts.find(
     (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
   );
-  const runbookValue = runbookArtifact?.value ?? '';
+  const runbookValue = runbookArtifact ? getRunbookContent(runbookArtifact) : '';
   const [draftRunbook, setDraftRunbook] = useState(runbookValue);
   const trimmedLength = draftRunbook.trim().length;
   const isOverLimit = trimmedLength > RUNBOOK_MAX_LENGTH;
@@ -69,9 +64,9 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
     const nextArtifacts = trimmedRunbook
       ? [
           {
-            id: runbookArtifact?.id ?? createRunbookArtifactId(),
+            id: resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, runbookArtifact?.id),
             type: RUNBOOK_ARTIFACT_TYPE,
-            value: trimmedRunbook,
+            data: { content: trimmedRunbook },
           },
         ]
       : [];

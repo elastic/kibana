@@ -29,10 +29,10 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
       maxAttempts: 3,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
       }) => {
         const logger = appContextService.getLogger();
 
@@ -44,22 +44,22 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
             try {
               if (taskParams.type === 'backportPackagePolicyInputId') {
                 await runBackportPackagePolicyInputId({
-                  abortController,
+                  signal,
                   logger,
                 });
               } else if (taskParams.type === 'migrateComponentTemplateILMs') {
                 await runMigrateComponentTemplateILMs({
-                  abortController,
+                  signal,
                   logger,
                 });
               } else if (taskParams.type === 'upgradePackageInstallVersion') {
                 await runUpgradePackageInstallVersion({
-                  abortController,
+                  signal,
                   logger,
                 });
               } else if (taskParams.type === 'reinstallPackagesForGlobalAssetUpdate') {
                 await runReinstallPackagesForGlobalAssetUpdate({
-                  abortController,
+                  signal,
                   logger,
                 });
               } else {

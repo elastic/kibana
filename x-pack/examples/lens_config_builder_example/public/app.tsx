@@ -80,7 +80,7 @@ export const App = (props: {
       const configBuilder = new LensConfigBuilder(props.dataViews);
       // eslint-disable-next-line no-console
       console.log('lensConfig', lensConfig);
-      const validatedConfig = lensApiConfigSchema.validate(lensConfig);
+      const validatedConfig = lensApiConfigSchema.parse(lensConfig);
       // eslint-disable-next-line no-console
       console.log('validatedConfig', validatedConfig);
       const lensState = configBuilder.fromAPIFormat(validatedConfig);

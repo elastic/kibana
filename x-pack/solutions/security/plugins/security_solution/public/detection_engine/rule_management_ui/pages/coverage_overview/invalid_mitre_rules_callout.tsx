@@ -49,7 +49,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
               version: MITRE_ATTACK_VERSION,
               learnMoreLink: (
                 <EuiLink
-                  href={docLinks.links.siem.mitreCoverage}
+                  href={docLinks.links.siem.remapMitreAttack}
                   target="_blank"
                   data-test-subj="coverageOverviewInvalidMitreRulesLearnMoreLink"
                 >

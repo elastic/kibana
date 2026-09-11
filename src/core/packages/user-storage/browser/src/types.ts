@@ -10,87 +10,81 @@
 import type { Observable } from 'rxjs';
 
 /**
- * An update emission published when a stored value changes.
+ * Browser-side user storage client: an in-memory cache seeded from
+ * server-injected values at first paint, with HTTP-backed writes.
  *
- * Use the `type` discriminant to distinguish a value write (`'set'`) from a
- * user-override removal (`'remove'`). The `'remove'` variant has no `newValue`
- * because the effective value reverts to the registered default — callers
- * should read the post-removal state via `get()` if needed.
- *
- * @public
- */
-export type UserStorageUpdate<T = unknown> =
-  | { type: 'set'; key: string; newValue: T; oldValue: T | undefined }
-  | { type: 'remove'; key: string; oldValue: T | undefined };
-
-/**
- * Browser-side user storage client. Returns synchronously from an in-memory
- * cache that is seeded from preloaded (server-injected) metadata at first
- * paint, and is refreshed by `set` / `remove` after the corresponding HTTP
- * write completes.
+ * Choosing a read:
+ * - `get$` for anything rendered; React should use the `useUserStorage` hook.
+ * - `get` when the value must be resolved before acting on it.
+ * - `peek` for a synchronous snapshot, safe to call during render.
  *
  * Distinct from the server-side `IUserStorageClient` (in
- * `@kbn/core-user-storage-common`) which is fully Promise-based.
+ * `@kbn/core-user-storage-common`), which is Promise-based for every method.
  *
  * @public
  */
 export interface IUserStorageClient {
   /**
-   * Pure synchronous read from the local cache with no side effects.
-   * Returns `undefined` when no cached value exists for the key and no
-   * `defaultValue` is provided.
+   * Whether user storage is usable for the current user: `false` for anonymous
+   * users, users without a `profile_uid`, or when the auth realm denies access to
+   * user-storage saved objects. Fixed at page render; it never changes afterwards.
    *
-   * Unlike `get`, `peek` never triggers a lazy fetch, making it safe to
-   * call during React render (which may be invoked multiple times before
-   * a commit under concurrent mode).
+   * Gate save/delete affordances on this. Reads need no guard - when `false` they
+   * resolve to their `defaultValue` without issuing a request.
+   */
+  isAvailable(): boolean;
+
+  /**
+   * Synchronous cache-only read; never triggers a fetch. Returns `undefined` when
+   * the key has no cached value and no `defaultValue` is given.
+   *
+   * Always correct for `preload: true` keys. For a `preload: false` key it returns
+   * the `defaultValue` until the fetch lands, so never use it as a write base.
    */
   peek<T = unknown>(key: string): T | undefined;
   peek<T = unknown>(key: string, defaultValue: T): T;
 
   /**
-   * Synchronous read from the local cache. Returns `undefined` when no cached
-   * value exists for the key and no `defaultValue` is provided.
-   *
-   * For keys without `preload: true`, the first call for an uncached key
-   * triggers a fire-and-forget lazy HTTP fetch in the background. Prefer
-   * `peek` in render functions; use `get` in imperative / effect code where
-   * triggering the fetch on first access is the intended behaviour.
+   * Resolves once the effective value is known, awaiting the lazy fetch for a
+   * `preload: false` key. Rejects if that fetch fails.
    */
-  get<T = unknown>(key: string): T | undefined;
-  get<T = unknown>(key: string, defaultValue: T): T;
+  get<T = unknown>(key: string): Promise<T | undefined>;
+  get<T = unknown>(key: string, defaultValue: T): Promise<T>;
 
   /**
-   * Observable that emits the current cached value followed by every future
-   * value seen for the given key. Emits `undefined` when no cached value
-   * exists and no `defaultValue` is provided. Suitable for React subscriptions.
+   * Emits the current value, then again on every hydration and write.
+   *
+   * The first emission is a synchronous cache snapshot, so it may be the
+   * `defaultValue` for a key that has not hydrated. A failed fetch neither errors
+   * nor completes the stream - subscribers stay on the default.
    */
   get$<T = unknown>(key: string): Observable<T | undefined>;
   get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
 
   /**
-   * Persists a new value via `PUT /internal/user_storage/{key}`. Returns the
-   * server-validated form of the value (after any Zod transforms or stripping),
-   * which is also what gets cached locally. On HTTP failure the cache is left
-   * untouched, the error is published to `getHttpError$`, and the promise rejects.
+   * Persists a value and caches the server-validated result (post Zod
+   * transform/strip), which is what this resolves with. On failure the cache is
+   * untouched and the promise rejects. Rejects without a request when
+   * `isAvailable()` is `false`.
+   *
+   * Writes are last-write-wins; concurrent tabs do not merge. Build the new value
+   * from `await get(key, default)`, never from `peek(key)`, or an unhydrated read
+   * will overwrite what the user had stored.
    */
   set<T = unknown>(key: string, value: T): Promise<T>;
 
   /**
-   * Removes the user override via `DELETE /internal/user_storage/{key}`.
-   * On success the cached value is deleted (subsequent reads fall back to
-   * `defaultValue`) and subscribers are notified.
+   * Removes the user override. The cached value is deleted and `get$` subscribers
+   * re-emit the registered default. Rejects without a request when
+   * `isAvailable()` is `false`.
    */
   remove(key: string): Promise<void>;
 
   /**
-   * Stream of every successful key update (write or remove).
-   * Does **not** emit for lazy-fetch cache hydrations.
-   */
-  getUpdate$(): Observable<UserStorageUpdate>;
-
-  /**
-   * Stream of HTTP errors raised by `set`, `remove`, or lazy-fetch calls.
-   * Suitable for centralised toast / telemetry handling.
+   * HTTP errors from `set`, `remove`, or a lazy fetch, for centralised toast or
+   * telemetry handling. The only channel for a fetch failure, since `get$` is
+   * silent on one. A failed `set`/`remove` also rejects its own promise, so report
+   * it in one place or the other.
    */
   getHttpError$(): Observable<Error>;
 }

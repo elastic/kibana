@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { AlertEpisodeOverviewListSection } from './overview_list_section';
-import { AlertEpisodeLifecycleHeatmapSection } from './lifecycle_heatmap_section';
-import { AlertEpisodeSeverityHeatmapSection } from './severity_heatmap_section';
+import { AlertEpisodeTimelineHeatmapsSection } from './timeline_heatmaps_section';
 import { AlertEpisodeTrendChartSection } from './trend_chart_section';
 import { AlertEpisodeRuleOverviewPanelSection } from './rule_overview_panel_section';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -35,8 +34,7 @@ export const AlertEpisodeOverviewSection = ({
       services={services}
     />
     <AlertEpisodeTrendChartSection episodeId={episodeId} services={services} />
-    <AlertEpisodeLifecycleHeatmapSection episodeId={episodeId} services={services} />
-    <AlertEpisodeSeverityHeatmapSection episodeId={episodeId} services={services} />
+    <AlertEpisodeTimelineHeatmapsSection episodeId={episodeId} services={services} />
     <AlertEpisodeRuleOverviewPanelSection episodeId={episodeId} services={services} />
   </EuiFlexGroup>
 );

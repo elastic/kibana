@@ -10,6 +10,9 @@ on:
         type: string
   issues:
     types: [opened, labeled, reopened]
+  # listen for new "new failure" comment
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -19,16 +22,46 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
+# run for one of three triggers:
+# - manual dispatch with an issue number
+# - a failed-test issue opened, reopened, or first labeled failed-test
+# - kibanamachine's "new failure" comment that brings failcount to 2
+if: >-
+  ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '')
+  || (github.event_name == 'issues' && !github.event.issue.pull_request
+  && contains(github.event.issue.labels.*.name, 'failed-test')
+  && (github.event.action != 'labeled' || github.event.label.name == 'failed-test'))
+  || (github.event_name == 'issue_comment' && !github.event.issue.pull_request
+  && contains(github.event.issue.labels.*.name, 'failed-test')
+  && github.event.comment.user.login == 'kibanamachine'
+  && (contains(github.event.issue.body, '"test.failCount":2,')
+  || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
 concurrency:
-  # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
+  # Keep one investigation lane per issue. Events that can't activate this workflow still
+  # create a run that claims the concurrency group before the `if` above is evaluated, so
+  # with `cancel-in-progress` they would kill an in-flight investigation and then skip
+  # themselves. Give those events their own group suffix:
+  # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
+  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
+  #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'failed-test' &&
         github.event.label.name
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        !(
+          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            contains(github.event.issue.body, '"test.failCount":2,') ||
+            contains(github.event.issue.body, '"test.failCount":2}')
+          )
+        ) &&
+        format('comment-{0}', github.event.comment.id)
       ) ||
       'investigate'
     }}
@@ -42,6 +75,7 @@ env:
 
 imports:
   - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 
 engine:
   id: claude
@@ -49,12 +83,11 @@ engine:
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -73,7 +106,7 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
     - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
@@ -91,6 +124,7 @@ safe-outputs:
     allowed:
       # classification labels, max one per issue
       - failure:test-needs-update
+      - failure:test-needs-migration
       - failure:test-environment
       - failure:application
       - failure:ci-environment
@@ -99,8 +133,17 @@ safe-outputs:
       - failure:ai-fixable
       - failure:fix-did-not-hold
       - failure:insufficient-data
-    max: 4
+      # fix-request label that triggers the Flaky Test Fixer workflow
+      - ai:fix-flaky
+    max: 5
     target: *issue_number
+    # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
+    # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+    # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
+    # labels and parks the rest as pending suggestions, so a `medium` verdict added no
+    # labels and `ai:fix-flaky` never fired (https://github.com/github/gh-aw/issues/53654).
+    issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
@@ -113,6 +156,17 @@ safe-outputs:
       - ai:fix-flaky
     max: 5
     target: *issue_number
+  # Lets the agent close the issue when the verdict is that there is nothing to
+  # fix in the repository (see "Close the issue when there is nothing to fix").
+  # Closing is safe: the failed test reporter reopens the issue automatically if
+  # the test fails again.
+  close-issue:
+    max: 1
+    target: *issue_number
+    required-labels: [failed-test]
+    state-reason: not_planned
+    # Same gating as `add-labels`: a `medium` close is parked as a suggestion, not applied.
+    issue-intent: false
 
 strict: false
 timeout-minutes: 35
@@ -133,9 +187,40 @@ This run is killed at a hard timeout and posts a single, write-once comment that
 
 Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
 
+If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, split the skills:
+
+- Investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). **Read `SKILL.md` and the references it requires before Classify, Fix proposal, labels, or the comment.** Listing the folder (`ls`) is not enough. That skill owns the diagnosis and recommended action. If the two skills disagree, the doctor wins.
+- Use the `flaky-test-investigator` skill only for everything else: CI artifact retrieval, pipeline context, this workflow's classification, labels, comment format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance.
+
+Then apply [Security Cypress: doctor action](#security-cypress-doctor-action) **before** Classify. If you have not named exactly one doctor action, you have not finished the investigation.
+
 Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
+
+Before classifying a UI failure as test-side, read the application code that renders the awaited element and confirm the state the test waits for is actually reachable.
+
+## Security Cypress: doctor action
+
+When the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, the doctor names **exactly one** action. State it before Classify. The comment's Proposed fix **is that action** — not an investigator Cypress wait.
+
+Do **not** write `#### Root cause & evidence` or `#### Additional context` in the issue comment. The `<details>` block contains only `#### Proposed fix` (and `#### Data collection issues` only if a screenshot fetch failed).
+
+| Doctor action | Comment's Proposed fix | `failure:ai-fixable` / `ai:fix-flaky` |
+| --- | --- | --- |
+| `migrate`, or any action that requires writing a **new** Scout spec or page object | Migrate. Point at `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/` (plus `scout-ui-testing` / `scout-api-testing` as needed). | Neither. The fixer will not open that PR. |
+| `move-to-api-or-unit` when that test **already exists** and Cypress is duplicate | Treat as `delete`. | Yes — so the fixer can delete. |
+| `move-to-api-or-unit` when a **new** API/unit test would be needed | Same handoff as migrate; name the API/unit destination. | Neither. |
+| `delete` | Delete the case (and unused helpers). | Yes — so the fixer can delete. |
+| `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guardrails. | Unchanged (existing Automatic fix request). |
+| `none` (environment / no repo change) | No repo change. | Neither. |
+
+When the doctor action is `migrate`, a new Scout spec, or a new API / unit (including Jest) spec, set `classification` to `test-needs-migration` and apply `failure:test-needs-migration`. Do **not** use `test-needs-update` / `failure:test-needs-update` for that. `test-needs-update` remains for Cypress-layer flakes that are not a migration (`delete`, `@serverlessQA` `cypress-fix`).
+
+Hard bans:
+
+- Do not propose a Cypress code fix unless the doctor action is `cypress-fix` (`@serverlessQA` only) or `fix-app`.
+- Do not recommend reopening or duplicating a Cypress wait/spinner PR when the doctor said leave Cypress.
 
 ## Environment constraints
 
@@ -146,8 +231,9 @@ Every conclusion must cite specific evidence. Do not guess.
 Set `classification` based on where the evidence points:
 
 - **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
-- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
-- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
+- **`test-needs-migration`**: Security Cypress doctor action is migrate, or a new Scout / API / unit (including Jest) spec. Use this instead of `test-needs-update`.
+- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference). A stale/empty read after a write is *not* this: if a usable readiness signal exists and the test isn't waiting on it, that's `test-needs-update`; if none exists, or the product returns stale where it should be consistent, that's `application`.
+- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug, or a stale/empty read after a write that should be read-your-writes consistent — a cache not invalidated, a missing convergence signal the test would need, or a transient error such as "unknown index" surfaced to the user).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
@@ -155,19 +241,30 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 ## Fix proposal
 
+For Security Cypress, skip this section's wait/`file:line` rules and use [Security Cypress: doctor action](#security-cypress-doctor-action) instead.
+
 - Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
-- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
+- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change. For a race/timeout/stale-element flake, that means naming **the terminal readiness signal the failing assertion reads and the step that actually raced** (often not where the error surfaced); the fix guardrails below cover how to wait on it.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
+### Fix guardrails
+
+Every fix you propose is held to the same guardrails as the fixer and verifier workflows that act on it:
+
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
+
 ## Labels
+
+Label only when `confidence` is `medium` or `high`. A `low`-confidence verdict adds or removes no labels — except `failure:inconclusive` and `failure:insufficient-data`, which exist to record exactly that uncertainty. The comment already surfaces low confidence (see "Comment format").
 
 ### Classification label
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
 - `failure:test-needs-update`: when `classification` is `test-needs-update`
+- `failure:test-needs-migration`: when `classification` is `test-needs-migration`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
@@ -175,14 +272,33 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 ### "Is the issue fixable?" label
 
-Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
+Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase). For Security Cypress, do **not** add `failure:ai-fixable` or `ai:fix-flaky` when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none` — the fixer will not implement those.
+
+### Automatic fix request
+
+Request an automatic fix immediately for a fixable **`application`** failure. For every other classification, only request a fix after the failure has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
+
+- **`application`, and you added `failure:ai-fixable`:** add `ai:fix-flaky` immediately, regardless of `failCount`.
+- **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
+- **Any other classification with a first-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
+
+**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
+
+An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate or the team opt-out below.
+
+#### Teams opted out of automatic fix requests
+
+Some teams prefer to request fixes themselves. When the issue carries one of these `Team:` labels, never add `ai:fix-flaky` — regardless of classification or `failCount`. Still add `failure:ai-fixable` when a fix is available, and use the "Fix available, team opted out" tip in "Comment format" so the team sees how to request one.
+
+- `Team:Kibana Management`
 
 ### "Previous fix didn't hold" label
 
 Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
 
 - a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
-- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold; and
+- the **failing run actually contained the fix**. A Cloud image trails `main`, so a failure reported soon after the fix merged may have run a checkout that predates it. Resolve the run's `Build hash` and check `gh api repos/elastic/kibana/compare/<fix-merge-sha>...<build-hash> --jq '.status'` — `ahead`/`identical` means the build has the fix; `behind`/`diverged` means it predates the fix (see the `flaky-test-investigator` skill's pipelines reference). A failure whose build predates the fix is propagation lag, not a regression — classify it `ci-environment` and do not add this label.
 
 Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
 
@@ -190,23 +306,45 @@ Do **not** add the label when the recurring failure is **unrelated** to what the
 
 Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
 
-When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
+When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. For Security Cypress there is no Additional context section — put that in `#### Data collection issues` if a fetch failed, otherwise in Proposed fix. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
 
 - **Name the logs you needed:** the logger/context, level, and the event or time window (e.g. `plugins.security.authentication` at `debug` around the failure), and why they would be decisive.
 - **Propose how to capture them on the next run:** the specific logger to raise and where. Aim for a plan precise enough that a single re-run would produce the evidence needed to firm up the classification.
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker. Clear a lingering `ai:fix-flaky` only when your fresh verdict is **not** fixable; when it is, keep (or add) it per "Automatic fix request". If the existing labels already match your verdict, leave them as they are.
 
-## Attribution
+## Close the issue when there is clearly nothing to fix
 
-- Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
-- Never speculate or use attribution as a fallback for weak evidence.
+When the verdict is that no change to this repository is needed, close the issue with the `close-issue` tool. Close only when **all** of the following hold:
+
+- the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
+- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open. **Exception:** pre-fix CI lag (the run's `Build hash` predates the fix — see the `flaky-test-investigator` skill's pipelines reference) is closable **even if it repeats**, because repeated lag is expected until the Cloud image catches up with `main`, not a problem to escalate;
+- you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
+
+Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a note block right after (and outside) the `<details>` block:
+
+```markdown
+> [!NOTE]
+> Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again.
+```
+
+For pre-fix CI lag, make the reason verifiable by naming the commit — e.g. "the failing run used Kibana `<short-sha>`, which predates the fix, so it ran pre-fix code, not a recurrence".
+
+When in doubt, leave the issue open.
+
+## Relevant history
+
+- Mention a PR or commit (or a small set, last 3 months) only when it materially explains how the flake became possible or observable.
+- State each change's precise causal role — e.g. introduced the faulty behavior, exposed a pre-existing issue, or supplied a prerequisite change. Never infer causation merely because a PR added the test or last touched the file.
+- Never name or `@`-mention an author, and omit the history entirely when the causal link is ambiguous.
 
 ## Comment format
 
-Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
+Post at most one comment on the issue. **On a re-run** — a reopen or a recurrence comment, where the issue already carries a prior investigation comment — read that latest comment first: if your fresh verdict agrees with it (same classification and root cause), **skip the comment entirely** and just apply the label changes the recurrence calls for — e.g. add `ai:fix-flaky`, plus add or remove any other labels as necessary. For Security Cypress, also compare **doctor actions**: if the prior comment proposed a Cypress wait, intercept, toast, or reopening a Cypress PR, and the doctor now says leave Cypress (`migrate` / `delete` / `move-to-api-or-unit` / `none`), the verdict **differs** — post. Post a comment only for the first investigation, or when your verdict genuinely differs (new evidence, a different root cause, a different doctor action, or the prior verdict was inconclusive and now is not).
+
+When you do post, optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
 
 **Write tight.** Use bullet points, not paragraphs; every sentence must be earned. Concretely:
 
@@ -217,18 +355,36 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a note or tip block about the automatically requested fix or an auto-close (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available.
+Use `> [!TIP]` only when the callout suggests the reader add a label; use `> [!NOTE]` for a purely informational callout (an incoming fix, an existing fix PR, or an auto-close). Add one of the following snippets right after (and outside) the `<details>` block, only when a fix is needed and available (see "Automatic fix request").
+
+**Fix requested** — you added `failure:ai-fixable` and `ai:fix-flaky`. Informational, so use a note:
+
+```markdown
+> [!NOTE]
+> Marked "AI-fixable": fix PR incoming within ~20-30 min.
+```
+
+If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence.
+
+**Fix held** — you added `failure:ai-fixable` without `ai:fix-flaky` because this is a first-time failure (`failCount` is 1). This suggests a label, so use a tip:
 
 ```markdown
 > [!TIP]
-> Add the `ai:fix-flaky` label and an agent will **open a fix PR** (usually within 15–20 minutes).
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix now; otherwise it will be requested automatically if the test fails again.
 ```
 
-If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
+**Fix available, team opted out** — you added `failure:ai-fixable` without `ai:fix-flaky` because the issue's team has opted out of automatic fix requests (see "Teams opted out of automatic fix requests"). Fixes are never requested automatically for it, so don't promise one:
+
+```markdown
+> [!TIP]
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix PR — `<Team: label>` has opted out of automatic fix requests.
+```
+
+Fill `<Team: label>` with the issue's opted-out team label, e.g. `Team:Kibana Management`.
 
 ### 1. Visible header (required)
 
@@ -240,12 +396,13 @@ A `###` heading followed by one summary sentence — nothing else, no standing m
 {One sentence pinpointing the exact failure point — the assertion, line, or error that fired.}
 ```
 
-**Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason:
+**Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason. Exception: for `test-needs-migration`, the heading is only `### Migrate to Scout`, `### Move to API`, or `### Move to unit` — pick the destination, no prefix, no em-dash reason.
 
 | classification      | verdict phrase         |
 | ------------------- | ---------------------- |
-| `test-needs-update` | Test needs an update   |
-| `test-environment`  | Test environment issue |
+| `test-needs-update`     | Test needs an update   |
+| `test-needs-migration`  | Migrate to Scout / Move to API / Move to unit |
+| `test-environment`      | Test environment issue |
 | `application`       | Application bug        |
 | `ci-environment`    | CI environment issue   |
 | `inconclusive`      | Inconclusive           |
@@ -259,7 +416,7 @@ Example: `### Test needs an update — the case is too long for a 60s budget`. *
 
 ### 2. Collapsible investigation (required)
 
-Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order:
+Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order. For Security Cypress (doctor path), omit `#### Root cause & evidence` and `#### Additional context` — the block is only Proposed fix:
 
 ```
 <details>
@@ -271,22 +428,26 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 #### Root cause & evidence
 
-{content — see guidance below}
+{content — see guidance below; omit this heading and section for Security Cypress}
 
 #### Additional context
 
-{content — optional, omit the whole section if there is nothing high-signal to add}
+{content — optional, omit the whole section if there is nothing high-signal to add; omit this heading and section for Security Cypress}
 
 </details>
 ```
 
 #### Proposed fix (required)
 
-State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
+For Security Cypress, this section is the doctor action from [Security Cypress: doctor action](#security-cypress-doctor-action). Do not add Root cause & evidence or Additional context after it.
+
+State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here. For Security Cypress there is no Root cause & evidence section; keep Proposed fix to the action only.
 
 **Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence _after_ the recommendation, clearly subordinate to it.
 
 **Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
+
+**A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which our guardrails forbid.
 
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
 - **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
@@ -308,18 +469,22 @@ Only link a section that genuinely matches; if none fits, omit the link rather t
 
 #### Root cause & evidence (required)
 
+Omit this entire section (heading and body) for Security Cypress. See [Security Cypress: doctor action](#security-cypress-doctor-action).
+
 Explain _why_ it failed in a few tight sentences or bullets, each anchored to a specific piece of evidence (inline link to a code line, commit, or log; you can mention screenshot contents if helpful). Lead with the decisive evidence.
 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
-- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
+- Per **Relevant history**, when strongly supported, name the PR or small set of PRs needed to explain how the flake became possible or observable, with inline links and merge dates. State each PR's precise causal role; do not force a single "introducing PR" when the history is multi-causal, and omit PR history when the evidence is ambiguous.
 
 #### Additional context (optional)
 
+Omit this entire section (heading and body) for Security Cypress. See [Security Cypress: doctor action](#security-cypress-doctor-action).
+
 Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
-- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis.
+- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis. Scope each rule-out to the evidence layer it actually covers — e.g. server logs can't rule out a client-side rendering bug.
 - **Verification:** the one command or step that reproduces the failure or confirms the fix.
 - **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 
