@@ -44,6 +44,7 @@ export type {
   CreateProposalRequest,
   DismissProposalRequest,
   DismissReason,
+  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,

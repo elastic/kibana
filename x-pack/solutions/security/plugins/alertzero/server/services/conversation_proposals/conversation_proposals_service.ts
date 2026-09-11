@@ -38,8 +38,8 @@ export class ConversationProposalsService {
     request: KibanaRequest,
     spaceId: string
   ): Promise<GetProposalsListResponse> {
-    const { proposals, total, truncated } = await this.proposalsService.listByWindow(
-      query,
+    const { proposals, truncated } = await this.proposalsService.listByWindow(
+      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
       spaceId
     );
 
@@ -48,7 +48,9 @@ export class ConversationProposalsService {
       request
     );
 
-    return { groups: this.groupProposals(proposals, titles), total, truncated };
+    const groups = this.groupProposals(proposals, titles);
+    const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
+    return { groups, total, truncated };
   }
 
   private groupProposals(
@@ -93,6 +95,7 @@ export class ConversationProposalsService {
     const pairs = await asyncMapWithLimit(uniqueIds, CONCURRENCY_LIMIT, async (id) => {
       try {
         const conversation = await client.get(id);
+        if (!conversation.title) return undefined;
         return [id, conversation.title] as [string, string];
       } catch (err) {
         this.logger.debug(`Could not resolve title for conversation [${id}]: ${err}`);

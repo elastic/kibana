@@ -211,6 +211,16 @@ export interface ProposalsListResponse {
   truncated: boolean;
 }
 
+/**
+ * Parameters for `listByWindow`. Callers declare which statuses to include in
+ * the "pending" leg of the query rather than having the platform hardcode them,
+ * keeping AlertZero-specific semantics out of platform code.
+ */
+export interface ListByWindowQuery {
+  includeStatuses: ProposalStatus[];
+  decidedWithinHours: number;
+}
+
 /** Terminal states: a decided or executed proposal can no longer be acted on. */
 export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
 

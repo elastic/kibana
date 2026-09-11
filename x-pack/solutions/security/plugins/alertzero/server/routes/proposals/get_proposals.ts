@@ -56,7 +56,7 @@ export const registerGetProposalsRoute = ({
           );
           return response.ok({ body });
         } catch (error) {
-          logger.error(`Failed to get proposals: ${error}`);
+          logger.error(error instanceof Error ? error : `Failed to get proposals: ${error}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get proposals' },

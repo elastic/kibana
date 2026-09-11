@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { JSONSchema7 } from 'json-schema';
 import {
@@ -23,10 +24,10 @@ import type {
   ApproveProposalRequest,
   CreateProposalRequest,
   DismissProposalRequest,
+  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
-  ProposalsQuery,
   ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
@@ -210,7 +211,10 @@ export class ProposalsService {
    * Action-metadata resolution is memoised per `actionWorkflowId` across the
    * entire result set to avoid a `getWorkflow` fetch per proposal.
    */
-  async listByWindow(query: ProposalsQuery, spaceId: string): Promise<ProposalsListResponse> {
+  async listByWindow(query: ListByWindowQuery, spaceId: string): Promise<ProposalsListResponse> {
+    const statusClause =
+      query.includeStatuses.length > 0 ? [{ terms: { status: query.includeStatuses } }] : [];
+
     const response = await this.deps.storage.search({
       track_total_hits: true,
       size: MAX_PROPOSALS_SIZE,
@@ -219,8 +223,8 @@ export class ProposalsService {
           filter: [{ term: { spaceId } }],
           // TODO(#19258): add `must_not: { exists: { field: 'supersededBy' } }` once the field lands.
           should: [
-            { term: { status: 'pending' } },
-            { range: { decidedAt: { gte: `now-${query.windowHours}h` } } },
+            ...statusClause,
+            { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
           ],
           minimum_should_match: 1,
         },
@@ -585,34 +589,37 @@ export class ProposalsService {
   }
 
   /**
-   * Resolves action metadata for a collection of proposals, memoising per
-   * `actionWorkflowId` across the batch. A single `getWorkflow` fetch serves
-   * all proposals that share the same action workflow, rather than fetching
-   * once per proposal as `withMetadata` does. The memo is request-scoped and
-   * never escapes this call.
+   * Resolves action metadata for a collection of proposals with a concurrency
+   * cap. Unique workflow IDs are fetched once each (deduplicated up front) and
+   * results are collected into a Map before the proposals are assembled, so a
+   * single failure for one workflow ID never affects proposals backed by a
+   * different one.
    */
   private async withMetadataBatch(
     proposals: Proposal[],
     spaceId: string
   ): Promise<ProposalWithMetadata[]> {
-    const metaMemo = new Map<string, Promise<ActionMetadata | undefined>>();
+    const uniqueWorkflowIds = [
+      ...new Set(
+        proposals.map((p) => p.actionWorkflowId).filter((id): id is string => id !== undefined)
+      ),
+    ];
 
-    return Promise.all(
-      proposals.map(async (proposal) => {
-        let action: ActionMetadata | undefined;
+    const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
+      const meta = await this.resolveActionMetadata(id, spaceId);
+      return [id, meta] as [string, ActionMetadata | undefined];
+    });
 
-        if (proposal.actionWorkflowId) {
-          let pending = metaMemo.get(proposal.actionWorkflowId);
-          if (!pending) {
-            pending = this.resolveActionMetadata(proposal.actionWorkflowId, spaceId);
-            metaMemo.set(proposal.actionWorkflowId, pending);
-          }
-          action = await pending;
-        }
+    const metaMap = new Map<string, ActionMetadata | undefined>(metaEntries);
 
-        return { ...proposal, action, expired: isExpired(proposal) };
-      })
-    );
+    return proposals.map((proposal) => ({
+      ...proposal,
+      action:
+        proposal.actionWorkflowId !== undefined
+          ? metaMap.get(proposal.actionWorkflowId)
+          : undefined,
+      expired: isExpired(proposal),
+    }));
   }
 }
 
