@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Graph prototype v.1 visual tree.
+ * Iterate on v.2 in `src/components_v2` so the two versions stay isolated.
+ * Fetch/mock data stays in `src/hooks`.
+ */
+
 export { Graph } from './graph/graph';
 export { GraphInvestigation } from './graph_investigation/graph_investigation';
 export {

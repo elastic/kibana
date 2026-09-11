@@ -171,6 +171,8 @@ export const entityNodeDataSchema = schema.allOf([
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
     // Risk and criticality fields — populated by the entity store when available
     assetCriticality: schema.maybe(schema.string()),
+    /** Integration / data source label, e.g. Active Directory, Okta, Endpoints. */
+    dataSource: schema.maybe(schema.string()),
     assetCriticalityCounts: schema.maybe(
       schema.object({
         extreme: schema.maybe(schema.number()),

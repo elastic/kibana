@@ -1,0 +1,650 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Dagre from '@dagrejs/dagre';
+import type { Node, Edge } from '@xyflow/react';
+import type { EdgeViewModel, NodeViewModel, Size, EntityNodeViewModel } from '../types';
+import { getStackNodeStyle } from '../node/styles';
+import {
+  isEntityNode,
+  isConnectorNode,
+  isStackNode,
+  isStackedLabel,
+  showStackedShape,
+} from '../utils';
+import {
+  STACK_NODE_VERTICAL_PADDING,
+  STACK_NODE_HORIZONTAL_PADDING,
+  NODE_HEIGHT,
+  NODE_LABEL_TOTAL_HEIGHT,
+  NODE_WIDTH,
+  NODE_LABEL_WIDTH,
+  NODE_LABEL_HEIGHT,
+  NODE_LABEL_DETAILS,
+} from '../constants';
+import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
+import { EVENT_PILL_HEIGHT } from '../node/label_node/event_pill_styles';
+import { alignHandleBandsInPlace, alignOriginSpineInPlace } from './layout_origin_spine';
+import {
+  GRAPH_LAYOUT_MIN_NODE_GAP,
+  GRAPH_LAYOUT_NODE_SEP,
+  GRAPH_LAYOUT_RANK_SEP,
+  LAYOUT_GRID_SIZE_OFFSET,
+} from './layout_constants';
+
+/** Dagre minimum separation between ranks (horizontal gaps in LR layout). */
+const GRAPH_RANK_SEP = GRAPH_LAYOUT_RANK_SEP;
+
+/** Dagre minimum separation between nodes in the same rank (vertical gaps in LR layout). */
+const GRAPH_NODE_SEP = GRAPH_LAYOUT_NODE_SEP;
+
+const GRID_SIZE_OFFSET = LAYOUT_GRID_SIZE_OFFSET;
+
+/** Card header block: 12px padding + 40px icon + 12px padding. */
+const CARD_LAYOUT_HEADER_HEIGHT = 64;
+/** Card body outer padding (top + bottom). */
+const CARD_LAYOUT_BODY_PADDING = 24;
+/** Approximate height of one metadata field block (label + value). */
+const CARD_LAYOUT_METADATA_BLOCK = 40;
+/** Vertical gap between metadata sections in the card body. */
+const CARD_LAYOUT_SECTION_GAP = 16;
+/** Grouped-entity stack tab under the card. */
+const CARD_LAYOUT_GROUP_STACK = 8;
+
+/**
+ * Estimates entity card height from visible metadata so Dagre can pack nodes
+ * tightly (close but non-overlapping) instead of always reserving the max card.
+ */
+const estimateEntityCardLayoutHeight = (data: EntityNodeViewModel): number => {
+  const showIp = Boolean(data.ips && data.ips.length > 0);
+  const showGeo = Boolean(data.countryCodes && data.countryCodes.length > 0);
+  const showCriticality = Boolean(data.assetCriticality || data.assetCriticalityCounts);
+  const showDataSource = Boolean(data.dataSource);
+  const hasBody = showIp || showGeo || showCriticality || showDataSource;
+
+  let height = CARD_LAYOUT_HEADER_HEIGHT;
+
+  if (hasBody) {
+    height += CARD_LAYOUT_BODY_PADDING;
+
+    if (showCriticality || showDataSource) {
+      height += CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showIp || showGeo) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+  }
+
+  if (showStackedShape(data.count)) {
+    height += CARD_LAYOUT_GROUP_STACK;
+  }
+
+  return Math.min(height, CARD_NODE_DEFAULT_HEIGHT);
+};
+
+export const layoutGraph = (
+  nodes: Array<Node<NodeViewModel>>,
+  edges: Array<Edge<EdgeViewModel>>
+): { nodes: Array<Node<NodeViewModel>> } => {
+  const nodesById: { [key: string]: Node<NodeViewModel> } = {};
+  const graphOpts = {
+    compound: true,
+    directed: true,
+  };
+
+  const g = new Dagre.graphlib.Graph(graphOpts)
+    .setGraph({
+      rankdir: 'LR',
+      align: 'UL',
+      ranksep: GRAPH_RANK_SEP,
+      nodesep: GRAPH_NODE_SEP,
+    })
+    .setDefaultEdgeLabel(() => ({}));
+
+  // Build set of stacked node IDs (nodes with parentId) to filter edges
+  const stackedNodeIds = new Set(nodes.filter((node) => node.parentId).map((node) => node.id));
+
+  // Only add edges where both source and target are NOT stacked nodes
+  // Stacked nodes are positioned inside their parent group, not by Dagre
+  edges
+    .filter((edge) => !stackedNodeIds.has(edge.source) && !stackedNodeIds.has(edge.target))
+    .forEach((edge) => g.setEdge(edge.source, edge.target));
+
+  const nodesOfParent: { [key: string]: Array<Node<NodeViewModel>> } = {};
+
+  nodes.forEach((node) => {
+    if (node.parentId) {
+      nodesOfParent[node.parentId] = nodesOfParent[node.parentId] || [];
+      nodesOfParent[node.parentId].push(node);
+    }
+  });
+  nodes.forEach((node) => {
+    let size = {
+      width: isEntityNode(node.data)
+        ? (node.data as { cardWidth?: number }).cardWidth ?? CARD_NODE_WIDTH
+        : NODE_WIDTH,
+      height: node.measured?.height ?? NODE_HEIGHT,
+    };
+
+    if (isConnectorNode(node.data)) {
+      size = {
+        height: NODE_LABEL_TOTAL_HEIGHT,
+        width: NODE_LABEL_WIDTH,
+      };
+
+      // TODO: waiting for a fix: https://github.com/dagrejs/dagre/issues/238
+      // if (node.parentId) {
+      //   g.setParent(node.id, node.parentId);
+      // }
+    } else if (isStackNode(node.data)) {
+      const res = layoutStackedLabels(node, nodesOfParent[node.id]);
+
+      size = res.size;
+
+      res.children.forEach((child) => {
+        nodesById[child.data.id] = child;
+      });
+    } else if (isEntityNode(node.data)) {
+      size.height = node.measured?.height ?? estimateEntityCardLayoutHeight(node.data);
+    }
+
+    if (!nodesById[node.id]) {
+      nodesById[node.id] = node;
+    }
+
+    if (node.parentId) {
+      return;
+    }
+
+    g.setNode(node.id, {
+      ...node,
+      ...size,
+    });
+  });
+
+  Dagre.layout(g);
+
+  alignNodesCenterInPlace(
+    g,
+    (nodeId: string) => {
+      const node = nodesById[nodeId].data;
+      return node && isStackedLabel(node);
+    },
+    nodesById
+  );
+
+  alignOriginSpineInPlace(g, nodesById, edges, stackedNodeIds, (nodeId: string) => {
+    const node = nodesById[nodeId]?.data;
+    return node !== undefined && isStackedLabel(node);
+  });
+
+  resolveRankOverlapsInPlace(g, () => true);
+  alignHandleBandsInPlace(g, nodesById, edges, stackedNodeIds);
+  resolveRankOverlapsInPlace(g, () => true);
+  alignHandleBandsInPlace(g, nodesById, edges, stackedNodeIds);
+
+  const layoutedNodes = nodes.map((node) => {
+    // For stacked nodes, we want to keep the original position relative to the parent
+    if (isConnectorNode(node.data) && node.data.parentId) {
+      return {
+        ...node,
+        position: nodesById[node.data.id].position,
+      };
+    }
+
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    // We also need to snap the position to avoid subpixel rendering issues.
+    // Y position is snapped as part of `alignNodesCenterInPlace` function (double snapping will cause misalignments).
+
+    const dagreNode = g.node(node.data.id);
+
+    if (isConnectorNode(node.data)) {
+      const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+      // Handles are pinned to the pill midline, not the reserved Dagre box center.
+      const y = Math.round(dagreNode.y - EVENT_PILL_HEIGHT / 2);
+
+      return {
+        ...node,
+        height: dagreNode.height ?? NODE_LABEL_TOTAL_HEIGHT,
+        position: { x, y },
+      };
+    }
+
+    if (isEntityNode(node.data)) {
+      const nodeHeight = dagreNode.height ?? estimateEntityCardLayoutHeight(node.data);
+      const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+      const y = Math.round(dagreNode.y - nodeHeight / 2);
+
+      return {
+        ...node,
+        height: nodeHeight,
+        position: { x, y },
+      };
+    }
+
+    const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
+    const y = Math.round(dagreNode.y - (dagreNode.height ?? 0) / 2);
+
+    if (isStackNode(node.data)) {
+      return {
+        ...node,
+        position: { x, y },
+        style: getStackNodeStyle({
+          width: dagreNode.width,
+          height: dagreNode.height,
+        }),
+      };
+    }
+
+    return {
+      ...node,
+      position: { x, y },
+    };
+  });
+
+  layoutedNodes.forEach((node) => {
+    nodesById[node.data.id] = node;
+  });
+
+  return { nodes: layoutedNodes };
+};
+
+const layoutStackedLabels = (
+  groupNode: Node<NodeViewModel>,
+  nodes: Array<Node<NodeViewModel>>
+): { size: Size; children: Array<Node<NodeViewModel>> } => {
+  const children = nodes.filter(
+    (child) => isConnectorNode(child.data) && child.parentId === groupNode.id
+  );
+  const stackSize = children.length;
+  const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
+  const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);
+  const stackHeight = spaceBetweenLabelShapes * (stackSize + 1) + NODE_LABEL_HEIGHT * stackSize;
+
+  // Layout children relative to parent
+  children.forEach((child, index) => {
+    child.position = {
+      x: stackWidth / 2 - NODE_LABEL_WIDTH / 2,
+      y: spaceBetweenLabelShapes * (index + 1) + NODE_LABEL_HEIGHT * index,
+    };
+  });
+
+  return {
+    size: { width: stackWidth, height: stackHeight },
+    children,
+  };
+};
+
+/**
+ * Shared context for graph alignment operations.
+ * - Y/Height/setY: accessors for node vertical position and height in Dagre
+ * - prevNodeY: tracks original Y positions before adjustments for cascading calculations
+ * - nodesById: map of node ID to node data for accessing node properties
+ */
+interface GraphHelpers {
+  g: Dagre.graphlib.Graph;
+  filter: (node: string) => boolean;
+  Y: (id: string) => number;
+  Height: (id: string) => number;
+  setY: (id: string, y: number) => number;
+  prevNodeY: Record<string, number>;
+  nodesById: Record<string, Node<NodeViewModel>>;
+}
+
+/** Returns child nodes (successors) that pass the filter. */
+const getFilteredSuccessors = (
+  g: Dagre.graphlib.Graph,
+  node: string,
+  filter: (n: string) => boolean
+): string[] =>
+  (g.successors(node)?.filter((sV) => filter(sV.toString())) ?? []).map((s) => s.toString());
+
+/** Returns parent nodes (predecessors) that pass the filter. */
+const getFilteredPredecessors = (
+  g: Dagre.graphlib.Graph,
+  node: string,
+  filter: (n: string) => boolean
+): string[] =>
+  (g.predecessors(node)?.filter((pV) => filter(pV.toString())) ?? []).map((p) => p.toString());
+
+/**
+ * Finds all sibling nodes (via shared parents) that also share at least one child with currNode.
+ * Used to identify nodes that need coordinated vertical distribution to avoid overlap.
+ */
+const findSiblingsWithSharedChildren = (
+  helpers: GraphHelpers,
+  currNode: string,
+  children: string[],
+  parents: string[]
+): string[] => {
+  const { g, filter } = helpers;
+  const siblingsWithSharedChildren: string[] = [];
+
+  for (const parent of parents) {
+    const allSiblings = getFilteredSuccessors(g, parent, filter);
+
+    for (const sibling of allSiblings) {
+      if (!siblingsWithSharedChildren.includes(sibling)) {
+        const siblingChildren = getFilteredSuccessors(g, sibling, filter);
+
+        if (children.some((child) => siblingChildren.includes(child))) {
+          siblingsWithSharedChildren.push(sibling);
+        }
+      }
+    }
+  }
+
+  return siblingsWithSharedChildren;
+};
+
+/**
+ * Calculates the center Y position from a set of node IDs.
+ */
+const calculateCenterY = (nodeIds: string[], Y: (id: string) => number): number => {
+  if (nodeIds.length === 0) return 0;
+
+  const first = nodeIds.reduce((min, nodeId) => (Y(nodeId) < Y(min) ? nodeId : min), nodeIds[0]);
+  const last = nodeIds.reduce((max, nodeId) => (Y(nodeId) > Y(max) ? nodeId : max), nodeIds[0]);
+  return Y(first) + (Y(last) - Y(first)) / 2;
+};
+
+/**
+ * Positions a node with multiple children at the vertical center of its children.
+ * If siblings share the same children (fan-in pattern), distributes them evenly
+ * around a common center (based on union of all siblings' children) to prevent overlap.
+ */
+const handleMultipleChildren = (
+  helpers: GraphHelpers,
+  currNode: string,
+  children: string[]
+): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+
+  const parents = getFilteredPredecessors(g, currNode, filter);
+  const siblingsWithSharedChildren = findSiblingsWithSharedChildren(
+    helpers,
+    currNode,
+    children,
+    parents
+  );
+
+  if (siblingsWithSharedChildren.length > 1) {
+    // Calculate common centerY from union of ALL children of ALL siblings
+    const allChildrenSet = new Set<string>();
+    for (const sibling of siblingsWithSharedChildren) {
+      const siblingChildren = getFilteredSuccessors(g, sibling, filter);
+      siblingChildren.forEach((child) => allChildrenSet.add(child));
+    }
+    const allChildren = Array.from(allChildrenSet);
+    const commonCenterY = calculateCenterY(allChildren, Y);
+
+    const sortedSiblings = [...siblingsWithSharedChildren].sort((a, b) => Y(a) - Y(b));
+    const heights = sortedSiblings.map((nodeId) => Height(nodeId));
+    const totalHeight =
+      heights.reduce((sum, height) => sum + height, 0) +
+      (sortedSiblings.length - 1) * GRID_SIZE_OFFSET;
+
+    let topEdge = commonCenterY - totalHeight / 2;
+
+    for (let index = 0; index < sortedSiblings.length; index += 1) {
+      const nodeId = sortedSiblings[index];
+      const centerY = topEdge + heights[index] / 2;
+
+      prevNodeY[nodeId] = Y(nodeId);
+      setY(nodeId, snapped(centerY));
+      topEdge += heights[index] + GRID_SIZE_OFFSET;
+    }
+  } else {
+    const centerY = calculateCenterY(children, Y);
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(centerY));
+  }
+};
+
+/**
+ * Positions a node with exactly one child. When multiple nodes converge to the same child
+ * (fan-in), calculates position to maintain equal edge lengths from first to last sibling.
+ * If child was already adjusted, propagates that adjustment to maintain relative positioning.
+ */
+const handleSingleChild = (helpers: GraphHelpers, currNode: string, child: string): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+  const siblings = getFilteredPredecessors(g, child, filter);
+
+  if (siblings.length > 1) {
+    const { lastSiblingInfo, firstSiblingInfo } = analyzeSiblings(siblings, prevNodeY, Y, Height);
+    const edgesHeight = lastSiblingInfo.middle - firstSiblingInfo.middle;
+    const finalChildY = Y(child) - Height(child) / 2;
+    const firstSiblingNewY = finalChildY - (edgesHeight - Height(child)) / 2;
+    const finalFirstSiblingNewY = firstSiblingNewY - firstSiblingInfo.h / 2;
+    const newY = snapped(finalFirstSiblingNewY) + currY - firstSiblingInfo.top;
+
+    prevNodeY[currNode] = currY;
+    setY(currNode, newY);
+  } else if (prevNodeY[child] !== undefined) {
+    const newY = currY - (prevNodeY[child] - Y(child));
+    prevNodeY[currNode] = currY;
+    setY(currNode, newY);
+  }
+};
+
+/**
+ * Positions a leaf node (no children) based on its parents.
+ * Delegates to handleMultipleParents or handleSingleParent, or preserves
+ * position for isolated nodes.
+ */
+const handleNoChildren = (helpers: GraphHelpers, currNode: string): void => {
+  const { g, filter, Y, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+  const parents = getFilteredPredecessors(g, currNode, filter);
+
+  if (parents.length > 1) {
+    handleMultipleParents(helpers, currNode, parents);
+  } else if (parents.length === 1) {
+    handleSingleParent(helpers, currNode, parents[0]);
+  } else {
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(currY));
+  }
+};
+
+/**
+ * Positions a node with multiple parents. If node has siblings (fan-out from any parent),
+ * preserves Dagre's positioning to avoid overlap. Otherwise, centers vertically
+ * between first and last parent for balanced edge lengths.
+ */
+const handleMultipleParents = (
+  helpers: GraphHelpers,
+  currNode: string,
+  parents: string[]
+): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+
+  const hasSiblings = parents.some((parent) => getFilteredSuccessors(g, parent, filter).length > 1);
+
+  if (hasSiblings) {
+    prevNodeY[currNode] = currY;
+  } else {
+    const { firstSiblingInfo: firstParentInfo, lastSiblingInfo: lastParentInfo } = analyzeSiblings(
+      parents,
+      prevNodeY,
+      Y,
+      Height
+    );
+    const edgesHeight = lastParentInfo.middle - firstParentInfo.middle;
+    const newY = firstParentInfo.middle + (edgesHeight - Height(currNode)) / 2;
+
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(newY));
+  }
+};
+
+/**
+ * Positions a node with exactly one parent. If parent has multiple children (fan-out),
+ * preserves Dagre's positioning to avoid sibling overlap. Otherwise, aligns
+ * vertically centered on the parent.
+ */
+const handleSingleParent = (helpers: GraphHelpers, currNode: string, parent: string): void => {
+  const { g, filter, Y, Height, setY, prevNodeY } = helpers;
+  const currY = Y(currNode);
+  const siblings = getFilteredSuccessors(g, parent, filter);
+
+  if (siblings.length > 1) {
+    prevNodeY[currNode] = currY;
+  } else {
+    const newY = Y(parent) - Height(currNode) / 2;
+    prevNodeY[currNode] = currY;
+    setY(currNode, snapped(newY));
+  }
+};
+
+/**
+ * Re-centre a Dagre-laid-out LR graph so that…
+ *   • any node with children sits at the vertical mid-point of its children
+ *   • any node with ≥2 parents sits at the vertical mid-point of its parents
+ *
+ * Runs in O(V + E) on Dagre's directed graphs.
+ * Mutates the Dagre graph in place.
+ */
+const alignNodesCenterInPlace = (
+  g: Dagre.graphlib.Graph,
+  filter: (node: string) => boolean,
+  nodesById: Record<string, Node<NodeViewModel>>
+) => {
+  const helpers: GraphHelpers = {
+    g,
+    filter,
+    Y: (id: string) => (g.node(id) as Dagre.Node).y,
+    Height: (id: string) => (g.node(id) as Dagre.Node).height,
+    setY: (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y),
+    prevNodeY: {},
+    nodesById,
+  };
+
+  const topo = topsort(g, filter);
+
+  for (const currNode of topo.reverse()) {
+    const children = getFilteredSuccessors(g, currNode, filter);
+
+    if (children.length > 1) {
+      handleMultipleChildren(helpers, currNode, children);
+    } else if (children.length === 1) {
+      handleSingleChild(helpers, currNode, children[0]);
+    } else {
+      handleNoChildren(helpers, currNode);
+    }
+  }
+};
+
+const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): string[] => {
+  const visited: Record<string, boolean> = {};
+  const stack: Record<string, boolean> = {};
+  const results: string[] = [];
+
+  function visit(node: string): void {
+    if (!filter(node)) {
+      return;
+    }
+
+    if (Object.hasOwn(stack, node)) {
+      throw new Error('CycleException');
+    }
+
+    if (!Object.hasOwn(visited, node)) {
+      stack[node] = true;
+      visited[node] = true;
+      g.predecessors(node)?.forEach((preNode) => visit(preNode.toString()));
+      delete stack[node];
+      results.push(node);
+    }
+  }
+
+  g.sinks().forEach((node) => visit(node.toString()));
+
+  return results;
+};
+
+function analyzeSiblings(
+  siblings: string[],
+  prevNodeY: Record<string, number>,
+  Y: (id: string) => number,
+  Height: (id: string) => number
+) {
+  const firstSibling = siblings.reduce(
+    (min, siblingNode) => ((prevNodeY[siblingNode] ?? Y(siblingNode)) < Y(min) ? siblingNode : min),
+    siblings[0]
+  );
+  const lastSibling = siblings.reduce(
+    (max, siblingNode) => ((prevNodeY[siblingNode] ?? Y(siblingNode)) > Y(max) ? siblingNode : max),
+    siblings[0]
+  );
+
+  const firstSiblingInfo = {
+    id: firstSibling,
+    h: Height(firstSibling),
+    top: (prevNodeY[firstSibling] ?? Y(firstSibling)) - Height(firstSibling) / 2,
+    middle: prevNodeY[firstSibling] ?? Y(firstSibling),
+  };
+  const lastSiblingInfo = {
+    id: lastSibling,
+    h: Height(lastSibling),
+    top: (prevNodeY[lastSibling] ?? Y(lastSibling)) - Height(lastSibling) / 2,
+    middle: prevNodeY[lastSibling] ?? Y(lastSibling),
+  };
+  return { lastSiblingInfo, firstSiblingInfo };
+}
+
+const snapped = (value: number, method: 'round' | 'floor' = 'round'): number => {
+  return Math[method](value / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+};
+
+/**
+ * Ensures nodes in the same rank do not overlap after spine and centering adjustments.
+ * Mutates the Dagre graph in place.
+ */
+const resolveRankOverlapsInPlace = (
+  g: Dagre.graphlib.Graph,
+  filter: (nodeId: string) => boolean
+): void => {
+  const nodesByRank = new Map<number, string[]>();
+
+  for (const nodeId of g.nodes()) {
+    if (filter(nodeId)) {
+      const dagreNode = g.node(nodeId) as Dagre.Node;
+      const rankKey = Math.round(dagreNode.x);
+      const rankNodes = nodesByRank.get(rankKey) ?? [];
+
+      rankNodes.push(nodeId);
+      nodesByRank.set(rankKey, rankNodes);
+    }
+  }
+
+  for (const rankNodeIds of nodesByRank.values()) {
+    if (rankNodeIds.length >= 2) {
+      const sorted = [...rankNodeIds].sort(
+        (left, right) => (g.node(left) as Dagre.Node).y - (g.node(right) as Dagre.Node).y
+      );
+
+      for (let index = 1; index < sorted.length; index += 1) {
+        const previousNode = g.node(sorted[index - 1]) as Dagre.Node;
+        const currentNode = g.node(sorted[index]) as Dagre.Node;
+        const previousHeight = previousNode.height ?? NODE_HEIGHT;
+        const currentHeight = currentNode.height ?? NODE_HEIGHT;
+        const minCenterY =
+          previousNode.y + previousHeight / 2 + GRAPH_LAYOUT_MIN_NODE_GAP + currentHeight / 2;
+
+        if (currentNode.y < minCenterY) {
+          currentNode.y = snapped(minCenterY);
+        }
+      }
+    }
+  }
+};

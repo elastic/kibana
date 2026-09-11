@@ -8,6 +8,7 @@
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { Timestamp } from './timestamp';
 import { DocumentSeverity } from '../../document/main/components/severity';
@@ -28,6 +29,10 @@ export interface ToolsFlyoutHeaderProps {
    */
   title: ReactNode;
   /**
+   * Optional control rendered 24px to the right of the title (e.g. prototype version).
+   */
+  titleExtra?: ReactNode;
+  /**
    * Optional cell action renderer passed to the child document flyout.
    */
   renderCellActions?: CellActionRenderer;
@@ -42,7 +47,13 @@ export interface ToolsFlyoutHeaderProps {
  * context (expand button, rule name, severity, timestamp) on the right.
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
-  ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
+  ({
+    hit,
+    title,
+    titleExtra,
+    renderCellActions = noopCellActionRenderer,
+    onAlertUpdated = noop,
+  }) => {
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -52,9 +63,21 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
         data-test-subj={TOOLS_FLYOUT_HEADER_TEST_ID}
       >
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>{title}</h4>
-          </EuiTitle>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+            css={css`
+              gap: 24px;
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h4>{title}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            {titleExtra ? <EuiFlexItem grow={false}>{titleExtra}</EuiFlexItem> : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">

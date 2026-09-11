@@ -6,4 +6,5 @@
  */
 
 export * from './src/components';
+export { GraphInvestigation as GraphInvestigationV2 } from './src/components_v2/graph_investigation/graph_investigation';
 export { useFetchGraphData } from './src/hooks';

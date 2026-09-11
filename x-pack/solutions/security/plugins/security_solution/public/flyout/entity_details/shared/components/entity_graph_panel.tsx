@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -21,6 +21,9 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { i18n } from '@kbn/i18n';
 import { GraphVisualization } from '../../../shared/components/graph_visualization';
+import { DEFAULT_GRAPH_PROTOTYPE_VERSION } from '../../../shared/components/graph_prototype_version';
+import type { GraphPrototypeVersion } from '../../../shared/components/graph_prototype_version';
+import { GraphPrototypeVersionSelector } from '../../../shared/components/graph_prototype_version_selector';
 
 export const EntityGraphPanelKey = 'entity_graph' as const;
 
@@ -81,6 +84,9 @@ export interface EntityGraphFlyoutContentProps {
 export const EntityGraphFlyoutContent: FC<EntityGraphFlyoutContentProps> = memo(
   ({ entityId, scopeId, onBack }) => {
     const { euiTheme } = useEuiTheme();
+    const [prototypeVersion, setPrototypeVersion] = useState<GraphPrototypeVersion>(
+      DEFAULT_GRAPH_PROTOTYPE_VERSION
+    );
 
     return (
       <>
@@ -90,12 +96,7 @@ export const EntityGraphFlyoutContent: FC<EntityGraphFlyoutContentProps> = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
@@ -108,10 +109,27 @@ export const EntityGraphFlyoutContent: FC<EntityGraphFlyoutContentProps> = memo(
                 {BACK_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="xs">
-                <h2>{TITLE}</h2>
-              </EuiTitle>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+                css={css`
+                  gap: 24px;
+                `}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h2>{TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <GraphPrototypeVersionSelector
+                    value={prototypeVersion}
+                    onChange={setPrototypeVersion}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -136,7 +154,12 @@ export const EntityGraphFlyoutContent: FC<EntityGraphFlyoutContentProps> = memo(
               height: 100%;
             `}
           >
-            <GraphVisualization mode="entity" entityId={entityId} scopeId={scopeId} />
+            <GraphVisualization
+              mode="entity"
+              entityId={entityId}
+              scopeId={scopeId}
+              prototypeVersion={prototypeVersion}
+            />
           </div>
         </EuiFlyoutBody>
       </>

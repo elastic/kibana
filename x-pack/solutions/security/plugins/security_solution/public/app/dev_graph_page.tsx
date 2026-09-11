@@ -35,11 +35,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
+import {
+  GraphInvestigation,
+  GraphInvestigationV2,
+} from '@kbn/cloud-security-posture-graph';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import { useKibana } from '../common/lib/kibana';
 import { GraphPreviewPanel } from '../flyout_v2/shared/components/graph_preview_panel';
 import { FlyoutTitle } from '../flyout_v2/shared/components/flyout_title';
+import { DEFAULT_GRAPH_PROTOTYPE_VERSION } from '../flyout/shared/components/graph_prototype_version';
+import type { GraphPrototypeVersion } from '../flyout/shared/components/graph_prototype_version';
+import { GraphPrototypeVersionSelector } from '../flyout/shared/components/graph_prototype_version_selector';
 
 const TIME_RANGE = {
   from: 'now-24h',
@@ -65,28 +71,35 @@ const FullGraph = ({
   dataView,
   entityActionsMode,
   entityStyleMode = 'default',
+  prototypeVersion,
 }: {
   dataView: DataView;
   entityActionsMode: 'button' | 'hover';
   entityStyleMode?: 'default' | 'colored';
-}) => (
-  <GraphInvestigation
-    scopeId="dev-graph-preview"
-    initialState={{
-      dataView,
-      originEventIds: ORIGIN_EVENT_IDS,
-      entityIds: ORIGIN_ENTITY_IDS,
-      timeRange: TIME_RANGE,
-    }}
-    showToggleSearch={true}
-    showInvestigateInTimeline={true}
-    searchControlsVariant="unified"
-    entityActionsMode={entityActionsMode}
-    entityStyleMode={entityStyleMode}
-    // Enables relationships + details actions in the expand/hover menus for local preview.
-    onOpenEventPreview={() => undefined}
-  />
-);
+  prototypeVersion: GraphPrototypeVersion;
+}) => {
+  const Investigation = prototypeVersion === 'v2' ? GraphInvestigationV2 : GraphInvestigation;
+
+  return (
+    <Investigation
+      key={prototypeVersion}
+      scopeId="dev-graph-preview"
+      initialState={{
+        dataView,
+        originEventIds: ORIGIN_EVENT_IDS,
+        entityIds: ORIGIN_ENTITY_IDS,
+        timeRange: TIME_RANGE,
+      }}
+      showToggleSearch={true}
+      showInvestigateInTimeline={true}
+      searchControlsVariant="unified"
+      entityActionsMode={entityActionsMode}
+      entityStyleMode={entityStyleMode}
+      // Enables relationships + details actions in the expand/hover menus for local preview.
+      onOpenEventPreview={() => undefined}
+    />
+  );
+};
 
 /** Dimmed Entity Analytics–like page behind the flyout (structure only). */
 const EntityAnalyticsBackdrop = () => {
@@ -241,6 +254,9 @@ const GraphFlyoutContent = ({
   onClose: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [prototypeVersion, setPrototypeVersion] = useState<GraphPrototypeVersion>(
+    DEFAULT_GRAPH_PROTOTYPE_VERSION
+  );
 
   return (
     <>
@@ -264,15 +280,32 @@ const GraphFlyoutContent = ({
         css={css`
           padding: 0 ${euiTheme.size.base} ${euiTheme.size.s};
           display: flex;
-          align-items: baseline;
+          align-items: center;
           justify-content: space-between;
           gap: ${euiTheme.size.m};
           flex-shrink: 0;
         `}
       >
-        <EuiTitle size="s">
-          <h2>Graph</h2>
-        </EuiTitle>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="none"
+          responsive={false}
+          css={css`
+            gap: 24px;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h2>Graph</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <GraphPrototypeVersionSelector
+              value={prototypeVersion}
+              onChange={setPrototypeVersion}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiText size="s" color="primary">
           {ORIGIN_ENTITY_NAME}
         </EuiText>
@@ -288,6 +321,7 @@ const GraphFlyoutContent = ({
           dataView={dataView}
           entityActionsMode={entityActionsMode}
           entityStyleMode={entityStyleMode}
+          prototypeVersion={prototypeVersion}
         />
       </div>
     </>

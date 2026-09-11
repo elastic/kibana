@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, Suspense } from 'react';
+import React, { memo, useMemo, useState, Suspense } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,9 @@ import type { CellActionRenderer } from '../../../shared/components/cell_actions
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { GraphVisualization } from '../../../../flyout/shared/components/graph_visualization';
+import { DEFAULT_GRAPH_PROTOTYPE_VERSION } from '../../../../flyout/shared/components/graph_prototype_version';
+import type { GraphPrototypeVersion } from '../../../../flyout/shared/components/graph_prototype_version';
+import { GraphPrototypeVersionSelector } from '../../../../flyout/shared/components/graph_prototype_version_selector';
 import { useGraphPreview } from '../../main/hooks/use_graph_preview';
 import { EventKind } from '../../main/constants/event_kinds';
 
@@ -37,6 +40,9 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.graphView.title', {
 export const GraphView = memo(({ hit, renderCellActions, onAlertUpdated }: GraphViewProps) => {
   const { euiTheme } = useEuiTheme();
   const { eventIds, timestamp } = useGraphPreview({ hit });
+  const [prototypeVersion, setPrototypeVersion] = useState<GraphPrototypeVersion>(
+    DEFAULT_GRAPH_PROTOTYPE_VERSION
+  );
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]
@@ -57,6 +63,12 @@ export const GraphView = memo(({ hit, renderCellActions, onAlertUpdated }: Graph
         <ToolsFlyoutHeader
           hit={hit}
           title={TITLE}
+          titleExtra={
+            <GraphPrototypeVersionSelector
+              value={prototypeVersion}
+              onChange={setPrototypeVersion}
+            />
+          }
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />
@@ -85,6 +97,7 @@ export const GraphView = memo(({ hit, renderCellActions, onAlertUpdated }: Graph
               eventIds={eventIds}
               timestamp={timestamp}
               isAlert={isAlert}
+              prototypeVersion={prototypeVersion}
             />
           </div>
         </Suspense>

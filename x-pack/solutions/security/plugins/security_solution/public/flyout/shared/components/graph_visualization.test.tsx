@@ -8,7 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
-import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
+import { GraphInvestigation, GraphInvestigationV2 } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
 import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
@@ -45,6 +45,7 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
 
   return {
     GraphInvestigation: jest.fn(),
+    GraphInvestigationV2: jest.fn(),
     isEntityNode,
     isEntityItem,
     getNodeDocumentMode,
@@ -112,12 +113,14 @@ const EVENT_PROPS = {
   eventIds: ['event-1', 'event-2'],
   timestamp: new Date().toISOString(),
   isAlert: false,
+  prototypeVersion: 'v1' as const,
 };
 
 const ENTITY_PROPS = {
   mode: 'entity' as const,
   scopeId: 'test-scope',
   entityId: 'entity-1',
+  prototypeVersion: 'v1' as const,
 };
 
 describe('GraphVisualization', () => {
@@ -125,6 +128,9 @@ describe('GraphVisualization', () => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
+      <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
+    );
+    (GraphInvestigationV2 as unknown as jest.Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
     );
   });

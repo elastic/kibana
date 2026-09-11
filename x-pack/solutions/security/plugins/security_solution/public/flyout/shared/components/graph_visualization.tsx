@@ -24,6 +24,8 @@ import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/t
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
+import type { GraphPrototypeVersion } from './graph_prototype_version';
+import { DEFAULT_GRAPH_PROTOTYPE_VERSION } from './graph_prototype_version';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
@@ -42,9 +44,15 @@ import { extractTimelineCapabilities } from '../../../common/utils/timeline_capa
 import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
-const GraphInvestigationLazy = React.lazy(() =>
+const GraphInvestigationV1Lazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
     default: module.GraphInvestigation,
+  }))
+);
+
+const GraphInvestigationV2Lazy = React.lazy(() =>
+  import('@kbn/cloud-security-posture-graph').then((module) => ({
+    default: module.GraphInvestigationV2,
   }))
 );
 
@@ -52,8 +60,13 @@ export const GRAPH_ID = 'graph-visualization' as const;
 
 const MAX_DOCUMENTS_TO_LOAD = 50;
 
+interface GraphVisualizationBaseProps {
+  /** Isolated visual prototype. Data/mocks stay shared across versions. */
+  prototypeVersion?: GraphPrototypeVersion;
+}
+
 /** Props for event/alert mode — drives the graph from an alert/event document */
-interface EventGraphVisualizationProps {
+interface EventGraphVisualizationProps extends GraphVisualizationBaseProps {
   mode: 'event';
   /** Scope ID for the flyout panel */
   scopeId: string;
@@ -66,7 +79,7 @@ interface EventGraphVisualizationProps {
 }
 
 /** Props for entity mode — drives the graph from an Entity Store entity ID */
-interface EntityGraphVisualizationProps {
+interface EntityGraphVisualizationProps extends GraphVisualizationBaseProps {
   mode: 'entity';
   /** Scope ID for the flyout panel */
   scopeId: string;
@@ -83,7 +96,9 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
  * - 'entity': driven by an Entity Store entity ID (used in entity detail panels).
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
-  const { scopeId } = props;
+  const { scopeId, prototypeVersion = DEFAULT_GRAPH_PROTOTYPE_VERSION } = props;
+  const GraphInvestigationLazy =
+    prototypeVersion === 'v2' ? GraphInvestigationV2Lazy : GraphInvestigationV1Lazy;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const height = useFlyoutBodyAvailableHeight(wrapperRef);
@@ -306,6 +321,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       {dataView && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
           <GraphInvestigationLazy
+            key={prototypeVersion}
             scopeId={scopeId}
             initialState={
               props.mode === 'event'

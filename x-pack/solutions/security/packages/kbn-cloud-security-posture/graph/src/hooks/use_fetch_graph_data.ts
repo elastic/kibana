@@ -61,6 +61,7 @@ interface EnhancedNode {
   documentsData?: Array<{ id: string; type: string; entity?: Record<string, unknown> }>;
   assetCriticality?: string;
   assetCriticalityCounts?: { extreme?: number; high?: number; medium?: number; low?: number };
+  dataSource?: string;
   riskScore?: number;
   riskScoreMin?: number;
   riskScoreMax?: number;
@@ -1066,6 +1067,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       ips: ['10.128.0.1'],
       countryCodes: ['US'],
       riskScore: 95.5,
+      assetCriticality: 'extreme_impact',
+      dataSource: 'Active Directory',
       documentsData: mockEntityDocuments(DEV_ORIGIN_ENTITY_ID, 'user', 'User'),
     },
 
@@ -1081,6 +1084,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // Critical — Figma entity card example score
       riskScore: 90.01,
+      assetCriticality: 'high_impact',
+      dataSource: 'Endpoints',
       documentsData: mockEntityDocuments('macbook-john-work', 'host', 'Host'),
     },
     {
@@ -1094,6 +1099,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // High
       riskScore: 85.0,
+      assetCriticality: 'medium_impact',
+      dataSource: 'Endpoints',
       documentsData: mockEntityDocuments('john-pc-home', 'host', 'Host'),
     },
     {
@@ -1107,6 +1114,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // Moderate
       riskScore: 55.2,
+      assetCriticality: 'high_impact',
+      dataSource: 'Entra ID',
       documentsData: mockEntityDocuments('admin-pc', 'host', 'Host'),
     },
     {
@@ -1120,6 +1129,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // High
       riskScore: 78.0,
+      assetCriticality: 'low_impact',
+      dataSource: 'Okta',
       documentsData: mockEntityDocuments('entities-services', 'service', 'Service'),
     },
 
@@ -1135,6 +1146,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // Low
       riskScore: 28.1,
+      assetCriticality: 'low_impact',
+      dataSource: 'Endpoints',
       documentsData: mockEntityDocuments('entity-auth-target', 'host', 'Host'),
     },
     {
@@ -1148,6 +1161,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // Moderate
       riskScore: 48.0,
+      assetCriticality: 'medium_impact',
+      dataSource: 'Workday',
       documentsData: mockEntityDocuments('entity-send-target', 'host', 'Host'),
     },
     {
@@ -1161,6 +1176,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       countryCodes: ['US'],
       // Unknown
       riskScore: 12.0,
+      assetCriticality: 'unassigned',
+      dataSource: 'Okta',
       documentsData: mockEntityDocuments('entity-grant-target', 'host', 'Host'),
     },
 
@@ -1263,6 +1280,8 @@ type SampleEntityProfile = {
   icon: string;
   shape: 'hexagon' | 'ellipse' | 'rectangle';
   riskScore: number;
+  assetCriticality: string;
+  dataSource: string;
 };
 
 const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
@@ -1273,6 +1292,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'storage',
     shape: 'hexagon',
     riskScore: 90.01,
+    assetCriticality: 'high_impact',
+    dataSource: 'Endpoints',
   },
   {
     ids: ['host:john-pc-home', 'john-pc-home'],
@@ -1281,6 +1302,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'storage',
     shape: 'hexagon',
     riskScore: 55.0,
+    assetCriticality: 'medium_impact',
+    dataSource: 'Endpoints',
   },
   {
     ids: ['host:admin-pc', 'admin-pc'],
@@ -1289,6 +1312,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'storage',
     shape: 'hexagon',
     riskScore: 75.0,
+    assetCriticality: 'high_impact',
+    dataSource: 'Entra ID',
   },
   {
     ids: ['host:low-risk-host', 'low-risk-host', 'entity-auth-target'],
@@ -1297,6 +1322,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'storage',
     shape: 'hexagon',
     riskScore: 25.0,
+    assetCriticality: 'low_impact',
+    dataSource: 'Endpoints',
   },
   {
     ids: [
@@ -1308,6 +1335,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'storage',
     shape: 'hexagon',
     riskScore: 98.72,
+    assetCriticality: 'extreme_impact',
+    dataSource: 'Endpoints',
   },
   {
     ids: ['user:john.doe', 'john.doe', DEV_ORIGIN_ENTITY_ID],
@@ -1316,6 +1345,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'user',
     shape: 'ellipse',
     riskScore: 95.5,
+    assetCriticality: 'extreme_impact',
+    dataSource: 'Active Directory',
   },
   {
     ids: ['user:alice', 'alice'],
@@ -1324,6 +1355,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'user',
     shape: 'ellipse',
     riskScore: 42.0,
+    assetCriticality: 'medium_impact',
+    dataSource: 'Okta',
   },
   {
     ids: ['service:auth-service', 'auth-service', 'entities-services'],
@@ -1332,6 +1365,8 @@ const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
     icon: 'package',
     shape: 'rectangle',
     riskScore: 78.0,
+    assetCriticality: 'low_impact',
+    dataSource: 'Okta',
   },
 ];
 
@@ -1350,6 +1385,20 @@ const findSampleEntityProfile = (entityId: string): SampleEntityProfile | undefi
 
 /** Stable demo risk so refresh never drops to gray/unknown. */
 const DEMO_RISK_SCORES = [98.72, 95.5, 90.01, 78.0, 75.0, 55.0, 42.0, 25.0] as const;
+const DEMO_CRITICALITY = [
+  'extreme_impact',
+  'high_impact',
+  'medium_impact',
+  'low_impact',
+  'unassigned',
+] as const;
+const DEMO_DATA_SOURCES = [
+  'Active Directory',
+  'Endpoints',
+  'Okta',
+  'Workday',
+  'Entra ID',
+] as const;
 
 const hashEntityId = (entityId: string): number =>
   entityId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -1377,13 +1426,16 @@ const resolveEntityProfile = (entityId: string): SampleEntityProfile => {
     shape = 'rectangle';
   }
 
+  const hash = hashEntityId(entityId);
   return {
     ids: [entityId, bare],
     label: bare,
     tag,
     icon,
     shape,
-    riskScore: DEMO_RISK_SCORES[hashEntityId(entityId) % DEMO_RISK_SCORES.length],
+    riskScore: DEMO_RISK_SCORES[hash % DEMO_RISK_SCORES.length],
+    assetCriticality: DEMO_CRITICALITY[hash % DEMO_CRITICALITY.length],
+    dataSource: DEMO_DATA_SOURCES[hash % DEMO_DATA_SOURCES.length],
   };
 };
 
@@ -1430,6 +1482,8 @@ const scenarioSampleEntityOrigin = (entityId: string): GraphResponse => {
     shape: profile.shape,
     color: 'primary' as const,
     riskScore: profile.riskScore,
+    assetCriticality: profile.assetCriticality,
+    dataSource: profile.dataSource,
     documentsData: mockEntityDocuments(entityId, entityType, profile.tag),
   };
 

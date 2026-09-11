@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+import { BaseEdge } from '@xyflow/react';
+import type { EdgeProps } from '../types';
+import { getShapeHandlePosition } from './utils';
+import { getMarkerEnd } from './markers';
+import { useEdgeColor } from './styles';
+import { GRAPH_EDGE_ID } from '../test_ids';
+import { getGraphEdgePath, GRAPH_EDGE_STEP_OFFSET } from './get_graph_edge_path';
+import { useGraphLayoutContext } from '../graph/graph_layout_context';
+import { getGraphEdgeRenderColor } from './edge_processing';
+
+const dashedStyle = {
+  strokeDasharray: '2 2',
+};
+
+const originHighlightStyle = {
+  strokeWidth: 2.5,
+  strokeDasharray: '6 4',
+};
+
+const NODES_WITHOUT_MARKER = ['label', 'group', 'relationship'];
+
+export const DefaultEdge = memo(
+  ({
+    id,
+    label,
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+    data,
+  }: EdgeProps) => {
+    const { useBundledEdgeRouting } = useGraphLayoutContext();
+    const color = getGraphEdgeRenderColor(data);
+    const sourceMargin = getShapeHandlePosition(data?.sourceShape);
+    const targetMargin = getShapeHandlePosition(data?.targetShape);
+    const markerEnd =
+      !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
+        ? getMarkerEnd('primary')
+        : undefined;
+
+    const sX = Math.round(sourceX - sourceMargin);
+    const sY = Math.round(sourceY);
+    const tX = Math.round(targetX + targetMargin);
+    const tY = Math.round(targetY);
+
+    const edgePath = getGraphEdgePath({
+      sourceX: sX,
+      sourceY: sY,
+      sourcePosition,
+      targetX: tX,
+      targetY: tY,
+      targetPosition,
+      stepOffset: useBundledEdgeRouting ? 0 : GRAPH_EDGE_STEP_OFFSET,
+    });
+
+    const isOriginHighlightEdge = Boolean(data?.isOriginHighlightEdge);
+
+    return (
+      <>
+        <BaseEdge
+          data-test-subj={GRAPH_EDGE_ID}
+          id={id}
+          path={edgePath}
+          interactionWidth={0}
+          className={isOriginHighlightEdge ? 'graph-origin-edge-path' : undefined}
+          style={{
+            stroke: useEdgeColor(color),
+            ...(isOriginHighlightEdge
+              ? originHighlightStyle
+              : data?.type === 'dashed'
+              ? dashedStyle
+              : {}),
+          }}
+          markerEnd={markerEnd}
+        />
+      </>
+    );
+  }
+);
+
+DefaultEdge.displayName = 'DefaultEdge';
