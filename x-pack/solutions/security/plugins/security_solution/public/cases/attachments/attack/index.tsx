@@ -252,17 +252,26 @@ const snapshotNarrative = (
 /** The `security.attack` attachment as posted to a case — the cases UI injects the `owner`. */
 export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'>;
 
-/** One constituent alert, posted alongside the attack it belongs to. */
+/**
+ * The attack's constituent alerts, batched into one attachment the way the alerts table batches
+ * a bulk add, so the case activity log gets a single "added N alerts" entry rather than one entry
+ * per alert.
+ *
+ * `metadata.index` stays a scalar: the Cases platform broadcasts a scalar index across every id,
+ * and every alert an attack comprises comes from the same alerts index pattern. An array would
+ * have to pair 1-to-1 with the ids, repeating the same string up to `MAX_ALERTS_PER_CASE` times.
+ */
 export interface AlertAttachmentWithoutOwner {
   type: typeof SECURITY_ALERT_ATTACHMENT_TYPE;
-  attachmentId: string;
+  attachmentId: string[];
   metadata: { index: string };
 }
 
 /** The attachments to post to a case, plus what had to be dropped to build them. */
 export interface AttackAttachmentsResult {
   /**
-   * The `security.attack` attachment first, then one `security.alert` attachment per alert.
+   * The `security.attack` attachment, followed by the single `security.alert` attachment holding
+   * every constituent alert id. The alert attachment is absent when the attack has no alerts.
    *
    * Typed narrower than the framework's `CaseAttachmentsWithoutOwner` union so callers and tests
    * can reach `metadata` without re-narrowing; assignability to the framework type is checked by
@@ -271,7 +280,7 @@ export interface AttackAttachmentsResult {
   attachments: Array<AttackAttachmentWithoutOwner | AlertAttachmentWithoutOwner>;
   /** The attack's full de-anonymised, deduplicated constituent alert count. */
   alertCount: number;
-  /** How many alert attachments were actually built — at most `MAX_ALERTS_PER_CASE`. */
+  /** How many alert ids the alert attachment carries — at most `MAX_ALERTS_PER_CASE`. */
   attachedAlertCount: number;
   /** True when the attack has more constituent alerts than a single request may carry. */
   truncated: boolean;
@@ -280,10 +289,12 @@ export interface AttackAttachmentsResult {
 /**
  * Builds the attachments for attaching one attack to a case: the `security.attack` attachment
  * carrying the metadata snapshot the activity card renders from, followed by one `security.alert`
- * attachment per de-anonymised constituent alert.
+ * attachment holding every de-anonymised constituent alert id.
  *
  * The constituent alerts are always included — attaching an attack means attaching the alerts it
- * comprises, so there is no at-attach-time choice about them.
+ * comprises, so there is no at-attach-time choice about them. They go in a single attachment so
+ * the case activity log records them as one "added N alerts" entry, matching a bulk add from the
+ * alerts table, rather than burying the attack's own entry under one entry per alert.
  *
  * The narrative fields are de-anonymised here, once, so nothing downstream of the attachment
  * needs the attack's `replacements` map.
@@ -351,7 +362,7 @@ export const buildAttackAttachments = ({
         MAX_ATTACK_TITLE_LENGTH
       ),
       // The attack's own alert count, which is what the preview card means by "alerts" — it can
-      // exceed the number of alert attachments created when the batch above was capped.
+      // exceed the number of ids actually attached when the batch above was capped.
       alertCount: originalAlertIds.length,
       // Lets the Cases platform pair this attachment's id with an index so the "already attached"
       // duplicate check works, and so status sync knows which index to write to.
@@ -374,12 +385,17 @@ export const buildAttackAttachments = ({
     } satisfies AttackAttachmentMetadata,
   };
 
-  const alertAttachments = attachedAlertIds.map<AlertAttachmentWithoutOwner>((alertId) => ({
-    type: SECURITY_ALERT_ATTACHMENT_TYPE,
-    attachmentId: alertId,
-    // The index is what makes the duplicate check and status sync work for these alerts too.
-    metadata: { index: alertsIndex },
-  }));
+  const alertAttachments: AlertAttachmentWithoutOwner[] =
+    attachedAlertIds.length > 0
+      ? [
+          {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: attachedAlertIds,
+            // The index is what makes the duplicate check and status sync work for these alerts too.
+            metadata: { index: alertsIndex },
+          },
+        ]
+      : [];
 
   return {
     attachments: [attackAttachment, ...alertAttachments],

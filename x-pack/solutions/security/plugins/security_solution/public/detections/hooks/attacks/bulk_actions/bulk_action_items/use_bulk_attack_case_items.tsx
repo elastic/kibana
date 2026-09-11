@@ -35,10 +35,10 @@ export interface UseBulkAttackCaseItemsProps {
   telemetrySource?: AttacksActionTelemetrySource;
   /**
    * The single attack being attached, when the caller has the whole attack document to hand.
-   * With `attackAttachmentsEnabled` on this is posted as a `security.attack` attachment plus one
-   * `security.alert` attachment per constituent alert; otherwise the markdown-comment payload
-   * built from the clicked rows is posted instead. `alertsIndex` is resolved here from the
-   * assistant context, so callers don't supply it.
+   * With `attackAttachmentsEnabled` on this is posted as a `security.attack` attachment plus a
+   * single `security.alert` attachment holding its constituent alerts; otherwise the
+   * markdown-comment payload built from the clicked rows is posted instead. `alertsIndex` is
+   * resolved here from the assistant context, so callers don't supply it.
    */
   attackToAttach?: Omit<AttackToAttach, 'alertsIndex'>;
 }

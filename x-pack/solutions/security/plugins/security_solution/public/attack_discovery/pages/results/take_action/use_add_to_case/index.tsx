@@ -30,8 +30,8 @@ export interface AddToNewCaseParams {
   /**
    * When provided and non-empty, these attachments are posted verbatim and `alertIds` /
    * `markdownComments` are ignored. The attack attachment path uses this to post a
-   * `security.attack` attachment plus its constituent `security.alert` attachments instead of a
-   * markdown user comment.
+   * `security.attack` attachment plus one `security.alert` attachment batching its constituent
+   * alerts, instead of a markdown user comment.
    */
   attachments?: CaseAttachmentsWithoutOwner;
 }

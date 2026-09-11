@@ -215,12 +215,12 @@ const attackToAttach = (overrides: Partial<AttackToAttach> = {}): AttackToAttach
 });
 
 describe('buildAttackAttachments', () => {
-  it('returns the attack attachment first, then one alert attachment per alert', () => {
+  it('returns the attack attachment first, then one alert attachment holding every alert', () => {
     const { attachments } = buildAttackAttachments(
       attackToAttach({ alertIds: ['alert-1', 'alert-2'] })
     );
 
-    expect(attachments).toHaveLength(3);
+    expect(attachments).toHaveLength(2);
     expect(attachments[0]).toEqual({
       type: SECURITY_ATTACK_ATTACHMENT_TYPE,
       attachmentId: 'attack-id-1',
@@ -232,18 +232,11 @@ describe('buildAttackAttachments', () => {
         index: ATTACK_INDEX,
       },
     });
-    expect(attachments.slice(1)).toEqual([
-      {
-        type: SECURITY_ALERT_ATTACHMENT_TYPE,
-        attachmentId: 'alert-1',
-        metadata: { index: ALERTS_INDEX },
-      },
-      {
-        type: SECURITY_ALERT_ATTACHMENT_TYPE,
-        attachmentId: 'alert-2',
-        metadata: { index: ALERTS_INDEX },
-      },
-    ]);
+    expect(attachments[1]).toEqual({
+      type: SECURITY_ALERT_ATTACHMENT_TYPE,
+      attachmentId: ['alert-1', 'alert-2'],
+      metadata: { index: ALERTS_INDEX },
+    });
   });
 
   it('builds a payload that satisfies the registered attack attachment schema', () => {
@@ -377,10 +370,7 @@ describe('buildAttackAttachments', () => {
       })
     );
 
-    expect(attachments.slice(1).map((attachment) => attachment.attachmentId)).toEqual([
-      'original-1',
-      'original-2',
-    ]);
+    expect(attachments[1].attachmentId).toEqual(['original-1', 'original-2']);
   });
 
   it('leaves ids with no replacement untouched', () => {
@@ -391,10 +381,7 @@ describe('buildAttackAttachments', () => {
       })
     );
 
-    expect(attachments.slice(1).map((attachment) => attachment.attachmentId)).toEqual([
-      'original-1',
-      'not-anonymised',
-    ]);
+    expect(attachments[1].attachmentId).toEqual(['original-1', 'not-anonymised']);
   });
 
   it('dedupes after de-anonymising, so two anonymised ids for one alert collapse', () => {
@@ -405,9 +392,7 @@ describe('buildAttackAttachments', () => {
       })
     );
 
-    expect(attachments.slice(1).map((attachment) => attachment.attachmentId)).toEqual([
-      'original-1',
-    ]);
+    expect(attachments[1].attachmentId).toEqual(['original-1']);
     expect(alertCount).toBe(1);
   });
 
@@ -448,14 +433,15 @@ describe('buildAttackAttachments', () => {
     expect(attachments).toHaveLength(1);
   });
 
-  it('caps the alert attachments at MAX_ALERTS_PER_CASE and reports the truncation', () => {
+  it('caps the batched alert ids at MAX_ALERTS_PER_CASE and reports the truncation', () => {
     const alertIds = Array.from({ length: MAX_ALERTS_PER_CASE + 5 }, (_, i) => `alert-${i}`);
 
     const { attachments, alertCount, attachedAlertCount, truncated } = buildAttackAttachments(
       attackToAttach({ alertIds })
     );
 
-    expect(attachments).toHaveLength(MAX_ALERTS_PER_CASE + 1);
+    expect(attachments).toHaveLength(2);
+    expect(attachments[1].attachmentId).toHaveLength(MAX_ALERTS_PER_CASE);
     expect(attachedAlertCount).toBe(MAX_ALERTS_PER_CASE);
     expect(truncated).toBe(true);
     // The metadata keeps the attack's real alert count even though fewer alerts were attached.

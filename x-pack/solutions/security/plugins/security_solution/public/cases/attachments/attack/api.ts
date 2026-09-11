@@ -27,9 +27,9 @@ export interface BulkDeleteCaseAttachmentsParams {
  * attachment of the case, which is what makes removing an attack and the alerts it brought in
  * a single atomic step rather than a loop of single deletes that can half-succeed.
  *
- * The endpoint accepts at most {@link MAX_BULK_DELETE_ATTACHMENTS} ids per request. An attack
- * can carry far more alerts than that, so larger sets are sent as sequential batches — the
- * attack attachment goes in the first batch so a failure part-way through can never leave the
+ * The endpoint accepts at most {@link MAX_BULK_DELETE_ATTACHMENTS} ids per request. A bulk
+ * selection can name more attachments than that, so larger sets are sent as sequential batches —
+ * the attack attachment goes in the first batch so a failure part-way through can never leave the
  * attack behind while its alerts are gone. Callers pass the attack id first.
  */
 export const bulkDeleteCaseAttachments = async ({

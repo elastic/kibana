@@ -335,12 +335,7 @@ describe('useBulkAttackCaseItems', () => {
       },
       {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
-        attachmentId: 'alert-1',
-        metadata: { index: ALERTS_INDEX },
-      },
-      {
-        type: SECURITY_ALERT_ATTACHMENT_TYPE,
-        attachmentId: 'alert-2',
+        attachmentId: ['alert-1', 'alert-2'],
         metadata: { index: ALERTS_INDEX },
       },
     ];
@@ -439,7 +434,8 @@ describe('useBulkAttackCaseItems', () => {
       await clickItem(1, { attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
 
       const { attachments } = onAddToNewCase.mock.calls[0][0];
-      expect(attachments).toHaveLength(MAX_ALERTS_PER_CASE + 1);
+      expect(attachments).toHaveLength(2);
+      expect(attachments[1].attachmentId).toHaveLength(MAX_ALERTS_PER_CASE);
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
     });
 
