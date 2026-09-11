@@ -9,27 +9,7 @@
 
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type {
-  DashboardState,
-  DashboardStateInput,
-  DashboardPinnedPanelsState,
-  DashboardPinnedPanelsStateInput,
-  DashboardPinnedPanel,
-  DashboardPinnedPanelInput,
-  DashboardOptionsInput,
-  GridDataInput,
-} from '@kbn/as-code-dashboard-schema';
-
-export type {
-  DashboardState,
-  DashboardStateInput,
-  DashboardPinnedPanelsState,
-  DashboardPinnedPanelsStateInput,
-  DashboardPinnedPanel,
-  DashboardPinnedPanelInput,
-  DashboardOptionsInput,
-  GridDataInput,
-};
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 /**
  * Capabilities object for the Dashboard application.

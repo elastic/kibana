@@ -22,15 +22,12 @@ import {
   MAX_TAB_LABEL_LENGTH,
   MAX_BREAKDOWN_FIELD_LENGTH,
   MAX_DISCOVER_SESSION_TAGS,
-  MAX_METRICS_TAB_DIMENSIONS,
-  MAX_METRICS_TAB_STATE_STRING_LENGTH,
   DiscoverTabType,
-  METRICS_GRID_HISTOGRAM_PERCENTILES,
-  METRICS_GRID_SIMPLE_AGGREGATIONS,
 } from '@kbn/discover-session-constants';
 import { classicTabSchema, esqlTabSchema } from './tab';
 import { visContextSchema } from './vis_context';
 import { discoverSessionControlPanelsSchema } from './control_panel';
+import { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
 
 const discoverSessionTabPresentationSchema = z
   .object({
@@ -87,7 +84,7 @@ const discoverSessionTabIdentitySchema = z
   })
   .strict();
 
-const discoverSessionDefaultTabTypeStateSchema = z
+export const discoverSessionDefaultTabTypeStateSchema = z
   .object({
     type: z
       .literal(`${DiscoverTabType.Default}`)
@@ -97,36 +94,6 @@ const discoverSessionDefaultTabTypeStateSchema = z
           'A tab with no type-specific saved state. ' +
           'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
       }),
-  })
-  .strict();
-
-const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
-
-export const discoverSessionMetricsTabTypeStateSchema = z
-  .object({
-    type: z.literal(`${DiscoverTabType.Metrics}`).meta({
-      description:
-        'A tab with saved metrics grid settings. Requires an ES|QL data source. ' +
-        'These settings are used only when the query supports the metrics experience.',
-    }),
-    dimensions: z
-      .array(z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH))
-      .max(MAX_METRICS_TAB_DIMENSIONS)
-      .meta({
-        description: 'Fields used to group metrics in the metrics grid.',
-      }),
-    search_term: z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH).meta({
-      description: 'Search term used to filter metrics in the metrics grid.',
-    }),
-    counter_aggregation: simpleAggregationSchema.meta({
-      description: 'Aggregation applied to counter metric fields.',
-    }),
-    gauge_aggregation: simpleAggregationSchema.meta({
-      description: 'Aggregation applied to gauge metric fields.',
-    }),
-    histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
-      description: 'Percentile displayed for histogram metric fields.',
-    }),
   })
   .strict();
 

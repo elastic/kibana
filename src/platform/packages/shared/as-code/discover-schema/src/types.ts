@@ -11,11 +11,12 @@ import type { z } from '@kbn/zod';
 import type {
   discoverSessionApiDataSchema,
   discoverSessionClassicTabSchema,
+  discoverSessionDefaultTabTypeStateSchema,
   discoverSessionEsqlTabSchema,
   discoverSessionMetricsTabSchema,
-  discoverSessionMetricsTabTypeStateSchema,
   discoverSessionApiTabSchema,
 } from './schemas/session_data';
+import type { discoverSessionMetricsTabTypeStateSchema } from './schemas/metrics_tab';
 
 // Output types (after parsing — all defaults resolved)
 export type DiscoverSessionData = z.output<typeof discoverSessionApiDataSchema>;
@@ -26,7 +27,7 @@ export type DiscoverSessionApiEsqlTab =
   | DiscoverSessionApiMetricsTab;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
 export type DiscoverSessionApiTabTypeState =
-  | { type: 'default' }
+  | z.output<typeof discoverSessionDefaultTabTypeStateSchema>
   | z.output<typeof discoverSessionMetricsTabTypeStateSchema>;
 
 // Input types (before parsing — fields with defaults are optional)

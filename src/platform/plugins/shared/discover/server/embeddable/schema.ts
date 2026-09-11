@@ -16,25 +16,8 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import {
-  dataTableSchema,
-  dataTableLimitsSchema,
-  viewModeSchema,
-  panelOverridesSchema,
-  classicTabSchema,
-  esqlTabSchema,
-  tabSchema,
-} from '@kbn/as-code-discover-schema';
-
-export {
-  dataTableSchema,
-  dataTableLimitsSchema,
-  viewModeSchema,
-  panelOverridesSchema,
-  classicTabSchema,
-  esqlTabSchema,
-  tabSchema,
-};
+import type { classicTabSchema, esqlTabSchema } from '@kbn/as-code-discover-schema';
+import { panelOverridesSchema, tabSchema } from '@kbn/as-code-discover-schema';
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 

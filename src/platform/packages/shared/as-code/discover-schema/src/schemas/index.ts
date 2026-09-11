@@ -16,11 +16,12 @@ export {
   discoverSessionControlPanelSchema,
   discoverSessionControlPanelsSchema,
 } from './control_panel';
+export { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
 export {
+  discoverSessionDefaultTabTypeStateSchema,
   discoverSessionClassicTabSchema,
   discoverSessionEsqlTabSchema,
   discoverSessionMetricsTabSchema,
-  discoverSessionMetricsTabTypeStateSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './session_data';
