@@ -249,6 +249,15 @@ export function getDataStateContainer({
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
   // ES|QL state cleanup is handled by Redux listener middleware (resetOnSavedSearchChange action)
 
+  // Forward the post-fetch EsqlSource (with populated resultColumns) into currentDataSource$
+  dataSubjects.documents$
+    .pipe(filter(({ esqlSource }) => !!esqlSource))
+    .subscribe(({ esqlSource }) => {
+      selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataSource$.next(
+        esqlSource!
+      );
+    });
+
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
    * to notify when data completed loading and to start a new autorefresh loop

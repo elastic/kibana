@@ -78,12 +78,14 @@ import { useAdditionalCellActions, useProfileAccessor } from '../../../../contex
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
+  useCurrentDataSource,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import type { EsqlSource } from '@kbn/data-source';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
@@ -153,6 +155,7 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const currentDataSource = useCurrentDataSource();
   const isWarningCalloutDismissed = useCurrentTabSelector(
     (state) => state.isWarningCalloutDismissed
   );
@@ -321,12 +324,12 @@ function DiscoverDocumentsComponent({
 
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
-      documentState.esqlSource
+      currentDataSource.kind === 'esql'
         ? (Object.fromEntries(
-            documentState.esqlSource.getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
+            (currentDataSource as EsqlSource).getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
           ) as DataTableColumnsMeta)
         : undefined,
-    [documentState.esqlSource]
+    [currentDataSource]
   );
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 

@@ -30,11 +30,13 @@ import {
   internalStateActions,
   useAppStateSelector,
   useCurrentTabAction,
+  useCurrentDataSource,
   useCurrentTabDataStateContainer,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import type { EsqlSource } from '@kbn/data-source';
 import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
@@ -88,6 +90,7 @@ export const DiscoverDocumentFlyout = memo(
 
     const dataStateContainer = useCurrentTabDataStateContainer();
     const documentState = useDataState(dataStateContainer.data$.documents$);
+    const currentDataSource = useCurrentDataSource();
     const rows = useMemo(() => documentState.result ?? [], [documentState.result]);
 
     const { hasExpandedDoc, requestState, notice, expandedDocRef } = useExpandedDocSync({
@@ -199,12 +202,12 @@ export const DiscoverDocumentFlyout = memo(
 
     const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
       () =>
-        documentState.esqlSource
+        currentDataSource.kind === 'esql'
           ? (Object.fromEntries(
-              documentState.esqlSource.getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
+              (currentDataSource as EsqlSource).getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
             ) as DataTableColumnsMeta)
           : undefined,
-      [documentState.esqlSource]
+      [currentDataSource]
     );
 
     const flyoutColumnsMeta = useMemo(() => {

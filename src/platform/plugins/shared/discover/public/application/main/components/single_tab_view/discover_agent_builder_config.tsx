@@ -18,11 +18,13 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
   internalStateActions,
   useAppStateSelector,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabDataStateContainer,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import type { EsqlSource } from '@kbn/data-source';
 import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
@@ -166,6 +168,7 @@ export const DiscoverAgentBuilderConfig = () => {
 
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const currentDataSource = useCurrentDataSource();
   const { totalHits } = useFetchMoreRecords();
   const getDeepAnalysisPlaybookAccessor = useProfileAccessor('getDeepAnalysisPlaybook');
 
@@ -175,7 +178,7 @@ export const DiscoverAgentBuilderConfig = () => {
     documentState.fetchStatus === FetchStatus.COMPLETE &&
     documentState.result &&
     documentState.result.length > 0 &&
-    Boolean(documentState.esqlSource);
+    currentDataSource.kind === 'esql';
 
   // Use a ref for query so the tool handler always reads the latest value
   const queryRef = useRef(query);
@@ -218,9 +221,9 @@ export const DiscoverAgentBuilderConfig = () => {
       ),
     ];
 
-    if (hasEsqlResults && documentState.esqlSource && documentState.result) {
+    if (hasEsqlResults && currentDataSource.kind === 'esql' && documentState.result) {
       const esqlQuery = isOfAggregateQueryType(query) ? query.esql : '';
-      const esqlColumns = documentState.esqlSource.getColumns();
+      const esqlColumns = (currentDataSource as EsqlSource).getColumns();
       const playbookContribution = getDeepAnalysisPlaybookAccessor(() => undefined)({
         dataView,
         query,
@@ -254,9 +257,9 @@ export const DiscoverAgentBuilderConfig = () => {
     agentBuilder,
     browserApiTools,
     columns,
+    currentDataSource,
     dataSource?.type,
     dataView,
-    documentState.esqlSource,
     documentState.result,
     getDeepAnalysisPlaybookAccessor,
     hasEsqlResults,

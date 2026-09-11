@@ -45,12 +45,14 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
   internalStateActions,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import type { DataSource, EsqlSource } from '@kbn/data-source';
 import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
@@ -199,6 +201,7 @@ export const useDiscoverHistogram = (
   } = requestParams;
 
   const dataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
@@ -260,6 +263,7 @@ export const useDiscoverHistogram = (
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
+        currentDataSource,
         isEsqlMode,
       });
 
@@ -471,9 +475,11 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 function getUnifiedHistogramTableForEsql({
   documentsValue,
+  currentDataSource,
   isEsqlMode,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
+  currentDataSource: DataSource;
   isEsqlMode: boolean;
 }) {
   if (
@@ -487,9 +493,10 @@ function getUnifiedHistogramTableForEsql({
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlSource
-    ? [...documentsValue.esqlSource.resultColumns]
-    : EMPTY_ESQL_COLUMNS;
+  const esqlQueryColumns =
+    currentDataSource.kind === 'esql'
+      ? [...(currentDataSource as EsqlSource).resultColumns]
+      : EMPTY_ESQL_COLUMNS;
   return {
     table: {
       type: 'datatable' as const,
