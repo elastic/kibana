@@ -1,0 +1,171 @@
+version: '1'
+name: Create investigation proposal
+description: >
+  Creates a proposal, gates it on a human decision unless the caller already
+  resolved autonomy, and runs the proposed action workflow once approved.
+  Solution-agnostic: callers supply the action workflow id and its input.
+enabled: true
+tags:
+  - agentic-investigation-proposals
+settings:
+  # The parked gate's wake-up is bounded by the workflow timeout, whose default
+  # is 6h. Without this the gate below would expire silently, so this has to
+  # stay comfortably above the gate's own 72h.
+  timeout: '80h'
+  on-failure:
+    # A gate timeout surfaces as a step failure rather than a branch, and HITL
+    # steps take no on-failure of their own. Without this a timed-out proposal
+    # would stay pending in the queue forever.
+    fallback:
+      # An expired gate is a decision that never came, not a malfunction, so it
+      # lands on `dismissed`. `waitForApproval` fails with an ExecutionError of
+      # type `TimeoutError`, which is the only signal that distinguishes it from
+      # a genuine failure.
+      - name: record_expiry
+        type: investigations.updateProposal
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type == 'TimeoutError' }}"
+        with:
+          proposalId: '{{ steps.create_proposal.output.proposalId }}'
+          status: dismissed
+      - name: record_failure
+        type: investigations.updateProposal
+        # Skipped when creation itself failed: there is no proposal to mark, and
+        # the template would resolve to an empty id.
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type != 'TimeoutError' }}"
+        with:
+          proposalId: '{{ steps.create_proposal.output.proposalId }}'
+          status: failed
+          executionError: '{{ error.message }}'
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        conversationId:
+          type: string
+          description: Conversation this proposal belongs to.
+        comment:
+          type: string
+          description: >
+            Explains what is being proposed, rendered as markdown. Required:
+            a proposal a human cannot read is not reviewable.
+        actionWorkflowId:
+          type: string
+          description: >
+            Managed action workflow to execute once approved. Omit for a
+            proposal the analyst carries out themselves.
+        actionInput:
+          type: object
+          additionalProperties: true
+          description: >
+            Input for the action workflow, passed through as its single
+            `actionInput` object.
+        impact:
+          type: string
+          enum: ['low', 'medium', 'high', 'critical']
+          description: Impact snapshotted at creation.
+        confidence:
+          type: string
+          enum: ['low', 'medium', 'high']
+          description: Confidence in the recommendation.
+        autoApprove:
+          type: boolean
+          description: >
+            Set by the caller when its autonomy policy already permits this
+            action. Defaults to false so the gate is fail-closed.
+      required:
+        - conversationId
+        - comment
+      additionalProperties: false
+
+# The contract a caller gets back from `workflow.execute`. `workflow.execute`
+# declares its output as unknown, so this is documentation for the caller; the
+# `workflow.output` steps below emit the values.
+outputs:
+  - name: proposalId
+    type: string
+  - name: status
+    type: string
+
+steps:
+  - name: create_proposal
+    type: investigations.createProposal
+    with:
+      conversationId: '{{ inputs.conversationId }}'
+      comment: '{{ inputs.comment }}'
+      actionWorkflowId: '{{ inputs.actionWorkflowId }}'
+      actionInput: '${{ inputs.actionInput }}'
+      impact: "{{ inputs.impact | default: 'low' }}"
+      confidence: "{{ inputs.confidence | default: 'medium' }}"
+      origin: worker
+      # Must stay equal to the gate timeout below, or the deadline the queue
+      # shows an analyst is not the one the gate actually enforces.
+      expiresIn: '72h'
+
+  - name: decision_gate
+    type: if
+    # `autoApprove` is only meaningful for an action proposal: autonomy governs
+    # whether an action may run without a human, and a non-action proposal has
+    # no action to govern. Approval is its entire lifecycle, so it is always
+    # gated and the flag is deliberately ignored.
+    condition: "${{ inputs.autoApprove != true or inputs.actionWorkflowId == null or inputs.actionWorkflowId == '' }}"
+    steps:
+      # The API records the decision before resuming, so this gate only needs
+      # the release signal. waitForApproval reconstructs its response as
+      # `{ approved: approved === true }`, which makes the branch below
+      # fail-closed by construction.
+      - name: await_decision
+        type: waitForApproval
+        # Static, and equal to the `expiresIn` recorded above: the engine does
+        # not template-render `timeout`, it hands the raw string to the duration
+        # parser, so a template here fails at execution time. A caller-supplied
+        # deadline returns once elastic/kibana#290258 lands.
+        timeout: '72h'
+        with:
+          message: "{{ inputs.comment | default: 'A proposal is awaiting your decision.' }}"
+          approveLabel: Approve
+          rejectLabel: Dismiss
+
+      - name: handle_dismissal
+        type: if
+        condition: '${{ steps.await_decision.output.response.approved != true }}'
+        steps:
+          - name: output_dismissed
+            type: workflow.output
+            status: completed
+            with:
+              proposalId: '{{ steps.create_proposal.output.proposalId }}'
+              status: dismissed
+
+  - name: run_action
+    type: if
+    # Absent for proposals the analyst carries out themselves; approval is the
+    # whole lifecycle in that case.
+    condition: "${{ inputs.actionWorkflowId != null and inputs.actionWorkflowId != '' }}"
+    steps:
+      - name: mark_executing
+        type: investigations.updateProposal
+        with:
+          proposalId: '{{ steps.create_proposal.output.proposalId }}'
+          status: executing
+
+      - name: execute_action
+        type: workflow.execute
+        with:
+          workflow-id: '{{ inputs.actionWorkflowId }}'
+          inputs:
+            # Every action workflow takes one `actionInput` object, so this
+            # workflow never needs to know an action's parameter names.
+            actionInput: '${{ inputs.actionInput }}'
+
+      - name: record_success
+        type: investigations.updateProposal
+        with:
+          proposalId: '{{ steps.create_proposal.output.proposalId }}'
+          status: succeeded
+
+  - name: output_result
+    type: workflow.output
+    status: completed
+    with:
+      proposalId: '{{ steps.create_proposal.output.proposalId }}'
+      status: "{{ steps.record_success.output.status | default: 'approved' }}"

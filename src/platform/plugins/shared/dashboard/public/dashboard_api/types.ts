@@ -56,9 +56,9 @@ import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardState, GridData } from '../../server';
+import type { DashboardRedirect } from '../dashboard_app/types';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 import type { DashboardLayout } from './layout_manager/types';
-import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardSettings } from './settings_manager';
 import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 
@@ -211,7 +211,7 @@ export type DashboardApi = CanExpandPanels &
     isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
-    runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
+    runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
