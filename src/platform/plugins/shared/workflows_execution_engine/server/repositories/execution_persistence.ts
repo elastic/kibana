@@ -139,10 +139,18 @@ export class InMemoryExecutionPersistence
       if (!update.id) {
         throw new Error('Step execution ID is required for in-memory upsert');
       }
-      this.stepExecutions.set(update.id, {
-        ...this.stepExecutions.get(update.id),
-        ...update,
-      });
+      const merged = { ...this.stepExecutions.get(update.id), ...update };
+      try {
+        this.stepExecutions.set(update.id, structuredClone(merged));
+      } catch (err) {
+        throw new Error(
+          `Failed to store step execution ${
+            update.id
+          }: state contains a non-serializable value. Root cause: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
     }
   }
 }
