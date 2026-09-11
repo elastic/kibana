@@ -15,6 +15,4 @@ export {
   createMainFlyoutDescriptionItems,
 } from './flyout_description_items';
 
-export { createChildFlyoutProps, createMainFlyoutProps } from './flyout_props';
-
 export const FLYOUT_MIN_WIDTH = 300;

@@ -8,7 +8,7 @@
  */
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -16,7 +16,11 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { SystemFlyoutService } from './system_flyout_service';
 import type { SystemFlyoutRef } from './system_flyout_ref';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlaySystemFlyoutStart } from '@kbn/core-overlays-browser';
+import type {
+  OverlayFlyoutTemplateStart,
+  OverlaySystemFlyoutStart,
+} from '@kbn/core-overlays-browser';
+import { FlyoutTemplate, useFlyoutClose } from '@kbn/flyout-template';
 import React from 'react';
 
 interface FlyoutManagerEvent {
@@ -65,7 +69,10 @@ afterEach(() => {
 });
 
 describe('SystemFlyoutService', () => {
-  let systemFlyouts: OverlaySystemFlyoutStart;
+  let systemFlyouts: {
+    open: OverlaySystemFlyoutStart['open'];
+    openTemplate: OverlayFlyoutTemplateStart['open'];
+  };
   let service: SystemFlyoutService;
   let targetDomElement: HTMLElement;
   let skipCleanup = false;
@@ -369,6 +376,299 @@ describe('SystemFlyoutService', () => {
         await ref2.close();
         expect(onClose2).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('openTemplate()', () => {
+    /** Minimal content component: a `FlyoutTemplate` with header and body zones. */
+    const content =
+      (title: string, body: React.ReactNode = 'content') =>
+      ({ onClose }: { onClose: () => void }) =>
+        (
+          <FlyoutTemplate onClose={onClose}>
+            <FlyoutTemplate.Header title={title} />
+            <FlyoutTemplate.Body>{body}</FlyoutTemplate.Body>
+          </FlyoutTemplate>
+        );
+
+    /** The contract handed to the content subtree: resolved root props plus `close`. */
+    const managedValue = (call = 0) =>
+      mockReactDomRender.mock.calls[call][0].props.children.props.value;
+
+    /** Silences the React error log a deliberate render failure produces. */
+    const silenceReactErrors = () => jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    it('renders the zones a content component declares: the header title is visible', () => {
+      systemFlyouts.openTemplate({ session: 'never' }, content('My Flyout Title'));
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
+      expect(getByRole('heading', { level: 3, name: 'My Flyout Title' })).toBeInTheDocument();
+    });
+
+    it('runs content hooks inside React, so state updates re-render the zones', () => {
+      const Content = ({ onClose }: { onClose: () => void }) => {
+        const [count, setCount] = React.useState(0);
+        return (
+          <FlyoutTemplate onClose={onClose}>
+            <FlyoutTemplate.Header title={`Count ${count}`} />
+            <FlyoutTemplate.Body>
+              <button type="button" onClick={() => setCount(count + 1)}>
+                increment
+              </button>
+            </FlyoutTemplate.Body>
+          </FlyoutTemplate>
+        );
+      };
+
+      systemFlyouts.openTemplate({ session: 'never' }, Content);
+      const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
+
+      expect(getByRole('heading', { level: 3, name: 'Count 0' })).toBeInTheDocument();
+      fireEvent.click(getByRole('button', { name: 'increment' }));
+      expect(getByRole('heading', { level: 3, name: 'Count 1' })).toBeInTheDocument();
+    });
+
+    it('lets nested content close the flyout through useFlyoutClose', () => {
+      const CloseButton = () => {
+        const close = useFlyoutClose();
+        return (
+          <button type="button" onClick={close}>
+            close me
+          </button>
+        );
+      };
+      const ref = systemFlyouts.openTemplate(
+        { session: 'never' },
+        content('Closes itself', <CloseButton />)
+      );
+
+      const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
+      expect((ref as SystemFlyoutRef).isClosed).toBe(false);
+
+      fireEvent.click(getByRole('button', { name: 'close me' }));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+    });
+
+    it('tears down even when the content swallows the onClose it was given', () => {
+      // EUI has already dropped the flyout by the time any handler runs, so a wrapper that
+      // never calls through must not be able to leave it rendered and untracked.
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => (
+        <FlyoutTemplate onClose={() => {}}>
+          <FlyoutTemplate.Header title="Swallows close" />
+          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      ));
+
+      const { getByLabelText } = render(mockReactDomRender.mock.calls[0][0]);
+      fireEvent.click(getByLabelText('Close this dialog'));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('fires onClose from options once when the content passes the prop through', () => {
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate(
+        { session: 'never', onClose },
+        content('Passes through')
+      );
+
+      const { getByLabelText } = render(mockReactDomRender.mock.calls[0][0]);
+      fireEvent.click(getByLabelText('Close this dialog'));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('tears down even when the content onClose handler throws', () => {
+      silenceReactErrors();
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => (
+        <FlyoutTemplate
+          onClose={() => {
+            throw new Error('handler blew up');
+          }}
+        >
+          <FlyoutTemplate.Header title="Throws on close" />
+          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      ));
+
+      // React re-throws a handler error through a synthetic event, which jsdom would surface
+      // as an unhandled error and fail the run. The throw is not what is under test here; the
+      // `finally` having run anyway is.
+      const swallow = (event: ErrorEvent) => event.preventDefault();
+      window.addEventListener('error', swallow);
+      const { getByLabelText } = render(mockReactDomRender.mock.calls[0][0]);
+      fireEvent.click(getByLabelText('Close this dialog'));
+      window.removeEventListener('error', swallow);
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('invokes onClose from options before closing the ref', () => {
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, content('Closeable'));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(false);
+
+      managedValue().close();
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+    });
+
+    it('matches open()`s ref contract: close() is idempotent and removes the container', async () => {
+      const targetElement = document.createElement('div');
+      const testService = new SystemFlyoutService();
+      const flyouts = testService.start({
+        analytics: analyticsMock,
+        i18n: i18nMock,
+        theme: themeMock,
+        userProfile: userProfileMock,
+        targetDomElement: targetElement,
+      });
+
+      const ref = flyouts.openTemplate({ session: 'never' }, content('Container test'));
+      expect(targetElement.children.length).toBe(1);
+
+      const firstClose = await ref.close();
+      const secondClose = await ref.close();
+
+      expect(firstClose).toBe(secondClose);
+      expect(targetElement.children.length).toBe(0);
+
+      testService.stop();
+    });
+
+    it('resolves flyout props such as size and outsideClickCloses for the template', () => {
+      systemFlyouts.openTemplate(
+        { session: 'never', size: 'l', outsideClickCloses: false },
+        content('Forwarded props')
+      );
+
+      expect(managedValue().props.size).toBe('l');
+      expect(managedValue().props.outsideClickCloses).toBe(false);
+    });
+
+    it('applies the resolved props even when the content passes its own to FlyoutTemplate', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      systemFlyouts.openTemplate({ session: 'never', size: 'l' }, ({ onClose }) => (
+        <FlyoutTemplate onClose={onClose} size="s">
+          <FlyoutTemplate.Header title="Overridden" />
+          <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      ));
+
+      const { container } = render(mockReactDomRender.mock.calls[0][0]);
+
+      expect(container.querySelector('[class*="euiFlyout"]')).toBeInTheDocument();
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('ignores root props'));
+    });
+
+    it('does not leak the children argument into the resolved template props', () => {
+      systemFlyouts.openTemplate({ session: 'never' }, content('No leak'));
+
+      expect(managedValue().props).not.toHaveProperty('children');
+    });
+
+    it('closes the flyout when the content throws while rendering', async () => {
+      const error = silenceReactErrors();
+      // The caller's `onClose` has to run: callers reset their own open state in it, and a
+      // caller that still believes the flyout is open cannot reopen it.
+      const onClose = jest.fn();
+      const ref = systemFlyouts.openTemplate({ session: 'never', onClose }, () => {
+        throw new Error('content blew up');
+      });
+
+      render(mockReactDomRender.mock.calls[0][0]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect((ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(error).toHaveBeenCalled();
+    });
+
+    it('releases the container when the content throws while rendering', async () => {
+      silenceReactErrors();
+      const targetElement = document.createElement('div');
+      const testService = new SystemFlyoutService();
+      const flyouts = testService.start({
+        analytics: analyticsMock,
+        i18n: i18nMock,
+        theme: themeMock,
+        userProfile: userProfileMock,
+        targetDomElement: targetElement,
+      });
+
+      flyouts.openTemplate({ session: 'never' }, () => {
+        throw new Error('content blew up');
+      });
+      expect(targetElement.children.length).toBe(1);
+
+      render(mockReactDomRender.mock.calls[0][0]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(targetElement.children.length).toBe(0);
+
+      testService.stop();
+    });
+
+    it('cascade closes a child flyout (session: "inherit") when the session ends', () => {
+      const parentRef = systemFlyouts.openTemplate(
+        { id: 'template-parent-flyout', session: 'start' },
+        content('Parent', 'parent content')
+      );
+      const childRef = systemFlyouts.openTemplate(
+        { id: 'template-child-flyout', session: 'inherit' },
+        content('Child', 'child content')
+      );
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: {
+          mainFlyoutId: 'template-parent-flyout',
+          childFlyoutId: 'template-child-flyout',
+        },
+      });
+
+      expect((childRef as SystemFlyoutRef).isClosed).toBe(true);
+      expect((parentRef as SystemFlyoutRef).isClosed).toBe(false);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not close an unrelated second "start" session', () => {
+      const refX = systemFlyouts.openTemplate(
+        { id: 'template-session-x', session: 'start' },
+        content('Session X', 'content x')
+      );
+      const refY = systemFlyouts.openTemplate(
+        { id: 'template-session-y', session: 'start' },
+        content('Session Y', 'content y')
+      );
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: { mainFlyoutId: 'template-session-x', childFlyoutId: 'template-session-y' },
+      });
+
+      expect((refX as SystemFlyoutRef).isClosed).toBe(false);
+      expect((refY as SystemFlyoutRef).isClosed).toBe(false);
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+
+    it('renders a child flyout with the id its cascade subscription matches on', () => {
+      systemFlyouts.openTemplate({ id: 'template-parent-flyout', session: 'start' }, content('P'));
+      systemFlyouts.openTemplate({ session: 'inherit' }, content('Child without an id'));
+
+      // The subscription falls back to an internal `system-flyout-<uuid>`, but with no `id`
+      // reaching EuiFlyout, EUI's useFlyoutId registers the flyout as `flyout-<generated>-<n>`.
+      // Unless the id is rendered, no CLOSE_SESSION event can ever match it.
+      expect(managedValue(1).props.id).toEqual(expect.any(String));
     });
   });
 
