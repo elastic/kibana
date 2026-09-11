@@ -71,6 +71,7 @@ import {
   persistRoundInput,
   appendRoundTerminated$,
   appendResumeExecution$,
+  executionStartedEvents$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -300,6 +301,10 @@ const handleConversationExecution = async ({
       })
     : EMPTY;
 
+  const startedEvents$ = storeConversation
+    ? executionStartedEvents$({ conversation, agentEvents$ })
+    : EMPTY;
+
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
@@ -342,7 +347,13 @@ const handleConversationExecution = async ({
           )
         : EMPTY;
 
-      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+      return merge(
+        conversationIdEvent$,
+        agentEvents$,
+        startedEvents$,
+        persistenceEvents$,
+        titleAttr$
+      ).pipe(
         filter((event) => !isRoundStartedEvent(event)),
         // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
         // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.

@@ -35,30 +35,42 @@ const ROUND_DERIVED_EVENT_TYPES = [
   TimelineEventType.executionTerminated,
 ];
 
-const conversationIdFromSseStream = (streamText: string): string | undefined => {
+interface ParsedSseBlock {
+  type: string;
+  data: any;
+}
+
+const parseSseBlocks = (streamText: string): ParsedSseBlock[] => {
+  const blocks: ParsedSseBlock[] = [];
   for (const block of streamText.split('\n\n')) {
     const lines = block.split('\n');
     const eventType = lines
       .find((line) => line.startsWith('event:'))
       ?.slice('event:'.length)
       .trim();
-    if (
-      eventType !== ChatEventType.conversationCreated &&
-      eventType !== ChatEventType.conversationUpdated
-    ) {
-      continue;
-    }
     const dataLine = lines.find((line) => line.startsWith('data:'));
-    if (!dataLine) {
+    if (!eventType || !dataLine) {
       continue;
     }
     try {
-      const payload = JSON.parse(dataLine.slice('data:'.length).trim());
-      if (typeof payload?.data?.conversation_id === 'string') {
-        return payload.data.conversation_id;
-      }
+      blocks.push({ type: eventType, data: JSON.parse(dataLine.slice('data:'.length).trim()) });
     } catch {
       // Not a JSON data line — skip it.
+    }
+  }
+  return blocks;
+};
+
+const conversationIdFromSseStream = (streamText: string): string | undefined => {
+  for (const block of parseSseBlocks(streamText)) {
+    if (
+      block.type !== ChatEventType.conversationCreated &&
+      block.type !== ChatEventType.conversationUpdated
+    ) {
+      continue;
+    }
+    if (typeof block.data?.data?.conversation_id === 'string') {
+      return block.data.data.conversation_id;
     }
   }
   return undefined;
@@ -195,6 +207,59 @@ apiTest.describe(
       const conversationId = conversationIdFromSseStream(streamText);
       expect(conversationId, 'expected a conversation_id in the SSE stream').toBeDefined();
       conversationIds.push(conversationId!);
+
+      // The events-native surface exposes execution_started + execution_terminated and drops
+      // round_complete.
+      const blocks = parseSseBlocks(streamText);
+      const startedIndex = blocks.findIndex(
+        (block) => block.type === TimelineEventType.executionStarted
+      );
+      const terminatedIndex = blocks.findIndex(
+        (block) => block.type === TimelineEventType.executionTerminated
+      );
+      expect(startedIndex, 'expected an execution_started block').toBeGreaterThanOrEqual(0);
+      expect(terminatedIndex, 'expected an execution_terminated block').toBeGreaterThanOrEqual(0);
+      expect(
+        blocks.some((block) => block.type === ChatEventType.roundComplete),
+        'events-native stream must not include round_complete'
+      ).toBe(false);
+
+      // execution_started must arrive at the start of the run — before any streaming chunks —
+      // and execution_terminated must arrive after the final message_complete, matching the
+      // real chronological order of the run.
+      const firstMessageChunkIndex = blocks.findIndex(
+        (block) => block.type === ChatEventType.messageChunk
+      );
+      const messageCompleteIndex = blocks.findIndex(
+        (block) => block.type === ChatEventType.messageComplete
+      );
+      expect(firstMessageChunkIndex, 'expected a message_chunk block').toBeGreaterThanOrEqual(0);
+      expect(messageCompleteIndex, 'expected a message_complete block').toBeGreaterThanOrEqual(0);
+      expect(startedIndex, 'execution_started must precede the first message_chunk').toBeLessThan(
+        firstMessageChunkIndex
+      );
+      expect(
+        terminatedIndex,
+        'execution_terminated must arrive after message_complete'
+      ).toBeGreaterThan(messageCompleteIndex);
+
+      // The SSE payloads must match the persisted timeline events byte-for-byte, so the frontend
+      // can de-duplicate the local copies against fetched history using event id.
+      const fetched = await getConversation(
+        apiClient,
+        adminCredentials.apiKeyHeader,
+        conversationId!
+      );
+      const persistedStarted = fetched.events?.find(
+        (event) => event.type === TimelineEventType.executionStarted
+      );
+      const persistedTerminated = fetched.events?.find(
+        (event) => event.type === TimelineEventType.executionTerminated
+      );
+      expect(persistedStarted).toBeDefined();
+      expect(persistedTerminated).toBeDefined();
+      expect(blocks[startedIndex].data).toStrictEqual(persistedStarted);
+      expect(blocks[terminatedIndex].data).toStrictEqual(persistedTerminated);
     });
 
     apiTest('invalid converse payload returns 400', async ({ apiClient }) => {
