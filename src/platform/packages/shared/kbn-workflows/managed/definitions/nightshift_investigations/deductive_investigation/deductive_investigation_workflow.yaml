@@ -152,21 +152,37 @@ steps:
             enum: ['80-critical', '60-high', '40-medium', '20-low']
           recommendations:
             type: array
-            maxItems: 5
+            description: >
+              Concrete, actionable steps to resolve or mitigate the issue — prefer specific commands,
+              config changes, or code over general advice like "investigate further" or "monitor the
+              situation". Score how strongly the findings support that each action will help, sort
+              by confidence descending, and return only the 3 strongest items.
+            maxItems: 3
             items:
               type: object
               properties:
                 title:
                   type: string
                   maxLength: 512
+                  description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  description: How strongly the findings support that this action will resolve or mitigate the confirmed problem.
                 description:
                   type: string
                   maxLength: 10000
+                  description: Why this step helps, or detail needed to carry it out, when the title alone isn't enough.
                 code:
                   type: string
                   maxLength: 10000
+                  description: >
+                    A command, config snippet, or code change backing this step, when one applies.
+                    Raw source, not a fenced markdown block.
               required:
                 - title
+                - confidence
         required:
           - summary
           - hypotheses
