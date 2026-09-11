@@ -1049,6 +1049,107 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload).toHaveLength(0);
     });
 
+    test('should update running task if regenerateApiKey is requested and includeRunningTasks is true', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        status: TaskStatus.Running,
+      });
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '3h' },
+        {
+          request: mockRequest,
+          regenerateApiKey: true,
+          includeRunningTasks: true,
+        }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [task],
+        {
+          validate: false,
+          mergeAttributes: false,
+          // `includeRunningTasks` scopes which tasks are updated and must not leak into the
+          // ApiKeyOptions forwarded to the store.
+          options: { request: mockRequest, regenerateApiKey: true },
+        },
+      ]);
+    });
+
+    test('should update running task with new schedule if includeRunningTasks is true', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        status: TaskStatus.Running,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '5h' },
+        { includeRunningTasks: true }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(1);
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
+      expect(bulkUpdatePayload[0].runAt).toBeInstanceOf(Date);
+    });
+
+    test('should update claiming task if includeRunningTasks is true', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        status: TaskStatus.Claiming,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '5h' },
+        { includeRunningTasks: true }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(1);
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
+    });
+
+    test('should not update failed task even if includeRunningTasks is true', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        status: TaskStatus.Failed,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '5h' },
+        { includeRunningTasks: true }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
     test('should not update task if new schedule is equal to previous using rrule', async () => {
       const task = taskManagerMock.createTask({
         id,
