@@ -14,9 +14,7 @@ project:
   title: '@kbn/schema-string-helpers'
   description: Moon project for @kbn/schema-string-helpers
   channel: ''
-  owner:
-    - '@elastic/kibana-security'
-    - '@elastic/kibana-core'
+  owner: '@elastic/kibana-security'
   sourceRoot: src/platform/packages/shared/kbn-schema-string-helpers
 dependsOn: []
 tags:
