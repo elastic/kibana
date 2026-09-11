@@ -8,6 +8,7 @@
  */
 
 export type {
+  ConnectorActionDef,
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
 } from './transform_connector_spec_response';

@@ -12,7 +12,13 @@ import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getConnectorSpec,
+  isSpecificActionsSelection,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
@@ -65,23 +71,34 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     getSmlEntry: async (originId, context) => {
       try {
         const so = await context.savedObjectsClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          config?: Record<string, unknown>;
+        };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';
+        const selectedActions = attrs.config?.selectedActions as SelectedActions;
 
         const spec = getConnectorSpec(actionTypeId);
         const displayName = spec?.metadata.displayName ?? actionTypeId;
         const description = spec?.metadata.description ?? '';
 
-        // Include sub-action descriptions from the ConnectorSpec
-        const subActionDescriptions = spec?.actions
-          ? Object.entries(spec.actions)
-              .filter(([, action]) => action.isTool && action.description)
-              .map(([actionName, action]) => `${actionName}: ${action.description}`)
+        const isRestricted = isSpecificActionsSelection(selectedActions);
+        const visibleActions = spec
+          ? filterActionsBySelection(spec.actions, selectedActions, {
+              requireDescription: true,
+            })
           : [];
+        const subActionDescriptions = visibleActions.map(([actionName, action]) =>
+          formatConnectorActionLine(actionName, action)
+        );
 
+        const headerParts = [...new Set([name, displayName, description].filter(Boolean))];
         const contentParts = [
-          ...new Set([name, displayName, description, ...subActionDescriptions].filter(Boolean)),
+          ...headerParts,
+          ...(isRestricted ? ['Only these actions are callable:'] : []),
+          ...subActionDescriptions,
         ];
 
         return {
@@ -106,14 +123,22 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         const soClient = await getActionSavedObjectsClient(context.request);
         const originId = item.origin_id ?? '';
         const so = await soClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          config?: Record<string, unknown>;
+        };
         const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
+        const attachmentSelectedActions = attrs.config?.selectedActions as SelectedActions;
 
         const data: ConnectorAttachmentData = {
           connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
+          ...(isSpecificActionsSelection(attachmentSelectedActions)
+            ? { selected_actions: attachmentSelectedActions }
+            : {}),
         };
 
         return {
