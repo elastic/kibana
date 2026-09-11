@@ -288,6 +288,25 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
+  reasoning_level: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('none'),
+        schema.literal('minimal'),
+        schema.literal('low'),
+        schema.literal('medium'),
+        schema.literal('high'),
+        schema.literal('xhigh'),
+      ],
+      {
+        meta: {
+          availability: { stability: 'experimental', since: '9.6.0' },
+          description:
+            'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.',
+        },
+      }
+    )
+  ),
   _execution_mode: schema.maybe(
     schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
       meta: {
