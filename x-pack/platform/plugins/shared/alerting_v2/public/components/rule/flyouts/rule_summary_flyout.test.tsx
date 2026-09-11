@@ -162,9 +162,13 @@ describe('RuleSummaryFlyout', () => {
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith({
-        ruleId: 'rule with spaces/and slash',
-      });
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith(
+        {
+          ruleId: 'rule with spaces/and slash',
+        },
+        undefined,
+        ['rule with spaces/and slash']
+      );
       expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
         'href',
         '/mock-locator-url'
