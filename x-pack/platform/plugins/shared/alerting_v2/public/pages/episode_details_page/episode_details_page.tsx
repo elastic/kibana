@@ -269,7 +269,7 @@ export function EpisodeDetailsPage() {
 
   const episodesListHref = episodesLocators.useUrl({});
   const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
+    (id: string) => rulesLocators.getRedirectUrl({ ruleId: id }),
     [rulesLocators]
   );
   const getEpisodeDetailsHref = useCallback(

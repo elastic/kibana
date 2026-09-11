@@ -133,7 +133,9 @@ describe('RuleSummaryFlyout', () => {
       renderFlyout();
       openMenu();
 
-      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
+        'rule-1',
+      ]);
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
         'href',
         '/mock-locator-url'
