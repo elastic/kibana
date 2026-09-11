@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const Model: z.ZodObject<{
     id: z.ZodString;
     family: z.ZodOptional<z.ZodString>;

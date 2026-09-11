@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const matchActionPoliciesForRuleBodySchema: z.ZodObject<{
     rule: z.ZodOptional<z.ZodObject<{
         id: z.ZodOptional<z.ZodString>;

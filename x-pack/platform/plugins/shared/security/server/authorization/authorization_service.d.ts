@@ -1,7 +1,8 @@
 import type { Observable } from 'rxjs';
 import type { CapabilitiesSetup, CustomBrandingSetup, HttpServiceSetup, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
 import type { FeaturesPluginSetup as FeaturesPluginSetup, FeaturesPluginStart as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { Actions, type PrivilegesService } from '@kbn/security-authorization-core';
+import type { Actions} from '@kbn/security-authorization-core';
+import { type PrivilegesService } from '@kbn/security-authorization-core';
 import type { AuthorizationMode, AuthorizationServiceSetup, CheckPrivilegesDynamicallyWithRequest, CheckSavedObjectsPrivilegesWithRequest, CheckUserProfilesPrivileges } from '@kbn/security-plugin-types-server';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';

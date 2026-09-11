@@ -1,5 +1,5 @@
 import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceEndpointProvider } from '@kbn/inference-common';
+import type { InferenceEndpointProvider } from '@kbn/inference-common';
 /**
  * Returns the modelId used by the underlying endpoint of the given inference connector
  */

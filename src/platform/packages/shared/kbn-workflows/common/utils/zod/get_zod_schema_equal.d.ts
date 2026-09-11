@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Helper to compare two Zod schemas via conversion to JSON Schema. To be used in tests.
  * @param a - The first Zod schema.

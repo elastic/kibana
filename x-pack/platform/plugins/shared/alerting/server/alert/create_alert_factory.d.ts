@@ -1,7 +1,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { AlertInstanceContext, AlertInstanceState } from '../types';
 import type { PublicAlert } from './alert';
-import { Alert } from './alert';
+import type { Alert } from './alert';
 export interface AlertFactory<State extends AlertInstanceState, Context extends AlertInstanceContext, ActionGroupIds extends string> {
     create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
     get: (id: string) => PublicAlert<State, Context, ActionGroupIds> | null;

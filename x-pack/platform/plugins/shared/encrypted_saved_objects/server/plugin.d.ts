@@ -3,9 +3,9 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { type CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 import { type CreateEsoModelVersionFn } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
-import { EncryptionError } from './crypto';
+import type { EncryptionError } from './crypto';
 import type { ClientInstanciator } from './saved_objects';
-import { SavedObjectsEncryptionExtension } from './saved_objects';
+import type { SavedObjectsEncryptionExtension } from './saved_objects';
 export interface PluginsSetup {
     security?: SecurityPluginSetup;
 }

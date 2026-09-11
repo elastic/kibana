@@ -1,5 +1,5 @@
 import type { Type } from '@kbn/config-schema';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 import type { TimeUnitChar } from '../common/utils';
 export declare const metricInventoryThresholdRuleParamsSchema: import("@kbn/config-schema").ObjectType<{
     criteria: Type<Readonly<{

@@ -2,7 +2,7 @@ import type { BulkFillGapsByRuleIdsParams } from './types';
 import type { Gap } from '../../../../lib/rule_gaps/gap';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { BackfillInitiator } from '../../../../../common/constants';
-import { GapFillSchedulePerRuleStatus } from './types';
+import type { GapFillSchedulePerRuleStatus } from './types';
 interface ProcessGapsBatchParams {
     range: BulkFillGapsByRuleIdsParams['range'];
     gapsBatch: Gap[];

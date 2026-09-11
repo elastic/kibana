@@ -1,4 +1,4 @@
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 export declare const rawAdHocRunParamsRuleSchema: import("@kbn/config-schema").ObjectType<Omit<{
     name: import("@kbn/config-schema").Type<string>;
     tags: import("@kbn/config-schema").Type<string[]>;

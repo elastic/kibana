@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const UpsertDatasetExamplePayload: z.ZodObject<{
     input: z.ZodOptional<z.ZodObject<{}, z.core.$catchall<z.ZodUnknown>>>;
     output: z.ZodOptional<z.ZodObject<{}, z.core.$catchall<z.ZodUnknown>>>;

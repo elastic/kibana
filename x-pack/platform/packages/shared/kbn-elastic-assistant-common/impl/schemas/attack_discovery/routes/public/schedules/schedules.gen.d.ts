@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * An query condition to filter alerts
  */

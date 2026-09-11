@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval.
  */

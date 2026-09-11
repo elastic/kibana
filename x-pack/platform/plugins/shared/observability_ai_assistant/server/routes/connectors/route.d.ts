@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { InferenceConnector } from '@kbn/inference-common';
 export declare const connectorRoutes: {
     "GET /internal/observability_ai_assistant/connectors/{connectorId}": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/observability_ai_assistant/connectors/{connectorId}", t.TypeC<{

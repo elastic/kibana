@@ -1,4 +1,5 @@
-import { BehaviorSubject, type Subject } from 'rxjs';
+import type { BehaviorSubject} from 'rxjs';
+import { type Subject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';

@@ -7,8 +7,8 @@ import type { AuthorizationTypeMap, AuthorizeAndRedactInternalBulkResolveParams,
 import type { AuthorizationResult } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { Actions, AuditLogger, CheckSavedObjectsPrivileges } from '@kbn/security-plugin-types-server';
-import { AccessControlService } from './access_control_service';
-import { SecurityAction } from './types';
+import type { AccessControlService } from './access_control_service';
+import type { SecurityAction } from './types';
 interface Params {
     actions: Actions;
     auditLogger: AuditLogger;

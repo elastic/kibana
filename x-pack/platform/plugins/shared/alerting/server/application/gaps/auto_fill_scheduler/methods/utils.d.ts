@@ -2,7 +2,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import type { ReadOperations, WriteOperations } from '../../../../authorization';
-import { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/common/audit_events';
+import type { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/common/audit_events';
 import type { SchedulerContext } from '../../methods/utils';
 /**
  * Fetches the gap auto fill scheduler saved object and performs rule type based authorization.

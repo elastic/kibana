@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { GridPanelData } from './types';
 export declare const useGridPanelState: ({ panelId, }: {
     panelId: string;

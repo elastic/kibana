@@ -5,7 +5,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { RulesClient } from './rules_client';
+import type { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';

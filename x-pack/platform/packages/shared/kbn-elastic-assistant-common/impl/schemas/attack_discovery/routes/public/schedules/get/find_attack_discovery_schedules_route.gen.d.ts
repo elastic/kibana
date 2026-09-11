@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FindAttackDiscoverySchedulesRequestQuery: z.ZodObject<{
     page: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
     per_page: z.ZodOptional<z.ZodCoercedNumber<unknown>>;

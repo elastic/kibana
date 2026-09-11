@@ -1,6 +1,6 @@
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ObservabilityAIAssistantConfig } from './config';
-import { ObservabilityAIAssistantService } from './service';
+import type { ObservabilityAIAssistantService } from './service';
 import type { ObservabilityAIAssistantServerSetup, ObservabilityAIAssistantServerStart, ObservabilityAIAssistantPluginSetupDependencies, ObservabilityAIAssistantPluginStartDependencies } from './types';
 export declare class ObservabilityAIAssistantPlugin implements Plugin<ObservabilityAIAssistantServerSetup, ObservabilityAIAssistantServerStart, ObservabilityAIAssistantPluginSetupDependencies, ObservabilityAIAssistantPluginStartDependencies> {
     logger: Logger;

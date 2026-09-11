@@ -1,5 +1,5 @@
-import { FilterStateStore } from '@kbn/es-query';
-import { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '@kbn/alerting-types';
+import type { FilterStateStore } from '@kbn/es-query';
+import type { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '@kbn/alerting-types';
 export * from './v2';
 export declare const executionStatusWarningReason: import("@kbn/config-schema").Type<RuleExecutionStatusWarningReasons>;
 export declare const executionStatusErrorReason: import("@kbn/config-schema").Type<RuleExecutionStatusErrorReasons>;

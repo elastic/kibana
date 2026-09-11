@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /** default NER model **/
 export declare const NER_MODEL_ID = "elastic__distilbert-base-uncased-finetuned-conll03-english";
 /**

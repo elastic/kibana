@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export type StringToPositiveNumberC = t.Type<number, string, unknown>;
 /**
  * Types the StrongToPositiveNumber as:

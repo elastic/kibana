@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const PostAttackDiscoveryBulkRequestBody: z.ZodObject<{
     update: z.ZodObject<{
         ids: z.ZodArray<z.ZodString>;

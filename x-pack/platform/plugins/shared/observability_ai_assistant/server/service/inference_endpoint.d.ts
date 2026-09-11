@@ -5,7 +5,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { CoreSetup } from '@kbn/core/server';
 import type { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
-import { InferenceModelState } from '../../common';
+import type { InferenceModelState } from '../../common';
 import type { ObservabilityAIAssistantConfig } from '../config';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 export declare const getInferenceEndpointsForEmbedding: ({ esClient, logger, }: {

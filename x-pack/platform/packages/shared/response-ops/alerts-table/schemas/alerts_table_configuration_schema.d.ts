@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Configuration schema for overrides to the table configuration that can be persisted across sessions.
  * This should include only the serializable properties that are user-configurable, all other props

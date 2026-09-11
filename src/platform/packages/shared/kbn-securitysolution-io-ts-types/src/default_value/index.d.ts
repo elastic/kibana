@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Creates a schema that sets a default value if the input value is not specified.
  *

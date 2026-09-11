@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Converts string value to a Typescript enum
  *  - "foo" -> MyEnum.foo

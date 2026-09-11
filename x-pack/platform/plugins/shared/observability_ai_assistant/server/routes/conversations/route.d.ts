@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Conversation } from '../../../common/types';
 export declare const conversationRoutes: {
     "PATCH /internal/observability_ai_assistant/conversation/{conversationId}": import("@kbn/server-route-repository-utils").ServerRoute<"PATCH /internal/observability_ai_assistant/conversation/{conversationId}", t.TypeC<{

@@ -1,4 +1,4 @@
-import { ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
+import type { ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
 export declare const influencerSchema: import("@kbn/config-schema").ObjectType<{
     fieldName: import("@kbn/config-schema").Type<string>;
     fieldValue: import("@kbn/config-schema").AnyType;

@@ -1,5 +1,5 @@
 import type { GraphEdge } from '@dagrejs/dagre';
-import { graphlib } from '@dagrejs/dagre';
+import type { graphlib } from '@dagrejs/dagre';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import type { GraphNodeUnion } from '../types';
 /**

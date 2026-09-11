@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Readable } from 'stream';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 export declare const chatRoutes: {

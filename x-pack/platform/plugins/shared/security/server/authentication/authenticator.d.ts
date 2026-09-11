@@ -2,8 +2,8 @@ import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@k
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AuthenticationResult } from './authentication_result';
-import { DeauthenticationResult } from './deauthentication_result';
+import type { AuthenticationResult } from './authentication_result';
+import type { DeauthenticationResult } from './deauthentication_result';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';

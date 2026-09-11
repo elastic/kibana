@@ -1,5 +1,5 @@
 import type { KibanaRequest, Logger, SavedObjectsServiceStart, SecurityServiceStart } from '@kbn/core/server';
-import { RulesSettingsClient } from './rules_settings_client';
+import type { RulesSettingsClient } from './rules_settings_client';
 export interface RulesSettingsClientFactoryOpts {
     logger: Logger;
     savedObjectsService: SavedObjectsServiceStart;

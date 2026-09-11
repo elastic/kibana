@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the TimeDuration as:
  *   - A string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time

@@ -4,7 +4,7 @@ import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { AlertingAuthorization, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { IRuleDataService } from '../rule_data_plugin_service';
-import { AlertsClient } from './alerts_client';
+import type { AlertsClient } from './alerts_client';
 export interface AlertsClientFactoryProps {
     logger: Logger;
     esClient: ElasticsearchClient;

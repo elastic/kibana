@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const GetEvaluationRunRequestQuery: z.ZodObject<{
     suite_id: z.ZodOptional<z.ZodString>;
     model_id: z.ZodOptional<z.ZodString>;

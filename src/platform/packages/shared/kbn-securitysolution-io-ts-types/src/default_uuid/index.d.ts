@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the DefaultUuid as:
  *   - If null or undefined, then a default string uuidv4() will be

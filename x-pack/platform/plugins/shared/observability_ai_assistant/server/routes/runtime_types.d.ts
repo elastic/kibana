@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { type ConversationCreateRequest, type ConversationUpdateRequest, type Message, type ObservabilityAIAssistantScreenContextRequest, type StarterPrompt } from '../../common/types';
 export declare const deanonymizationRt: t.TypeC<{
     start: t.NumberC;

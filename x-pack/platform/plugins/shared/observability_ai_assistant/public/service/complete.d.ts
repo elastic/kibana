@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { type StreamingChatResponseEventWithoutError } from '../../common';
 import type { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '../api';

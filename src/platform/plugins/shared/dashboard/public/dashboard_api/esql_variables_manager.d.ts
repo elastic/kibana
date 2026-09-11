@@ -1,7 +1,8 @@
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { type ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { BehaviorSubject, type Subject } from 'rxjs';
+import type { BehaviorSubject} from 'rxjs';
+import { type Subject } from 'rxjs';
 import type { initializeSettingsManager } from './settings_manager';
 export declare const initializeESQLVariablesManager: (children$: PublishingSubject<{
     [key: string]: DefaultEmbeddableApi;

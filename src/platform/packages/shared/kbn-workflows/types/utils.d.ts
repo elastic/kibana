@@ -1,5 +1,5 @@
 import type { ConnectorContractUnion, DynamicConnectorContract, EsWorkflowCreate, HttpMethod, InternalConnectorContract, StepStabilityLevel, WorkflowStepExecutionDto } from './v1';
-import { ExecutionStatus } from './v1';
+import type { ExecutionStatus } from './v1';
 import type { BuiltInStepProperty, BuiltInStepType, ElasticsearchStep, ForEachStep, IfStep, KibanaStep, MergeStep, ParallelStep, Step, SwitchStep, WaitStep, WhileStep, WorkflowYaml } from '../spec/schema';
 import type { TriggerType } from '../spec/schema/triggers';
 export declare function transformWorkflowYamlJsontoEsWorkflow(workflowDefinition: WorkflowYaml): EsWorkflowCreate;

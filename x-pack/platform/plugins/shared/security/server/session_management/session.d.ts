@@ -2,7 +2,7 @@ import type { KibanaRequest, Logger, SessionStorageSetOptions } from '@kbn/core/
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SessionCookie } from './session_cookie';
-import { SessionMissingError } from './session_errors';
+import type { SessionMissingError } from './session_errors';
 import type { SessionIndex, SessionIndexValue } from './session_index';
 import type { AuthenticationProvider } from '../../common';
 import type { ConfigType } from '../config';

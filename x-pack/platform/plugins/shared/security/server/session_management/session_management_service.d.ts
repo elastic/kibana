@@ -2,7 +2,7 @@ import type { Observable } from 'rxjs';
 import type { ElasticsearchClient, HttpServiceSetup, Logger } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { Session } from './session';
+import type { Session } from './session';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 export interface SessionManagementServiceSetupParams {

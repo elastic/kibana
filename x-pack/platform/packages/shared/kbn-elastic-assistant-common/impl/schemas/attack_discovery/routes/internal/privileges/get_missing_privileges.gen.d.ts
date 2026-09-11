@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const AttackDiscoveryMissingPrivileges: z.ZodObject<{
     index_name: z.ZodString;
     privileges: z.ZodArray<z.ZodString>;

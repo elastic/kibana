@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export type CreateAnonymizationProfileRequestBody = z.infer<typeof CreateAnonymizationProfileRequestBody>;
 export declare const CreateAnonymizationProfileRequestBody: z.ZodObject<{
     name: z.ZodString;

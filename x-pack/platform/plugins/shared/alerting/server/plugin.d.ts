@@ -17,7 +17,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
-import { RuleTypeRegistry } from './rule_type_registry';
+import type { RuleTypeRegistry } from './rule_type_registry';
 import type { RulesClientCreateOptions } from './rules_client_factory';
 import type { RuleAlertData } from './types';
 import type { AlertInstanceContext, AlertInstanceState, AlertsHealth, RuleType, RuleTypeParams, RuleTypeState, RulesClientApi } from './types';

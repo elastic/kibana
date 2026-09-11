@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 export interface StreamedHttpResponse {
     response?: {

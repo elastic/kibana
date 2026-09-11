@@ -1,6 +1,6 @@
 import type { ProjectRouting } from '@kbn/es-query';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DashboardState } from '../../common';
 export declare const COMPARE_DEBOUNCE = 100;
 export declare function initializeProjectRoutingManager(initialState: DashboardState, projectRoutingRestore$: PublishingSubject<boolean>): {

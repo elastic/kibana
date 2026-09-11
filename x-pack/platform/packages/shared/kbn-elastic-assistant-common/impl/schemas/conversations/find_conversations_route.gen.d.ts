@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * The field by which to sort the conversations. Possible values are `created_at`, `title`, and `updated_at`.
  */

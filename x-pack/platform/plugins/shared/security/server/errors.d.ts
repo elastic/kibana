@@ -1,5 +1,5 @@
-import { errors } from '@elastic/elasticsearch';
-import Boom from '@hapi/boom';
+import type { errors } from '@elastic/elasticsearch';
+import type Boom from '@hapi/boom';
 import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core/server';
 export declare function wrapError(error: any): Boom.Boom<unknown>;
 /**

@@ -7,7 +7,7 @@ import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin, RequestHan
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { scanDashboards } from './scan_dashboards';
+import type { scanDashboards } from './scan_dashboards';
 interface SetupDeps {
     embeddable: EmbeddableSetup;
     usageCollection?: UsageCollectionSetup;

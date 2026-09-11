@@ -1,6 +1,6 @@
 import type { Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageApiConfigType } from './config';
-import { UsageReportingService } from './usage_reporting';
+import type { UsageReportingService } from './usage_reporting';
 /**
  * Setup contract
  */

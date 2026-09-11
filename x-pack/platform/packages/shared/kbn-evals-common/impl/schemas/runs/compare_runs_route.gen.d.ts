@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const PairedTTestResult: z.ZodObject<{
     datasetId: z.ZodString;
     datasetName: z.ZodString;

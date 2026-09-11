@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const PostAttackDiscoveryGenerateRequestBody: z.ZodObject<{
     alertsIndexPattern: z.ZodString;
     anonymizationFields: z.ZodArray<z.ZodObject<{

@@ -2,7 +2,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { Moment } from 'moment';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 export declare const COMPARE_DEBOUNCE = 100;

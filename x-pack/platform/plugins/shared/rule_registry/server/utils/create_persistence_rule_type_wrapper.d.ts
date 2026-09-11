@@ -1,5 +1,5 @@
 import type { estypes } from '@elastic/elasticsearch';
-import { ALERT_INSTANCE_ID, ALERT_SUPPRESSION_DOCS_COUNT, ALERT_SUPPRESSION_END, ALERT_SUPPRESSION_START } from '@kbn/rule-data-utils';
+import type { ALERT_INSTANCE_ID, ALERT_SUPPRESSION_DOCS_COUNT, ALERT_SUPPRESSION_END, ALERT_SUPPRESSION_START } from '@kbn/rule-data-utils';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import type { CommonAlertFields870, SuppressionFields870 } from '../../common/schemas';
 /**

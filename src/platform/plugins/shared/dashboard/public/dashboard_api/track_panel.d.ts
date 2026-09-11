@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { BehaviorSubject, Subject } from 'rxjs';
 export declare const highlightAnimationDuration = 2000;
 export declare function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>, dashboardContainerRef$: BehaviorSubject<HTMLElement | null>): {
     expandedPanelId$: BehaviorSubject<string | undefined>;

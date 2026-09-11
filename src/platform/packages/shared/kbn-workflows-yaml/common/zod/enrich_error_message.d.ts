@@ -1,5 +1,5 @@
 import type { Document } from 'yaml';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export type ConnectorParamsSchemaResolver = (stepType: string) => z.ZodType | null;
 export interface ErrorContext {
     schema?: z.ZodType;

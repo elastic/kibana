@@ -1,5 +1,5 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { Alert } from '../alert/alert';
+import type { Alert } from '../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
 import type { IAlertsClient, InitializeExecutionOpts, LogAlertsOpts, DetermineDelayedAlertsOpts } from './types';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';

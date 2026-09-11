@@ -1,4 +1,5 @@
-import { SessionError, SessionErrorReason } from './session_error';
+import type { SessionErrorReason } from './session_error';
+import { SessionError } from './session_error';
 /**
  * Thrown when a session can no longer be used due to expiration.
  *

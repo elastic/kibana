@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const EvaluationRunDatasetExample: z.ZodObject<{
     example_id: z.ZodString;
     example_index: z.ZodNullable<z.ZodNumber>;

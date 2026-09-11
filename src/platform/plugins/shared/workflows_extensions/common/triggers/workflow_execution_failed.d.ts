@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '../trigger_registry/types';
 export declare const WORKFLOW_EXECUTION_FAILED_TRIGGER_ID: "workflows.failed";
 export declare const workflowExecutionFailedEventSchema: z.ZodObject<{

@@ -2,7 +2,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializer } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
-import { ConfigSchema } from './config';
+import type { ConfigSchema } from './config';
 import type { PluginSetupDependencies, SecurityPluginSetup } from './plugin';
 export type { CasesSupportedOperations } from './authorization';
 export type { SecurityPluginSetup, SecurityPluginStart };

@@ -1,4 +1,4 @@
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 export declare const actionsSchema: import("@kbn/config-schema").Type<Readonly<{
     group?: string | undefined;
     uuid?: string | undefined;

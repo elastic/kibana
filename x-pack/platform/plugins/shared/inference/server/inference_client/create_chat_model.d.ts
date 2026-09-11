@@ -1,6 +1,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceChatModel} from '@kbn/inference-langchain';
+import { type InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationRule, InferenceCallbacks } from '@kbn/inference-common';
 import type { ActionsClientProvider } from '../types';

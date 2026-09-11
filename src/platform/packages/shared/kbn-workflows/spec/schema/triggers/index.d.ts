@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
 export { ScheduledTriggerSchema, SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN, } from './scheduled_trigger_schema';

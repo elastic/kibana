@@ -1,7 +1,7 @@
 import React from 'react';
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import type { RuleFormData, RuleTypeMetaData } from '../types';
-import { RuleFormStepId } from '../constants';
+import type { RuleFormStepId } from '../constants';
 interface RuleFlyoutProps {
     isEdit?: boolean;
     isSaving?: boolean;

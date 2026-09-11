@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const DefendInsightsGetRequestQuery: z.ZodObject<{
     ids: z.ZodOptional<z.ZodPreprocess<z.ZodArray<z.ZodString>>>;
     connector_id: z.ZodOptional<z.ZodString>;

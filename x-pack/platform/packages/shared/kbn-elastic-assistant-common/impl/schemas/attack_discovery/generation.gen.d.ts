@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const AttackDiscoveryGeneration: z.ZodObject<{
     alerts_context_count: z.ZodOptional<z.ZodNumber>;
     connector_id: z.ZodString;

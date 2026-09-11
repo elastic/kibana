@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Reason why a Knowledge Base Entry was skipped during the bulk action.
  */

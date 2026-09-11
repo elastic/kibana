@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const SCHEDULED_INTERVAL_PATTERN: RegExp;
 export declare const SCHEDULED_INTERVAL_ERROR = "Scheduled interval must be at least 1 minute. Use format like \"1m\", \"90s\", \"2h\", \"1d\"";
 export declare const ScheduledTriggerSchema: z.ZodObject<{

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const CreateConversationRequestBody: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     title: z.ZodString;

@@ -1,4 +1,4 @@
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { RuleTypeIndex } from '../../../../types';
 export type RuleTypeIdsByFeatureId<T = string[]> = Partial<Record<typeof AlertConsumers.SIEM | typeof AlertConsumers.OBSERVABILITY | typeof AlertConsumers.STACK_ALERTS | typeof AlertConsumers.ML, T>>;
 /**

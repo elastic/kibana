@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * JSON Schema type values (Draft 7 / 2020-12 standard).
  * Single source of truth – used in both the Zod schema definition

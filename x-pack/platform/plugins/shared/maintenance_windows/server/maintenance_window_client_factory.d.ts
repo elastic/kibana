@@ -1,5 +1,5 @@
 import type { KibanaRequest, Logger, SavedObjectsServiceStart, SecurityServiceStart, UiSettingsServiceStart } from '@kbn/core/server';
-import { MaintenanceWindowClient } from './client';
+import type { MaintenanceWindowClient } from './client';
 export interface MaintenanceWindowClientFactoryOpts {
     logger: Logger;
     savedObjectsService: SavedObjectsServiceStart;

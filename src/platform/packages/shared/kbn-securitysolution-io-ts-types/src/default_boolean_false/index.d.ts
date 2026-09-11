@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the DefaultBooleanFalse as:
  *   - If null or undefined, then a default false will be set

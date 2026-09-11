@@ -1,5 +1,6 @@
 import { type ProductName } from './product';
-import { type ResourceType, ResourceTypes } from './resource_type';
+import type { ResourceTypes } from './resource_type';
+import { type ResourceType } from './resource_type';
 export declare const DEFAULT_ELSER = ".elser-2-elasticsearch";
 export declare const getArtifactName: ({ productName, productVersion, excludeExtension, inferenceId, }: {
     productName: ProductName;

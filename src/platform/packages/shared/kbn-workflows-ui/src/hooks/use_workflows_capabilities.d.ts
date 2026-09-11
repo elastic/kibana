@@ -1,5 +1,5 @@
 import type { Capabilities } from '@kbn/core/public';
-import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
+import type { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 declare const CapabilitiesMap: {
     readonly canCreateWorkflow: WorkflowsManagementUiActions.create;
     readonly canReadWorkflow: WorkflowsManagementUiActions.read;

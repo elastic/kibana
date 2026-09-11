@@ -1,7 +1,7 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionChunkEvent, ChatCompletionTokenCountEvent } from '@kbn/inference-common';
-import { ChatCompletionEventType } from '@kbn/inference-common';
+import type { ChatCompletionEventType } from '@kbn/inference-common';
 export declare function parseInlineFunctionCalls({ logger }: {
     logger: Logger;
 }): (source: Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>) => Observable<({

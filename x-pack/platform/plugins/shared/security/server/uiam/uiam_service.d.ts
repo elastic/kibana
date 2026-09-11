@@ -1,5 +1,5 @@
 import type { Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { CreateUiamOAuthClientParams, UiamOAuthClientLogo, UiamOAuthClientResponse, UiamOAuthClientType, UiamOAuthConnectionResponse, UpdateUiamOAuthClientParams, UpdateUiamOAuthConnectionParams } from '@kbn/core-security-server';
 import type { ClientAuthentication, GrantUiamAPIKeyParams } from '@kbn/security-plugin-types-server';
 import type { UiamConfigType } from '../config';

@@ -3,7 +3,7 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PublicFrameworkAlertsService, DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { type IRuleDataClient } from '../rule_data_client';
-import { IndexInfo } from './index_info';
+import type { IndexInfo } from './index_info';
 import type { Dataset, IndexOptions } from './index_options';
 /**
  * A service for creating and using Elasticsearch indices for alerts-as-data.

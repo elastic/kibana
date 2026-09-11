@@ -1,4 +1,4 @@
-import { WorkflowApi } from './workflows_api';
+import type { WorkflowApi } from './workflows_api';
 /**
  * Returns a memoized `WorkflowApi` instance wired to the current Kibana HTTP service.
  *

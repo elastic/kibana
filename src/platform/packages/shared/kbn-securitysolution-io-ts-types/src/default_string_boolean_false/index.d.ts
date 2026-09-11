@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the DefaultStringBooleanFalse as:
  *   - If a string this will convert the string to a boolean

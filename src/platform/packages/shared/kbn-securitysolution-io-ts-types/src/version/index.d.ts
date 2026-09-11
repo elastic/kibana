@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Note this is just a positive number, but we use it as a type here which is still ok.
  * This type was originally from "x-pack/solutions/security/plugins/security_solution/common/detection_engine/schemas/common/schemas.ts"

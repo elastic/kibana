@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { Plugin } from './plugin';
+import type { Plugin } from './plugin';
 export type { Rule, RuleAction, RuleType, RuleTypeIndex, RuleTypeModel, RuleStatusFilterProps, RuleStatus, RuleTableItem, ActionType, ActionTypeRegistryContract, RuleTypeRegistryContract, RuleTypeParamsExpressionProps, ValidationResult, ActionVariables, ActionConnector, IErrorObject, RuleFlyoutCloseReason, RuleTypeParams, AsApiContract, RuleSummary, AlertStatus, RuleEventLogListProps, RuleDefinitionProps, RulesListVisibleColumns, AlertSummaryTimeRange, NotifyWhenSelectOptions, RuleCreationValidConsumer, } from './types';
 export type { AlertFormatter, AlertFormatterFormatters, FormattedAlertInfo, } from '@kbn/alerts-ui-shared/src/common/types';
 export type { ActionConnectorFieldsProps, ActionParamsProps, ActionTypeModel, GenericValidationResult, } from './types';

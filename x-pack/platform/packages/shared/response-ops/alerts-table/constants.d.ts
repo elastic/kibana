@@ -1,5 +1,5 @@
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { AlertsTableSupportedConsumers, AlertsTableSortCombinations } from './types';
 interface AlertProducerData {
     displayName: string;

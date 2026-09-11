@@ -1,5 +1,5 @@
 import type { BulkFillGapsByRuleIdsParams } from './types';
-import { BulkFillGapsScheduleResult } from './types';
+import type { BulkFillGapsScheduleResult } from './types';
 import type { BulkGapFillError } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GapReasonType } from '../../../../../common/constants';
