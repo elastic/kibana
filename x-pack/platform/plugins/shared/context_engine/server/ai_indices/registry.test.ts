@@ -102,7 +102,7 @@ describe('AiIndexRegistry', () => {
       );
     });
 
-    it('logs a warning and does not throw when putManaged throws InvalidAiIndexDestError', async () => {
+    it('rethrows InvalidAiIndexDestError', async () => {
       const service = makeServiceMock();
       service.putManaged.mockRejectedValue(new InvalidAiIndexDestError('dest not ready'));
       registry.register('test', makeProperties());
@@ -114,12 +114,10 @@ describe('AiIndexRegistry', () => {
           aiIndexService: service as unknown as AiIndexService,
           logger,
         })
-      ).resolves.not.toThrow();
-
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('dest not ready'));
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
     });
 
-    it('logs a warning and skips when the id is taken by a user-owned index', async () => {
+    it('rethrows when the id is taken by a user-owned index', async () => {
       const service = makeServiceMock();
       service.putManaged.mockRejectedValue(new AiIndexIdConflictError('test'));
       registry.register('test', makeProperties());
@@ -131,9 +129,7 @@ describe('AiIndexRegistry', () => {
           aiIndexService: service as unknown as AiIndexService,
           logger,
         })
-      ).resolves.not.toThrow();
-
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('user-owned index'));
+      ).rejects.toBeInstanceOf(AiIndexIdConflictError);
     });
 
     it('treats a concurrent registration (AiIndexConflictError) as benign', async () => {
@@ -150,13 +146,11 @@ describe('AiIndexRegistry', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('registered concurrently')
-      );
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('registered concurrently'));
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('logs a warning and does not throw when putManaged throws an unexpected error', async () => {
+    it('rethrows unexpected errors', async () => {
       const service = makeServiceMock();
       service.putManaged.mockRejectedValue(new Error('ES cluster unavailable'));
       registry.register('test', makeProperties());
@@ -168,9 +162,7 @@ describe('AiIndexRegistry', () => {
           aiIndexService: service as unknown as AiIndexService,
           logger,
         })
-      ).resolves.not.toThrow();
-
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ES cluster unavailable'));
+      ).rejects.toThrow('ES cluster unavailable');
     });
   });
 });

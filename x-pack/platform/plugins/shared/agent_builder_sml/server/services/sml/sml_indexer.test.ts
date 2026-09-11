@@ -927,6 +927,37 @@ describe('createSmlIndexer', () => {
         expect(ensureDefaultAiIndex).toHaveBeenCalledTimes(1);
         expect(ensureDefaultAiIndex).toHaveBeenCalledWith('default');
       });
+
+      it('does not call ensureDefaultAiIndex for * or empty space ids', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlEntry = { type: 'lens', title: 'T', content: 'c' };
+        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(undefined);
+        const indexer = createSmlIndexer({ registry, logger, ensureDefaultAiIndex });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-ensure-wildcard',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['*', '', 'marketing'],
+            esClient,
+          })
+        );
+
+        expect(ensureDefaultAiIndex).toHaveBeenCalledTimes(1);
+        expect(ensureDefaultAiIndex).toHaveBeenCalledWith('marketing');
+        expect(ensureDefaultAiIndex).not.toHaveBeenCalledWith('*');
+        expect(ensureDefaultAiIndex).not.toHaveBeenCalledWith('');
+      });
     });
 
     describe('getPermissions hook', () => {

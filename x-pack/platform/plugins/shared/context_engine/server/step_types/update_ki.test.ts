@@ -11,12 +11,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { getUpdateKiStepDefinition } from './update_ki';
-import {
-  createMockStepContext,
-  mockAiIndexService,
-  mockGetSpaces,
-  mockKiStepTelemetry,
-} from './test_utils';
+import { createMockStepContext, mockAiIndexService, mockKiStepTelemetry } from './test_utils';
 
 const searchHit = (index: string) => ({ hits: { hits: [{ _id: 'ki-1', _index: index }] } });
 
@@ -50,7 +45,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: async () => false,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -73,7 +67,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: async () => false,
       ...mockKiStepTelemetry(),
@@ -98,7 +91,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -141,7 +133,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -171,7 +162,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -196,7 +186,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -221,7 +210,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
@@ -246,7 +234,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -279,7 +266,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -318,7 +304,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -356,7 +341,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
@@ -384,7 +368,6 @@ describe('getUpdateKiStepDefinition', () => {
 
     const { handler } = getUpdateKiStepDefinition({
       getAiIndexService: () => service,
-      getSpaces: mockGetSpaces(),
       isContextEngineEnabled: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),

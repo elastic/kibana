@@ -15,7 +15,6 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
@@ -37,6 +36,7 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
+import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
 
 export class ContextEnginePlugin
   implements
@@ -54,7 +54,6 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
-  private ensureAiIndexFn?: (id: string, spaceId: string) => Promise<void>;
   private analyticsService?: ContextEngineAnalyticsService;
 
   constructor(context: PluginInitializerContext) {
@@ -137,13 +136,6 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.spaces;
       },
-      getManagedAiIndexIds: () => this.aiIndexRegistry.getManagedIds(),
-      ensureAiIndex: (id, spaceId) => {
-        if (!this.ensureAiIndexFn) {
-          throw new Error('AI index service not available — plugin has not started');
-        }
-        return this.ensureAiIndexFn(id, spaceId);
-      },
     });
 
     registerStepDefinitions({
@@ -156,23 +148,20 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
-      getSpaces: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.spaces;
-      },
-      isContextEngineEnabled: async (request) => {
+      isContextEngineEnabled: async (spaceId) => {
         const [coreStart] = await coreSetup.getStartServices();
-        const soClient = coreStart.savedObjects.getScopedClient(request);
-        const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-        return (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+        return isContextEngineEnabledInSpace({
+          savedObjects: coreStart.savedObjects,
+          uiSettings: coreStart.uiSettings,
+          spaceId,
+        });
       },
-      checkWritePrivilege: async (request) => {
+      checkWritePrivilege: async (request, spaceId) => {
         const [, startDeps] = await coreSetup.getStartServices();
-        const { security, spaces } = startDeps;
+        const { security } = startDeps;
         if (!security) {
           return true;
         }
-        const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
         const { hasAllRequested } = await security.authz
           .checkPrivilegesWithRequest(request)
           .atSpace(spaceId, {
@@ -204,9 +193,34 @@ export class ContextEnginePlugin
 
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
 
+    const ensureAiIndex = async (id: string, spaceId: string): Promise<void> => {
+      const enabled = await isContextEngineEnabledInSpace({
+        savedObjects: coreStart.savedObjects,
+        uiSettings: coreStart.uiSettings,
+        spaceId,
+      });
+      if (!enabled) {
+        return;
+      }
+      if (!this.aiIndexService) {
+        throw new Error('AI index service not available — plugin has not started');
+      }
+      await this.aiIndexRegistry.ensure({
+        id,
+        spaceId,
+        aiIndexService: this.aiIndexService,
+        logger: aiIndexLogger,
+      });
+    };
+
     this.aiIndexService = new AiIndexService({
       esClient: this.esClient,
       logger: aiIndexLogger,
+      managedBootstrap: {
+        isManaged: (id) => this.aiIndexRegistry.has(id),
+        getManagedIds: () => this.aiIndexRegistry.getManagedIds(),
+        ensure: ensureAiIndex,
+      },
     });
 
     this.signalsService = new SignalsService({
@@ -233,33 +247,12 @@ export class ContextEnginePlugin
       );
     });
 
-    const aiIndexService = this.aiIndexService;
-    const registry = this.aiIndexRegistry;
-
     const soClient = coreStart.savedObjects.createInternalRepository();
-    const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
     const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);
 
     this.isFeedbackLoopEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
       false;
-
-    const isContextEngineEnabled = async () =>
-      (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
-
-    const ensureAiIndex = async (id: string, spaceId: string): Promise<void> => {
-      if (!(await isContextEngineEnabled())) {
-        return;
-      }
-      await registry.ensure({
-        id,
-        spaceId,
-        aiIndexService,
-        logger: aiIndexLogger,
-      });
-    };
-
-    this.ensureAiIndexFn = ensureAiIndex;
 
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(

@@ -18,7 +18,7 @@ import type {
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
 export const buildAiIndexDocId = (spaceId: string, aiIndexId: string): string =>
-  `${spaceId}_${aiIndexId}`;
+  `${spaceId}:${aiIndexId}`;
 
 const storageSettings = {
   name: aiIndicesIndexName,

@@ -48,6 +48,12 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
+export interface AiIndexManagedBootstrap {
+  isManaged: (id: string) => boolean;
+  getManagedIds: () => string[];
+  ensure: (id: string, spaceId: string) => Promise<void>;
+}
+
 type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
 
 const assertAiIndexAcceptsAutomation = (
@@ -82,14 +88,27 @@ const assertAiIndexAcceptsAutomation = (
 export class AiIndexService {
   private readonly esClient: ElasticsearchClient;
   private readonly storageClient: AiIndexStorageClient;
+  private readonly managedBootstrap?: AiIndexManagedBootstrap;
 
-  constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
+  constructor({
+    esClient,
+    logger,
+    managedBootstrap,
+  }: {
+    esClient: ElasticsearchClient;
+    logger: Logger;
+    managedBootstrap?: AiIndexManagedBootstrap;
+  }) {
     this.esClient = esClient;
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
+    this.managedBootstrap = managedBootstrap;
   }
 
   /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
   async create(aiIndexId: string, spaceId: string, properties: AiIndexProperties): Promise<void> {
+    if (this.managedBootstrap?.isManaged(aiIndexId)) {
+      throw new AiIndexManagedError(aiIndexId);
+    }
     await this.assertValidDest(properties.dest);
 
     const now = new Date().toISOString();
@@ -107,6 +126,7 @@ export class AiIndexService {
         id: buildAiIndexDocId(spaceId, aiIndexId),
         document,
         op_type: 'create',
+        refresh: 'wait_for',
       });
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -130,7 +150,7 @@ export class AiIndexService {
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId, spaceId);
-    if (existing?.document.managed) {
+    if (existing?.document.managed || (!existing && this.managedBootstrap?.isManaged(aiIndexId))) {
       throw new AiIndexManagedError(aiIndexId);
     }
 
@@ -192,11 +212,17 @@ export class AiIndexService {
           document: fullDocument,
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
+          refresh: 'wait_for',
         });
         return 'updated';
       }
 
-      await this.storageClient.index({ id: docId, document: fullDocument, op_type: 'create' });
+      await this.storageClient.index({
+        id: docId,
+        document: fullDocument,
+        op_type: 'create',
+        refresh: 'wait_for',
+      });
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -241,10 +267,18 @@ export class AiIndexService {
 
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
     const existing = await this.findDocument(aiIndexId, spaceId);
-    if (!existing) {
+    if (existing) {
+      return toAiIndexItem(existing.document);
+    }
+    if (!this.managedBootstrap?.isManaged(aiIndexId)) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return toAiIndexItem(existing.document);
+    await this.managedBootstrap.ensure(aiIndexId, spaceId);
+    const newManagedAIIndex = await this.findDocument(aiIndexId, spaceId);
+    if (!newManagedAIIndex) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    return toAiIndexItem(newManagedAIIndex.document);
   }
 
   /**
@@ -311,16 +345,17 @@ export class AiIndexService {
   }
 
   async list(spaceId: string): Promise<AiIndexHttpItem[]> {
-    const response = await this.storageClient.search({
-      size: MAX_AI_INDICES,
-      track_total_hits: false,
-      query: { term: { space: spaceId } },
-    });
-    // Sorted by id in memory: Elasticsearch disallows sorting on `_id`, and the
-    // result set is bounded by MAX_AI_INDICES.
-    return response.hits.hits
-      .flatMap((hit) => (hit._source ? [toAiIndexItem(hit._source as AiIndexDocument)] : []))
-      .sort((a, b) => a.id.localeCompare(b.id));
+    const items = await this.searchSpace(spaceId);
+    const missingManagedIds =
+      this.managedBootstrap
+        ?.getManagedIds()
+        .filter((id) => !items.some((item) => item.id === id)) ?? [];
+    if (missingManagedIds.length === 0) {
+      return items;
+    }
+
+    await Promise.all(missingManagedIds.map((id) => this.managedBootstrap?.ensure(id, spaceId)));
+    return this.searchSpace(spaceId);
   }
 
   /**
@@ -345,6 +380,16 @@ export class AiIndexService {
     }
   }
 
+  private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
+    const response = await this.storageClient.search({
+      size: MAX_AI_INDICES,
+      track_total_hits: false,
+      query: { term: { space: spaceId } },
+      sort: [{ id: 'asc' }],
+    });
+    return response.hits.hits.flatMap((hit) => (hit._source ? [toAiIndexItem(hit._source)] : []));
+  }
+
   private async findDocument(
     aiIndexId: string,
     spaceId: string
@@ -364,7 +409,7 @@ export class AiIndexService {
         id: buildAiIndexDocId(spaceId, aiIndexId),
         seq_no_primary_term: true,
       });
-      if (!response.found || !response._source) {
+      if (!response.found || !response._source || response._source.space !== spaceId) {
         return undefined;
       }
       return {

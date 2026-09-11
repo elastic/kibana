@@ -16,10 +16,12 @@ export const createMockStepContext = ({
   input,
   esClient,
   abortController = new AbortController(),
+  spaceId = 'default',
 }: {
   input: unknown;
   esClient: unknown;
   abortController?: AbortController;
+  spaceId?: string;
 }): StepHandlerContext => {
   return {
     input,
@@ -28,7 +30,7 @@ export const createMockStepContext = ({
     contextManager: {
       getScopedEsClient: jest.fn().mockReturnValue(esClient),
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
-      getContext: jest.fn(),
+      getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
       renderInputTemplate: jest.fn(),
     },
     logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
@@ -43,14 +45,6 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
   ({
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
-
-/** Resolves to a minimal Spaces plugin start that returns the given space id. */
-export const mockGetSpaces = (spaceId = 'default') =>
-  jest.fn().mockResolvedValue({
-    spacesService: {
-      getSpaceId: jest.fn().mockReturnValue(spaceId),
-    },
-  });
 
 /** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */
 export const mockKiStepTelemetry = () => ({

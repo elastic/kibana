@@ -65,6 +65,7 @@ import {
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
+  AiIndexIdConflictError,
   InvalidConnectorSourceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
@@ -288,7 +289,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (
     error instanceof AiIndexManagedError ||
     error instanceof AiIndexConflictError ||
-    error instanceof AiIndexAlreadyExistsError
+    error instanceof AiIndexAlreadyExistsError ||
+    error instanceof AiIndexIdConflictError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
@@ -302,8 +304,6 @@ export const registerAiIndexRoutes = ({
   getImprovementsService,
   getActions,
   getSpaces,
-  getManagedAiIndexIds,
-  ensureAiIndex,
 }: {
   router: IRouter;
   logger: Logger;
@@ -311,8 +311,6 @@ export const registerAiIndexRoutes = ({
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
-  getManagedAiIndexIds: () => string[];
-  ensureAiIndex: (id: string, spaceId: string) => Promise<void>;
 }) => {
   // Create an AI index
   router.versioned
@@ -441,12 +439,6 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
-          if (error instanceof AiIndexNotFoundError && getManagedAiIndexIds().includes(aiIndexId)) {
-            await ensureAiIndex(aiIndexId, spaceId);
-            const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId, spaceId);
-            auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
-            return response.ok({ body });
-          }
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
@@ -477,16 +469,8 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         try {
           const spaceId = resolveSpaceId(await getSpaces(), request);
-          let aiIndices = await getAiIndexService().list(spaceId);
-          const missingManagedIds = getManagedAiIndexIds().filter(
-            (id) => !aiIndices.some((ai) => ai.id === id)
-          );
-          if (missingManagedIds.length > 0) {
-            await Promise.all(missingManagedIds.map((id) => ensureAiIndex(id, spaceId)));
-            aiIndices = await getAiIndexService().list(spaceId);
-          }
           const body: ListAiIndexResponse = {
-            ai_indices: aiIndices,
+            ai_indices: await getAiIndexService().list(spaceId),
           };
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
           return response.ok({ body });

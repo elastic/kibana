@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from './service';
-import { AiIndexConflictError, AiIndexIdConflictError, InvalidAiIndexDestError } from './errors';
+import { AiIndexConflictError } from './errors';
 
 export class AiIndexRegistry {
   private readonly entries = new Map<string, AiIndexProperties>();
@@ -61,23 +61,13 @@ export class AiIndexRegistry {
       const result = await aiIndexService.putManaged(id, spaceId, properties);
       logger.debug(`AI index '${id}' ${result} in space '${spaceId}'`);
     } catch (err) {
-      if (err instanceof InvalidAiIndexDestError) {
-        logger.warn(`AI index '${id}' dest is not valid: '${err.message}'. Skipped.`);
-      } else if (err instanceof AiIndexIdConflictError) {
-        logger.warn(
-          `AI index '${id}' is already registered as a user-owned index in space '${spaceId}'; skipping managed registration.`
-        );
-      } else if (err instanceof AiIndexConflictError) {
+      if (err instanceof AiIndexConflictError) {
         logger.debug(
           `AI index '${id}' was registered concurrently in space '${spaceId}' — skipping.`
         );
-      } else {
-        logger.warn(
-          `Failed to register AI index '${id}' in space '${spaceId}': ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
+        return;
       }
+      throw err;
     }
   }
 }

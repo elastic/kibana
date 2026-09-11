@@ -7,12 +7,15 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
+import {
+  AiIndexAlreadyExistsError,
+  AiIndexManagedError,
+  AiIndexNotFoundError,
+} from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { KiVerificationSummary } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
@@ -21,11 +24,10 @@ import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
   getAiIndexService: () => AiIndexService;
-  getSpaces: () => Promise<SpacesPluginStart | undefined>;
-  /** Whether the Context Engine advanced setting is on in the request's space. */
-  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
-  /** Whether the request has the Context Engine write API privilege. */
-  checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
+  /** Whether the Context Engine advanced setting is on in this space. */
+  isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
+  /** Whether the request has the Context Engine write API privilege in this space. */
+  checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
 }
@@ -135,10 +137,11 @@ export const withKiVerificationTelemetry = async ({
 
 /** Fails the step when the workflow user lacks the Context Engine write API privilege. */
 export const assertKiWritePrivilege = async (
-  checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>,
-  request: KibanaRequest
+  checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>,
+  request: KibanaRequest,
+  spaceId: string
 ): Promise<void> => {
-  if (!(await checkWritePrivilege(request))) {
+  if (!(await checkWritePrivilege(request, spaceId))) {
     throw new ExecutionError({
       type: 'PermissionError',
       message: 'Insufficient privileges to modify knowledge indicators in AI indices',
@@ -146,12 +149,12 @@ export const assertKiWritePrivilege = async (
   }
 };
 
-/** Fails the step when the Context Engine setting is off in the request's space. */
+/** Fails the step when the Context Engine setting is off in this space. */
 export const assertContextEngineEnabled = async (
-  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>,
-  request: KibanaRequest
+  isContextEngineEnabled: (spaceId: string) => Promise<boolean>,
+  spaceId: string
 ): Promise<void> => {
-  if (!(await isContextEngineEnabled(request))) {
+  if (!(await isContextEngineEnabled(spaceId))) {
     throw new ExecutionError({
       type: 'FeatureDisabledError',
       message: `Context Engine is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}' advanced setting to use this step.`,
@@ -215,6 +218,12 @@ export const resolveOrCreateAiIndex = async (
       // Lost a concurrent creation race; the AI index exists now.
       const { dest: existingDest, managed } = await service.get(aiIndexId, spaceId);
       return { dest: existingDest, managed };
+    }
+    if (error instanceof AiIndexManagedError) {
+      throw new ExecutionError({
+        type: 'ValidationError',
+        message: `Cannot create AI index '${aiIndexId}': this id is reserved for a managed AI index`,
+      });
     }
     throw error;
   }

@@ -19,7 +19,6 @@ import {
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
-  getSpaces,
   isContextEngineEnabled,
   checkWritePrivilege,
   analyticsService,
@@ -29,8 +28,8 @@ export const getCreateKiStepDefinition = ({
     ...createKiStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
-      await assertContextEngineEnabled(isContextEngineEnabled, request);
-      const spaceId = (await getSpaces())?.spacesService.getSpaceId(request) ?? 'default';
+      const spaceId = context.contextManager.getContext().workflow.spaceId;
+      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
       return withKiWriteTelemetry({
@@ -39,7 +38,7 @@ export const getCreateKiStepDefinition = ({
         analyticsService,
         logger,
         run: async (setManaged) => {
-          await assertKiWritePrivilege(checkWritePrivilege, request);
+          await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
           const { dest, managed } = await resolveOrCreateAiIndex(
             getAiIndexService,

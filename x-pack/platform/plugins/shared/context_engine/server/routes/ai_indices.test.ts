@@ -104,8 +104,6 @@ describe('ai indices routes', () => {
   let esGet: jest.Mock;
   let improvementsClients: unknown[];
   let getSpaces: jest.Mock;
-  let getManagedAiIndexIds: jest.Mock;
-  let ensureAiIndex: jest.Mock;
   const logger = loggerMock.create();
   const defaultSpaceId = 'default';
 
@@ -156,8 +154,6 @@ describe('ai indices routes', () => {
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     improvementsClients = [];
     getSpaces = jest.fn().mockResolvedValue(undefined);
-    getManagedAiIndexIds = jest.fn().mockReturnValue([]);
-    ensureAiIndex = jest.fn().mockResolvedValue(undefined);
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -191,8 +187,6 @@ describe('ai indices routes', () => {
       },
       getActions: async () => actions,
       getSpaces,
-      getManagedAiIndexIds,
-      ensureAiIndex,
     });
   });
 
@@ -457,21 +451,6 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: aiIndexItem });
-    });
-
-    it('ensures a managed AI index and retries when it is missing on first get', async () => {
-      const managedElasticIndex = { ...aiIndexItem, id: 'elastic', managed: true };
-      getManagedAiIndexIds.mockReturnValue(['elastic']);
-      aiIndexService.get
-        .mockRejectedValueOnce(new AiIndexNotFoundError('elastic'))
-        .mockResolvedValueOnce(managedElasticIndex);
-
-      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'elastic' } });
-
-      expect(ensureAiIndex).toHaveBeenCalledWith('elastic', defaultSpaceId);
-      expect(aiIndexService.get).toHaveBeenCalledTimes(2);
-      expect(aiIndexService.get).toHaveBeenCalledWith('elastic', defaultSpaceId);
-      expect(response.ok).toHaveBeenCalledWith({ body: managedElasticIndex });
     });
 
     it('returns 404 when the AI index does not exist', async () => {
@@ -748,19 +727,6 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.list).toHaveBeenCalledWith(defaultSpaceId);
       expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [] } });
-    });
-
-    it('ensures missing managed AI indices and re-lists', async () => {
-      const managedElasticIndex = { ...aiIndexItem, id: 'elastic', managed: true };
-      getManagedAiIndexIds.mockReturnValue(['elastic']);
-      aiIndexService.list.mockResolvedValueOnce([]).mockResolvedValueOnce([managedElasticIndex]);
-
-      await callRoute('GET', aiIndexPath, {});
-
-      expect(ensureAiIndex).toHaveBeenCalledWith('elastic', defaultSpaceId);
-      expect(aiIndexService.list).toHaveBeenCalledTimes(2);
-      expect(aiIndexService.list).toHaveBeenCalledWith(defaultSpaceId);
-      expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [managedElasticIndex] } });
     });
   });
 
