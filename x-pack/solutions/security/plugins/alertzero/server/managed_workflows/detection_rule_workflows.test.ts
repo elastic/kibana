@@ -535,7 +535,7 @@ describe('detection rule workflows', () => {
 
         expect(String(action.if)).not.toContain('record_preview_outcome');
         expect(comment).toContain('The backtest could not verify the proposed query');
-        expect(comment).toContain('Approving still applies it to the rule.');
+        expect(comment).toContain('The proposed query is still applied to the rule.');
       });
 
       // A partial or timed-out alert count would understate a backtest, so the

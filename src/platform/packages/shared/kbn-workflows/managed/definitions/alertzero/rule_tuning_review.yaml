@@ -53,6 +53,14 @@ triggers:
             this list). The agent retrieves these by id to ground the diagnosis; they
             are tagged once the gate resolves, which places the reviewed watermark
             that retires any older untagged false positives.
+        total_alert_count:
+          type: integer
+          minimum: 0
+          description: Every alert the rule produced in the window; with total_fp_count gives the FP rate shown to the analyst.
+        total_fp_count:
+          type: integer
+          minimum: 0
+          description: All false positives in the window, reviewed or not.
         analysis_window_days:
           type: integer
           minimum: 1
@@ -160,14 +168,30 @@ steps:
         substring rather than a full path: *corp-agent-signed.msi*, not
         *\deploy-share\packages\corp-agent-signed.msi*. Keep exact field values
         (process.name, user.name) quoted; only wildcard matches go unquoted.
+
+        The analyst sees your output as a proposal card, so fill every field for a
+        reader who has not seen the alerts: title is one short line naming the
+        change; summary says why the rule needs tuning; fp_pattern describes the
+        recurring benign pattern; reasoning is a numbered list of the steps that led
+        to the recommendation; confidence is how sure you are that the change removes
+        the false positives without losing detections.
       schema:
         type: object
         properties:
           change_type:
             type: string
             enum: [exception, suppression, query, threshold]
+          title:
+            type: string
           summary:
             type: string
+          fp_pattern:
+            type: string
+          reasoning:
+            type: string
+          confidence:
+            type: string
+            enum: [low, medium, high]
           current_query:
             type: string
           proposed_query:
@@ -176,7 +200,7 @@ steps:
             type: string
           rekey_required:
             type: boolean
-        required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
+        required: [change_type, title, summary, fp_pattern, reasoning, confidence, current_query, proposed_query, exception_condition, rekey_required]
 
   # Human-facing record of this proposal, deliberately separate from
   # diagnose_rule's own conversation: the agent transcript stays opaque, the
@@ -333,16 +357,30 @@ steps:
     type: data.set
     with:
       comment: |-
-        **Rule tuning review for {{ steps.fetch_rule.output.name }}**
+        **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
-        {{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
+        **Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        **Investigation:** [Rule tuning: {{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
+
+        **Why this rule needs tuning**
+        {% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}
         {% if inputs.fp_count > inputs.alert_ids.size %}
         The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives; tagging them retires the older ones from future sweeps too.
         {% endif %}
-
         {{ steps.diagnose_rule.output.structured_output.summary }}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" and steps.record_auto_apply_support.output.supported %}
+        **False positive pattern**
+        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+
+        **Reasoning**
+        {{ steps.diagnose_rule.output.structured_output.reasoning }}
+
+        **Sample alerts**
+        {% for alert_id in inputs.alert_ids limit: 5 %}[{{ alert_id }}](/s/{{ workflow.spaceId }}/app/security/alerts/redirect/{{ alert_id }}?index=.alerts-security.alerts-{{ workflow.spaceId }}){% unless forloop.last %}, {% endunless %}{% endfor %}
+
+        **Proposed change**
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         Current query:
         ```
         {{ steps.diagnose_rule.output.structured_output.current_query }}
@@ -352,27 +390,6 @@ steps:
         ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
         ```
-
-        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }}, lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover): current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}, proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
-        {% if steps.record_preview_outcome.output.current_error_text != '' %}
-        Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
-        {% endif %}
-        {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
-        Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
-        {% endif %}
-        {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false and steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}
-        Approving applies the proposed query to the rule.
-        {% else %}
-        The backtest could not verify the proposed query, so judge it from the diagnosis and the queries above. Approving still applies it to the rule.
-        {% endif %}
-        {% else %}
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
-        Proposed query:
-        ```
-        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
-        ```
-
-        This rule uses a data view, timestamp override, or alert suppression, so it is not previewed or applied automatically.
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
         Proposed exception:
@@ -380,7 +397,30 @@ steps:
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
         ```
         {% endif %}
-        This {{ steps.diagnose_rule.output.structured_output.change_type }} change is not applied automatically; apply it manually in the Detection Rules UI if appropriate. Approving marks these alerts acknowledged, so sweeps revisit the rule only once new false positives accumulate.
+        {% if steps.rule_tune_supported.output.auto %}
+
+        **Backtest**
+        {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }}, lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive {{ inputs.last_fp_at }} (usually a much shorter span than the false positives cover). Alerts before: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}. Alerts after: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
+        {% if steps.record_preview_outcome.output.current_error_text != '' %}
+        Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
+        {% endif %}
+        {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
+        Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
+        {% endif %}
+
+        **On approval**
+        {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false and steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}
+        The proposed query is applied to the rule.
+        {% else %}
+        The backtest could not verify the proposed query, so judge it from the diagnosis and the queries above. The proposed query is still applied to the rule.
+        {% endif %}
+        {% else %}
+
+        **On approval**
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        This rule uses a data view, timestamp override, or alert suppression, so the query is not previewed or applied automatically.
+        {% endif %}
+        Nothing is applied automatically; make the change in the Detection Rules UI if appropriate. Approving marks these alerts acknowledged, so sweeps revisit the rule only once new false positives accumulate.
         {% endif %}
 
   # The proposal gate records the recommendation on the investigation, parks on
@@ -403,7 +443,7 @@ steps:
           id: "{{ inputs.rule_uuid }}"
           query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
         impact: medium
-        confidence: medium
+        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
         # Query edits always wait for an analyst; matches the action's approvalPolicy.
         autoApprove: false
 
@@ -420,7 +460,7 @@ steps:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
         comment: "{{ steps.compose_proposal.output.comment }}"
         impact: low
-        confidence: medium
+        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
 
   # The gate reports `succeeded` once the action ran, `approved` for a manual
   # proposal, `dismissed` otherwise. Spelled out per outcome rather than derived
