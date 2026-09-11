@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import type {
   PersistedIndexPatternLayer,
   PieVisualizationState,
@@ -29,6 +29,7 @@ interface ViewResultsInLensActionProps {
   mode?: string;
   scheduleId?: string;
   executionCount?: number;
+  onMenuItemClick?: () => void;
 }
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
@@ -39,6 +40,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   mode,
   scheduleId,
   executionCount,
+  onMenuItemClick,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
@@ -73,10 +75,26 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
     [actionId, endDate, executionCount, lensService, logsDataView, mode, scheduleId, startDate]
   );
 
+  const handleMenuItemClick = useCallback(
+    (event: any) => {
+      handleClick(event);
+      onMenuItemClick?.();
+    },
+    [handleClick, onMenuItemClick]
+  );
+
   const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
 
   if (!isLensAvailable) {
     return null;
+  }
+
+  if (buttonType === ViewResultsActionButtonType.menuItem) {
+    return (
+      <EuiContextMenuItem icon="lensApp" onClick={handleMenuItemClick} disabled={isDisabled}>
+        {VIEW_IN_LENS}
+      </EuiContextMenuItem>
+    );
   }
 
   if (buttonType === ViewResultsActionButtonType.button) {
