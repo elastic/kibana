@@ -470,22 +470,21 @@ export class DatePicker {
       const intervalUnitAttr = await button.getAttribute('data-refresh-interval-unit');
       const isPausedAttr = await button.getAttribute('data-refresh-paused');
 
-      // Attributes are absent when auto-refresh is not configured
-      if (intervalMsAttr === null) {
-        return { interval: '', units: DATE_UNIT_LABELS[DateUnitSelector.Seconds], isPaused: true };
-      }
-
-      const intervalMs = Number(intervalMsAttr);
-      if (!Number.isFinite(intervalMs)) {
-        throw new Error(`Unexpected data-refresh-interval value: "${intervalMsAttr}"`);
+      if (intervalMsAttr === null || intervalUnitAttr === null || isPausedAttr === null) {
+        throw new Error(`Refresh config was requested but not found`);
       }
 
       const unit = Object.hasOwn(DATE_UNIT_LABELS, intervalUnitAttr ?? '')
         ? (intervalUnitAttr as DateUnitSelector)
         : DateUnitSelector.Seconds;
 
+      const interval = Math.round(Number(intervalMsAttr) / MS_PER_DATE_UNIT[unit]);
+      if (!Number.isInteger(interval) || interval <= 0) {
+        throw new Error(`Unexpected data-refresh-interval value: "${intervalMsAttr}"`);
+      }
+
       return {
-        interval: String(Math.round(intervalMs / MS_PER_DATE_UNIT[unit])),
+        interval: String(interval),
         units: DATE_UNIT_LABELS[unit],
         isPaused: isPausedAttr !== 'false',
       };
