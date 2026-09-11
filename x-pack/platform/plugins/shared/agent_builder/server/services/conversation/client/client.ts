@@ -22,8 +22,6 @@ import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
-  TimelineEventType,
-  isEventsNativeVersion,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isConversationAccessControlRole,
@@ -38,7 +36,6 @@ import {
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
-import { userMessageActor } from './rounds_to_events';
 import type {
   ConversationWithPermissions,
   UpdateConversationAccessControlRequestBody,
@@ -55,7 +52,6 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
-  AppendContextMessageRequest,
   AddAttachmentsToLastRoundRequest,
   AppendEventsRequest,
   ConversationCreateRequest,
@@ -122,7 +118,6 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  appendContextMessage(request: AppendContextMessageRequest): Promise<ConversationWithPermissions>;
   appendEvents(
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
@@ -526,44 +521,6 @@ class ConversationClientImpl implements ConversationClient {
       }),
     });
     return result;
-  }
-
-  async appendContextMessage(
-    request: AppendContextMessageRequest
-  ): Promise<ConversationWithPermissions> {
-    const { id, message = '', refs = [], attachments, author } = request;
-
-    await this.writeConversation({
-      conversationId: id,
-      access: 'converse',
-      fields: (current) => {
-        if (!isEventsNativeVersion(current.schema_version)) {
-          throw createInternalError('Standalone messages require canonical event storage');
-        }
-
-        return {
-          events: [
-            ...(current.events ?? []),
-            {
-              id: uuidv4(),
-              type: TimelineEventType.userMessage,
-              created_at: new Date().toISOString(),
-              actor: userMessageActor({ ...current, user: this.user }, { author }),
-              data: { message, attachment_refs: refs },
-            },
-          ],
-          attachments: reconcileAttachments({
-            snapshot: attachments?.snapshot ?? [],
-            stored: current.attachments ?? [],
-            produced: attachments?.produced ?? [],
-          }),
-          read: false,
-          read_by: [],
-        };
-      },
-    });
-
-    return await this.get(id);
   }
 
   async appendEvents(

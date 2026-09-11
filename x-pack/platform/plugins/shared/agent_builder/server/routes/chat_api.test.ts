@@ -234,13 +234,13 @@ describe('context message acknowledgements', () => {
     const getStartServices = jest.fn();
     const services = {
       conversations: {
-        getScopedClient: async () => ({ appendContextMessage, get: async () => conversation }),
-        getConversationRoundAuthor: async () => ({ id: 'user' }),
+        getScopedClient: async () => ({ get: async () => conversation }),
+        appendContextMessage,
       },
       attachments: {
         getTypeDefinition: jest.fn(),
         validate: jest.fn().mockImplementation(async (attachments) =>
-          attachments.map((attachment: { type: string; data: unknown }) => ({
+          attachments?.map((attachment: { type: string; data: unknown }) => ({
             id: 'attachment-1',
             type: attachment.type,
             data: attachment.data,
@@ -274,7 +274,7 @@ describe('context message acknowledgements', () => {
       response
     );
     expect(result.status).toBe(200);
-    expect(services.attachments.validate).toHaveBeenCalledWith([], expect.any(Object));
+    expect(services.attachments.validate).toHaveBeenCalledWith(undefined, expect.any(Object));
     expect(appendContextMessage).toHaveBeenCalledTimes(1);
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
@@ -330,8 +330,8 @@ describe('context message acknowledgements', () => {
     const appendContextMessage = jest.fn();
     const services = {
       conversations: {
-        getScopedClient: async () => ({ appendContextMessage, get: async () => ({}) }),
-        getConversationRoundAuthor: async () => ({ id: 'user' }),
+        getScopedClient: async () => ({ get: async () => ({}) }),
+        appendContextMessage,
       },
       attachments: {
         getTypeDefinition: jest.fn(),

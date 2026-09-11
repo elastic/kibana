@@ -11,8 +11,6 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   ChatRequestBodyPayload,
@@ -104,36 +102,19 @@ export function registerChatApiRoutes({
 
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
-            const client = await conversationsService.getScopedClient({ request });
 
             let attachments: AttachmentInput[] | undefined;
             try {
-              attachments = await attachmentsService.validate(attachmentInputs ?? [], request);
+              attachments = await attachmentsService.validate(attachmentInputs, request);
             } catch (error) {
               throw createBadRequestError(error instanceof Error ? error.message : String(error));
             }
 
-            const conversation = await client.get(conversationId);
-            const snapshot = conversation.attachments ?? [];
-            const stateManager = createAttachmentStateManager(snapshot, {
-              getTypeDefinition: attachmentsService.getTypeDefinition,
-            });
-
-            for (const attachment of attachments ?? []) {
-              if (attachment.id && stateManager.getAttachmentRecord(attachment.id)) {
-                await stateManager.update(attachment.id, attachment, ATTACHMENT_REF_ACTOR.user);
-              } else {
-                await stateManager.add(attachment, ATTACHMENT_REF_ACTOR.user);
-              }
-            }
-
-            const author = await conversationsService.getConversationRoundAuthor({ request });
-            const body = await client.appendContextMessage({
-              id: conversationId,
+            const body = await conversationsService.appendContextMessage({
+              request,
+              conversationId,
               message: input,
-              refs: stateManager.getAccessedRefs(),
-              attachments: { snapshot, produced: stateManager.getAll() },
-              author,
+              attachments,
             });
 
             return response.ok({ body });
