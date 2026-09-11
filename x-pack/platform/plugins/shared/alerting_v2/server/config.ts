@@ -48,11 +48,16 @@ const rulesRunSchema = schema.object({
   query: schema.object({
     /**
      * Maximum allowed Elasticsearch response body size (in bytes) for
-     * non-streaming rule queries (recovery, data-presence). Queries whose
-     * response exceeds this limit are aborted and the execution is attributed
-     * to the rule owner so they can narrow the query or raise the limit.
-     * Accepts a byte-size string (`10mb`, `512kb`) or a plain number of bytes.
-     * Defaults to 50mb.
+     * non-streaming rule queries: the breach query on the JSON response path,
+     * plus the recovery and data-presence queries. Queries whose response
+     * exceeds this limit are aborted and the execution fails as a user error
+     * so the rule owner can narrow the query (KEEP / STATS) or raise the limit.
+     *
+     * Every execution transiently holds roughly 4x the response size in heap,
+     * and Task Manager capacity decides how many run at once, so size this as
+     * `heap budget / (capacity x 4)`. Accepts a byte-size string (`10mb`, `512kb`)
+     * or a plain number of bytes. Defaults to 50mb; `config/serverless.yml`
+     * lowers it to 10mb for the default Serverless background-tasks pod.
      */
     maxResponseSize: schema.byteSize({
       defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
