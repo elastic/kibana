@@ -14,15 +14,15 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { AppHeader } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
+import { InfraOnboardingPage } from '../../../components/shared/templates/infra_onboarding_page';
 import { WithMetricsExplorerOptionsUrlState } from '../../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { useInfraHasData } from '../../../hooks/use_infra_has_data';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
-import { ExplorerOnboardingPage } from './components/explorer_onboarding_page';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
-import { useExplorerHasData } from './hooks/use_explorer_has_data';
 import { metricsExplorerTitle } from '../../../translations';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';
 import { MetricsInDiscoverCallout } from './components/metrics_in_discover_callout';
@@ -42,7 +42,7 @@ export const MetricsExplorerPage = (): React.ReactElement => {
   );
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
-  const { showOnboarding } = useExplorerHasData();
+  const { showOnboarding } = useInfraHasData();
 
   // Template noDataConfig ignores children; Explorer renders onboarding as body instead.
   return (
@@ -72,7 +72,7 @@ export const MetricsExplorerPage = (): React.ReactElement => {
             },
           }}
         >
-          {showOnboarding ? <ExplorerOnboardingPage /> : <MetricsExplorerContent />}
+          {showOnboarding ? <InfraOnboardingPage /> : <MetricsExplorerContent />}
         </InfraPageTemplate>
       </MetricsExplorerOptionsContainer>
     </div>
@@ -103,6 +103,9 @@ const MetricsExplorerContent = () => {
 
   const prevDataRef = useRef(data);
   const { onPageReady } = usePerformanceContext();
+
+  useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
+  useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
   useEffect(() => {
     if (currentView) {
