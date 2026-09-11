@@ -124,6 +124,7 @@ export const getConverseHelpers = ({
       configuration_overrides: configurationOverrides,
       action,
       project_routing: projectRouting,
+      reasoning_level: reasoningLevel,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
@@ -149,6 +150,7 @@ export const getConverseHelpers = ({
         configurationOverrides,
         action,
         projectRouting,
+        reasoningLevel,
         nextInput: {
           message: input,
           prompts,
