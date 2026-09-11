@@ -47,8 +47,16 @@ const createMockTestCase = (overrides: {
   outcome: ReturnType<TestCase['outcome']>;
   title?: string;
   filePath?: string;
+  expectedStatus?: TestCase['expectedStatus'];
+  results?: Array<Pick<TestResult, 'status'>>;
 }): TestCase => {
-  const { outcome, title = 'should work', filePath = 'path/to/file.spec.ts' } = overrides;
+  const {
+    outcome,
+    title = 'should work',
+    filePath = 'path/to/file.spec.ts',
+    expectedStatus = 'passed',
+    results = [{ status: 'failed' }],
+  } = overrides;
 
   return {
     titlePath: () => ['', 'local', filePath, 'My Suite', title],
@@ -60,6 +68,8 @@ const createMockTestCase = (overrides: {
       titlePath: () => ['', 'local', filePath, 'My Suite'],
     },
     outcome: () => outcome,
+    expectedStatus,
+    results,
   } as unknown as TestCase;
 };
 
@@ -148,6 +158,61 @@ describe('ScoutFailedTestReporter', () => {
       status: 'timedout',
       errors: ['global teardown threw', 'string thrown', 'Playwright run timedout'],
     });
+  });
+
+  it('records tests cut off by --max-failures as a runner error, not intentional skips', () => {
+    const saveRunnerErrorsSpy = jest
+      .spyOn(ScoutFailureTracker.prototype, 'saveRunnerErrors')
+      .mockImplementation(() => {});
+    const failed = createMockTestCase({ outcome: 'unexpected', title: 'failed' });
+    const neverStarted = createMockTestCase({ outcome: 'skipped', title: 'never', results: [] });
+    const skippedAtRuntime = createMockTestCase({
+      outcome: 'skipped',
+      title: 'runtime skip',
+      results: [{ status: 'skipped' }],
+    });
+    const declaredSkip = createMockTestCase({
+      outcome: 'skipped',
+      title: 'test.skip',
+      expectedStatus: 'skipped',
+      results: [{ status: 'skipped' }],
+    });
+    const interruptedTest = createMockTestCase({
+      outcome: 'skipped',
+      title: 'interrupted',
+      results: [{ status: 'interrupted' }],
+    });
+    reporter.onBegin(
+      createMockConfig(),
+      createMockSuite([failed, neverStarted, skippedAtRuntime, declaredSkip, interruptedTest])
+    );
+
+    reporter.onTestEnd(failed, createMockResult({ status: 'failed' }));
+    reporter.onEnd(createMockFullResult('failed'));
+
+    expect(saveRunnerErrorsSpy).toHaveBeenCalledWith({
+      status: 'failed',
+      errors: ['2 test(s) did not run'],
+    });
+  });
+
+  it('does not record a runner error for a completed run with only declared skips', () => {
+    const saveRunnerErrorsSpy = jest
+      .spyOn(ScoutFailureTracker.prototype, 'saveRunnerErrors')
+      .mockImplementation(() => {});
+    const failed = createMockTestCase({ outcome: 'unexpected', title: 'failed' });
+    const declaredSkip = createMockTestCase({
+      outcome: 'skipped',
+      title: 'test.skip',
+      expectedStatus: 'skipped',
+      results: [{ status: 'skipped' }],
+    });
+    reporter.onBegin(createMockConfig(), createMockSuite([failed, declaredSkip]));
+
+    reporter.onTestEnd(failed, createMockResult({ status: 'failed' }));
+    reporter.onEnd(createMockFullResult('failed'));
+
+    expect(saveRunnerErrorsSpy).toHaveBeenCalledWith({ status: 'failed', errors: [] });
   });
 
   it('stamps distinct attempt numbers on each attempt of a repeatedly-failing test', () => {

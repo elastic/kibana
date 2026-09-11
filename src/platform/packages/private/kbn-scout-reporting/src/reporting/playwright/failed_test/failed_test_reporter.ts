@@ -183,19 +183,31 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onEnd(result: FullResult) {
+    const allTests = this.suite?.allTests() ?? [];
+
     // A test's outcome is only knowable once every attempt has run, so flaky tests are excluded
     // here rather than in onTestEnd. Their failing attempt still stays in the report artifact
     // above (useful debugging material); only the GitHub-issue tracker excludes them, since it
     // shouldn't open issues for tests that ultimately passed.
     const flakyTestIds = new Set(
-      (this.suite?.allTests() ?? [])
-        .filter((test) => test.outcome() === 'flaky')
-        .map((test) => getTestIdentity(test).id)
+      allTests.filter((test) => test.outcome() === 'flaky').map((test) => getTestIdentity(test).id)
     );
 
     // 'failed' is explained by the per-test failures; a global timeout or interruption is not.
     if (result.status === 'timedout' || result.status === 'interrupted') {
       this.runnerErrors.push(`Playwright run ${result.status}`);
+    }
+
+    // Tests Playwright never ran (e.g. cut off by --max-failures) are neither failures nor
+    // intentional skips; same classification as Playwright's own "did not run" summary line.
+    const didNotRun = allTests.filter(
+      (test) =>
+        test.outcome() === 'skipped' &&
+        !test.results.some((attempt) => attempt.status === 'interrupted') &&
+        (test.results.length === 0 || test.expectedStatus !== 'skipped')
+    ).length;
+    if (didNotRun > 0) {
+      this.runnerErrors.push(`${didNotRun} test(s) did not run`);
     }
 
     // Save & conclude the report
