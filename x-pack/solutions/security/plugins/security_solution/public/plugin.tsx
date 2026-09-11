@@ -89,6 +89,7 @@ import {
   registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
+  registerExceptionAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
@@ -397,6 +398,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           uiSettings: core.uiSettings,
         });
       }
+      registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,

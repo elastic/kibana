@@ -26,7 +26,10 @@ import type {
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
 import { RuleExceptionList } from '../../../common/api/detection_engine/model/rule_schema';
-import { assertUnreachable } from '../../../common/utility_types';
+import {
+  MissingExceptionEntryOperandError,
+  toApiEntries as toApiEntriesUnwrapped,
+} from '../../../common/detection_engine/rule_exceptions/to_api_entries';
 
 /**
  * The step action on whose behalf a util call runs; used as the verb phrase
@@ -46,78 +49,21 @@ type CreateExceptionItemBody = Pick<
   'name' | 'description' | 'type' | 'entries' | 'os_types' | 'tags' | 'expire_time' | 'comments'
 >;
 
-const missingEntryKey = (entry: ExceptionEntryInput, key: 'value' | 'values' | 'list') =>
-  new ExecutionError({
-    type: 'ValidationError',
-    message: `Exception entry on field "${entry.field}" is missing \`${key}\`, required for \`${entry.operator}\` entries`,
-  });
-
 /**
  * Maps the step's flat, UI-verb entry shape (see `exceptionEntrySchema`) onto
- * the exceptions API's discriminated union of entry `type` + `included`/
- * `excluded` operator. The presence checks mirror the schema's
- * `superRefine`s, which have already run by the time the handler is invoked;
- * they are re-checked here to narrow the optional fields.
+ * the exceptions API's entry union, rewrapping the mapper's operand error as a
+ * step `ValidationError`.
  */
-export const toApiEntries = (entries: ExceptionEntryInput[]): EntriesArray =>
-  entries.map((entry) => {
-    const { operator, field, value, values, list } = entry;
-    switch (operator) {
-      case 'is':
-      case 'is_not':
-        if (value === undefined) {
-          throw missingEntryKey(entry, 'value');
-        }
-        return {
-          type: 'match',
-          field,
-          operator: operator === 'is' ? 'included' : 'excluded',
-          value,
-        };
-      case 'matches':
-      case 'does_not_match':
-        if (value === undefined) {
-          throw missingEntryKey(entry, 'value');
-        }
-        return {
-          type: 'wildcard',
-          field,
-          operator: operator === 'matches' ? 'included' : 'excluded',
-          value,
-        };
-      case 'is_one_of':
-      case 'is_not_one_of':
-        if (values === undefined) {
-          throw missingEntryKey(entry, 'values');
-        }
-        return {
-          type: 'match_any',
-          field,
-          operator: operator === 'is_one_of' ? 'included' : 'excluded',
-          value: values,
-        };
-      case 'exists':
-      case 'does_not_exist':
-        return {
-          type: 'exists',
-          field,
-          operator: operator === 'exists' ? 'included' : 'excluded',
-        };
-      case 'is_in_list':
-      case 'is_not_in_list':
-        if (list === undefined) {
-          throw missingEntryKey(entry, 'list');
-        }
-        return {
-          type: 'list',
-          field,
-          operator: operator === 'is_in_list' ? 'included' : 'excluded',
-          list,
-        };
-      default:
-        return assertUnreachable(operator);
+export const toApiEntries = (entries: ExceptionEntryInput[]): EntriesArray => {
+  try {
+    return toApiEntriesUnwrapped(entries);
+  } catch (error) {
+    if (error instanceof MissingExceptionEntryOperandError) {
+      throw new ExecutionError({ type: 'ValidationError', message: error.message });
     }
-  });
+    throw error;
+  }
+};
 
 /**
  * Builds the create-item request body shared by the rule exceptions API and
