@@ -21,6 +21,25 @@ import type { TaskManagerUsage } from './types';
 import type { MonitoredUtilization } from '../routes/background_task_utilization';
 import type { MonitoredStat } from '../monitoring/monitoring_stats_stream';
 import type { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
+import type { TaskManagerStartContract } from '..';
+import { TASK_ID } from './constants';
+
+const eventLogState = {
+  has_errors: false,
+  runs: 1,
+  total_task_runs_24hr: 150,
+  task_runs_by_type_24hr: [
+    { name: 'alerting:.index-threshold', value: 100 },
+    { name: 'actions:.server-log', value: 50 },
+  ],
+  task_runs_other_24hr: 0,
+  schedule_delay_ms_24hr: { p50: 100, p75: 250, p95: 1200, p99: 5000 },
+};
+
+const createGetTaskManagerStart = (state: unknown = eventLogState) =>
+  jest.fn().mockResolvedValue({
+    get: jest.fn().mockResolvedValue({ state }),
+  } as unknown as TaskManagerStartContract);
 
 describe('registerTaskManagerUsageCollector', () => {
   let collector: Collector<unknown>;
@@ -40,7 +59,9 @@ describe('registerTaskManagerUsageCollector', () => {
       usageCollectionMock,
       monitoringStats$,
       monitoringUtilization$,
-      ['actions:*']
+      ['actions:*'],
+      createGetTaskManagerStart(),
+      logger
     );
 
     const mockHealth = getMockMonitoredHealth();
@@ -68,7 +89,9 @@ describe('registerTaskManagerUsageCollector', () => {
       usageCollectionMock,
       monitoringStats$,
       monitoringUtilization$,
-      ['actions:*']
+      ['actions:*'],
+      createGetTaskManagerStart(),
+      logger
     );
 
     const mockHealth = getMockMonitoredHealth();
@@ -105,7 +128,9 @@ describe('registerTaskManagerUsageCollector', () => {
       usageCollectionMock,
       monitoringStats$,
       monitoringUtilization$,
-      ['actions:*']
+      ['actions:*'],
+      createGetTaskManagerStart(),
+      logger
     );
 
     const mockHealth = getMockMonitoredHealth();
@@ -116,6 +141,122 @@ describe('registerTaskManagerUsageCollector', () => {
 
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+    expect(telemetry.capacity).toEqual(10);
+    expect(telemetry.configured_capacity).toEqual(10);
+  });
+
+  it('should report telemetry from the snapshot telemetry task state', async () => {
+    const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    const fetchContext = createCollectorFetchContextMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
+
+    const taskManager = {
+      get: jest.fn().mockResolvedValue({ state: eventLogState }),
+    } as unknown as TaskManagerStartContract;
+    const getTaskManagerStart = jest.fn().mockResolvedValue(taskManager);
+
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      ['actions:*'],
+      getTaskManagerStart,
+      logger
+    );
+
+    monitoringStats$.next(getMockMonitoredHealth());
+    monitoringUtilization$.next(getMockMonitoredUtilization());
+    await sleep(1001);
+
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+
+    expect(taskManager.get).toHaveBeenCalledWith(TASK_ID);
+    expect(telemetry.total_task_runs_24hr).toEqual(150);
+    expect(telemetry.task_runs_by_type_24hr).toEqual([
+      { name: 'alerting:.index-threshold', value: 100 },
+      { name: 'actions:.server-log', value: 50 },
+    ]);
+    expect(telemetry.task_runs_other_24hr).toEqual(0);
+    expect(telemetry.schedule_delay_ms_24hr).toEqual({ p50: 100, p75: 250, p95: 1200, p99: 5000 });
+  });
+
+  it('should report defaults when the snapshot telemetry task has not run yet', async () => {
+    const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    const fetchContext = createCollectorFetchContextMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
+
+    const getTaskManagerStart = jest.fn().mockResolvedValue({
+      get: jest.fn().mockRejectedValue(new Error('NotInitialized taskManager is still starting')),
+    } as unknown as TaskManagerStartContract);
+
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      ['actions:*'],
+      getTaskManagerStart,
+      logger
+    );
+
+    monitoringStats$.next(getMockMonitoredHealth());
+    monitoringUtilization$.next(getMockMonitoredUtilization());
+    await sleep(1001);
+
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+
+    expect(telemetry.total_task_runs_24hr).toEqual(0);
+    expect(telemetry.task_runs_by_type_24hr).toEqual([]);
+    expect(telemetry.task_runs_other_24hr).toEqual(0);
+    expect(telemetry.schedule_delay_ms_24hr).toEqual({
+      p50: null,
+      p75: null,
+      p95: null,
+      p99: null,
+    });
+  });
+
+  it('should not throw when reading the task state fails unexpectedly', async () => {
+    const monitoringStats$ = new Subject<MonitoredHealth>();
+    const monitoringUtilization$ = new Subject<MonitoredUtilization>();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    const fetchContext = createCollectorFetchContextMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
+
+    const getTaskManagerStart = jest.fn().mockResolvedValue({
+      get: jest
+        .fn()
+        .mockRejectedValue(new Error('Saved object [task/snapshot_telemetry] not found')),
+    } as unknown as TaskManagerStartContract);
+
+    registerTaskManagerUsageCollector(
+      usageCollectionMock,
+      monitoringStats$,
+      monitoringUtilization$,
+      ['actions:*'],
+      getTaskManagerStart,
+      logger
+    );
+
+    monitoringStats$.next(getMockMonitoredHealth());
+    monitoringUtilization$.next(getMockMonitoredUtilization());
+    await sleep(1001);
+
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+
+    expect(telemetry.total_task_runs_24hr).toEqual(0);
     expect(telemetry.capacity).toEqual(10);
   });
 });

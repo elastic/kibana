@@ -13260,6 +13260,71 @@
         },
         "capacity": {
           "type": "long"
+        },
+        "configured_capacity": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of normal cost tasks this Kibana runs simultaneously"
+          }
+        },
+        "total_task_runs_24hr": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of task runs started across the cluster in the last 24 hours, from the event log"
+          }
+        },
+        "task_runs_by_type_24hr": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The task type"
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of runs started for this task type in the last 24 hours"
+                }
+              }
+            }
+          }
+        },
+        "task_runs_other_24hr": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of runs started in the last 24 hours belonging to task types outside the task_runs_by_type_24hr breakdown, which is capped to the highest volume task types"
+          }
+        },
+        "schedule_delay_ms_24hr": {
+          "properties": {
+            "p50": {
+              "type": "long",
+              "_meta": {
+                "description": "50th percentile of task schedule delay in ms over 24 hours"
+              }
+            },
+            "p75": {
+              "type": "long",
+              "_meta": {
+                "description": "75th percentile of task schedule delay in ms over 24 hours"
+              }
+            },
+            "p95": {
+              "type": "long",
+              "_meta": {
+                "description": "95th percentile of task schedule delay in ms over 24 hours"
+              }
+            },
+            "p99": {
+              "type": "long",
+              "_meta": {
+                "description": "99th percentile of task schedule delay in ms over 24 hours"
+              }
+            }
+          }
         }
       }
     },
