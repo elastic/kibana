@@ -15,11 +15,15 @@ import type {
 } from '@kbn/saved-search-plugin/public';
 import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../server';
 import type { DiscoverSessionClient } from './api_client';
-import { prepareDiscoverSession } from './session_preparation';
-import { getDiscoverSessionReferences, toDiscoverSessionApiData } from './session_conversions';
+import {
+  fromDiscoverSessionApiResponse,
+  getDiscoverSessionReferences,
+  toDiscoverSessionApiData,
+} from './session_conversions';
 
 // Coordinates session loading and saving through HTTP or the legacy client, selected by the flag.
-// HTTP loads prepare the API response for Discover and return its warnings without showing UI.
+// HTTP loads convert the API response and return its warnings without showing UI.
+// Local Data View IDs are assigned when the UI restores its tabs, not by this service.
 // HTTP saves convert the session into a create or upsert request, then keep the submitted tabs
 // and update only the session ID, metadata, and references from the response.
 
@@ -61,7 +65,7 @@ export const createSessionService = ({
     get: async (id) => {
       const response = await apiClient.get(id);
       return {
-        session: prepareDiscoverSession(response, response.resolve),
+        session: fromDiscoverSessionApiResponse(response, response.resolve),
         warnings: response.warnings ?? [],
       };
     },

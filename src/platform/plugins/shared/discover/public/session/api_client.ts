@@ -50,10 +50,12 @@ export type DiscoverSessionGetResult = DiscoverSessionGetResponse & {
 /** Creates the browser client used by Discover's core session flows. */
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
-    http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
-      version: DISCOVER_SESSION_API_VERSION,
-      body: JSON.stringify(data),
-    }),
+    requestWithReadableError(() =>
+      http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
+        version: DISCOVER_SESSION_API_VERSION,
+        body: JSON.stringify(data),
+      })
+    ),
 
   get: (id) =>
     requestWithReadableError(
@@ -79,10 +81,12 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
     ),
 
   upsert: (id, data) =>
-    http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
-      version: DISCOVER_SESSION_API_VERSION,
-      body: JSON.stringify(data),
-    }),
+    requestWithReadableError(() =>
+      http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
+        version: DISCOVER_SESSION_API_VERSION,
+        body: JSON.stringify(data),
+      })
+    ),
   // TODO: Add DELETE when connecting Discover's session deletion flow to the HTTP API.
 });
 

@@ -132,22 +132,28 @@ describe('Discover session API client', () => {
     );
   });
 
-  it('preserves the original HTTP error when create fails', async () => {
+  it('uses the server message and keeps the original cause when create fails', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
     const error = createBadRequestError();
     http.post.mockRejectedValue(error);
 
-    await expect(client.create(data)).rejects.toBe(error);
+    const result = client.create(data);
+
+    await expect(result).rejects.toThrow('chart_interval must be a supported value');
+    await expect(result).rejects.toHaveProperty('cause', error);
   });
 
-  it('preserves the original HTTP error when upsert fails', async () => {
+  it('uses the server message and keeps the original cause when upsert fails', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
     const error = createBadRequestError();
     http.put.mockRejectedValue(error);
 
-    await expect(client.upsert('session-id', data)).rejects.toBe(error);
+    const result = client.upsert('session-id', data);
+
+    await expect(result).rejects.toThrow('chart_interval must be a supported value');
+    await expect(result).rejects.toHaveProperty('cause', error);
   });
 });
 

@@ -10,7 +10,8 @@
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import { unpinFilter } from '@kbn/es-query';
-import { isPlainObject } from 'lodash';
+import { cloneDeep, isPlainObject } from 'lodash';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import {
   injectReferences,
   parseSearchSourceJSON,
@@ -39,9 +40,9 @@ import { fromApiTabTypeState, toApiTabTypeState } from '../../common/session/tab
 // Converts between API documents and Discover's in-memory sessions, including their references.
 // The stored-tab format is only an intermediate step to reuse existing search and table conversions;
 // this file does not read or write Saved Objects. Chart, control, and tab-type conversions are shared.
-// The client handles HTTP, while session_preparation adds local IDs and filter defaults after loading.
+// Reading applies filter defaults; the client handles HTTP, and tab restoration assigns inline IDs.
 
-/** Builds a Discover session from API data and URL-resolution metadata, before local preparation. */
+/** Builds a Discover session from API data, including filter defaults and URL-resolution metadata. */
 export const fromDiscoverSessionApiResponse = (
   response: DiscoverSessionApiResponse,
   resolve?: DiscoverSessionResolve
@@ -110,7 +111,7 @@ const fromApiTab = (apiTab: DiscoverSessionApiTab) => {
     jsonModeSettings: storedTab.jsonModeSettings,
     isTextBasedQuery: storedTab.isTextBasedQuery,
     usesAdHocDataView: apiTab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
-    serializedSearchSource,
+    serializedSearchSource: normalizeSearchSourceFilters(serializedSearchSource),
     hideChart: apiTab.hide_chart,
     hideTable: apiTab.hide_table,
     hideAggregatedPreview: apiTab.hide_aggregated_preview,
@@ -207,4 +208,17 @@ const toApiSearchSource = (tab: DiscoverSessionTab) => {
 const getInlineDataViewId = (searchSource: SerializedSearchSourceFields) => {
   const { index } = searchSource;
   return index && typeof index !== 'string' ? index.id : undefined;
+};
+
+/** Applies FilterManager's defaults to copied filters so opening a session does not look like an edit. */
+const normalizeSearchSourceFilters = (searchSource: SerializedSearchSourceFields) => {
+  const { filter } = searchSource;
+  if (!filter) {
+    return searchSource;
+  }
+
+  return {
+    ...searchSource,
+    filter: mapAndFlattenFilters(cloneDeep(filter)),
+  };
 };
