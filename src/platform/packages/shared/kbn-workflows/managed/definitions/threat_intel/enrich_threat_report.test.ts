@@ -126,13 +126,19 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     expect(workflow.enabled).toBe(false);
   });
 
-  it('routes enrich HTTP calls through a fixed real space, not workflow.spaceId', () => {
-    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain('routeSpaceId: "default"');
+  // Not "-global": a space literally named "global" running the pre-space-aware
+  // version of this workflow would collide with a real global install's key.
+  it('uses a concurrency key with no space or "global" suffix', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain('key: "threat-intel-enrich"');
+  });
+
+  // No `/s/{id}/` prefix resolves to the `default` space implicitly, same as the
+  // former `routeSpaceId: "default"` variable did, without needing the variable.
+  it('calls the enrich routes with no space prefix, resolving to the default space', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('routeSpaceId');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toMatch(/path:\s*"\/s\//);
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
-      '/s/{{ variables.routeSpaceId }}/internal/threat_intel/'
-    );
-    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain(
-      '/s/{{ variables.spaceId }}/internal/threat_intel/'
+      'path: "/internal/threat_intel/assess_relevance"'
     );
   });
 
