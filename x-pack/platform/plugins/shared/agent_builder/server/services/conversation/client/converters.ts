@@ -12,7 +12,9 @@ import type {
   ConversationRoundStep,
   ConversationWithoutRounds,
   CurrentUser,
+  RoundInput,
   ToolResult,
+  TimelineEvent,
   UserIdAndName,
   SerializedMetadataValue,
   ConversationParentRelation,
@@ -59,7 +61,12 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import {
+  isRoundDerivedEventId,
+  parseExecutionId,
+  roundToEvents,
+  roundsToEvents,
+} from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -80,14 +87,45 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
+/** True when a round's stored timeline spans more than one execution (a HITL resume). */
+const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
+  storedEvents.some((event) => {
+    const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
+    return execution?.roundId === roundId && execution.index > 0;
+  });
+
 /**
- * Rebuilds the stored timeline on write: round events keep their order, and additive events
- * (like errors) get slotted in by timestamp. That keeps a future error where it actually
- * happened instead of dumped at the end.
+ * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
+ * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
+ * original user message. Undefined refs mean no update; an empty array explicitly clears them.
  */
-const reconcileEvents = (merged: Conversation) => {
-  const roundDerived = roundsToEvents(merged);
-  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
+const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
+  const stored = merged.events ?? [];
+  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
+
+  const roundDerived: TimelineEvent[] = [];
+  for (const round of merged.rounds) {
+    const storedForRound = stored.filter(
+      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
+    );
+    if (hasResumeExecution(round.id, storedForRound)) {
+      const userMessageId = `${round.id}::user_message`;
+      roundDerived.push(
+        ...storedForRound.map((event) => {
+          if (event.id !== userMessageId || !round.input.attachment_refs) {
+            return event;
+          }
+          const data = event.data as RoundInput;
+          return {
+            ...event,
+            data: { ...data, attachment_refs: round.input.attachment_refs },
+          } as TimelineEvent;
+        })
+      );
+    } else {
+      roundDerived.push(...roundToEvents(round, merged));
+    }
+  }
 
   const events = [...roundDerived];
   for (const event of additive) {
@@ -463,7 +501,7 @@ export const updateConversation = ({
   updateDate: Date;
 }) => {
   const {
-    events: _ignoredEvents,
+    events: updateEvents,
     schema_version: _ignoredSchemaVersion,
     ...safeUpdate
   } = update as ConversationUpdatableFields & {
@@ -479,7 +517,16 @@ export const updateConversation = ({
     schema_version: conversation.schema_version,
   } as Conversation;
 
-  if (!isEventsNativeVersion(merged.schema_version)) {
+  if (updateEvents !== undefined) {
+    return {
+      ...merged,
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: updateEvents,
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
+    };
+  }
+
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
     return merged;
   }
 
@@ -506,8 +553,6 @@ export const createRequestToEs = ({
   const effectiveUser = conversation.user ?? currentUser;
   const createdAt = creationDate.toISOString();
 
-  // The initial timeline is derived from the rounds being created, using the same user that
-  // gets persisted so `user_message` actors match the stored ownership.
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
@@ -518,7 +563,10 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events = roundsToEvents(forEvents);
+  const events =
+    conversation.events && conversation.events.length > 0
+      ? conversation.events
+      : roundsToEvents(forEvents);
 
   return {
     agent_id: conversation.agent_id,

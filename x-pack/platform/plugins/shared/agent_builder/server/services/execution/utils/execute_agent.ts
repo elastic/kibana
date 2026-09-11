@@ -20,7 +20,10 @@ import type {
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 
 export const executeAgent$ = ({
   agentId,
@@ -37,6 +40,7 @@ export const executeAgent$ = ({
   defaultConnectorId,
   telemetryMetadata,
   maxContentLength,
+  reasoningLevel,
   browserApiTools,
   configurationOverrides,
   action,
@@ -44,6 +48,7 @@ export const executeAgent$ = ({
   interactivity,
   parentExecutionId,
   projectRouting,
+  roundId,
 }: {
   agentId: string;
   executionId: string;
@@ -59,6 +64,7 @@ export const executeAgent$ = ({
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
+  reasoningLevel?: ChatCompletionReasoningEffort;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
@@ -66,6 +72,7 @@ export const executeAgent$ = ({
   interactivity?: InteractivityConfigInput;
   parentExecutionId?: string;
   projectRouting?: string;
+  roundId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -76,6 +83,7 @@ export const executeAgent$ = ({
       defaultConnectorId,
       telemetryMetadata,
       maxContentLength,
+      reasoningLevel,
       executionMode,
       interactive: interactivity,
       parentExecutionId,
@@ -91,6 +99,7 @@ export const executeAgent$ = ({
         outputSchema,
         action,
         executionId,
+        roundId,
       },
       onEvent: (event) => {
         observer.next(event);

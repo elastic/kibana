@@ -18,6 +18,6 @@ export { listApisForTarget } from './list_apis';
 export type { ApiSummary } from './list_apis';
 export { EXPANDABLE_KEY, toDescribedDefinition, toDescribedSchema } from './describe_schema';
 export type { DescribedSchema } from './describe_schema';
-export { getUnsupportedReason, prepareApiRequest } from './prepare_request';
+export { prepareApiRequest } from './prepare_request';
 export type { PrepareApiRequestFailure } from './prepare_request';
 export { dispatchApiRequest, getFailureDetails } from './dispatch_request';

@@ -77,9 +77,18 @@ steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
     with:
       node-version-file: '.nvmrc'
-      cache: yarn
+  - name: Enable corepack-managed pnpm
+    # Kibana pins pnpm via package.json "engines.pnpm" (no "packageManager" field) and
+    # `kbn bootstrap` refuses to run without it. corepack drops the `pnpm` shim next to
+    # `node`, so the `KBN_NODE_BIN` export below exposes it to the agent too.
+    run: |
+      export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+      PNPM_VERSION="$(node -p "require('./package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+      corepack enable
+      corepack prepare "pnpm@${PNPM_VERSION}" --activate
+      pnpm --version
   - name: Bootstrap Kibana
-    run: yarn kbn bootstrap
+    run: pnpm kbn bootstrap
   - name: Expose Kibana's Node.js path to the agent
     # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
     # `node` is whichever version the runner cached first, not the one setup-node just
@@ -217,8 +226,9 @@ max-ai-credits: 1200
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - a PR already addresses this root cause (open or merged) — see [Duplicate detection](#duplicate-detection), which runs first as step 1;
-- you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
-- the fix has to target a version branch (see "Fixes that must target a version branch").
+- you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix;
+- the fix has to target a version branch (see "Fixes that must target a version branch"); or
+- the failing test is under `x-pack/solutions/security/test/security_solution_cypress/cypress/` and the doctor's action is one this fixer does not ship (migrate, a new Scout spec, or a new API/unit test) — see [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship).
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
 
@@ -237,7 +247,7 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 
 ## Environment
 
-Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `yarn`, since each call starts a fresh shell:
+Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `pnpm`, since each call starts a fresh shell:
 
 ```bash
 export PATH="$KBN_NODE_BIN:$PATH"
@@ -261,7 +271,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 2. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any relevant PR/commit history and its precise causal role, and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 8.
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
-5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
+5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). If the failing test is Security Cypress, apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) first — a migrate / new-Scout verdict means skip to step 8, not a Scout rewrite. Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 7. Open the PR (see "PR format" below) without release-note or backport labels. The Flaky Fix Verifier applies both after it validates the PR. If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
@@ -280,9 +290,37 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 - **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
 - the comment is **absent**, or offers no actionable root cause.
 
-To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
+To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). The doctor owns the diagnosis and recommended action; if the two skills disagree, the doctor wins. Use the `flaky-test-investigator` skill only for CI artifact retrieval, pipeline context, and this workflow's steps, PR format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance. Then apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) before writing any patch.
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## Security Cypress: what this fixer may ship
+
+When the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, the doctor names one action. This fixer may **execute** only a subset of those actions. Diagnosis still belongs to the doctor; shipping does not.
+
+| Doctor action | This fixer |
+| --- | --- |
+| `delete` | Open a **delete-only** draft PR. Also delete helpers, screens, tasks, fixtures, users/roles, and archives that become unused. Grep remaining Cypress, Scout, and API tests before deleting a shared file. |
+| `migrate`, or any action that requires writing a **new** Scout spec or page object | **No PR.** Do not scaffold a spec, copy Cypress into Playwright, or add a page object to start a migration. Hand off in the outcome comment (see below). |
+| `move-to-api-or-unit` when that test **already exists** and Cypress is duplicate | Treat as `delete`. |
+| `move-to-api-or-unit` when a **new** API/unit test would be needed | **No PR.** Same handoff as migrate. |
+| `fix-app`, or a Cypress patch on a `@serverlessQA` test | Smallest product or Cypress fix, existing guardrails. |
+| environment / no repo change | No PR. |
+
+Hard bans (do not "helpfully" do these anyway):
+
+- Do not migrate Cypress to Scout.
+- Do not write a new Scout spec or page object from scratch.
+- Do not delete a test **instead of** migrating. If Scout coverage is still required, that is a handoff, not a delete.
+- Do not implement an investigator Cypress wait (toast, intercept, timeout) when the doctor said leave Cypress.
+
+A doctor `delete` is an intentional removal (navigation/page-load, or coverage already at API/unit), not skipping a flake. It is the one exception to the imported "don't reduce coverage" guardrail.
+
+**Handoff** (no PR): use the "Migrate Cypress test to Scout" outcome comment. Point the requester at these skills — read the files; do not invoke them, and do not follow the doctor's "open CI in the browser" guidance:
+
+- `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/`
+- `.agents/skills/scout-ui-testing/`
+- `.agents/skills/scout-api-testing/`
 
 ## Verifying a Jest fix
 
@@ -296,12 +334,12 @@ for i in $(seq 1 25); do
   node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
   node -e 'const a = require("/tmp/gh-aw/agent/jest-run.json").testResults[0]?.assertionResults.find((t) => t.fullName.includes(process.argv[1])); console.log(a ? a.duration : 0)' '<distinctive substring of the test name>' >> /tmp/gh-aw/agent/jest-durations
 done
-echo "$fails/25 runs failed"
+echo "$((25 - fails))/25 passed ($fails failed)"
 awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
 ```
 
 - **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
-- **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
+- **Report both loops** as pass counts, not failure counts: `<passes>/<runs>` before the fix (avg, max), then the same after — e.g. `21/25` then `25/25`, never `4/25 failed` / `0/25 failed`. Use that on the Jest line of "Verified locally" and in the runtime table. Add under "Not verified locally" that neither loop ran under CI's parallel load.
 - **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
@@ -311,7 +349,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 Write the body so a developer can grasp the fix and its root cause at a glance, from the PR alone — without needing to open links or leave the page (links are still welcome for anyone who wants to dig deeper).
 
 - **Branch**: name the PR's source branch `fix/flaky-<issue-number>-<short-kebab-slug>` (e.g. `fix/flaky-275144-host-flow-ingestion-wait`) to keep fixer branches uniform.
-- **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
+- **Title**: `[<Feature>] <concise summary of the fix>`. Prefix by the user-facing area or named project this serves (the `Feature:` / `Project:` a maintainer would triage it under), not the plugin/package folder you edited — e.g. `[Fleet]`, `[Alerting v2]`, `[Chrome Next]`.
 - **Body**:
   ```
   Fixes #<issue-number>
@@ -321,10 +359,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   <only when the test failed by running past its time budget, add this table right below the Summary, so the numbers are visible without opening Verification. Fill it from the two loops in "Verifying a Jest fix", and name the budget the test failed against (5s unless the file raises it with `jest.setTimeout`):
 
-  | Runtime vs. 5s budget | Failed | Avg | Max |
+  | Runtime vs. 5s budget | Passed | Avg | Max |
   | --- | --- | --- | --- |
-  | Before fix | 4/25 | 4.6s | 5.0s |
-  | After fix | 0/25 | 0.9s | 1.1s |
+  | Before fix | 21/25 | 4.6s | 5.0s |
+  | After fix | 25/25 | 0.9s | 1.1s |
 
   Omit the table for every other kind of flake.>
 
@@ -343,10 +381,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
-  ✅ Passed: `node scripts/eslint <files>`
-  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
-  ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
+  <one bullet per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
+  - ✅ Passed: `node scripts/eslint <files>`
+  - ✅ Passed: `node scripts/jest <test>`: 21/25 passed before the fix (avg 820ms, max 4.9s), 25/25 after (avg 890ms, max 1.0s)
+  - ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
   #### Not verified locally
 
@@ -372,7 +410,7 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Release-note and backport labels
 
-Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification, adds a user-focused `## Release note` section for `release_note:fix`, and leaves its label rationale in a short PR comment; label guidance does not belong in the PR body.
+Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification, adds a user-focused `## Release note` section for `release_note:fix`, and leaves its label rationale in a collapsed PR comment section; label guidance does not belong in the PR body.
 
 The only exception is a failure that must be fixed directly on a version branch and therefore cannot produce a `main` PR for the verifier. In that no-PR hand-off, use `release_note:skip` for internal changes, documentation changes, fixes for unreleased features, or other non-user-facing changes; use `release_note:fix` for user-facing bug fixes to already released versions. For `release_note:fix`, include a `## Release note` section with one concise, user-focused description of what the change does for the user. Also include any confident version-branch labels described below.
 
@@ -461,6 +499,13 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Migrate Cypress test to Scout** (Security Cypress — doctor action is migrate, a new Scout spec, or a new API/unit test; no PR opened):
+  ```markdown
+  ### 🔄 Migrate Cypress test to Scout
+
+  The doctor recommends migrating this Cypress coverage to Scout, which this fixer does not implement. Use the [`security-cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/SKILL.md), [`scout-ui-testing`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-ui-testing/SKILL.md) and [`scout-api-testing`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-api-testing/SKILL.md) skills as needed. Do not patch the Cypress spec.
+  ```
+  For a new API or unit test rather than Scout, swap the heading to `### 🔄 Move Cypress coverage to API` or `### 🔄 Move Cypress coverage to unit` — pick the destination the doctor named — and name that destination in the sentence.
 - **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
   ```markdown
   ### 🕒 Pre-fix CI lag, not a regression

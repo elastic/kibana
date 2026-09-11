@@ -16,6 +16,13 @@ type ServerUrlParts = UrlParts & {
 export interface ScoutServerConfig {
   serverless?: boolean;
   http2?: boolean;
+  /**
+   * Set when the test servers boot Kibana into the `preboot` stage on purpose and it never reaches
+   * the `available` status (first-boot / interactive setup suites). Scout skips the post-startup
+   * steps that require a fully booted, security-enabled Kibana, such as pre-creating the
+   * Elasticsearch Security indexes via SAML authentication.
+   */
+  prebootOnly?: boolean;
   servers: {
     kibana: ServerUrlParts;
     elasticsearch: ServerUrlParts;
@@ -39,5 +46,9 @@ export interface ScoutServerConfig {
     sourceArgs: string[];
     serverArgs: string[];
     useDedicatedTestRunner?: boolean;
+    runOptions?: {
+      wait?: RegExp;
+      alwaysUseSource?: boolean;
+    };
   };
 }
