@@ -5121,6 +5121,9 @@ importers:
       '@kbn/dependency-ownership':
         specifier: workspace:*
         version: link:packages/kbn-dependency-ownership
+      '@kbn/dependency-quarantine':
+        specifier: workspace:*
+        version: link:packages/kbn-dependency-quarantine
       '@kbn/dependency-usage':
         specifier: workspace:*
         version: link:packages/kbn-dependency-usage
@@ -6694,6 +6697,8 @@ importers:
   packages/kbn-cli-dev-mode: {}
 
   packages/kbn-dependency-ownership: {}
+
+  packages/kbn-dependency-quarantine: {}
 
   packages/kbn-dependency-usage: {}
 

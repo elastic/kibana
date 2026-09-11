@@ -247,6 +247,7 @@ packages:
   - 'packages/kbn-ci-stats-shipper-cli'
   - 'packages/kbn-cli-dev-mode'
   - 'packages/kbn-dependency-ownership'
+  - 'packages/kbn-dependency-quarantine'
   - 'packages/kbn-dependency-usage'
   - 'packages/kbn-docs-utils'
   - 'packages/kbn-eslint-config'
