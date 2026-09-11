@@ -394,6 +394,8 @@ describe('maybeCreateDockerNetwork()', () => {
 });
 
 describe('maybePullDockerImage()', () => {
+  const logged = () => logWriter.messages.join('\n');
+
   test('should pull the passed image', async () => {
     execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
@@ -401,6 +403,8 @@ describe('maybePullDockerImage()', () => {
 
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+    expect(logged()).toContain('prefer-cached: disabled (KBN_ES_SNAPSHOT_USE_CACHED=false)');
+    expect(logged()).toContain('decision: pull (prefer-cached is disabled)');
   });
 
   describe('with KBN_ES_SNAPSHOT_USE_CACHED=true', () => {
@@ -419,6 +423,9 @@ describe('maybePullDockerImage()', () => {
 
       expect(execa.mock.calls).toHaveLength(1);
       expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+      expect(logged()).toContain('prefer-cached: enabled (KBN_ES_SNAPSHOT_USE_CACHED=true)');
+      expect(logged()).toContain('local image: found (local-image-id)');
+      expect(logged()).toContain('decision: skip pull');
     });
 
     test('pulls when the image is not available locally', async () => {
@@ -430,6 +437,21 @@ describe('maybePullDockerImage()', () => {
 
       expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
       expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+      expect(logged()).toContain('prefer-cached: enabled (KBN_ES_SNAPSHOT_USE_CACHED=true)');
+      expect(logged()).toContain('local image: not found');
+      expect(logged()).toContain('decision: pull (image is not available locally)');
+    });
+
+    test('pulls when the local image check fails', async () => {
+      execa
+        .mockImplementationOnce(() => Promise.reject({ message: 'docker daemon not running' }))
+        .mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+      expect(logged()).toContain('local image check failed (docker daemon not running)');
+      expect(logged()).toContain('decision: pull (local image check failed)');
     });
   });
 });
