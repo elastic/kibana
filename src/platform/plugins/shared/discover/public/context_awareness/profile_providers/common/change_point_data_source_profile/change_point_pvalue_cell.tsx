@@ -52,8 +52,8 @@ export const ChangePointPvalueCell: FC<ChangePointPvalueCellProps> = ({
   const raw = row.flattened?.[columnId] ?? row.flattened?.[context.pvalueColumnId];
   const pvalue = typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
 
-  if (pvalue === null || pvalue === undefined) {
-    return null;
+  if (pvalue === null) {
+    return <>-</>;
   }
 
   const level = getPvalueImpactLevel(pvalue);

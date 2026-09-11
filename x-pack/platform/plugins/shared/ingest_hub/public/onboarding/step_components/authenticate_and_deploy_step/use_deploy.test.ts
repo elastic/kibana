@@ -7,7 +7,13 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import { getRegionFieldName, buildStreamVars, buildPackageInputs, useDeploy } from './use_deploy';
+import {
+  getRegionFieldName,
+  buildStreamVars,
+  buildPackageInputs,
+  toSOServiceVars,
+  useDeploy,
+} from './use_deploy';
 import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
@@ -20,9 +26,20 @@ function makeVarDef(
   return { name, type, title: name, ...opts } as RegistryVarsEntry;
 }
 
+jest.mock('react-router-dom', () => ({
+  useHistory: jest.fn(),
+  useParams: jest.fn(),
+}));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
+
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
+  sendCreateCloudOnboardingDeployment: jest.fn(),
+  sendUpdateCloudOnboardingDeployment: jest.fn(),
 }));
 
 jest.mock('../../use_aws_service_matrix', () => {
@@ -124,15 +141,27 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
-import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
+import {
+  sendCreateAgentlessPolicy,
+  sendGetPackageInfoByKey,
+  sendCreateCloudOnboardingDeployment,
+  sendUpdateCloudOnboardingDeployment,
+} from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useHistory, useParams } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
+const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
+const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockUseHistory = useHistory as jest.Mock;
+const mockUseParams = useParams as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -679,6 +708,12 @@ function setupMocks({
   detectAndReviewStep?: Record<string, unknown>;
   instances?: Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>;
 } = {}) {
+  mockUseHistory.mockReturnValue({ location: { search: '', hash: '' }, replace: jest.fn() });
+  mockUseParams.mockReturnValue({ integrationId: 'aws' });
+  mockUseKibana.mockReturnValue({
+    services: { notifications: { toasts: { addDanger: jest.fn() } } },
+  });
+
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
     authenticateAndDeployStep: { connectorId, staticKeys },
@@ -710,6 +745,8 @@ function setupMocks({
   });
 
   mockSendCreateAgentlessPolicy.mockResolvedValue({ data: {} });
+  mockSendCreateCloudOnboardingDeployment.mockResolvedValue({ item: { id: 'so-dep-123' } });
+  mockSendUpdateCloudOnboardingDeployment.mockResolvedValue({ item: { id: 'so-dep-123' } });
 }
 
 describe('useDeploy', () => {
@@ -1144,5 +1181,321 @@ describe('useDeploy', () => {
     // Managed integrations API called once (for ec2; cloudtrail is ecf, non-managed)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  // ─── SO write (cloud-onboarding-deployment) ─────────────────────────────────
+
+  describe('cloud-onboarding-deployment SO', () => {
+    it('creates SO before dispatch when connectorId is set', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'connector-abc', provider: 'aws' })
+      );
+      // Agentless policy fires after SO creation
+      expect(mockSendCreateAgentlessPolicy).toHaveBeenCalled();
+    });
+
+    it('creates SO with authMethod: static_keys when no connectorId', async () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: undefined,
+        staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ authMethod: 'static_keys', provider: 'aws' })
+      );
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.not.objectContaining({ connectorId: expect.anything() })
+      );
+    });
+
+    it('passes authMethod: identity_federation when connectorId is set', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ authMethod: 'identity_federation' })
+      );
+    });
+
+    it('passes authMethod: static_keys and omits connectorId when no connector', async () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: undefined,
+        staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({ authMethod: 'static_keys' })
+      );
+      const callArg = mockSendCreateCloudOnboardingDeployment.mock.calls[0][0];
+      expect(callArg.connectorId).toBeUndefined();
+    });
+
+    it('saves onboardingDeploymentId to session via updateDetectAndReviewStep', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const updateDetectAndReviewStep = mockUseOnboardingFlow.mock.results[0].value
+        .updateDetectAndReviewStep as jest.Mock;
+      const idUpdate = updateDetectAndReviewStep.mock.calls.find(
+        ([u]: [Record<string, unknown>]) => 'onboardingDeploymentId' in u
+      )?.[0];
+      expect(idUpdate?.onboardingDeploymentId).toBe('so-dep-123');
+    });
+
+    it('updates SO with packagePolicyIds and succeeded status after successful deploy', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'p-1' } });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        'so-dep-123',
+        expect.objectContaining({ status: 'succeeded', packagePolicyIds: ['p-1'] })
+      );
+    });
+
+    it('updates SO with failed status when deploy fails', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        'so-dep-123',
+        expect.objectContaining({ status: 'failed' })
+      );
+    });
+
+    it('SO creation failure is non-fatal — deploy still proceeds', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendCreateCloudOnboardingDeployment.mockRejectedValue(new Error('SO create failed'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateAgentlessPolicy).toHaveBeenCalled();
+      expect(mockSendUpdateCloudOnboardingDeployment).not.toHaveBeenCalled();
+    });
+
+    it('uses existing onboardingDeploymentId on retry without creating a new SO', async () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        detectAndReviewStep: {
+          serviceStatuses: { ec2: 'error' },
+          failedInstances: ['ec2'],
+          onboardingDeploymentId: 'existing-dep-id',
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy(['ec2']);
+      });
+
+      expect(mockSendCreateCloudOnboardingDeployment).not.toHaveBeenCalled();
+      expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        'existing-dep-id',
+        expect.objectContaining({ status: expect.stringMatching(/succeeded|failed/) })
+      );
+    });
+
+    it('dedupes packagePolicyIds when prior bundled deploy mapped multiple instances to the same policy', async () => {
+      // Simulates a retry where detectAndReviewStep already holds inst-a and inst-b both pointing
+      // to 'shared-policy' (a bundled group from the prior run). The new deploy adds 'policy-ec2'.
+      // Without Set dedup, the merged Object.values would contain 'shared-policy' twice.
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        detectAndReviewStep: {
+          policyIdsByInstance: { 'inst-a': 'shared-policy', 'inst-b': 'shared-policy' },
+          onboardingDeploymentId: 'dep-dedup-test',
+        },
+      });
+      mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-ec2' } });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        // Retry — instanceIds provided — so no new SO create, uses existing dep id.
+        await result.current.handleDeploy(['ec2']);
+      });
+
+      const updateCall = mockSendUpdateCloudOnboardingDeployment.mock.calls[0];
+      const packagePolicyIds: string[] = updateCall[1].packagePolicyIds;
+      // Must contain each distinct policy exactly once.
+      expect(packagePolicyIds).toContain('shared-policy');
+      expect(packagePolicyIds).toContain('policy-ec2');
+      expect(packagePolicyIds.filter((id) => id === 'shared-policy')).toHaveLength(1);
+    });
+
+    it('shows addDanger toast when SO create fails (best-effort — deploy still proceeds)', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendCreateCloudOnboardingDeployment.mockRejectedValue(new Error('SO create failed'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const addDanger =
+        mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts?.addDanger;
+      expect(addDanger).toHaveBeenCalled();
+      // Deploy must still proceed despite the SO failure.
+      expect(mockSendCreateAgentlessPolicy).toHaveBeenCalled();
+    });
+
+    it('shows addDanger toast when SO update fails after deploy completes', async () => {
+      setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
+      mockSendUpdateCloudOnboardingDeployment.mockRejectedValue(new Error('SO update failed'));
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      const addDanger =
+        mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts?.addDanger;
+      expect(addDanger).toHaveBeenCalled();
+      // onContinue must still fire — update failure is non-fatal.
+      expect(
+        mockUseOnboardingFlow.mock.results[0].value.updateDetectAndReviewStep
+      ).toHaveBeenCalled();
+    });
+  });
+});
+
+// ─── toSOServiceVars ─────────────────────────────────────────────────────────
+
+describe('toSOServiceVars', () => {
+  function makeServiceWithMultiField(): AwsServiceMatrixEntry {
+    return {
+      id: 'svc',
+      name: 'Svc',
+      category: 'compute',
+      signalTypes: ['logs'],
+      dataStreams: ['svc'],
+      packageName: 'aws',
+      deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+      inputs: ['aws-s3'],
+      requiredConfig: [],
+      optionalConfig: ['regions'],
+      identityFederationSupported: true,
+      defaultEnabled: false,
+      defaultEnabledInputs: [],
+      showInUI: true,
+      varDefsByInput: {
+        'aws-s3': {
+          regions: makeVarDef('regions', 'text', { multi: true }),
+          // queue_url is a plain text field not in ECF_TRIGGER_VAR_NAMES — stays as string.
+          queue_url: makeVarDef('queue_url', 'text'),
+        },
+      },
+    };
+  }
+
+  it('converts multi-value string to array for SO storage', () => {
+    const service = makeServiceWithMultiField();
+    const servicesMap = new Map([['svc', service]]);
+    const result = toSOServiceVars(
+      {
+        svc: {
+          enabledDataStreams: ['svc'],
+          varsByDataStream: {
+            svc: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { regions: 'us-east-1,eu-west-1', bucket_arn: 'arn:...' } },
+            },
+          },
+        },
+      },
+      servicesMap
+    ) as Record<
+      string,
+      { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }
+    >;
+
+    expect(result.svc.varsByDataStream.svc.varsByInput['aws-s3'].regions).toEqual([
+      'us-east-1',
+      'eu-west-1',
+    ]);
+  });
+
+  it('leaves non-multi string fields unchanged', () => {
+    const service = makeServiceWithMultiField();
+    const servicesMap = new Map([['svc', service]]);
+    const result = toSOServiceVars(
+      {
+        svc: {
+          enabledDataStreams: ['svc'],
+          varsByDataStream: {
+            svc: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { regions: 'us-east-1', queue_url: 'https://sqs.example' } },
+            },
+          },
+        },
+      },
+      servicesMap
+    ) as Record<
+      string,
+      { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }
+    >;
+
+    expect(result.svc.varsByDataStream.svc.varsByInput['aws-s3'].queue_url).toBe(
+      'https://sqs.example'
+    );
+  });
+
+  it('passes through service not found in servicesMap unchanged', () => {
+    const servicesMap = new Map<string, AwsServiceMatrixEntry>();
+    const vars = {
+      unknown_svc: {
+        enabledDataStreams: ['unknown_svc'],
+        varsByDataStream: {
+          unknown_svc: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: { 'aws-s3': { regions: 'us-east-1,eu-west-1' } },
+          },
+        },
+      },
+    };
+    const result = toSOServiceVars(vars, servicesMap) as Record<
+      string,
+      { varsByDataStream: Record<string, { varsByInput: Record<string, Record<string, unknown>> }> }
+    >;
+    expect(result.unknown_svc.varsByDataStream.unknown_svc.varsByInput['aws-s3'].regions).toBe(
+      'us-east-1,eu-west-1'
+    );
   });
 });
