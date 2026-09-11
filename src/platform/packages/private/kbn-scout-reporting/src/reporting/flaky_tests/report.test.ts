@@ -134,6 +134,53 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     ).rejects.toThrow('lookbackDays must be a positive integer, got 1.5');
   });
 
+  it('rejects an empty classification list', async () => {
+    await expect(
+      ScoutFlakyTests.fromElasticsearch(es, { ...options, classifications: [] }, log)
+    ).rejects.toThrow('classifications must include at least one of');
+  });
+
+  it('drops tests of an excluded classification before the per-test lookups', async () => {
+    jest
+      .spyOn(queries, 'fetchFailingFiles')
+      .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
+    jest
+      .spyOn(queries, 'fetchTestStats')
+      .mockResolvedValue([
+        statsRow({ testId: 'jest-flaky', failedBuilds: 3 }),
+        statsRow({ testId: 'jest-broken', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
+      ]);
+    jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
+    const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(new Map());
+    const fetchSampleFailures = jest
+      .spyOn(queries, 'fetchSampleFailures')
+      .mockResolvedValue(new Map());
+
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(
+      es,
+      { ...options, classifications: ['flaky'] },
+      log
+    );
+
+    expect(report.scope.classifications).toEqual(['flaky']);
+    expect(report.flaky.map((entry) => entry.testId)).toEqual(['jest-flaky']);
+    expect(report.consistentlyFailing).toEqual([]);
+    expect(report.summary).toEqual({
+      totalFlaky: 1,
+      totalConsistentlyFailing: 0,
+      flakyByFramework: { jest: 1 },
+    });
+    expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
+      expect.objectContaining({ testId: 'jest-flaky' }),
+    ]);
+    expect(fetchSampleFailures).toHaveBeenCalledWith(
+      es,
+      expect.anything(),
+      ['jest-flaky'],
+      options.samplesPerTest
+    );
+  });
+
   it('aggregates per framework, classifies, ranks, caps and decorates the result', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
       { framework: 'jest', filePath: 'a.test.ts' },
@@ -348,6 +395,9 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
       ],
       consistentlyFailing: [],
     });
+
+    // reports written before `scope.classifications` existed default to both lists
+    expect(report.scope.classifications).toEqual(['flaky', 'consistently-failing']);
 
     const outputPath = path.join(tmpDir, 'nested', 'report.json');
     new ScoutFlakyTests(report).writeToFile(outputPath);
