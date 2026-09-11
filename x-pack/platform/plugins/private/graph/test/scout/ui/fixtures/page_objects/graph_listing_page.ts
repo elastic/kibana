@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
-import { ContentListWrapper } from '@kbn/scout';
+import { AppMenu, ContentListWrapper, type Locator, type ScoutPage } from '@kbn/scout';
 
 const LISTING_TIMEOUT = 20_000;
 
@@ -23,15 +22,15 @@ export class GraphListingPage {
   readonly emptyPromptCreateButton: Locator;
   readonly appHeader: Locator;
   private readonly emptyState: Locator;
-  private readonly appMenuOverflowButton: Locator;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
     this.contentList = new ContentListWrapper(page);
+    this.appMenu = new AppMenu(page);
     this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
     this.emptyPromptCreateButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
     this.appHeader = this.page.testSubj.locator('appHeader');
     this.emptyState = this.page.testSubj.locator('content-list-emptyState');
-    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
   }
 
   /**
@@ -56,10 +55,6 @@ export class GraphListingPage {
       await this.emptyPromptCreateButton.click();
       return;
     }
-    if (!(await this.createGraphButton.isVisible())) {
-      await this.appMenuOverflowButton.click();
-      await this.createGraphButton.waitFor({ state: 'visible' });
-    }
-    await this.createGraphButton.click();
+    await this.appMenu.clickItem(this.createGraphButton);
   }
 }

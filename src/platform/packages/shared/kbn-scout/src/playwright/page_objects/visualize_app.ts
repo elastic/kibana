@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { AppMenu } from './app_menu';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 type VisType = 'lens' | 'vega' | 'metrics' | 'aggbased' | 'maps';
@@ -25,6 +26,7 @@ export class VisualizeApp {
   private readonly editInLensButton;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
   readonly saveModal: SavedObjectSaveModal;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
     this.landingPage = this.page.testSubj.locator('visualizationLandingPage');
@@ -38,6 +40,7 @@ export class VisualizeApp {
     this.visualizationLoader = this.page.testSubj.locator('visualizationLoader');
     this.editInLensButton = this.page.testSubj.locator('visualizeEditInLensButton');
     this.saveModal = new SavedObjectSaveModal(this.page);
+    this.appMenu = new AppMenu(this.page);
   }
 
   async goto() {
@@ -47,41 +50,8 @@ export class VisualizeApp {
     await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
   }
 
-  private async revealAppMenuItem(item: typeof this.visualizeSaveButton) {
-    if (await item.isVisible()) {
-      return;
-    }
-
-    const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
-    const popover = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.popover);
-
-    // Poll separately: `.or().waitFor()` throws in strict mode when both
-    // locators are visible, and `.first()` is banned.
-    await expect
-      .poll(async () => (await item.isVisible()) || (await overflowButton.isVisible()))
-      .toBeTruthy();
-    if (await item.isVisible()) {
-      return;
-    }
-
-    if (await popover.isVisible()) {
-      await overflowButton.click();
-      await expect(popover).toBeHidden();
-    }
-
-    await overflowButton.click();
-    const popoverOpened = await popover
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!popoverOpened) {
-      await overflowButton.click();
-    }
-    await item.waitFor({ state: 'visible' });
-  }
-
   async openNewVisualizationWizard() {
-    await this.revealAppMenuItem(this.newItemButton);
+    await this.appMenu.revealItem(this.newItemButton);
     await this.newItemButton.click();
     await expect(this.visNewDialogGroups).toBeVisible();
   }
@@ -126,7 +96,7 @@ export class VisualizeApp {
   }
 
   async openSaveModal() {
-    await this.revealAppMenuItem(this.visualizeSaveButton);
+    await this.appMenu.revealItem(this.visualizeSaveButton);
     await this.visualizeSaveButton.click();
     await expect(this.saveModal.modal).toBeVisible();
   }
@@ -175,12 +145,12 @@ export class VisualizeApp {
   }
 
   async clickEditInLensButton() {
-    await this.revealAppMenuItem(this.editInLensButton);
+    await this.appMenu.revealItem(this.editInLensButton);
     await this.editInLensButton.click();
   }
 
   async expectEditInLensButtonVisible() {
-    await this.revealAppMenuItem(this.editInLensButton);
+    await this.appMenu.revealItem(this.editInLensButton);
     await expect(this.editInLensButton).toBeVisible();
   }
 
