@@ -207,6 +207,59 @@ describe('InMemoryExecutionPersistence', () => {
     expect(result).toEqual({ id: 'step-proj', status: ExecutionStatus.RUNNING });
   });
 
+  it('normalises absent output to null when sourceIncludes requests output', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-norm',
+        spaceId: 'space-1',
+        stepId: 'step-norm',
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        // output deliberately omitted — step has no output yet
+      },
+    ]);
+
+    // Explicit projection: output absent in doc → must be normalised to null
+    const [projected] = await persistence.getStepExecutionsByIds(['step-norm'], ['id', 'output']);
+    expect(projected).toEqual({ id: 'step-norm', output: null });
+
+    // Open projection (no sourceIncludes): output must stay absent
+    const [open] = await persistence.getStepExecutionsByIds(['step-norm']);
+    expect(open).not.toHaveProperty('output');
+  });
+
+  it('does not reintroduce output when it is explicitly excluded', async () => {
+    const persistence = new InMemoryExecutionPersistence(execution);
+    await persistence.bulkUpsert([
+      {
+        id: 'step-excl-out',
+        spaceId: 'space-1',
+        stepId: 'step-excl-out',
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId,
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2026-07-21T00:00:00.000Z',
+        topologicalIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+      },
+    ]);
+    const [result] = await persistence.getStepExecutionsByIds(
+      ['step-excl-out'],
+      ['id', 'output'],
+      ['output']
+    );
+    expect(result).not.toHaveProperty('output');
+  });
+
   it('applies sourceExcludes projection to step executions', async () => {
     const persistence = new InMemoryExecutionPersistence(execution);
     await persistence.bulkUpsert([
