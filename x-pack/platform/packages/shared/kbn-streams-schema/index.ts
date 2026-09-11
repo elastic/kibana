@@ -43,6 +43,11 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export {
+  isBuiltInRootStreamField,
+  otelRootBuiltInFieldNames,
+  ecsRootBuiltInFieldNames,
+} from './src/helpers/is_built_in_root_stream_field';
+export {
   isOtelStream,
   OTEL_CONTENT_FIELD,
   ECS_CONTENT_FIELD,

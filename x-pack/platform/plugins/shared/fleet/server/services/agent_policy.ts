@@ -1730,6 +1730,7 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
+      await unenrollForAgentPolicyId(soClient, esClient, id, { revoke: true });
       // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
@@ -3013,9 +3014,6 @@ class AgentPolicyService {
   ): Promise<void> {
     const logger = this.getLogger('deleteVerifierPolicy');
     try {
-      // Force-revoke agents before deleting the policy because the agentless deployment
-      // is destroyed immediately, so agents can never check in to acknowledge a graceful unenroll.
-      await unenrollForAgentPolicyId(soClient, esClient, policyId, { revoke: true });
       await this.delete(soClient, esClient, policyId, { force: true });
     } catch (err) {
       logger.error(
