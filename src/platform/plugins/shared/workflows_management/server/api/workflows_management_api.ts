@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type {
   SmlIndexAction,
@@ -16,10 +17,12 @@ import type {
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AccessControlInput } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  getWorkflowPermissions,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
@@ -32,6 +35,9 @@ import type {
   ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
+  WorkflowAccessControl,
+  WorkflowAccessControlRole,
+  WorkflowAccessOperation,
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
@@ -113,6 +119,8 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowAggsOptions {
   managedFilter?: GetWorkflowsParams['managedFilter'];
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+  request?: KibanaRequest;
 }
 
 export interface DeleteWorkflowsResponse {
@@ -163,6 +171,7 @@ export interface GetStepExecutionParams {
 }
 
 export interface SearchStepExecutionsParams {
+  request?: KibanaRequest;
   workflowId: string;
   stepId?: string;
   /**
@@ -331,12 +340,48 @@ export class WorkflowsManagementApi {
     });
   }
 
+  public async assertWorkflowAccess(
+    id: string,
+    spaceId: string,
+    operation: WorkflowAccessOperation,
+    request?: KibanaRequest
+  ): Promise<void> {
+    const workflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!workflow) throw new WorkflowNotFoundError(id);
+    if (!workflow.access_control) return;
+    const access = await this.workflowsService.getAccessControl();
+    await access.assertAccess(workflow, operation, request);
+  }
+
+  public async updateAccessControl(
+    id: string,
+    spaceId: string,
+    input: AccessControlInput<WorkflowAccessControlRole>,
+    request: KibanaRequest
+  ): Promise<WorkflowAccessControl> {
+    const workflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!workflow) throw new WorkflowNotFoundError(id);
+    const access = await this.workflowsService.getAccessControl();
+    await access.assertAccess(workflow, 'manage', request);
+    const result = await access.update(id, spaceId, input, request);
+    this.notifySml(id, 'update', request);
+    return result;
+  }
+
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
+    options?: {
+      includeExecutionHistory?: boolean;
+      includeManagedExecutionHistory?: boolean;
+      request?: KibanaRequest;
+    }
   ): Promise<WorkflowListDto> {
-    return this.workflowsService.getWorkflows(params, spaceId, options);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.getWorkflows(params, spaceId, {
+      ...options,
+      accessControlFilter: await access.readFilter(options?.request),
+    });
   }
 
   /**
@@ -350,20 +395,41 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
   }
 
-  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    return this.workflowsService.getWorkflow(id, spaceId);
+  public async getWorkflow(
+    id: string,
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<WorkflowDetailDto | null> {
+    const workflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!workflow) return null;
+    if (!request && !workflow.access_control && !workflow.owner_id) return workflow;
+    const access = await this.workflowsService.getAccessControl();
+    const permissions = await access.permissions(workflow, request);
+    if (!permissions.read) return null;
+    return { ...workflow, permissions };
   }
 
   public async getHistoryForWorkflow(
     id: string,
     spaceId: string,
-    options?: { page?: number; perPage?: number }
+    options?: { page?: number; perPage?: number; request?: KibanaRequest }
   ): Promise<WorkflowChangesHistoryResponse> {
+    await this.assertWorkflowAccess(id, spaceId, 'read', options?.request);
     return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
   }
 
-  public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
-    return this.workflowsService.getWorkflowsByIds(ids, spaceId);
+  public async getWorkflowsByIds(
+    ids: string[],
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<WorkflowDetailDto[]> {
+    const workflows = await this.workflowsService.getWorkflowsByIds(ids, spaceId);
+    if (!workflows.some(({ access_control }) => access_control?.access_mode === 'private')) {
+      return workflows;
+    }
+    const access = await this.workflowsService.getAccessControl();
+    const profileId = request ? await access.getProfileId(request) : undefined;
+    return workflows.filter((workflow) => getWorkflowPermissions(workflow, profileId).read);
   }
 
   public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
@@ -373,9 +439,15 @@ export class WorkflowsManagementApi {
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,
-    source?: string[]
+    source?: string[],
+    request?: KibanaRequest
   ): Promise<WorkflowPartialDetailDto[]> {
-    return this.workflowsService.getWorkflowsSourceByIds(ids, spaceId, source);
+    const visible = await this.getWorkflowsByIds(ids, spaceId, request);
+    return this.workflowsService.getWorkflowsSourceByIds(
+      visible.map(({ id }) => id),
+      spaceId,
+      source
+    );
   }
 
   public async createWorkflow(
@@ -394,6 +466,13 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { overwrite?: boolean }
   ): Promise<BulkCreateWorkflowsResult> {
+    if (options?.overwrite) {
+      const existing = await this.workflowsService.getWorkflowsByIds(
+        workflows.flatMap(({ id }) => (id ? [id] : [])),
+        spaceId
+      );
+      for (const { id } of existing) await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+    }
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
       spaceId,
@@ -411,6 +490,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
+    await this.assertWorkflowAccess(workflow.id, spaceId, 'read', request);
     // Rewrite only the `name` field directly in the YAML text so that cloning
     // works even when the source workflow's YAML is schema-invalid. Strictly
     // parsing/validating here would reject invalid-but-editable workflows.
@@ -440,6 +520,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { allowManagedWorkflowMutation?: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
@@ -463,6 +544,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<RestoreWorkflowVersionResponseDto> {
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
@@ -488,12 +570,24 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
+    for (const id of workflowIds) {
+      const workflow = await this.workflowsService.getWorkflow(id, spaceId, {
+        includeDeleted: true,
+      });
+      if (workflow?.access_control) {
+        const access = await this.workflowsService.getAccessControl();
+        await access.assertAccess(workflow, 'edit', request);
+      }
+    }
     const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);
     if (workflows.some(({ managed }) => managed === true)) {
       throw new ManagedWorkflowDeleteForbiddenError();
     }
 
-    const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
+    const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, {
+      ...options,
+      request,
+    });
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
         this.notifySml(id, 'delete', request);
@@ -521,6 +615,9 @@ export class WorkflowsManagementApi {
     triggeredBy?: string,
     metadata?: Record<string, unknown>
   ): Promise<string> {
+    if (!workflow.isEphemeral) {
+      await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
+    }
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -603,7 +700,7 @@ export class WorkflowsManagementApi {
 
     const workflow = isExecuteInlineWorkflowParams(params)
       ? await this.createEphemeralWorkflowExecutionModel(params)
-      : await this.getSavedWorkflowExecutionModel(params.workflowId, spaceId);
+      : await this.getSavedWorkflowExecutionModel(params.workflowId, spaceId, request);
 
     const workflowExecutionId = await this.runWorkflow(
       workflow,
@@ -655,9 +752,10 @@ export class WorkflowsManagementApi {
 
   private async getSavedWorkflowExecutionModel(
     workflowId: string,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<WorkflowExecutionEngineModel> {
-    const workflow = await this.getWorkflow(workflowId, spaceId);
+    const workflow = await this.getWorkflow(workflowId, spaceId, request);
 
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
@@ -692,7 +790,7 @@ export class WorkflowsManagementApi {
     let execution: WorkflowExecutionDto | null | undefined;
     do {
       try {
-        execution = await this.getWorkflowExecution(workflowExecutionId, spaceId, {
+        execution = await this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, {
           includeOutput: true,
         });
 
@@ -773,6 +871,14 @@ export class WorkflowsManagementApi {
     spaceId,
     request,
   }: TestWorkflowParams): Promise<string> {
+    if (workflowId) {
+      await this.assertWorkflowAccess(
+        workflowId,
+        spaceId,
+        workflowYaml ? 'edit' : 'execute',
+        request
+      );
+    }
     let resolvedYaml = workflowYaml;
     let resolvedWorkflowId = workflowId;
     let existingWorkflow: WorkflowDetailDto | null = null;
@@ -822,7 +928,7 @@ export class WorkflowsManagementApi {
           originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
           managedVersion: existingWorkflow?.managedVersion,
         },
-        { isTestRun: true, isEphemeral: true }
+        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
       ),
       context,
       request
@@ -839,6 +945,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
+    if (workflowId) await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request);
     const validation = await this.workflowsService.validateWorkflow(workflowYaml, spaceId, request);
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, workflowYaml);
@@ -869,32 +976,65 @@ export class WorkflowsManagementApi {
     params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return this.workflowsService.getWorkflowExecutions(params, spaceId);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.getWorkflowExecutions(
+      { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
+      spaceId
+    );
   }
 
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return this.workflowsService.searchExecutionsView(params, spaceId);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.searchExecutionsView(
+      { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
+      spaceId
+    );
   }
 
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; request?: KibanaRequest }
   ): Promise<WorkflowExecutionDto | null> {
-    return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
+    const execution = await this.workflowsService.getWorkflowExecution(
+      workflowExecutionId,
+      spaceId,
+      options
+    );
+    if (!execution) return null;
+    if (!execution.workflowId) return execution;
+    const workflow = await this.workflowsService.getWorkflow(execution.workflowId, spaceId, {
+      includeDeleted: true,
+    });
+    if (workflow?.access_control) {
+      const access = await this.workflowsService.getAccessControl();
+      if (!(await access.permissions(workflow, options?.request)).read) return null;
+    }
+    return execution;
   }
 
   public async getChildWorkflowExecutions(
     parentExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<ChildWorkflowExecutionItem[]> {
-    return this.workflowsService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+    await this.assertExecutionAccess(parentExecutionId, spaceId, 'read', request);
+    const children = await this.workflowsService.getChildWorkflowExecutions(
+      parentExecutionId,
+      spaceId
+    );
+    const visible: ChildWorkflowExecutionItem[] = [];
+    for (const child of children) {
+      if (await this.getWorkflow(child.workflowId, spaceId, request)) visible.push(child);
+    }
+    return visible;
   }
 
   public async getWorkflowExecutionLogs(params: {
+    request?: KibanaRequest;
     executionId: string;
     spaceId: string;
     size: number;
@@ -903,6 +1043,7 @@ export class WorkflowsManagementApi {
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<WorkflowExecutionLogsDto> {
+    await this.assertExecutionAccess(params.executionId, params.spaceId, 'read', params.request);
     let result: LogSearchResult;
 
     if (this.isStepExecution(params)) {
@@ -947,8 +1088,10 @@ export class WorkflowsManagementApi {
 
   public async getStepExecution(
     params: GetStepExecutionParams,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<EsWorkflowStepExecution | null> {
+    await this.assertExecutionAccess(params.executionId, spaceId, 'read', request);
     return this.workflowsService.getStepExecution(params, spaceId);
   }
 
@@ -956,7 +1099,26 @@ export class WorkflowsManagementApi {
     params: SearchStepExecutionsParams,
     spaceId: string
   ): Promise<StepExecutionListResult> {
+    await this.assertWorkflowAccess(params.workflowId, spaceId, 'read', params.request);
     return this.workflowsService.searchStepExecutions(params, spaceId);
+  }
+
+  private async assertExecutionAccess(
+    executionId: string,
+    spaceId: string,
+    operation: WorkflowAccessOperation,
+    request?: KibanaRequest
+  ): Promise<void> {
+    const execution = await this.workflowsService.getWorkflowExecution(executionId, spaceId);
+    if (!execution) throw new WorkflowNotFoundError(executionId);
+    if (!execution.workflowId) return;
+    const workflow = await this.workflowsService.getWorkflow(execution.workflowId, spaceId, {
+      includeDeleted: true,
+    });
+    if (workflow?.access_control) {
+      const access = await this.workflowsService.getAccessControl();
+      await access.assertAccess(workflow, operation, request);
+    }
   }
 
   public async cancelWorkflowExecution(
@@ -965,6 +1127,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string }
   ): Promise<void> {
+    await this.assertExecutionAccess(workflowExecutionId, spaceId, 'execute', request);
     const channel = options?.channel;
     try {
       const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
@@ -986,8 +1149,9 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string }
   ): Promise<void> {
+    await this.assertWorkflowAccess(workflowId, spaceId, 'execute', request);
     const channel = options?.channel;
-    const workflow = await this.getWorkflow(workflowId, spaceId);
+    const workflow = await this.getWorkflow(workflowId, spaceId, request);
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
     }
@@ -1022,6 +1186,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
+    await this.assertExecutionAccess(executionId, spaceId, 'execute', request);
     const channel = options?.channel;
     try {
       const stepExecutionId =
@@ -1072,9 +1237,18 @@ export class WorkflowsManagementApi {
   /** Cross-workflow listing of active `waitForInput` step executions. */
   public async listWaitingForInputSteps(
     spaceId: string,
-    params: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
+    params: {
+      page?: number;
+      perPage?: number;
+      includeReasoning?: boolean;
+      request?: KibanaRequest;
+    } = {}
   ): Promise<WaitForInputListResult> {
-    return this.workflowsService.listWaitingForInputSteps(spaceId, params);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.listWaitingForInputSteps(spaceId, {
+      ...params,
+      accessControlFilter: await access.executionFilter(spaceId, params.request),
+    });
   }
 
   public async resumeWorkflowExecutionExternallyViaGet(
@@ -1138,17 +1312,29 @@ export class WorkflowsManagementApi {
       page?: number;
       perPage?: number;
       includeReasoning?: boolean;
+      request?: KibanaRequest;
     } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
-    return this.workflowsService.listProcessedWaitForInputSteps(spaceId, params);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.listProcessedWaitForInputSteps(spaceId, {
+      ...params,
+      accessControlFilter: await access.executionFilter(spaceId, params.request),
+    });
   }
 
   /** Facet buckets for processed `waitForInput` step executions. */
   public async listProcessedWaitForInputFacets(
     spaceId: string,
-    options: { maxBuckets?: number } = {}
+    options: {
+      maxBuckets?: number;
+      request?: KibanaRequest;
+    } = {}
   ): Promise<ProcessedWaitForInputFacets> {
-    return this.workflowsService.listProcessedWaitForInputFacets(spaceId, options);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.listProcessedWaitForInputFacets(spaceId, {
+      ...options,
+      accessControlFilter: await access.executionFilter(spaceId, options.request),
+    });
   }
 
   /** Claims a `waitForInput` step by writing server-derived HITL audit metadata. */
@@ -1163,9 +1349,20 @@ export class WorkflowsManagementApi {
 
   public async getWorkflowStats(
     spaceId: string,
-    options?: { includeExecutionStats?: boolean; includeManagedExecutionStats?: boolean }
+    options?: {
+      includeExecutionStats?: boolean;
+      includeManagedExecutionStats?: boolean;
+      request?: KibanaRequest;
+    }
   ) {
-    return this.workflowsService.getWorkflowStats(spaceId, options);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.getWorkflowStats(spaceId, {
+      ...options,
+      accessControlFilter: await access.readFilter(options?.request),
+      ...(options?.includeExecutionStats
+        ? { executionAccessFilter: await access.executionFilter(spaceId, options.request) }
+        : {}),
+    });
   }
 
   public async getWorkflowAggs(
@@ -1173,9 +1370,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     options?: GetWorkflowAggsOptions
   ) {
-    return options
-      ? this.workflowsService.getWorkflowAggs(fields, spaceId, options)
-      : this.workflowsService.getWorkflowAggs(fields, spaceId);
+    const access = await this.workflowsService.getAccessControl();
+    return this.workflowsService.getWorkflowAggs(fields, spaceId, {
+      ...options,
+      accessControlFilter: await access.readFilter(options?.request),
+    });
   }
 
   public async getAvailableConnectors(

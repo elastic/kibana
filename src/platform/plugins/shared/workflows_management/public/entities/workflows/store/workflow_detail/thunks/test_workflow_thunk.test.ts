@@ -93,6 +93,28 @@ describe('testWorkflowThunk', () => {
     expect(result.payload).toEqual(mockResponse);
   });
 
+  it('tests only the saved definition for an executor, even if editor YAML differs', async () => {
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Modified draft\nsteps: []' });
+    store.dispatch({
+      type: 'detail/setWorkflow',
+      payload: {
+        id: 'saved-workflow',
+        enabled: false,
+        permissions: { read: true, execute: true, edit: false, manage: false },
+      },
+    });
+    mockWorkflowApi.testWorkflow.mockResolvedValue({ workflowExecutionId: 'saved-test' });
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: { message: 'Saved test' } }));
+
+    expect(result.type).toBe('detail/testWorkflowThunk/fulfilled');
+    expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
+      workflowId: 'saved-workflow',
+      workflowYaml: undefined,
+      inputs: { message: 'Saved test' },
+    });
+  });
+
   it('should reject when no YAML content to test', async () => {
     // Set up state with empty yaml
     store.dispatch({ type: 'detail/setYamlString', payload: '' });

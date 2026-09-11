@@ -101,7 +101,10 @@ describe('workflowSmlType', () => {
           _source: ['spaceId', 'updated_at'],
           query: {
             bool: {
-              must_not: [{ exists: { field: 'deleted_at' } }],
+              must_not: [
+                { exists: { field: 'deleted_at' } },
+                { term: { 'access_control.access_mode': 'private' } },
+              ],
             },
           },
           sort: [{ updated_at: { order: 'desc' } }, '_shard_doc'],
@@ -312,7 +315,10 @@ describe('workflowSmlType', () => {
           query: {
             bool: {
               must: [{ ids: { values: ['workflow-abc'] } }],
-              must_not: [{ exists: { field: 'deleted_at' } }],
+              must_not: [
+                { exists: { field: 'deleted_at' } },
+                { term: { 'access_control.access_mode': 'private' } },
+              ],
             },
           },
           _source: ['name', 'description', 'tags', 'enabled', 'triggerTypes'],
@@ -485,7 +491,7 @@ describe('workflowSmlType', () => {
         spaceId: 'my-space',
       });
 
-      expect(api.getWorkflow).toHaveBeenCalledWith('workflow-xyz', 'my-space');
+      expect(api.getWorkflow).toHaveBeenCalledWith('workflow-xyz', 'my-space', expect.any(Object));
     });
 
     it('returns undefined when workflow is not found', async () => {

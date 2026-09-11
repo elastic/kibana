@@ -76,13 +76,16 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
           const { executionId } = request.params;
           const { size, page, sortField, sortOrder, stepExecutionId } = request.query;
           const spaceId = spaces.getSpaceId(request);
-          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId);
+          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
+            request,
+          });
           if (!workflowExecution) {
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
 
           const logs = await api.getWorkflowExecutionLogs({
+            request,
             executionId,
             spaceId,
             size,

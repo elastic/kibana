@@ -40,10 +40,14 @@ const makeStorageClient = (
 ) => {
   const mockClient = {
     search: jest.fn().mockResolvedValue({
-      hits: { hits: hits.map((h) => ({ _id: h._id, _source: h._source })) },
+      hits: {
+        hits: hits.map((h) => ({ _id: h._id, _source: h._source, _seq_no: 7, _primary_term: 2 })),
+      },
     }),
     bulk: jest.fn().mockResolvedValue({
-      items: hits.map((h) => ({ index: { _id: h._id, status: 200 } })),
+      items: hits.map((h) => ({
+        index: { _id: h._id, status: 200, _seq_no: 8, _primary_term: 2 },
+      })),
     }),
     delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
   };
@@ -69,6 +73,70 @@ const noopExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
 describe('deleteWorkflows', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it('checks the stored access before any delete write', async () => {
+    const { client, storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
+    const assertCanDelete = jest.fn(() => {
+      throw new Error('Access revoked');
+    });
+    await expect(
+      deleteWorkflows({
+        ids: ['wf-1'],
+        spaceId: 'default',
+        force: false,
+        storage,
+        ...makeExecutionsDataAccess(),
+        taskScheduler: null,
+        logger,
+        getWorkflowExecutions: noopExecutions,
+        assertCanDelete,
+      })
+    ).rejects.toThrow('Access revoked');
+    expect(assertCanDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test' }));
+    expect(client.bulk).not.toHaveBeenCalled();
+    expect(client.delete).not.toHaveBeenCalled();
+  });
+
+  it('retains the ACL record when force deletion could leave private executions behind', async () => {
+    const { client, storage } = makeStorageClient([
+      {
+        _id: 'private-workflow',
+        _source: makeWorkflowSource({ access_control: { access_mode: 'private', entries: [] } }),
+      },
+    ]);
+    await expect(
+      deleteWorkflows({
+        ids: ['private-workflow'],
+        spaceId: 'default',
+        force: true,
+        storage,
+        ...makeExecutionsDataAccess(),
+        taskScheduler: null,
+        logger,
+        getWorkflowExecutions: noopExecutions,
+      })
+    ).rejects.toThrow('Delete private workflows without force');
+    expect(client.delete).not.toHaveBeenCalled();
+    expect(client.bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not force-delete after a concurrent access change', async () => {
+    const { client, storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
+    client.bulk.mockResolvedValueOnce({ items: [{ index: { _id: 'wf-1', status: 409 } }] });
+    await expect(
+      deleteWorkflows({
+        ids: ['wf-1'],
+        spaceId: 'default',
+        force: true,
+        storage,
+        ...makeExecutionsDataAccess(),
+        taskScheduler: null,
+        logger,
+        getWorkflowExecutions: noopExecutions,
+      })
+    ).rejects.toThrow('A workflow changed during deletion');
+    expect(client.delete).not.toHaveBeenCalled();
+  });
+
   describe('soft delete', () => {
     it('marks workflows as deleted and disabled', async () => {
       const { client, storage } = makeStorageClient([
@@ -93,6 +161,7 @@ describe('deleteWorkflows', () => {
       expect(result.failures).toEqual([]);
 
       const bulkOps = client.bulk.mock.calls[0][0].operations;
+      expect(bulkOps[0].index).toMatchObject({ if_seq_no: 7, if_primary_term: 2 });
       expect(bulkOps[0].index.document).toMatchObject({
         enabled: false,
         deleted_at: expect.any(Date),
@@ -201,7 +270,7 @@ describe('deleteWorkflows', () => {
 
       expect(result.deleted).toBe(1);
       expect(result.successfulIds).toEqual(['wf-1']);
-      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1' });
+      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1', if_seq_no: 8, if_primary_term: 2 });
       expect(workflowExecutionsDataClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {

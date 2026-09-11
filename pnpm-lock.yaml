@@ -1823,6 +1823,12 @@ importers:
       '@kbn/enterprise-search-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/enterprise_search
+      '@kbn/entity-access-control':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control
+      '@kbn/entity-access-control-ui':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-entity-access-control-ui
       '@kbn/entity-store':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/entity_store
@@ -7760,6 +7766,10 @@ importers:
   src/platform/packages/shared/kbn-elastic-agent-utils: {}
 
   src/platform/packages/shared/kbn-encrypted-saved-objects-shared: {}
+
+  src/platform/packages/shared/kbn-entity-access-control: {}
+
+  src/platform/packages/shared/kbn-entity-access-control-ui: {}
 
   src/platform/packages/shared/kbn-es: {}
 

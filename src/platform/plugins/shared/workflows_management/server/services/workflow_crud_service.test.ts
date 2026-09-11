@@ -8,7 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
@@ -113,7 +113,7 @@ const makeDeps = (
     getTaskScheduler: () => null,
     executionQueryService,
     validationService,
-    getCoreStart: () => ({} as CoreStart),
+    getCoreStart: () => coreMock.createStart(),
     changeHistoryService: {
       isInitialized: () => false,
       asScoped: jest.fn(),
@@ -1081,7 +1081,7 @@ describe('WorkflowCrudService', () => {
           },
         });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 2, _primary_term: 1 });
 
@@ -1107,11 +1107,11 @@ describe('WorkflowCrudService', () => {
       expect(callArgs.getAction!('wf-existing')).toBe(WorkflowChangeHistoryAction.workflowUpdate);
     });
 
-    it('overwrite=true indexes new workflows with plain bulk index (no OCC metadata)', async () => {
+    it('overwrite=true creates new workflows without replacing concurrent writes', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValueOnce({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
 
       const service = new WorkflowCrudService(deps);
@@ -1126,7 +1126,7 @@ describe('WorkflowCrudService', () => {
       expect(client.bulk).toHaveBeenCalledWith({
         operations: [
           {
-            index: {
+            create: {
               _id: 'wf-new',
               document: expect.objectContaining({ version: 1 }),
             },
@@ -1134,9 +1134,37 @@ describe('WorkflowCrudService', () => {
         ],
         refresh: 'wait_for',
       });
-      const bulkOp = client.bulk.mock.calls[0][0].operations[0].index;
+      const bulkOp = client.bulk.mock.calls[0][0].operations[0].create;
       expect(bulkOp).not.toHaveProperty('if_seq_no');
       expect(bulkOp).not.toHaveProperty('if_primary_term');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an import when another workflow takes the ID after the access check', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValueOnce({ hits: { hits: [] } });
+      client.bulk.mockResolvedValue({
+        items: [
+          {
+            create: {
+              _id: 'wf-new',
+              status: 409,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'Document already exists',
+              },
+            },
+          },
+        ],
+      });
+      const result = await new WorkflowCrudService(deps).bulkCreateWorkflows(
+        [{ id: 'wf-new', yaml: validYaml('New') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+      expect(result.created).toHaveLength(0);
+      expect(result.failed).toEqual([expect.objectContaining({ id: 'wf-new' })]);
       expect(client.index).not.toHaveBeenCalled();
     });
 
@@ -1178,7 +1206,7 @@ describe('WorkflowCrudService', () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValueOnce({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
 
       const service = new WorkflowCrudService(deps);
@@ -1284,7 +1312,7 @@ describe('WorkflowCrudService', () => {
           },
         });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'wf-new', status: 200 } }],
+        items: [{ create: { _id: 'wf-new', status: 201 } }],
       });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 3, _primary_term: 1 });
 
@@ -1307,11 +1335,11 @@ describe('WorkflowCrudService', () => {
       );
     });
 
-    it('uses index (overwrite) vs create (no overwrite) based on the option flag', async () => {
+    it('uses create for new workflows with either overwrite option', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });
       client.bulk.mockResolvedValue({
-        items: [{ index: { _id: 'id-a', status: 200 } }],
+        items: [{ create: { _id: 'id-a', status: 201 } }],
       });
 
       const service = new WorkflowCrudService(deps);
@@ -1320,8 +1348,8 @@ describe('WorkflowCrudService', () => {
       });
 
       const ops = client.bulk.mock.calls[0][0].operations;
-      expect(ops[0]).toHaveProperty('index');
-      expect(ops[0]).not.toHaveProperty('create');
+      expect(ops[0]).toHaveProperty('create');
+      expect(ops[0]).not.toHaveProperty('index');
 
       client.bulk.mockClear();
       client.bulk.mockResolvedValue({

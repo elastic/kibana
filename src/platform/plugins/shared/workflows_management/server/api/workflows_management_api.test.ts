@@ -74,7 +74,26 @@ describe('WorkflowsManagementApi', () => {
     mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
 
     mockWorkflowsService = {
-      getWorkflow: jest.fn(),
+      getAccessControl: jest.fn().mockResolvedValue({
+        permissions: jest
+          .fn()
+          .mockResolvedValue({ read: true, execute: true, edit: true, manage: false }),
+        assertAccess: jest.fn(),
+        readFilter: jest.fn().mockResolvedValue({ match_all: {} }),
+        executionFilter: jest.fn().mockResolvedValue({ match_all: {} }),
+      }),
+      getWorkflow: jest.fn().mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        yaml: '',
+        valid: true,
+        createdAt: '2026-09-10T00:00:00.000Z',
+        createdBy: 'test-user',
+        lastUpdatedAt: '2026-09-10T00:00:00.000Z',
+        lastUpdatedBy: 'test-user',
+        definition: null,
+      }),
       getWorkflowsByIds: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
@@ -85,7 +104,9 @@ describe('WorkflowsManagementApi', () => {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
       validateWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest
+        .fn()
+        .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
@@ -494,6 +515,40 @@ steps:
     });
 
     describe('when testing with workflowId parameter', () => {
+      it.each([
+        { workflowYaml: undefined, permission: 'execute', isEphemeral: false },
+        { workflowYaml: mockWorkflowYaml, permission: 'edit', isEphemeral: true },
+      ])(
+        'requires $permission for isEphemeral=$isEphemeral',
+        async ({ workflowYaml, permission, isEphemeral }) => {
+          const privateWorkflow: WorkflowDetailDto = {
+            ...mockWorkflowDetailDto,
+            access_control: { access_mode: 'private', entries: [] },
+          };
+          mockWorkflowsService.getWorkflow.mockResolvedValue(privateWorkflow);
+
+          await api.testWorkflow({
+            workflowId: mockWorkflowDetailDto.id,
+            workflowYaml,
+            inputs,
+            spaceId,
+            request: mockRequest,
+          });
+
+          const access = await mockWorkflowsService.getAccessControl();
+          expect(access.assertAccess).toHaveBeenCalledWith(
+            privateWorkflow,
+            permission,
+            mockRequest
+          );
+          expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+            expect.objectContaining({ yaml: mockWorkflowYaml, isTestRun: true, isEphemeral }),
+            expect.any(Object),
+            mockRequest
+          );
+        }
+      );
+
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
@@ -1265,11 +1320,9 @@ steps:
         deleteResult
       );
 
-      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
-        ['wf-1'],
-        'default',
-        undefined
-      );
+      expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default', {
+        request: mockRequest,
+      });
     });
   });
 

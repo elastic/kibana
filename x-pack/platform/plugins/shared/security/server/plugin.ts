@@ -381,6 +381,7 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
+        checkUserProfilesPrivileges: this.authorizationSetup.checkUserProfilesPrivileges,
         checkPrivilegesDynamicallyWithRequest:
           this.authorizationSetup.checkPrivilegesDynamicallyWithRequest,
         checkSavedObjectsPrivilegesWithRequest:
@@ -486,6 +487,7 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup!.actions,
         checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+        checkUserProfilesPrivileges: this.authorizationSetup!.checkUserProfilesPrivileges,
         checkPrivilegesDynamicallyWithRequest:
           this.authorizationSetup!.checkPrivilegesDynamicallyWithRequest,
         checkSavedObjectsPrivilegesWithRequest:

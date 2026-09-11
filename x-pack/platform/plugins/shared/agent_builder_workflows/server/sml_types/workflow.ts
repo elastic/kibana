@@ -46,7 +46,10 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
           _source: ['spaceId', 'updated_at'],
           query: {
             bool: {
-              must_not: [{ exists: { field: 'deleted_at' } }],
+              must_not: [
+                { exists: { field: 'deleted_at' } },
+                { term: { 'access_control.access_mode': 'private' } },
+              ],
             },
           },
           sort: [{ updated_at: { order: 'desc' } }, '_shard_doc'],
@@ -87,7 +90,10 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
         query: {
           bool: {
             must: [{ ids: { values: [originId] } }],
-            must_not: [{ exists: { field: 'deleted_at' } }],
+            must_not: [
+              { exists: { field: 'deleted_at' } },
+              { term: { 'access_control.access_mode': 'private' } },
+            ],
           },
         },
         _source: ['name', 'description', 'tags', 'enabled', 'triggerTypes'],
@@ -123,7 +129,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
   getPermissions: () => kibanaPermissions({ kiType: WORKFLOW_KI_TYPE }),
 
   toAttachment: async (item, context) => {
-    const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId);
+    const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId, context.request);
     if (!workflow) return undefined;
 
     return {

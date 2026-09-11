@@ -15,6 +15,10 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/security-plugin",
+    "@kbn/ui-callout",
+    "@kbn/entity-access-control-ui",
+    "@kbn/entity-access-control",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/esql-language",
@@ -82,6 +86,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/connector-schemas",
     "@kbn/react-query",
+    "@kbn/react-hooks",
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
     "@kbn/test-jest-helpers",
@@ -128,7 +133,7 @@
     "@kbn/app-header",
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/mock-idp-utils",
+    "@kbn/mock-idp-utils"
   ],
   "exclude": ["target/**/*"]
 }

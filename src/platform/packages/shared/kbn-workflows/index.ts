@@ -136,3 +136,16 @@ export type {
   WorkflowValidationRuleOwner,
   WorkflowValidationRules,
 } from './validation/rules';
+
+export {
+  WORKFLOW_ACCESS_CONTROL_ROLES,
+  workflowAccessControlSchema,
+  getWorkflowPermissions,
+} from './common/access_control';
+export type {
+  WorkflowAccessControl,
+  WorkflowAccessControlRole,
+  WorkflowAccessOperation,
+  WorkflowPermissions,
+  WorkflowAccessSubject,
+} from './common/access_control';

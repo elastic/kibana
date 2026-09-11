@@ -25,6 +25,7 @@ export class WorkflowEditorPage {
   public actionsMenuButton: Locator;
   public actionsMenuSearch: Locator;
   public readOnlyBadge: Locator;
+  public readonly accessMode: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -45,6 +46,37 @@ export class WorkflowEditorPage {
     this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
     this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
+  }
+
+  async openAccessDialog(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.click('workflowAccessButton');
+    await this.accessMode.waitFor({ state: 'visible' });
+  }
+
+  async setAccessMode(mode: 'private' | 'public'): Promise<void> {
+    await this.page.components.superSelect('entityAccessControlMode').selectOptionByValue(mode);
+  }
+
+  async addAccessUser(name: string): Promise<void> {
+    await this.page.getByRole('combobox', { name: 'Find users' }).fill(name);
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  accessRole(username: string): Locator {
+    return this.page.getByLabel(`Role for ${username}`, { exact: true });
+  }
+
+  async setAccessRole(username: string, role: 'viewer' | 'executor' | 'editor'): Promise<void> {
+    await this.page.components
+      .superSelect(`entityAccessControlRole-${username}`)
+      .selectOptionByValue(role);
+  }
+
+  async saveAccess(): Promise<void> {
+    await this.page.testSubj.click('workflowAccessSave');
+    await this.accessMode.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -377,6 +409,12 @@ export class WorkflowEditorPage {
       state: 'visible',
     });
     await this.page.testSubj.click('confirmModalConfirmButton');
+  }
+
+  async executeWorkflowFromBottomBar(inputs: Record<string, unknown>): Promise<void> {
+    await this.page.testSubj.click('workflowBottomBarRunButton');
+    await this.setExecuteModalInputs(inputs);
+    await this.page.testSubj.click('executeWorkflowButton');
   }
 
   /**

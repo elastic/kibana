@@ -15,6 +15,7 @@ import {
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -32,7 +33,9 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
+  const workflow = useSelector(selectWorkflow);
+  const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
 
   const { setSelectedExecution } = useWorkflowUrlState();
 
@@ -104,7 +107,7 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
-      isTestRun={true}
+      isTestRun
       definition={definition}
       workflowId={workflowId}
       yamlString={yamlString}

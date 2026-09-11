@@ -114,6 +114,8 @@ describe('Workflow routes', () => {
     });
 
     const mockRouter = {
+      put: jest.fn(),
+      post: jest.fn(),
       versioned: {
         get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
           routeSecurity[`GET:${config.path}`] = config.security;
@@ -181,7 +183,7 @@ describe('Workflow routes', () => {
           managedFilter: 'unmanaged',
         },
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
       expect(response.ok).toHaveBeenCalledWith({ body: list });
     });
@@ -203,7 +205,7 @@ describe('Workflow routes', () => {
           sortOrder: 'asc',
         }),
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
     });
 
@@ -223,6 +225,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflows).toHaveBeenCalledWith(expect.any(Object), 'default-space', {
         includeExecutionHistory: true,
         includeManagedExecutionHistory: false,
+        request,
       });
     });
 
@@ -249,7 +252,7 @@ describe('Workflow routes', () => {
           visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
         }),
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
     });
 
@@ -280,7 +283,7 @@ describe('Workflow routes', () => {
           visibilityContext,
         }),
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
     });
 
@@ -333,7 +336,7 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space');
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space', request);
       expect(response.ok).toHaveBeenCalledWith({ body: workflow });
     });
 
@@ -690,11 +693,12 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['a'], 'default-space');
+      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['a'], 'default-space', request);
       expect(mockApi.getWorkflowsSourceByIds).toHaveBeenCalledWith(
         ['a'],
         'default-space',
-        undefined
+        undefined,
+        request
       );
       expect(response.ok).toHaveBeenCalledWith({ body: workflows });
     });
@@ -718,7 +722,7 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space');
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space', request);
       expect(mockApi.cloneWorkflow).toHaveBeenCalledWith(wf, 'default-space', request);
       expect(response.ok).toHaveBeenCalledWith({ body: cloned });
     });
@@ -790,7 +794,7 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['w1'], 'default-space');
+      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['w1'], 'default-space', request);
       expect(response.ok).toHaveBeenCalled();
     });
 
@@ -925,6 +929,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: false,
         includeManagedExecutionStats: false,
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: stats });
     });
@@ -949,6 +954,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: true,
         includeManagedExecutionStats: false,
+        request,
       });
     });
 
@@ -969,6 +975,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: true,
         includeManagedExecutionStats: true,
+        request,
       });
     });
   });
@@ -991,6 +998,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'unmanaged',
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });
@@ -1006,6 +1014,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'unmanaged',
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });
@@ -1023,6 +1032,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'all',
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });

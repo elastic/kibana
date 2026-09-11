@@ -778,6 +778,8 @@ packages:
   - 'src/platform/packages/shared/kbn-edot-collector'
   - 'src/platform/packages/shared/kbn-elastic-agent-utils'
   - 'src/platform/packages/shared/kbn-encrypted-saved-objects-shared'
+  - 'src/platform/packages/shared/kbn-entity-access-control'
+  - 'src/platform/packages/shared/kbn-entity-access-control-ui'
   - 'src/platform/packages/shared/kbn-es'
   - 'src/platform/packages/shared/kbn-es-archiver'
   - 'src/platform/packages/shared/kbn-es-errors'

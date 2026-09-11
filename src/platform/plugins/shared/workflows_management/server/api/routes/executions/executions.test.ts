@@ -185,7 +185,7 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', request);
       expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
         workflow: {
           id: 'wf-1',
@@ -569,6 +569,7 @@ describe('Execution Routes', () => {
       expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', {
         includeInput: true,
         includeOutput: false,
+        request,
       });
       expect(result).toEqual({ type: 'ok', body: execution });
     });
@@ -723,7 +724,8 @@ describe('Execution Routes', () => {
 
       expect(mockApi.getStepExecution).toHaveBeenCalledWith(
         { executionId: 'ex-1', id: 'se-1' },
-        'default'
+        'default',
+        request
       );
       expect(result).toEqual({ type: 'ok', body: step });
     });
@@ -837,6 +839,7 @@ describe('Execution Routes', () => {
         sortField: 'timestamp',
         sortOrder: 'desc',
         stepExecutionId: 'step-ex-1',
+        request,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
     });
@@ -860,6 +863,7 @@ describe('Execution Routes', () => {
         sortField: undefined,
         sortOrder: undefined,
         stepExecutionId: undefined,
+        request,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
     });
@@ -1054,7 +1058,7 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.getChildWorkflowExecutions).toHaveBeenCalledWith('ex-1', 'default');
+      expect(mockApi.getChildWorkflowExecutions).toHaveBeenCalledWith('ex-1', 'default', request);
       expect(result).toEqual({ type: 'ok', body: children });
     });
   });

@@ -373,3 +373,44 @@ Workflows are space-aware and respect Kibana Spaces boundaries.
 ---
 
 **Plugin Owner**: `@elastic/workflows-eng`
+
+## Workflow access control
+
+The workflow Access dialog uses `@kbn/entity-access-control` and
+`@kbn/entity-access-control-ui`. Its ACL has the same field structure as Agent
+Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
+`role`, and server-assigned `added_at`. The workflow stores the owner in `owner_id`.
+
+| Role | View | Run | Edit and delete | Change access |
+| --- | --- | --- | --- | --- |
+| Owner | Yes | Yes | Yes | Yes |
+| Editor | Yes | Yes | Yes | No |
+| Executor | Yes | Yes | No | No |
+| Viewer | Yes | No | No | No |
+
+These permissions also require the corresponding feature privileges in the space.
+User suggestions require Workflows Read in that space. Saving private access checks
+each recipient's RBAC: Viewer requires Read, Executor also requires Execute, and
+Editor also requires Update. A rejected grant leaves the access settings unchanged.
+Public workflows use the existing RBAC permissions for viewing, running, editing,
+and deletion. ACL entries apply only to private workflows. The owner controls
+visibility and sharing. Managed workflows keep their existing plugin access rules.
+
+The detail page tests workflows even when disabled. Executors test the saved YAML;
+Editors and owners can test draft YAML. Test runs do not enable the workflow.
+Normal runs and scheduled runs still require an enabled workflow.
+
+Workflows without an ACL keep their existing access. New workflows with a user
+profile record the creator as owner and start with public access under RBAC.
+For older workflows, the recorded creator can set the first ACL; this records their profile ID as owner. Subsequent checks use profile IDs.
+
+Workflow searches apply ACL filters before pagination and aggregation. Execution
+and Inbox searches exclude inaccessible workflow IDs, including soft-deleted
+workflows. This requires a search of inaccessible workflows in the space before
+querying execution data. Writes retain the ACL during YAML updates and imports.
+Execution checks use the current ACL and the execution identity.
+
+Private workflows support regular deletion. Force deletion is rejected because
+execution cleanup can fail; the deleted workflow must retain its ACL to protect
+remaining execution data. Private workflows are excluded from Agent Builder's
+search index, which currently supports feature privileges only.

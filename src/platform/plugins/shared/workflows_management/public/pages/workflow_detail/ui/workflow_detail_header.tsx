@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
+import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -121,10 +122,11 @@ export const WorkflowDetailHeader = React.memo(
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
+    const [isAccessOpen, setIsAccessOpen] = useState(false);
     const {
       canCreateWorkflow,
-      canUpdateWorkflow,
-      canExecuteWorkflow,
+      canUpdateWorkflow: hasUpdatePrivilege,
+      canExecuteWorkflow: hasExecutePrivilege,
       canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
@@ -134,6 +136,9 @@ export const WorkflowDetailHeader = React.memo(
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
+    const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
+    const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+    const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
@@ -211,10 +216,11 @@ export const WorkflowDetailHeader = React.memo(
       return getTestRunTooltipContent({
         isExecutionsTab,
         isValid: isSyntaxValid,
-        canRunWorkflow: canExecuteWorkflow,
+        canRunWorkflow: hasExecutePrivilege,
+        hasWorkflowAccess: workflow?.permissions?.execute !== false,
         isSaving,
       });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
+    }, [isSyntaxValid, hasExecutePrivilege, workflow, isExecutionsTab, isSaving]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -393,6 +399,16 @@ export const WorkflowDetailHeader = React.memo(
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
+      if (canManageAccess && !isManagedWorkflow) {
+        items.push({
+          id: 'workflowAccess',
+          overflow: true,
+          label: i18n.translate('workflows.access.openButtonLabel', { defaultMessage: 'Access' }),
+          iconType: 'users',
+          run: () => setIsAccessOpen(true),
+          testId: 'workflowAccessButton',
+        });
+      }
       if (workflowId) {
         items.push(executionsToggleItem);
       }
@@ -440,6 +456,7 @@ export const WorkflowDetailHeader = React.memo(
         items,
       };
     }, [
+      canManageAccess,
       isExecutionsTab,
       workflowId,
       executionsToggleItem,
@@ -472,6 +489,9 @@ export const WorkflowDetailHeader = React.memo(
             docLink={WORKFLOWS_DOCUMENTATION_URL}
           />
         </EuiPageTemplate>
+        {isAccessOpen && workflow && (
+          <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
+        )}
         {runConfirmationModal}
       </>
     );
