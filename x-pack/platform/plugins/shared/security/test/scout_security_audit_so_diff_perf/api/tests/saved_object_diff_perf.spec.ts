@@ -24,6 +24,7 @@ import { expect } from '@kbn/scout/api';
 
 // Allow-listed on the `security_audit_so_diff_perf` config set and the Cloud plan in the README.
 const TYPE = 'index-pattern';
+const DASHBOARD_TYPE = 'dashboard';
 const KBN_HEADERS = { 'kbn-xsrf': 'x', 'x-elastic-internal-origin': 'kibana' };
 // Free-form label for the run (e.g. "diffs-on", "diffs-off-1gb-ech"); stored in the results.
 const RUN_LABEL = process.env.SO_DIFF_PERF_LABEL ?? 'unlabeled';
@@ -36,6 +37,11 @@ const SINGLE_UPDATES = 40;
 const BULK_UPDATE = { rounds: 5, objects: 20, panels: 2 * PANELS_PER_LEAF_BLOCK };
 const IMPORT = { passes: 2, objects: 30, panels: PANELS_PER_LEAF_BLOCK };
 const CONCURRENT = { rounds: 3, parallel: 8, objectsPerBatch: 6, panels: 1000 };
+
+// Dashboard workload: 60 Lens panels ≈ 49 KB panelsJSON string. Each title-only update
+// replaces the entire panelsJSON string in the diff (single large field, not nested leaves).
+const DASHBOARD_PANELS = 60;
+const DASHBOARD_UPDATES = 20;
 
 interface ProcessSample {
   eventLoopDelayMaxMs: number;
@@ -84,6 +90,85 @@ const buildNestedAttributes = (title: string, panelCount: number) => {
   }
   return { title, description: 'perf', panels };
 };
+
+const buildDashboardPanel = (index: number) => ({
+  version: '8.8.0',
+  type: 'lens',
+  gridData: { x: (index % 2) * 24, y: Math.floor(index / 2) * 15, w: 24, h: 15, i: `panel-${index}` },
+  panelIndex: `panel-${index}`,
+  embeddableConfig: {
+    attributes: {
+      title: `Panel ${index}`,
+      visualizationType: 'lnsXY',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          legend: { isVisible: true, position: 'right' },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar_stacked',
+          layers: [
+            {
+              layerId: `layer-${index}`,
+              accessors: [`y${index}`],
+              position: 'top',
+              seriesType: 'bar_stacked',
+              showGridlines: false,
+              xAccessor: `x${index}`,
+            },
+          ],
+        },
+        datasourceStates: {
+          indexpattern: {
+            layers: {
+              [`layer-${index}`]: {
+                columnOrder: [`x${index}`, `y${index}`],
+                columns: {
+                  [`x${index}`]: {
+                    label: '@timestamp',
+                    dataType: 'date',
+                    operationType: 'date_histogram',
+                    sourceField: '@timestamp',
+                    isBucketed: true,
+                    scale: 'interval',
+                    params: { interval: 'auto', includeEmptyRows: true },
+                  },
+                  [`y${index}`]: {
+                    label: 'Count of records',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                  },
+                },
+              },
+            },
+          },
+        },
+        query: { language: 'kuery', query: '' },
+        filters: [],
+      },
+    },
+    enhancements: {},
+  },
+});
+
+/**
+ * Real dashboard saved object attributes. `panelsJSON` is a JSON-serialized string — a
+ * title-only update keeps panelsJSON identical, so the diff emits one replace op on /title
+ * and one noOp on /panelsJSON. The memory pressure is holding the full serialized string
+ * (≈ panelCount × 800 bytes) before and after simultaneously during the diff phase.
+ */
+const buildDashboardAttributes = (title: string, panelCount: number) => ({
+  title,
+  description: 'perf test dashboard',
+  panelsJSON: JSON.stringify(Array.from({ length: panelCount }, (_, i) => buildDashboardPanel(i))),
+  optionsJSON: JSON.stringify({ hidePanelTitles: false, useMargins: true }),
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: JSON.stringify({ query: { query: '', language: 'kuery' }, filter: [] }),
+  },
+});
 
 const sampleProcess = async (
   apiClient: ApiClientFixture,
@@ -435,6 +520,40 @@ apiTest.describe(
         }
       );
     });
+
+    apiTest(
+      'sequential single updates of a large real dashboard',
+      async ({ apiClient, samlAuth }) => {
+        const headers = await authHeaders(samlAuth);
+        const id = `so-diff-perf-${stamp}-w6`;
+        const created = await apiClient.post(`api/saved_objects/${DASHBOARD_TYPE}/${id}`, {
+          headers,
+          body: { attributes: buildDashboardAttributes('perf-w6', DASHBOARD_PANELS) },
+          responseType: 'json',
+        });
+        expect(created).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: DASHBOARD_TYPE, id });
+
+        await measure(
+          apiClient,
+          headers,
+          `dashboard update x${DASHBOARD_UPDATES} (${DASHBOARD_PANELS}-panel, title only)`,
+          async (record) => {
+            for (let i = 0; i < DASHBOARD_UPDATES; i++) {
+              await timedRequest(
+                () =>
+                  apiClient.put(`api/saved_objects/${DASHBOARD_TYPE}/${id}`, {
+                    headers,
+                    body: { attributes: { title: `perf-w6-${i}` } },
+                    responseType: 'json',
+                  }),
+                record
+              );
+            }
+          }
+        );
+      }
+    );
 
     apiTest('summary', async ({ apiClient, samlAuth, log }, testInfo) => {
       const headers = await authHeaders(samlAuth);

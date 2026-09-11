@@ -10,15 +10,17 @@
 import { securityAuditServerArgs } from '../security_audit/shared';
 
 /**
- * Saved-object diff auditing on a 1.5 GB old-space heap. `index-pattern` is the
- * public-API type the OOM spec writes; `fieldSizeLimit` is left at the 48kb
- * default so the suite actually flattens large nested attributes instead of
- * truncating them. Array values must be JSON literals.
+ * Saved-object diff auditing on a 1.5 GB old-space heap. `index-pattern` and `dashboard`
+ * are the public-API types the OOM and perf specs write. `fieldSizeLimit` is raised to
+ * 100kb so dashboard `panelsJSON` strings (a single large field) are not truncated in the
+ * audit log — the 48kb default would clip a 60-panel dashboard. Array values must be JSON
+ * literals.
  */
 export const securityAuditSoDiffOomServerArgs = [
   ...securityAuditServerArgs,
   '--xpack.security.audit.savedObjectDiff.enabled=true',
-  '--xpack.security.audit.savedObjectDiff.typesToInclude=["index-pattern"]',
+  '--xpack.security.audit.savedObjectDiff.typesToInclude=["index-pattern","dashboard"]',
+  '--xpack.security.audit.savedObjectDiff.fieldSizeLimit=100kb',
 ];
 
 /**

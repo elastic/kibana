@@ -1,5 +1,5 @@
 {
-  "sha1": "28253956301b6208bb62ca124e8eedd4a6d5b8a0",
+  "sha1": "abc5e500426ee082307c5ea61a010836a45a16a9",
   "testChannels": [
     "ci-batch-weekly"
   ],
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 114,
+        "line": 201,
         "column": 15
       }
     },
@@ -32,12 +32,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 146,
-        "column": 31
+        "line": 235,
+        "column": 28
       }
     },
     {
-      "id": "c167a1910518aea-b3a1c4e9f2d07f1",
+      "id": "c167a1910518aea-34dfa9f47d3294e",
       "title": "Saved object audit diffs OOM prevention bulk update nested objects succeeds under constrained heap",
       "expectedStatus": "passed",
       "tags": [
@@ -48,12 +48,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 198,
-        "column": 5
+        "line": 265,
+        "column": 11
       }
     },
     {
-      "id": "c167a1910518aea-a7f2e1c9d4b08e3",
+      "id": "c167a1910518aea-fcc662123766c5d",
+      "title": "Saved object audit diffs OOM prevention create and update a large real dashboard succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
+        "line": 305,
+        "column": 77
+      }
+    },
+    {
+      "id": "c167a1910518aea-0c40a822164014a",
       "title": "Saved object audit diffs OOM prevention sequential updates to a large object succeed under constrained heap",
       "expectedStatus": "passed",
       "tags": [
@@ -64,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 248,
-        "column": 5
+        "line": 348,
+        "column": 44
       }
     }
   ]

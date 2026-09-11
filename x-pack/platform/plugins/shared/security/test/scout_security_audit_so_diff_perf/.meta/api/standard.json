@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "2ba81214c234647cd95e9e8c92db31911d50023f",
   "testChannels": [
     "ci-batch-weekly"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
-        "line": 244,
-        "column": 23
+        "line": 333,
+        "column": 18
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
-        "line": 264,
-        "column": 80
+        "line": 353,
+        "column": 16
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
-        "line": 291,
-        "column": 31
+        "line": 379,
+        "column": 16
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
-        "line": 322,
-        "column": 19
+        "line": 411,
+        "column": 23
       }
     },
     {
@@ -70,8 +70,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
-        "line": 359,
-        "column": 7
+        "line": 446,
+        "column": 25
+      }
+    },
+    {
+      "id": "fe23a3230de4670-6dd8e9702244f4c",
+      "title": "Saved object audit diffs — performance measurements sequential single updates of a large real dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 476,
+        "column": 22
       }
     },
     {
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
-        "line": 385,
-        "column": 21
+        "line": 498,
+        "column": 72
       }
     }
   ]

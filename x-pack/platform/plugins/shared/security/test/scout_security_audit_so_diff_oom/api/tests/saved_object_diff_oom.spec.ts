@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/api';
 import { waitForDiffEvent } from '../../../scout_security_audit/api/helpers/audit_log';
 
 const TYPE = 'index-pattern';
+const DASHBOARD_TYPE = 'dashboard';
 const KBN_HEADERS = { 'kbn-xsrf': 'x', 'x-elastic-internal-origin': 'kibana' };
 
 const GIB = 1024 * 1024 * 1024;
@@ -21,6 +22,10 @@ const MAX_SETTLED_HEAP_USAGE_RATIO = 0.85;
 // Nested plain objects (not arrays — flatten treats arrays as a single leaf) so
 // create/update actually walks thousands of pointers, like a large dashboard.
 const DEEP_PANEL_COUNT = 800;
+// Real dashboard: panelsJSON is a single JSON-serialized string ≈ 49 KB for 60 panels.
+// A title-only update keeps panelsJSON identical; the diff holds both the before and after
+// serialized strings simultaneously — different stress pattern than the nested index-pattern.
+const DASHBOARD_PANEL_COUNT = 60;
 const BULK_OBJECT_COUNT = 20;
 const BULK_PANEL_COUNT = 80;
 // Bulk update holds before+after snapshots for every object simultaneously — the
@@ -49,6 +54,79 @@ const buildNestedAttributes = (title: string, panelCount: number) => {
   }
   return { title, name: title, panels };
 };
+
+const buildDashboardPanel = (index: number) => ({
+  version: '8.8.0',
+  type: 'lens',
+  gridData: { x: (index % 2) * 24, y: Math.floor(index / 2) * 15, w: 24, h: 15, i: `panel-${index}` },
+  panelIndex: `panel-${index}`,
+  embeddableConfig: {
+    attributes: {
+      title: `Panel ${index}`,
+      visualizationType: 'lnsXY',
+      type: 'lens',
+      references: [],
+      state: {
+        visualization: {
+          legend: { isVisible: true, position: 'right' },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar_stacked',
+          layers: [
+            {
+              layerId: `layer-${index}`,
+              accessors: [`y${index}`],
+              position: 'top',
+              seriesType: 'bar_stacked',
+              showGridlines: false,
+              xAccessor: `x${index}`,
+            },
+          ],
+        },
+        datasourceStates: {
+          indexpattern: {
+            layers: {
+              [`layer-${index}`]: {
+                columnOrder: [`x${index}`, `y${index}`],
+                columns: {
+                  [`x${index}`]: {
+                    label: '@timestamp',
+                    dataType: 'date',
+                    operationType: 'date_histogram',
+                    sourceField: '@timestamp',
+                    isBucketed: true,
+                    scale: 'interval',
+                    params: { interval: 'auto', includeEmptyRows: true },
+                  },
+                  [`y${index}`]: {
+                    label: 'Count of records',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                  },
+                },
+              },
+            },
+          },
+        },
+        query: { language: 'kuery', query: '' },
+        filters: [],
+      },
+    },
+    enhancements: {},
+  },
+});
+
+const buildDashboardAttributes = (title: string, panelCount: number) => ({
+  title,
+  description: 'oom test dashboard',
+  panelsJSON: JSON.stringify(Array.from({ length: panelCount }, (_, i) => buildDashboardPanel(i))),
+  optionsJSON: JSON.stringify({ hidePanelTitles: false, useMargins: true }),
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: JSON.stringify({ query: { query: '', language: 'kuery' }, filter: [] }),
+  },
+});
 
 const getHeapMetrics = async (
   apiClient: ApiClientFixture,
@@ -245,6 +323,52 @@ apiTest.describe(
           oldValue: 'oom-bu-0',
         });
         expect(lastDiff.ops.length).toBeGreaterThan(0);
+
+        await expectHeapUsageWithinBudget(apiClient, headers);
+      }
+    );
+
+    apiTest(
+      'create and update a large real dashboard succeeds under constrained heap',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_HEADERS };
+        await expectHeapUsageWithinBudget(apiClient, headers);
+
+        // Dashboard panelsJSON is a single large JSON string (not nested leaves). A title-only
+        // update holds the full before+after strings simultaneously during the diff phase —
+        // different allocation pattern than the nested index-pattern objects above.
+        const id = `so-diff-oom-dash-${Date.now()}`;
+        const createRes = await apiClient.post(`api/saved_objects/${DASHBOARD_TYPE}/${id}`, {
+          headers,
+          body: { attributes: buildDashboardAttributes('oom-dashboard', DASHBOARD_PANEL_COUNT) },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: DASHBOARD_TYPE, id });
+
+        const createDiff = await waitForDiffEvent('saved_object_create', id);
+        expect(createDiff.format).toBe('json_patch_extended');
+        expect(createDiff.ops.find((op) => op.path === '/title')).toMatchObject({
+          op: 'add',
+          value: 'oom-dashboard',
+        });
+
+        const updateRes = await apiClient.put(`api/saved_objects/${DASHBOARD_TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'oom-dashboard-updated' } },
+          responseType: 'json',
+        });
+        expect(updateRes).toHaveStatusCode(200);
+
+        const updateDiff = await waitForDiffEvent('saved_object_update', id);
+        expect(updateDiff.ops.find((op) => op.path === '/title')).toMatchObject({
+          op: 'replace',
+          value: 'oom-dashboard-updated',
+          oldValue: 'oom-dashboard',
+        });
+        // panelsJSON did not change — it appears as a noOp (one large string field)
+        expect(updateDiff.noOps.find((op) => op.path === '/panelsJSON')).toBeDefined();
 
         await expectHeapUsageWithinBudget(apiClient, headers);
       }
