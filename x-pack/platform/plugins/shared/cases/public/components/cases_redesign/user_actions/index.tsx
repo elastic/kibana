@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexItem, EuiImage, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiSkeletonText,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { AddComment } from '../../add_comment';
@@ -22,7 +28,7 @@ import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useBuildUserActions } from './hooks/use_build_user_actions';
 import { useBuilderContext } from './hooks/use_builder_context';
 import { useCommentsList } from './hooks/use_comments_list';
-import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
+import { notFound } from '@elastic/eui-illustrations';
 import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
@@ -178,11 +184,11 @@ export const UserActions = React.memo((props: UserActionsProps) => {
             color="transparent"
             css={{ paddingBlockStart: euiTheme.size.xxl }}
             icon={
-              <EuiImage
-                css={{ width: 200, height: 148 }}
-                size="200"
+              <EuiIllustration
+                type={notFound}
                 alt=""
-                url={noResultsIllustration}
+                fullWidth={false}
+                style={{ maxInlineSize: 200 }}
               />
             }
             title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}

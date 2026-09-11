@@ -11,7 +11,7 @@ import {
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiImage,
+  EuiIllustration,
   EuiSpacer,
   EuiSuperUpdateButton,
   EuiToolTip,
@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CaseViewFilters } from './case_view_filters';
 import { useCaseViewFilters } from '../hooks/use_case_view_filters';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
-import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
+import { notFound } from '@elastic/eui-illustrations';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
@@ -316,11 +316,11 @@ export const CaseViewAttachments = ({
             color="transparent"
             css={{ paddingBlockStart: euiTheme.size.xxl }}
             icon={
-              <EuiImage
-                css={{ width: 200, height: 148 }}
-                size="200"
+              <EuiIllustration
+                type={notFound}
                 alt=""
-                url={noResultsIllustration}
+                fullWidth={false}
+                style={{ maxInlineSize: 200 }}
               />
             }
             title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}
