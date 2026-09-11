@@ -10,124 +10,95 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowExecutionListItem } from './workflow_execution_list_item';
+import { WorkflowExecutionList } from './workflow_execution_list';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 const meta: Meta = {
-  title: 'Workflows Management/Workflow Execution List/Workflow Execution List Item',
-  component: WorkflowExecutionListItem,
-  decorators: [kibanaReactDecorator, (story) => <div style={{ width: '275px' }}>{story()}</div>],
+  title: 'Workflows Management/Workflow Execution List/Workflow Execution List',
+  component: WorkflowExecutionList,
+  decorators: [
+    kibanaReactDecorator,
+    (story) => <div style={{ width: '320px', height: '480px' }}>{story()}</div>,
+  ],
 };
 
 export default meta;
-type Story = StoryObj<typeof WorkflowExecutionListItem>;
+type Story = StoryObj<typeof WorkflowExecutionList>;
 
-const executedByProfile: UserProfileWithAvatar = {
-  uid: 'u_john_doe',
-  enabled: true,
-  user: {
-    username: 'john.doe@example.com',
-    full_name: 'John Doe',
-    email: 'john.doe@example.com',
-  },
-  data: {},
+const defaultFilters = {
+  statuses: [],
+  executionTypes: [],
+  executedBy: [],
 };
 
-export const Completed: Story = {
-  args: {
-    status: ExecutionStatus.COMPLETED,
-    startedAt: new Date(),
-    executedByProfile,
-    showExecutor: true,
-    triggeredBy: 'manual',
-  },
+const baseListProps = {
+  filters: defaultFilters,
+  onFiltersChange: () => undefined,
+  isInitialLoading: false,
+  isLoadingMore: false,
+  error: null,
+  onExecutionClick: () => undefined,
+  selectedId: null,
+  setPaginationObserver: () => undefined,
+  showExecutor: true,
+  canCancel: true,
+  isCancelInProgress: false,
+  onConfirmCancel: async () => undefined,
 };
 
-// Regression story for elastic/kibana#275866: a completed execution that finished
-// a few days ago but crosses the calendar-month boundary. Before the fix this
-// rendered "1 month ago"; after, "N days ago" / "N weeks ago".
-export const CompletedRecentPrevMonth: Story = {
+export const MixedStatuses: Story = {
   args: {
-    status: ExecutionStatus.COMPLETED,
-    startedAt: moment().startOf('month').subtract(6, 'days').toDate(),
-    executedByLabel: 'john.doe@example.com',
-    triggeredBy: 'manual',
-  },
-};
-
-export const Failed: Story = {
-  args: {
-    status: ExecutionStatus.FAILED,
-    startedAt: new Date(),
-    executedByProfile,
-    showExecutor: true,
-    triggeredBy: 'manual',
-  },
-};
-
-export const Pending: Story = {
-  args: {
-    status: ExecutionStatus.PENDING,
-    startedAt: new Date(),
-  },
-};
-
-export const Running: Story = {
-  args: {
-    status: ExecutionStatus.RUNNING,
-    startedAt: new Date(),
-  },
-};
-
-export const WaitingForInput: Story = {
-  args: {
-    status: ExecutionStatus.WAITING_FOR_INPUT,
-    startedAt: new Date(),
-  },
-};
-
-export const Cancelled: Story = {
-  args: {
-    status: ExecutionStatus.CANCELLED,
-    startedAt: new Date(),
-  },
-};
-
-export const Skipped: Story = {
-  args: {
-    status: ExecutionStatus.SKIPPED,
-    startedAt: new Date(),
-  },
-};
-
-export const Selected: Story = {
-  args: {
-    status: ExecutionStatus.COMPLETED,
-    startedAt: new Date(),
-    executedByProfile,
-    showExecutor: true,
-    triggeredBy: 'scheduled',
-    selected: true,
-  },
-};
-
-export const RunningSelected: Story = {
-  args: {
-    status: ExecutionStatus.RUNNING,
-    startedAt: new Date(),
-    executedByProfile,
-    showExecutor: true,
-    triggeredBy: 'scheduled',
-    selected: true,
-  },
-};
-
-export const WaitingForInputSelected: Story = {
-  args: {
-    status: ExecutionStatus.WAITING_FOR_INPUT,
-    startedAt: new Date(),
-    selected: true,
+    ...baseListProps,
+    executions: {
+      results: [
+        {
+          id: 'exec-1',
+          spaceId: 'default',
+          status: ExecutionStatus.COMPLETED,
+          isTestRun: false,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          error: null,
+          duration: 1234,
+          workflowId: 'wf-1',
+          workflowName: 'Demo',
+          executedBy: 'u_john_doe',
+          triggeredBy: 'manual',
+        },
+        {
+          id: 'exec-2',
+          spaceId: 'default',
+          status: ExecutionStatus.FAILED,
+          isTestRun: true,
+          startedAt: moment().subtract(2, 'days').toISOString(),
+          finishedAt: moment().subtract(2, 'days').toISOString(),
+          error: null,
+          duration: 45000,
+          workflowId: 'wf-1',
+          workflowName: 'Demo',
+          executedBy: 'u_mGBROF_q5bm_long_system_principal',
+          triggeredBy: 'manual',
+          stepId: 'analyze_alerts',
+        },
+        {
+          id: 'exec-3',
+          spaceId: 'default',
+          status: ExecutionStatus.RUNNING,
+          isTestRun: false,
+          startedAt: new Date().toISOString(),
+          finishedAt: '',
+          error: null,
+          duration: null,
+          workflowId: 'wf-1',
+          workflowName: 'Demo',
+          executedBy: 'u_john_doe',
+          triggeredBy: 'scheduled',
+        },
+      ],
+      page: 1,
+      size: 100,
+      total: 3,
+    },
   },
 };
