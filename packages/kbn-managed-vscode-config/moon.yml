@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-managed-vscode-config
 dependsOn:
   - '@kbn/kibana-manifest-schema'
+  - '@kbn/dev-utils'
 tags:
   - shared-common
   - package

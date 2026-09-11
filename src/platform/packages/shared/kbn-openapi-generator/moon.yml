@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/repo-info'
   - '@kbn/handlebars'
+  - '@kbn/dev-utils'
 tags:
   - shared-common
   - package
