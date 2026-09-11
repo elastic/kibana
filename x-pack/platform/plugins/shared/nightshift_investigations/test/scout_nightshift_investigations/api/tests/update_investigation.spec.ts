@@ -75,8 +75,14 @@ apiTest.describe(
         summary: 'Root cause identified.',
         conclusion: 'Memory leak in service X.',
         hypotheses: [{ candidate: 'memory leak', confidence: 0.95, status: 'confirmed' }],
-        recommendations: [{ title: 'Restart pod' }],
-        blind_spots: [{ title: 'Network logs', description: 'Not available' }],
+        recommendations: [
+          { title: 'Add memory alert', confidence: 0.7 },
+          { title: 'Restart pod', confidence: 0.95 },
+        ],
+        blind_spots: [
+          { title: 'Profiles', confidence: 0.6, description: 'Not available' },
+          { title: 'Network logs', confidence: 0.8, description: 'Not available' },
+        ],
         conversation_id: 'conv-persist-1',
         impact: { entities: [{ name: 'service-x' }] },
       });
@@ -91,13 +97,26 @@ apiTest.describe(
       expect(investigationRequest.body.hypotheses).toStrictEqual([
         { candidate: 'memory leak', confidence: 0.95, status: 'confirmed' },
       ]);
-      expect(investigationRequest.body.recommendations).toStrictEqual([{ title: 'Restart pod' }]);
+      expect(investigationRequest.body.recommendations).toStrictEqual([
+        { title: 'Restart pod', confidence: 0.95 },
+        { title: 'Add memory alert', confidence: 0.7 },
+      ]);
       expect(investigationRequest.body.blind_spots).toStrictEqual([
-        { title: 'Network logs', description: 'Not available' },
+        { title: 'Network logs', confidence: 0.8, description: 'Not available' },
+        { title: 'Profiles', confidence: 0.6, description: 'Not available' },
       ]);
       expect(investigationRequest.body.conversation_id).toBe('conv-persist-1');
       expect(investigationRequest.body.impact).toStrictEqual({ entities: [{ name: 'service-x' }] });
       expect(investigationRequest.body.completed_at).toBeDefined();
+    });
+
+    apiTest('returns 400 for an unscored current recommendation', async ({ apiClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+        status: 'completed',
+        recommendations: [{ title: 'Restart pod' }],
+      });
+
+      expect(response).toHaveStatusCode(400);
     });
 
     apiTest('updates error field for failed investigations', async ({ apiClient }) => {
