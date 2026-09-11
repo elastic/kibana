@@ -392,8 +392,6 @@ steps:
   # as the approver. A gate timeout fails the gate, which fails this run before the
   # tag steps: the alerts stay unreviewed and the next sweep proposes the rule again
   # with a fresh diagnosis, while the investigation stays open because nobody decided.
-  # The second synchronous child of this run, but the first of this wake-up cycle:
-  # run_previews already resumed the run before these steps execute.
   - name: propose_action
     type: workflow.execute
     if: >-
