@@ -275,7 +275,7 @@ export const findThreatReports = async (
   // Resolve the cursor before opening anything so a sort mismatch or a malformed
   // token fails fast (and, on the first page, so we know whether to open a PIT).
   let pitId: string | undefined;
-  let searchAfter: [number | null, number] | undefined;
+  let searchAfter: [number | string | null, number] | undefined;
   if (cursor) {
     const decoded = decodeCursor(cursor);
     if (decoded.sort !== sort) {
@@ -361,13 +361,22 @@ export const findThreatReports = async (
     const last = pageHits[pageHits.length - 1];
     const primary = last.sort?.[0];
     const shardDoc = last.sort?.[1];
-    if ((typeof primary === 'number' || primary == null) && typeof shardDoc === 'number') {
+    // Date sorts may surface as epoch millis (number) or an ISO string depending
+    // on the cluster/format; both are valid `search_after` values. Refusing to
+    // encode here used to close the PIT and return `nextCursor: null`, which
+    // silently truncated the catalog mid-page.
+    const primaryOk =
+      primary === null || typeof primary === 'number' || typeof primary === 'string';
+    if (primaryOk && typeof shardDoc === 'number') {
       nextCursor = encodeCursor({
         version: 2,
         pitId: nextPitId,
         sort,
-        sortValues: [primary ?? null, shardDoc],
+        sortValues: [primary, shardDoc],
       });
+    } else {
+      await esClient.closePointInTime({ id: nextPitId }).catch(() => {});
+      throw new Error('Unable to encode threat report pagination cursor from search sort values');
     }
   }
 

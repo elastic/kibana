@@ -169,10 +169,10 @@ describe('getThreatReport', () => {
       expect('evidence' in result).toBe(false);
     });
 
-    it('passes a legacy flat evidence object through unchanged rather than hiding it', async () => {
-      // A stale (not recreated) index holds the pre-v30 flat shape. Collapsing
-      // that into "absent" would make a broken deployment look like "not hunted
-      // here", so the legacy object is returned as-is.
+    it('passes a legacy flat evidence object through on a space-owned report', async () => {
+      // Pre-v30 flat shape on a space-owned doc is that space's own evidence, so
+      // returning it still distinguishes "hunted here" from "absent" without
+      // cross-space leakage.
       const legacy = {
         revision: 1,
         space_id: 'default',
@@ -185,6 +185,22 @@ describe('getThreatReport', () => {
       const result = await getThreatReport(mockHit(legacy), defaultArgs);
 
       expect(result.evidence).toEqual(legacy.evidence);
+    });
+
+    it('omits legacy flat evidence on a global report rather than leaking another space', async () => {
+      const legacyGlobal = {
+        revision: 1,
+        space_id: '*',
+        evidence: {
+          alert_hits: { window: '7d', ioc_match_hits: 5, technique_overlap_hits: 0 },
+          alert_hits_total: 5,
+        },
+      };
+
+      const result = await getThreatReport(mockHit(legacyGlobal), defaultArgs);
+
+      expect(result.evidence).toBeUndefined();
+      expect('evidence' in result).toBe(false);
     });
   });
 });

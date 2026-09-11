@@ -29,6 +29,15 @@ describe('report_cursor', () => {
     expect(decodeCursor(encoded).sortValues[0]).toBeNull();
   });
 
+  it('returns a round-tripped string primary sort value', () => {
+    const encoded = encodeCursor({
+      ...basePayload,
+      sort: 'updated_at',
+      sortValues: ['2024-01-01T00:00:00.000Z', 7],
+    });
+    expect(decodeCursor(encoded).sortValues[0]).toBe('2024-01-01T00:00:00.000Z');
+  });
+
   it('returns the round-tripped pit id', () => {
     expect(decodeCursor(encodeCursor(basePayload)).pitId).toBe('pit-abc');
   });

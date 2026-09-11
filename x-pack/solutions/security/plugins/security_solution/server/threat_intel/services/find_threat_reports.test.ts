@@ -19,7 +19,7 @@ const buildHit = ({
   source,
 }: {
   id: string;
-  sort: Array<string | number | null>;
+  sort: Array<string | number | boolean | null>;
   source?: Record<string, unknown>;
 }) => ({
   _id: id,
@@ -149,6 +149,47 @@ describe('findThreatReports', () => {
     expect(result.nextCursor).toBe(
       encodeCursor({ version: 2, pitId: 'pit-1', sort: 'relevance', sortValues: [0.8, 2] })
     );
+  });
+
+  it('returns a nextCursor when the primary sort value is an ISO date string', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(
+      buildSearchResponse([
+        buildHit({ id: 'r1', sort: ['2024-02-01T00:00:00.000Z', 1] }),
+        buildHit({ id: 'r2', sort: ['2024-01-15T00:00:00.000Z', 2] }),
+        buildHit({ id: 'r3', sort: ['2024-01-01T00:00:00.000Z', 3] }),
+      ]) as never
+    );
+
+    const result = await findThreatReports(esClient, {
+      ...defaultArgs,
+      sort: 'updated_at',
+    });
+
+    expect(result.nextCursor).toBe(
+      encodeCursor({
+        version: 2,
+        pitId: 'pit-1',
+        sort: 'updated_at',
+        sortValues: ['2024-01-15T00:00:00.000Z', 2],
+      })
+    );
+  });
+
+  it('throws rather than silently ending pagination when sort values cannot be encoded', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(
+      buildSearchResponse([
+        buildHit({ id: 'r1', sort: [true, 1] }),
+        buildHit({ id: 'r2', sort: [true, 2] }),
+        buildHit({ id: 'r3', sort: [true, 3] }),
+      ]) as never
+    );
+
+    await expect(findThreatReports(esClient, defaultArgs)).rejects.toThrow(
+      /Unable to encode threat report pagination cursor/
+    );
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
   });
 
   it('returns a null nextCursor on the last page', async () => {

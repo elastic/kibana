@@ -29,7 +29,7 @@ export interface ReportCursorPayload {
    */
   sort: string;
   /** Primary sort value and `_shard_doc` tiebreak from the last returned hit. */
-  sortValues: [number | null, number];
+  sortValues: [number | string | null, number];
 }
 
 /** Encodes a cursor payload as an opaque base64url string. */
@@ -61,7 +61,7 @@ export const decodeCursor = (encoded: string): ReportCursorPayload => {
   }
 
   const primary = sortValues[0];
-  if (primary !== null && typeof primary !== 'number') {
+  if (primary !== null && typeof primary !== 'number' && typeof primary !== 'string') {
     throw new InvalidCursorError('Invalid or unsupported cursor');
   }
 

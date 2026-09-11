@@ -61,9 +61,7 @@ export const getThreatReport = async (
     revision,
   };
 
-  // Nested per-space array (v30). Project the caller's element only (never '*');
-  // a legacy flat object is left alone so stale indexes stay distinguishable
-  // from "not hunted here".
+  // Nested per-space array (v30). Project the caller's element only (never '*').
   if (Array.isArray(source.evidence)) {
     const element = source.evidence.find(
       (el): el is Record<string, unknown> =>
@@ -74,6 +72,15 @@ export const getThreatReport = async (
     if (element) {
       result.evidence = element;
     } else {
+      delete result.evidence;
+    }
+  } else if (source.evidence != null && typeof source.evidence === 'object') {
+    // Legacy flat object (pre-v30). Safe only on a space-owned doc: under the old
+    // clobber model that object is the owning space's evidence. On a global (`*`)
+    // doc it is whichever space wrote last, so returning it would leak that
+    // space's hit counts to every other space. Omit it there; a stale global
+    // index is drop+recreate under the flag anyway.
+    if (source.space_id !== spaceId) {
       delete result.evidence;
     }
   }
