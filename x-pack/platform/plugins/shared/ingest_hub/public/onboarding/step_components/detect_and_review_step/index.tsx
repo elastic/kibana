@@ -33,6 +33,7 @@ import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
 import { InstalledContent } from './installed_content';
+import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -76,6 +77,9 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   const installationInfo = awsPackageData?.item?.installationInfo;
   const installedKibana: KibanaAssetReference[] = installationInfo?.installed_kibana ?? [];
   const installedEs: EsAssetReference[] = installationInfo?.installed_es ?? [];
+
+  // Resolve the href to [Metrics AWS] Overview for the "Take me to my data" button.
+  const overviewHref = useAwsOverviewDashboardUrl(installedKibana);
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
@@ -150,6 +154,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             fill
             iconType="sortRight"
             iconSide="right"
+            href={overviewHref}
             onClick={onContinue}
             data-test-subj="detectAndReviewStep-continueButton"
           >
