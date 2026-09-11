@@ -14,6 +14,7 @@ import { escapeHatch } from '../utils';
 import type { attachmentApiV2 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyCaseResponse } from '../../../common/attachments';
 
 export const bulkCreateAttachmentsRoute = createCasesRoute({
   method: 'post',
@@ -34,19 +35,19 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
       const attachments = request.body as attachmentApiV2.BulkCreateAttachmentsRequestV2;
-      // Encode the response in `unified` mode when the batch contains an
-      // attachment with no V1 form to downgrade to: a unified-only type
-      // (dashboard, map, discoverSession) or an SO-reference instance of a
-      // hybrid type (e.g. Lens-by-reference). Everything else stays legacy-shaped
-      // so existing public consumers of this route are unaffected.
+      // Keep the response unified when the batch contains an attachment with
+      // no V1 form to downgrade to: a unified-only type (dashboard, map,
+      // discoverSession) or an SO-reference instance of a hybrid type (e.g.
+      // Lens-by-reference). Everything else stays legacy-shaped so existing
+      // public consumers of this route are unaffected.
       const hasUnifiedOnlyAttachment = attachments.some((attachment) =>
         isUnifiedOnlyAttachment(attachment)
       );
-      const res: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
+      const created: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
         caseId,
         attachments,
-        mode: hasUnifiedOnlyAttachment ? 'unified' : 'legacy',
       });
+      const res = hasUnifiedOnlyAttachment ? created : toLegacyCaseResponse(created);
 
       return response.ok({
         body: res,

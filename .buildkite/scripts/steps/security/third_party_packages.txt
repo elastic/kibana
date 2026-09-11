@@ -53,6 +53,7 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+jsondiffpatch
 typescript-7
 immer-v9
 react-redux-v7
