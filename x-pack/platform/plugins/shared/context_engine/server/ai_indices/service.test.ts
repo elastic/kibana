@@ -125,6 +125,16 @@ describe('AiIndexService', () => {
       });
     });
 
+    it('defaults memory_enabled to false', async () => {
+      await service.create('customer_support', properties);
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ memory_enabled: false }),
+        })
+      );
+    });
+
     it('throws AiIndexAlreadyExistsError when the id already exists (409)', async () => {
       storageClient.index.mockRejectedValue(createConflictError());
 
@@ -209,6 +219,24 @@ describe('AiIndexService', () => {
         enabled: true,
         agent_id: 'my-analysis-agent',
       });
+    });
+
+    it('persists memory_enabled when updating an existing AI index', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: aiIndexDocument,
+      });
+
+      await expect(
+        service.put('customer_support', { ...properties, memory_enabled: true })
+      ).resolves.toBe('updated');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.memory_enabled).toBe(true);
     });
 
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
@@ -631,7 +659,34 @@ describe('AiIndexService', () => {
       await expect(service.get('customer_support')).resolves.toEqual({
         id: 'customer_support',
         ...aiIndexDocument,
+        memory_enabled: false,
       });
+    });
+
+    it('defaults memory_enabled to false for legacy documents without the field', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
+
+      await expect(service.get('customer_support')).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', memory_enabled: false })
+      );
+    });
+
+    it('round-trips memory_enabled from the stored document to the item', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, memory_enabled: true },
+      });
+
+      await expect(service.get('customer_support')).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
+      );
     });
 
     it('defaults managed to false for legacy documents without the field', async () => {
@@ -737,8 +792,8 @@ describe('AiIndexService', () => {
       } as unknown as Awaited<ReturnType<AiIndexStorageClient['search']>>);
 
       await expect(service.list()).resolves.toEqual([
-        { id: 'billing', ...aiIndexDocument },
-        { id: 'customer_support', ...aiIndexDocument },
+        { id: 'billing', ...aiIndexDocument, memory_enabled: false },
+        { id: 'customer_support', ...aiIndexDocument, memory_enabled: false },
       ]);
 
       expect(storageClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
