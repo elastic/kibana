@@ -110,11 +110,12 @@ const handleExperimentalFeatures = async <T extends { configuration?: { ai_indic
     return { body, contextEngineEnabled };
   }
 
-  const { ai_indices: _stripped, ...restConfig } = body.configuration;
-  return {
-    body: contextEngineEnabled ? body : ({ ...body, configuration: restConfig } as T),
-    contextEngineEnabled,
-  };
+  if (!contextEngineEnabled) {
+    const { ai_indices: _stripped, ...restConfig } = body.configuration;
+    return { body: { ...body, configuration: restConfig } as T, contextEngineEnabled };
+  }
+
+  return { body, contextEngineEnabled };
 };
 
 /**
