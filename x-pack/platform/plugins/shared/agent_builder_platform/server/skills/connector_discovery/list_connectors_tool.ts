@@ -12,19 +12,12 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
-
-const isChatCallableConnectorType = (connectorTypeId: string): boolean =>
-  connectorTypeId === MCP_CONNECTOR_ID || !!getConnectorSpec(connectorTypeId);
 
 const listConnectorsSchema = z.object({}).describe('No parameters.');
 
 export type ListConnectorsInput = z.infer<typeof listConnectorsSchema>;
 
-/**
- * Inline tool that lists connectors attached to the current agent that are
- * callable as tools (have a ConnectorSpec or are MCP connectors).
- */
+/** Inline tool that lists connectors with a ConnectorSpec that are callable as agent tools. */
 export const createListConnectorsTool = ({
   getActionsStart,
 }: {
@@ -43,7 +36,7 @@ export const createListConnectorsTool = ({
       const allConnectors = await actionsClient.getAll();
 
       const connectors = allConnectors
-        .filter((connector) => isChatCallableConnectorType(connector.actionTypeId))
+        .filter((connector) => !!getConnectorSpec(connector.actionTypeId))
         .map((connector) => {
           const spec = getConnectorSpec(connector.actionTypeId);
           return {

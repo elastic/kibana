@@ -132,21 +132,19 @@ describe('registerInternalConnectorRoutes', () => {
       expect(result.body[0].type).toBe('.github');
     });
 
-    it('includes MCP connectors even without a spec', async () => {
+    it('excludes MCP connectors (they surface as direct tools, not via discovery)', async () => {
       mockGetAll.mockResolvedValue([makeConnector({ actionTypeId: MCP_TYPE })]);
       mockGetConnectorSpec.mockReturnValue(undefined);
 
-      const result = (await callList()) as { type: string; body: Array<{ type: string }> };
+      const result = (await callList()) as { type: string; body: unknown[] };
 
       expect(result.type).toBe('ok');
-      expect(result.body).toHaveLength(1);
-      expect(result.body[0].type).toBe(MCP_TYPE);
+      expect(result.body).toHaveLength(0);
     });
 
-    it('uses the spec description when available, connector name as fallback', async () => {
+    it('uses the spec description when available', async () => {
       mockGetAll.mockResolvedValue([
         makeConnector({ id: 'c1', name: 'My GitHub', actionTypeId: '.github' }),
-        makeConnector({ id: 'c2', name: 'My MCP', actionTypeId: MCP_TYPE }),
       ]);
       mockGetConnectorSpec.mockImplementation((id: string) =>
         id === '.github' ? makeSpec('Manage GitHub issues') : undefined
@@ -158,7 +156,6 @@ describe('registerInternalConnectorRoutes', () => {
       };
 
       expect(result.body.find((c) => c.id === 'c1')?.description).toBe('Manage GitHub issues');
-      expect(result.body.find((c) => c.id === 'c2')?.description).toBe('My MCP');
     });
   });
 

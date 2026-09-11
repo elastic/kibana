@@ -101,22 +101,21 @@ describe('connector-discovery inline tools', () => {
       expect(data.connectors[0].id).toBe('c2');
     });
 
-    it('includes MCP connectors even without a spec', async () => {
+    it('excludes MCP connectors (they surface as direct tools, not via discovery)', async () => {
       const { actionsStart } = makeActionsStart([makeConnector({ actionTypeId: '.mcp' })]);
       mockGetConnectorSpec.mockReturnValue(undefined);
       const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
 
       const result = (await tool.handler({}, makeContext())) as ToolHandlerStandardReturn;
 
-      const data = result.results[0].data as { connectors: Array<{ type: string }> };
-      expect(data.connectors).toHaveLength(1);
-      expect(data.connectors[0].type).toBe('.mcp');
+      const data = result.results[0].data as { connectors: unknown[]; total: number };
+      expect(data.connectors).toHaveLength(0);
+      expect(data.total).toBe(0);
     });
 
-    it('uses spec description when available, falls back to connector name', async () => {
+    it('uses spec description when available', async () => {
       const { actionsStart } = makeActionsStart([
         makeConnector({ id: 'c1', name: 'My GitHub', actionTypeId: '.github' }),
-        makeConnector({ id: 'c2', name: 'My MCP', actionTypeId: '.mcp' }),
       ]);
       mockGetConnectorSpec.mockImplementation((id: string) =>
         id === '.github' ? makeSpec('Manage GitHub issues') : undefined
@@ -129,7 +128,6 @@ describe('connector-discovery inline tools', () => {
         connectors: Array<{ id: string; description: string }>;
       };
       expect(data.connectors.find((c) => c.id === 'c1')?.description).toBe('Manage GitHub issues');
-      expect(data.connectors.find((c) => c.id === 'c2')?.description).toBe('My MCP');
     });
 
     it('returns an error result when getAll throws', async () => {

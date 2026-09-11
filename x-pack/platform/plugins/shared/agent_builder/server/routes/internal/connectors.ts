@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import type { RouteDependencies } from '../types';
@@ -19,9 +18,6 @@ import type {
 } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
-
-const isChatCallableConnectorType = (connectorTypeId: string): boolean =>
-  connectorTypeId === MCP_CONNECTOR_ID || !!getConnectorSpec(connectorTypeId);
 
 export function registerInternalConnectorRoutes({ router, coreSetup, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -41,7 +37,7 @@ export function registerInternalConnectorRoutes({ router, coreSetup, logger }: R
       const allConnectors = await actionsClient.getAll();
 
       const connectors: AgentConnectorSummary[] = allConnectors
-        .filter((connector) => isChatCallableConnectorType(connector.actionTypeId))
+        .filter((connector) => !!getConnectorSpec(connector.actionTypeId))
         .map((connector) => {
           const spec = getConnectorSpec(connector.actionTypeId);
           return {
