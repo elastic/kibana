@@ -28,8 +28,10 @@ export interface AiIndexDataReadServiceApi {
   /** Throws `AiIndexNotFoundError` for an unknown id. */
   describe(id: string): Promise<DescribeAiIndexResponse>;
   /**
-   * Entries with documents visible in this space, or none the caller can read. Unreadable, hidden
-   * and unverifiable entries are dropped. `ids` narrows the registry before probing.
+   * The AI indices the caller can use in this space: those that are empty, or hold at least one
+   * document the caller can see here. Left out when the caller cannot read the backing index,
+   * when every document belongs to another space, or when the check itself failed. `ids` limits
+   * which registry entries are checked.
    */
   listVisible(ids?: string[]): Promise<AiIndexHttpItem[]>;
 }

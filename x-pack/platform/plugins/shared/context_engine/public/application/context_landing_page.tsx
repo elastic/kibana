@@ -59,7 +59,7 @@ const ContextLandingPageContent = ({
         })}
         description={i18n.translate('xpack.contextEngine.landing.description', {
           defaultMessage:
-            'Manage AI Indexes to organize and retrieve contextual knowledge for your agents. Only AI indices available to you in this space are shown.',
+            'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
         })}
         restrictWidth
         bottomBorder={false}

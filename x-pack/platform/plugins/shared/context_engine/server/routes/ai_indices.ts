@@ -516,7 +516,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'List AI indices',
-      description: `Lists the AI indices available to the caller: registered entries whose backing indices hold documents the caller can see in the current space, or none the caller can read at all. Entries the caller cannot read are omitted. Up to ${MAX_AI_INDICES} entries.`,
+      description: `Lists the AI indices the caller can use in the current space. An AI index is left out when the caller cannot read its backing index, or when every document in it belongs to another space. An empty AI index is still listed. Up to ${MAX_AI_INDICES} entries.`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },

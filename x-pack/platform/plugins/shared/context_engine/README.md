@@ -47,22 +47,24 @@ Notes:
 
 ## Listing AI indices
 
-`GET /api/context_engine/ai_index` returns the AI indices available to the
-caller, not the whole registry. Two existence probes run per entry as the
-current user, in one `msearch`: any readable documents, and any matching the
-space filter. An entry is listed when it has documents visible in the current
-space, or none the caller can read at all (a still-empty or not-yet-created
-index appears). It is dropped when its readable documents are all hidden from
-this space, or when a probe fails or is incomplete: a 403 for lack of `read`,
-any other error, a timeout, a failed shard. Probes use strict index options;
-`ignore_unavailable` would silently drop unreadable indices and pass them off
-as empty. The agent prompt's AI-index catalog applies the same rule.
+`GET /api/context_engine/ai_index` returns the AI indices the caller can use
+in the current space, not the whole registry. An AI index is listed when its
+backing index is empty (or does not exist yet), or when it holds at least one
+document the caller can see in this space. It is not listed when the caller
+lacks `read` on the backing index, or when every document in it belongs to
+another space.
 
-Consequences: an entry can be absent from the list yet still be fetched,
-updated or deleted by id (the management page and the agent AI-index picker
-say so); and a wildcard `dest.value` matching no index the caller may read
-resolves to nothing (404, not 403), so it is listed as empty rather than
-dropped.
+To decide, Kibana runs two small searches per AI index as the current user,
+in a single `msearch`: one for any document at all, one for any document in
+this space. Any error, timeout or failed shard on either search hides the
+entry. The searches deliberately do not set `ignore_unavailable`: with it, an
+index the caller cannot read would look empty and be listed anyway. The agent
+prompt's AI-index catalog uses the same rule.
+
+Two things follow. An AI index that is not listed can still be fetched,
+updated or deleted by id. And a wildcard `dest.value` that matches no index
+the caller can read looks the same as an index that does not exist yet
+(Elasticsearch returns 404, not 403), so it is listed as empty.
 
 ## Querying AI indices
 
@@ -167,9 +169,11 @@ target broad enough to exceed it returns 400.
 `contextEngine:read` grants the routes; it grants **no** Elasticsearch index
 privileges. Callers also need, on every backing index (`ai-index-*`):
 
-- `read` to be listed, with one exception: a wildcard `dest.value` matching no
-  index the caller can read is listed as empty. Otherwise an entry whose
-  backing indices the caller cannot read is omitted, not an error;
+- `read` to be listed. Without it the AI index is left out of the list; there
+  is no error. (The one case that looks different is a wildcard `dest.value`
+  matching nothing the caller can read: Elasticsearch reports it as
+  "no such index", so it shows up as an empty AI index. See
+  [Listing AI indices](#listing-ai-indices));
 - `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
