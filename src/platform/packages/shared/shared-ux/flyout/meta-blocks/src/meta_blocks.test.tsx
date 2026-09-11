@@ -40,11 +40,32 @@ describe('MetaBlocks', () => {
     const email = 'long-user-name-with-ellipsis@elastic.co';
     render(
       <MetaBlocks
-        items={[{ title: 'Last updated by', value: <EuiLink href="#">{email}</EuiLink> }]}
+        items={[
+          {
+            title: 'Last updated by',
+            value: (
+              <EuiLink href="#" data-test-subj="ownerLink">
+                {email}
+              </EuiLink>
+            ),
+          },
+        ]}
       />
     );
 
     expect(screen.getByRole('link', { name: email })).toBeInTheDocument();
+    // The sizing copy measures text, so the caller's element is mounted once.
+    expect(screen.getByTestId('ownerLink')).toBeInTheDocument();
+  });
+
+  it('leaves a link that renders a button untruncated', () => {
+    const email = 'long-user-name-with-ellipsis@elastic.co';
+    render(
+      <MetaBlocks items={[{ title: 'Last updated by', value: <EuiLink>{email}</EuiLink> }]} />
+    );
+
+    expect(screen.queryByTestId('fullText')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: email })).toBeInTheDocument();
   });
 
   it('leaves values that own their layout untruncated', () => {

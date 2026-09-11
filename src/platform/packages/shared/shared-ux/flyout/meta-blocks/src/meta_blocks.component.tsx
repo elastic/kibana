@@ -34,6 +34,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       flex: 0 1 auto;
       min-width: 0;
 
+      /* Holds an anchor at body weight, so the sizing copy measures the rendered width. */
       a {
         font-weight: ${euiTheme.font.weight.regular};
       }
@@ -70,13 +71,20 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
   };
 };
 
+interface TruncationHostProps {
+  href?: string;
+  children?: ReactNode;
+}
+
 /**
- * A link is inline text, so it can host the truncation. Wrappers that size themselves to their
- * content, such as badges, cannot: `EuiTextTruncate` measures a block-level box, which collapses to
- * zero width inside a shrink-to-fit parent.
+ * An anchor is inline text, so it can host the truncation. `EuiTextTruncate` measures a block-level
+ * box, which collapses to zero width inside a shrink-to-fit parent, so two kinds of value cannot
+ * host it: wrappers that size themselves to their content, such as badges, and an `EuiLink` with no
+ * `href`, which renders a `button`.
  */
-const isLinkElement = (value: ReactNode): value is ReactElement<{ children?: ReactNode }> =>
-  isValidElement(value) && (value.type === EuiLink || value.type === 'a');
+const isTruncationHost = (value: ReactNode): value is ReactElement<TruncationHostProps> =>
+  isValidElement<TruncationHostProps>(value) &&
+  (value.type === 'a' || (value.type === EuiLink && typeof value.props.href === 'string'));
 
 /** The text a value reduces to, or `undefined` when the value is richer than a single string. */
 const getTruncatableText = (value: ReactNode): string | undefined => {
@@ -85,7 +93,7 @@ const getTruncatableText = (value: ReactNode): string | undefined => {
     // which reports text that fits as overflowing.
     return String(value).trim();
   }
-  if (isLinkElement(value)) {
+  if (isTruncationHost(value)) {
     return getTruncatableText(value.props.children);
   }
   return undefined;
@@ -98,7 +106,7 @@ const getTruncatableText = (value: ReactNode): string | undefined => {
  */
 const renderTruncated = (value: ReactNode, text: string) => {
   const truncated = <EuiTextTruncate text={text} truncation="middle" />;
-  return isLinkElement(value) ? cloneElement(value, undefined, truncated) : truncated;
+  return isTruncationHost(value) ? cloneElement(value, undefined, truncated) : truncated;
 };
 
 /** A compact, responsive row of key-value pairs. */
@@ -125,7 +133,7 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
             {truncatableText !== undefined ? (
               <span css={memoized.truncatedValue}>
                 <span css={memoized.fullTextSizer} aria-hidden>
-                  {item.value}
+                  {truncatableText}
                 </span>
                 <span css={memoized.truncationOverlay}>
                   {renderTruncated(item.value, truncatableText)}
