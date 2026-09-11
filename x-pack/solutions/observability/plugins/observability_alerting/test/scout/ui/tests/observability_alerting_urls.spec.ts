@@ -12,7 +12,15 @@ import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
-import { OBSERVABILITY_ALERTING_SURFACES } from '../fixtures/page_objects';
+import {
+  OBSERVABILITY_ALERTING_SURFACES,
+  OBSERVABILITY_ALERTING_RULES_V1_URL_RE,
+  OBSERVABILITY_ALERTING_RULES_V2_URL_RE,
+} from '../fixtures/page_objects';
+import {
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
+  OBSERVABILITY_ALERTING_RULES_V2_PATH,
+} from '../../../../public/constants';
 
 /*
  * Lives under the default Scout config (`test/scout/`) so
@@ -22,6 +30,7 @@ import { OBSERVABILITY_ALERTING_SURFACES } from '../fixtures/page_objects';
  * setting on and cannot cover the flag-off case.
  *
  * One test per URL so a redirect or title mismatch is isolated to that path.
+ * Tab-switch tests stay in this file so they cannot race the flag-off cases.
  */
 test.describe(
   'Observability Alerting URLs',
@@ -72,5 +81,68 @@ test.describe(
         });
       });
     }
+
+    test('switches between v1 and v2 rules tabs without leaving observability', async ({
+      kbnClient,
+      page,
+      pageObjects,
+    }) => {
+      await setAlertingV2EnabledSetting(kbnClient, true);
+      const alerting = pageObjects.observabilityAlerting;
+
+      await test.step('start on v2 and switch to v1', async () => {
+        await alerting.goto(OBSERVABILITY_ALERTING_RULES_V2_PATH);
+        await expect(alerting.pageTitle).toHaveText('Rules', { timeout: 30_000 });
+        await expect(alerting.v2RulesTab).toBeVisible();
+        await expect(alerting.v1RulesTab).toBeVisible();
+
+        await alerting.clickV1RulesTab();
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
+        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
+        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
+      });
+
+      await test.step('from v1, switch back to v2', async () => {
+        await alerting.clickV2RulesTab();
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V2_URL_RE);
+        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'true');
+        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'false');
+      });
+
+      await test.step('from v2, switch to v1 again', async () => {
+        await alerting.clickV1RulesTab();
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
+        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
+        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
+    test('starts on v1 and keeps host-aware tabs after switching to v2 and back', async ({
+      kbnClient,
+      page,
+      pageObjects,
+    }) => {
+      await setAlertingV2EnabledSetting(kbnClient, true);
+      const alerting = pageObjects.observabilityAlerting;
+
+      await test.step('start on v1 and switch to v2', async () => {
+        await alerting.goto(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+        await expect(alerting.pageTitle).toHaveText('Rules', { timeout: 30_000 });
+        await expect(alerting.v1RulesTab).toBeVisible();
+        await expect(alerting.v2RulesTab).toBeVisible();
+
+        await alerting.clickV2RulesTab();
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V2_URL_RE);
+        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'true');
+        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'false');
+      });
+
+      await test.step('from v2, switch back to v1', async () => {
+        await alerting.clickV1RulesTab();
+        await expect(page).toHaveURL(OBSERVABILITY_ALERTING_RULES_V1_URL_RE);
+        await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
+        await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
+      });
+    });
   }
 );

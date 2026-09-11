@@ -16,6 +16,8 @@ import {
   createQueryClientWrapper,
 } from '../../hooks/test_utils';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
+import { AlertEpisodeOverviewSection } from './overview_section';
+import { AlertEpisodesRelatedSection } from './related_section';
 
 jest.mock('../../hooks/use_fetch_rule');
 
@@ -23,10 +25,10 @@ jest.mock('./details_header_section', () => ({
   AlertEpisodeDetailsHeaderSection: () => <div data-test-subj="headerSectionStub" />,
 }));
 jest.mock('./overview_section', () => ({
-  AlertEpisodeOverviewSection: () => <div data-test-subj="overviewSectionStub" />,
+  AlertEpisodeOverviewSection: jest.fn(() => <div data-test-subj="overviewSectionStub" />),
 }));
 jest.mock('./related_section', () => ({
-  AlertEpisodesRelatedSection: () => <div data-test-subj="relatedSectionStub" />,
+  AlertEpisodesRelatedSection: jest.fn(() => <div data-test-subj="relatedSectionStub" />),
 }));
 jest.mock('./metadata_section', () => ({
   AlertEpisodeMetadataSection: () => <div data-test-subj="metadataSectionStub" />,
@@ -47,11 +49,16 @@ const loadedRuleState = {
   rule: { id: 'rule-1', metadata: { name: 'Rule A' } },
 } as const;
 
+const mockGetRuleDetailsHref = (ruleId: string) => `/host-aware/rules/${ruleId}`;
+const mockGetEpisodeDetailsHref = (episodeId: string) => `/host-aware/inbox/${episodeId}`;
+
 const baseProps = {
   episodeId: 'ep-1',
   groupHash: 'gh-1',
   onClose: jest.fn(),
   services: mockServices,
+  getRuleDetailsHref: mockGetRuleDetailsHref,
+  getEpisodeDetailsHref: mockGetEpisodeDetailsHref,
 };
 
 describe('AlertEpisodeDetailsFlyout', () => {
@@ -69,6 +76,14 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('alertingV2EpisodeFlyoutCloseIcon')).toBeInTheDocument();
   });
 
+  it('forwards getRuleDetailsHref to the overview section', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+    expect(jest.mocked(AlertEpisodeOverviewSection)).toHaveBeenCalledWith(
+      expect.objectContaining({ getRuleDetailsHref: mockGetRuleDetailsHref }),
+      expect.anything()
+    );
+  });
+
   it('exposes view details behind the footer take action menu', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
@@ -78,7 +93,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toHaveAttribute(
       'href',
-      mockHttp.basePath.prepend('/app/management/alertingV2/episodes/ep-1')
+      '/host-aware/inbox/ep-1'
     );
   });
 
@@ -86,6 +101,10 @@ describe('AlertEpisodeDetailsFlyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabRelated'));
     expect(screen.getByTestId('relatedSectionStub')).toBeInTheDocument();
+    expect(jest.mocked(AlertEpisodesRelatedSection)).toHaveBeenCalledWith(
+      expect.objectContaining({ getEpisodeDetailsHref: mockGetEpisodeDetailsHref }),
+      expect.anything()
+    );
   });
 
   it('switches to metadata tab when the rule is loaded', () => {
