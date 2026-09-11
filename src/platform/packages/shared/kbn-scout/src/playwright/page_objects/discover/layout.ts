@@ -724,19 +724,17 @@ export abstract class LayoutMixin extends SaveMixin {
    * `value` is the selectable item value when it differs from the visible label.
    */
   async chooseBreakdownField(field: string, value = field) {
+    const selectable = this.page.testSubj.locator('unifiedHistogramBreakdownSelectorSelectable');
     await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'visible',
-    });
+    await selectable.waitFor({ state: 'visible' });
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
-    await this.page
-      .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
-      )
-      .click();
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'hidden',
+    // The list is virtualised; clicking while EUI is still filtering misses the option
+    // and leaves the popover open.
+    await selectable.and(this.page.locator('[data-is-searching="false"]')).waitFor({
+      state: 'attached',
     });
+    await selectable.locator(`.euiSelectableListItem[value="${value}"]`).click();
+    await selectable.waitFor({ state: 'hidden' });
   }
 
   /**
