@@ -635,12 +635,13 @@ describe('UiamService', () => {
       });
     });
 
-    it('withholds both the shared secret and the client certificate when client authentication is not requested', async () => {
+    it('withholds only the shared secret (not the mTLS certificate) when client authentication is not requested', async () => {
       const mockResponse: GrantUiamApiKeyResponse = {
         id: 'api-key-id',
         key: 'essu_api_key_from_grant',
         description: 'api-key-from-grant',
       };
+      agentSpy.mockClear();
       const mtlsUiamService = new UiamService(
         loggingSystemMock.createLogger(),
         ConfigSchema.validate(
@@ -660,7 +661,17 @@ describe('UiamService', () => {
         ).uiam,
         { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
-      agentSpy.mockClear();
+
+      // The dispatcher created during construction always includes the mTLS client certificate.
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
 
       fetchSpy.mockResolvedValue({
         ok: true,
@@ -698,15 +709,6 @@ describe('UiamService', () => {
         },
         body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
-      });
-      // The dispatcher this grant used keeps the CAs and server verification, but presents no
-      // client certificate.
-      expect(agentSpy).toHaveBeenCalledWith({
-        connect: {
-          ca: ['mocked file content for /some/ca/path'],
-          allowPartialTrustChain: true,
-          rejectUnauthorized: true,
-        },
       });
     });
 
