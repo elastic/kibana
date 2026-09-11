@@ -62,14 +62,15 @@ export function validateVariables(
   for (const variableItem of variableItems) {
     const { yamlPath: path, offset } = variableItem;
 
-    let context: typeof DynamicStepContextSchema;
-    try {
-      const nearestStepPath = getNearestStepPath(path);
-      const nearestStep = nearestStepPath
-        ? getValueAtYamlPath<{ name?: string }>(workflowDefinition, nearestStepPath)
-        : undefined;
-      const cacheKey = nearestStep?.name ?? ROOT_CACHE_KEY;
+    const nearestStepPath = getNearestStepPath(path);
+    const nearestStep = nearestStepPath
+      ? getValueAtYamlPath<{ name?: string }>(workflowDefinition, nearestStepPath)
+      : undefined;
+    const cacheKey = nearestStep?.name ?? ROOT_CACHE_KEY;
 
+    let context: typeof DynamicStepContextSchema | null = null;
+
+    try {
       let stepSchema = stepSchemaCache.get(cacheKey);
       if (!stepSchema) {
         if (nearestStep?.name) {
@@ -92,6 +93,7 @@ export function validateVariables(
       }
 
       const variableOffset = offset ?? fallbackForOffsetValue(variableItem, yamlDocument, model);
+      context = pathSchema;
       if (yamlDocument != null && variableOffset !== undefined) {
         const fullContextKey = `${pathContextKey}:${variableOffset}`;
         const cachedContext = fullContextCache.get(fullContextKey);
@@ -106,22 +108,21 @@ export function validateVariables(
           );
           fullContextCache.set(fullContextKey, context);
         }
-      } else {
-        context = pathSchema;
       }
+    } catch {
+      // Unreachable on any known input: the "step not in graph" throws are guarded by
+      // the early return in getContextSchemaForStep, and every InvalidForeachParameterError
+      // is already degraded to z.unknown() by getForeachStateSchema. Kept so that a throw
+      // introduced here later costs one variable rather than the whole document, which the
+      // document-level boundary in useYamlValidation would otherwise clear.
+      context = null;
+    }
 
+    if (context !== null) {
       const error = validateVariable(variableItem, context);
       if (error) {
         errors.push(error);
       }
-    } catch (e) {
-      errors.push({
-        ...variableItem,
-        message: 'Failed to get context schema for path',
-        severity: 'error',
-        owner: 'variable-validation',
-        hoverMessage: null,
-      });
     }
   }
 

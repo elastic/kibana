@@ -31,71 +31,136 @@ export const AttackDiscoveryFindRequestQuery = lazySchema(() =>
     /**
      * Filter results to Attack discoveries that include any of the provided alert IDs
      */
-    alert_ids: ArrayFromString(z.string()).optional(),
+    alert_ids: ArrayFromString(z.string())
+      .optional()
+      .describe('Filter results to Attack discoveries that include any of the provided alert IDs'),
     /**
      * Filter results to Attack discoveries created by any of the provided human readable connector names. Note that values must match the human readable `connector_name` property of an Attack discovery, e.g. "GPT-5 Chat", which are distinct from `connector_id` values used to generate Attack discoveries.
      */
-    connector_names: ArrayFromString(z.string()).optional(),
+    connector_names: ArrayFromString(z.string())
+      .optional()
+      .describe(
+        'Filter results to Attack discoveries created by any of the provided human readable connector names. Note that values must match the human readable `connector_name` property of an Attack discovery, e.g. "GPT-5 Chat", which are distinct from `connector_id` values used to generate Attack discoveries.'
+      ),
     /**
      * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
      */
-    enable_field_rendering: BooleanFromString.optional().default(false),
+    enable_field_rendering: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.'
+      ),
     /**
      * End of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
      */
-    end: z.string().optional(),
+    end: z
+      .string()
+      .optional()
+      .describe(
+        'End of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").'
+      ),
     /**
      * Filter results to the Attack discoveries with the specified IDs
      */
-    ids: ArrayFromString(z.string()).optional(),
+    ids: ArrayFromString(z.string())
+      .optional()
+      .describe('Filter results to the Attack discoveries with the specified IDs'),
     /**
      * If `true`, the response will include `unique_alert_ids` and `unique_alert_ids_count` aggregated across the matched Attack discoveries
      */
-    include_unique_alert_ids: BooleanFromString.optional(),
+    include_unique_alert_ids: BooleanFromString.optional().describe(
+      'If `true`, the response will include `unique_alert_ids` and `unique_alert_ids_count` aggregated across the matched Attack discoveries'
+    ),
     /**
      * Page number to return (used for pagination). Defaults to 1.
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Page number to return (used for pagination). Defaults to 1.'),
     /**
      * Number of Attack discoveries to return per page (used for pagination). Defaults to 10.
      */
-    per_page: z.coerce.number().int().min(1).optional().default(10),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(10)
+      .describe(
+        'Number of Attack discoveries to return per page (used for pagination). Defaults to 10.'
+      ),
     /**
      * Free-text search query applied to relevant text fields of Attack discoveries (title, description, tags, etc.)
      */
-    search: z.string().optional(),
+    search: z
+      .string()
+      .optional()
+      .describe(
+        'Free-text search query applied to relevant text fields of Attack discoveries (title, description, tags, etc.)'
+      ),
     /**
      * Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user. Mutually exclusive with `include_all_authors`.
      */
-    shared: BooleanFromString.optional(),
+    shared: BooleanFromString.optional().describe(
+      'Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user. Mutually exclusive with `include_all_authors`.'
+    ),
     /**
      * If `true`, the response will include all attack discoveries matching other criteria regardless of who created them. Mutually exclusive with `shared`.
      */
-    include_all_authors: BooleanFromString.optional(),
+    include_all_authors: BooleanFromString.optional().describe(
+      'If `true`, the response will include all attack discoveries matching other criteria regardless of who created them. Mutually exclusive with `shared`.'
+    ),
     /**
      * Whether to filter by scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
      */
-    scheduled: BooleanFromString.optional(),
+    scheduled: BooleanFromString.optional().describe(
+      'Whether to filter by scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.'
+    ),
     /**
      * Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
      */
-    sort_field: AttackDiscoveryFindSortField.optional().default('@timestamp'),
+    sort_field: AttackDiscoveryFindSortField.optional()
+      .default('@timestamp')
+      .describe(
+        'Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.'
+      ),
     /**
      * Sort order direction `asc` for ascending or `desc` for descending. Defaults to `desc`.
      */
-    sort_order: SortOrder.optional().default('desc'),
+    sort_order: SortOrder.optional()
+      .default('desc')
+      .describe(
+        'Sort order direction `asc` for ascending or `desc` for descending. Defaults to `desc`.'
+      ),
     /**
      * Start of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
      */
-    start: z.string().optional(),
+    start: z
+      .string()
+      .optional()
+      .describe(
+        'Start of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").'
+      ),
     /**
      * Filter by alert workflow status. Provide one or more of the allowed workflow states.
      */
-    status: ArrayFromString(z.enum(['acknowledged', 'closed', 'open'])).optional(),
+    status: ArrayFromString(z.enum(['acknowledged', 'closed', 'open']))
+      .optional()
+      .describe(
+        'Filter by alert workflow status. Provide one or more of the allowed workflow states.'
+      ),
     /**
      * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
      */
-    with_replacements: BooleanFromString.optional().default(true),
+    with_replacements: BooleanFromString.optional()
+      .default(true)
+      .describe(
+        'When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.'
+      ),
   })
 );
 export type AttackDiscoveryFindRequestQuery = z.infer<typeof AttackDiscoveryFindRequestQuery>;
@@ -106,31 +171,52 @@ export const AttackDiscoveryFindResponse = lazySchema(() =>
     /**
      * List of human readable connector names that are present in the matched Attack discoveries. Useful for building client filters or summaries.
      */
-    connector_names: z.array(z.string()),
+    connector_names: z
+      .array(z.string())
+      .describe(
+        'List of human readable connector names that are present in the matched Attack discoveries. Useful for building client filters or summaries.'
+      ),
     /**
      * Array of matched Attack discovery objects. Each item follows the `AttackDiscoveryApiAlert` schema.
      */
-    data: z.array(AttackDiscoveryApiAlert),
+    data: z
+      .array(AttackDiscoveryApiAlert)
+      .describe(
+        'Array of matched Attack discovery objects. Each item follows the `AttackDiscoveryApiAlert` schema.'
+      ),
     /**
      * Current page number of the paginated result set.
      */
-    page: z.number().int(),
+    page: z.number().int().describe('Current page number of the paginated result set.'),
     /**
      * Number of items requested per page.
      */
-    per_page: z.number().int(),
+    per_page: z.number().int().describe('Number of items requested per page.'),
     /**
      * Total number of Attack discoveries matching the query (across all pages).
      */
-    total: z.number().int(),
+    total: z
+      .number()
+      .int()
+      .describe('Total number of Attack discoveries matching the query (across all pages).'),
     /**
      * List of unique alert IDs aggregated from the matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.
      */
-    unique_alert_ids: z.array(z.string()).optional(),
+    unique_alert_ids: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'List of unique alert IDs aggregated from the matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.'
+      ),
     /**
      * Number of unique alert IDs across all matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.
      */
-    unique_alert_ids_count: z.number().int(),
+    unique_alert_ids_count: z
+      .number()
+      .int()
+      .describe(
+        'Number of unique alert IDs across all matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.'
+      ),
   })
 );
 export type AttackDiscoveryFindResponse = z.infer<typeof AttackDiscoveryFindResponse>;

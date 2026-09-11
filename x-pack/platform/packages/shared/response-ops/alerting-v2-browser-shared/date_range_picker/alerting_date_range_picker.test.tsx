@@ -202,7 +202,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(lastPickerProps?.timeZone).toBe('America/New_York');
-    expect(lastPickerProps?.dateFormat).toBe('MMM D, YYYY @ HH:mm:ss.SSS');
+    expect(lastPickerProps?.inputDateFormats).toEqual(['MMM D, YYYY @ HH:mm:ss.SSS']);
     expect(lastPickerProps?.canAccessAdvancedSettings).toBe(true);
     expect(lastPickerProps?.prependBasePath).toBe(core.http.basePath.prepend);
   });

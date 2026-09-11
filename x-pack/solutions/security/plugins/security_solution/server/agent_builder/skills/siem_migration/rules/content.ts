@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
+  SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
+  SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
+} from '../../../tools/siem_migrations';
+import { RULE_MIGRATION_SKILLS } from './skill_ids';
+
 /**
  * Shared content blocks for the Automatic Migration sibling skills.
  *
@@ -28,10 +35,14 @@ Automatic Rule Migration is split across sibling skills. This skill handles one 
 are available when the user's request shifts. Cross-references are advisory — naming a sibling
 does not auto-load its tools, the user must move to that workflow.
 
-- **automatic-migration-rules-summarize** — Overview of all migrations: list every migration with its
+- **${RULE_MIGRATION_SKILLS.SUMMARIZE}** — Overview of all migrations: list every migration with its
   status and rule counts. Use when the user asks "how are my migrations doing" or wants a summary.
-- **automatic-migration-rules-start-migration** — Start, reprocess, or resume a migration's translation run.
-  Resolves the AI connector, confirms the mutating action, and picks START vs REPROCESS vs RESUME.
+- **${RULE_MIGRATION_SKILLS.START}** — Start, reprocess, or resume a migration's translation run.
+  Resolves the AI connector, checks for missing resources before starting,
+  and picks START vs REPROCESS vs RESUME.
+- **${RULE_MIGRATION_SKILLS.STOP}** — Stop a running migration (mutating).
+- **${RULE_MIGRATION_SKILLS.UPDATE}** — Rename a migration (mutating).
+- **${RULE_MIGRATION_SKILLS.DELETE}** — Permanently delete a migration and all its rule items (destructive, irreversible).
 `;
 
 /**
@@ -51,19 +62,19 @@ step below. Never show migration ids in table headers, column values, or example
 the name instead and resolve it to the id internally when calling tools.
 
 1. Resolve a user-provided migration **name** to its **migration id** by calling
-   \`security.siem_migration.get_all_rule_migration_stats\` and matching on the \`name\` field.
+   \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` and matching on the \`name\` field.
 2. If two migrations share the same name, disambiguate using the hierarchy in
    "Disambiguating Same-Name Migrations" below before acting.
 3. Only if every disambiguating attribute still collides, surface the **full migration id** as a
    last resort — present the tied migrations in a numbered list and ask the user to pick by number.
    Never ask the user to type or paste an id voluntarily; this is the fallback, not the default.
-4. **Pasted-id fallback**: \`get_all_rule_migration_stats\` only returns migrations that have at
+4. **Pasted-id fallback**: \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` only returns migrations that have at
    least one eligible rule item. A migration with zero eligible items (or only non-eligible
    items) is invisible to name resolution. If the user pastes a migration id directly (e.g. copied
-   from the UI), verify it with \`security.siem_migration.get_rule_migration\` before acting on it.
+   from the UI), verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` before acting on it (stats returns the same fields plus status/counts, using fewer tokens).
 5. **Rule item ids**: some actions (install specific rules, reprocess a subset) need a **rule item
-   id** — never a migration id. Resolve a user-provided rule **title** to its item id by calling
-   \`security.siem_migration.get_migration_rules\` and matching on the original or translated title.
+   id**, in addition to the migration id. Resolve a user-provided rule **title** to its item id by calling
+   \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` and matching on the original or translated title.
    Never ask the user for a rule item id; always work from the title.
 `;
 
@@ -77,7 +88,7 @@ export const MIGRATION_NAME_DISAMBIGUATION_BLOCK = `
 When two or more migrations share the same name, disambiguate in this order (stop at the first
 attribute that separates them):
 
-1. **Vendor** — Splunk vs QRadar vs Sentinel (from \`get_all_rule_migration_stats\` \`vendor\`).
+1. **Vendor** — Splunk vs QRadar vs Sentinel (from \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` \`vendor\`).
 2. **Status** — ready / running / stopped / interrupted / finished.
 3. **Created date** — \`created_at\`, newest first.
 4. **Full migration id** — last resort. Present the still-tied migrations as a numbered list
@@ -105,6 +116,50 @@ This skill only supports **Rule Migrations**.  IF user has not specified the mig
 export const AUTOMATIC_MIGRATION_GENERAL_GUIDELINES = `
 ## General Guidelines
 
-- Detection Rules is different from Automatic Rule Migration or SIEM Rule Migration. You must not confused between them. This skill is ONLY about Automatic Rule Migration and NOT for Detection Rules.
+- EVERY question with finite defined answers (For example yes, no) MUST be presented as a multiple choice question.
+- Detection Rules is different from Automatic Rule Migration or SIEM Rule Migration. You must not confuse between them. This skill is ONLY about Automatic Rule Migration and NOT for Detection Rules.
 - When responding to the user, highlight important information in code segments(\`\`) or code blocks in case of multiline (\`\`\`) or bold text (**).  For example, migration name, rule titles, statuses, counts, queries, prebuilt rule Id or integration ID. Do not do highlighting in the table.
+`;
+
+/**
+ * Freshness contract for server-state reads. Injected into every mutating sibling skill.
+ *
+ * Two orthogonal rules:
+ *  1. Answers carry over — within one run only, not conversation-wide.
+ *  2. Tool reads never carry over — adjacency (read is the last action) is the only safe gate.
+ *
+ * The block is intentionally phrased without referencing any platform-internal marker format
+ * (e.g. "[Sent: …]") so it remains correct if the message formatting changes.
+ */
+export const MIGRATION_STATE_FRESHNESS_BLOCK = `
+## Server State Must Be Re-Read, Not Remembered
+
+Two different things can be "already known", and they follow opposite rules.
+
+**The user's answers carry over — within one run.** Once the user has answered a pre-flight
+question for the run you are setting up — which connector, whether to skip prebuilt matching,
+whether to proceed despite missing resources — do not ask it again while setting up that same
+run. The answers belong to that one attempt, not to the conversation. Ask them again from
+scratch whenever the user asks for a different migration, a different action, or another run
+after one has already been executed.
+
+**Tool reads never carry over.** Migration state is server data you do not own. Between your
+read and your next action, the user can start or stop a migration from the Kibana UI, upload
+the macros and lookups you reported as missing, or let a run finish. None of that appears in
+this conversation.
+
+### Two rules for reads
+
+**1. Read immediately before you act.** Before any mutating call, the state read must be the last
+action you took. Server state can go stale in the time between your read and your next action.
+
+**2. Read again for every new request.** Anything you read before the user's latest request is
+stale, no matter what it said. A follow-up like "try again", "run it again", or "retry" is a new
+request: re-read before acting on it.
+
+Both rules apply to migration task status, item counts, translation counts, and missing resources alike.
+
+Never write or think "I already have the migration details from an earlier check" or "the
+migration is still \`ready\` from my earlier check". Judge a read by *when you made it*, never by
+how confident the value feels.
 `;

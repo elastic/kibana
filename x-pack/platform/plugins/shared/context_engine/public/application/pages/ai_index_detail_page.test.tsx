@@ -24,6 +24,7 @@ import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
+import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -60,12 +61,13 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_ai_index_ki_summary', () => ({
-  useAiIndexKiSummary: () => ({
-    kiSummary: {
-      count: 25,
-      dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
-      counts_by_type: [
+jest.mock('../hooks/use_ki_list', () => ({
+  useKiList: () => ({
+    kis: [],
+    total: 25,
+    summary: {
+      total: 25,
+      countsByType: [
         { type: 'index_metadata', count: 10 },
         { type: 'document', count: 8 },
         { type: 'detection', count: 7 },
@@ -80,6 +82,12 @@ jest.mock('../hooks/use_ai_index_ki_summary', () => ({
 jest.mock('../hooks/use_signal_groups', () => ({
   useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
 }));
+
+jest.mock('../hooks/use_feedback_loop_enabled', () => ({
+  useFeedbackLoopEnabled: jest.fn(() => true),
+}));
+
+const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 
 jest.mock('../hooks/use_signals', () => ({
   useSignals: () => ({
@@ -158,6 +166,7 @@ describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
+    mockUseFeedbackLoopEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -183,11 +192,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
-    expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent('10');
-    expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent(
-      'index metadata'
-    );
-    expect(screen.getByTestId('contextAiIndexKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -237,6 +242,77 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toHaveAttribute(
+      'aria-label',
+      'Automations locked. Add a source above to unlock automations.'
+    );
+    expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsLocked')).toHaveAttribute(
+      'aria-label',
+      'Signals locked. Create an automation above to start collecting signals.'
+    );
+  });
+
+  it('hides the signals section when the feedback loop is disabled', async () => {
+    mockUseFeedbackLoopEnabled.mockReturnValue(false);
+
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows automations once sources are configured', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsLocked')).toBeInTheDocument();
+  });
+
+  it('keeps automations visible when sources are removed but automations remain', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [],
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailPageTitle');
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'My workflow'
+    );
+  });
+
+  it('shows signals once automations are configured', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsPanel')).toBeInTheDocument();
   });
 
   it('renders an error state when the fetch fails', async () => {
@@ -361,8 +437,9 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
     expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
   });
 
   it('discards the draft when editing is cancelled', async () => {
@@ -482,6 +559,25 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 
+  it('shows all overview sections for managed AI indexes without setup locks', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      managed: true,
+      sources: [],
+      automations: [],
+    });
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailManagedBadge');
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsPanel')).toBeInTheDocument();
+  });
+
   it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue({ ...aiIndex, managed: false });
@@ -493,6 +589,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
+
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
   });
 
@@ -543,5 +640,24 @@ describe('AiIndexDetailPage', () => {
     });
 
     expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('switches to the Knowledge Indicators tab', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.capabilities = {
+      ...services.application.capabilities,
+      discover_v2: { show: true },
+    };
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators'));
+
+    expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
   });
 });

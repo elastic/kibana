@@ -15,7 +15,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
+import { LATEST_LOG_EXTRACTION_DEFAULTS } from '../saved_objects/global_state/constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -137,7 +137,10 @@ describe('AssetManagerClient', () => {
     };
 
     mockGlobalStateClient = {
-      init: jest.fn().mockResolvedValue(undefined),
+      init: jest.fn().mockResolvedValue({
+        historySnapshot: { status: 'started', frequency: '24h' },
+        logsExtraction: LATEST_LOG_EXTRACTION_DEFAULTS,
+      }),
       findOrThrow: jest.fn().mockResolvedValue({
         historySnapshot: {},
         logsExtraction: {},
@@ -158,9 +161,6 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -168,7 +168,9 @@ describe('AssetManagerClient', () => {
       analytics: {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
-      savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsClient: {
+        delete: jest.fn().mockResolvedValue({}),
+      } as unknown as SavedObjectsClientContract,
     });
   });
 
@@ -256,9 +258,6 @@ describe('AssetManagerClient', () => {
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
           mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-        remoteLogExtractionStateClient: {
-          delete: jest.fn().mockResolvedValue(undefined),
-        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
         namespace,
         isServerless: false,
         logsExtractionClient: {
@@ -445,104 +444,38 @@ describe('AssetManagerClient', () => {
   });
 
   describe('logsExtraction resolution on install', () => {
-    const existingLogsExtraction = {
-      additionalIndexPatterns: ['existing-*'],
-      fieldHistoryLength: 99,
-      lookbackPeriod: '12h',
-      delay: '5m',
-      docsLimit: 1234,
-      maxLogsPerPage: 5678,
-      timeout: '60s',
-      frequency: '2m',
-    };
+    // Resolution (merging params with existing/defaults) is globalStateClient's responsibility.
+    // AssetManagerClient passes provided params through unchanged.
 
-    it('fresh install with no params applies defaults', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
+    it('passes undefined logsExtraction when no params are provided', async () => {
       await client.init({} as KibanaRequest, ['host']);
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            additionalIndexPatterns: [],
-            fieldHistoryLength: 10,
-            lookbackPeriod: '3h',
-            delay: '1m',
-            frequency: '1m',
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-            timeout: '59s',
-          }),
-        })
+        expect.objectContaining({ logsExtraction: undefined })
       );
     });
 
-    it('fresh install with params merges params with defaults', async () => {
-      mockGlobalStateClient.find.mockResolvedValue(undefined);
-
+    it('passes provided params directly as logsExtraction overrides', async () => {
       await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '1m' });
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          }),
-        })
+        expect.objectContaining({ logsExtraction: { delay: '2m', frequency: '1m' } })
       );
     });
 
-    it('re-install with no params preserves existing config', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
-      await client.init({} as KibanaRequest, ['host']);
-
-      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
-      );
-    });
-
-    it('re-install with empty params object preserves existing config', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
+    it('passes empty object when empty params are provided', async () => {
       await client.init({} as KibanaRequest, ['host'], {});
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+        expect.objectContaining({ logsExtraction: {} })
       );
     });
 
-    it('re-install with params overwrites existing config with parsed params', async () => {
-      mockGlobalStateClient.find.mockResolvedValue({
-        historySnapshot: {},
-        logsExtraction: existingLogsExtraction,
-      });
-
+    it('passes partial params as overrides, not expanded to full config', async () => {
       await client.init({} as KibanaRequest, ['host'], { delay: '2m' });
 
       expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logsExtraction: expect.objectContaining({
-            delay: '2m',
-            frequency: '1m',
-            lookbackPeriod: '3h',
-            fieldHistoryLength: 10,
-            additionalIndexPatterns: [],
-            docsLimit: 10000,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          }),
-        })
+        expect.objectContaining({ logsExtraction: { delay: '2m' } })
       );
     });
   });
@@ -558,21 +491,16 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const buildClient = (
     overrides: Partial<{
       latestExists: boolean;
-      updatesExists: boolean;
       metadataExists: boolean;
     }> = {}
   ) => {
-    const { latestExists = true, updatesExists = true, metadataExists = true } = overrides;
+    const { latestExists = true, metadataExists = true } = overrides;
 
     mockUserEsClient = {
       indices: {
         exists: jest.fn().mockResolvedValue(latestExists),
         getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
-          if (name.includes('updates')) {
-            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          } else {
-            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          }
+          return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
         }),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -596,9 +524,6 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         find: jest.fn(),
         delete: jest.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -616,7 +541,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns false and does not reinstall when all assets are present', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: true, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -625,7 +550,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns true and reinstalls when the latest index is missing', async () => {
-    buildClient({ latestExists: false, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: false, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -641,20 +566,8 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     );
   });
 
-  it('returns true and reinstalls when the updates data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: false, metadataExists: true });
-
-    const result = await client.reinstallSharedAssetsIfMissing();
-
-    expect(result).toBe(true);
-    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.updates.default')
-    );
-  });
-
   it('returns true and reinstalls when the metadata data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: false });
+    buildClient({ latestExists: true, metadataExists: false });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -784,9 +697,6 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
         engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         globalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: true,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -807,7 +717,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
   };
 
   describe('legacy-only assets (FF-off post-upgrade scenario)', () => {
-    it('reports legacy index template names as installed', async () => {
+    it('reports neutral index template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -821,14 +731,12 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
-      expect(templates[0].id).toContain('security_');
-      expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).toContain('security_');
-      expect(templates[1].installed).toBe(true);
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).not.toContain('security_');
+      expect(templates[0].installed).toBe(false);
     });
 
-    it('reports legacy component template names as installed', async () => {
+    it('reports neutral component template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -842,11 +750,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
-      expect(componentTemplates[0].id).toContain('security_');
-      expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
+      expect(componentTemplates).toHaveLength(1);
+      expect(componentTemplates[0].id).not.toContain('security_');
+      expect(componentTemplates[0].installed).toBe(false);
     });
   });
 
@@ -865,11 +771,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
+      expect(templates).toHaveLength(1);
       expect(templates[0].id).not.toContain('security_');
       expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).not.toContain('security_');
-      expect(templates[1].installed).toBe(true);
     });
 
     it('reports neutral component template names as installed', async () => {
@@ -886,11 +790,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
+      expect(componentTemplates).toHaveLength(1);
       expect(componentTemplates[0].id).not.toContain('security_');
       expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).not.toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
     });
   });
 

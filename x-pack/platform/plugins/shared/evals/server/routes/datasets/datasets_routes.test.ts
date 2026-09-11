@@ -34,11 +34,15 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_COPY_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   GetEvaluationDatasetsRequestQuery,
+  MAX_DATASET_EXAMPLES_REQUEST_BYTES,
+  MAX_EXAMPLES_PER_DATASET,
 } from '@kbn/evals-common';
 import { DatasetAlreadyExistsError } from '../../storage/datasets/dataset_already_exists_error';
+import { DatasetExamplesLimitExceededError } from '../../storage/datasets/dataset_examples_limit_exceeded_error';
 import { ExampleAlreadyExistsError } from '../../storage/datasets/example_already_exists_error';
 import { ExampleNotFoundError } from '../../storage/datasets/example_not_found_error';
 import {
@@ -51,6 +55,7 @@ import { registerGetDatasetRoute } from './get_dataset';
 import { registerUpdateDatasetRoute } from './update_dataset';
 import { registerDeleteDatasetRoute } from './delete_dataset';
 import { registerAddExamplesRoute } from './add_examples';
+import { registerCopyDatasetRoute } from './copy_dataset';
 import { registerUpdateExampleRoute } from './update_example';
 import { registerDeleteExampleRoute } from './delete_example';
 import { registerUpsertDatasetRoute } from './upsert_dataset';
@@ -104,6 +109,7 @@ const buildRouteSetup = ({
     deleteExample: jest.fn(),
     upsert: jest.fn(),
     resolveByName: jest.fn(),
+    copy: jest.fn(),
   };
 
   const datasetService = {
@@ -704,6 +710,22 @@ describe('dataset routes', () => {
   });
 
   describe('POST /internal/evals/datasets/{datasetId}/examples', () => {
+    it('registers the route with the dataset examples body cap', () => {
+      const router = httpServiceMock.createRouter();
+
+      registerAddExamplesRoute({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        canEncrypt: true,
+        getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      } as any);
+
+      const versionedRouter = router.versioned as MockedVersionedRouter;
+      const routeConfig = versionedRouter.post.mock.calls[0][0];
+
+      expect(routeConfig.options?.body?.maxBytes).toBe(MAX_DATASET_EXAMPLES_REQUEST_BYTES);
+    });
+
     it('adds examples for an existing dataset', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerAddExamplesRoute,
@@ -711,7 +733,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 2 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 2, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -727,12 +749,16 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, [
-        { input: { question: 'q1' }, output: { answer: 'a1' }, metadata: {} },
-        { input: { question: 'q2' }, output: { answer: 'a2' }, metadata: { type: 'new' } },
-      ]);
+      expect(datasetClient.addExamples).toHaveBeenCalledWith(
+        datasetId,
+        [
+          { input: { question: 'q1' }, output: { answer: 'a1' }, metadata: {} },
+          { input: { question: 'q2' }, output: { answer: 'a2' }, metadata: { type: 'new' } },
+        ],
+        { rejectDuplicates: true }
+      );
       expect(response.status).toBe(200);
-      expect(response.payload).toEqual({ added: 2 });
+      expect(response.payload).toEqual({ added: 2, skipped_duplicates: 0 });
     });
 
     it('adds examples with only input (no output or metadata)', async () => {
@@ -742,7 +768,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -755,11 +781,13 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, [
-        { input: { question: 'input-only' } },
-      ]);
+      expect(datasetClient.addExamples).toHaveBeenCalledWith(
+        datasetId,
+        [{ input: { question: 'input-only' } }],
+        { rejectDuplicates: true }
+      );
       expect(response.status).toBe(200);
-      expect(response.payload).toEqual({ added: 1 });
+      expect(response.payload).toEqual({ added: 1, skipped_duplicates: 0 });
     });
 
     it('adds a completely empty example (no input, output, or metadata)', async () => {
@@ -769,7 +797,7 @@ describe('dataset routes', () => {
         path: EVALS_DATASET_EXAMPLES_URL,
       });
       datasetClient.datasetExists.mockResolvedValueOnce(true);
-      datasetClient.addExamples.mockResolvedValueOnce({ added: 1 });
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1, conflicts: 0 });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -782,9 +810,11 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, [{}]);
+      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, [{}], {
+        rejectDuplicates: true,
+      });
       expect(response.status).toBe(200);
-      expect(response.payload).toEqual({ added: 1 });
+      expect(response.payload).toEqual({ added: 1, skipped_duplicates: 0 });
     });
 
     it('returns 404 when dataset does not exist', async () => {
@@ -831,6 +861,272 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(409);
       expect(response.payload.message).toContain('already exists');
+    });
+
+    it('returns 409 when the dataset example limit would be exceeded', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.addExamples.mockRejectedValueOnce(
+        new DatasetExamplesLimitExceededError(MAX_EXAMPLES_PER_DATASET)
+      );
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body: { examples: [{ input: datasetExample.input }] },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('at most');
+    });
+  });
+
+  describe('POST /internal/evals/datasets/{datasetId}/examples with import options', () => {
+    const examples = [
+      { input: { question: 'q1' }, output: { answer: 'a1' } },
+      { input: { question: 'q2' }, output: { answer: 'a2' } },
+      { input: { question: 'q2' }, output: { answer: 'a2' } },
+    ];
+
+    it('imports examples for an existing dataset', async () => {
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+        spaceId: 'sales',
+      });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.addExamples.mockResolvedValueOnce({ added: examples.length, conflicts: 0 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        body: { examples, source: 'import', on_duplicate: 'skip' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+      expect(datasetClient.addExamples).toHaveBeenCalledWith(datasetId, examples, {
+        rejectDuplicates: false,
+        source: 'import',
+      });
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ added: examples.length, skipped_duplicates: 0 });
+    });
+
+    it('reports skipped duplicates from the bulk result', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.addExamples.mockResolvedValueOnce({ added: 1, conflicts: 2 });
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body: { examples, source: 'import', on_duplicate: 'skip' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ added: 1, skipped_duplicates: 2 });
+    });
+
+    it('returns 404 when the dataset does not exist', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.datasetExists.mockResolvedValueOnce(false);
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body: { examples, source: 'import', on_duplicate: 'skip' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+      expect(datasetClient.addExamples).not.toHaveBeenCalled();
+    });
+
+    it('forwards the JSON body to a remote Kibana', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      mockedForwardToRemoteKibana.mockResolvedValueOnce({
+        statusCode: 200,
+        body: { added: 2, skipped_duplicates: 1 },
+      });
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        query: { [DESTINATION_QUERY_PARAM]: 'remote-1' },
+        body: { examples, source: 'import', on_duplicate: 'skip' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(mockedForwardToRemoteKibana).toHaveBeenCalledWith(
+        expect.objectContaining({
+          remoteId: 'remote-1',
+          request,
+          method: 'POST',
+          body: { examples, source: 'import', on_duplicate: 'skip' },
+        })
+      );
+      expect(datasetClient.datasetExists).not.toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ added: 2, skipped_duplicates: 1 });
+    });
+  });
+
+  describe('POST /internal/evals/datasets/{datasetId}/_copy', () => {
+    const body = { name: 'qa-dataset-copy', description: 'Copied dataset' };
+
+    it('copies a dataset in the active space', async () => {
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+        spaceId: 'sales',
+      });
+      datasetClient.copy.mockResolvedValueOnce({
+        ...dataset,
+        id: 'dataset-copy',
+        name: body.name,
+        examples_count: 2,
+        examples: [],
+      });
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body,
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+      expect(datasetClient.copy).toHaveBeenCalledWith(datasetId, body);
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        dataset_id: 'dataset-copy',
+        name: body.name,
+        examples_count: 2,
+      });
+    });
+
+    it('returns 404 when the source dataset does not exist', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+      });
+      datasetClient.copy.mockResolvedValueOnce(undefined);
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body,
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.payload).toEqual({ message: `Evaluation dataset not found: ${datasetId}` });
+    });
+
+    it('returns 409 when the copy name already exists', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+      });
+      datasetClient.copy.mockRejectedValueOnce(new DatasetAlreadyExistsError(body.name));
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body,
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('already exists');
+    });
+
+    it('forwards the JSON body to a remote Kibana', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCopyDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL,
+      });
+      mockedForwardToRemoteKibana.mockResolvedValueOnce({
+        statusCode: 200,
+        body: { dataset_id: 'remote-copy', name: body.name, examples_count: 2 },
+      });
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_COPY_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        query: { [DESTINATION_QUERY_PARAM]: 'remote-1' },
+        body,
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(mockedForwardToRemoteKibana).toHaveBeenCalledWith(
+        expect.objectContaining({
+          remoteId: 'remote-1',
+          request,
+          method: 'POST',
+          body,
+        })
+      );
+      expect(datasetClient.copy).not.toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        dataset_id: 'remote-copy',
+        name: body.name,
+        examples_count: 2,
+      });
     });
   });
 

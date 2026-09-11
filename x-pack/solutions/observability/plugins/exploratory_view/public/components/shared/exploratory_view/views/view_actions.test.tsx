@@ -47,7 +47,7 @@ describe('ViewActions', () => {
     fireEvent.click(applyBtn);
 
     await waitFor(() => {
-      expect(applyChanges).toBeCalledTimes(1);
+      expect(applyChanges).toHaveBeenCalledTimes(1);
     });
   };
 
@@ -71,7 +71,7 @@ describe('ViewActions', () => {
     fireEvent.click(applyBtn);
 
     await waitFor(() => {
-      expect(applyChanges).toBeCalledTimes(0);
+      expect(applyChanges).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -146,7 +146,7 @@ describe('ViewActions', () => {
     fireEvent.click(applyBtn);
 
     await waitFor(() => {
-      expect(applyChanges).toBeCalledTimes(0);
+      expect(applyChanges).toHaveBeenCalledTimes(0);
     });
   });
 });

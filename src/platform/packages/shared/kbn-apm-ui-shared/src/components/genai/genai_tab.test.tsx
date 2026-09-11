@@ -29,10 +29,10 @@ const baseFields: GenAiFields = {
   outputMessages: [],
 };
 
-function renderTab(fields: Partial<GenAiFields> = {}) {
+function renderTab(fields: Partial<GenAiFields> = {}, detailsSlot?: React.ReactNode) {
   return render(
     <EuiThemeProvider>
-      <GenAiTab genAi={{ ...baseFields, ...fields }} />
+      <GenAiTab genAi={{ ...baseFields, ...fields }} detailsSlot={detailsSlot} />
     </EuiThemeProvider>
   );
 }
@@ -144,5 +144,77 @@ describe('GenAiTab', () => {
     renderTab({ responseModel: undefined, requestParams: {}, response: {} });
     expect(screen.getByTestId('genAiDetails')).toBeInTheDocument();
     expect(screen.queryByTestId('genAiSection-conversation')).toBeNull();
+  });
+
+  it('renders tool definitions section', () => {
+    renderTab({
+      toolDefinitions: JSON.stringify([
+        {
+          type: 'function',
+          name: 'platform.core.execute_esql',
+          description: 'Run ES|QL',
+          parameters: { type: 'object', properties: { query: { type: 'string' } } },
+        },
+      ]),
+    });
+    expect(screen.getByTestId('genAiSection-tools')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiToolDef-platform.core.execute_esql')).toBeInTheDocument();
+  });
+
+  it('renders invalid tool definitions in the tools section', () => {
+    renderTab({
+      toolDefinitions: '{"legacy":{"description":"Search"}}',
+    });
+
+    const toolsSection = screen.getByTestId('genAiSection-tools');
+    expect(toolsSection).toHaveTextContent('gen_ai.tool.definitions');
+    expect(toolsSection).toHaveTextContent('legacy');
+  });
+
+  it('renders invalid tool definitions when a custom details slot is present', () => {
+    renderTab(
+      {
+        toolDefinitions: '{"legacy":{"description":"Search"}}',
+      },
+      <div data-test-subj="customDetailsSlot">Custom details</div>
+    );
+
+    expect(screen.getByTestId('customDetailsSlot')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiSection-tools')).toHaveTextContent('legacy');
+  });
+
+  it('renders tool call arguments and result', () => {
+    renderTab({
+      toolName: 'platform.core.execute_esql',
+      toolCallArguments: '{"query":"FROM logs"}',
+      toolCallResult: '{"rows":[]}',
+    });
+    expect(screen.getByTestId('genAiSection-toolCall')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiToolCallArguments')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiToolCallResult')).toBeInTheDocument();
+  });
+
+  it('renders a tool name without tool call input or output', () => {
+    renderTab({ toolName: 'platform.core.execute_esql' });
+
+    expect(screen.getByTestId('genAiSection-toolCall')).toHaveTextContent(
+      'platform.core.execute_esql'
+    );
+  });
+
+  it('renders tool call data when a custom details slot is present', () => {
+    renderTab(
+      {
+        toolName: 'platform.core.execute_esql',
+        toolCallArguments: '{"query":"FROM logs"}',
+      },
+      <div data-test-subj="customDetailsSlot">Custom details</div>
+    );
+
+    expect(screen.getByTestId('customDetailsSlot')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiSection-toolCall')).toHaveTextContent(
+      'platform.core.execute_esql'
+    );
+    expect(screen.getByTestId('genAiToolCallArguments')).toBeInTheDocument();
   });
 });

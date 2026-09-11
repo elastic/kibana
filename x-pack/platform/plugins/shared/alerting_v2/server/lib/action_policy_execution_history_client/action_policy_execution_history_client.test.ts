@@ -554,8 +554,8 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           rules: [{ name: 'Rule 1' }],
           workflows: [{ id: 'w-1', name: null }],
         });
-        expect(mocks.logger.error).toHaveBeenCalledWith(
-          expect.any(String),
+        expect(mocks.logger.warn).toHaveBeenCalledWith(
+          'Execution history lookup failed',
           expect.objectContaining({
             labels: { code: 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED' },
           })
@@ -570,8 +570,8 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const result = await mocks.client.listExecutionHistory({ request });
 
         expect(result.items[0].policy).toEqual({ id: 'p-1', name: null });
-        expect(mocks.logger.error).toHaveBeenCalledWith(
-          expect.any(String),
+        expect(mocks.logger.warn).toHaveBeenCalledWith(
+          'Execution history lookup failed',
           expect.objectContaining({
             labels: { code: 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED' },
           })
@@ -586,8 +586,8 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const result = await mocks.client.listExecutionHistory({ request });
 
         expect(result.items[0].rules[0]).toEqual({ id: 'r-1', name: null });
-        expect(mocks.logger.error).toHaveBeenCalledWith(
-          expect.any(String),
+        expect(mocks.logger.warn).toHaveBeenCalledWith(
+          'Execution history lookup failed',
           expect.objectContaining({
             labels: { code: 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED' },
           })

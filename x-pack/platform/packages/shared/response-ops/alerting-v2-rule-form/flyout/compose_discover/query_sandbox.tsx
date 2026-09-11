@@ -41,7 +41,7 @@ import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { extractFromSourceQuery } from './extract_from_source_query';
-import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT } from './constants';
+import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
 import { useQuerySandboxStyles } from './query_sandbox.styles';
 import { useEditorHeightResize } from './use_editor_height_resize';
 
@@ -113,8 +113,11 @@ export interface QuerySandboxProps {
     onRecoveryBlockChange: (v: string) => void;
     onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+    onBaseEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     readOnly?: boolean;
   };
+  /** Mount handler for the single (non-tabbed) editor — e.g. to attach validation. */
+  onSingleEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   /**
    * Static validation error messages for the active tab's query — e.g. from a
    * blocked Apply. Rendered next to the editor, independent of `hasRun`/`isError`
@@ -141,6 +144,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   tabProps,
   headerActions,
   validationError,
+  onSingleEditorMount,
 }) => {
   const euiThemeContext = useEuiTheme();
   const {
@@ -306,6 +310,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         tabs={tabProps.tabs}
         onAlertEditorMount={tabProps.onAlertEditorMount}
         onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
+        onBaseEditorMount={tabProps.onBaseEditorMount}
         readOnly={tabProps.readOnly}
         hideTabBar
       />
@@ -316,13 +321,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         onChange={(v) => onQueryChange?.(v)}
         height="100%"
         options={{
-          minimap: { enabled: false },
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          fontSize: 13,
+          ...ESQL_CODE_EDITOR_OPTIONS,
           readOnly: isReadOnly,
           domReadOnly: isReadOnly,
         }}
+        editorDidMount={onSingleEditorMount}
       />
     );
 

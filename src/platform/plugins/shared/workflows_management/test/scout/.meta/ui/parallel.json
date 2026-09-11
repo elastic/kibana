@@ -1,8 +1,7 @@
 {
-  "sha1": "5aad092acde4cc8dd02ec238a2afbb0818fee545",
+  "sha1": "3591ec83708de47af129304c217552bbca49c7a4",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -35,6 +34,24 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 56,
         "column": 13
+      }
+    },
+    {
+      "id": "19444d1b23e18a3-5e19e05711f14c3",
+      "title": "Workflow editor actions menu on the executions tab shows the actions menu only while the workflow is editable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/actions_menu_executions.spec.ts",
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -587,8 +604,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 143,
-        "column": 51
+        "line": 142,
+        "column": 22
       }
     },
     {
@@ -606,7 +623,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
         "line": 157,
-        "column": 31
+        "column": 20
       }
     },
     {

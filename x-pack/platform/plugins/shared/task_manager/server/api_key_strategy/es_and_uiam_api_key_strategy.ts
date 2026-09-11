@@ -24,12 +24,13 @@ import {
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';
 import type {
+  ApiKeyInvalidationSource,
   ApiKeySOFields,
   ApiKeyStrategy,
   GrantApiKeysOpts,
   InvalidationTarget,
 } from './api_key_strategy';
-import { markApiKeysForInvalidation } from './api_key_strategy';
+import { markApiKeysForInvalidation, recordTaskRunCredentialUsage } from './api_key_strategy';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
@@ -117,7 +118,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         request,
         user,
         apiKeyCreatedByUser,
-        isUiamRequest
+        isUiamRequest,
+        opts?.onApiKeyCreated
       );
 
       const uiamOnlyResult = new Map<string, ApiKeySOFields>();
@@ -176,7 +178,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
             request,
             user,
             apiKeyCreatedByUser,
-            isUiamRequest
+            isUiamRequest,
+            opts?.onApiKeyCreated
           );
 
     const result = new Map<string, ApiKeySOFields>();
@@ -200,7 +203,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     request: KibanaRequest,
     user: AuthenticatedUser | null,
     apiKeyCreatedByUser: boolean,
-    isUiamRequest: boolean
+    isUiamRequest: boolean,
+    onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated']
   ): Promise<Map<string, UiamApiKeyResult>> {
     const uiam = this.security.authc.apiKeys.uiam;
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
@@ -246,6 +250,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         });
 
         if (uiamResult) {
+          onApiKeyCreated?.({ apiKeyId: uiamResult.id, uiamApiKey: uiamResult.api_key });
           uiamKeyByTaskTypeMap.set(taskType, {
             apiKey: uiamResult.api_key,
             apiKeyId: uiamResult.id,
@@ -275,9 +280,13 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
+    const { userScope, apiKey, uiamApiKey } = taskInstance;
+    const record = recordTaskRunCredentialUsage(taskInstance);
+
     if (this.typeToUse === ApiKeyType.UIAM) {
-      if (taskInstance.uiamApiKey) {
-        return getUiamApiKeySecret(taskInstance.uiamApiKey);
+      if (uiamApiKey) {
+        record('uiam_api_key', userScope?.apiKeyCreatedByUser ? 'user_created_key' : 'provisioned');
+        return getUiamApiKeySecret(uiamApiKey);
       }
 
       // No UIAM key available even though the strategy is configured to use UIAM.
@@ -287,21 +296,24 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       // tracked via the `kibana.task_manager.task_run.uiam_api_key_fallback.count`
       // OTel counter instead, which is broken down per project.
       // Mirrors the alerting rule loader behavior (see PR #264434).
-      const { userScope, apiKey } = taskInstance;
       if (apiKey) {
         if (userScope?.apiKeyCreatedByUser) {
+          record('es_api_key', 'user_created_key');
           taskManagerUiamTelemetry.recordUiamApiKeyFallback('user_created_key');
           this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
         } else {
+          record('es_api_key', 'fallback_unexpected');
           taskManagerUiamTelemetry.recordUiamApiKeyFallback('unexpected');
           this.logger.debug(
             'UIAM API key is not provided to create a fake request, falling back to regular API key.',
             { tags: UIAM_LOGS_USAGE_TAGS }
           );
         }
+      } else {
+        record('none', 'not_set');
       }
       return apiKey;
     }
@@ -310,19 +322,25 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // strategy's `typeToUse` is ES (`grant_uiam_api_keys=true` while `api_key_type`
     // defaults to `es`). Fall back to the UIAM key so the task can still authenticate
     // at run time instead of yielding an undefined credential.
-    if (!taskInstance.apiKey && taskInstance.uiamApiKey) {
+    if (!apiKey && uiamApiKey) {
+      record('uiam_api_key', userScope?.apiKeyCreatedByUser ? 'user_created_key' : 'provisioned');
       this.logger.debug(
         'ES API key is not provided to create a fake request, falling back to UIAM API key.',
         { tags: UIAM_LOGS_USAGE_TAGS }
       );
-      return getUiamApiKeySecret(taskInstance.uiamApiKey);
+      return getUiamApiKeySecret(uiamApiKey);
     }
 
-    return taskInstance.apiKey;
+    if (apiKey) {
+      record('es_api_key', 'config');
+    } else {
+      record('none', 'not_set');
+    }
+    return apiKey;
   }
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
-    const { userScope, uiamApiKey, apiKey } = taskInstance;
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
+    const { userScope, uiamApiKey, apiKey } = source;
     // `apiKeyCreatedByUser` gates invalidation for BOTH the ES and UIAM keys.
     // See the invariant documented in `grantApiKeys`: both credentials are
     // currently persisted with the same ownership, so a single flag is

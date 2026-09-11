@@ -866,7 +866,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         isLoading={indicesLoading}
-                        color="success"
                         onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"

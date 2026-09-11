@@ -50,20 +50,22 @@ const finalState: InvestigationState = {
   recommendations: [
     {
       title: 'Roll back the deployment that introduced the regression',
+      confidence: 0.95,
       code: 'kubectl rollout undo deployment/checkout-service',
     },
   ],
   blind_spots: [
     {
       title: 'No profiling data available',
+      confidence: 0.7,
       description: 'Could not confirm whether a leak compounded the exhaustion.',
     },
   ],
 };
 
-const finalStateWithUpdates: InvestigationState = {
+const finalStateWithTriggerFeedback: InvestigationState = {
   ...finalState,
-  significant_event_updates: [
+  trigger_feedback: [
     {
       field: 'severity',
       from: '40-medium',
@@ -163,8 +165,15 @@ describe('InvestigationOutput', () => {
   it('honours the emphasis and inline code the agent wrote, without showing the markers', () => {
     const stateWithMarkdown: InvestigationState = {
       ...finalState,
-      recommendations: [{ title: '**Block the attacker IPs** at the firewall via `hosts.deny`' }],
-      blind_spots: [{ title: 'No `apm-*` indices', description: 'Needed for _tracing_.' }],
+      recommendations: [
+        {
+          title: '**Block the attacker IPs** at the firewall via `hosts.deny`',
+          confidence: 0.9,
+        },
+      ],
+      blind_spots: [
+        { title: 'No `apm-*` indices', confidence: 0.8, description: 'Needed for _tracing_.' },
+      ],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
@@ -180,7 +189,7 @@ describe('InvestigationOutput', () => {
     const gap = 'No GeoIP enrichment available for the attacker IPs.';
     const stateWithRecoveredGap: InvestigationState = {
       ...finalState,
-      blind_spots: [{ title: gap, description: gap }],
+      blind_spots: [{ title: gap, confidence: 0.8, description: gap }],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithRecoveredGap} />);
@@ -272,13 +281,15 @@ describe('InvestigationOutput', () => {
     expect(screen.getByText(liveState.summary)).toBeInTheDocument();
   });
 
-  describe('significant_event_updates', () => {
+  describe('trigger_feedback', () => {
     it('renders the proposed updates block with a severity and a status row when complete', () => {
-      renderWithI18n(<InvestigationOutput status="complete" state={finalStateWithUpdates} />);
+      renderWithI18n(
+        <InvestigationOutput status="complete" state={finalStateWithTriggerFeedback} />
+      );
 
-      expect(screen.getByTestId('investigationSignificantEventUpdates')).toBeInTheDocument();
+      expect(screen.getByTestId('investigationTriggerFeedback')).toBeInTheDocument();
 
-      const severityRow = screen.getByTestId('investigationSignificantEventUpdate-severity');
+      const severityRow = screen.getByTestId('investigationTriggerFeedback-severity');
       expect(severityRow).toHaveTextContent('Medium');
       expect(severityRow).toHaveTextContent('Critical');
       expect(severityRow).toHaveTextContent('Checkout is fully blocked for every user');
@@ -286,16 +297,18 @@ describe('InvestigationOutput', () => {
       expect(severityRow).toHaveTextContent('FROM traces | WHERE service.name == "checkout"');
       expect(severityRow).toHaveTextContent('All checkout pods in CrashLoopBackOff');
 
-      const statusRow = screen.getByTestId('investigationSignificantEventUpdate-status');
+      const statusRow = screen.getByTestId('investigationTriggerFeedback-status');
       expect(statusRow).toHaveTextContent('Open');
       expect(statusRow).toHaveTextContent('Dismissed');
       expect(statusRow).toHaveTextContent('No actual failure was found');
     });
 
     it('renders a summary update as From/To free text (non-badge field)', () => {
-      renderWithI18n(<InvestigationOutput status="complete" state={finalStateWithUpdates} />);
+      renderWithI18n(
+        <InvestigationOutput status="complete" state={finalStateWithTriggerFeedback} />
+      );
 
-      const summaryRow = screen.getByTestId('investigationSignificantEventUpdate-summary');
+      const summaryRow = screen.getByTestId('investigationTriggerFeedback-summary');
       expect(summaryRow).toHaveTextContent('From: Checkout latency is elevated.');
       expect(summaryRow).toHaveTextContent('To: Checkout is fully unavailable');
       expect(summaryRow).toHaveTextContent('The triaged summary understated the impact.');
@@ -304,13 +317,15 @@ describe('InvestigationOutput', () => {
     it('does not render the updates block when there are no updates', () => {
       renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
-      expect(screen.queryByTestId('investigationSignificantEventUpdates')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('investigationTriggerFeedback')).not.toBeInTheDocument();
     });
 
     it('does not render the updates block while the investigation is still running', () => {
-      renderWithI18n(<InvestigationOutput status="running" state={finalStateWithUpdates} />);
+      renderWithI18n(
+        <InvestigationOutput status="running" state={finalStateWithTriggerFeedback} />
+      );
 
-      expect(screen.queryByTestId('investigationSignificantEventUpdates')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('investigationTriggerFeedback')).not.toBeInTheDocument();
     });
   });
 });

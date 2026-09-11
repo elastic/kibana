@@ -1,5 +1,8 @@
 {
   "sha1": "11e1f02bd08d3d5d5641fae0eb68a02c6c838dba",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "1d44fdaf82ec788-de3841a730c3abc",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 31,
-        "column": 10
+        "line": 26,
+        "column": 29
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 36,
+        "column": 42
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 49,
+        "column": 15
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 62,
+        "column": 5
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 70,
+        "column": 14
       }
     }
   ]

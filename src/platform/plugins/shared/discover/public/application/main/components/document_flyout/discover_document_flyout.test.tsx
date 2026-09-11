@@ -42,14 +42,16 @@ jest.mock('@elastic/eui', () => {
   return {
     ...actual,
     copyToClipboard: jest.fn(),
-    EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
-      <OriginalFlyout {...props} ref={ref}>
-        {props.flyoutMenuProps && (
-          <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
-        )}
-        {props.children}
-      </OriginalFlyout>
-    )),
+    EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => {
+      const { flyoutMenuProps, children, ...rest } = props;
+
+      return (
+        <OriginalFlyout {...rest} ref={ref}>
+          {flyoutMenuProps && <actual.EuiFlyoutMenu {...flyoutMenuProps} hideCloseButton />}
+          {children}
+        </OriginalFlyout>
+      );
+    }),
   };
 });
 
@@ -165,21 +167,22 @@ describe('DiscoverDocumentFlyout', () => {
   });
 
   it('copies a document link from the flyout menu and ignores duplicate clicks', async () => {
-    const { services } = await setup({ hits: esHitsMock });
+    const { services, toolkit } = await setup({ hits: esHitsMock });
+    // Freeze the seeded results so the unawaited main fetch can't remount the menu mid-click.
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     const shareButton = await screen.findByRole('button', {
       name: 'Share direct link',
     });
     expectShareButtonEbt(shareButton, 'linkable');
 
+    // Both clicks must stay in one act() so the second lands while isCopyingLinkRef is still set.
     act(() => {
       shareButton.click();
       shareButton.click();
     });
 
-    await waitFor(() => {
-      expect(copyToClipboard).toHaveBeenCalledTimes(1);
-    });
+    expect(copyToClipboard).toHaveBeenCalledTimes(1);
     expect(services.toastNotifications.addSuccess).toHaveBeenCalledWith({
       title: 'Link copied to clipboard',
     });
@@ -340,6 +343,8 @@ describe('DiscoverDocumentFlyout', () => {
       searchResult: searchResponseFor(outOfResultsHit),
       hits: esHitsMock,
     });
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -413,6 +418,8 @@ describe('DiscoverDocumentFlyout', () => {
         result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
       });
     });
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    documents$.next = jest.fn();
 
     const rowFromResults = documents$
       .getValue()
@@ -434,6 +441,8 @@ describe('DiscoverDocumentFlyout', () => {
   it('keeps flyout pagination populated when the URL reference changes to another document already in the results (e.g. browser back navigation)', async () => {
     const { toolkit } = await setup({ hits: esHitsMock });
     const tabId = toolkit.getCurrentTab().id;
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);

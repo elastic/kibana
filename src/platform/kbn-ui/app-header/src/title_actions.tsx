@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useCurrentEuiBreakpoint, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FavoriteButton } from '@kbn/ui-favorite-button';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/ui-ai-components';
+import { useCurrentChromeApplicationBreakpoint } from '@kbn/ui-chrome-layout';
+import { FavoriteButton } from '@kbn/ui-favorite-button';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, { useMemo } from 'react';
-import type { AppHeaderFavoriteAction, AppHeaderShareAction } from './types';
+import type {
+  AppHeaderExperimentalDashboardAiAction,
+  AppHeaderFavoriteAction,
+  AppHeaderShareAction,
+} from './types';
 import { asOptionalPlainText } from './as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
@@ -27,6 +33,10 @@ const ADD_TO_STARRED_LABEL = i18n.translate('kbnUI.appHeader.favoriteAddLabel', 
 
 const REMOVE_FROM_STARRED_LABEL = i18n.translate('kbnUI.appHeader.favoriteRemoveLabel', {
   defaultMessage: 'Remove from Starred',
+});
+
+const ENHANCE_LABEL = i18n.translate('kbnUI.appHeader.enhanceButtonLabel', {
+  defaultMessage: 'Enhance',
 });
 
 const useTitleActionsStyles = () => {
@@ -62,67 +72,123 @@ const useTitleActionsStyles = () => {
   }, [euiTheme]);
 };
 
+const useEnhanceIconOnly = (): boolean => {
+  const applicationBreakpoint = useCurrentChromeApplicationBreakpoint();
+  const viewportBreakpoint = useCurrentEuiBreakpoint();
+  const breakpoint = applicationBreakpoint ?? viewportBreakpoint;
+
+  return breakpoint !== 'm' && breakpoint !== 'l' && breakpoint !== 'xl';
+};
+
+const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAction }) => {
+  const iconOnly = useEnhanceIconOnly();
+  const testSubj = action.testId ?? APP_HEADER_TEST_SUBJECTS.enhance;
+
+  const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    const triggerElement = event.currentTarget;
+    action.onClick({
+      returnFocus: () => triggerElement.focus(),
+    });
+  };
+
+  if (iconOnly) {
+    return (
+      <AiButton
+        iconOnly
+        variant="empty"
+        size="xs"
+        iconType="sparkles"
+        withToolTip
+        aria-label={ENHANCE_LABEL}
+        isDisabled={action.isDisabled}
+        data-test-subj={testSubj}
+        onClick={handleClick}
+      />
+    );
+  }
+
+  return (
+    <AiButton
+      variant="empty"
+      size="xs"
+      iconType="sparkles"
+      aria-label={ENHANCE_LABEL}
+      isDisabled={action.isDisabled}
+      data-test-subj={testSubj}
+      onClick={handleClick}
+    >
+      {ENHANCE_LABEL}
+    </AiButton>
+  );
+};
+
 export interface TitleActionsProps {
   shareAction?: AppHeaderShareAction;
   favorite?: AppHeaderFavoriteAction;
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
 }
 
-export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favorite }) => {
-  const styles = useTitleActionsStyles();
+export const TitleActions = React.memo<TitleActionsProps>(
+  ({ shareAction, favorite, experimentalDashboardAiAction }) => {
+    const styles = useTitleActionsStyles();
 
-  if (!shareAction && !favorite) {
-    return null;
+    if (!shareAction && !favorite && !experimentalDashboardAiAction) {
+      return null;
+    }
+
+    const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
+    const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
+    const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
+
+    return (
+      <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
+        {shareAction ? (
+          <EuiToolTip
+            content={shareTooltipContent ?? SHARE_ARIA_LABEL}
+            title={shareTooltipTitle}
+            {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
+          >
+            <EuiButtonIcon
+              iconType="share"
+              color="text"
+              display="empty"
+              size="xs"
+              css={styles.iconButton}
+              aria-label={SHARE_ARIA_LABEL}
+              isDisabled={shareAction.isDisabled}
+              data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`}
+              onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+                const triggerElement = event.currentTarget;
+                void shareAction.onClick({
+                  returnFocus: () => triggerElement.focus(),
+                });
+              }}
+            />
+          </EuiToolTip>
+        ) : null}
+        {favorite ? (
+          <div css={styles.favoriteSlot} data-test-subj={APP_HEADER_TEST_SUBJECTS.favorite}>
+            <FavoriteButton
+              status={favorite.status}
+              onClick={favorite.onToggle}
+              isDisabled={favorite.isDisabled}
+              addLabel={ADD_TO_STARRED_LABEL}
+              removeLabel={REMOVE_FROM_STARRED_LABEL}
+              data-test-subj={[
+                APP_HEADER_TEST_SUBJECTS.favoriteButton,
+                favorite.status === 'favorited' || favorite.status === 'removing'
+                  ? 'unfavoriteButton'
+                  : 'favoriteButton',
+              ].join(' ')}
+            />
+          </div>
+        ) : null}
+        {experimentalDashboardAiAction ? (
+          <EnhanceButton action={experimentalDashboardAiAction} />
+        ) : null}
+      </div>
+    );
   }
-
-  const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
-  const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
-  const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
-
-  return (
-    <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
-      {shareAction ? (
-        <EuiToolTip
-          content={shareTooltipContent ?? SHARE_ARIA_LABEL}
-          title={shareTooltipTitle}
-          {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
-        >
-          <EuiButtonIcon
-            iconType="share"
-            color="text"
-            display="empty"
-            size="xs"
-            css={styles.iconButton}
-            aria-label={SHARE_ARIA_LABEL}
-            isDisabled={shareAction.isDisabled}
-            data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`}
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
-              const triggerElement = event.currentTarget;
-              void shareAction.onClick({
-                returnFocus: () => triggerElement.focus(),
-              });
-            }}
-          />
-        </EuiToolTip>
-      ) : null}
-      {favorite ? (
-        <div css={styles.favoriteSlot} data-test-subj={APP_HEADER_TEST_SUBJECTS.favorite}>
-          <FavoriteButton
-            status={favorite.status}
-            onClick={favorite.onToggle}
-            isDisabled={favorite.isDisabled}
-            addLabel={ADD_TO_STARRED_LABEL}
-            removeLabel={REMOVE_FROM_STARRED_LABEL}
-            data-test-subj={[
-              APP_HEADER_TEST_SUBJECTS.favoriteButton,
-              favorite.status === 'favorited' || favorite.status === 'removing'
-                ? 'unfavoriteButton'
-                : 'favoriteButton',
-            ].join(' ')}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-});
+);
 
 TitleActions.displayName = 'TitleActions';

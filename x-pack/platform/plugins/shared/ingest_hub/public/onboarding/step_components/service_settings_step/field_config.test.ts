@@ -29,7 +29,8 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     id: 'test',
     name: 'Test Service',
     category: 'compute',
-    signalType: 'logs',
+    signalTypes: ['logs'],
+    dataStreams: [],
     inputs: [],
     deploymentMethods: [],
     showInUI: true,
@@ -171,8 +172,16 @@ describe('toTyped / toDraft', () => {
     expect(toTyped('a,b, c', multiMeta)).toEqual(['a', 'b', 'c']);
   });
 
+  it('toTyped: multi already-array returned as-is (SO resume path)', () => {
+    expect(toTyped(['us-east-1', 'eu-west-1'], multiMeta)).toEqual(['us-east-1', 'eu-west-1']);
+  });
+
   it('toTyped: multi empty → empty array', () => {
     expect(toTyped('', multiMeta)).toEqual([]);
+  });
+
+  it('toTyped: text already-array joins with comma (structural field fallback)', () => {
+    expect(toTyped(['a', 'b'], textMeta)).toBe('a,b');
   });
 
   it('toTyped: text passes through', () => {

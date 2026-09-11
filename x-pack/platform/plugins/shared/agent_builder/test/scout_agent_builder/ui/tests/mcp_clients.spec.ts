@@ -15,8 +15,7 @@ import {
 } from '../../../scout_agent_builder_shared/lib/oauth_clients_kbn';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/277343
-test.describe.skip(
+test.describe(
   '[NON-MKI] Agent Builder — MCP Clients management',
   { tag: ['@local-serverless-search'] },
   () => {

@@ -37,6 +37,7 @@ export const DynamicSettingsCodec = t.intersection([
     defaultTLSRuleEnabled: t.boolean,
     defaultStatusRuleEnabled: t.boolean,
     privateLocationsSyncInterval: t.number,
+    rebalancePrivateLocationShardsEnabled: t.boolean,
   }),
 ]);
 

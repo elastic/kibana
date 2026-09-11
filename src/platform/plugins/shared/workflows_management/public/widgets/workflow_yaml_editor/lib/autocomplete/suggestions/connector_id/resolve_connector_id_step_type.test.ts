@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveConnectorIdStepType } from './resolve_connector_id_step_type';
+import { parseDocument } from 'yaml';
+import {
+  resolveConnectorIdStepType,
+  resolveConnectorIdTriggerType,
+} from './resolve_connector_id_step_type';
 import type { StepInfo, StepPropInfo } from '../../../../../../entities/workflows/store';
 
 describe('resolveConnectorIdStepType', () => {
@@ -60,5 +64,22 @@ describe('resolveConnectorIdStepType', () => {
         focusedYamlPair
       )
     ).toBe('slack_api');
+  });
+});
+
+describe('resolveConnectorIdTriggerType', () => {
+  const yamlDocument = parseDocument(`triggers:
+  - type: inboundWebhook.received
+    connector-id: testyng
+`);
+
+  it('maps a connector-event trigger connector-id to the spec type id', () => {
+    expect(resolveConnectorIdTriggerType(['triggers', 0, 'connector-id'], yamlDocument)).toBe(
+      '.inboundWebhook'
+    );
+  });
+
+  it('returns null outside a trigger connector-id path', () => {
+    expect(resolveConnectorIdTriggerType(['steps', 0, 'connector-id'], yamlDocument)).toBeNull();
   });
 });

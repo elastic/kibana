@@ -36,6 +36,7 @@ import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
 import { createSecrets, deleteSecrets } from './common';
+import { findFleetPoliciesUsingSecrets } from './fleet_policies';
 
 /**
  * Given a new package policy, extracts any secrets, creates them in Elasticsearch,
@@ -190,16 +191,32 @@ export async function extractAndUpdateSecrets(opts: {
 }
 
 /**
- * Given a list of secret ids, checks to see if they are still referenced by any
- * package policies, and if not, deletes them.
+ * Given a list of secret ids, checks whether they are still referenced by any
+ * package policy saved object OR by any compiled .fleet-policies document, and
+ * deletes only those that are provably unreferenced by either source.
+ *
+ * Fails closed: if we cannot determine whether a compiled policy references a
+ * secret (e.g. agentPolicyIds is not provided, ES is unreachable, or deployment
+ * was async), the secret is kept rather than deleted. A leaked secret is
+ * recoverable; deleting a referenced one crashes fleet-server for the entire
+ * deployment (elastic/fleet-server#7536).
+ *
+ * agentPolicyIds should be the union of all agent policy ids associated with the
+ * package policies whose secrets are being cleaned up. Omitting it causes the
+ * .fleet-policies check to be skipped and all candidates to be kept.
  */
 export async function deleteSecretsIfNotReferenced(opts: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   ids: string[];
+  agentPolicyIds?: string[];
+  // When true, skip the compiled .fleet-policies check (the caller guarantees those docs are
+  // already removed). The package-policy SO check still runs to guard against shared secrets.
+  skipCompiledPolicyCheck?: boolean;
 }): Promise<void> {
-  const { esClient, soClient, ids } = opts;
+  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck } = opts;
   const logger = appContextService.getLogger();
+
   const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
     soClient,
     ids,
@@ -208,15 +225,51 @@ export async function deleteSecretsIfNotReferenced(opts: {
   if (packagePoliciesUsingSecrets.length) {
     packagePoliciesUsingSecrets.forEach(({ id, policyIds }) => {
       logger.debug(
-        `Not deleting secret with id ${id} is still in use by package policies: ${policyIds.join(
+        `Not deleting secret with id ${id} — still referenced by package policies: ${policyIds.join(
           ', '
         )}`
       );
     });
   }
 
+  let compiledPolicyReferencedIds = new Set<string>();
+
+  if (!skipCompiledPolicyCheck) {
+    // Check compiled .fleet-policies documents. These are what fleet-server actually reads;
+    // a compiled doc can reference a secret that no live package policy SO does (e.g. an
+    // older revision_idx still in the index). Fails closed: if the check cannot complete,
+    // we keep all candidates rather than risk deleting a referenced secret.
+    const { referencedIds, checkFailed } = await findFleetPoliciesUsingSecrets({
+      esClient,
+      ids,
+      agentPolicyIds: agentPolicyIds ?? [],
+    });
+
+    if (checkFailed) {
+      logger.warn(
+        `[deleteSecretsIfNotReferenced] Could not verify .fleet-policies references for secrets [${ids.join(
+          ', '
+        )}] — skipping deletion to avoid removing a referenced secret.`
+      );
+      return;
+    }
+
+    compiledPolicyReferencedIds = referencedIds;
+  }
+
+  const skippedByCompiledPolicy = ids.filter((id) => compiledPolicyReferencedIds.has(id));
+  for (const id of skippedByCompiledPolicy) {
+    logger.debug(
+      `Not deleting secret with id ${id} — still referenced by a compiled .fleet-policies document.`
+    );
+  }
+
   const secretsToDelete = ids.filter((id) => {
-    return !packagePoliciesUsingSecrets.some((packagePolicy) => packagePolicy.id === id);
+    const referencedBySO = packagePoliciesUsingSecrets.some(
+      (packagePolicy) => packagePolicy.id === id
+    );
+    const referencedByCompiledPolicy = compiledPolicyReferencedIds.has(id);
+    return !referencedBySO && !referencedByCompiledPolicy;
   });
 
   if (!secretsToDelete.length) {
@@ -300,15 +353,19 @@ export function diffSecretPaths(
     }
 
     const newPath = newPathsByPath[oldPath.path.join('.')];
-    if (newPath && newPath.value.value) {
-      const newValue = newPath.value?.value;
-      if (!newValue?.isSecretRef) {
-        toCreate.push(newPath);
-        toDelete.push(oldPath);
-      } else {
-        noChange.push(newPath);
-      }
+    if (newPath) {
       delete newPathsByPath[oldPath.path.join('.')];
+      if (newPath.value.value) {
+        if (!newPath.value.value.isSecretRef) {
+          toCreate.push(newPath);
+          toDelete.push(oldPath);
+        } else {
+          noChange.push(newPath);
+        }
+      } else {
+        // value explicitly cleared (null/undefined) — old secret must be deleted
+        toDelete.push(oldPath);
+      }
     }
   }
 

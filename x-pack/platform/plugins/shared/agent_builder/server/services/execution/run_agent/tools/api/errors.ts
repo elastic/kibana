@@ -9,7 +9,8 @@ import type { Logger } from '@kbn/logging';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import type { ApiTarget, PrepareApiRequestFailure } from '../../api';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import type { PrepareApiRequestFailure } from '../../api';
 
 export interface ApiFailureContext {
   toolId: string;
@@ -66,12 +67,6 @@ export const apiFailureToErrorResult = (
       logger.error(`${toolId}: failed to load API "${api}" (target=${target}): ${failure.error}`);
       return createErrorResult({
         message: `Failed to load API definition for "${api}": ${toMessage(failure.error)}`,
-      });
-
-    case 'unsupported_api':
-      return createErrorResult({
-        message: `Cannot execute "${api}": ${failure.reason} Do not retry it.`,
-        metadata,
       });
 
     case 'schema_unavailable':

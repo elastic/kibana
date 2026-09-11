@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
@@ -138,7 +139,10 @@ export function registerInternalConversationRoutes({
         const { metadata } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
-        const updatedConversation = await client.patchMetadata(conversationId, metadata);
+        const { conversation: updatedConversation } = await client.patchMetadata(
+          conversationId,
+          metadata
+        );
 
         return response.ok<PatchConversationMetadataResponse>({
           body: {
@@ -184,6 +188,54 @@ export function registerInternalConversationRoutes({
     })
   );
 
+  // submit round feedback
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/rounds/{round_id}/_feedback`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+          round_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
+          chips: schema.maybe(
+            schema.arrayOf(
+              schema.oneOf([
+                schema.literal('inaccurate'),
+                schema.literal('incomplete'),
+                schema.literal('didnt_follow_instructions'),
+                schema.literal('accurate'),
+                schema.literal('useful'),
+                schema.literal('well_explained'),
+              ]),
+              { maxSize: 3 }
+            )
+          ),
+          comment: schema.maybe(schema.string({ maxLength: 500 })),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId, round_id: roundId } = request.params;
+      const { vote, chips, comment } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      await client.updateRoundFeedback(conversationId, roundId, {
+        vote,
+        chips: chips as FeedbackChipId[] | undefined,
+        comment,
+      });
+
+      return response.noContent();
+    })
+  );
+
   router.post(
     {
       path: `${internalApiPath}/conversations/{conversation_id}/_set_pinned`,
@@ -206,10 +258,7 @@ export function registerInternalConversationRoutes({
       const { pinned } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update(
-        { id: conversationId, pinned },
-        { access: 'converse', retryOnConflict: true }
-      );
+      const updatedConversation = await client.setPinned(conversationId, pinned);
 
       return response.ok<MarkPinnedConversationResponse>({
         body: {

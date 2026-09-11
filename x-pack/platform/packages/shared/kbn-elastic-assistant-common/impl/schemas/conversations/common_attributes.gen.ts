@@ -26,11 +26,11 @@ export const TraceData = lazySchema(() =>
     /**
      * Could be any string, not necessarily a UUID
      */
-    transactionId: z.string().optional(),
+    transactionId: z.string().optional().describe('Could be any string, not necessarily a UUID'),
     /**
      * Could be any string, not necessarily a UUID
      */
-    traceId: z.string().optional(),
+    traceId: z.string().optional().describe('Could be any string, not necessarily a UUID'),
   })
 );
 export type TraceData = z.infer<typeof TraceData>;
@@ -51,15 +51,18 @@ export const BaseInterruptValue = lazySchema(() =>
     /**
      * Type of the interrupt
      */
-    type: InterruptType,
+    type: InterruptType.describe('Type of the interrupt'),
     /**
      * Whether the interrupt has expired and can no longer be resumed.
      */
-    expired: z.boolean().optional(),
+    expired: z
+      .boolean()
+      .optional()
+      .describe('Whether the interrupt has expired and can no longer be resumed.'),
     /**
      * Thread ID of the graph execution that produced this message.
      */
-    threadId: z.string(),
+    threadId: z.string().describe('Thread ID of the graph execution that produced this message.'),
   })
 );
 export type BaseInterruptValue = z.infer<typeof BaseInterruptValue>;
@@ -72,7 +75,7 @@ export const BaseInterruptResumeValue = lazySchema(() =>
     /**
      * Type of the resume value
      */
-    type: InterruptType,
+    type: InterruptType.describe('Type of the resume value'),
   })
 );
 export type BaseInterruptResumeValue = z.infer<typeof BaseInterruptResumeValue>;
@@ -111,11 +114,11 @@ export const SelectOptionInterruptValue = lazySchema(() =>
       /**
        * Description of action required
        */
-      description: z.string(),
+      description: z.string().describe('Description of action required'),
       /**
        * List of actions to choose from
        */
-      options: z.array(SelectOptionInterruptOption),
+      options: z.array(SelectOptionInterruptOption).describe('List of actions to choose from'),
     })
   )
 );
@@ -131,7 +134,9 @@ export const SelectOptionInterruptResumeValue = lazySchema(() =>
       /**
        * The value of the selected option to resume the graph execution with
        */
-      value: z.string(),
+      value: z
+        .string()
+        .describe('The value of the selected option to resume the graph execution with'),
     })
   )
 );
@@ -145,11 +150,11 @@ export const SelectOptionInterrupt = lazySchema(() =>
     /**
      * The interrupt value
      */
-    interruptValue: SelectOptionInterruptValue,
+    interruptValue: SelectOptionInterruptValue.describe('The interrupt value'),
     /**
      * The resume value
      */
-    resumeValue: SelectOptionInterruptResumeValue,
+    resumeValue: SelectOptionInterruptResumeValue.describe('The resume value'),
   })
 );
 export type SelectOptionInterrupt = z.infer<typeof SelectOptionInterrupt>;
@@ -164,11 +169,11 @@ export const InputTextInterruptValue = lazySchema(() =>
       /**
        * Description of action required
        */
-      description: z.string().optional(),
+      description: z.string().optional().describe('Description of action required'),
       /**
        * Placeholder text for the input field
        */
-      placeholder: z.string().optional(),
+      placeholder: z.string().optional().describe('Placeholder text for the input field'),
     })
   )
 );
@@ -184,7 +189,7 @@ export const InputTextInterruptResumeValue = lazySchema(() =>
       /**
        * Text value used to resume the graph execution with.
        */
-      value: z.string(),
+      value: z.string().describe('Text value used to resume the graph execution with.'),
     })
   )
 );
@@ -198,11 +203,11 @@ export const InputTextInterrupt = lazySchema(() =>
     /**
      * The interrupt value
      */
-    interruptValue: InputTextInterruptValue,
+    interruptValue: InputTextInterruptValue.describe('The interrupt value'),
     /**
      * The resume value
      */
-    resumeValue: InputTextInterruptResumeValue,
+    resumeValue: InputTextInterruptResumeValue.describe('The resume value'),
   })
 );
 export type InputTextInterrupt = z.infer<typeof InputTextInterrupt>;
@@ -231,11 +236,11 @@ export const BaseContentReference = lazySchema(() =>
     /**
      * Id of the content reference
      */
-    id: z.string(),
+    id: z.string().describe('Id of the content reference'),
     /**
      * Type of the content reference
      */
-    type: z.string(),
+    type: z.string().describe('Type of the content reference'),
   })
 );
 export type BaseContentReference = z.infer<typeof BaseContentReference>;
@@ -250,11 +255,11 @@ export const KnowledgeBaseEntryContentReference = lazySchema(() =>
       /**
        * Id of the Knowledge Base Entry
        */
-      knowledgeBaseEntryId: z.string(),
+      knowledgeBaseEntryId: z.string().describe('Id of the Knowledge Base Entry'),
       /**
        * Name of the knowledge base entry
        */
-      knowledgeBaseEntryName: z.string(),
+      knowledgeBaseEntryName: z.string().describe('Name of the knowledge base entry'),
     })
   )
 );
@@ -270,11 +275,11 @@ export const EsqlContentReference = lazySchema(() =>
       /**
        * An ESQL query
        */
-      query: z.string(),
+      query: z.string().describe('An ESQL query'),
       /**
        * Label of the query
        */
-      label: z.string(),
+      label: z.string().describe('Label of the query'),
       /**
        * Time range to select in the time picker.
        */
@@ -283,7 +288,8 @@ export const EsqlContentReference = lazySchema(() =>
           from: z.string(),
           to: z.string(),
         })
-        .optional(),
+        .optional()
+        .describe('Time range to select in the time picker.'),
     })
   )
 );
@@ -299,7 +305,7 @@ export const SecurityAlertContentReference = lazySchema(() =>
       /**
        * ID of the Alert
        */
-      alertId: z.string(),
+      alertId: z.string().describe('ID of the Alert'),
     })
   )
 );
@@ -315,11 +321,11 @@ export const HrefContentReference = lazySchema(() =>
       /**
        * Label of the query
        */
-      label: z.string().optional(),
+      label: z.string().optional().describe('Label of the query'),
       /**
        * URL to the external resource
        */
-      href: z.string(),
+      href: z.string().describe('URL to the external resource'),
     })
   )
 );
@@ -347,11 +353,11 @@ export const ProductDocumentationContentReference = lazySchema(() =>
       /**
        * Title of the documentation
        */
-      title: z.string(),
+      title: z.string().describe('Title of the documentation'),
       /**
        * URL to the documentation
        */
-      url: z.string(),
+      url: z.string().describe('URL to the documentation'),
     })
   )
 );
@@ -403,15 +409,21 @@ export const MessageMetadata = lazySchema(() =>
     /**
      * Data referred to by the message content.
      */
-    contentReferences: ContentReferences.optional(),
+    contentReferences: ContentReferences.optional().describe(
+      'Data referred to by the message content.'
+    ),
     /**
      * When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
      */
-    interruptValue: InterruptValue.optional(),
+    interruptValue: InterruptValue.optional().describe(
+      'When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.'
+    ),
     /**
      * When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
      */
-    interruptResumeValue: InterruptResumeValue.optional(),
+    interruptResumeValue: InterruptResumeValue.optional().describe(
+      'When the agent is resumed after an interrupt, this field is populated with the details of the resume value.'
+    ),
   })
 );
 export type MessageMetadata = z.infer<typeof MessageMetadata>;
@@ -457,43 +469,46 @@ export const Message = lazySchema(() =>
     /**
      * Message id
      */
-    id: NonEmptyString.optional(),
+    id: NonEmptyString.optional().describe('Message id'),
     /**
      * Message content.
      */
-    content: z.string(),
+    content: z.string().describe('Message content.'),
     /**
      * Refusal reason returned by the model when content is filtered.
      */
-    refusal: z.string().optional(),
+    refusal: z
+      .string()
+      .optional()
+      .describe('Refusal reason returned by the model when content is filtered.'),
     /**
      * Message content.
      */
-    reader: Reader.optional(),
+    reader: Reader.optional().describe('Message content.'),
     /**
      * Message role.
      */
-    role: MessageRole,
+    role: MessageRole.describe('Message role.'),
     /**
      * The user who sent the message.
      */
-    user: User.optional(),
+    user: User.optional().describe('The user who sent the message.'),
     /**
      * The timestamp message was sent or received.
      */
-    timestamp: NonEmptyTimestamp,
+    timestamp: NonEmptyTimestamp.describe('The timestamp message was sent or received.'),
     /**
      * Is error message.
      */
-    isError: z.boolean().optional(),
+    isError: z.boolean().optional().describe('Is error message.'),
     /**
      * Trace data
      */
-    traceData: TraceData.optional(),
+    traceData: TraceData.optional().describe('Trace data'),
     /**
      * Metadata
      */
-    metadata: MessageMetadata.optional(),
+    metadata: MessageMetadata.optional().describe('Metadata'),
   })
 );
 export type Message = z.infer<typeof Message>;
@@ -503,23 +518,23 @@ export const ApiConfig = lazySchema(() =>
     /**
      * Connector ID
      */
-    connectorId: z.string(),
+    connectorId: z.string().describe('Connector ID'),
     /**
      * Action type ID
      */
-    actionTypeId: z.string(),
+    actionTypeId: z.string().describe('Action type ID'),
     /**
      * Default system prompt ID
      */
-    defaultSystemPromptId: z.string().optional(),
+    defaultSystemPromptId: z.string().optional().describe('Default system prompt ID'),
     /**
      * Provider
      */
-    provider: Provider.optional(),
+    provider: Provider.optional().describe('Provider'),
     /**
      * Model
      */
-    model: z.string().optional(),
+    model: z.string().optional().describe('Model'),
   })
 );
 export type ApiConfig = z.infer<typeof ApiConfig>;
@@ -543,42 +558,45 @@ export const ConversationResponse = lazySchema(() =>
     /**
      * The conversation title.
      */
-    title: z.string(),
+    title: z.string().describe('The conversation title.'),
     /**
      * The conversation category.
      */
-    category: ConversationCategory,
+    category: ConversationCategory.describe('The conversation category.'),
     timestamp: NonEmptyTimestamp.optional(),
     /**
      * The last time conversation was updated.
      */
-    updatedAt: z.string().optional(),
+    updatedAt: z.string().optional().describe('The last time conversation was updated.'),
     /**
      * The time conversation was created.
      */
-    createdAt: z.string(),
+    createdAt: z.string().describe('The time conversation was created.'),
     replacements: Replacements.optional(),
     /**
      * The user who created the conversation.
      */
-    createdBy: User,
+    createdBy: User.describe('The user who created the conversation.'),
     users: z.array(User),
     /**
      * The conversation messages.
      */
-    messages: z.array(Message).optional(),
+    messages: z.array(Message).optional().describe('The conversation messages.'),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig.optional(),
+    apiConfig: ApiConfig.optional().describe('LLM API configuration.'),
     /**
      * Exclude from last conversation storage.
      */
-    excludeFromLastConversationStorage: z.boolean().optional(),
+    excludeFromLastConversationStorage: z
+      .boolean()
+      .optional()
+      .describe('Exclude from last conversation storage.'),
     /**
      * Kibana space
      */
-    namespace: z.string(),
+    namespace: z.string().describe('Kibana space'),
   })
 );
 export type ConversationResponse = z.infer<typeof ConversationResponse>;
@@ -589,23 +607,26 @@ export const ConversationUpdateProps = lazySchema(() =>
     /**
      * The conversation title.
      */
-    title: z.string().optional(),
+    title: z.string().optional().describe('The conversation title.'),
     /**
      * The conversation category.
      */
-    category: ConversationCategory.optional(),
+    category: ConversationCategory.optional().describe('The conversation category.'),
     /**
      * The conversation messages.
      */
-    messages: z.array(Message).optional(),
+    messages: z.array(Message).optional().describe('The conversation messages.'),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig.optional(),
+    apiConfig: ApiConfig.optional().describe('LLM API configuration.'),
     /**
      * Exclude from last conversation storage.
      */
-    excludeFromLastConversationStorage: z.boolean().optional(),
+    excludeFromLastConversationStorage: z
+      .boolean()
+      .optional()
+      .describe('Exclude from last conversation storage.'),
     replacements: Replacements.optional(),
     users: z.array(User).optional(),
   })
@@ -617,27 +638,30 @@ export const ConversationCreateProps = lazySchema(() =>
     /**
      * The conversation id.
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The conversation id.'),
     /**
      * The conversation title.
      */
-    title: z.string(),
+    title: z.string().describe('The conversation title.'),
     /**
      * The conversation category.
      */
-    category: ConversationCategory.optional(),
+    category: ConversationCategory.optional().describe('The conversation category.'),
     /**
      * The conversation messages.
      */
-    messages: z.array(Message).optional(),
+    messages: z.array(Message).optional().describe('The conversation messages.'),
     /**
      * LLM API configuration.
      */
-    apiConfig: ApiConfig.optional(),
+    apiConfig: ApiConfig.optional().describe('LLM API configuration.'),
     /**
      * Exclude from last conversation storage.
      */
-    excludeFromLastConversationStorage: z.boolean().optional(),
+    excludeFromLastConversationStorage: z
+      .boolean()
+      .optional()
+      .describe('Exclude from last conversation storage.'),
     replacements: Replacements.optional(),
   })
 );
@@ -648,7 +672,7 @@ export const ConversationMessageCreateProps = lazySchema(() =>
     /**
      * The conversation messages.
      */
-    messages: z.array(Message),
+    messages: z.array(Message).describe('The conversation messages.'),
   })
 );
 export type ConversationMessageCreateProps = z.infer<typeof ConversationMessageCreateProps>;

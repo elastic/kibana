@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { RegionPolicyBody, RegionPolicyResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
-import { REGION_POLICY_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
+import {
+  INFERENCE_ENDPOINTS_QUERY_KEY,
+  REGION_POLICY_QUERY_KEY,
+  ROUTE_VERSIONS,
+} from '../../common/constants';
 import { parseRegionPolicyConflict } from '../utils/parse_region_policy_conflict';
 import { useKibana } from './use_kibana';
 import { useRegionPreferencesRedesignEnabled } from './use_region_preferences_redesign_enabled';
@@ -39,6 +43,7 @@ export const useSaveRegionPolicy = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData([REGION_POLICY_QUERY_KEY], data);
+      queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY]);
       services.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.saveSuccess', {
           defaultMessage: 'Region preferences saved',
