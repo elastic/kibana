@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
 import type { ParsedItem, ParsedPart } from '@kbn/ui-react-assembly';
 import type {
@@ -21,6 +21,7 @@ import {
   FlyoutHeaderCollapseProvider,
   FlyoutTabsProvider,
   FlyoutTemplateConfigProvider,
+  useFlyoutTemplateManaged,
 } from './context';
 import type { FlyoutTabDescriptor, FlyoutTabsState } from './context/tabs_context';
 import { useHeaderCollapse } from './use_header_collapse';
@@ -57,8 +58,8 @@ const resolveDefaultSelectedTabId = (
   return tabs[0]?.id;
 };
 
-/** Root component that renders Header, Body, Footer zones in template order. */
-const FlyoutTemplateRoot = ({
+/** Renders Header, Body, Footer zones in template order from fully resolved root props. */
+const FlyoutTemplateResolved = ({
   children,
   onClose,
   size = 'm',
@@ -227,6 +228,65 @@ const FlyoutTemplateRoot = ({
         </FlyoutTabsProvider>
       </FlyoutTemplateConfigProvider>
     </EuiFlyout>
+  );
+};
+
+/**
+ * Root component. Under a managing opener the resolved props win outright, so the `id` and
+ * `session` its bookkeeping matches on cannot be contradicted here. `onClose` stays the
+ * element's own, so the declarative contract can keep requiring it, with teardown composed
+ * in behind it.
+ */
+const FlyoutTemplateRoot = (props: FlyoutTemplateProps) => {
+  const managed = useFlyoutTemplateManaged();
+  const { onClose } = props;
+  const ignoredPropNames = managed
+    ? Object.keys(props).filter(
+        (name) =>
+          name !== 'children' &&
+          name !== 'onClose' &&
+          props[name as keyof FlyoutTemplateProps] !== undefined
+      )
+    : [];
+  const ignoredPropList = ignoredPropNames.join(', ');
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production' || !ignoredPropList) return;
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[FlyoutTemplate] A managed flyout ignores root props on <FlyoutTemplate>; move ${ignoredPropList} to the options passed to the opener.`
+    );
+  }, [ignoredPropList]);
+
+  // EUI routes the close button, history navigation, and cascade closes through `onClose`, and
+  // has already dropped the flyout from its manager by the time any of them arrive. Content
+  // that wraps or swallows the handler must not be able to strand the flyout, so teardown runs
+  // regardless of what it does.
+  const hasClosedRef = useRef(false);
+  const closeManaged = managed?.close;
+  const handleManagedClose = useCallback<NonNullable<FlyoutTemplateProps['onClose']>>(
+    (event) => {
+      // EUI's history-navigation detector invokes `onClose` before clearing the flag its own
+      // unmount cleanup reads, so the synchronous teardown below re-enters this handler.
+      if (hasClosedRef.current) {
+        return;
+      }
+      hasClosedRef.current = true;
+      try {
+        onClose?.(event);
+      } finally {
+        closeManaged?.();
+      }
+    },
+    [onClose, closeManaged]
+  );
+
+  return (
+    <FlyoutTemplateResolved
+      {...(managed ? { ...managed.props, onClose: handleManagedClose } : props)}
+    >
+      {props.children}
+    </FlyoutTemplateResolved>
   );
 };
 

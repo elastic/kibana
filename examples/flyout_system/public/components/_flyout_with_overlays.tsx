@@ -11,22 +11,18 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayStart } from '@kbn/core/public';
+import type { OverlayRef, OverlayStart } from '@kbn/core/public';
 import { useBooleanUrlState } from '@kbn/shared-url-state';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 
 import {
   createChildFlyoutDescriptionItems,
@@ -51,100 +47,115 @@ interface SessionFlyoutProps {
   overlays: OverlayStart;
 }
 
+/** The child flyout's single body item; no `EuiFlyoutBody` wrapper needed. */
 const ChildFlyoutContent: React.FC<Pick<SessionFlyoutProps, 'childSize' | 'childMaxWidth'>> =
-  React.memo((props) => {
-    const { childSize, childMaxWidth } = props;
+  React.memo(({ childSize, childMaxWidth }) => (
+    <>
+      <EuiText>
+        <p>
+          This is a child flyout opened from the flyout that was opened using the{' '}
+          <EuiCode>openFlyoutTemplate</EuiCode> method.
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiDescriptionList
+        type="column"
+        listItems={createChildFlyoutDescriptionItems(
+          childSize,
+          childMaxWidth,
+          <EuiCode>openFlyoutTemplate</EuiCode>
+        )}
+      />
+    </>
+  ));
 
-    return (
-      <EuiFlyoutBody>
-        <EuiText>
-          <p>
-            This is a child flyout opened from the flyout that was opened using the{' '}
-            <EuiCode>openSystemFlyout</EuiCode> method.
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiDescriptionList
-          type="column"
-          listItems={createChildFlyoutDescriptionItems(
-            childSize,
-            childMaxWidth,
-            <EuiCode>openSystemFlyout</EuiCode>
-          )}
-        />
-      </EuiFlyoutBody>
-    );
-  });
-
-interface FlyoutContentProps {
-  historyKey: symbol;
-  title: string;
+interface FlyoutPropertiesProps {
   flyoutType: 'overlay' | 'push';
   flyoutOwnFocus: boolean;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
+}
+
+/** The main flyout's first body section: a description list of the current widget options. */
+const FlyoutProperties: React.FC<FlyoutPropertiesProps> = React.memo(
+  ({ flyoutType, flyoutOwnFocus, mainSize, mainMaxWidth }) => (
+    <EuiDescriptionList
+      type="column"
+      listItems={createMainFlyoutDescriptionItems(
+        flyoutType,
+        flyoutOwnFocus,
+        mainSize,
+        mainMaxWidth,
+        <EuiCode>openFlyoutTemplate</EuiCode>
+      )}
+    />
+  )
+);
+
+/** Filler content between the two sections, long enough to demonstrate header-collapse-on-scroll. */
+const FillerContent: React.FC = () => (
+  <EuiText>
+    <p>
+      Below is some filler content to demonstrate scrolling behavior. Scroll down to access the
+      button to <strong>open the child flyout</strong>.
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+      labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+      laboris nisi ut aliquip ex ea commodo consequat.
+    </p>
+    <p>
+      Sed vel lacus id magna laoreet aliquam. Praesent aliquam in tellus eu pellentesque. Nulla
+      facilisi. Sed pulvinar, massa vitae interdum pulvinar, risus lectus porta nunc, vel efficitur
+      turpis odio nec nisi. Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris
+      sit amet orci. Aenean dignissim pellentesque felis, non volutpat arcu. Morbi a enim in magna
+      semper bibendum. Etiam scelerisque, nunc ac egestas consequat, odio nibh euismod nulla, eget
+      auctor orci nibh vel nisi. Aliquam erat volutpat. Mauris vel neque sit amet nunc gravida
+      congue sed sit amet purus. Quisque lacus quam, egestas ac tincidunt a, lacinia vel velit.
+      Aenean facilisis nulla vitae urna tincidunt congue sed ut dui. Morbi malesuada nulla nec purus
+      convallis consequat. Vivamus id mollis quam. Morbi ac commodo nulla.
+    </p>
+  </EuiText>
+);
+
+interface ChildFlyoutTriggersProps {
+  historyKey: symbol;
+  title: string;
   childSize: 's' | 'm' | 'fill';
   childMaxWidth?: number;
   overlays: OverlayStart;
-  childFlyoutRefA: React.MutableRefObject<OverlayRef | null>;
-  childFlyoutRefB: React.MutableRefObject<OverlayRef | null>;
-  handleCloseFlyout: () => void;
 }
 
-const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
-  const {
-    historyKey,
-    title,
-    flyoutType,
-    flyoutOwnFocus,
-    mainSize,
-    mainMaxWidth,
-    childSize,
-    childMaxWidth,
-    overlays,
-    childFlyoutRefA,
-    childFlyoutRefB,
-    handleCloseFlyout,
-  } = props;
-
-  const [isChildFlyoutAOpen, setIsChildFlyoutAOpen] = useState<boolean>(false);
-  const [isChildFlyoutBOpen, setIsChildFlyoutBOpen] = useState<boolean>(false);
-
-  // Refs for manual focus management - return focus to child trigger buttons
+/**
+ * The two child-flyout trigger buttons, and everything that drives them. This subtree owns its
+ * own open/closed state, so clicking a trigger re-renders it without re-rendering the main
+ * flyout's chrome.
+ */
+const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
+  historyKey,
+  title,
+  childSize,
+  childMaxWidth,
+  overlays,
+}) => {
   const childTriggerARef = useRef<HTMLButtonElement>(null);
   const childTriggerBRef = useRef<HTMLButtonElement>(null);
 
-  const handleCloseChildFlyoutA = useCallback(() => {
-    if (childFlyoutRefA.current) {
-      childFlyoutRefA.current.close();
-      childFlyoutRefA.current = null;
-      setIsChildFlyoutAOpen(false);
-    }
+  const overlayARef = useRef<OverlayRef | null>(null);
+  const overlayBRef = useRef<OverlayRef | null>(null);
+  const [isChildAOpen, setIsChildAOpen] = useState(false);
+  const [isChildBOpen, setIsChildBOpen] = useState(false);
 
-    // Return focus to child trigger button after closing child flyout A
-    setTimeout(() => {
-      childTriggerARef.current?.focus();
-    }, 100);
-  }, [childFlyoutRefA]);
-  const handleCloseChildFlyoutB = useCallback(() => {
-    if (childFlyoutRefB.current) {
-      childFlyoutRefB.current.close();
-      childFlyoutRefB.current = null;
-      setIsChildFlyoutBOpen(false);
-    }
-
-    // Return focus to child trigger button after closing child flyout B
-    setTimeout(() => {
-      childTriggerBRef.current?.focus();
-    }, 100);
-  }, [childFlyoutRefB]);
-
-  const openChildFlyoutA = useCallback(() => {
-    childFlyoutRefA.current = overlays.openSystemFlyout(
-      <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />,
+  const openChildFlyout = (
+    overlayRef: React.MutableRefObject<OverlayRef | null>,
+    setIsOpen: (v: boolean) => void,
+    returnFocusRef: React.RefObject<HTMLButtonElement>,
+    label: 'A' | 'B',
+    id: string
+  ) => {
+    overlayRef.current = overlays.openFlyoutTemplate(
       {
-        id: `childFlyout-${title}`,
-        title: `Child flyout A of ${title}`,
+        id,
         session: 'inherit',
         historyKey,
         size: childSize,
@@ -152,129 +163,87 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         maxWidth: childMaxWidth,
         minWidth: FLYOUT_MIN_WIDTH,
         onActive: () => {
-          console.log('activate child flyout', title); // eslint-disable-line no-console
+          console.log(`activate child flyout ${label}`, title); // eslint-disable-line no-console
         },
         onClose: () => {
-          console.log('close child flyout', title); // eslint-disable-line no-console
-          childFlyoutRefA.current = null;
-          setIsChildFlyoutAOpen(false);
-
-          // Return focus to child trigger button after closing child flyout A
-          setTimeout(() => {
-            childTriggerARef.current?.focus();
-          }, 100);
+          overlayRef.current = null;
+          setIsOpen(false);
+          returnFocusRef.current?.focus();
         },
-      }
+      },
+      ({ onClose }) => (
+        <FlyoutTemplate onClose={onClose}>
+          <FlyoutTemplate.Header title={`Child flyout ${label} of ${title}`} collapsed />
+          <FlyoutTemplate.Body>
+            <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />
+          </FlyoutTemplate.Body>
+        </FlyoutTemplate>
+      )
     );
-    setIsChildFlyoutAOpen(true);
-  }, [historyKey, childSize, childMaxWidth, overlays, title, childFlyoutRefA]);
+    setIsOpen(true);
+  };
 
-  const openChildFlyoutB = useCallback(() => {
-    childFlyoutRefB.current = overlays.openSystemFlyout(
-      <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />,
-      {
-        id: `childFlyout-${title}-B`,
-        title: `Child flyout B of ${title}`,
-        session: 'inherit',
-        historyKey,
-        size: childSize,
-        hasChildBackground: true,
-        maxWidth: childMaxWidth,
-        minWidth: FLYOUT_MIN_WIDTH,
-        onActive: () => {
-          console.log('activate child flyout B', title); // eslint-disable-line no-console
-        },
-        onClose: () => {
-          console.log('close child flyout B', title); // eslint-disable-line no-console
-          childFlyoutRefB.current = null;
-          setIsChildFlyoutBOpen(false);
+  const closeChildFlyout = (
+    overlayRef: React.MutableRefObject<OverlayRef | null>,
+    setIsOpen: (v: boolean) => void,
+    returnFocusRef: React.RefObject<HTMLButtonElement>
+  ) => {
+    overlayRef.current?.close();
+    overlayRef.current = null;
+    setIsOpen(false);
+    returnFocusRef.current?.focus();
+  };
 
-          // Return focus to child trigger button after closing child flyout B
-          setTimeout(() => {
-            childTriggerBRef.current?.focus();
-          }, 100);
-        },
-      }
-    );
-    setIsChildFlyoutBOpen(true);
-  }, [historyKey, childSize, childMaxWidth, overlays, title, childFlyoutRefB]);
+  useEffect(() => {
+    return () => {
+      overlayARef.current?.close();
+      overlayBRef.current?.close();
+      overlayARef.current = null;
+      overlayBRef.current = null;
+    };
+  }, []);
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2 id={`flyoutHeading-${title}`}>
-            Flyout with <EuiCode>openSystemFlyout</EuiCode>: {title}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiDescriptionList
-          type="column"
-          listItems={createMainFlyoutDescriptionItems(
-            flyoutType,
-            flyoutOwnFocus,
-            mainSize,
-            mainMaxWidth,
-            <EuiCode>openSystemFlyout</EuiCode>
-          )}
-        />
-        <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            Below is some filler content to demonstrate scrolling behavior. Scroll down to access
-            the button to <strong>open the child flyout</strong>.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </p>
-          <p>
-            Sed vel lacus id magna laoreet aliquam. Praesent aliquam in tellus eu pellentesque.
-            Nulla facilisi. Sed pulvinar, massa vitae interdum pulvinar, risus lectus porta nunc,
-            vel efficitur turpis odio nec nisi. Donec nec justo eget felis facilisis fermentum.
-            Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis, non
-            volutpat arcu. Morbi a enim in magna semper bibendum. Etiam scelerisque, nunc ac egestas
-            consequat, odio nibh euismod nulla, eget auctor orci nibh vel nisi. Aliquam erat
-            volutpat. Mauris vel neque sit amet nunc gravida congue sed sit amet purus. Quisque
-            lacus quam, egestas ac tincidunt a, lacinia vel velit. Aenean facilisis nulla vitae urna
-            tincidunt congue sed ut dui. Morbi malesuada nulla nec purus convallis consequat.
-            Vivamus id mollis quam. Morbi ac commodo nulla.
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiButton
-          buttonRef={childTriggerARef}
-          onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}
-          data-test-subj={`openChildFlyoutAOverlaysButton-${title}`}
-        >
-          {isChildFlyoutAOpen ? 'Close child flyout A' : 'Open child flyout A'}
-        </EuiButton>{' '}
-        <EuiButton
-          buttonRef={childTriggerBRef}
-          onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}
-          data-test-subj={`openChildFlyoutBOverlaysButton-${title}`}
-        >
-          {isChildFlyoutBOpen ? 'Close child flyout B' : 'Open child flyout B'}
-        </EuiButton>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={handleCloseFlyout}
-              aria-label="Close"
-              data-test-subj={`closeMainFlyoutOverlaysButton-${title}`}
-            >
-              Close
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <EuiButton
+        buttonRef={childTriggerARef}
+        onClick={
+          isChildAOpen
+            ? () => closeChildFlyout(overlayARef, setIsChildAOpen, childTriggerARef)
+            : () =>
+                openChildFlyout(
+                  overlayARef,
+                  setIsChildAOpen,
+                  childTriggerARef,
+                  'A',
+                  `childFlyout-${title}`
+                )
+        }
+        data-test-subj={`openChildFlyoutAOverlaysButton-${title}`}
+      >
+        {isChildAOpen ? 'Close child flyout A' : 'Open child flyout A'}
+      </EuiButton>{' '}
+      <EuiButton
+        buttonRef={childTriggerBRef}
+        onClick={
+          isChildBOpen
+            ? () => closeChildFlyout(overlayBRef, setIsChildBOpen, childTriggerBRef)
+            : () =>
+                openChildFlyout(
+                  overlayBRef,
+                  setIsChildBOpen,
+                  childTriggerBRef,
+                  'B',
+                  `childFlyout-${title}-B`
+                )
+        }
+        data-test-subj={`openChildFlyoutBOverlaysButton-${title}`}
+      >
+        {isChildBOpen ? 'Close child flyout B' : 'Open child flyout B'}
+      </EuiButton>
     </>
   );
-});
+};
 
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, overlays, historyKey } = props;
@@ -284,12 +253,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useBooleanUrlState(
     `flyoutOverlays_${title.replace(/\s+/g, '')}Open`
   );
-  const flyoutRef = useRef<OverlayRef | null>(null);
-  const childFlyoutRefA = useRef<OverlayRef | null>(null);
-  const childFlyoutRefB = useRef<OverlayRef | null>(null);
-
-  // Ref for manual focus management - return focus to trigger button
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<OverlayRef | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Callbacks for state synchronization
   const mainFlyoutOnActive = useCallback(() => {
@@ -300,28 +266,13 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     setIsFlyoutOpen(false);
   }, [setIsFlyoutOpen]);
 
-  // Bridge URL-backed open state to the imperative overlays.openSystemFlyout API:
+  // Bridge URL-backed open state to the imperative overlays.openFlyoutTemplate API:
   // opening mounts the overlay, closing (via URL, Back button, or user click) unmounts it.
   useEffect(() => {
-    if (isFlyoutOpen && !flyoutRef.current) {
-      flyoutRef.current = overlays.openSystemFlyout(
-        <FlyoutContent
-          historyKey={historyKey}
-          title={title}
-          flyoutType={flyoutType}
-          flyoutOwnFocus={flyoutOwnFocus}
-          mainSize={mainSize}
-          mainMaxWidth={mainMaxWidth}
-          childSize={childSize}
-          childMaxWidth={childMaxWidth}
-          overlays={overlays}
-          childFlyoutRefA={childFlyoutRefA}
-          childFlyoutRefB={childFlyoutRefB}
-          handleCloseFlyout={handleCloseFlyout}
-        />,
+    if (isFlyoutOpen && !isOpen) {
+      overlayRef.current = overlays.openFlyoutTemplate(
         {
           id: `mainFlyout-${title}`,
-          title,
           type: flyoutType,
           ownFocus: flyoutOwnFocus,
           size: mainSize,
@@ -330,22 +281,63 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           resizable: true,
           onActive: mainFlyoutOnActive,
           onClose: () => {
+            overlayRef.current = null;
+            setIsOpen(false);
             setIsFlyoutOpen(false);
-            // flyoutRef is cleared by the effect cleanup
+            triggerRef.current?.focus();
           },
-          ['aria-labelledby']: `flyoutHeading-${title}`,
           historyKey,
-        }
+        },
+        ({ onClose }) => (
+          <FlyoutTemplate onClose={onClose}>
+            <FlyoutTemplate.Header
+              title={title}
+              description={
+                <>
+                  Opened with <EuiCode>openFlyoutTemplate</EuiCode>
+                </>
+              }
+            />
+            <FlyoutTemplate.Body>
+              <FlyoutTemplate.Body.Section title="Flyout properties">
+                <FlyoutProperties
+                  flyoutType={flyoutType}
+                  flyoutOwnFocus={flyoutOwnFocus}
+                  mainSize={mainSize}
+                  mainMaxWidth={mainMaxWidth}
+                />
+              </FlyoutTemplate.Body.Section>
+              <FillerContent />
+              <FlyoutTemplate.Body.Section title="Child flyouts">
+                <ChildFlyoutTriggers
+                  historyKey={historyKey}
+                  title={title}
+                  childSize={childSize}
+                  childMaxWidth={childMaxWidth}
+                  overlays={overlays}
+                />
+              </FlyoutTemplate.Body.Section>
+            </FlyoutTemplate.Body>
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.SecondaryAction
+                label="Close"
+                onClick={handleCloseFlyout}
+                data-test-subj={`closeMainFlyoutOverlaysButton-${title}`}
+              />
+            </FlyoutTemplate.Footer>
+          </FlyoutTemplate>
+        )
       );
-    } else if (!isFlyoutOpen && flyoutRef.current) {
-      flyoutRef.current.close();
-      flyoutRef.current = null;
-      setTimeout(() => {
-        triggerRef.current?.focus();
-      }, 100);
+      setIsOpen(true);
+    } else if (!isFlyoutOpen && isOpen) {
+      overlayRef.current?.close();
+      overlayRef.current = null;
+      setIsOpen(false);
+      triggerRef.current?.focus();
     }
   }, [
     isFlyoutOpen,
+    isOpen,
     title,
     flyoutType,
     flyoutOwnFocus,
@@ -360,13 +352,12 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     setIsFlyoutOpen,
   ]);
 
-  // Unmount cleanup: prevent an orphaned overlay if the component unmounts while open.
+  // The overlay renders into core's DOM target, outside this app's React root, so unmounting
+  // while open would leave it on screen with nothing left to dismiss it.
   useEffect(() => {
     return () => {
-      if (flyoutRef.current) {
-        flyoutRef.current.close();
-        flyoutRef.current = null;
-      }
+      overlayRef.current?.close();
+      overlayRef.current = null;
     };
   }, []);
 
@@ -377,7 +368,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               {/* Switches to control flyout options. Disabled while open: the imperative
-                  overlays.openSystemFlyout API bakes these options in at open time. */}
+                  overlays.openFlyoutTemplate API bakes these options in at open time. */}
               <FlyoutTypeSwitch
                 title={title}
                 flyoutType={flyoutType}
@@ -415,18 +406,13 @@ SessionFlyout.displayName = 'SessionFlyoutFromOverlaysService';
 
 export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays, historyKey }) => (
   <>
-    <EuiTitle>
+    <EuiTitle size="s">
       <h2>
-        Flyouts with <EuiCode>core.overlays</EuiCode> services
+        <EuiCode>core.overlays.openFlyoutTemplate</EuiCode>
       </h2>
     </EuiTitle>
     <EuiSpacer size="s" />
     <EuiPanel>
-      <EuiTitle size="s">
-        <h3>
-          With <EuiCode>core.overlays.openSystemFlyout</EuiCode>
-        </h3>
-      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiDescriptionList
         type="column"
