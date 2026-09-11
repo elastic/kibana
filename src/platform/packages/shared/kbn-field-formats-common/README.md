@@ -14,6 +14,10 @@ The package currently exposes the following constants from `./constants`:
 - `NAN_LABEL` — string used to represent Not-a-Number. Value: `"NaN"`
 - `MISSING_TOKEN` — internal token used to mark missing values in aggregations and formatting flows. Value: `"__missing__"`
 
+It also exposes one predicate:
+
+- `isMissingValue(value)` — true for a value that carries no data: `null`, `undefined`, or `MISSING_TOKEN`
+
 ## Usage
 
 Import the constants and use them when rendering or formatting values so the UI stays consistent across apps and plugins.
@@ -41,6 +45,8 @@ function normalizeBucketKey(key: string | undefined) {
   expose `NULL_LABEL` on hover, which is why charts keep `NULL_LABEL` while tables and Discover
   render the dash.
 - `MISSING_TOKEN` is an internal sentinel value, not a user-facing label; prefer mapping it to a label (for example, `EMPTY_LABEL`) before rendering.
+- Use `isMissingValue` rather than re-checking `value == null || value === MISSING_TOKEN`, so that
+  rendering, copy-to-clipboard, and CSV export all agree on which values are missing.
 - If you need to customize how special values are displayed, build that logic on top of these shared constants rather than re-defining literals.
 
 

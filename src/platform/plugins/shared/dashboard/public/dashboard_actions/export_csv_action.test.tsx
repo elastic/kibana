@@ -59,9 +59,11 @@ describe('Export CSV action', () => {
       embeddable: context.embeddable,
       asString: true,
     })) as unknown as undefined | Record<string, { content: string; type: string }>;
+    // The row has no value under the "originalLastName" column id, so that cell exports as the
+    // same dash the table renders for a missing value.
     expect(result).toEqual({
       'untitled.csv': {
-        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibanana,${LINE_FEED_CHARACTER}`,
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibanana,-${LINE_FEED_CHARACTER}`,
         type: 'text/plain;charset=utf-8',
       },
     });

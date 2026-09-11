@@ -13,6 +13,7 @@ import {
   dataTableContextMock,
   dataTableContextRowsMock,
 } from '../../__mocks__/table_context';
+import { NULL_TOKEN } from '@kbn/field-formats-common';
 import { servicesMock } from '../../__mocks__/services';
 import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
@@ -497,7 +498,7 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe('hi there');
   });
 
-  it('should return an empty string and not fail', () => {
+  it('should convert a field the document does not have to the dash the grid renders', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
       dataView: dataTableContextComplexMock.dataView,
@@ -510,7 +511,10 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('');
+    // "-" starts a formula, but the dash is our own constant rather than document content,
+    // so it must not come back escaped as "'-" even when the value is CSV compatible.
+    expect(result.formattedString).toBe(NULL_TOKEN);
+    expect(result.withFormula).toBe(false);
   });
 
   it('should return an empty string when rowIndex is out of range', () => {

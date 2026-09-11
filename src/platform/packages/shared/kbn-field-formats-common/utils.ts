@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EMPTY_LABEL, NULL_LABEL, NULL_TOKEN, NAN_LABEL, MISSING_TOKEN } from './constants';
-export { isMissingValue } from './utils';
+import { MISSING_TOKEN } from './constants';
+
+/**
+ * True when a value carries no data: an absent field, an explicit null, or the sentinel
+ * Elasticsearch aggregations use for a missing bucket. These are the values rendered as
+ * NULL_TOKEN in tables and Discover and as NULL_LABEL everywhere else.
+ */
+export const isMissingValue = (value: unknown): boolean => value == null || value === MISSING_TOKEN;
