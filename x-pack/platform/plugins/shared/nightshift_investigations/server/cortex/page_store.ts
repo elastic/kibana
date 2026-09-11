@@ -222,7 +222,8 @@ export const createCortexPageStore = ({
     });
   };
 
-  const listAll = async (): Promise<CortexPageSummary[]> => collapseDuplicatePages(await listAllRaw());
+  const listAll = async (): Promise<CortexPageSummary[]> =>
+    collapseDuplicatePages(await listAllRaw());
 
   const preferredStatus = (pages: CortexPageSummary[]): CortexPageStatus => {
     if (pages.some((page) => page.status === 'established')) {
