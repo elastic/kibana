@@ -7,12 +7,24 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
+import {
+  DEFAULT_BUCKET_MINUTES,
+  DEFAULT_WINDOW_HOURS,
+  useProposalChartsSummary,
+} from '../../hooks/use_proposal_charts_summary';
 import { CHARTS_SUMMARY_PANELS } from './constants';
 import { ProposalChartsSummaryCard } from './proposal_charts_summary_card';
 
-export const ProposalChartsSummaryRow: React.FC = () => {
-  const { data, isLoading, error } = useProposalChartsSummary();
+interface ProposalChartsSummaryRowProps {
+  windowHours?: number;
+  bucketMinutes?: number;
+}
+
+export const ProposalChartsSummaryRow: React.FC<ProposalChartsSummaryRowProps> = ({
+  windowHours = DEFAULT_WINDOW_HOURS,
+  bucketMinutes = DEFAULT_BUCKET_MINUTES,
+}) => {
+  const { data, isLoading, error } = useProposalChartsSummary({ windowHours, bucketMinutes });
 
   // Hide rather than error out: the queue below is the primary surface. Gated on
   // `!data` so keepPreviousData keeps the cards up through a transient refetch failure.
@@ -45,6 +57,8 @@ export const ProposalChartsSummaryRow: React.FC = () => {
               count={count}
               series={series}
               isLoading={isLoading}
+              windowHours={windowHours}
+              bucketMinutes={bucketMinutes}
             />
           </EuiFlexItem>
         );

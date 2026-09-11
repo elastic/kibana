@@ -17,8 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { ProposalSparkline } from './proposal_sparkline';
-import * as i18n from './translations';
-import { CHART_ARIA_LABEL } from './translations';
+import { CHART_ARIA_LABEL, CHART_SERIES_NAME, HOURS_AGO, NOW } from './translations';
 import type { ChartsSummaryPanelColor } from './constants';
 
 interface ProposalChartsSummaryCardProps {
@@ -29,6 +28,9 @@ interface ProposalChartsSummaryCardProps {
   /** Oldest-first. */
   series: Array<{ x: number; y: number }>;
   isLoading: boolean;
+  /** The window the series was fetched for; labels and tooltips read from it. */
+  windowHours: number;
+  bucketMinutes: number;
 }
 
 export const ProposalChartsSummaryCard: React.FC<ProposalChartsSummaryCardProps> = ({
@@ -38,6 +40,8 @@ export const ProposalChartsSummaryCard: React.FC<ProposalChartsSummaryCardProps>
   count,
   series,
   isLoading,
+  windowHours,
+  bucketMinutes,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -69,21 +73,22 @@ export const ProposalChartsSummaryCard: React.FC<ProposalChartsSummaryCardProps>
         <ProposalSparkline
           series={series}
           color={resolvedColor}
-          ariaLabel={CHART_ARIA_LABEL(label, count)}
+          ariaLabel={CHART_ARIA_LABEL(label, count, windowHours)}
           panelId={id}
-          seriesName={`${label} Actions`}
+          seriesName={CHART_SERIES_NAME(label)}
+          bucketMinutes={bucketMinutes}
         />
       )}
       <EuiSpacer size="xs" />
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {i18n.TWENTY_FOUR_HOURS_AGO}
+            {HOURS_AGO(windowHours)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {i18n.NOW}
+            {NOW}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

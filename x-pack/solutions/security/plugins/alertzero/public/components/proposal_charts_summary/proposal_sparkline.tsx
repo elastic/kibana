@@ -20,6 +20,7 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
 
 export interface SparklinePoint {
   x: number;
@@ -34,8 +35,12 @@ interface ProposalSparklineProps {
   /** Used as the @elastic/charts spec id, so it must not change with locale. */
   panelId: string;
   seriesName: string;
-  /** Needed to render the end of the bucket's time range in the tooltip header. */
-  bucketMinutes?: number;
+  /**
+   * Renders the end of the bucket's time range in the tooltip header. Required
+   * rather than defaulted: a default that silently disagrees with the window the
+   * data was fetched for produces wrong tooltips with no type error.
+   */
+  bucketMinutes: number;
 }
 
 export const ProposalSparkline: React.FC<ProposalSparklineProps> = ({
@@ -44,15 +49,16 @@ export const ProposalSparkline: React.FC<ProposalSparklineProps> = ({
   ariaLabel,
   panelId,
   seriesName,
-  bucketMinutes = 30,
+  bucketMinutes,
 }) => {
   const chartBaseTheme = useElasticChartsTheme();
   const locale = i18n.getLocale();
+  const timeZone = useKibanaTimeZone();
 
   const yMax = Math.max(...series.map((p) => p.y), 0);
   const yDomainMax = yMax > 0 ? yMax * 1.25 : 1;
 
-  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', timeZone };
 
   // `value` is the raw x, i.e. the bucket's start timestamp in ms.
   const headerFormatter = ({ value }: { value: number }) => {

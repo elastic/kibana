@@ -15,8 +15,12 @@ import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-
 import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './use_watches_api';
 
-const DEFAULT_WINDOW_HOURS = 24;
-const DEFAULT_BUCKET_MINUTES = 30;
+/**
+ * Exported so callers that render the window (axis labels, tooltip ranges) read
+ * the same values the data was fetched with, rather than restating them.
+ */
+export const DEFAULT_WINDOW_HOURS = 24;
+export const DEFAULT_BUCKET_MINUTES = 30;
 
 export const useProposalChartsSummary = ({
   windowHours = DEFAULT_WINDOW_HOURS,

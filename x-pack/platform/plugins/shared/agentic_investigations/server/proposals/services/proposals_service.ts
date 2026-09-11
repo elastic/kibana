@@ -20,7 +20,10 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
-import { PROPOSALS_RESUME_CHANNEL } from '../../../common/proposals/constants';
+import {
+  PROPOSALS_RESUME_CHANNEL,
+  PROPOSAL_UNCATEGORIZED,
+} from '../../../common/proposals/constants';
 import type {
   ApproveProposalRequest,
   CreateProposalRequest,
@@ -48,6 +51,16 @@ import {
 } from './errors';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+
+/**
+ * Elasticsearch's `esql.query.result_truncation_max_size` default. A LIMIT above
+ * this is capped to it rather than honoured, so asking for more is not a way to
+ * avoid truncation — bounding the row count is (see MAX_CHARTS_SUMMARY_BUCKETS).
+ */
+const ESQL_RESULT_TRUNCATION_MAX_SIZE = 10000;
+
+/** One row per category; generous enough that truncation implies a bug. */
+const ESQL_CATEGORY_ROW_LIMIT = 1000;
 
 /** The parts of an action workflow definition this service reads. */
 interface ActionWorkflowDefinition {
@@ -253,10 +266,17 @@ export class ProposalsService {
 
   /**
    * Open-proposal counts per bucket. A proposal counts as open at bucket T if it
-   * was created at or before the end of T and not decided by the start of T+1.
+   * was created at or before the end of T and had neither been decided nor
+   * expired by the start of T+1.
    *
-   * An anchor count seeds a running sum that opens and closes then move, which is
-   * what keeps this to three queries instead of one per bucket.
+   * An anchor count seeds a running sum that opens, closes and expiries then
+   * move, which is what keeps this to four queries instead of one per bucket.
+   *
+   * Expiry is treated as a fourth event stream rather than as a `WHERE` filter.
+   * Filtering on `expiresAt > NOW()` would evaluate a *request-time* predicate
+   * against every historical bucket, so a proposal that has since expired would
+   * be erased from its own past — the same past bucket would return a different
+   * value on each refetch.
    */
   async chartsSummary(
     { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
@@ -279,54 +299,82 @@ export class ProposalsService {
     let anchorResponse;
     let opensResponse;
     let closesResponse;
+    let expiriesResponse;
     try {
-      [anchorResponse, opensResponse, closesResponse] = await Promise.all([
+      [anchorResponse, opensResponse, closesResponse, expiriesResponse] = await Promise.all([
         // TODO(#19258): once `supersededBy` exists, add `AND supersededBy IS NULL`
-        // to all three queries, so a superseded proposal is not counted alongside
+        // to all four queries, so a superseded proposal is not counted alongside
         // its replacement.
+        //
+        // `COALESCE(category, …)` in every query: a proposal with no action has no
+        // category, and a bare `BY category` would drop it from the aggregation —
+        // and, under `drop_null_columns`, drop the column outright when no row has
+        // one, zeroing the whole chart.
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND createdAt < TO_DATETIME(${{ wsAnchorCreated: windowStartIso }})
           AND (decidedAt IS NULL OR decidedAt >= TO_DATETIME(${{
             wsAnchorDecided: windowStartIso,
           }}))
-          AND (expiresAt IS NULL OR expiresAt > NOW())
+          AND (expiresAt IS NULL OR expiresAt >= TO_DATETIME(${{
+            wsAnchorExpires: windowStartIso,
+          }}))
+        | EVAL category = COALESCE(category, ${{ anchorUncategorized: PROPOSAL_UNCATEGORIZED }})
         | STATS anchor = COUNT(*) BY category
-        | LIMIT 50`,
+        | LIMIT ${ESQL_CATEGORY_ROW_LIMIT}`,
         }),
 
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND createdAt >= TO_DATETIME(${{ wsOpensFilter: windowStartIso }})
-          AND (expiresAt IS NULL OR expiresAt > NOW())
         | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
           wsOpensDiff: windowStartIso,
         }}), createdAt) / ${{ bucketMinutes }})
+        | EVAL category = COALESCE(category, ${{ opensUncategorized: PROPOSAL_UNCATEGORIZED }})
         | STATS opens = COUNT(*) BY idx, category
         | SORT idx ASC
-        | LIMIT 16200`,
+        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
         }),
 
         this.deps.storage.esql({
           pipeline: esql`WHERE spaceId == ${{ spaceId }}
           AND decidedAt IS NOT NULL
           AND decidedAt >= TO_DATETIME(${{ wsClosesFilter: windowStartIso }})
-          AND (expiresAt IS NULL OR expiresAt > NOW())
         | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
           wsClosesDiff: windowStartIso,
         }}), decidedAt) / ${{ bucketMinutes }})
+        | EVAL category = COALESCE(category, ${{ closesUncategorized: PROPOSAL_UNCATEGORIZED }})
         | STATS closes = COUNT(*) BY idx, category
         | SORT idx ASC
-        | LIMIT 16200`,
+        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
+        }),
+
+        // `decidedAt IS NULL` so a proposal that expired and was later decided is
+        // decremented once, by the closes query, rather than by both.
+        this.deps.storage.esql({
+          pipeline: esql`WHERE spaceId == ${{ spaceId }}
+          AND decidedAt IS NULL
+          AND expiresAt IS NOT NULL
+          AND expiresAt >= TO_DATETIME(${{ wsExpiriesFilter: windowStartIso }})
+          AND expiresAt <= NOW()
+        | EVAL idx = FLOOR(DATE_DIFF("minutes", TO_DATETIME(${{
+          wsExpiriesDiff: windowStartIso,
+        }}), expiresAt) / ${{ bucketMinutes }})
+        | EVAL category = COALESCE(category, ${{ expiriesUncategorized: PROPOSAL_UNCATEGORIZED }})
+        | STATS expiries = COUNT(*) BY idx, category
+        | SORT idx ASC
+        | LIMIT ${ESQL_RESULT_TRUNCATION_MAX_SIZE}`,
         }),
       ]);
     } catch (error) {
       // An index created outside the storage adapter can be missing a field this
-      // queries, which ES|QL rejects rather than treating as null. Read that as
-      // "no data" so the UI flatlines instead of 500ing; anything else propagates.
-      if (isEsqlVerificationError(error)) {
+      // queries, which ES|QL rejects rather than treating as null. Read *that*
+      // case as "no data" so the UI flatlines instead of 500ing. Every other
+      // verification failure is a genuine query defect and must propagate:
+      // swallowing it would render a healthy-looking dashboard of zeroes.
+      if (isEsqlUnknownColumnError(error)) {
         this.deps.logger.warn(
-          `chartsSummary: ES|QL verification error — returning zero buckets. ` +
+          `chartsSummary: ES|QL reported an unknown column — returning zero buckets. ` +
             `Recreate the index via the proposals write path to fix the mapping. Error: ${error.message}`
         );
         return zeroBuckets();
@@ -334,9 +382,14 @@ export class ProposalsService {
       throw error;
     }
 
+    this.warnIfTruncated(opensResponse, 'opens');
+    this.warnIfTruncated(closesResponse, 'closes');
+    this.warnIfTruncated(expiriesResponse, 'expiries');
+
     const anchorByCat = parseEsqlCountByCategory(anchorResponse, 'anchor');
     const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
     const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
+    const expiriesByIdxAndCat = parseEsqlCountByIdxAndCategory(expiriesResponse, 'expiries');
 
     const runningSums: Record<string, number> = { ...anchorByCat };
     const buckets: ProposalChartsSummaryBucket[] = [];
@@ -352,11 +405,30 @@ export class ProposalsService {
         // negative, and a negative open count is worse than an undercount.
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
+      for (const [cat, count] of Object.entries(expiriesByIdxAndCat[i] ?? {})) {
+        runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
+      }
 
       buckets.push({ timestamp, counts: { ...runningSums } });
     }
 
     return { buckets };
+  }
+
+  /**
+   * Elasticsearch caps an ES|QL result set at `esql.query.result_truncation_max_size`
+   * whatever LIMIT the query asked for, and drops the tail of the sort — here, the
+   * most recent buckets. The schema's bucket ceiling should keep this unreachable,
+   * so a hit means an unexpectedly wide category vocabulary.
+   */
+  private warnIfTruncated(response: { values: unknown[] }, label: string): void {
+    if (response.values.length >= ESQL_RESULT_TRUNCATION_MAX_SIZE) {
+      this.deps.logger.warn(
+        `chartsSummary: the ${label} query returned ${response.values.length} rows, at or above ` +
+          `the ES|QL truncation ceiling of ${ESQL_RESULT_TRUNCATION_MAX_SIZE}. The most recent ` +
+          `buckets may be undercounted.`
+      );
+    }
   }
 
   /**
@@ -811,11 +883,21 @@ const sameInput = (
   stored: Record<string, unknown> | undefined
 ): boolean => isEqual(submitted ?? {}, stored ?? {});
 
-const isEsqlVerificationError = (error: unknown): boolean => {
-  const type =
-    (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ??
-    (error as { body?: { error?: { type?: string } } })?.body?.error?.type;
-  return type === 'verification_exception';
+/**
+ * Narrow on purpose. ES|QL raises `verification_exception` for every query it
+ * refuses to plan — a renamed field, an unsupported function, a bad cast. Only
+ * the unknown-column case means "the mapping has not caught up yet"; treating
+ * the rest as no-data would turn a broken query into a silent flat line.
+ */
+const isEsqlUnknownColumnError = (error: unknown): boolean => {
+  const body =
+    (error as { meta?: { body?: { error?: { type?: string; reason?: string } } } })?.meta?.body
+      ?.error ?? (error as { body?: { error?: { type?: string; reason?: string } } })?.body?.error;
+
+  if (body?.type !== 'verification_exception') return false;
+
+  const detail = `${body.reason ?? ''} ${(error as { message?: string })?.message ?? ''}`;
+  return /unknown column/i.test(detail);
 };
 
 const isVersionConflict = (error: unknown): boolean => {

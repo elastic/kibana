@@ -214,12 +214,13 @@ export const ConversationsPage: React.FC = () => {
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
-            isLoading={isStatsLoading && !statsData}
+            // Both queries: the header states something about each, so settling
+            // one while the other is in flight would flash a title the next
+            // render contradicts.
+            isLoading={isLoading || (isStatsLoading && !statsData)}
+            hasError={Boolean(statsError)}
             isQueueEmpty={
-              !isStatsLoading &&
-              !statsError &&
-              sortedConversations.length === 0 &&
-              proposalCount === 0
+              !isStatsLoading && sortedConversations.length === 0 && proposalCount === 0
             }
             eventCount={proposalCount}
           />
