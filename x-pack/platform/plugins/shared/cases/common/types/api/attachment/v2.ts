@@ -15,16 +15,54 @@ import {
 } from './v1';
 import {
   AttachmentRtV2,
-  AttachmentsRtV2,
   UnifiedAttachmentPayloadRt,
+  UnifiedAttachmentRt,
 } from '../../domain/attachment/v2';
 import { limitedArraySchema } from '../../../schema';
+
+// Same shape in v1 and v2 (just saved object ids); re-exported under the V2
+// alias for attachmentApiV2 namespace completeness.
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
+
+// --- Unified-only: no legacy (v1) form, no wire back-compat to preserve ---
 
 export const UnifiedAttachmentPatchRequestRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
+
+// Unified-only bulk payload. Client/service accept only unified; the route
+// converts the mixed wire body before calling the client.
+export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
+  codec: UnifiedAttachmentPayloadRt,
+  min: 0,
+  max: MAX_BULK_CREATE_ATTACHMENTS,
+  fieldName: 'attachments',
+});
+
+// Internal route only, no legacy wire contract to preserve. The client is
+// unified-only (post mode-removal), so the response is unified-only too.
+export const BulkGetUnifiedAttachmentsResponseRt = rt.strict({
+  attachments: rt.array(UnifiedAttachmentRt),
+  errors: rt.array(
+    rt.strict({
+      error: rt.string,
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      savedObjectId: rt.string,
+    })
+  ),
+});
+
+export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
+  typeof BulkCreateUnifiedAttachmentsRequestRt
+>;
+export type BulkGetUnifiedAttachmentsResponse = rt.TypeOf<
+  typeof BulkGetUnifiedAttachmentsResponseRt
+>;
+
+// --- V2 union: version-spanning (v1 legacy ∪ unified). Used at read/response
+// boundaries and any write boundary that still accepts both wire shapes ---
 
 export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
 export const AttachmentRequestWithoutRefsRtV2 = rt.union([
@@ -50,20 +88,7 @@ export const BulkCreateAttachmentsRequestRtV2 = limitedArraySchema({
   fieldName: 'attachments',
 });
 
-export const BulkGetAttachmentsResponseRtV2 = rt.strict({
-  attachments: AttachmentsRtV2,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      savedObjectId: rt.string,
-    })
-  ),
-});
-
 export type AttachmentRequestV2 = rt.TypeOf<typeof AttachmentRequestRtV2>;
 export type AttachmentPatchRequestV2 = rt.TypeOf<typeof AttachmentPatchRequestRtV2>;
 export type AttachmentsFindResponseV2 = rt.TypeOf<typeof AttachmentsFindResponseRtV2>;
 export type BulkCreateAttachmentsRequestV2 = rt.TypeOf<typeof BulkCreateAttachmentsRequestRtV2>;
-export type BulkGetAttachmentsResponseV2 = rt.TypeOf<typeof BulkGetAttachmentsResponseRtV2>;

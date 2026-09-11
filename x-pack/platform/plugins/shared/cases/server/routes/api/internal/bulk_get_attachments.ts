@@ -38,10 +38,11 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
         BulkGetAttachmentsRequestRt
       )(request.body);
 
-      const res: attachmentApiV2.BulkGetAttachmentsResponseV2 = await client.attachments.bulkGet({
-        caseID: request.params.case_id,
-        savedObjectIds: requestBody.ids,
-      });
+      const res: attachmentApiV2.BulkGetUnifiedAttachmentsResponse =
+        await client.attachments.bulkGet({
+          caseID: request.params.case_id,
+          savedObjectIds: requestBody.ids,
+        });
 
       return response.ok({
         body: res,

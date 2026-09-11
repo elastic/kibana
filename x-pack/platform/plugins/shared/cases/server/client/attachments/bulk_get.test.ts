@@ -7,12 +7,14 @@
 
 import Boom from '@hapi/boom';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
-import { mockCaseComments, mockCaseUnifiedAttachments } from '../../mocks';
+import { mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  const attachmentSO = mockCaseComments[0];
+  // The response is unified-only; use a unified fixture even for the
+  // error-construction tests below, which don't exercise attachment shape.
+  const attachmentSO = mockCaseUnifiedAttachments[0];
   const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
 
   describe('errors', () => {

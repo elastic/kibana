@@ -15,11 +15,10 @@ import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 
 /**
  * Update an attachment.
@@ -43,7 +42,6 @@ export async function update(
       version: queryCommentVersion,
       ...queryRestAttributes
     } = decodeWithExcessOrThrow(UnifiedAttachmentPatchRequestRt)(queryParams);
-    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
 
     await validateMaxUserActions({
       caseId: caseID,
@@ -51,10 +49,9 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    // Also enforce registry registration and the unified zod schema for
-    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
-    // paths so PATCH stays in sync with POST.
-    validateRegisteredAttachments({
+    // Enforce registry registration and the unified zod schema; mirrors the
+    // add/bulk_create paths so PATCH stays in sync with POST.
+    validateUnifiedAttachments({
       query: queryRestAttributes,
       unifiedAttachmentTypeRegistry,
     });
