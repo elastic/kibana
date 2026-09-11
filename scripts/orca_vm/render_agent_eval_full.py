@@ -48,7 +48,7 @@ REFERENCE_MODELS = [
     "openai-gpt-oss-120b", "openai-gpt-oss-20b",
     "deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.6",
     "google/gemma-4-31b-it", "Qwen36_27b",
-    "zai-glm-5-2", "gp-llm-v2", "rainbow-sprinkles",
+    "zai-glm-5-2", "gp-llm-v2",
 ]
 
 MISSING_REASONS = {
