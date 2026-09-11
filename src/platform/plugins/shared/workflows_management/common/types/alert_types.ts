@@ -36,3 +36,5 @@ export interface AlertEvent {
   ruleUrl?: string;
   spaceId: string;
 }
+
+export type AlertRuleLinkInfo = Pick<AlertEventRule, 'id' | 'name'> & Pick<AlertEvent, 'ruleUrl'>;

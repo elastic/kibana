@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -34,6 +42,10 @@ interface WorkflowExecutionOverviewProps {
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  alertRule?: {
+    name: string;
+    href: string;
+  };
 }
 
 const formatExecutionDate = (date: string) => {
@@ -68,6 +80,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    alertRule,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -207,6 +220,27 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               </EuiFlexGroup>
             </div>
           </EuiFlexItem>
+
+          {alertRule && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('workflowsManagement.executionOverview.alertRuleLabel', {
+                    defaultMessage: 'Alert rule',
+                  })}
+                  {': '}
+                </strong>
+                <EuiLink
+                  href={alertRule.href}
+                  target="_blank"
+                  external
+                  data-test-subj="workflowExecutionAlertRuleLink"
+                >
+                  {alertRule.name}
+                </EuiLink>
+              </EuiText>
+            </EuiFlexItem>
+          )}
 
           {showResumeUI && executionId && (
             <EuiFlexItem grow={false}>

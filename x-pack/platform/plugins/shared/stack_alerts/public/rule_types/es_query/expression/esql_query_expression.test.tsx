@@ -429,6 +429,40 @@ describe('EsqlQueryRuleTypeExpression', () => {
     expect(result.getByTestId('testQueryError')).toBeInTheDocument();
   });
 
+  test('should opt in to including ES|QL results in the alert payload', () => {
+    const setRuleParams = jest.fn();
+
+    render(
+      <EsqlQueryExpression
+        unifiedSearch={unifiedSearchMock}
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={defaultEsqlQueryExpressionParams}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+        data={dataMock}
+        dataViews={dataViewMock}
+        defaultActionGroupId=""
+        actionGroups={[]}
+        charts={chartsStartMock}
+        onChangeMetaData={() => {}}
+      />,
+      {
+        wrapper: AppWrapper,
+      }
+    );
+
+    const checkbox = screen.getByTestId('includeEsqlResultsCheckbox');
+    expect(checkbox).not.toBeChecked();
+
+    fireEvent.click(checkbox);
+
+    expect(checkbox).toBeChecked();
+    expect(setRuleParams).toHaveBeenCalledWith('includeEsqlResults', true);
+  });
+
   test('getTimeFilter should return the correct filters', async () => {
     expect(getTimeFilter('@timestamp', '3h')).toEqual({
       timeFilter: {

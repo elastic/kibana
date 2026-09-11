@@ -18,6 +18,13 @@ export const STACK_AAD_INDEX_NAME = 'stack';
 export const ALERT_TITLE = `${ALERT_NAMESPACE}.title` as const;
 // kibana.alert.evaluation.conditions - human readable string that shows the conditions set by the user
 export const ALERT_EVALUATION_CONDITIONS = `${ALERT_NAMESPACE}.evaluation.conditions` as const;
+export const ALERT_ESQL_QUERY_RESULTS = `${ALERT_NAMESPACE}.esql.results` as const;
+export const ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT =
+  `${ALERT_NAMESPACE}.esql.results_total_count` as const;
+export const ALERT_ESQL_QUERY_RESULTS_STORED_COUNT =
+  `${ALERT_NAMESPACE}.esql.results_stored_count` as const;
+export const ALERT_ESQL_QUERY_RESULTS_TRUNCATED =
+  `${ALERT_NAMESPACE}.esql.results_truncated` as const;
 
 export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlertType> = {
   context: STACK_AAD_INDEX_NAME,
@@ -34,6 +41,27 @@ export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlertType> = {
       [ALERT_GROUPING]: {
         type: 'object',
         dynamic: true,
+        array: false,
+        required: false,
+      },
+      [ALERT_ESQL_QUERY_RESULTS]: {
+        type: 'object',
+        enabled: false,
+        array: true,
+        required: false,
+      },
+      [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: {
+        type: 'long',
+        array: false,
+        required: false,
+      },
+      [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: {
+        type: 'long',
+        array: false,
+        required: false,
+      },
+      [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: {
+        type: 'boolean',
         array: false,
         required: false,
       },

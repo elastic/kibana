@@ -83,6 +83,35 @@ describe('WorkflowExecutionOverview', () => {
       expect(dataView.textContent).toContain('Mode: input');
       expect(dataView.textContent).toContain('Step: Overview');
     });
+
+    it('should link to the alert rule in a new tab', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          alertRule={{
+            name: 'CPU rule',
+            href: '/s/space-1/app/rules/rule/rule-1',
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('workflowExecutionAlertRuleLink')).toHaveAttribute(
+        'href',
+        '/s/space-1/app/rules/rule/rule-1'
+      );
+      expect(screen.getByTestId('workflowExecutionAlertRuleLink')).toHaveAttribute(
+        'target',
+        '_blank'
+      );
+      expect(screen.getByTestId('workflowExecutionAlertRuleLink')).toHaveTextContent('CPU rule');
+    });
+
+    it('should not render an alert rule link for other execution triggers', () => {
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={createMockStepExecution()} />);
+
+      expect(screen.queryByTestId('workflowExecutionAlertRuleLink')).not.toBeInTheDocument();
+    });
   });
 
   describe('status display', () => {

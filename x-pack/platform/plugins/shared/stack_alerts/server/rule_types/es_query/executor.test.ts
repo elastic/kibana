@@ -19,6 +19,12 @@ import type { FetchEsQueryOpts } from './lib/fetch_es_query';
 import type { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
 import type { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+import {
+  ALERT_ESQL_QUERY_RESULTS,
+  ALERT_ESQL_QUERY_RESULTS_STORED_COUNT,
+  ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT,
+  ALERT_ESQL_QUERY_RESULTS_TRUNCATED,
+} from '..';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -629,6 +635,100 @@ describe('es_query executor', () => {
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should persist ES|QL result rows on the alert', async () => {
+      const esqlResult = {
+        'host.name': 'server-1',
+        cpu_pct: '42',
+        threshold: '20',
+      };
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 1,
+              hits: [{ _id: 'esql_query_document', _index: '', _source: esqlResult }],
+            },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          params: {
+            ...defaultProps,
+            searchType: 'esqlQuery',
+            includeEsqlResults: true,
+            threshold: [0],
+            thresholdComparator: '>=' as Comparator,
+          },
+        },
+        []
+      );
+
+      expect(mockReport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: expect.objectContaining({
+            [ALERT_ESQL_QUERY_RESULTS]: [esqlResult],
+            [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: 1,
+            [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: 1,
+            [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: false,
+          }),
+        })
+      );
+    });
+
+    it('should not persist ES|QL result rows by default', async () => {
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 1,
+              hits: [
+                {
+                  _id: 'esql_query_document',
+                  _index: '',
+                  _source: { 'host.name': 'server-1' },
+                },
+              ],
+            },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+
+      await executor(
+        coreMock,
+        {
+          ...defaultExecutorOptions,
+          params: {
+            ...defaultProps,
+            searchType: 'esqlQuery',
+            threshold: [0],
+            thresholdComparator: '>=' as Comparator,
+          },
+        },
+        []
+      );
+
+      expect(mockReport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: expect.objectContaining({
+            [ALERT_ESQL_QUERY_RESULTS]: undefined,
+            [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: undefined,
+            [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: undefined,
+            [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: undefined,
+          }),
+        })
+      );
     });
 
     it('should set limit as reached if results are truncated', async () => {

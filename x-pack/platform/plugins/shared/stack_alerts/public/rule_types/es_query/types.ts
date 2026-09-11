@@ -67,6 +67,7 @@ export interface OnlySearchSourceRuleParams {
 export interface OnlyEsqlQueryRuleParams {
   searchType?: 'esqlQuery';
   esqlQuery: AggregateQuery;
+  includeEsqlResults?: boolean;
   timeField: string;
 }
 

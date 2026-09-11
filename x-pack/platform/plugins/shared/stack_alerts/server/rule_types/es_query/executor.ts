@@ -39,7 +39,15 @@ import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule, getSourceFieldsFromHit } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
-import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
+import {
+  ALERT_ESQL_QUERY_RESULTS,
+  ALERT_ESQL_QUERY_RESULTS_STORED_COUNT,
+  ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT,
+  ALERT_ESQL_QUERY_RESULTS_TRUNCATED,
+  ALERT_EVALUATION_CONDITIONS,
+  ALERT_TITLE,
+} from '..';
+import { createEsqlResultsBudget, getBoundedEsqlResults } from './bounded_esql_results';
 
 export async function executor(
   core: CoreSetup,
@@ -134,6 +142,7 @@ export async function executor(
       });
 
   const unmetGroupValues: Record<string, number> = {};
+  let esqlResultsBudget = createEsqlResultsBudget();
   for (const result of parsedResults.results) {
     const groupingObject = result.groupingObject
       ? unflattenObject(result.groupingObject)
@@ -180,6 +189,13 @@ export async function executor(
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
     const ecsGroups = getEcsGroupsFromFlattenGrouping(result.groupingObject);
+    const esqlResults =
+      esqlQueryRule && params.includeEsqlResults
+        ? getBoundedEsqlResults(result.hits, esqlResultsBudget)
+        : undefined;
+    if (esqlResults) {
+      esqlResultsBudget = esqlResults.remainingBudget;
+    }
 
     alertsClient.report({
       id,
@@ -196,6 +212,23 @@ export async function executor(
         [ALERT_GROUPING]: groupingObject,
         ...ecsGroups,
         ...actionContext.sourceFields,
+        // Undefined flattened fields remove metadata left by an earlier opted-in execution.
+        ...(esqlQueryRule && !esqlResults
+          ? {
+              [ALERT_ESQL_QUERY_RESULTS]: undefined,
+              [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: undefined,
+              [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: undefined,
+              [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: undefined,
+            }
+          : {}),
+        ...(esqlResults
+          ? {
+              [ALERT_ESQL_QUERY_RESULTS]: esqlResults.results,
+              [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: esqlResults.totalCount,
+              [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: esqlResults.storedCount,
+              [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: esqlResults.truncated,
+            }
+          : {}),
       },
     });
     if (!isGroupAgg) {

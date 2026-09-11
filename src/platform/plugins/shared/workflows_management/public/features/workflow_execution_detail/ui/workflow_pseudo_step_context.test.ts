@@ -13,6 +13,7 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerContextFromExecution,
   buildTriggerStepExecutionFromContext,
+  getAlertRuleLinkInfo,
 } from './workflow_pseudo_step_context';
 
 describe('buildTriggerContextFromExecution', () => {
@@ -210,6 +211,34 @@ describe('buildTriggerStepExecutionFromContext', () => {
     });
     expect(result?.stepId).toBe('alert');
     expect(result?.stepType).toBe('trigger_alert');
+  });
+
+  it('extracts the alert rule link information from execution context', () => {
+    expect(
+      getAlertRuleLinkInfo({
+        ...baseExecution,
+        context: {
+          event: {
+            alerts: [{ id: 'a1' }],
+            rule: { id: 'rule-1', name: 'CPU rule' },
+            ruleUrl: '/s/space-1/app/rules/rule/rule-1',
+          },
+        },
+      })
+    ).toEqual({
+      id: 'rule-1',
+      name: 'CPU rule',
+      ruleUrl: '/s/space-1/app/rules/rule/rule-1',
+    });
+  });
+
+  it('does not return rule link information for a non-alert execution', () => {
+    expect(
+      getAlertRuleLinkInfo({
+        ...baseExecution,
+        context: { event: { type: 'scheduled' } },
+      })
+    ).toBeUndefined();
   });
 
   it('sets trigger_event pseudo-step for event-driven execution', () => {

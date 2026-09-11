@@ -14,6 +14,26 @@ import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
+  it('should expose dynamic ES|QL result fields for alert-triggered workflows', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'ESQL alert results',
+      enabled: true,
+      triggers: [{ type: 'alert' }],
+      steps: [{ name: 'process_result', type: 'console' }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    expect(
+      getSchemaAtPath(contextSchema, 'event.alerts[0].kibana.alert.esql.results').schema
+    ).toBeInstanceOf(z.ZodArray);
+    expect(
+      getSchemaAtPath(contextSchema, 'event.alerts[0].kibana.alert.esql.results[0].host_name')
+        .schema
+    ).toBeInstanceOf(z.ZodUnion);
+  });
+
   it('should handle nested object inputs for variable validation', () => {
     const workflow: WorkflowYaml = {
       version: '1',
@@ -336,11 +356,13 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     steps: [{ name: 'step1', type: 'console' }],
   };
 
-  function getEventKeys(workflow: WorkflowYaml | WorkflowYaml): string[] {
+  function getEventKeys(workflow: WorkflowYaml): string[] {
     const contextSchema = getWorkflowContextSchema(workflow);
-    const eventResult = getSchemaAtPath(contextSchema, 'event');
-    expect(eventResult.schema).toBeDefined();
-    return Object.keys(getShape(eventResult.schema!));
+    const eventSchema = getSchemaAtPath(contextSchema, 'event').schema;
+    if (!eventSchema) {
+      throw new Error('Expected the workflow context to contain an event schema');
+    }
+    return Object.keys(getShape(eventSchema));
   }
 
   it.each<{
@@ -353,43 +375,43 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       label: 'manual trigger',
       triggers: [{ type: 'manual' }],
       expectedKeys: ['spaceId'],
-      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'ruleUrl', 'params'],
     },
     {
       label: 'scheduled trigger',
       triggers: [{ type: 'scheduled', with: { every: '5m' } }],
       expectedKeys: ['spaceId'],
-      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'ruleUrl', 'params'],
     },
     {
       label: 'alert trigger',
       triggers: [{ type: 'alert' }],
-      expectedKeys: ['spaceId', 'alerts', 'rule', 'params'],
+      expectedKeys: ['spaceId', 'alerts', 'rule', 'ruleUrl', 'params'],
       unexpectedKeys: ['timestamp'],
     },
     {
       label: 'manual + alert triggers',
       triggers: [{ type: 'manual' }, { type: 'alert' }],
-      expectedKeys: ['spaceId', 'alerts', 'rule', 'params'],
+      expectedKeys: ['spaceId', 'alerts', 'rule', 'ruleUrl', 'params'],
       unexpectedKeys: ['timestamp'],
     },
     {
       label: 'manual + scheduled triggers',
       triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
       expectedKeys: ['spaceId'],
-      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'params'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'ruleUrl', 'params'],
     },
     {
       label: 'empty triggers array',
       triggers: [] as any,
       expectedKeys: ['spaceId'],
-      unexpectedKeys: ['timestamp'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'ruleUrl', 'params'],
     },
     {
       label: 'undefined triggers',
       triggers: undefined as any,
       expectedKeys: ['spaceId'],
-      unexpectedKeys: ['timestamp'],
+      unexpectedKeys: ['timestamp', 'alerts', 'rule', 'ruleUrl', 'params'],
     },
   ])(
     'should produce correct event keys for $label',
@@ -397,7 +419,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       const workflow = {
         ...baseWorkflow,
         triggers,
-      } as WorkflowYaml | WorkflowYaml;
+      } as WorkflowYaml;
       const eventKeys = getEventKeys(workflow);
 
       for (const key of expectedKeys) {

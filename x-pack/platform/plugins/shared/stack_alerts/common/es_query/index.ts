@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { EsqlTable } from './esql_query_utils';
+export type { EsqlResultRow, EsqlTable } from './esql_query_utils';
 export {
   rowToDocument,
   transformToEsqlTable,
@@ -19,4 +19,6 @@ export {
   ConditionMetAlertInstanceId,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ESQL_RESULTS_MAX_ROWS_PER_EXECUTION,
+  ESQL_RESULTS_MAX_BYTES_PER_EXECUTION,
 } from './constants';

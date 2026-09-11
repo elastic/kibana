@@ -35,6 +35,8 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
+import type { AlertRuleLinkInfo } from '../../../../common/types/alert_types';
+import { useAlertRuleLink } from '../../../hooks/navigation/use_alert_rule_link';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
@@ -56,6 +58,8 @@ interface WorkflowStepExecutionDetailsProps {
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
   parentWorkflowExecution?: WorkflowExecutionLinkInfo;
+  /** Alert rule that triggered this execution, shown on the overview pseudo-step. */
+  alertRule?: AlertRuleLinkInfo;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
@@ -73,8 +77,10 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     waitingStepExecutionId,
     childWorkflowExecution,
     parentWorkflowExecution,
+    alertRule,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const alertRuleHref = useAlertRuleLink(alertRule);
     const workflowNav = useNavigateToExecution(
       childWorkflowExecution
         ? {
@@ -203,6 +209,9 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           approvalLabels={approvalLabels}
           shouldAutoResume={shouldAutoResume}
           waitingStepExecutionId={waitingStepExecutionId}
+          alertRule={
+            alertRule && alertRuleHref ? { name: alertRule.name, href: alertRuleHref } : undefined
+          }
         />
       );
     }
