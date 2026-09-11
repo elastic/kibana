@@ -97,8 +97,6 @@ describe('accumulateNewTermsFieldCardinality', () => {
   it('should defensively handle a non-object scalar key', () => {
     const accumulator = createNewTermsFieldCardinalityAccumulator();
 
-    // Composite bucket keys are always objects, so this shape is not reachable through the type. The
-    // cast exercises the defensive branch that guards against a malformed key at runtime.
     accumulateNewTermsFieldCardinality(accumulator, [
       { key: 'scalar', doc_count: 1 },
     ] as unknown as estypes.AggregationsCompositeBucket[]);
@@ -112,7 +110,6 @@ describe('accumulateNewTermsFieldCardinality', () => {
     const accumulator = createNewTermsFieldCardinalityAccumulator();
     const logger = { debug: jest.fn() } as unknown as Logger;
 
-    // A getter that throws forces the guarded try/catch to trip.
     const hostileBuckets = [
       {
         get key() {

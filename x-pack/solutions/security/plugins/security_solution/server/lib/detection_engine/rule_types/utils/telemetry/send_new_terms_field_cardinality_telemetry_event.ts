@@ -70,9 +70,7 @@ export const accumulateNewTermsFieldCardinality = (
 
 /**
  * Reports metrics about the fields a New Terms rule groups by, per execution, to size how many
- * distinct combinations and how long the grouped values are for real rules. This drives whether they
- * fit a native ES|QL INLINE STATS migration. Reports only aggregate metrics and whether the rule is
- * an Elastic prebuilt rule, never the rule id, name, field names or values.
+ * distinct combinations and how long the grouped values are for real rules.
  */
 export const sendNewTermsFieldCardinalityTelemetryEvent = ({
   analytics,

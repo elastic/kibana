@@ -166,7 +166,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       let pageNumber = 0;
       let alertsCandidateCount: number | undefined;
       // Telemetry: size how many distinct grouping-key combinations real New Terms rules produce, and
-      // how long the grouped values are, over the rule run window. No field names or values captured.
+      // how long the grouped values are, over the rule run window.
       const newTermsCardinality = createNewTermsFieldCardinalityAccumulator();
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
@@ -447,7 +447,6 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         afterKey = searchResult.aggregations.new_terms.after_key;
       }
 
-      // analytics is undefined during rule preview, so preview runs report nothing.
       if (analytics) {
         try {
           sendNewTermsFieldCardinalityTelemetryEvent({
@@ -456,7 +455,6 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             accumulator: newTermsCardinality,
           });
         } catch (error) {
-          // Never let a telemetry failure fail the rule run.
           logger.info(`Failed to send New Terms field cardinality telemetry event: ${error}`);
         }
       }
