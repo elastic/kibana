@@ -5,29 +5,60 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Investigation } from '../../types';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
-import { BaseActions, type BaseActionsProps } from '../actions';
-import type { ConversationsActionsGroupProps } from '../conversation_card';
+import { BaseActions, type CardActionType } from '../actions';
+import { AssignActionModal } from '../modals/assign_action_modal';
+import { BaseActionModal } from '../modals/base_action_modal';
+import { ApprovalModal } from '../modals/approval_modal/approval_modal';
+import { MODAL_TRANSLATIONS } from '../modals/translations';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
-  onClickAction: BaseActionsProps['onClickAction'];
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
+  onOpenChat: () => void;
 }
 
+interface ModalState {
+  type: CardActionType | null;
+  recordId: Investigation['recordId'] | null;
+}
+
+const CLOSED_MODAL: ModalState = { type: null, recordId: null };
+
+/**
+ * Footer slot content. It owns its action modals rather than delegating them upwards: the flyout is
+ * mounted through `core.overlays.openFlyout`, so there is no page-level React tree to host them.
+ */
 export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFooterProps>(
-  ({ investigation, onClickAction, onClickRecommendedAction }) => {
-    const onOpenChat = useOpenInChat(investigation.id);
+  ({ investigation, onOpenChat }) => {
+    const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
+    const [isApprovalOpen, setIsApprovalOpen] = useState(false);
+
+    const closeModal = useCallback(() => setModalState(CLOSED_MODAL), []);
+    const closeApproval = useCallback(() => setIsApprovalOpen(false), []);
+
+    const onClickAction = useCallback(
+      (action: CardActionType, recordId: Investigation['recordId']) => {
+        setModalState({ type: action, recordId });
+      },
+      []
+    );
+
+    const onClickRecommendedAction = useCallback(() => setIsApprovalOpen(true), []);
 
     return (
-      <EuiFlyoutFooter>
+      <>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="productAgent" onClick={onOpenChat} size="s">
+            <EuiButton
+              iconType="productAgent"
+              onClick={onOpenChat}
+              size="s"
+              data-test-subj="investigationFlyoutOpenChat"
+            >
               {DETAILS_FLYOUT_LABELS.actions.openChat}
             </EuiButton>
           </EuiFlexItem>
@@ -37,10 +68,44 @@ export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFoo
               isFlyout={true}
               onClickAction={onClickAction}
               onClickRecommendedAction={onClickRecommendedAction}
+              onOpenChat={onOpenChat}
+              data-test-subj="investigationFlyoutActions"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyoutFooter>
+
+        {isApprovalOpen ? (
+          <ApprovalModal
+            selectedRecommendedActionConversation={investigation}
+            onConfirm={closeApproval}
+            onClose={closeApproval}
+          />
+        ) : null}
+
+        {modalState.type === 'assign' && modalState.recordId ? (
+          <AssignActionModal
+            recordId={modalState.recordId}
+            initialAssignee={investigation.assignee}
+            onClose={closeModal}
+            onAssign={closeModal}
+          />
+        ) : null}
+
+        {modalState.type === 'dismiss' && modalState.recordId ? (
+          <BaseActionModal
+            type="dismiss"
+            title={MODAL_TRANSLATIONS.dismiss.title}
+            recordId={modalState.recordId}
+            onClose={closeModal}
+            rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+            primaryAction={{
+              color: 'danger',
+              label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+              onClick: closeModal,
+            }}
+          />
+        ) : null}
+      </>
     );
   }
 );
