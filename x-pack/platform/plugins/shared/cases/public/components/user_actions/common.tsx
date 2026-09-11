@@ -18,6 +18,7 @@ import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 import { getUserActionAriaLabel } from './user_actions_aria_labels';
+import { withActionSourceEvent } from './action_source_event';
 
 interface Props {
   userAction: SnakeToCamelCase<ConnectorUserAction>;
@@ -71,7 +72,7 @@ export const createCommonUpdateUserActionBuilder = ({
             userProfiles={userProfiles}
           />
         ),
-        event: label,
+        event: withActionSourceEvent(label, userAction.source),
         'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.id}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: icon,

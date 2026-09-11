@@ -1313,7 +1313,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { internallyManagedAlerts, rule } = params;
+    const { source, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1350,9 +1350,8 @@ export class CasesConnectorExecutor {
             data: { content: comment },
             owner: theCase.owner,
           })) ?? [];
-        const rulePayload = internallyManagedAlerts
-          ? { id: null, name: null }
-          : { id: rule.id, name: rule.name };
+        const rulePayload =
+          source === 'attack' ? { id: null, name: null } : { id: rule.id, name: rule.name };
         // Collect the parallel alertId / alertIndex arrays in a single pass.
         // Order is preserved by reduce per the ECMA-262 spec.
         const { alertIds, alertIndices } = alerts.reduce<{

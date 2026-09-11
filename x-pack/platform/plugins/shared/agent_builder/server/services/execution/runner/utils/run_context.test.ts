@@ -93,7 +93,11 @@ describe('RunContext utilities', () => {
       };
 
       const agentId = 'test-agent';
-      const forkedContext = forkContextForAgentRun({ agentId, parentContext });
+      const forkedContext = forkContextForAgentRun({
+        agentId,
+        agentName: 'Desk agent',
+        parentContext,
+      });
 
       expect(forkedContext).toEqual({
         runId: 'parent-run-id',
@@ -101,6 +105,7 @@ describe('RunContext utilities', () => {
           {
             type: 'agent',
             agentId,
+            agentName: 'Desk agent',
           },
         ],
       });

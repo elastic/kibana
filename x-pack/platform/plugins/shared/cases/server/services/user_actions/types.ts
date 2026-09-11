@@ -26,6 +26,7 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
+  ActionSource,
 } from '../../../common/types/domain';
 import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
@@ -190,6 +191,7 @@ export interface ServiceContext {
    * the user-actions service is oblivious to v2's start lifecycle.
    */
   analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  actionSource?: ActionSource;
 }
 
 export interface PushTimeFrameInfo {

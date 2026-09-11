@@ -50,6 +50,7 @@ export const forkContextForAgentRun = ({
   ...agentEntry
 }: {
   agentId: string;
+  agentName?: string;
   conversationId?: string;
   executionId?: string;
   parentContext: RunContext;

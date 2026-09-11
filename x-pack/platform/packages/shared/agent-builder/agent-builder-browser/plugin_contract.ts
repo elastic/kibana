@@ -143,6 +143,10 @@ export interface PublicEmbeddableConversationInputProps {
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
+  /**
+   * Conversation id to restore when the sidebar opens.
+   */
+  conversationId?: string;
 }
 
 /**
