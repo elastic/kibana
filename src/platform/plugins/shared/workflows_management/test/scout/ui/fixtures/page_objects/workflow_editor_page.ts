@@ -50,6 +50,7 @@ export class WorkflowEditorPage {
   }
 
   async openAccessDialog(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
     await this.page.testSubj.click('workflowAccessButton');
     await this.accessMode.waitFor({ state: 'visible' });
   }

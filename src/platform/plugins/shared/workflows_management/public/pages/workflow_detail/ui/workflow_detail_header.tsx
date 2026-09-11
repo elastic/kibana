@@ -402,6 +402,7 @@ export const WorkflowDetailHeader = React.memo(
       if (canManageAccess && !isManagedWorkflow) {
         items.push({
           id: 'workflowAccess',
+          overflow: true,
           label: i18n.translate('workflows.access.openButtonLabel', { defaultMessage: 'Access' }),
           iconType: 'users',
           run: () => setIsAccessOpen(true),
