@@ -46,6 +46,8 @@ class Es:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--env-file", default="/tmp/golden-cluster-env.sh")
+    ap.add_argument("--suite", default="security-persona-matrix",
+                    help="suite_id filter for score docs (agent-builder feeds agent_eval_full boards)")
     ap.add_argument("--since", required=True, help="ISO lower bound for trace docs")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
@@ -61,7 +63,7 @@ def main():
     score_body = {
         "size": 1000,
         "query": {"bool": {"filter": [
-            {"term": {"metadata.suite_id": "security-persona-matrix"}},
+            {"term": {"metadata.suite_id": args.suite}},
             {"range": {"@timestamp": {"gte": args.since}}},
         ]}},
         "_source": [
