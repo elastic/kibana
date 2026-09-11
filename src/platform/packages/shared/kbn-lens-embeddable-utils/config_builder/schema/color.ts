@@ -155,7 +155,7 @@ export const legacyColorByValueSchema = colorByValueBaseSchema
     }),
   })
   .meta({
-    id: 'legacyColorByValue',
+    id: 'visLegacyColorByValue',
     title: 'Legacy color by value',
     description: 'Legacy color by value configuration',
     deprecated: true,
@@ -166,7 +166,7 @@ export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema
     range: z.literal('absolute'),
   })
   .meta({
-    id: 'legacyColorByValueAbsolute',
+    id: 'visLegacyColorByValueAbsolute',
     title: 'Legacy color by value (absolute)',
     description: 'Legacy color by absolute value configuration',
     deprecated: true,
@@ -177,7 +177,7 @@ export const colorByValueAbsoluteSchema = colorByValueBaseSchema
     range: z.literal('absolute'),
   })
   .meta({
-    id: 'colorByValueAbsolute',
+    id: 'visColorByValueAbsolute',
     title: 'Color By Value (Absolute)',
     description: 'Color by absolute value configuration',
   });
@@ -187,7 +187,7 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema
     range: z.literal('percentage'),
   })
   .meta({
-    id: 'colorByValuePercentage',
+    id: 'visColorByValuePercentage',
     title: 'Color By Value (Percentage)',
     description: 'Color by percentage value configuration',
   });
@@ -211,7 +211,7 @@ export const colorByValuePaletteSchema = z
       }),
   })
   .meta({
-    id: 'colorByValuePalette',
+    id: 'visColorByValuePalette',
     title: 'Color By Value (Palette)',
     description:
       'Color by value using a palette, with colors distributed across the range of values.',
@@ -225,7 +225,7 @@ export const colorByValueSchema = z
     legacyColorByValueSchema,
   ])
   .meta({
-    id: 'colorByValue',
+    id: 'visColorByValue',
     title: 'Color By Value',
     description:
       'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.',
@@ -241,7 +241,7 @@ export const staticColorSchema = z
   })
   .strict()
   .meta({
-    id: 'staticColor',
+    id: 'visStaticColor',
     title: 'Static Color',
     description: 'Fixed color for all values in the dimension.',
   });
@@ -257,7 +257,7 @@ const colorFromPaletteSchema = z
   })
   .strict()
   .meta({
-    id: 'colorFromPalette',
+    id: 'visColorFromPalette',
     title: 'Color From Palette',
     description: 'Color at a fixed index position in a named palette.',
   });
@@ -269,7 +269,7 @@ const colorCodeSchema = z
   })
   .strict()
   .meta({
-    id: 'color_code',
+    id: 'visColorCode',
     title: 'Color Code',
     description: 'A color specified as a hex or CSS color code string.',
   });
@@ -277,7 +277,7 @@ const colorCodeSchema = z
 const colorDefSchema = z.union([colorFromPaletteSchema, colorCodeSchema]);
 
 const unassignedColorSchema = z.union([colorFromPaletteSchema, colorCodeSchema]).meta({
-  id: 'unassignedColorSchema',
+  id: 'visUnassignedColorSchema',
   description: 'The color to use for unassigned values.',
 });
 
@@ -302,7 +302,7 @@ const categoricalColorMappingSchema = z
   })
   .strict()
   .meta({
-    id: 'categoricalColorMapping',
+    id: 'visCategoricalColorMapping',
     title: 'Categorical Color Mapping',
     description:
       'Palette color assignment for specific categorical values. Unmapped values receive the unassigned color.',
@@ -334,7 +334,7 @@ const gradientColorMappingSchema = z
   })
   .strict()
   .meta({
-    id: 'gradientColorMapping',
+    id: 'visGradientColorMapping',
     title: 'Gradient Color Mapping',
     description: 'Gradient color mapping across categorical values.',
   });
@@ -358,7 +358,7 @@ export const colorMappingSchema = z
   ])
   .default(DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE)
   .meta({
-    id: 'colorMapping',
+    id: 'visColorMapping',
     title: 'Color Mapping',
     description:
       'Color mapping for dimension values, either categorical (for specific values) or as a gradient.',
@@ -367,13 +367,13 @@ export const colorMappingSchema = z
 export const noColorSchema = z
   .object({ type: z.literal('none') })
   .strict()
-  .meta({ id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring' });
+  .meta({ id: 'visNoColor', title: 'No Color', description: 'Explicitly disables coloring' });
 
 export const autoColorSchema = z
   .object({ type: z.literal('auto') })
   .strict()
   .meta({
-    id: 'autoColor',
+    id: 'visAutoColor',
     title: 'Auto Color',
     description: 'Coloring determined at runtime based on chart defaults',
   });
@@ -387,7 +387,7 @@ export const allColoringTypeSchema = z
     autoColorSchema,
   ])
   .meta({
-    id: 'allColoringType',
+    id: 'visAllColoringType',
     title: 'Color Configuration',
     description:
       'Color configuration for a dimension, with options for value-range coloring, static color, categorical or gradient color mapping, or no color.',
