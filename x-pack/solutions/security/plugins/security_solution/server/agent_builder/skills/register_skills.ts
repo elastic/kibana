@@ -18,6 +18,7 @@ import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+import { createEndpointResponseActionsSkill } from './endpoint_response_actions';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createInvestigateRuleSkill } from './investigate_rule';
 import { createFindRulesSkill } from './find_rules';
@@ -121,6 +122,12 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.endpointForensicAnalysisSkill) {
     await agentBuilder.skills.register(endpointForensicAnalysisSkill);
+  }
+
+  if (experimentalFeatures.endpointResponseActionsSkill) {
+    agentBuilder.skills.register(
+      createEndpointResponseActionsSkill(options.endpointAppContextService)
+    );
   }
 
   if (experimentalFeatures.investigateRuleSkill) {
