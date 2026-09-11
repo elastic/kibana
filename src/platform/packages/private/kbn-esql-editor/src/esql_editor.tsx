@@ -905,7 +905,11 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   const tabKeyDisposable = editor.onKeyDown((e) => {
-                    if (e.keyCode === monaco.KeyCode.Tab) {
+                    if (
+                      e.keyCode === monaco.KeyCode.Tab &&
+                      !e.shiftKey &&
+                      !isSuggestionPopupOpenRef.current
+                    ) {
                       suppressSuggestionsRef.current = true;
                     }
                   });
