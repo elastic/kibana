@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerRoutesMock = jest.fn();
+import type { Container } from 'inversify';
+import { OnSetup, OnStart } from '@kbn/core-di';
 
-jest.doMock('./routes', () => ({
-  registerRoutes: registerRoutesMock,
-}));
+export function setup(container: Container): void {
+  return container.getAll(OnSetup, { chained: true }).forEach((fn) => fn(container));
+}
+
+export function start(container: Container): void {
+  return container.getAll(OnStart, { chained: true }).forEach((fn) => fn(container));
+}
