@@ -24,13 +24,23 @@ The `--profile` flag decides which cluster records the run. Refer to [`--profile
 | Keep scores on your own machine      | `node scripts/evals start --suite nightshift-investigations --profile local`     |
 | Publish scores to the golden cluster | `node scripts/evals start --suite nightshift-investigations --profile dev-vault` |
 
-The golden cluster is what the weekly pipeline writes to and what the dashboards read, so use it when a run needs to be comparable against the weekly baseline. It reads its credentials from Vault at runtime, so run `vault login --method oidc` first. `local` writes to your own Elasticsearch instead, which is the right choice while iterating on a spec.
+`dev-vault` publishes to the golden cluster, which is what the weekly pipeline writes to and what the dashboards read, so use it when a run needs to be comparable against the weekly baseline. It reads its credentials from Vault at runtime, handling the login itself and opening a browser if your Vault session has expired.
 
-One prerequisite specific to this suite: its seed data lives in GCS, so export `GCS_CREDENTIALS` (the full service account JSON) before the cluster starts. See [seed data](#seed-data) below.
+`local` records scores on your own development Elasticsearch and Kibana, so start those yourself before running the suite. Both stay in the foreground, so each needs its own terminal, and the suite then runs in a third:
 
-For model and judge selection, `--grep` and repetitions, see
-[running evals locally](../kbn-evals/README.md#11-getting-started-locally). This suite does not
-override any of those flags.
+```bash
+# terminal 1
+yarn es snapshot --license trial   # Elasticsearch on localhost:9200
+
+# terminal 2
+yarn start                         # Kibana on localhost:5601
+```
+
+`start` will not launch them for you. It brings up a separate Scout cluster on `9220` and `5620` for the suite to run against, and leaves your development instance alone. Omitting `--profile` prompts for a destination instead.
+
+Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
+
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
 
 ## Two kinds of dataset
 
@@ -81,6 +91,38 @@ evaluate.describe(dataset.id, () => {
   });
 });
 ```
+
+## Adding a new eval
+
+Copy [`evals/smoke/`](evals/smoke) and work through its five files. Nothing outside the new
+folder needs to change, and the suite picks the spec up automatically.
+
+1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
+   and an evaluator type bound to your task's output.
+2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
+   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, then
+   following the investigation to a terminal status.
+3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
+   against, a `seedSource`, and an `examples()` call returning ground truth. Export a
+   `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
+   `NIGHTSHIFT_DATASETS` work for your eval too.
+4. **`evaluators.ts`** — write CODE evaluators as plain objects, and reach for the `evaluators`
+   fixture for LLM-as-judge scoring (`evaluators.criteria([...])`). Export them as one array.
+5. **`<name>.spec.ts`** — iterate your datasets, call `withSeedData(dataset)` once per describe
+   block, and hand the task and evaluators to `executorClient.runExperiment`.
+
+Two details worth knowing before you start:
+
+- **Seed data belongs in [`src/seed_data/sources.ts`](src/seed_data/sources.ts), not in your eval
+  folder.** Several evals can share one snapshot, and the CLI that publishes it has to agree with
+  the eval that reads it, so each source is declared once and referenced by both.
+- **`examples` is a function, not an array.** It is called when Playwright collects the describe
+  tree, which is what a dataset reading ground truth from files downloaded during global setup
+  needs.
+
+If your eval needs data from somewhere other than a GCS snapshot, add a member to `SeedSource` in
+[`src/seed_data/types.ts`](src/seed_data/types.ts) and a branch to `seedDataset` in
+[`src/seed_data/seed.ts`](src/seed_data/seed.ts). That switch is the only place seeding fans out.
 
 ## Seed data
 
@@ -141,38 +183,6 @@ Raising `--document-count` also means raising `SYNTHETIC_SMOKE_DOCUMENT_COUNT` i
 [`sources.ts`](src/seed_data/sources.ts), since that constant is the ground truth the eval scores
 against.
 
-## Adding a new eval
-
-Copy [`evals/smoke/`](evals/smoke) and work through its five files. Nothing outside the new
-folder needs to change, and the suite picks the spec up automatically.
-
-1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
-   and an evaluator type bound to your task's output.
-2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
-   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, then
-   following the investigation to a terminal status.
-3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
-   against, a `seedSource`, and an `examples()` call returning ground truth. Export a
-   `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
-   `NIGHTSHIFT_DATASETS` work for your eval too.
-4. **`evaluators.ts`** — write CODE evaluators as plain objects, and reach for the `evaluators`
-   fixture for LLM-as-judge scoring (`evaluators.criteria([...])`). Export them as one array.
-5. **`<name>.spec.ts`** — iterate your datasets, call `withSeedData(dataset)` once per describe
-   block, and hand the task and evaluators to `executorClient.runExperiment`.
-
-Two details worth knowing before you start:
-
-- **Seed data belongs in [`src/seed_data/sources.ts`](src/seed_data/sources.ts), not in your eval
-  folder.** Several evals can share one snapshot, and the CLI that publishes it has to agree with
-  the eval that reads it, so each source is declared once and referenced by both.
-- **`examples` is a function, not an array.** It is called when Playwright collects the describe
-  tree, which is what a dataset reading ground truth from files downloaded during global setup
-  needs.
-
-If your eval needs data from somewhere other than a GCS snapshot, add a member to `SeedSource` in
-[`src/seed_data/types.ts`](src/seed_data/types.ts) and a branch to `seedDataset` in
-[`src/seed_data/seed.ts`](src/seed_data/seed.ts). That switch is the only place seeding fans out.
-
 ## Environment variables
 
 | Variable              | Effect                                                                                                                                            |
@@ -181,8 +191,7 @@ If your eval needs data from somewhere other than a GCS snapshot, add a member t
 | `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                    |
 | `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                    |
 
-Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset
-id as well.
+Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
 
 ```bash
 NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-investigations
@@ -203,8 +212,4 @@ as `nightshift-investigations`.
 
 ## Enabling the investigation engine
 
-The smoke eval never calls the engine, so the server config it would need does not exist yet. An
-eval that does needs `xpack.nightshift_investigations.enabled`, along with Agent Builder,
-workflows and an inference endpoint for `significant_events_investigation`. That belongs in a new
-`evals_nightshift_investigations` Scout config set extending `evals_tracing`, in the same shape as
-`evals_workflows`, referenced from `serverConfigSet` in the suite's entry in `evals.suites.json`.
+The smoke eval never calls the engine, so the server config it would need does not exist yet. An eval that does needs `xpack.nightshift_investigations.enabled`, along with Agent Builder, workflows and an inference endpoint for `significant_events_investigation`. That belongs in a new `evals_nightshift_investigations` Scout config set extending `evals_tracing`, in the same shape as `evals_workflows`, referenced from `serverConfigSet` in the suite's entry in `evals.suites.json`.
