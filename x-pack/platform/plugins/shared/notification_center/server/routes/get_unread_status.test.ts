@@ -46,7 +46,7 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
     await handler({} as never, httpServerMock.createKibanaRequest({ method: 'get' }), response);
 
     expect(response.forbidden).toHaveBeenCalledWith({
-      body: { message: 'A user profile is required to read notification unread state.' },
+      body: { message: 'A user profile is required to check unread status.' },
     });
   });
 
@@ -77,7 +77,7 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
-      body: { message: 'Failed to read notification unread state.' },
+      body: { message: 'Failed to load unread status.' },
     });
   });
 

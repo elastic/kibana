@@ -29,7 +29,7 @@ export const registerGetUnreadStatusRoute = ({
         const client = userStorage.asScoped(request);
         if (!client) {
           return response.forbidden({
-            body: { message: 'A user profile is required to read notification unread state.' },
+            body: { message: 'A user profile is required to check unread status.' },
           });
         }
 
@@ -37,7 +37,7 @@ export const registerGetUnreadStatusRoute = ({
         if (!readState) {
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to read notification unread state.' },
+            body: { message: 'Failed to load unread status.' },
           });
         }
 

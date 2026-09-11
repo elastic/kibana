@@ -33,7 +33,7 @@ apiTest.describe(
       expect(await h.markAllRead(apiClient)).toHaveStatusCode(403);
     });
 
-    apiTest('unread count is forbidden', async ({ apiClient }) => {
+    apiTest('unread status is forbidden', async ({ apiClient }) => {
       expect(await h.getUnreadStatus(apiClient)).toHaveStatusCode(403);
     });
 
