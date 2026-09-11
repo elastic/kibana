@@ -124,10 +124,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
-    const initialEsqlStr = readEsqlQuery(initialState);
-    const esql$ = new BehaviorSubject<AggregateQuery[]>(
-      initialEsqlStr ? [{ esql: initialEsqlStr }] : []
-    );
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
