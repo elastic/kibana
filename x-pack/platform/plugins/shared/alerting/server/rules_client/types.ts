@@ -41,6 +41,7 @@ import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
 import type { IScopedChangeTrackingService } from './lib/change_tracking';
+import type { ApiKeyType } from '../task_runner/types';
 
 export type {
   BulkEditOperation,
@@ -124,6 +125,7 @@ export interface RulesClientContext {
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly shouldGrantUiam?: boolean;
+  readonly apiKeyType?: ApiKeyType;
   readonly isServerless: boolean;
   readonly featureFlags: FeatureFlagsStart;
   /**

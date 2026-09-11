@@ -23,7 +23,7 @@ const HasContent = () => {
 describe('useHasChromeAppHeaderContent', () => {
   it('detects app-menu-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.next.appHeader.set({
+    chrome.appHeader.set({
       menu: {
         items: [
           {
@@ -48,7 +48,7 @@ describe('useHasChromeAppHeaderContent', () => {
 
   it('detects favorite-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.next.appHeader.set({
+    chrome.appHeader.set({
       favorite: {
         status: 'unfavorited',
         onToggle: jest.fn(),
@@ -66,7 +66,7 @@ describe('useHasChromeAppHeaderContent', () => {
 
   it('detects share-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.next.appHeader.set({
+    chrome.appHeader.set({
       share: {
         onClick: jest.fn(),
       },
@@ -83,7 +83,7 @@ describe('useHasChromeAppHeaderContent', () => {
 
   it('detects metadata-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
-    chrome.next.appHeader.set({
+    chrome.appHeader.set({
       metadata: [{ type: 'text', label: 'Created by: analyst' }],
     });
 
@@ -160,7 +160,7 @@ describe('useHasChromeAppHeaderContent', () => {
         { text: 'Current page' },
       ])
     );
-    chrome.next.appHeader.set({ back: false });
+    chrome.appHeader.set({ back: false });
 
     render(
       <TestChromeProviders chrome={chrome}>
@@ -193,7 +193,7 @@ describe('useHasChromeAppHeaderContent', () => {
         ],
       })
     );
-    chrome.next.appHeader.set({ back: false });
+    chrome.appHeader.set({ back: false });
 
     render(
       <TestChromeProviders chrome={chrome}>

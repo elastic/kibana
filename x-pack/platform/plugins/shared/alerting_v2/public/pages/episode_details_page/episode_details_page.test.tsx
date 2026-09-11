@@ -21,7 +21,7 @@ import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule'
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { TestProviders } from '../../test_utils/test_providers';
-import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
+import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
@@ -31,7 +31,8 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } 
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockCanReadExecutionHistory = true;
 
-jest.mock('../../agent_builder/use_episode_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useEpisodeAutoAttach: jest.fn(),
 }));
 
@@ -483,10 +484,14 @@ describe('EpisodeDetailsPage', () => {
     it('passes the loaded episode to useEpisodeAutoAttach', () => {
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
-        ruleName: 'Rule A',
-        groupingFields: ['host.name'],
-      });
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+        mockEpisode,
+        {
+          ruleName: 'Rule A',
+          groupingFields: ['host.name'],
+        },
+        expect.any(Object)
+      );
     });
 
     it('omits grouping fields when the rule is not loaded', () => {
@@ -501,10 +506,14 @@ describe('EpisodeDetailsPage', () => {
 
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
-        ruleName: undefined,
-        groupingFields: undefined,
-      });
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+        mockEpisode,
+        {
+          ruleName: undefined,
+          groupingFields: undefined,
+        },
+        expect.any(Object)
+      );
     });
 
     it('passes the next episode when the episode id changes', () => {
@@ -535,10 +544,14 @@ describe('EpisodeDetailsPage', () => {
         </MockChromeContextProvider>
       );
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(nextEpisode, {
-        ruleName: 'Rule A',
-        groupingFields: ['host.name'],
-      });
+      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(
+        nextEpisode,
+        {
+          ruleName: 'Rule A',
+          groupingFields: ['host.name'],
+        },
+        expect.any(Object)
+      );
     });
   });
 });

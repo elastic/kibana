@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCode, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCode, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,6 +21,7 @@ import {
   EXAMPLE_CONNECTOR_SERVICE_TYPES,
 } from '../../../../../common/constants';
 
+import { DESCRIPTION_LABEL } from '../../../shared/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 
@@ -32,6 +33,7 @@ import { SyncJobs } from '../search_index/sync_jobs/sync_jobs';
 
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 
+import { ConnectorDescription } from './connector_description';
 import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorStats } from './connector_stats';
 import { ConnectorViewLogic } from './connector_view_logic';
@@ -45,6 +47,16 @@ export const ConnectorDetailOverview: React.FC = () => {
 
   return (
     <>
+      {connector && (
+        <>
+          <EuiTitle size="xs">
+            <h2>{DESCRIPTION_LABEL}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <ConnectorDescription connector={connector} />
+          <EuiSpacer />
+        </>
+      )}
       {
         // TODO remove this callout when example status is removed
         connector &&

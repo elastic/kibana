@@ -93,11 +93,11 @@ export const DiscoverTopNav = ({
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    // always show the timepicker for ES|QL mode
-    return (
-      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
-    );
-  }, [dataView, isEsqlMode]);
+    if (dataView.type === DataViewType.ROLLUP) {
+      return false;
+    }
+    return { disabled: !dataView.isTimeBased() };
+  }, [dataView]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
