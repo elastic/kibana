@@ -11,11 +11,6 @@ import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import type { ActiveStreamState } from './active_stream_state';
 import { activeStreamReducer, initialActiveStreamState } from './active_stream_state';
 
-/**
- * Minimal event source the store folds over. Today this is `EventsService` (the public
- * transport), but the store only needs raw per-conversation events — nothing else off it.
- * When transport moves to websockets, only the thing that implements this changes.
- */
 export interface ChatEventSource {
   getChatEvents$: (conversationId: string) => Observable<BrowserChatEvent>;
 }
