@@ -49,6 +49,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
