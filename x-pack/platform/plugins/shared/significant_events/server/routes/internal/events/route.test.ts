@@ -23,6 +23,9 @@ const investigateRoute =
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
+const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/events/{id}'];
+const eventsUpdateRoute =
+  internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
 
 type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
@@ -200,5 +203,102 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
+  });
+});
+
+describe('GET /internal/significant_events/events/{id}', () => {
+  const baseEvent = {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    event_uuid: 'version-1',
+    event_id: 'event-1',
+    status: 'open' as const,
+    stream_names: ['logs.test'],
+    title: 'Test event',
+    summary: 'Test summary',
+    severity: '40-medium' as const,
+    confidence: 0.8,
+  };
+
+  it('returns 404 when the event uuid is missing', async () => {
+    await expect(
+      eventsGetRoute.handler({
+        params: { path: { id: 'missing' } },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          getEventClient: () => ({
+            findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
+            findByEventId: jest.fn(),
+          }),
+        }),
+        server: {},
+      } as never)
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('returns the latest version with unique signal_rule_uuids', async () => {
+    const older = { ...baseEvent };
+    const latest = {
+      ...baseEvent,
+      event_uuid: 'version-2',
+      previous_event_uuid: 'version-1',
+      assessment_note: 'Known noise',
+      signals: [
+        { metadata: { rule_uuid: 'rule-a' } },
+        { metadata: { rule_uuid: 'rule-a' } },
+        { metadata: { rule_uuid: 'rule-b' } },
+        { metadata: {} },
+      ],
+    };
+
+    const response = await eventsGetRoute.handler({
+      params: { path: { id: older.event_uuid } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => ({
+          findByEventUuid: jest.fn().mockResolvedValue({ hits: [older] }),
+          findByEventId: jest.fn().mockResolvedValue({ hits: [older, latest] }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.event_uuid).toBe('version-2');
+    expect(response.assessment_note).toBe('Known noise');
+    expect(response.signal_rule_uuids).toEqual(['rule-a', 'rule-b']);
+  });
+});
+
+describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
+  const bodySchema = eventsUpdateRoute.params.shape.body;
+
+  it('rejects dismissed status with no assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'dismissed' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(['assessment_note']);
+    }
+  });
+
+  it('rejects dismissed status with a blank assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'dismissed', assessment_note: '   ' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(['assessment_note']);
+    }
+  });
+
+  it('accepts dismissed status with a non-empty assessment_note', () => {
+    const result = bodySchema.safeParse({
+      status: 'dismissed',
+      assessment_note: 'Known noise from nightly batch job',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts closed status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'closed' });
+    expect(result.success).toBe(true);
   });
 });
