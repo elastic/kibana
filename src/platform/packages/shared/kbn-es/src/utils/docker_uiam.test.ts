@@ -234,7 +234,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.gateway_connection_mode=true",
             "--env",
-            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=",
+            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=,3KyUueOHfXAbZbcxM/sL7nfyUFOgX7u8ONBKHbz2AqI=",
             "--env",
             "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",

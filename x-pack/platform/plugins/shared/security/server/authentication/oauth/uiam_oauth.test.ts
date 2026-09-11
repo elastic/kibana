@@ -40,6 +40,24 @@ describe('UiamOAuth', () => {
     });
   });
 
+  it('forwards request client authentication', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'Bearer essu_ephemeral_token',
+        'x-client-authentication': 'upstream-shared-secret',
+      },
+    });
+
+    await uiamOAuth.listClients(request);
+
+    expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(
+      'essu_ephemeral_token',
+      undefined,
+      undefined,
+      { sharedSecret: 'upstream-shared-secret' }
+    );
+  });
+
   describe('createClient()', () => {
     it('returns null when license is not enabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
@@ -70,11 +88,15 @@ describe('UiamOAuth', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', {
-        resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
-        project_id: 'test-project-id',
-        client_name: 'Test',
-      });
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        {
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
+          client_name: 'Test',
+        },
+        undefined
+      );
     });
 
     it('forwards logo, metadata, and redirect_uris when provided', async () => {
@@ -101,7 +123,11 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.createClient(request, params);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', params);
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        params,
+        undefined
+      );
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -139,7 +165,12 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.listClients(request, 'c1');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith('essu_access_token', 'c1', undefined);
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(
+        'essu_access_token',
+        'c1',
+        undefined,
+        undefined
+      );
     });
 
     it('forwards project_id filter to UIAM service', async () => {
@@ -153,7 +184,8 @@ describe('UiamOAuth', () => {
       expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(
         'essu_access_token',
         undefined,
-        'my-project-id'
+        'my-project-id',
+        undefined
       );
     });
   });
@@ -183,10 +215,15 @@ describe('UiamOAuth', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', {
-        client_name: 'Updated',
-        client_metadata: { k: 'v' },
-      });
+      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        'c1',
+        {
+          client_name: 'Updated',
+          client_metadata: { k: 'v' },
+        },
+        undefined
+      );
     });
 
     it('forwards redirect_uris replacement to UIAM', async () => {
@@ -206,7 +243,12 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.updateClient(request, 'c1', params);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', params);
+      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        'c1',
+        params,
+        undefined
+      );
     });
   });
 
@@ -232,7 +274,12 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.revokeClient(request, 'c1', 'done');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.revokeOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', 'done');
+      expect(mockUiam.revokeOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        'c1',
+        'done',
+        undefined
+      );
     });
   });
 
@@ -253,7 +300,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.deleteClient(request, 'c1');
 
       expect(result).toBe(true);
-      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1');
+      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', undefined);
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -296,6 +343,7 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         'conn1',
+        undefined,
         undefined
       );
     });
@@ -317,7 +365,8 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         undefined,
         undefined,
-        'my-project-id'
+        'my-project-id',
+        undefined
       );
     });
   });
@@ -352,7 +401,8 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         'conn1',
-        { name: 'New name' }
+        { name: 'New name' },
+        undefined
       );
     });
 
@@ -397,7 +447,8 @@ describe('UiamOAuth', () => {
         'essu_access_token',
         'c1',
         'conn1',
-        'reason'
+        'reason',
+        undefined
       );
     });
   });
@@ -422,7 +473,8 @@ describe('UiamOAuth', () => {
       expect(mockUiam.deleteOAuthConnection).toHaveBeenCalledWith(
         'essu_access_token',
         'c1',
-        'conn1'
+        'conn1',
+        undefined
       );
     });
 
@@ -463,7 +515,11 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.resolveUsers(request, ['user-1']);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.resolveUsers).toHaveBeenCalledWith('essu_access_token', ['user-1']);
+      expect(mockUiam.resolveUsers).toHaveBeenCalledWith(
+        'essu_access_token',
+        ['user-1'],
+        undefined
+      );
     });
 
     it('propagates the error when UIAM call fails', async () => {

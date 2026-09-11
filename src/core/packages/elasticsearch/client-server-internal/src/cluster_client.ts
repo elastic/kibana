@@ -24,7 +24,11 @@ import type {
   ElasticsearchClientConfig,
   AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
-import { HTTPAuthorizationHeader, isExternalUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
@@ -234,9 +238,12 @@ export class ClusterClient implements ICustomClusterClient {
     let clientAuthentication: string | undefined | null;
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      clientAuthentication =
-        credential &&
-        this.security.uiam.getElasticsearchClientAuthentication(
+      const hasUiamInboundClientAuthentication =
+        credential?.scheme.toLowerCase() === 'bearer' &&
+        isUiamCredential(credential) &&
+        scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER] !== undefined;
+      if (credential && !hasUiamInboundClientAuthentication) {
+        clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
             ? { credentialSource: 'inbound', credential, requestHeaders }
             : {
@@ -244,6 +251,7 @@ export class ClusterClient implements ICustomClusterClient {
                 credential,
               }
         );
+      }
     }
 
     return {
@@ -255,8 +263,11 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
+    const authHeaders = isRealRequest(request)
+      ? this.authHeaders?.get(request) ?? {}
+      : request.headers;
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
-      headers: isRealRequest(request) ? this.authHeaders?.get(request) ?? {} : request.headers,
+      headers: authHeaders,
     });
     if (!authorizationHeader) {
       throw new Error(
@@ -271,18 +282,28 @@ export class ClusterClient implements ICustomClusterClient {
     // minted by Kibana itself, so neither needs an attestation to be trusted. The exception is a
     // fake request explicitly marked as carrying a user-created (external) UIAM credential, which
     // UIAM rejects when presented with client authentication.
+    const isUiamInboundToken =
+      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
+      isUiamCredential(authorizationHeader);
+    const inboundUiamClientAuthentication = isUiamInboundToken
+      ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER]
+      : undefined;
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
-    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
-      credentialSource: isExternalCredential ? 'external' : 'internal',
-      credential: authorizationHeader,
-    });
+    const clientAuthentication =
+      inboundUiamClientAuthentication ??
+      this.security?.uiam?.getElasticsearchClientAuthentication({
+        credentialSource: isExternalCredential ? 'external' : 'internal',
+        credential: authorizationHeader,
+      });
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
-      ...(clientAuthentication ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication } : {}),
+      ...(clientAuthentication !== undefined
+        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }
+        : {}),
     };
   }
 }

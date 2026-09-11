@@ -32,6 +32,7 @@ import type { SecurityLicense } from '../../../common';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import { type UiamServicePublic } from '../../uiam';
+import { getUiamClientAuthentication } from '../../uiam/get_client_authentication';
 import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
 export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
@@ -287,13 +288,16 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    // Preserve UIAM client authentication paired with the granting credential. Other credentials
+    // use `es-client-authentication` (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
+      const suppliedSharedSecret = getUiamClientAuthentication(request)?.sharedSecret;
+      clientAuthentication =
+        suppliedSharedSecret !== undefined
+          ? { scheme: 'SharedSecret', value: suppliedSharedSecret }
+          : this.uiam.getClientAuthentication();
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,

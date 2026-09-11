@@ -22,6 +22,7 @@ import type {
 import type { SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
 import type { UiamServicePublic } from '../../uiam';
+import { getUiamClientAuthentication } from '../../uiam/get_client_authentication';
 
 export interface UiamOAuthOptions {
   logger: Logger;
@@ -55,7 +56,11 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to create an OAuth client');
 
     try {
-      const result = await this.uiam.createOAuthClient(accessToken, params);
+      const result = await this.uiam.createOAuthClient(
+        accessToken,
+        params,
+        getUiamClientAuthentication(request)
+      );
       this.logger.debug(`OAuth client created successfully with id ${result.id}`);
       return result;
     } catch (e) {
@@ -80,7 +85,12 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to list OAuth clients');
 
     try {
-      const result = await this.uiam.listOAuthClients(accessToken, clientId, projectId);
+      const result = await this.uiam.listOAuthClients(
+        accessToken,
+        clientId,
+        projectId,
+        getUiamClientAuthentication(request)
+      );
       this.logger.debug('OAuth clients listed successfully');
       return result;
     } catch (e) {
@@ -105,7 +115,12 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to update OAuth client ${clientId}`);
 
     try {
-      const result = await this.uiam.updateOAuthClient(accessToken, clientId, params);
+      const result = await this.uiam.updateOAuthClient(
+        accessToken,
+        clientId,
+        params,
+        getUiamClientAuthentication(request)
+      );
       this.logger.debug(`OAuth client ${clientId} updated successfully`);
       return result;
     } catch (e) {
@@ -130,7 +145,12 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to revoke OAuth client ${clientId}`);
 
     try {
-      const result = await this.uiam.revokeOAuthClient(accessToken, clientId, reason);
+      const result = await this.uiam.revokeOAuthClient(
+        accessToken,
+        clientId,
+        reason,
+        getUiamClientAuthentication(request)
+      );
       this.logger.debug(`OAuth client ${clientId} revoked successfully`);
       return result;
     } catch (e) {
@@ -151,7 +171,11 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to delete OAuth client ${clientId}`);
 
     try {
-      await this.uiam.deleteOAuthClient(accessToken, clientId);
+      await this.uiam.deleteOAuthClient(
+        accessToken,
+        clientId,
+        getUiamClientAuthentication(request)
+      );
       this.logger.debug(`OAuth client ${clientId} deleted successfully`);
       return true;
     } catch (e) {
@@ -181,7 +205,8 @@ export class UiamOAuth implements UiamOAuthType {
         accessToken,
         clientId,
         connectionId,
-        projectId
+        projectId,
+        getUiamClientAuthentication(request)
       );
       this.logger.debug('OAuth connections listed successfully');
       return result;
@@ -212,7 +237,8 @@ export class UiamOAuth implements UiamOAuthType {
         accessToken,
         clientId,
         connectionId,
-        params
+        params,
+        getUiamClientAuthentication(request)
       );
       this.logger.debug(`OAuth connection ${connectionId} updated successfully`);
       return result;
@@ -245,7 +271,8 @@ export class UiamOAuth implements UiamOAuthType {
         accessToken,
         clientId,
         connectionId,
-        reason
+        reason,
+        getUiamClientAuthentication(request)
       );
       this.logger.debug(`OAuth connection ${connectionId} revoked successfully`);
       return result;
@@ -273,7 +300,12 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to delete OAuth connection ${connectionId}`);
 
     try {
-      await this.uiam.deleteOAuthConnection(accessToken, clientId, connectionId);
+      await this.uiam.deleteOAuthConnection(
+        accessToken,
+        clientId,
+        connectionId,
+        getUiamClientAuthentication(request)
+      );
       this.logger.debug(`OAuth connection ${connectionId} deleted successfully`);
       return true;
     } catch (e) {
@@ -300,7 +332,7 @@ export class UiamOAuth implements UiamOAuthType {
     const accessToken = UiamOAuth.getAccessToken(request);
     this.logger.debug(`Attempting to resolve ${userIds.length} user(s)`);
 
-    return this.uiam.resolveUsers(accessToken, userIds);
+    return this.uiam.resolveUsers(accessToken, userIds, getUiamClientAuthentication(request));
   }
 
   /**

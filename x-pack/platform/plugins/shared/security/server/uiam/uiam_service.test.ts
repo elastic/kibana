@@ -15,6 +15,7 @@ import {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 
+import type { UiamClientAuthentication } from './get_client_authentication';
 import {
   type GrantUiamApiKeyRequestBody,
   type GrantUiamApiKeyResponse,
@@ -339,6 +340,112 @@ describe('UiamService', () => {
         uiamService.getInternalCallerAttestationHeaders(
           new HTTPAuthorizationHeader('Bearer', 'essu_two')
         )
+      );
+    });
+  });
+
+  describe('forwarded client authentication', () => {
+    const operations: Array<{
+      name: string;
+      run: (
+        service: UiamService,
+        authentication: UiamClientAuthentication
+      ) => Promise<object | void>;
+    }> = [
+      {
+        name: 'grant API key',
+        run: (service, clientAuthentication) =>
+          service.grantApiKey(
+            new HTTPAuthorizationHeader('Bearer', 'essu_ephemeral_token'),
+            { name: 'test-key' },
+            { clientAuthentication }
+          ),
+      },
+      {
+        name: 'revoke API key',
+        run: (service, auth) => service.revokeApiKey('key-id', 'essu_key', auth),
+      },
+      {
+        name: 'create OAuth client',
+        run: (service, auth) =>
+          service.createOAuthClient(
+            'essu_token',
+            { resource: 'https://kibana.example', project_id: 'project-id' },
+            auth
+          ),
+      },
+      {
+        name: 'list OAuth clients',
+        run: (service, auth) => service.listOAuthClients('essu_token', undefined, undefined, auth),
+      },
+      {
+        name: 'update OAuth client',
+        run: (service, auth) =>
+          service.updateOAuthClient('essu_token', 'client-id', { client_name: 'Test' }, auth),
+      },
+      {
+        name: 'revoke OAuth client',
+        run: (service, auth) =>
+          service.revokeOAuthClient('essu_token', 'client-id', undefined, auth),
+      },
+      {
+        name: 'delete OAuth client',
+        run: (service, auth) => service.deleteOAuthClient('essu_token', 'client-id', auth),
+      },
+      {
+        name: 'list OAuth connections',
+        run: (service, auth) =>
+          service.listOAuthConnections('essu_token', undefined, undefined, undefined, auth),
+      },
+      {
+        name: 'update OAuth connection',
+        run: (service, auth) =>
+          service.updateOAuthConnection(
+            'essu_token',
+            'client-id',
+            'connection-id',
+            { name: 'Test' },
+            auth
+          ),
+      },
+      {
+        name: 'revoke OAuth connection',
+        run: (service, auth) =>
+          service.revokeOAuthConnection(
+            'essu_token',
+            'client-id',
+            'connection-id',
+            undefined,
+            auth
+          ),
+      },
+      {
+        name: 'delete OAuth connection',
+        run: (service, auth) =>
+          service.deleteOAuthConnection('essu_token', 'client-id', 'connection-id', auth),
+      },
+      {
+        name: 'resolve users',
+        run: (service, auth) => service.resolveUsers('essu_token', ['user-id'], auth),
+      },
+    ];
+
+    describe.each(operations)('$name', ({ run }) => {
+      it.each(['upstream-shared-secret', undefined])(
+        'preserves the incoming secret %s',
+        async (sharedSecret) => {
+          fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+
+          await run(uiamService, sharedSecret === undefined ? {} : { sharedSecret });
+
+          expect(fetchSpy).toHaveBeenCalledTimes(1);
+          const headers = fetchSpy.mock.calls[0][1].headers;
+          if (sharedSecret === undefined) {
+            expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+          } else {
+            expect(headers[ES_CLIENT_AUTHENTICATION_HEADER]).toBe(sharedSecret);
+          }
+        }
       );
     });
   });
