@@ -28,6 +28,8 @@ import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { DataControlType } from '@kbn/controls-constants';
 import { ChooseColumnPopover } from './choose_column_popover';
 import { DataControlEditorStrings } from '../data_control_constants';
 
@@ -39,6 +41,7 @@ export const ESQLValuesPreview: React.FC<{
   queryNeedsRunning: boolean;
   isQueryRunning: boolean;
   dataSource: string;
+  selectedControlType?: DataControlType;
 }> = ({
   previewOptions,
   previewError,
@@ -47,6 +50,7 @@ export const ESQLValuesPreview: React.FC<{
   queryNeedsRunning,
   isQueryRunning,
   dataSource,
+  selectedControlType,
 }) => {
   const isEmpty = useMemo(() => previewOptions.length === 0, [previewOptions]);
 
@@ -57,12 +61,12 @@ export const ESQLValuesPreview: React.FC<{
   );
 
   const range = useMemo(() => {
-    if (isNumericType(singleColumn?.type)) {
+    if (selectedControlType === RANGE_SLIDER_CONTROL && isNumericType(singleColumn?.type)) {
       const optionsAsNumbers = previewOptions.map((v) => Number(v));
       return { min: min(optionsAsNumbers), max: max(optionsAsNumbers) };
     }
     return null;
-  }, [previewOptions, singleColumn]);
+  }, [previewOptions, selectedControlType, singleColumn]);
 
   const body = previewError ? (
     <EuiPanel

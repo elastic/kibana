@@ -11,6 +11,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ESQLColumn } from '@kbn/es-types';
+import { RANGE_SLIDER_CONTROL, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { ESQLValuesPreview } from './esql_values_preview';
 
 const noopProps = {
@@ -24,13 +25,14 @@ const numericColumn: ESQLColumn = { name: 'bytes', type: 'long' };
 const stringColumn: ESQLColumn = { name: 'os', type: 'keyword' };
 
 describe('ESQLValuesPreview', () => {
-  it('renders min/max stats for numeric columns', () => {
+  it('renders min/max stats for numeric columns when control type is range slider', () => {
     const { getByText, getByTestId } = render(
       <I18nProvider>
         <ESQLValuesPreview
           {...noopProps}
           previewOptions={[6, 7, 67]}
           previewColumns={[numericColumn]}
+          selectedControlType={RANGE_SLIDER_CONTROL}
         />
       </I18nProvider>
     );
@@ -38,6 +40,22 @@ describe('ESQLValuesPreview', () => {
     expect(getByTestId('esqlValuesPreviewRange')).toBeInTheDocument();
     expect(getByText('6')).toBeInTheDocument();
     expect(getByText('67')).toBeInTheDocument();
+  });
+
+  it('renders a list of values for numeric columns when control type is options list', () => {
+    const { getByTestId, queryByTestId } = render(
+      <I18nProvider>
+        <ESQLValuesPreview
+          {...noopProps}
+          previewOptions={[6, 7, 67]}
+          previewColumns={[numericColumn]}
+          selectedControlType={OPTIONS_LIST_CONTROL}
+        />
+      </I18nProvider>
+    );
+
+    expect(queryByTestId('esqlValuesPreviewRange')).not.toBeInTheDocument();
+    expect(getByTestId('esqlValuesPreviewStrings')).toBeInTheDocument();
   });
   it('renders a list of values for string columns', () => {
     const { getByTestId } = render(

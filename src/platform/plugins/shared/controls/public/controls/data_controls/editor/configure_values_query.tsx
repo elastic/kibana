@@ -18,6 +18,7 @@ import type { ESQLColumn } from '@kbn/es-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-publishing';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
+import type { DataControlType } from '@kbn/controls-constants';
 import { dataService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
@@ -32,6 +33,7 @@ interface ConfigureValuesQueryProps {
   isEdit: boolean;
   esqlVariables?: ESQLControlVariable[];
   parentApi?: unknown;
+  selectedControlType?: DataControlType;
   // Re-opens the parent data control editor flyout. Used after the inner ESQL variable
   // control creation flyout closes
   reopenEditor?: (overrides?: Partial<DataControlEditorState>) => void;
@@ -44,6 +46,7 @@ export const ConfigureValuesQuery = ({
   isEdit,
   esqlVariables = [],
   parentApi,
+  selectedControlType,
   reopenEditor,
 }: ConfigureValuesQueryProps) => {
   const [previewOptions, setPreviewOptions] = useState<string[] | number[]>([]);
@@ -207,6 +210,7 @@ export const ConfigureValuesQuery = ({
         updateQuery={appendColumnToESQLQuery}
         isQueryRunning={isPreviewQueryRunning}
         dataSource={dataSource}
+        selectedControlType={selectedControlType}
       />
     </>
   );
