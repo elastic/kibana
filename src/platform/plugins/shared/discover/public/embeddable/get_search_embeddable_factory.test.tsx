@@ -37,13 +37,19 @@ import {
   type ContextAwarenessToolkit,
 } from '../context_awareness';
 import { TEST_PROFILE_STATE_DEF } from '../context_awareness/__mocks__/profile_state';
-import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
+import {
+  mockInitializeDrilldownsManager,
+  setStubKibanaServices,
+} from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
 describe('saved search embeddable', () => {
+  // The reused platform error panel resolves its edit action through the embeddable plugin services
+  setStubKibanaServices();
+
   const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
   const getInitialRuntimeState = ({
@@ -306,6 +312,8 @@ describe('saved search embeddable', () => {
 
       await waitFor(() => {
         expect(discoverComponent.getByTestId('discoverEmbeddableErrorCallout')).toBeInTheDocument();
+        // the platform error panel is reused so both modes render the error identically
+        expect(discoverComponent.getByTestId('embeddableError')).toBeInTheDocument();
         expect(
           discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton')
         ).toBeInTheDocument();

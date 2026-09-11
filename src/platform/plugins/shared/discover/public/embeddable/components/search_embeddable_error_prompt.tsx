@@ -8,9 +8,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { renderSearchError } from '@kbn/search-errors';
+import { PresentationPanelError } from '@kbn/embeddable-plugin/public';
 import type { InlineEditing } from './saved_search_grid';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 
@@ -19,46 +17,20 @@ export interface SearchEmbeddableErrorPromptProps {
   inlineEditing: InlineEditing;
 }
 
+/**
+ * Renders a search error inside the panel while inline editing, where the platform's blocking
+ * error panel would hide the apply/discard footer along with the rest of our content.
+ */
 export const SearchEmbeddableErrorPrompt = ({
   error,
   inlineEditing,
 }: SearchEmbeddableErrorPromptProps) => {
-  const renderedError = renderSearchError(error);
-
   return (
     <SavedSearchEmbeddableBase inlineEditing={inlineEditing} isLoading={false}>
-      <EuiFlexGroup
-        alignItems="center"
-        css={{ height: '100%' }}
-        gutterSize="none"
-        justifyContent="center"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiEmptyPrompt
-            body={
-              renderedError?.body ?? (
-                <p>
-                  {error.message ||
-                    i18n.translate('discover.embeddable.error.unknownErrorDescription', {
-                      defaultMessage: 'An unknown error occurred while running the query.',
-                    })}
-                </p>
-              )
-            }
-            data-test-subj="discoverEmbeddableErrorCallout"
-            icon={<EuiIcon aria-hidden={true} color="danger" size="xxl" type="warning" />}
-            title={
-              <h2>
-                {renderedError?.title ??
-                  i18n.translate('discover.embeddable.error.defaultTitle', {
-                    defaultMessage: 'Unable to run the query',
-                  })}
-              </h2>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div css={{ height: '100%' }} data-test-subj="discoverEmbeddableErrorCallout">
+        {/* `api` is intentionally omitted: its edit action duplicates the inline edit hover actions */}
+        <PresentationPanelError error={error} />
+      </div>
     </SavedSearchEmbeddableBase>
   );
 };

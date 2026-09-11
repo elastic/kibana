@@ -445,15 +445,18 @@ export const getSearchEmbeddableFactory = ({
 
           if (searchError) {
             return (
-              <SearchEmbeddableErrorPrompt
-                error={searchError}
-                inlineEditing={{
-                  hasPendingChanges: hasPendingInlineTabChanges,
-                  isActive: isInlineEditing,
-                  onApply: inlineEditingApi.applyInlineTabSelection,
-                  onCancel: inlineEditingApi.cancelInlineTabSelection,
-                }}
-              />
+              // The reused platform error panel styles itself from the Emotion theme
+              <KibanaRenderContextProvider {...discoverServices.core}>
+                <SearchEmbeddableErrorPrompt
+                  error={searchError}
+                  inlineEditing={{
+                    hasPendingChanges: hasPendingInlineTabChanges,
+                    isActive: isInlineEditing,
+                    onApply: inlineEditingApi.applyInlineTabSelection,
+                    onCancel: inlineEditingApi.cancelInlineTabSelection,
+                  }}
+                />
+              </KibanaRenderContextProvider>
             );
           }
 
