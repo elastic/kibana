@@ -13,7 +13,7 @@ export interface LongTaskInfo {
   worstTaskDuration: number; // largest retained task duration (ms)
   worstTaskStartTime: number | null; // start time of the worst retained task
   totalBlockingTime: number; // sum over window of max(0, duration - 50)
-  tasksInLast30Seconds: number; // number of long tasks in the window
+  tasksInLast30Seconds: number; // number of tasks >= 100ms in the window
 }
 
 // Long Task entries are PerformanceEntry with startTime/duration (+ optional attribution)
@@ -25,7 +25,7 @@ export type PerformanceLongTaskTiming = PerformanceEntry & {
 export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   // Good defaults
   private static readonly HISTORY_DURATION = 30_000; // 30s sliding window
-  private static readonly SEVERE_THRESHOLD = 100; // only emit tasks >= 100ms
+  private static readonly SLOW_TASK_THRESHOLD = 100;
   private static readonly TBT_BASELINE = 50; // TBT counts duration beyond 50ms
   private static readonly MAX_TASKS = 500; // soft cap to bound memory
 
@@ -166,7 +166,7 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     if (!this.isMonitoring) return;
     const { duration, startTime } = entry;
     if (startTime < this.sessionStartedAt) return;
-    if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
+    if (duration <= LongTaskMonitor.TBT_BASELINE) return;
 
     this.pushTask({ duration, startTime });
     this.publishCurrentStats();
@@ -209,7 +209,9 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
       totalBlockingTime: this.calculateTotalBlockingTime(),
       worstTaskDuration: this.worstTaskDuration,
       worstTaskStartTime: this.worstTaskStartTime,
-      tasksInLast30Seconds: this.taskHistory.length,
+      tasksInLast30Seconds: this.taskHistory.filter(
+        ({ duration }) => duration >= LongTaskMonitor.SLOW_TASK_THRESHOLD
+      ).length,
     };
   }
 }

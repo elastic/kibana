@@ -235,7 +235,8 @@ export const FrameJankIndicator: React.FC = () => {
       inpUnsubscribe();
     };
   }, []);
-  const warning = getPerformanceWarning(perfInfo, longTaskStats, inpStats);
+  const frameInfo = perfInfo?.history.length ? perfInfo : null;
+  const warning = getPerformanceWarning(frameInfo, longTaskStats, inpStats);
   const active = hovered || focused;
   const timingStartTime =
     warning?.kind === 'input' || warning?.kind === 'stall' ? warning.startTime : null;
@@ -290,34 +291,34 @@ export const FrameJankIndicator: React.FC = () => {
           <>
             <div>
               FPS:{' '}
-              {perfInfo ? (
-                <SeverityValue metricType="fps" value={perfInfo.fps}>
-                  {perfInfo.fps}
+              {frameInfo ? (
+                <SeverityValue metricType="fps" value={frameInfo.fps}>
+                  {frameInfo.fps}
                 </SeverityValue>
               ) : (
                 '—'
               )}
             </div>
-            <div>Range: {perfInfo ? `${perfInfo.minFps}–${perfInfo.maxFps}` : '—'}</div>
+            <div>Range: {frameInfo ? `${frameInfo.minFps}–${frameInfo.maxFps}` : '—'}</div>
             <div css={warning?.kind === 'frames' ? selectedMetricStyles : undefined}>
               Jank:{' '}
-              {perfInfo ? (
+              {frameInfo ? (
                 <>
-                  <SeverityValue metricType="jankPercentage" value={perfInfo.jankPercentage}>
-                    {perfInfo.jankPercentage}%
+                  <SeverityValue metricType="jankPercentage" value={frameInfo.jankPercentage}>
+                    {frameInfo.jankPercentage}%
                   </SeverityValue>{' '}
-                  (below {Number((perfInfo.baselineFps * 0.85).toFixed(1))} FPS)
+                  (below {Number((frameInfo.baselineFps * 0.85).toFixed(1))} FPS)
                 </>
               ) : (
                 '—'
               )}
             </div>
-            <div>Samples: {perfInfo?.history.length ?? 0}</div>
+            <div>Samples: {frameInfo?.history.length ?? 0}</div>
             <div>
-              Percent of 1-second samples below 85% of this tab’s best FPS this session (floor 60).
-              Not dropped frames.
+              Percent of 1-second samples below 85% of a calibrated session target based on recent
+              healthy samples (floor 60). The target only rises while visible. Not dropped frames.
             </div>
-            {!perfInfo && <div>Measuring frame rate…</div>}
+            {!frameInfo && <div>Measuring frame rate…</div>}
           </>
         )}
       </div>
@@ -392,10 +393,10 @@ export const FrameJankIndicator: React.FC = () => {
   const triggerAriaLabel = warningReason
     ? `Performance warning: ${warningReason}`
     : 'Performance monitor';
-  const measuredHistory = perfInfo?.history ?? [];
+  const measuredHistory = frameInfo?.history ?? [];
   const placeholderCount = Math.max(0, GRAPH_SAMPLE_COUNT - measuredHistory.length);
-  const graphBaseline = perfInfo?.baselineFps ?? 60;
-  const badgeValue = frameSupported === false || !perfInfo ? '—' : `${perfInfo.jankPercentage}%`;
+  const graphBaseline = frameInfo?.baselineFps ?? 60;
+  const badgeValue = frameSupported === false || !frameInfo ? '—' : `${frameInfo.jankPercentage}%`;
 
   return (
     <EuiToolTip content={tooltipContent}>

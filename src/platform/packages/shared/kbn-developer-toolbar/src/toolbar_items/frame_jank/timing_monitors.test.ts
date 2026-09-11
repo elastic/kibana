@@ -126,7 +126,7 @@ describe('LongTaskMonitor', () => {
   it('expires task statistics without another task and cancels expiry while stopped', () => {
     deliver([timingEntry(300), timingEntry(80)]);
     expect(snapshots.at(-1)).toEqual({
-      totalBlockingTime: 250,
+      totalBlockingTime: 280,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 300,
       worstTaskStartTime: 0,
@@ -136,7 +136,7 @@ describe('LongTaskMonitor', () => {
     deliver([timingEntry(100), timingEntry(80)]);
     jest.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toMatchObject({
-      totalBlockingTime: 50,
+      totalBlockingTime: 80,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 100,
     });

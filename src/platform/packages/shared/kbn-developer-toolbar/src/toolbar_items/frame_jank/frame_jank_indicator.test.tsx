@@ -141,10 +141,18 @@ describe('FrameJankIndicator warnings', () => {
     expect(screen.getAllByTestId('performanceGraphBar')).toHaveLength(20);
     expect(screen.getByText('Jank —')).toBeTruthy();
 
+    emit({
+      perf: { ...neutralPerf, fps: 0, history: [], maxFps: 0, minFps: 0 },
+    });
+    expect(screen.getByText('Jank —')).toBeTruthy();
+
+    fireEvent.focus(screen.getByLabelText('Performance monitor'));
+    expect(screen.getByRole('tooltip').textContent).toContain('Samples: 0');
+    expect(screen.getByRole('tooltip').textContent).toContain('Measuring frame rate…');
+
     emit({ perf: { ...neutralPerf, history: [60] } });
     expect(screen.getAllByTestId('performanceGraphBar')).toHaveLength(20);
 
-    fireEvent.focus(screen.getByLabelText('Performance monitor'));
     expect(screen.getByRole('tooltip').textContent).toContain('Samples: 1');
     expect(screen.getByRole('tooltip').textContent).not.toContain('Measuring frame rate…');
   });
