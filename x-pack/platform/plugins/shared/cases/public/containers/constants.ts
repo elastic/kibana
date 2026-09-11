@@ -70,6 +70,7 @@ export const casesQueriesKeys = {
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
+  workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
 };
 
 export const casesMutationsKeys = {
