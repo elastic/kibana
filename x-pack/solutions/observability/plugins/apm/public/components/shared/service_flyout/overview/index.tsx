@@ -226,7 +226,6 @@ export function ServiceFlyoutOverview({
     [environment, indexes, kuery, latencyAggregationType, service.id, transactionType]
   );
 
-
   return (
     <div data-test-subj="serviceFlyoutOverview">
       <ServiceFlyoutQueryControls
