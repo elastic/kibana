@@ -45,7 +45,7 @@ export interface SmlServiceSetup {
 interface SmlServiceStartDeps {
   logger: Logger;
   securityAuthz?: AuthorizationServiceSetup;
-  ensureDefaultAiIndex?: (spaceId: string) => Promise<void>;
+  ensureDefaultAiIndex: (spaceId: string) => Promise<void>;
 }
 
 export interface SmlServiceInstance {

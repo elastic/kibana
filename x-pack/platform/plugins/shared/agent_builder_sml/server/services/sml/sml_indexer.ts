@@ -255,12 +255,11 @@ class SmlIndexerImpl implements SmlIndexer {
     }
 
     if (this.ensureDefaultAiIndex) {
-      const spacesToEnsure = spaces.filter((space) => space !== '*' && space !== '');
+      const spacesToEnsure = spaces.filter(
+        (space) => space !== '*' && space !== '' && !this.ensuredSpaces.has(space)
+      );
       await Promise.all(
         spacesToEnsure.map(async (space) => {
-          if (this.ensuredSpaces.has(space)) {
-            return;
-          }
           try {
             await this.ensureDefaultAiIndex!(space);
             this.ensuredSpaces.add(space);
