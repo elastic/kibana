@@ -347,7 +347,7 @@ export function ValueControlForm({
               <ESQLValuesPreview
                 values={selectedValues.map((v) => v.label)}
                 columns={queryColumns}
-                previewError={esqlQueryErrors?.[0]}
+                error={esqlQueryErrors?.[0]}
                 updateQuery={updateQuery}
               />
             </EuiFormRow>

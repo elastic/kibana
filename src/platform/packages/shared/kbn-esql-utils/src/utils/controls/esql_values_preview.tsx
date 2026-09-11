@@ -24,10 +24,11 @@ export const ESQLValuesPreview: React.FC<{
   values: string[] | number[];
   // Columns returned by the query — used to detect multi-column errors and determine value type
   columns: ESQLColumn[];
-  previewError?: Error;
+  // Query execution error; when set, renders an error callout instead of values
+  error?: Error;
   updateQuery: (column: string) => void;
   selectedControlType?: DataControlType;
-}> = ({ values, previewError, columns, updateQuery, selectedControlType }) => {
+}> = ({ values, error, columns, updateQuery, selectedControlType }) => {
   const isEmpty = useMemo(() => values.length === 0, [values]);
 
   const multiColumnResult = useMemo(() => columns.length > 1, [columns]);
@@ -44,7 +45,7 @@ export const ESQLValuesPreview: React.FC<{
     return null;
   }, [values, selectedControlType, singleColumn]);
 
-  if (previewError) {
+  if (error) {
     return (
       <EuiCallOut
         announceOnMount
@@ -55,7 +56,7 @@ export const ESQLValuesPreview: React.FC<{
         iconType="error"
         size="s"
       >
-        <p>{previewError.message}</p>
+        <p>{error.message}</p>
       </EuiCallOut>
     );
   }
