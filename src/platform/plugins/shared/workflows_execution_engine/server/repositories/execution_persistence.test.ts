@@ -142,25 +142,23 @@ describe('InMemoryExecutionPersistence', () => {
 
   it('throws a descriptive error when step execution state contains a non-cloneable value', async () => {
     const persistence = new InMemoryExecutionPersistence(execution);
-    await persistence.bulkUpsert([
-      {
-        id: 'step-err',
-        spaceId: 'space-1',
-        stepId: 'step-err',
-        scopeStack: [],
-        workflowRunId: execution.id,
-        workflowId: execution.workflowId,
-
-        status: (() => {}) as any,
-        startedAt: '2026-07-21T00:00:00.000Z',
-        topologicalIndex: 0,
-        globalExecutionIndex: 0,
-        stepExecutionIndex: 0,
-      },
-    ]);
-    await expect(persistence.getStepExecutionsByIds(['step-err'])).rejects.toThrow(
-      /Failed to clone step execution step-err.*non-serializable/
-    );
+    await expect(
+      persistence.bulkUpsert([
+        {
+          id: 'step-err',
+          spaceId: 'space-1',
+          stepId: 'step-err',
+          scopeStack: [],
+          workflowRunId: execution.id,
+          workflowId: execution.workflowId,
+          status: (() => {}) as any,
+          startedAt: '2026-07-21T00:00:00.000Z',
+          topologicalIndex: 0,
+          globalExecutionIndex: 0,
+          stepExecutionIndex: 0,
+        },
+      ])
+    ).rejects.toThrow(/Failed to store step execution step-err.*non-serializable/);
   });
 
   it('returns a defensive copy from getStepExecutionsByIds', async () => {
