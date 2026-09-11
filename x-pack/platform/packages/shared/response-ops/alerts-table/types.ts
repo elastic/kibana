@@ -109,6 +109,7 @@ export type SystemCellId = keyof SystemCellComponentMap;
 
 interface CaseInfo {
   id: string;
+  owner: string;
 }
 
 type UseCasesAddToExistingCaseModal = (
