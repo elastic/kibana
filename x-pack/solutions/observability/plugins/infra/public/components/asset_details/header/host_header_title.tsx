@@ -48,8 +48,6 @@ export const getHostHeaderBadges = ({
     label: i18n.translate('xpack.infra.assetDetails.header.hostTitleExtrasBadgeLabel', {
       defaultMessage: 'Host details',
     }),
-    renderCustomBadge: () => (
-      <HostHeaderTitle title={title} schema={schema} includeTitle={false} />
-    ),
+    renderCustomBadge: () => <HostHeaderTitle title={title} schema={schema} includeTitle={false} />,
   },
 ];

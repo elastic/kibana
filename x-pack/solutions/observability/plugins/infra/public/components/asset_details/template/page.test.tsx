@@ -106,9 +106,7 @@ jest.mock('../header/host_header_title', () => ({
   getHostHeaderBadges: () => [
     {
       label: 'Host details',
-      renderCustomBadge: () => (
-        <div data-test-subj="hostHeaderExtras" data-include-title="false" />
-      ),
+      renderCustomBadge: () => <div data-test-subj="hostHeaderExtras" data-include-title="false" />,
     },
   ],
 }));
