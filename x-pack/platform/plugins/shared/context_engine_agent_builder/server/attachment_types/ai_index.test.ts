@@ -25,6 +25,7 @@ describe('createAiIndexAttachmentType', () => {
   const validData = {
     id: 'my-ai-index',
     description: 'Support tickets',
+    memory_enabled: false,
     dest: { type: 'data_stream' as const, value: 'ai-index-ds-my-ai-index' },
     sources: [{ type: 'esql' as const, value: 'FROM tickets' }],
     automations: [{ type: 'workflow' as const, value: 'wf-1' }],

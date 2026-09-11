@@ -23,6 +23,7 @@ const storageSettings = {
     properties: {
       description: types.text({}),
       managed: types.boolean({}),
+      memory_enabled: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
       dest: types.object({
@@ -58,6 +59,9 @@ const storageSettings = {
 export interface AiIndexDocument {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  // Optional for backward compatibility with entries written before memory
+  // support existed; absence is treated as disabled (`false`) on read.
+  memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;
