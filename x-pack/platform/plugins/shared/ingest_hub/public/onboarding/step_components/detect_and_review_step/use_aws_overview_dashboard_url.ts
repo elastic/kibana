@@ -5,56 +5,39 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  epmRouteService,
-  type KibanaAssetReference,
-  type GetBulkAssetsResponse,
-} from '@kbn/fleet-plugin/common';
-
-/** Canonical title of the AWS metrics overview dashboard shipped with the `aws` package. */
-const AWS_OVERVIEW_DASHBOARD_TITLE = '[Metrics AWS] Overview';
+import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 /**
- * Resolves the basePath-prefixed href to the `[Metrics AWS] Overview` dashboard from the
- * installed kibana assets, or `undefined` when the dashboard is not found.
+ * Canonical saved-object ID of the `[Metrics AWS] Overview` dashboard shipped with
+ * the `aws` integration package (elastic/integrations). Stable across renames.
  *
- * Uses its own query rather than sharing one with `useInstalledContent` so the return type
- * is explicit (`string | undefined`) and not inferred through Fleet's bulk-assets type chain.
+ * Source: packages/aws/kibana/dashboard/aws-fac28650-7349-11e9-816b-07687310a99a.json
+ */
+const AWS_METRICS_OVERVIEW_DASHBOARD_ID = 'aws-fac28650-7349-11e9-816b-07687310a99a';
+
+/**
+ * Resolves the basePath-prefixed href to the `[Metrics AWS] Overview` dashboard using
+ * the installed kibana asset references, matching by dashboard ID rather than title.
+ *
+ * In the default space the asset `id` equals the package ID directly. In non-default
+ * spaces Fleet re-keys the saved object and sets `originId` to the original package ID
+ * — this follows Fleet's `getDashboardIdForSpace` pattern (fleet/services/dashboard_helpers.ts).
+ *
+ * Returns `undefined` if the dashboard is not installed.
  */
 export function useAwsOverviewDashboardUrl(
   installedKibana: KibanaAssetReference[]
 ): string | undefined {
   const { services } = useKibana<CoreStart>();
 
-  // KibanaSavedObjectType.dashboard === 'dashboard' — use literal to avoid runtime enum import.
-  const dashboardRefs = installedKibana.filter((k) => k.type === 'dashboard');
+  const overviewRef = installedKibana.find(
+    // KibanaSavedObjectType.dashboard === 'dashboard' — literal avoids runtime enum import.
+    (k) => k.type === 'dashboard' && (k.originId ?? k.id) === AWS_METRICS_OVERVIEW_DASHBOARD_ID
+  );
 
-  const { data } = useQuery<string | undefined>({
-    queryKey: [
-      'ingest_hub',
-      'aws_overview_dashboard_url',
-      dashboardRefs.map((k) => k.id).join(','),
-    ],
-    queryFn: async (): Promise<string | undefined> => {
-      const response = await services.http.post<GetBulkAssetsResponse>(
-        epmRouteService.getBulkAssetsPath(),
-        {
-          body: JSON.stringify({
-            assetIds: dashboardRefs.map((k) => ({ id: k.id, type: k.type })),
-          }),
-        }
-      );
-      const overview = response?.items?.find(
-        (item) => item.attributes?.title === AWS_OVERVIEW_DASHBOARD_TITLE
-      );
-      return overview?.appLink ? services.http.basePath.prepend(overview.appLink) : undefined;
-    },
-    enabled: dashboardRefs.length > 0,
-    staleTime: Infinity,
-  });
-
-  return data;
+  return overviewRef
+    ? services.http.basePath.prepend(`/app/dashboards#/view/${overviewRef.id}`)
+    : undefined;
 }
