@@ -34,6 +34,7 @@ import {
   customContentPanelDefinition,
   editCustomContentPanelConfigInputSchema,
 } from './custom_content';
+import { attachmentPanelInputSchema } from './attachment_source';
 
 /**
  * Panel registry barrel.
@@ -54,6 +55,8 @@ import {
  * resolvable type is additive and needs no operation-handler changes.
  */
 export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
+export { attachmentPanelInputSchema } from './attachment_source';
+export type { AttachmentPanelInput } from './attachment_source';
 export type { PanelContent } from './panel_type';
 export type { CustomContentPanelConfig } from './custom_content';
 
@@ -107,6 +110,7 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
     lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
     vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
   ]),
+  attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -115,6 +119,7 @@ export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
   z.discriminatedUnion('renderer', [lensPanelRequestSchema, vegaPanelRequestSchema]),
+  attachmentPanelInputSchema,
 ]);
 
 /**
