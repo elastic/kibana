@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { ProtectionModes } from '../../common/endpoint/types';
-import type { PolicyData } from '../../common/endpoint/types';
+import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { createFeatureUsageServiceMock } from '../endpoint/services/feature_usage/mocks';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
@@ -85,6 +85,25 @@ describe('notifyProtectionFeatureUsage', () => {
       await notify();
 
       expect(featureUsageService.notifyUsage).not.toHaveBeenCalled();
+    });
+
+    // Policies stored before macOS ransomware shipped in 9.4 have no `mac.ransomware` branch at
+    // all. `fleet_integration.ts:288` guards for that shape on the way in, and this module has to
+    // as well — reading it unguarded threw a TypeError that failed the whole update callback.
+    it('treats a missing macOS ransomware branch as off rather than throwing', async () => {
+      const currentMac = currentPackagePolicy.inputs[0].config.policy.value.mac as Partial<
+        PolicyConfig['mac']
+      >;
+      delete currentMac.ransomware;
+      currentPackagePolicy.inputs[0].config.policy.value.windows.ransomware.mode =
+        ProtectionModes.off;
+      newPackagePolicy.inputs[0].config.policy.value.windows.ransomware.mode = ProtectionModes.off;
+      newPackagePolicy.inputs[0].config.policy.value.mac.ransomware.mode = ProtectionModes.prevent;
+
+      await notify();
+
+      expect(featureUsageService.notifyUsage).toHaveBeenCalledTimes(1);
+      expect(featureUsageService.notifyUsage).toHaveBeenCalledWith('RANSOMWARE_PROTECTION');
     });
   });
 

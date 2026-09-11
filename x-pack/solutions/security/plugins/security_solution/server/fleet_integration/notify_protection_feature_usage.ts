@@ -14,13 +14,10 @@ const OS_KEYS = Object.values(PolicyOperatingSystem);
 const PROTECTION_KEYS = ['memory_protection', 'behavior_protection'] as const;
 const RANSOMWARE_OS_KEYS = [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac] as const;
 
-function isNewlyEnabled(current: ProtectionModes, next: ProtectionModes) {
-  if (current === 'off' && (next === 'prevent' || next === 'detect')) {
-    return true;
-  }
-
-  return false;
-}
+// A protection counts as newly enabled when it moves to an active mode from `off`, or from a
+// branch that does not exist at all — the shape of policies stored before that protection shipped.
+const isNewlyEnabled = (current: ProtectionModes | undefined, next: ProtectionModes | undefined) =>
+  (current === undefined || current === 'off') && (next === 'prevent' || next === 'detect');
 
 function notifyProtection(type: string, featureUsageService: FeatureUsageService) {
   switch (type) {
@@ -58,8 +55,8 @@ export async function notifyProtectionFeatureUsage(
     if (
       !ransomwareNotified &&
       isNewlyEnabled(
-        currentPolicyConfig[osKey].ransomware.mode,
-        newPolicyConfig[osKey].ransomware.mode
+        currentPolicyConfig[osKey]?.ransomware?.mode,
+        newPolicyConfig[osKey]?.ransomware?.mode
       )
     ) {
       notifyProtection('ransomware', featureUsageService);
@@ -75,8 +72,8 @@ export async function notifyProtectionFeatureUsage(
       if (
         !notified &&
         isNewlyEnabled(
-          currentPolicyConfig[osKey][protectionKey].mode,
-          newPolicyConfig[osKey][protectionKey].mode
+          currentPolicyConfig[osKey]?.[protectionKey]?.mode,
+          newPolicyConfig[osKey]?.[protectionKey]?.mode
         )
       ) {
         notifyProtection(protectionKey, featureUsageService);
