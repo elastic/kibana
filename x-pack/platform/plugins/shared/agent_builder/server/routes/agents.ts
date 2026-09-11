@@ -97,18 +97,23 @@ export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): P
 };
 
 /**
- * Strips `ai_indices` from an incoming write body when the Context Engine is disabled,
+ * Strips fields gated by experimental feature flags from an incoming write body,
  * leaving stored values intact so they reactivate when the flag is toggled back on.
  */
-const withoutAiIndices = <T extends { configuration?: { ai_indices?: string[] } }>(
+const handleExperimentalFeatures = async <T extends { configuration?: { ai_indices?: string[] } }>(
   body: T,
-  contextEngineEnabled: boolean
-): T => {
-  if (contextEngineEnabled || !body.configuration) {
+  ctx: AgentBuilderHandlerContext
+): Promise<T> => {
+  if (!body.configuration) {
     return body;
   }
+
+  const contextEngineEnabled = await isContextEngineEnabled(ctx);
+
   const { ai_indices: _stripped, ...restConfig } = body.configuration;
-  return { ...body, configuration: restConfig } as T;
+  return contextEngineEnabled
+    ? body
+    : ({ ...body, configuration: restConfig } as T);
 };
 
 /**
@@ -380,7 +385,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        const createBody = withoutAiIndices(request.body, contextEngineEnabled);
+        const createBody = await handleExperimentalFeatures(request.body, ctx);
 
         try {
           const createdProfile = await service.create(createBody);
@@ -529,7 +534,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        const updateBody = withoutAiIndices(request.body, contextEngineEnabled);
+        const updateBody = await handleExperimentalFeatures(request.body, ctx);
 
         try {
           const profile = await service.update(request.params.id, updateBody);
