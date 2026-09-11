@@ -89,6 +89,7 @@ export interface AiIndexFeedbackAnalysis {
 
 export interface AiIndexProperties {
   description?: string;
+  memory_enabled?: boolean;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
@@ -99,6 +100,7 @@ export interface AiIndexProperties {
 export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
   id: string;
   managed: boolean;
+  memory_enabled: boolean;
   date_created: string;
   date_modified: string;
   traces: AiIndexTraceWithQuery[];
