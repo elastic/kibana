@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
@@ -19,7 +20,10 @@ import {
   createMockWorkflowDataClient,
 } from '@kbn/workflows-execution-engine/server/mocks';
 import { getWorkflowExecution } from './get_workflow_execution';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import {
+  WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../../common';
 
 describe('getWorkflowExecution', () => {
   let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
@@ -284,6 +288,138 @@ describe('getWorkflowExecution', () => {
       });
 
       expect(result?.version).toBeUndefined();
+    });
+
+    it('should load only the first step ids up to the mget cap', async () => {
+      const manyIds = Array.from(
+        { length: WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT + 1 },
+        (_, index) => `s${index}`
+      );
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, stepExecutionIds: manyIds },
+        ] as unknown as EsWorkflowExecution[])
+      );
+      mockStepDataClient.getByIds.mockImplementation(async (ids) =>
+        mockStepGetByIds(ids.map((id) => ({ id, stepId: id, status: 'completed' })))
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
+      expect(mockStepDataClient.getByIds.mock.calls[0][0]).toHaveLength(
+        WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT
+      );
+      expect(result?.stepExecutions).toHaveLength(WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT);
+    });
+
+    it('should return empty steps when search fallback hits a size abort', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, stepExecutionIds: undefined },
+        ] as unknown as EsWorkflowExecution[])
+      );
+      mockStepDataClient.search.mockRejectedValue(
+        new errors.RequestAbortedError(
+          'The content length (9000) is bigger than the maximum allowed buffer (42)'
+        )
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(result?.stepExecutions).toEqual([]);
+      expect(mockLogger.warn).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should return the execution with empty steps when no step documents could be loaded', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
+      );
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      );
+      mockStepDataClient.getByIds.mockRejectedValue(sizeError);
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('exec-1');
+      expect(result?.status).toBe('completed');
+      expect(result?.stepExecutions).toEqual([]);
+      expect(mockLogger.warn).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should omit step executions when omitStepExecutions is true', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
+      );
+
+      const result = await getWorkflowExecution({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+        omitStepExecutions: true,
+      });
+
+      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+      expect(mockStepDataClient.search).not.toHaveBeenCalled();
+      expect(result?.stepExecutions).toEqual([]);
+    });
+
+    it('should log a warn and rethrow when the execution document mget exceeds the response size', async () => {
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      );
+      mockWorkflowDataClient.getByIds.mockRejectedValue(sizeError);
+
+      await expect(
+        getWorkflowExecution({
+          ...baseParams,
+          workflowExecutionsDataClient: mockWorkflowDataClient,
+          stepExecutionsDataClient: mockStepDataClient,
+          logger: mockLogger,
+        })
+      ).rejects.toBe(sizeError);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Workflow execution document exec-1 exceeded the maximum response size Kibana can process'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should log the execution id for unexpected failures', async () => {
+      mockWorkflowDataClient.getByIds.mockRejectedValue(new Error('es down'));
+
+      await expect(
+        getWorkflowExecution({
+          ...baseParams,
+          workflowExecutionsDataClient: mockWorkflowDataClient,
+          stepExecutionsDataClient: mockStepDataClient,
+          logger: mockLogger,
+        })
+      ).rejects.toThrow('es down');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to get workflow execution exec-1: Error: es down'
+      );
     });
   });
 });

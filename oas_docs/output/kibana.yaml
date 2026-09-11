@@ -83574,6 +83574,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Include execution input data.
           in: query
@@ -83585,6 +83586,13 @@ paths:
         - description: Include execution output data.
           in: query
           name: includeOutput
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: Omit embedded step executions from the response.
+          in: query
+          name: omitStepExecutions
           required: false
           schema:
             default: false
@@ -83697,6 +83705,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -83735,6 +83744,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -83798,6 +83808,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter logs by a specific step execution ID.
           in: query
@@ -83912,6 +83923,7 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -84001,12 +84013,14 @@ paths:
           name: executionId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Step execution ID.
           in: path
           name: stepExecutionId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -84080,6 +84094,86 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
+      operationId: get-workflows-executions-executionid-steps
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: Number of step executions per page.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 1000
+            maximum: 5000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getExecutionStepsResponseExample:
+                  description: Example response returning a page of step executions for a workflow run
+                  value:
+                    page: 1
+                    results:
+                      - executionTimeMs: 1000
+                        finishedAt: '2025-11-20T12:00:02.000Z'
+                        globalExecutionIndex: 0
+                        id: step-exec-001
+                        isTestRun: false
+                        scopeStack: []
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:01.000Z'
+                        status: completed
+                        stepExecutionIndex: 0
+                        stepId: hello_world_step
+                        stepType: console
+                        topologicalIndex: 0
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowRunId: exec-a1b2c3d4-e5f6-7890
+                    size: 1000
+                    total: 1
+          description: Indicates a successful response
+      summary: Get execution step executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps?page=1&size=1000" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps?page=1&size=1000
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -84408,6 +84502,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -85092,6 +85187,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.
           in: query
@@ -85144,6 +85240,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -85232,6 +85329,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -85348,6 +85446,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -85438,6 +85537,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -85519,6 +85619,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by execution status.
           in: query
@@ -85726,6 +85827,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
       responses:
         '200':
@@ -85764,6 +85866,7 @@ paths:
           name: workflowId
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Filter by step ID.
           in: query

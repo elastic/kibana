@@ -65,11 +65,13 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 
 import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   DeleteWorkflowsResponse,
+  GetExecutionStepExecutionsParams,
   GetStepExecutionParams,
   GetWorkflowAggsOptions,
   GetWorkflowsParams,
@@ -512,7 +514,7 @@ export class WorkflowsService {
   public async getWorkflowExecution(
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecution(executionId, spaceId, options);
@@ -524,6 +526,14 @@ export class WorkflowsService {
   ): Promise<ChildWorkflowExecutionItem[]> {
     await this.ensureInitialized();
     return this.executionQueryService.getChildWorkflowExecutions(parentExecutionId, spaceId);
+  }
+
+  public async getExecutionStepExecutions(
+    params: GetExecutionStepExecutionsParams,
+    spaceId: string
+  ): Promise<GetExecutionStepExecutionsResult> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getExecutionStepExecutions(params, spaceId);
   }
 
   public async getWorkflowExecutions(

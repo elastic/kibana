@@ -1,0 +1,37 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getExecutionStepsResponseExample:
+            description: 'Example response returning a page of step executions for a workflow run'
+            value:
+              results:
+                - id: step-exec-001
+                  spaceId: default
+                  stepId: hello_world_step
+                  stepType: console
+                  workflowRunId: exec-a1b2c3d4-e5f6-7890
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:01.000Z'
+                  finishedAt: '2025-11-20T12:00:02.000Z'
+                  executionTimeMs: 1000
+                  topologicalIndex: 0
+                  globalExecutionIndex: 0
+                  stepExecutionIndex: 0
+                  scopeStack: []
+              total: 1
+              page: 1
+              size: 1000
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps?page=1&size=1000" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions/{executionId}/steps?page=1&size=1000

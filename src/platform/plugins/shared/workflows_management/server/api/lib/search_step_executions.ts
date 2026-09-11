@@ -129,7 +129,7 @@ export const searchStepExecutions = async ({
       startedBefore,
     });
 
-    const isPaginated = workflowId !== undefined && (page !== undefined || size !== undefined);
+    const isPaginated = page !== undefined || size !== undefined;
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
