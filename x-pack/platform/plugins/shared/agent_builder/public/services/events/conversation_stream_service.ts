@@ -7,20 +7,15 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, defer, finalize } from 'rxjs';
-import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
-import type { ActiveStreamState } from './active_stream_state';
-import { activeStreamReducer, initialActiveStreamState } from './active_stream_state';
+import type { ActiveExecutionDraft } from './active_execution_reducer';
+import { activeExecutionReducer } from './active_execution_reducer';
+import type { EventsService } from './events_service';
 
-export interface ChatEventSource {
-  getChatEvents$: (conversationId: string) => Observable<BrowserChatEvent>;
-  /** Fires when the run terminates, however it terminates - completed, errored or aborted. */
-  getRunEnded$: (conversationId: string) => Observable<void>;
-}
+export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getRunEnded$'>;
 
 interface ConversationStream {
   conversationId: string;
-  /** The fold's accumulator, and what consumers subscribe to. */
-  state$: BehaviorSubject<ActiveStreamState>;
+  state$: BehaviorSubject<ActiveExecutionDraft | null>;
   sub: Subscription;
   ended: boolean;
 }
@@ -40,10 +35,10 @@ export class ConversationStreamService {
   }
 
   private createStream(conversationId: string): ConversationStream {
-    const state$ = new BehaviorSubject<ActiveStreamState>(initialActiveStreamState);
+    const state$ = new BehaviorSubject<ActiveExecutionDraft | null>(null);
     const sub = this.source
       .getChatEvents$(conversationId)
-      .subscribe((event) => state$.next(activeStreamReducer(state$.getValue(), event)));
+      .subscribe((event) => state$.next(activeExecutionReducer(state$.getValue(), event)));
     const stream: ConversationStream = { conversationId, state$, sub, ended: false };
     this.streams.set(conversationId, stream);
 
@@ -54,17 +49,20 @@ export class ConversationStreamService {
   private onRunEnded(stream: ConversationStream) {
     const { conversationId, state$ } = stream;
     stream.ended = true;
-    const state = state$.getValue();
-    if (state.activeExecution) {
-      state$.next({ ...state, activeExecution: null });
+    if (state$.getValue()) {
+      state$.next(null);
     }
     this.maybeTeardown(conversationId);
   }
 
   private maybeTeardown(conversationId: string) {
     const stream = this.streams.get(conversationId);
-    const isIdle = !stream?.state$.getValue().activeExecution;
-    if (!stream || stream.state$.observed || (!stream.ended && !isIdle)) {
+    if (!stream) {
+      return;
+    }
+    const isIdle = !stream.state$.getValue();
+    const canReclaim = !stream.state$.observed && (stream.ended || isIdle);
+    if (!canReclaim) {
       return;
     }
     stream.sub.unsubscribe();
@@ -73,9 +71,9 @@ export class ConversationStreamService {
 
   /**
    * Hot state stream for one conversation. Consumers subscribe (e.g. via `useObservable`)
-   * and receive the folded `ActiveStreamState` as the agent runs.
+   * and receive the folded `ActiveExecutionDraft` as the agent runs, `null` when idle.
    */
-  getActiveStream$(conversationId: string): Observable<ActiveStreamState> {
+  getActiveStream$(conversationId: string): Observable<ActiveExecutionDraft | null> {
     return defer(() => this.ensure(conversationId).state$).pipe(
       finalize(() => this.maybeTeardown(conversationId))
     );
@@ -83,6 +81,10 @@ export class ConversationStreamService {
 
   /** Non-reactive snapshot: is this conversation mid-run right now. */
   isStreamActive(conversationId: string): boolean {
-    return !!this.streams.get(conversationId)?.state$.getValue().activeExecution;
+    return !!this.streams.get(conversationId)?.state$.getValue();
+  }
+
+  releaseStream(conversationId: string) {
+    this.maybeTeardown(conversationId);
   }
 }
