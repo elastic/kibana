@@ -10,6 +10,7 @@ import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import { getModelDependencies } from './esql_editor_messages_registry';
 
 // Monaco keybinding rules are global (per language service, not per editor) and
 // cannot be un-added, so register them once for the whole page.
@@ -112,9 +113,10 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
       addInlineSuggestTabKeybindings();
     }
 
-    // Quick fixes only surface once validation markers exist (wired separately);
-    // registering here is harmless until then.
-    const codeActions = ESQLLang.getCodeActionProvider?.(stableCallbacks);
+    const codeActions = ESQLLang.getCodeActionProvider?.({
+      ...stableCallbacks,
+      getModelDependencies,
+    });
     if (codeActions) {
       disposables.push(monaco.languages.registerCodeActionProvider(ESQL_LANG_ID, codeActions));
     }
