@@ -52,6 +52,11 @@ export {
 } from './src/hooks/use_conversation_investigation';
 
 export {
+  registerAgenticInvestigationTemplateUI,
+  type RegisterAgenticInvestigationTemplateUIOptions,
+  DEFAULT_INVESTIGATION_STATUS_OPTIONS,
+} from './src/template_ui/register';
+export {
   AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
   AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
   AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,

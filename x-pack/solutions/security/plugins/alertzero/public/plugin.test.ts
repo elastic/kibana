@@ -6,6 +6,12 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
+import {
+  AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
+  AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
+  AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
+} from '@kbn/agentic-investigations-common';
 import type { AlertZeroClientConfig } from './types';
 import { AlertZeroPublicPlugin } from './plugin';
 
@@ -39,5 +45,44 @@ describe('AlertZeroPublicPlugin feature-flag gating', () => {
     expect(coreSetup.application.register).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'alertzero', appRoute: '/app/alertzero' })
     );
+  });
+});
+
+describe('AlertZeroPublicPlugin conversation template UI registration', () => {
+  const startPlugin = (enabled: boolean) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const agentBuilder = agentBuilderMocks.createStart();
+
+    plugin.start(coreMock.createStart(), { agentBuilder } as never);
+
+    return agentBuilder;
+  };
+
+  it('registers the investigation template UI and its tabs when enabled', () => {
+    const { conversationTemplates } = startPlugin(true);
+
+    expect(conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalledWith(
+      'investigation',
+      expect.any(Function)
+    );
+    expect(conversationTemplates.registerTab).toHaveBeenCalledWith(
+      AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
+      expect.any(Function)
+    );
+    expect(conversationTemplates.registerTab).toHaveBeenCalledWith(
+      AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
+      expect.any(Function)
+    );
+    expect(conversationTemplates.registerTab).toHaveBeenCalledWith(
+      AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
+      expect.any(Function)
+    );
+  });
+
+  it('registers nothing when disabled', () => {
+    const { conversationTemplates } = startPlugin(false);
+
+    expect(conversationTemplates.registerTemplateUIDefinition).not.toHaveBeenCalled();
+    expect(conversationTemplates.registerTab).not.toHaveBeenCalled();
   });
 });
