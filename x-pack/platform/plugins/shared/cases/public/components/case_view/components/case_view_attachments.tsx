@@ -43,7 +43,7 @@ import {
   EXPAND_ALL_ATTACHMENTS,
   NO_COLLAPSIBLE_ATTACHMENTS,
 } from './translations';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;

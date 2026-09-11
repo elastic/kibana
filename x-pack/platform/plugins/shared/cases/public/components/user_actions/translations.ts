@@ -67,10 +67,6 @@ export const RESUME_EDITING_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SHOW_MORE = i18n.translate('xpack.cases.caseView.userActions.showMore', {
-  defaultMessage: 'Show more',
-});
-
 export const CREATE_CASE = i18n.translate('xpack.cases.caseView.userActions.createCase', {
   defaultMessage: 'Created case',
 });
@@ -157,3 +153,62 @@ export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
     values: { count },
     defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });
+
+export const MORE_ACTIVITIES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.redesign.userActions.moreActivities', {
+    values: { count },
+    defaultMessage: '{count} more {count, plural, =1 {activity} other {activities}}',
+  });
+
+export const SHOW_MORE_ACTIVITIES_ARIA = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.showMoreActivitiesAria',
+  { defaultMessage: 'Show more activities' }
+);
+
+export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.noSearchResults.title',
+  {
+    defaultMessage: 'No results match your search criteria',
+  }
+);
+
+export const NO_SEARCH_RESULTS_BODY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.noSearchResults.body',
+  {
+    defaultMessage: 'Try modifying your search or filters.',
+  }
+);
+
+export const COLLAPSE_ACTIVITY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.collapseActivity',
+  { defaultMessage: 'Collapse activity' }
+);
+
+export const EXPAND_ACTIVITY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.expandActivity',
+  { defaultMessage: 'Expand activity' }
+);
+
+export const COLLAPSE_ALL_ACTIVITIES = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.collapseAllActivities',
+  { defaultMessage: 'Collapse all' }
+);
+
+export const EXPAND_ALL_ACTIVITIES = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.expandAllActivities',
+  { defaultMessage: 'Expand all' }
+);
+
+export const SHOW_MORE_ACTIVITY = i18n.translate(
+  'xpack.cases.casesRedesign.userActions.showMoreActivity',
+  {
+    defaultMessage: 'Show more',
+  }
+);
+
+export const NOTHING_TO_COLLAPSE = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.nothingToCollapse',
+  {
+    defaultMessage: 'No comments or attachments to collapse',
+  }
+);

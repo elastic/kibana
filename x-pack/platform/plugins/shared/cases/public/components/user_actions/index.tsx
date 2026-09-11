@@ -5,70 +5,38 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
+import { EuiEmptyPrompt, EuiFlexItem, EuiImage, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { AddComment } from '../add_comment';
 import { useCaseViewParams } from '../../common/navigation';
 import type { UserActionTreeProps } from './types';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
-import { UserToolTip } from '../user_profiles/user_tooltip';
-import { Username } from '../user_profiles/username';
-import { CaseUserAvatar } from '../user_profiles/user_avatar';
+import { hasActiveUserActivityFilter } from '../user_actions_activity_bar/utils';
 import { UserActionsList } from './user_actions_list';
-import { useUserActionsPagination } from './use_user_actions_pagination';
+import { useUserActionsPagination } from './hooks/use_user_actions_pagination';
 import { useLastPageUserActions } from './use_user_actions_last_page';
-import { ShowMoreButton } from './show_more_button';
 import { useLastPage } from './use_last_page';
 import { useUserPermissions } from './use_user_permissions';
+import { useBuildUserActions } from './hooks/use_build_user_actions';
+import { useBuilderContext } from './hooks/use_builder_context';
+import { useCommentsList } from './hooks/use_comments_list';
+import noResultsIllustration from '../../assets/illustration_product_no_results_magnifying_glass.svg';
+import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../containers/use_get_case_users';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { parseCaseUsers } from '../utils';
 
-const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
-  const customSize = hasNextPage
-    ? {
-        showMoreSectionSize: euiTheme.size.xxxl,
-        marginTopShowMoreSectionSize: euiTheme.size.xxxl,
-        marginBottomShowMoreSectionSize: euiTheme.size.xxxl,
-      }
-    : {
-        showMoreSectionSize: euiTheme.size.m,
-        marginTopShowMoreSectionSize: euiTheme.size.m,
-        marginBottomShowMoreSectionSize: euiTheme.size.m,
-      };
+export type UserActionsProps = Omit<
+  UserActionTreeProps,
+  'currentUserProfile' | 'caseConnectors' | 'userProfiles' | 'casesConfiguration'
+>;
 
-  const blockSize = `${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
-  ${customSize.marginBottomShowMoreSectionSize}`;
-  return `
-          .commentList--hasShowMore
-            [class*='euiTimelineItem-center']:last-child:not(:only-child)
-            > [class*='euiTimelineItemIcon-']::before {
-            block-size: calc(
-              100% + ${blockSize}
-            );
-          }
-          .commentList--hasShowMore
-            [class*='euiTimelineItem-center']:first-child
-            > [class*='euiTimelineItemIcon-']::before {
-            inset-block-start: 0%;
-            block-size: calc(
-              100% + ${blockSize}
-            );
-          }
-          .commentList--hasShowMore
-              [class*='euiTimelineItem-']
-              > [class*='euiTimelineItemIcon-']::before {
-              block-size: calc(
-                100% + ${blockSize}
-              );
-              }
-        `;
-};
-
-export const UserActions = React.memo((props: UserActionTreeProps) => {
+export const UserActions = React.memo((props: UserActionsProps) => {
   const {
-    currentUserProfile,
     data: caseData,
     statusActionButton,
     attachActionButton,
@@ -76,6 +44,15 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActionsStats,
   } = props;
   const { detailName: caseId } = useCaseViewParams();
+
+  const { data: caseConnectors = {} } = useGetCaseConnectors(caseData.id);
+  const { data: caseUsers } = useGetCaseUsers(caseData.id);
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { userProfiles } = useMemo(
+    () => parseCaseUsers({ caseUsers, createdBy: caseData.createdBy }),
+    [caseUsers, caseData.createdBy]
+  );
 
   const { lastPage } = useLastPage({ userActivityQueryParams, userActionsStats });
 
@@ -85,13 +62,17 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     isLoadingInfiniteUserActions,
     hasNextPage,
     fetchNextPage,
-    showBottomList,
     isFetchingNextPage,
+    remainingActionCount,
+    total: totalFilteredUserActions,
   } = useUserActionsPagination({
     userActivityQueryParams,
     caseId: caseData.id,
-    lastPage,
   });
+
+  const hasActiveFilter = hasActiveUserActivityFilter(userActivityQueryParams);
+  const showNoResults =
+    hasActiveFilter && !isLoadingInfiniteUserActions && totalFilteredUserActions === 0;
 
   const { euiTheme } = useEuiTheme();
 
@@ -103,9 +84,9 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     });
 
   const { getCanAddUserComments } = useUserPermissions();
-
-  // add-comment markdown is not visible in History filter
   const shouldShowCommentEditor = getCanAddUserComments(userActivityQueryParams);
+
+  const actionsHandler = useUserActionsHandler();
 
   const {
     commentRefs,
@@ -113,9 +94,38 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     handleManageQuote,
     handleUpdate,
     loadingCommentIds,
-  } = useUserActionsHandler();
+    manageMarkdownEditIds,
+    selectedOutlineCommentId,
+    handleOutlineComment,
+    handleDeleteComment,
+  } = actionsHandler;
 
-  const MarkdownNewComment = useMemo(
+  const builderContext = useBuilderContext({
+    caseData,
+    casesConfiguration,
+    caseConnectors,
+    userProfiles,
+    currentUserProfile,
+    manageMarkdownEditIds,
+    selectedOutlineCommentId,
+    loadingCommentIds,
+    handleOutlineComment,
+    handleDeleteComment,
+  });
+
+  const builtInfiniteActions = useBuildUserActions({
+    caseUserActions: infiniteCaseUserActions,
+    attachments: infiniteLatestAttachments,
+    ...builderContext,
+  });
+
+  const builtLastPageActions = useBuildUserActions({
+    caseUserActions: lastPageUserActions,
+    attachments: lastPageAttachments,
+    ...builderContext,
+  });
+
+  const commentEditor = useMemo(
     () => (
       <AddComment
         id={NEW_COMMENT_ID}
@@ -138,27 +148,17 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     ]
   );
 
-  const bottomActions = shouldShowCommentEditor
-    ? [
-        {
-          username: (
-            <UserToolTip userInfo={currentUserProfile}>
-              <Username userInfo={currentUserProfile} />
-            </UserToolTip>
-          ),
-          'data-test-subj': 'add-comment',
-          timelineAvatar: <CaseUserAvatar size="m" userInfo={currentUserProfile} />,
-          className: 'isEdit',
-          children: MarkdownNewComment,
-        },
-      ]
-    : [];
-
-  const handleShowMore = useCallback(() => {
-    if (fetchNextPage) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage]);
+  const allComments = useCommentsList({
+    builtInfiniteActions,
+    builtLastPageActions,
+    hasNextPage,
+    remainingActionCount,
+    fetchNextPage,
+    isFetchingNextPage,
+    shouldShowCommentEditor,
+    currentUserProfile,
+    commentEditor,
+  });
 
   return (
     <EuiSkeletonText
@@ -170,47 +170,39 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         isLoadingInfiniteUserActions
       }
     >
-      <EuiFlexItem
-        {...(showBottomList
-          ? {
-              css: css`
-                ${getIconsCss(hasNextPage, euiTheme)}
-              `,
+      <EuiFlexItem>
+        {showNoResults && (
+          <EuiEmptyPrompt
+            data-test-subj="user-actions-no-search-results"
+            layout="horizontal"
+            color="transparent"
+            css={{ paddingBlockStart: euiTheme.size.xxl }}
+            icon={
+              <EuiImage
+                css={{ width: 200, height: 148 }}
+                size="200"
+                alt=""
+                url={noResultsIllustration}
+              />
             }
-          : {})}
-      >
+            title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}
+            body={<p>{NO_SEARCH_RESULTS_BODY}</p>}
+          />
+        )}
+        {/*
+          Rendered regardless of `showNoResults`: when filtered out, the
+          infinite/last-page action lists are empty, so this only contributes
+          the "add comment" editor entry (when allowed), keeping it usable
+          even when the current filters match no user actions.
+        */}
         <UserActionsList
-          {...props}
-          caseUserActions={infiniteCaseUserActions}
-          attachments={infiniteLatestAttachments}
+          comments={allComments}
+          caseData={caseData}
+          userProfiles={userProfiles}
           commentRefs={commentRefs}
           handleManageQuote={handleManageQuote}
-          bottomActions={lastPage <= 1 ? bottomActions : []}
-          isExpandable
+          actionsHandler={actionsHandler}
         />
-        {hasNextPage && (
-          <ShowMoreButton onShowMoreClick={handleShowMore} isLoading={isFetchingNextPage} />
-        )}
-        {lastPageUserActions?.length ? (
-          <EuiFlexItem
-            {...(!hasNextPage
-              ? {
-                  css: css`
-                    margin-top: ${euiTheme.size.l};
-                  `,
-                }
-              : {})}
-          >
-            <UserActionsList
-              {...props}
-              caseUserActions={lastPageUserActions}
-              attachments={lastPageAttachments}
-              bottomActions={bottomActions}
-              commentRefs={commentRefs}
-              handleManageQuote={handleManageQuote}
-            />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexItem>
     </EuiSkeletonText>
   );
