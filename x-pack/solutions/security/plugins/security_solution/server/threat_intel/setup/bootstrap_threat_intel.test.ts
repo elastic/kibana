@@ -178,7 +178,9 @@ describe('ensureThreatIntelBootstrap', () => {
     (esClient.indices.getFieldMapping as jest.Mock).mockRejectedValue(notFound);
 
     // Bootstrap must resolve — the 404 is not retried and seeding continues.
-    await expect(ensureThreatIntelBootstrap({ esClient, logger: makeLogger() })).resolves.toBeDefined();
+    await expect(
+      ensureThreatIntelBootstrap({ esClient, logger: makeLogger() })
+    ).resolves.toBeDefined();
     expect(esClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
   });
 
