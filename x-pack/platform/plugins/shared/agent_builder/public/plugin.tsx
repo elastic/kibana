@@ -419,7 +419,7 @@ export class AgentBuilderPlugin
     };
 
     if (hasAgentBuilder) {
-      core.chrome.next.aiButton.register({
+      core.chrome.controls.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
             coreStart={core}
