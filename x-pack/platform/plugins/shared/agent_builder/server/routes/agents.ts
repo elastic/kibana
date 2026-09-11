@@ -103,17 +103,18 @@ export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): P
 const handleExperimentalFeatures = async <T extends { configuration?: { ai_indices?: string[] } }>(
   body: T,
   ctx: AgentBuilderHandlerContext
-): Promise<T> => {
-  if (!body.configuration) {
-    return body;
-  }
-
+): Promise<{ body: T; contextEngineEnabled: boolean }> => {
   const contextEngineEnabled = await isContextEngineEnabled(ctx);
 
+  if (!body.configuration) {
+    return { body, contextEngineEnabled };
+  }
+
   const { ai_indices: _stripped, ...restConfig } = body.configuration;
-  return contextEngineEnabled
-    ? body
-    : ({ ...body, configuration: restConfig } as T);
+  return {
+    body: contextEngineEnabled ? body : ({ ...body, configuration: restConfig } as T),
+    contextEngineEnabled,
+  };
 };
 
 /**
@@ -384,8 +385,10 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        const createBody = await handleExperimentalFeatures(request.body, ctx);
+        const { body: createBody, contextEngineEnabled } = await handleExperimentalFeatures(
+          request.body,
+          ctx
+        );
 
         try {
           const createdProfile = await service.create(createBody);
@@ -533,8 +536,10 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        const updateBody = await handleExperimentalFeatures(request.body, ctx);
+        const { body: updateBody, contextEngineEnabled } = await handleExperimentalFeatures(
+          request.body,
+          ctx
+        );
 
         try {
           const profile = await service.update(request.params.id, updateBody);
