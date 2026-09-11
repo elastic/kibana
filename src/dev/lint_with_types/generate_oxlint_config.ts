@@ -45,6 +45,10 @@ const NO_FLOATING_PROMISES = 'typescript/no-floating-promises';
 /** oxlint has no `--ext`; everything but .ts/.tsx is excluded so only TS sources are linted */
 const NON_TS_IGNORE_PATTERNS = ['**/*.{js,jsx,mjs,cjs,mts,cts,json,vue,svelte,astro}'];
 
+// Mirror tsc's `skipLibCheck: true`: oxlint's parser reports TypeScript grammar errors (e.g.
+// TS1016) that ESLint's parser does not, and declaration files are never type-checked either.
+const DECLARATION_IGNORE_PATTERNS = ['**/*.d.ts'];
+
 const HAS_MAGIC = /[*?[{]/;
 const compile = (glob: string) => new Minimatch(glob, { dot: true });
 
@@ -189,7 +193,11 @@ export function generateOxlintConfig(
     options: { typeAware: true },
     rules: { ...BASE_RULES },
     overrides,
-    // files no active project covers were never linted by the per-project ESLint run
-    ignorePatterns: [...NON_TS_IGNORE_PATTERNS, ...files.filter((file) => !covered.has(file))],
+    ignorePatterns: [
+      ...NON_TS_IGNORE_PATTERNS,
+      ...DECLARATION_IGNORE_PATTERNS,
+      // files no active project covers were never linted by the per-project ESLint run
+      ...files.filter((file) => !covered.has(file)),
+    ],
   };
 }
