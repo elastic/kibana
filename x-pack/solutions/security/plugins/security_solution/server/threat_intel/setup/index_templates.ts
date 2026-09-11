@@ -17,9 +17,9 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 
-const TEMPLATE_VERSION = 30;
-
-const TEMPLATE_META = { managed_by: 'threat_intel', version: TEMPLATE_VERSION };
+// Identifies our templates in Elasticsearch `_meta`. Not an upgrade counter —
+// existing-index upgrades are field-presence migrations + REQUIRED_*_FIELDS.
+const TEMPLATE_META = { managed_by: 'threat_intel' };
 
 /**
  * These are plugin-owned indices, not user data: they must not show up in index
@@ -302,6 +302,10 @@ const threatReportsTemplate = {
             },
             // Hunt Watch's writer (per hunt run; no writer lands in this branch).
             last_hunted_at: { type: 'date' as const },
+            // Report.revision echoed at hunt time so continuous_threat_hunt can
+            // bypass the time cooldown when enrich bumps revision. Reserved
+            // mapping only until the hunt_feedback route lands.
+            last_hunted_revision: { type: 'integer' as const },
             // Latest targeted hunt status echo (keyword for mapping stability).
             last_hunt_status: { type: 'keyword' as const },
             last_hunt_run_id: { type: 'keyword' as const },

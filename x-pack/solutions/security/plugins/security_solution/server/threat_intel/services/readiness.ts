@@ -247,16 +247,23 @@ export const getThreatIntelReadiness = async ({
   let usableReportCount = 0;
   let lastIngestAt: string | null = null;
   let lastEnrichAt: string | null = null;
+  let statsAvailable = true;
   try {
     const stats = await loadUsableStats({ esClient, spaceId });
     usableReportCount = stats.usableReportCount;
     lastIngestAt = stats.lastIngestAt;
     lastEnrichAt = stats.lastEnrichAt;
   } catch (err) {
+    statsAvailable = false;
     logger.warn(`Readiness usable-report stats failed: ${(err as Error).message}`);
   }
 
-  if (usableReportCount === 0) {
+  if (!statsAvailable) {
+    // A failed stats query is not the same as an empty catalog: reporting
+    // `no_usable_reports` here would tell a consumer "nothing ingested yet" when
+    // the truth is the count could not be read. Surface it distinctly instead.
+    reasonCodes.push('usable_stats_unavailable');
+  } else if (usableReportCount === 0) {
     reasonCodes.push('no_usable_reports');
   }
 

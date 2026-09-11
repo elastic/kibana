@@ -10,9 +10,10 @@
  *
  * When you add a new field to the threatReportsTemplate mapping:
  * 1. Add the field to `threatReportsTemplate` in index_templates.ts.
- * 2. Bump TEMPLATE_VERSION and document the bump in the JSDoc block.
- * 3. Add a migrateExisting* function and wire it into installIndexTemplates.
- * 4. Update the assertions here.
+ * 2. Add a migrateExisting* function (if putMapping-able) and wire it into
+ *    installIndexTemplates, or add a REQUIRED_*_FIELDS leaf for drop+recreate
+ *    changes that cannot be applied in place.
+ * 3. Update the assertions here.
  */
 
 import * as fs from 'fs';
@@ -565,6 +566,7 @@ describe('index_templates — mapping coverage guard', () => {
       expect.objectContaining({
         alert_hits_total: { type: 'integer' },
         last_hunt_status: { type: 'keyword' },
+        last_hunted_revision: { type: 'integer' },
         corroborated_rank_score: { type: 'float' },
       })
     );
@@ -578,8 +580,9 @@ describe('index_templates — mapping coverage guard', () => {
     expect(src).toContain("{ path: 'evidence.space_id' }");
   });
 
-  it('TEMPLATE_VERSION is 30 for the evidence reshape', () => {
-    expect(src).toContain('const TEMPLATE_VERSION = 30;');
+  it('templates stamp managed_by threat_intel in _meta (no version counter)', () => {
+    expect(src).toContain("const TEMPLATE_META = { managed_by: 'threat_intel' }");
+    expect(src).not.toContain('TEMPLATE_VERSION');
   });
 
   it('indicators template declares a top-level space_id keyword (v24 space isolation)', async () => {

@@ -11,7 +11,7 @@ import {
   findThreatReports,
   USABLE_REPORT_FILTER,
 } from './find_threat_reports';
-import { encodeCursor } from '../lib/report_cursor';
+import { encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
 const buildHit = ({
   id,
@@ -36,13 +36,21 @@ const buildHit = ({
   },
 });
 
-const buildSearchResponse = (hits: ReturnType<typeof buildHit>[]) =>
+const buildSearchResponse = (hits: ReturnType<typeof buildHit>[], pitId = 'pit-1') =>
   ({
     took: 1,
     timed_out: false,
+    pit_id: pitId,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: { total: { value: hits.length, relation: 'eq' as const }, max_score: null, hits },
   } as const);
+
+const createEsClient = () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as never);
+  esClient.closePointInTime.mockResolvedValue({ succeeded: true, num_freed: 1 } as never);
+  return esClient;
+};
 
 describe('buildFindReportFilters', () => {
   const defaultArgs = {
@@ -108,9 +116,9 @@ describe('findThreatReports', () => {
   };
 
   it('returns mapped summary items from search hits', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(
-      buildSearchResponse([buildHit({ id: 'r1', sort: [0.9, 'r1'] })]) as never
+      buildSearchResponse([buildHit({ id: 'r1', sort: [0.9, 1] })]) as never
     );
 
     const result = await findThreatReports(esClient, defaultArgs);
@@ -126,25 +134,27 @@ describe('findThreatReports', () => {
     ]);
   });
 
-  it('returns a nextCursor when more pages remain', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  it('returns a nextCursor carrying the pit id and last sort values when more pages remain', async () => {
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(
       buildSearchResponse([
-        buildHit({ id: 'r1', sort: [0.9, 'r1'] }),
-        buildHit({ id: 'r2', sort: [0.8, 'r2'] }),
-        buildHit({ id: 'r3', sort: [0.7, 'r3'] }),
+        buildHit({ id: 'r1', sort: [0.9, 1] }),
+        buildHit({ id: 'r2', sort: [0.8, 2] }),
+        buildHit({ id: 'r3', sort: [0.7, 3] }),
       ]) as never
     );
 
     const result = await findThreatReports(esClient, defaultArgs);
 
-    expect(result.nextCursor).toBe(encodeCursor([0.8, 'r2']));
+    expect(result.nextCursor).toBe(
+      encodeCursor({ version: 2, pitId: 'pit-1', sort: 'relevance', sortValues: [0.8, 2] })
+    );
   });
 
   it('returns a null nextCursor on the last page', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(
-      buildSearchResponse([buildHit({ id: 'r1', sort: [0.9, 'r1'] })]) as never
+      buildSearchResponse([buildHit({ id: 'r1', sort: [0.9, 1] })]) as never
     );
 
     const result = await findThreatReports(esClient, defaultArgs);
@@ -152,8 +162,34 @@ describe('findThreatReports', () => {
     expect(result.nextCursor).toBeNull();
   });
 
-  it('returns a search that sorts by extracted.relevance for sort=relevance', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  it('returns after closing the point-in-time on the last page', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(
+      buildSearchResponse([buildHit({ id: 'r1', sort: [0.9, 1] })]) as never
+    );
+
+    await findThreatReports(esClient, defaultArgs);
+
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+  });
+
+  it('returns without closing the point-in-time when more pages remain', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(
+      buildSearchResponse([
+        buildHit({ id: 'r1', sort: [0.9, 1] }),
+        buildHit({ id: 'r2', sort: [0.8, 2] }),
+        buildHit({ id: 'r3', sort: [0.7, 3] }),
+      ]) as never
+    );
+
+    await findThreatReports(esClient, defaultArgs);
+
+    expect(esClient.closePointInTime).not.toHaveBeenCalled();
+  });
+
+  it('returns a search that sorts by extracted.relevance with a _shard_doc tiebreak for sort=relevance', async () => {
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
 
     await findThreatReports(esClient, { ...defaultArgs, sort: 'relevance' });
@@ -162,27 +198,30 @@ describe('findThreatReports', () => {
       expect.objectContaining({
         sort: [
           { 'extracted.relevance': { order: 'desc', missing: '_last' } },
-          { _id: { order: 'asc' } },
+          { _shard_doc: { order: 'asc' } },
         ],
       })
     );
   });
 
-  it('returns a search that sorts by rank_score for sort=rank', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  it('returns a search that sorts by rank_score with a _shard_doc tiebreak for sort=rank', async () => {
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
 
     await findThreatReports(esClient, { ...defaultArgs, sort: 'rank' });
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: [{ rank_score: { order: 'desc', missing: '_last' } }, { _id: { order: 'asc' } }],
+        sort: [
+          { rank_score: { order: 'desc', missing: '_last' } },
+          { _shard_doc: { order: 'asc' } },
+        ],
       })
     );
   });
 
-  it('returns a search that sorts by lineage.extracted_at for sort=updated_at', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  it('returns a search that sorts by lineage.extracted_at with a _shard_doc tiebreak for sort=updated_at', async () => {
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
 
     await findThreatReports(esClient, { ...defaultArgs, sort: 'updated_at' });
@@ -191,33 +230,152 @@ describe('findThreatReports', () => {
       expect.objectContaining({
         sort: [
           { 'lineage.extracted_at': { order: 'desc', missing: '_last' } },
-          { _id: { order: 'asc' } },
+          { _shard_doc: { order: 'asc' } },
         ],
       })
     );
   });
 
-  it('returns a search_after from a decoded cursor', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  it('returns a first-page search that opens a point-in-time over the hidden reports index', async () => {
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
-    const cursor = encodeCursor([0.5, 'prev-id']);
+
+    await findThreatReports(esClient, defaultArgs);
+
+    expect(esClient.openPointInTime).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.kibana-threat-reports*',
+        keep_alive: '2m',
+        expand_wildcards: ['open', 'hidden'],
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      })
+    );
+  });
+
+  it('returns a first-page search that runs against the point-in-time, not an index', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
+
+    await findThreatReports(esClient, defaultArgs);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ pit: { id: 'pit-1', keep_alive: '2m' } })
+    );
+  });
+
+  it('returns empty when the reports index does not exist yet', async () => {
+    const esClient = createEsClient();
+    esClient.openPointInTime.mockRejectedValue({ statusCode: 404 } as never);
+
+    const result = await findThreatReports(esClient, defaultArgs);
+
+    expect(result).toEqual({ items: [], nextCursor: null });
+  });
+
+  it('reuses the cursor pit id instead of opening a new point-in-time', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
+    const cursor = encodeCursor({
+      version: 2,
+      pitId: 'pit-existing',
+      sort: 'relevance',
+      sortValues: [0.5, 9],
+    });
+
+    await findThreatReports(esClient, { ...defaultArgs, cursor });
+
+    expect(esClient.openPointInTime).not.toHaveBeenCalled();
+  });
+
+  it('returns a search_after and pit from a decoded cursor', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
+    const cursor = encodeCursor({
+      version: 2,
+      pitId: 'pit-existing',
+      sort: 'relevance',
+      sortValues: [0.5, 9],
+    });
 
     await findThreatReports(esClient, { ...defaultArgs, cursor });
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        search_after: [0.5, 'prev-id'],
+        pit: { id: 'pit-existing', keep_alive: '2m' },
+        search_after: [0.5, 9],
       })
     );
   });
 
+  it('throws InvalidCursorError when the cursor was minted for a different sort', async () => {
+    const esClient = createEsClient();
+    const cursor = encodeCursor({
+      version: 2,
+      pitId: 'pit-existing',
+      sort: 'rank',
+      sortValues: [0.5, 9],
+    });
+
+    await expect(
+      findThreatReports(esClient, { ...defaultArgs, sort: 'relevance', cursor })
+    ).rejects.toThrow(InvalidCursorError);
+  });
+
+  it('throws InvalidCursorError when the point-in-time has expired', async () => {
+    const esClient = createEsClient();
+    // ES reports an expired PIT as a 404 whose top-level type is
+    // search_phase_execution_exception; the real cause is in the shard reason.
+    esClient.search.mockRejectedValue({
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          failed_shards: [{ reason: { type: 'search_context_missing_exception' } }],
+        },
+      },
+    });
+    const cursor = encodeCursor({
+      version: 2,
+      pitId: 'pit-existing',
+      sort: 'relevance',
+      sortValues: [0.5, 9],
+    });
+
+    await expect(findThreatReports(esClient, { ...defaultArgs, cursor })).rejects.toThrow(
+      InvalidCursorError
+    );
+  });
+
+  it('closes a point-in-time it opened when the first-page search fails', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockRejectedValue(new Error('boom'));
+
+    await expect(findThreatReports(esClient, defaultArgs)).rejects.toThrow('boom');
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+  });
+
+  it('does not close a cursor-supplied point-in-time when the search fails', async () => {
+    const esClient = createEsClient();
+    esClient.search.mockRejectedValue(new Error('boom'));
+    const cursor = encodeCursor({
+      version: 2,
+      pitId: 'pit-existing',
+      sort: 'relevance',
+      sortValues: [0.5, 9],
+    });
+
+    await expect(findThreatReports(esClient, { ...defaultArgs, cursor })).rejects.toThrow('boom');
+    expect(esClient.closePointInTime).not.toHaveBeenCalled();
+  });
+
   it('returns diamond summary fields when present on the hit', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const esClient = createEsClient();
     esClient.search.mockResolvedValue(
       buildSearchResponse([
         buildHit({
           id: 'r1',
-          sort: [0.9, 'r1'],
+          sort: [0.9, 1],
           source: {
             extracted: {
               iocs: [{ type: 'domain', value: 'evil.com' }],
@@ -231,21 +389,5 @@ describe('findThreatReports', () => {
     const result = await findThreatReports(esClient, defaultArgs);
 
     expect(result.items[0].diamond).toEqual({ signalCount: 3, suitable: true });
-  });
-
-  it('returns a search using the hidden-index wildcard options', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue(buildSearchResponse([]) as never);
-
-    await findThreatReports(esClient, defaultArgs);
-
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: '.kibana-threat-reports*',
-        expand_wildcards: ['open', 'hidden'],
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      })
-    );
   });
 });

@@ -5,19 +5,38 @@
  * 2.0.
  */
 
-export interface ReportCursorPayload {
-  version: 1;
-  /** Primary sort value and document `_id` tiebreak from the last returned hit. */
-  sortValues: [string | number | null, string];
+/** A cursor that cannot be decoded, is the wrong version, or was minted for a different sort. */
+export class InvalidCursorError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidCursorError';
+  }
 }
 
-/** Encodes a `[primarySort, docId]` tuple as an opaque base64url cursor. */
-export const encodeCursor = (sortValues: [string | number | null, string]): string => {
-  const payload: ReportCursorPayload = { version: 1, sortValues };
-  return Buffer.from(JSON.stringify(payload)).toString('base64url');
-};
+export interface ReportCursorPayload {
+  version: 2;
+  /**
+   * Point-in-time id the first page was opened against. Every later page reads
+   * the same frozen view, which is what makes `search_after` stable while
+   * enrichment and evidence writes touch the reports concurrently, and is what
+   * lets the sort use the `_shard_doc` tie-breaker.
+   */
+  pitId: string;
+  /**
+   * The sort mode the cursor was minted under. Replaying a cursor under a
+   * different sort would apply this primary value to a different field and
+   * silently return the wrong page, so the reader rejects a mismatch.
+   */
+  sort: string;
+  /** Primary sort value and `_shard_doc` tiebreak from the last returned hit. */
+  sortValues: [number | null, number];
+}
 
-/** Decodes an opaque cursor string. Throws if the token is malformed or has an unsupported version. */
+/** Encodes a cursor payload as an opaque base64url string. */
+export const encodeCursor = (payload: ReportCursorPayload): string =>
+  Buffer.from(JSON.stringify(payload)).toString('base64url');
+
+/** Decodes an opaque cursor string. Throws `InvalidCursorError` if malformed or unsupported. */
 export const decodeCursor = (encoded: string): ReportCursorPayload => {
   let parsed: Partial<ReportCursorPayload>;
   try {
@@ -25,25 +44,26 @@ export const decodeCursor = (encoded: string): ReportCursorPayload => {
       Buffer.from(encoded, 'base64url').toString('utf-8')
     ) as Partial<ReportCursorPayload>;
   } catch {
-    throw new Error('Invalid cursor: failed to decode');
+    throw new InvalidCursorError('Invalid cursor: failed to decode');
   }
 
+  const { version, pitId, sort, sortValues } = parsed;
   if (
-    parsed.version !== 1 ||
-    !Array.isArray(parsed.sortValues) ||
-    parsed.sortValues.length !== 2 ||
-    typeof parsed.sortValues[1] !== 'string'
+    version !== 2 ||
+    typeof pitId !== 'string' ||
+    pitId.length === 0 ||
+    typeof sort !== 'string' ||
+    !Array.isArray(sortValues) ||
+    sortValues.length !== 2 ||
+    typeof sortValues[1] !== 'number'
   ) {
-    throw new Error(`Invalid or unsupported cursor: ${JSON.stringify(parsed)}`);
+    throw new InvalidCursorError('Invalid or unsupported cursor');
   }
 
-  const primary = parsed.sortValues[0];
-  if (primary !== null && typeof primary !== 'string' && typeof primary !== 'number') {
-    throw new Error(`Invalid or unsupported cursor: ${JSON.stringify(parsed)}`);
+  const primary = sortValues[0];
+  if (primary !== null && typeof primary !== 'number') {
+    throw new InvalidCursorError('Invalid or unsupported cursor');
   }
 
-  return {
-    version: 1,
-    sortValues: [primary, parsed.sortValues[1]],
-  };
+  return { version: 2, pitId, sort, sortValues: [primary, sortValues[1]] };
 };

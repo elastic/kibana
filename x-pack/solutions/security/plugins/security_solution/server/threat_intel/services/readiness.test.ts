@@ -175,6 +175,20 @@ describe('getThreatIntelReadiness', () => {
     );
   });
 
+  it('returns degraded with usable_stats_unavailable, not no_usable_reports, when the stats query fails', async () => {
+    const deps = buildDefaultDeps();
+    deps.esClient.search.mockRejectedValue(new Error('es unavailable'));
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'degraded',
+        reasonCodes: ['usable_stats_unavailable'],
+      })
+    );
+  });
+
   it('returns degraded with embedding_endpoint_unavailable when inference.get fails', async () => {
     const deps = buildDefaultDeps();
     deps.esClient.inference.get.mockImplementation(async (req) => {

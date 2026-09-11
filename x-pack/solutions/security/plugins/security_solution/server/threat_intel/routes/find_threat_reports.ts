@@ -11,6 +11,7 @@ import {
   type ThreatReportSort,
 } from '../../../common/threat_intel';
 import { findThreatReports } from '../services/find_threat_reports';
+import { InvalidCursorError } from '../lib/report_cursor';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_READ_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
@@ -63,9 +64,9 @@ export const registerFindThreatReportsRoute = ({
           });
           return response.ok({ body: result });
         } catch (err) {
-          if ((err as Error).message?.startsWith('Invalid')) {
+          if (err instanceof InvalidCursorError) {
             return response.badRequest({
-              body: { message: (err as Error).message },
+              body: { message: err.message },
             });
           }
           logger.warn(`find_threat_reports failed: ${(err as Error).message}`);
