@@ -86,6 +86,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/cps-server-utils",
     "@kbn/cps-utils",
+    "@kbn/es-query-constants",
   ],
   "exclude": ["target/**/*"]
 }
