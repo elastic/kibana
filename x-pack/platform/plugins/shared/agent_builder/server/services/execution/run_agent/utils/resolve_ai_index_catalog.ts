@@ -21,7 +21,7 @@ const fallbackEntry = (id: string): AiIndexCatalogEntry => {
 };
 
 /**
- * Builds the prompt's AI index catalog. Defaults go through the resolver too, so the prompt agrees
+ * Builds the prompt's AI Index catalog. Defaults go through the resolver too, so the prompt agrees
  * with what the caller can list; ids the resolver omits are rendered bare.
  */
 export const resolveAiIndexCatalog = async ({

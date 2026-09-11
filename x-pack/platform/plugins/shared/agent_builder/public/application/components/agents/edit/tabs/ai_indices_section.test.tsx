@@ -101,16 +101,16 @@ describe('AiIndicesSection', () => {
 
     renderSection();
 
-    expect(screen.queryByText('AI indices')).not.toBeInTheDocument();
+    expect(screen.queryByText('AI Indices')).not.toBeInTheDocument();
   });
 
   it('renders the section when the Context Engine is on', () => {
     renderSection();
 
-    expect(screen.getByText('AI indices')).toBeInTheDocument();
+    expect(screen.getByText('AI Indices')).toBeInTheDocument();
   });
 
-  it('shows a callout when the AI indices list failed to load', () => {
+  it('shows a callout when the AI Indices list failed to load', () => {
     mockListError = new Error('boom');
 
     renderSection();
@@ -118,7 +118,7 @@ describe('AiIndicesSection', () => {
     expect(screen.getByTestId('agentBuilderAiIndicesLoadError')).toBeInTheDocument();
   });
 
-  it('shows a callout when the default AI indices failed to load', () => {
+  it('shows a callout when the default AI Indices failed to load', () => {
     mockAgentAiIndicesError = new Error('boom');
 
     renderSection();

@@ -75,7 +75,7 @@ const registerAiIndex = (id: string, index: string) => ({
 const listedIds = (body: { ai_indices: Array<{ id: string }> }): string[] =>
   body.ai_indices.map(({ id }) => id).filter((id) => id.endsWith(RUN_ID));
 
-apiTest.describe('context engine AI index list visibility', { tag: tags.stateful.classic }, () => {
+apiTest.describe('context engine AI Index list visibility', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let listCredentials: RoleApiCredentials;
 

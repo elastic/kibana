@@ -46,7 +46,7 @@ describe('resolveAiIndexVisibility', () => {
     expect(msearch).not.toHaveBeenCalled();
   });
 
-  it('sends two existence probes per AI index in one msearch', async () => {
+  it('sends two existence probes per AI Index in one msearch', async () => {
     msearch.mockResolvedValue({ responses: [hits(1), hits(1), hits(0), hits(0)] });
 
     await resolveAiIndexVisibility({
@@ -77,7 +77,7 @@ describe('resolveAiIndexVisibility', () => {
     });
   });
 
-  it('classifies each AI index from its probe pair', async () => {
+  it('classifies each AI Index from its probe pair', async () => {
     msearch.mockResolvedValue({
       responses: [
         hits(1),

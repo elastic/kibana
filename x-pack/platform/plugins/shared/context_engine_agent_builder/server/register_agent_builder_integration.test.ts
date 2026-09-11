@@ -77,7 +77,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     });
 
     if (!resolver) {
-      throw new Error('Expected an AI index resolver to be registered');
+      throw new Error('Expected an AI Index resolver to be registered');
     }
     return {
       resolver,
@@ -90,7 +90,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     };
   };
 
-  it('reads visible AI indices as the requesting user through the data read service', async () => {
+  it('reads visible AI Indices as the requesting user through the data read service', async () => {
     const { resolver, getAiIndexDataReadService, asScoped, asCurrentUser } = setup({
       aiIndices: [],
     });
