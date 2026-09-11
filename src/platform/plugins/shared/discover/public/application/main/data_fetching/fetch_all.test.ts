@@ -132,6 +132,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         interceptedWarnings: [],
         result: documents,
+        dataSource: expect.any(Object),
         query: { query: '', language: 'kuery' },
       },
     ]);
@@ -255,7 +256,7 @@ describe('test fetchAll', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockfetchEsql.mockResolvedValue({
       records: documents,
-      esqlSource: createMockEsqlSource(),
+      dataSource: createMockEsqlSource(),
     });
     const query = { esql: 'from foo' };
     deps.internalState.dispatch(
@@ -274,7 +275,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.PARTIAL,
         interceptedWarnings: [],
         result: documents,
-        esqlSource: expect.objectContaining({ id: 'mock-esql-source' }),
+        dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
         esqlHeaderWarning: undefined,
         query,
       },

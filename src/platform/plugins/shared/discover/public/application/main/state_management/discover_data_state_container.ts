@@ -33,13 +33,9 @@ import {
   getTableHidden,
   getSidebarHidden,
 } from '@kbn/discover-utils';
-import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import {
-  getESQLStatsQueryMeta,
-  getProjectRoutingFromEsqlQuery,
-  getESQLTimeField,
-} from '@kbn/esql-utils';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -82,7 +78,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
-  esqlSource?: EsqlSource;
+  dataSource?: DataSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
@@ -243,6 +239,8 @@ export function getDataStateContainer({
     dataSubjects,
     getCurrentTab,
     injectCurrentTab,
+    dataSourceService: services.dataSourceService,
+    dataViews: services.dataViews,
   });
 
   // The main subscription to handle state changes
@@ -251,10 +249,10 @@ export function getDataStateContainer({
 
   // Forward the post-fetch EsqlSource (with populated resultColumns) into currentDataSource$
   dataSubjects.documents$
-    .pipe(filter(({ esqlSource }) => !!esqlSource))
-    .subscribe(({ esqlSource }) => {
+    .pipe(filter(({ dataSource }) => !!dataSource))
+    .subscribe(({ dataSource }) => {
       selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataSource$.next(
-        esqlSource!
+        dataSource!
       );
     });
 
@@ -567,11 +565,11 @@ export function getDataStateContainer({
                 return;
               }
 
-              const { esqlSource } = dataSubjects.documents$.getValue();
+              const { dataSource } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,
-                esqlQueryColumns: esqlSource?.getColumns(),
+                esqlQueryColumns: dataSource?.getColumns(),
               });
 
               if (postFetchStateUpdate) {
@@ -625,42 +623,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = getCurrentTab().appState.query;
-    if (isOfAggregateQueryType(query)) {
-      const currentSource = dataSubjects.documents$.getValue().esqlSource;
-      const projectRouting =
-        getProjectRoutingFromEsqlQuery(query.esql) ?? services.cps?.cpsManager?.getProjectRouting();
-
-      const nextSource = await EsqlSource.create({
-        query: query.esql,
-        resultColumns: currentSource?.resultColumns ?? [],
-        timeFieldName: await getESQLTimeField({
-          query: query.esql,
-          http: services.http,
-          projectRouting,
-        }),
-        projectRouting,
-      });
-
-      if (nextSource.id !== currentSource?.id) {
-        const nextDataView = await registerEsqlSourceInDataViewsCache(
-          services.dataViews,
-          nextSource
-        );
-        services.dataSourceService.registerEsqlSource(nextSource);
-        selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataSource$.next(
-          nextSource
-        );
-        if (nextDataView) {
-          internalState.dispatch(
-            injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
-          );
-        }
-      }
-    }
-
     refetch$.next(undefined);
-
     return refetch$;
   };
 

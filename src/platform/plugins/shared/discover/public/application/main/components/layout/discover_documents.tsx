@@ -69,6 +69,7 @@ import {
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { showTimeFieldColumn } from '../../../../utils/show_time_field_column';
+import { columnsToColumnsMeta } from '../../../../utils/columns_to_columns_meta';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
@@ -324,11 +325,7 @@ function DiscoverDocumentsComponent({
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
       currentDataSource.kind === 'esql'
-        ? (Object.fromEntries(
-            currentDataSource
-              .getColumns()
-              .map((c) => [c.name, { type: c.type, esType: c.esType }])
-          ) as DataTableColumnsMeta)
+        ? columnsToColumnsMeta(currentDataSource.getColumns())
         : undefined,
     [currentDataSource]
   );

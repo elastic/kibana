@@ -35,7 +35,6 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
@@ -46,6 +45,7 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { columnsToColumnsMeta } from '../utils/columns_to_columns_meta';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -230,12 +230,8 @@ export function initializeFetch({
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlSource
-                ? (Object.fromEntries(
-                    result.esqlSource
-                      .getColumns()
-                      .map((c) => [c.name, { type: c.type, esType: c.esType }])
-                  ) as DataTableColumnsMeta)
+              columnsMeta: result.dataSource
+                ? columnsToColumnsMeta(result.dataSource.getColumns())
                 : undefined,
               rows: result.records,
               hitCount: result.records.length,

@@ -65,7 +65,7 @@ describe('fetchEsql', () => {
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
-      esqlSource: expect.any(Object),
+      dataSource: expect.any(Object),
       esqlHeaderWarning: undefined,
       interceptedWarnings: [],
       approximationApplied: undefined,
@@ -111,7 +111,7 @@ describe('fetchEsql', () => {
             flattened: hits[1],
           },
         ],
-        esqlSource: expect.any(Object),
+        dataSource: expect.any(Object),
         esqlHeaderWarning: undefined,
         interceptedWarnings: [],
         approximationApplied: undefined,

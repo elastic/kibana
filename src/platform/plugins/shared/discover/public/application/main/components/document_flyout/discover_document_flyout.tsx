@@ -45,6 +45,7 @@ import {
   getExpandedDocLinkDisabledReason,
 } from '../../utils/expanded_doc';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { columnsToColumnsMeta } from '../../../../utils/columns_to_columns_meta';
 
 const expandedDocLinkabilityEbtDetails: Record<ExpandedDocLinkability, string> = {
   [ExpandedDocLinkability.Linkable]: 'linkable',
@@ -202,11 +203,7 @@ export const DiscoverDocumentFlyout = memo(
     const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
       () =>
         currentDataSource.kind === 'esql'
-          ? (Object.fromEntries(
-              currentDataSource
-                .getColumns()
-                .map((c) => [c.name, { type: c.type, esType: c.esType }])
-            ) as DataTableColumnsMeta)
+          ? columnsToColumnsMeta(currentDataSource.getColumns())
           : undefined,
       [currentDataSource]
     );

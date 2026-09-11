@@ -22,7 +22,7 @@ export enum FetchStatus {
 
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
-  esqlSource?: EsqlSource;
+  dataSource?: EsqlSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
   approximationApplied?: boolean;

@@ -13,7 +13,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { DataViewSource } from '@kbn/data-source';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -32,6 +32,7 @@ import type {
   DataMsg,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
+import type { RecordsFetchResponse } from '../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
@@ -109,7 +110,7 @@ export function fetchAll(
     });
 
     // Start fetching all required requests
-    const response = isEsqlQuery
+    const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
           dataView,
@@ -133,60 +134,63 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(async ({ records, esqlSource, interceptedWarnings = [], esqlHeaderWarning }) => {
-        if (isEsqlQuery && esqlSource) {
-          services.dataSourceService.registerEsqlSource(esqlSource);
-          await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
-        }
-        fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+      .then(
+        async ({
+          records,
+          dataSource: esqlSource,
+          interceptedWarnings = [],
+          esqlHeaderWarning,
+        }) => {
+          fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
-        if (isEsqlQuery) {
-          const fetchStatus =
-            interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
-              ? FetchStatus.ERROR
-              : FetchStatus.COMPLETE;
-          dataSubjects.totalHits$.next({
-            fetchStatus,
-            result: records.length,
-          });
-        } else {
-          const currentTotalHits = dataSubjects.totalHits$.getValue();
-          // If the total hits (or chart) query is still loading, emit a partial
-          // hit count that's at least our retrieved document count
-          if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
-            // trigger `partial` only for the first request (if no total hits value yet)
+          if (isEsqlQuery) {
+            const fetchStatus =
+              interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
+                ? FetchStatus.ERROR
+                : FetchStatus.COMPLETE;
             dataSubjects.totalHits$.next({
-              fetchStatus: FetchStatus.PARTIAL,
+              fetchStatus,
               result: records.length,
             });
+          } else {
+            const currentTotalHits = dataSubjects.totalHits$.getValue();
+            // If the total hits (or chart) query is still loading, emit a partial
+            // hit count that's at least our retrieved document count
+            if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+              // trigger `partial` only for the first request (if no total hits value yet)
+              dataSubjects.totalHits$.next({
+                fetchStatus: FetchStatus.PARTIAL,
+                result: records.length,
+              });
+            }
           }
+
+          /**
+           * Determine the appropriate fetch status
+           *
+           * The partial state for ES|QL mode is necessary to limit data table renders.
+           * Depending on the type of query new columns can be added to AppState to ensure the data table
+           * shows the updated columns. The partial state was introduced to prevent
+           * too frequent state changes that cause the table to re-render too often, which can cause
+           * race conditions, poor user experience, and potential test flakiness.
+           *
+           * For non-ES|QL queries, we always use COMPLETE status as they don't require this
+           * special handling.
+           */
+          const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
+
+          dataSubjects.documents$.next({
+            fetchStatus,
+            result: records,
+            dataSource: esqlSource ?? (dataView.id ? new DataViewSource(dataView) : undefined),
+            esqlHeaderWarning,
+            interceptedWarnings,
+            query,
+          });
+
+          checkHitCount(dataSubjects.main$, records.length);
         }
-
-        /**
-         * Determine the appropriate fetch status
-         *
-         * The partial state for ES|QL mode is necessary to limit data table renders.
-         * Depending on the type of query new columns can be added to AppState to ensure the data table
-         * shows the updated columns. The partial state was introduced to prevent
-         * too frequent state changes that cause the table to re-render too often, which can cause
-         * race conditions, poor user experience, and potential test flakiness.
-         *
-         * For non-ES|QL queries, we always use COMPLETE status as they don't require this
-         * special handling.
-         */
-        const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
-
-        dataSubjects.documents$.next({
-          fetchStatus,
-          result: records,
-          esqlSource,
-          esqlHeaderWarning,
-          interceptedWarnings,
-          query,
-        });
-
-        checkHitCount(dataSubjects.main$, records.length);
-      })
+      )
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;

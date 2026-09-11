@@ -168,7 +168,7 @@ export function fetchEsql({
             return {
               records: finalData || [],
               interceptedWarnings,
-              esqlSource,
+              dataSource: esqlSource,
               esqlHeaderWarning,
               approximationApplied,
             };
@@ -178,7 +178,7 @@ export function fetchEsql({
       return {
         records: [],
         interceptedWarnings: [],
-        esqlSource: undefined,
+        dataSource: undefined,
         esqlHeaderWarning: undefined,
         approximationApplied: undefined,
       };
