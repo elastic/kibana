@@ -155,6 +155,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
+  `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -198,6 +199,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'feature-identification',
   'streams-memory-synthesis',
   'streams-memory-consolidation',
   'streams-conversation-scraper',
@@ -205,9 +207,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
   'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',

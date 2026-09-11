@@ -39,7 +39,12 @@ describe('InferenceCostsTransparencyTour', () => {
     props: Partial<React.ComponentProps<typeof InferenceCostsTransparencyTour>> = {}
   ) =>
     renderWithI18n(
-      <InferenceCostsTransparencyTour promoId={promoId} isCloudEnabled={true} {...props}>
+      <InferenceCostsTransparencyTour
+        promoId={promoId}
+        isCloudEnabled={true}
+        fieldName="semantic_text"
+        {...props}
+      >
         <span data-test-subj={childTestId} />
       </InferenceCostsTransparencyTour>
     );
@@ -160,7 +165,11 @@ describe('InferenceCostsTransparencyTour', () => {
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
 
     rerender(
-      <InferenceCostsTransparencyTour promoId={promoId} isCloudEnabled={true}>
+      <InferenceCostsTransparencyTour
+        promoId={promoId}
+        isCloudEnabled={true}
+        fieldName="semantic_text"
+      >
         <span data-test-subj={childTestId} />
       </InferenceCostsTransparencyTour>
     );

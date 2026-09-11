@@ -857,6 +857,27 @@ describe('Both modes', () => {
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });
+
+      /**
+       * GIVEN a footer item is new
+       * WHEN I visit that item and navigate away
+       * THEN hovering it shows the label without a New badge
+       */
+      it('should hide new badge from tooltip after visiting the item and navigating away', async () => {
+        render(<TestComponent items={observabilityMock.navItems} />);
+
+        const whatsNewLink = screen.getByTestId(footerItemId('whats_new'));
+
+        await user.click(whatsNewLink);
+        await user.click(screen.getByTestId(primaryItemId('discover')));
+        await user.hover(whatsNewLink);
+        flushPopoverTimers();
+
+        const tooltip = await screen.findByRole('tooltip');
+
+        expect(tooltip).toHaveTextContent("What's new");
+        expect(tooltip.querySelector('.euiBadge')).not.toBeInTheDocument();
+      });
     });
   });
 

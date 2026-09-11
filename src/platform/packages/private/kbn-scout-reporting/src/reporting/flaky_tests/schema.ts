@@ -19,6 +19,14 @@ export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
 export type TestFramework = z.infer<typeof TestFrameworkSchema>;
 
+/**
+ * `flaky`: failed in some builds and passed in others. `consistently-failing`: never had a
+ * clean pass in the window.
+ */
+export const FLAKY_TEST_CLASSIFICATIONS = ['flaky', 'consistently-failing'] as const;
+export const FlakyTestClassificationSchema = z.enum(FLAKY_TEST_CLASSIFICATIONS);
+export type FlakyTestClassification = z.infer<typeof FlakyTestClassificationSchema>;
+
 export const FlakyTestSampleFailureSchema = z.object({
   message: z.string(),
   buildUrl: z.optional(z.string()),
@@ -110,6 +118,8 @@ export interface FlakyTestReportOptions {
   pipelines: string[];
   branches: string[];
   frameworks: TestFramework[];
+  /** Which lists to compute; tests of an omitted classification are dropped before decoration. */
+  classifications: FlakyTestClassification[];
   thresholds: FlakyTestReportThresholds;
   samplesPerTest: number;
   /** Upper bound of the window; defaults to the current time. */
@@ -121,6 +131,7 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
   pipelines: ['kibana-on-merge'],
   branches: [],
   frameworks: [...TEST_FRAMEWORKS],
+  classifications: [...FLAKY_TEST_CLASSIFICATIONS],
   thresholds: {
     minBuilds: 10,
     minFailedBuilds: 2,
@@ -142,6 +153,13 @@ export const FlakyTestReportSchema = z.object({
     /** Empty means no branch filter. */
     branches: z.array(z.string()),
     frameworks: z.array(TestFrameworkSchema),
+    /**
+     * Lists that were computed; an omitted classification has an empty list and a zero total.
+     * Defaults to both so reports written before the field existed still parse.
+     */
+    classifications: z
+      .array(FlakyTestClassificationSchema)
+      .default([...FLAKY_TEST_CLASSIFICATIONS]),
   }),
   thresholds: FlakyTestReportThresholdsSchema,
   summary: z.object({
