@@ -33,7 +33,6 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
         // @ts-ignore — data_source is a valid global privilege
         data_source: expectedDataSourcePrivileges,
       },
-      kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
     });
   });
 

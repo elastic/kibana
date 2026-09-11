@@ -93,10 +93,7 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     await pageObjects.securityRoleMappings.deleteRoleMapping('delete_test_mapping');
   });
 
-  test('displays an error when navigating to a non-existent role mapping', async ({
-    pageObjects,
-    page,
-  }) => {
+  test('displays an error when navigating to a non-existent role mapping', async ({ page }) => {
     await page.goto('/app/management/security/role_mappings/edit/i-do-not-exist');
     await expect(page.testSubj.locator('errorLoadingRoleMappingEditorToast')).toBeVisible();
     await expect(page).toHaveURL(/management\/security\/role_mappings\//);

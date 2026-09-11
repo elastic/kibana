@@ -59,7 +59,7 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('username')).toHaveText(/.+/);
   });
 
-  test('change password and re-login', async ({ pageObjects, browserAuth, esClient }) => {
+  test('change password and re-login', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],

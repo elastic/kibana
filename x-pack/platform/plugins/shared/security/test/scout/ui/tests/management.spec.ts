@@ -128,7 +128,6 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
       name: 'nav-test-role',
       cluster: [],
       indices: [],
-      kibana: [{ base: ['all'], spaces: ['*'] }],
     });
 
     try {
@@ -146,7 +145,6 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
       name: 'clone-source-role',
       cluster: [],
       indices: [],
-      kibana: [{ base: ['all'], spaces: ['*'] }],
     });
 
     try {
@@ -167,7 +165,6 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
       name: 'link-test-role',
       cluster: [],
       indices: [],
-      kibana: [{ base: ['all'], spaces: ['*'] }],
     });
     await esClient.security.putUser({
       username: 'link-test-dashuser',
