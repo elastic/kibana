@@ -229,6 +229,7 @@ export const useEditorConfig = ({
         verticalScrollbarSize: 6,
       },
       scrollBeyondLastLine: false,
+      acceptSuggestionOnTab: 'off',
       tabSize: 2,
       theme: ESQL_LANG_ID,
       wordWrap: 'on',

@@ -451,8 +451,14 @@ export const getToggleCommentLines = (lines: string[]): string[] => {
  * - a space
  * - `::`
  * - `.`
+ *
+ * Returns false when the content before the cursor is only whitespace (e.g. Tab indentation)
+ * to avoid re-opening the suggestion widget after the user indents a line.
  */
 export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  if (!lineContentBeforeCursor.trim()) {
+    return false;
+  }
   const lastCharacter = lineContentBeforeCursor.at(-1);
   const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
   const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');

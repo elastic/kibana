@@ -450,6 +450,9 @@ describe('helpers', function () {
       ['backtick', 'FROM `', true],
       ['empty string', '', false],
       ['comma', 'field1,', false],
+      ['only spaces (tab indent)', '  ', false],
+      ['only tab character', '\t', false],
+      ['mixed whitespace', '   \t  ', false],
     ])('should return %s for %s', (_label, input, expected) => {
       expect(shouldAutoTriggerSuggestions(input as string)).toBe(expected);
     });
