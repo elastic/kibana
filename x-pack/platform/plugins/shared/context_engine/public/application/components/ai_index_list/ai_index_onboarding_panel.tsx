@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -23,7 +24,7 @@ import onboardingIllustrationLight from './assets/ai_index_onboarding_light.svg'
 const ILLUSTRATION_SIZE_PX = 236;
 
 export const AiIndexOnboardingPanel = () => {
-  const isDarkMode = useIsDarkMode();
+  const { colorMode } = useEuiTheme();
   const onboardingIllustration =
     colorMode === COLOR_MODES_STANDARD.dark
       ? onboardingIllustrationDark
