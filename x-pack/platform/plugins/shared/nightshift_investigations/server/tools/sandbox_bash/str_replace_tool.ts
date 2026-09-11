@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
-import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import { getScopedConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 
 export const SANDBOX_STR_REPLACE_TOOL_ID = 'nightshift_sandbox_str_replace';
 
@@ -60,8 +60,8 @@ export const createSandboxStrReplaceTool = ({
     openWorldHint: false,
   },
   handler: async (params, context) => {
-    const rawConversationId = getConversationId(context);
-    if (!rawConversationId) {
+    const conversationId = getScopedConversationId(context, getSpaceId);
+    if (!conversationId) {
       return {
         results: [
           { type: ToolResultType.error, data: { message: 'No conversation context available.' } },
@@ -69,7 +69,6 @@ export const createSandboxStrReplaceTool = ({
       };
     }
 
-    const conversationId = `${getSpaceId(context.request)}:${rawConversationId}`;
     const resolvedPath = resolveAbsolutePath(params.file_path);
     logger.debug(`sandbox_str_replace: ${resolvedPath}`);
 

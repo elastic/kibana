@@ -13,7 +13,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
-import { getConversationId, getSandboxCallContext } from './tool_utils';
+import { getScopedConversationId, getSandboxCallContext } from './tool_utils';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -68,9 +68,9 @@ export const createSandboxBashTool = ({
   handler: async (params, context) => {
     const { command, working_directory, env, timeout_seconds, connector_id } = params;
 
-    const rawConversationId = getConversationId(context);
+    const conversationId = getScopedConversationId(context, getSpaceId);
 
-    if (!rawConversationId) {
+    if (!conversationId) {
       return {
         results: [
           {
@@ -82,7 +82,6 @@ export const createSandboxBashTool = ({
     }
 
     const callContext = getSandboxCallContext(context);
-    const conversationId = `${getSpaceId(context.request)}:${rawConversationId}`;
 
     // Connector credentials are resolved in Kibana and scoped to this one command's environment.
     // The sandbox never holds a credential-retrieval primitive of its own.

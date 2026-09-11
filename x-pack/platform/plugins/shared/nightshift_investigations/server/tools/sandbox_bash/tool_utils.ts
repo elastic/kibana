@@ -17,6 +17,14 @@ export const getConversationId = (context: {
     .map((e) => (e as Extract<RunContextStackEntry, { type: 'agent' }>).conversationId)
     .find(Boolean);
 
+export const getScopedConversationId = (
+  context: { runContext: { stack: unknown[] }; request: KibanaRequest },
+  getSpaceId: (request: KibanaRequest) => string
+): string | undefined => {
+  const rawId = getConversationId(context);
+  return rawId !== undefined ? `${getSpaceId(context.request)}:${rawId}` : undefined;
+};
+
 /**
  * Resolve a file path to an absolute path inside the sandbox.
  * Relative paths are anchored to /workspace (the default sandbox working dir).
