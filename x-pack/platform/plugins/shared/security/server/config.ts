@@ -306,7 +306,10 @@ export const ConfigSchema = schema.object({
       include_saved_object_names: schema.boolean({ defaultValue: true }),
       savedObjectDiff: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
-        typesToInclude: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        typesToInclude: schema.arrayOf(schema.string({ maxLength: 100 }), {
+          defaultValue: [],
+          maxSize: 50,
+        }),
         fieldSizeLimit: schema.byteSize({ defaultValue: '48kb' }),
       }),
       appender: schema.maybe(coreConfig.logging.appenders),
