@@ -70,12 +70,14 @@ export class ContextEngineAnalyticsService {
     passed,
     verifiersRun,
     failedVerifierIds,
+    failedWorkflowVerifierCount,
     errorType,
   }: {
     outcome: ContextEngineOutcome;
     passed?: boolean;
     verifiersRun?: number;
     failedVerifierIds?: string[];
+    failedWorkflowVerifierCount?: number;
     errorType?: string;
   }): void {
     try {
@@ -87,6 +89,10 @@ export class ContextEngineAnalyticsService {
           ...(verifiersRun !== undefined && { verifiers_run: verifiersRun }),
           ...(failedVerifierIds !== undefined &&
             failedVerifierIds.length > 0 && { failed_verifier_ids: failedVerifierIds }),
+          ...(failedWorkflowVerifierCount !== undefined &&
+            failedWorkflowVerifierCount > 0 && {
+              failed_workflow_verifier_count: failedWorkflowVerifierCount,
+            }),
           ...(errorType !== undefined && { error_type: errorType }),
         }
       );

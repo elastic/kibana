@@ -6,7 +6,7 @@ The Context Engine plugin reports event-based telemetry (EBT) for Knowledge Indi
 
 - KI free text is never reported. No `title`, `description`, `content`, `tags`, or `attributes` values appear in any payload.
 
-- Verifier failure `reason` strings echo query text and user data, so they appear only in the step output. Verifier ids are reported verbatim.
+- Verifier failure `reason` strings echo query text and user data, so they appear only in the step output. Built-in verifier ids are reported verbatim; custom verifier workflow ids derive from user-typed names and collapse to `workflow`.
 
 - AI index ids are reported verbatim.
 
@@ -49,7 +49,7 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 | `outcome` | The run outcome: `success` (verification completed, pass or fail), `failure` (the run errored), or `aborted` when the run was cancelled. |
 | `passed` | Whether every applicable verifier passed. A throwing verifier counts as a failure. Present when the run completed. |
 | `verifiers_run` | Number of verifiers that ran; `0` means the KI had nothing to verify, so those passes can be filtered out. Present when the run completed. |
-| `failed_verifier_ids` | Failing verifier ids, verbatim. Present only when a completed run failed verification. |
+| `failed_verifier_ids` | Distinct failing verifier ids: built-ins verbatim, custom verifier workflows as `workflow`. Present only when a completed run failed verification. |
 | `error_type` | As in KI write events. Present only on `failure`. |
 
 ## Logs

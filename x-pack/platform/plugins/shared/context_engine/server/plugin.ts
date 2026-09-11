@@ -9,6 +9,7 @@ import type {
   CoreSetup,
   CoreStart,
   ElasticsearchClient,
+  KibanaRequest,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
@@ -16,6 +17,7 @@ import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
 import type {
@@ -73,8 +75,36 @@ export class ContextEnginePlugin
     this.analyticsService.registerContextEngineEventTypes();
     const analyticsService = this.analyticsService;
 
+    const checkApiPrivileges = async (
+      request: KibanaRequest,
+      spaceId: string,
+      actions: readonly string[]
+    ): Promise<boolean> => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      const { security } = startDeps;
+      if (!security) {
+        return true;
+      }
+      const { hasAllRequested } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .atSpace(spaceId, {
+          kibana: actions.map((action) => security.authz.actions.api.get(action)),
+        });
+      return hasAllRequested;
+    };
+
+    const workflowsManagement = setupDeps.workflowsManagement?.management;
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
+      createVerifyKiStepDefinition(
+        coreSetup,
+        this.logger.get('context_steps'),
+        analyticsService,
+        workflowsManagement && {
+          workflowsManagement,
+          checkExecutePrivilege: (request, spaceId) =>
+            checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
+        }
+      )
     );
 
     coreSetup.uiSettings.registerGlobal({

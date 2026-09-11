@@ -38,20 +38,21 @@ export class KiVerificationService {
     const results: KiVerifierResult[] = [];
 
     const seen = new Set<string>();
-    const selectedVerifiers = verifiers.map((id) => {
-      if (seen.has(id)) {
-        throw new KiVerificationInputError(`Duplicate verifier id: "${id}"`);
-      }
-      seen.add(id);
-      const verifier = this.registry.get(id);
+    const selectedVerifiers = verifiers.map((entry) => {
+      const verifier = typeof entry === 'string' ? this.registry.get(entry) : entry;
       if (!verifier) {
-        throw new KiVerificationInputError(`Unknown verifier id: "${id}"`);
+        throw new KiVerificationInputError(`Unknown verifier id: "${entry}"`);
       }
+      if (seen.has(verifier.id)) {
+        throw new KiVerificationInputError(`Duplicate verifier id: "${verifier.id}"`);
+      }
+      seen.add(verifier.id);
 
-      return { id, verifier };
+      return verifier;
     });
 
-    for (const { id, verifier } of selectedVerifiers) {
+    for (const verifier of selectedVerifiers) {
+      const { id } = verifier;
       try {
         if (!verifier.applies(ki, verifierContext)) {
           continue;

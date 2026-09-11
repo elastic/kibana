@@ -14,6 +14,7 @@ import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { KiVerificationSummary } from '../ki_verification';
+import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
 import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
@@ -105,11 +106,22 @@ export const withKiVerificationTelemetry = async ({
   try {
     const summary = await run();
     const failures = summary.results.filter((result) => !result.passed);
+    const failedWorkflowVerifierCount = failures.filter(({ verifier }) =>
+      verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX)
+    ).length;
     analyticsService.reportKiVerification({
       outcome: 'success',
       passed: summary.passed,
       verifiersRun: summary.results.length,
-      failedVerifierIds: failures.map(({ verifier }) => verifier),
+      // Workflow ids are user-chosen names, so collapse all custom verifiers to 'workflow' in telemetry.
+      failedVerifierIds: [
+        ...new Set(
+          failures.map(({ verifier }) =>
+            verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX) ? 'workflow' : verifier
+          )
+        ),
+      ],
+      failedWorkflowVerifierCount,
     });
     if (summary.passed) {
       logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);
