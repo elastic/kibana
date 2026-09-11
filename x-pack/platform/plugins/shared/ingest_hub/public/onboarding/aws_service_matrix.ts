@@ -299,7 +299,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: ['aws-s3'],
   },
   // aws_securityhub replaces securityhub policy template in aws (legacy)
-    {
+  {
     id: 'aws_securityhub',
     category: 'security_identity_compliance',
     packageName: 'aws_securityhub',
@@ -952,7 +952,11 @@ export function buildAwsServiceMatrix(
     }
 
     const signalTypes: SignalType[] = [...signalTypesSet];
-    const deploymentMethods = buildDeploymentMethods(staticMethods, managedIntegrations, !entry.ecfOnly);
+    const deploymentMethods = buildDeploymentMethods(
+      staticMethods,
+      managedIntegrations,
+      !entry.ecfOnly
+    );
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
     const ecfConfig = applyEcfOnlyConfig(

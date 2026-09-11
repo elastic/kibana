@@ -81,7 +81,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-    const { data: firehoseData, refetch: firehoseRefetch } = useGetPackageInfoByKeyQuery(
+  const { data: firehoseData, refetch: firehoseRefetch } = useGetPackageInfoByKeyQuery(
     'awsfirehose',
     undefined,
     PACKAGE_QUERY_OPTIONS,

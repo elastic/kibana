@@ -390,7 +390,11 @@ describe('AWS service matrix', () => {
   describe('agent_based fallback deployment method', () => {
     it('applies to non-ECF entries when no package is available', () => {
       const [result] = buildAwsServiceMatrix({} as any, [
-        { id: 'aws_securityhub', category: 'security_identity_compliance', packageName: 'aws_securityhub' },
+        {
+          id: 'aws_securityhub',
+          category: 'security_identity_compliance',
+          packageName: 'aws_securityhub',
+        },
       ]);
       expect(result.deploymentMethods).toEqual([{ method: 'agent_based', preferred: true }]);
       expect(result.showInUI).toBe(true);
@@ -419,11 +423,20 @@ describe('AWS service matrix', () => {
           },
         ],
         data_streams: [
-          { path: 'task_stats', type: 'metrics', streams: [{ input: 'awsfargate/metrics', vars: [] }] },
+          {
+            path: 'task_stats',
+            type: 'metrics',
+            streams: [{ input: 'awsfargate/metrics', vars: [] }],
+          },
         ],
       };
       const [result] = buildAwsServiceMatrix({ awsfargate: pkg as any }, [
-        { id: 'awsfargate', category: 'containers', packageName: 'awsfargate', policyTemplate: 'fargate' },
+        {
+          id: 'awsfargate',
+          category: 'containers',
+          packageName: 'awsfargate',
+          policyTemplate: 'fargate',
+        },
       ]);
       expect(result.deploymentMethods).toEqual([{ method: 'agent_based', preferred: true }]);
     });
@@ -450,7 +463,11 @@ describe('AWS service matrix', () => {
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
-        { id: 'aws_securityhub', category: 'security_identity_compliance', packageName: 'aws_securityhub' },
+        {
+          id: 'aws_securityhub',
+          category: 'security_identity_compliance',
+          packageName: 'aws_securityhub',
+        },
       ]);
       expect(result.dataStreams).toEqual(['finding']);
       expect(result.signalTypes).toContain('logs');
@@ -470,7 +487,11 @@ describe('AWS service matrix', () => {
           },
         ],
         data_streams: [
-          { path: 'model_invocation', type: 'logs', streams: [{ input: 'aws-cloudwatch', vars: [] }] },
+          {
+            path: 'model_invocation',
+            type: 'logs',
+            streams: [{ input: 'aws-cloudwatch', vars: [] }],
+          },
         ],
       };
       const [result] = buildAwsServiceMatrix({ aws_bedrock: pkg as any }, [
