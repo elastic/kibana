@@ -18,9 +18,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   /**
    * The base ESS config's `enabledActionTypes` does not include `.bedrock`,
    * and its `allowedHosts` does not include the mock host used by the
-   * runtime-created connector in start.ts and stop.ts. Both are replaced
-   * (not appended) here rather than pushed as a second `--flag`, since
-   * Kibana's CLI arg parser is not guaranteed to merge repeated array flags.
+   * runtime-created connector in start.ts, stop.ts, and delete.ts. Both are
+   * replaced (not appended) here rather than pushed as a second `--flag`,
+   * since Kibana's CLI arg parser is not guaranteed to merge repeated array
+   * flags.
    */
   const baseServerArgs = defaultConfig.kbnTestServer.serverArgs.filter(
     (arg: string) =>

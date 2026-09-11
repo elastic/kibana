@@ -251,6 +251,23 @@
     ]
   },
   {
+    "id": "discover",
+    "name": "Discover",
+    "areas": [
+      "platform"
+    ],
+    "github": {
+      "team": "elastic/kibana-discover",
+      "label": "Team:Discover"
+    },
+    "responsibilities": [
+      "Discover",
+      "ES|QL editor",
+      "Data plugin",
+      "Data view plugin"
+    ]
+  },
+  {
     "id": "discovery",
     "name": "Data Discovery",
     "areas": [
@@ -350,6 +367,27 @@
     "github": {
       "team": "elastic/kibana-performance-testing"
     }
+  },
+  {
+    "id": "dashboards",
+    "name": "Dashboards",
+    "areas": [
+      "platform"
+    ],
+    "github": {
+      "team": "elastic/kibana-dashboards",
+      "label": "Team:Dashboards"
+    },
+    "responsibilities": [
+      "Dashboards app",
+      "Visualizations (Lens, Timelion, TSVB, Vega, Maps, Graph)",
+      "Markdown embeddable",
+      "Links embeddable",
+      "Embeddable framework",
+      "Unified Search",
+      "Input Controls",
+      "Canvas application"
+    ]
   },
   {
     "id": "presentation",

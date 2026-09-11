@@ -22,6 +22,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -47,6 +48,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -78,6 +80,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   storage?: Storage;
   isCloud: boolean;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  tabs?: AppHeaderTab[];
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
@@ -86,6 +89,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
   isServerless: boolean;

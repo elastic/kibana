@@ -18,6 +18,9 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -35,6 +38,20 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
+
+/**
+ * Represents the request body for creating a service account via UIAM.
+ */
+interface CreateServiceAccountRequestBody {
+  /** Organization that owns the service account. */
+  organization_id: string;
+  /** A descriptive name for the service account. */
+  name: string;
+  /** Roles granted to the service account, referenced by name. */
+  role_assignments: ServiceAccountRoleAssignments;
+  /** Principals allowed to exchange the service account's credentials for a token. */
+  assumable_by: ServiceAccountAssumableBy[];
+}
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -59,16 +76,17 @@ export interface GrantUiamApiKeyRequestBody {
 }
 
 /**
- * Options that control how the grant request itself is authenticated to UIAM.
+ * Options that control how a request is authenticated to UIAM.
  */
-export interface GrantUiamApiKeyOptions {
+export interface UiamClientAuthenticationOptions {
   /**
-   * Whether to present Kibana's own client authentication (the shared secret header and, when
-   * configured, the mTLS client certificate) alongside the granting credential. UIAM authenticates
-   * the credential and Kibana independently, and requires the two to agree: an internal API key or
-   * a session token must arrive with client authentication, while an external (organization) API
-   * key must arrive without it, so that internal credentials that leak cannot be replayed through
-   * customer-facing code paths. Presenting the wrong combination fails the grant.
+   * Whether to present Kibana's shared secret header alongside the caller credential. UIAM
+   * authenticates the credential and Kibana independently, and requires the two to agree: an
+   * internal API key or a session token must arrive with the shared secret, while an external
+   * (organization) API key must arrive without it, so that internal credentials that leak cannot
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails
+   * authentication. The mTLS client certificate is always presented when configured, regardless
+   * of this option.
    *
    * Defaults to `true`, which is correct for everything except an external API key.
    */
@@ -224,7 +242,7 @@ export interface UiamServicePublic {
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    options?: GrantUiamApiKeyOptions
+    options?: UiamClientAuthenticationOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -249,6 +267,22 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Creates a service account via the UIAM service.
+   *
+   * Called with the caller's own credential, so UIAM downscopes the new account
+   * to a subset of that caller's privileges.
+   *
+   * @param authorization The caller's UIAM authorization header.
+   * @param body The request body for creating the service account.
+   * @param options Whether to include Kibana client authentication.
+   */
+  createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    options?: UiamClientAuthenticationOptions
+  ): Promise<ServiceAccount>;
 
   /**
    * Creates an OAuth client via the UIAM service.
@@ -377,7 +411,6 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
-  #dispatcherWithoutClientCertificate: Agent | undefined;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -554,7 +587,7 @@ export class UiamService implements UiamServicePublic {
   async grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    { includeClientAuthentication = true }: GrantUiamApiKeyOptions = {}
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
   ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
@@ -586,9 +619,7 @@ export class UiamService implements UiamServicePublic {
           Authorization: authorization.toString(),
         },
         body: JSON.stringify(body),
-        dispatcher: includeClientAuthentication
-          ? this.#dispatcher
-          : this.#getDispatcherWithoutClientCertificate(),
+        dispatcher: this.#dispatcher,
       };
 
       const response = await UiamService.#parseUiamResponse(
@@ -672,6 +703,43 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamService.createServiceAccount}.
+   */
+  async createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
+  ): Promise<ServiceAccount> {
+    try {
+      this.#logger.debug('Attempting to create service account.');
+
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify({ ...body, type: 'project' }),
+        dispatcher: this.#dispatcher,
+      };
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, requestOptions)
+      );
+
+      this.#logger.debug(`Successfully created service account with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }
@@ -1089,22 +1157,15 @@ export class UiamService implements UiamServicePublic {
 
   /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
-   *
-   * @param includeClientCertificate Whether to present Kibana's own mTLS client certificate. Server
-   * verification is unaffected either way.
    */
-  #createFetchDispatcher(includeClientCertificate = true) {
+  #createFetchDispatcher() {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
 
     const readFile = (file: string) => readFileSync(file, 'utf8');
 
     // Read client certificate and key for mTLS from PEM files.
-    const cert =
-      includeClientCertificate && this.#config.ssl.certificate
-        ? readFile(this.#config.ssl.certificate)
-        : undefined;
-    const key =
-      includeClientCertificate && this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
+    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
+    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
@@ -1135,20 +1196,6 @@ export class UiamService implements UiamServicePublic {
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
       },
     });
-  }
-
-  /**
-   * Returns the dispatcher for the rare request that must not present Kibana's own mTLS client
-   * certificate, created on first use since virtually every request presents it. Without a
-   * certificate configured there is nothing to withhold, so the main dispatcher (and its connection
-   * pool) is reused.
-   */
-  #getDispatcherWithoutClientCertificate() {
-    if (!this.#config.ssl.certificate) {
-      return this.#dispatcher;
-    }
-
-    return (this.#dispatcherWithoutClientCertificate ??= this.#createFetchDispatcher(false));
   }
 
   /**
