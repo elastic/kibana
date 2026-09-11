@@ -10,6 +10,10 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { waitForDiffEvent } from '../../../scout_security_audit/api/helpers/audit_log';
+import {
+  buildDashboardAttributes,
+  buildNestedAttributes,
+} from '../../../scout_security_audit/api/helpers/object_builders';
 
 const TYPE = 'index-pattern';
 const DASHBOARD_TYPE = 'dashboard';
@@ -40,99 +44,6 @@ interface HeapMetrics {
   sizeLimitBytes: number;
   usageRatio: number;
 }
-
-const buildNestedAttributes = (title: string, panelCount: number) => {
-  const panels: Record<string, unknown> = {};
-  for (let i = 0; i < panelCount; i++) {
-    panels[`p${i}`] = {
-      title: `Panel ${i}`,
-      vis: {
-        type: 'histogram',
-        params: { buckets: i, label: `bucket-${i}` },
-      },
-    };
-  }
-  return { title, name: title, panels };
-};
-
-const buildDashboardPanel = (index: number) => ({
-  version: '8.8.0',
-  type: 'lens',
-  gridData: {
-    x: (index % 2) * 24,
-    y: Math.floor(index / 2) * 15,
-    w: 24,
-    h: 15,
-    i: `panel-${index}`,
-  },
-  panelIndex: `panel-${index}`,
-  embeddableConfig: {
-    attributes: {
-      title: `Panel ${index}`,
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [],
-      state: {
-        visualization: {
-          legend: { isVisible: true, position: 'right' },
-          valueLabels: 'hide',
-          preferredSeriesType: 'bar_stacked',
-          layers: [
-            {
-              layerId: `layer-${index}`,
-              accessors: [`y${index}`],
-              position: 'top',
-              seriesType: 'bar_stacked',
-              showGridlines: false,
-              xAccessor: `x${index}`,
-            },
-          ],
-        },
-        datasourceStates: {
-          indexpattern: {
-            layers: {
-              [`layer-${index}`]: {
-                columnOrder: [`x${index}`, `y${index}`],
-                columns: {
-                  [`x${index}`]: {
-                    label: '@timestamp',
-                    dataType: 'date',
-                    operationType: 'date_histogram',
-                    sourceField: '@timestamp',
-                    isBucketed: true,
-                    scale: 'interval',
-                    params: { interval: 'auto', includeEmptyRows: true },
-                  },
-                  [`y${index}`]: {
-                    label: 'Count of records',
-                    dataType: 'number',
-                    operationType: 'count',
-                    isBucketed: false,
-                    scale: 'ratio',
-                    sourceField: '___records___',
-                  },
-                },
-              },
-            },
-          },
-        },
-        query: { language: 'kuery', query: '' },
-        filters: [],
-      },
-    },
-    enhancements: {},
-  },
-});
-
-const buildDashboardAttributes = (title: string, panelCount: number) => ({
-  title,
-  description: 'oom test dashboard',
-  panelsJSON: JSON.stringify(Array.from({ length: panelCount }, (_, i) => buildDashboardPanel(i))),
-  optionsJSON: JSON.stringify({ hidePanelTitles: false, useMargins: true }),
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: JSON.stringify({ query: { query: '', language: 'kuery' }, filter: [] }),
-  },
-});
 
 const getHeapMetrics = async (
   apiClient: ApiClientFixture,

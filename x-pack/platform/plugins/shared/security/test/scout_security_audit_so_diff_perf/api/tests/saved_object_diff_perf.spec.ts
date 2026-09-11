@@ -11,6 +11,11 @@ import { apiTest, AUDIT_LOG_PATH, tags } from '@kbn/scout';
 import type { ApiClientFixture, SamlAuth } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import {
+  buildDashboardAttributes,
+  buildNestedAttributes,
+} from '../../../scout_security_audit/api/helpers/object_builders';
+
 /**
  * Saved object audit diff performance measurements.
  *
@@ -79,102 +84,6 @@ const percentile = (values: number[], p: number) => {
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))];
 };
-
-const buildNestedAttributes = (title: string, panelCount: number) => {
-  const panels: Record<string, unknown> = {};
-  for (let i = 0; i < panelCount; i++) {
-    panels[`p${i}`] = {
-      title: `Panel ${i}`,
-      vis: { type: 'histogram', params: { buckets: i, label: `bucket-${i}`, enabled: true } },
-    };
-  }
-  return { title, description: 'perf', panels };
-};
-
-const buildDashboardPanel = (index: number) => ({
-  version: '8.8.0',
-  type: 'lens',
-  gridData: {
-    x: (index % 2) * 24,
-    y: Math.floor(index / 2) * 15,
-    w: 24,
-    h: 15,
-    i: `panel-${index}`,
-  },
-  panelIndex: `panel-${index}`,
-  embeddableConfig: {
-    attributes: {
-      title: `Panel ${index}`,
-      visualizationType: 'lnsXY',
-      type: 'lens',
-      references: [],
-      state: {
-        visualization: {
-          legend: { isVisible: true, position: 'right' },
-          valueLabels: 'hide',
-          preferredSeriesType: 'bar_stacked',
-          layers: [
-            {
-              layerId: `layer-${index}`,
-              accessors: [`y${index}`],
-              position: 'top',
-              seriesType: 'bar_stacked',
-              showGridlines: false,
-              xAccessor: `x${index}`,
-            },
-          ],
-        },
-        datasourceStates: {
-          indexpattern: {
-            layers: {
-              [`layer-${index}`]: {
-                columnOrder: [`x${index}`, `y${index}`],
-                columns: {
-                  [`x${index}`]: {
-                    label: '@timestamp',
-                    dataType: 'date',
-                    operationType: 'date_histogram',
-                    sourceField: '@timestamp',
-                    isBucketed: true,
-                    scale: 'interval',
-                    params: { interval: 'auto', includeEmptyRows: true },
-                  },
-                  [`y${index}`]: {
-                    label: 'Count of records',
-                    dataType: 'number',
-                    operationType: 'count',
-                    isBucketed: false,
-                    scale: 'ratio',
-                    sourceField: '___records___',
-                  },
-                },
-              },
-            },
-          },
-        },
-        query: { language: 'kuery', query: '' },
-        filters: [],
-      },
-    },
-    enhancements: {},
-  },
-});
-
-/**
- * Real dashboard saved object attributes. `panelsJSON` is a JSON-serialized string — a
- * title-only update keeps panelsJSON identical, so the diff emits one replace op on /title
- * and one noOp on /panelsJSON. The memory pressure is holding the full serialized string
- * (≈ panelCount × 800 bytes) before and after simultaneously during the diff phase.
- */
-const buildDashboardAttributes = (title: string, panelCount: number) => ({
-  title,
-  description: 'perf test dashboard',
-  panelsJSON: JSON.stringify(Array.from({ length: panelCount }, (_, i) => buildDashboardPanel(i))),
-  optionsJSON: JSON.stringify({ hidePanelTitles: false, useMargins: true }),
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: JSON.stringify({ query: { query: '', language: 'kuery' }, filter: [] }),
-  },
-});
 
 const sampleProcess = async (
   apiClient: ApiClientFixture,
