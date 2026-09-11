@@ -17,6 +17,7 @@ export {
   STREAMS_TIERED_AI_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
   FAILURE_STORE_SELECTOR,
+  STREAMS_DEFAULT_UNIT_ID,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';

@@ -64,6 +64,7 @@ import {
   useSourceEnvironmentLoader,
   useSources,
 } from '../../../streams_layout/sources/sources_context';
+import { createUnitRepository } from '../../../../services/unit_repository';
 import type { SourceType, SourceViewModel } from '../../../streams_layout/sources/types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from '../../../streams_layout/sources/source_type_config';
 import { CreateSourceModal } from '../../../streams_layout/sources/create_source_modal';
@@ -92,10 +93,21 @@ interface CanvasContextMenuState {
  * wired to real data.
  */
 export function StreamsCanvas() {
-  const { core } = useKibana();
+  const {
+    core,
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
+  const unitDefinitionRepository = useMemo(
+    () => createUnitRepository({ streamsRepositoryClient }),
+    [streamsRepositoryClient]
+  );
 
   return (
     <CanvasStateContextProvider
@@ -103,6 +115,8 @@ export function StreamsCanvas() {
       urlStateStorageContainer={urlStateStorageContainer}
       apiKeyGenerationDeps={apiKeyGenerationDeps}
       loadSourceEnvironment={loadSourceEnvironment}
+      loadUnitDefinition={unitDefinitionRepository.load}
+      persistUnitDefinition={unitDefinitionRepository.persist}
     >
       <StreamsCanvasInner />
     </CanvasStateContextProvider>

@@ -29,10 +29,12 @@ import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
+  STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE,
   STREAMS_FEATURE_ID,
   STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
+  STREAMS_UI_METADATA_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
@@ -56,7 +58,9 @@ import { registerFieldsMetadataExtractors } from './register_fields_metadata_ext
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
-import { getStreamsPromptsSavedObject } from './lib/prompts/prompts_config';
+import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
+import { createConfigDistributorClient } from './lib/unit_config/config_distributor_client';
+import type { UnitConfigHooks } from './lib/unit_config/types';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -97,6 +101,7 @@ export class StreamsPlugin
   private streamsService?: StreamsService;
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
+  private canEncrypt = false;
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
@@ -121,7 +126,11 @@ export class StreamsPlugin
       this.logger.get('patternExtraction')
     );
 
-    core.savedObjects.registerType(getStreamsPromptsSavedObject());
+    registerStreamsSavedObjects(core.savedObjects, {
+      isStreamsCanvasEnabled: this.config.canvas.enabled,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
+    this.canEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -150,7 +159,16 @@ export class StreamsPlugin
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
-      const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
+      const scopedSoClient = coreStart.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: this.config.canvas.enabled
+          ? [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE, STREAMS_UI_METADATA_SAVED_OBJECT_TYPE]
+          : [],
+      });
+      const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
+        includedHiddenTypes: this.config.canvas.enabled
+          ? [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE]
+          : [],
+      });
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
@@ -199,6 +217,8 @@ export class StreamsPlugin
       return {
         scopedClusterClient,
         soClient,
+        encryptedSavedObjectsClient,
+        canEncrypt: this.canEncrypt,
         attachmentClient,
         streamsClient,
         getKnowledgeIndicatorClient,
@@ -272,6 +292,15 @@ export class StreamsPlugin
     registerFeatureFlags(core);
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
+    // `encryptCredentials` is the distributor sidecar transform (project public
+    // key → `credentials[]`). It is not wired until the project public key is
+    // available; publish with non-empty secrets fails rather than
+    // sending plaintext. At-rest encryption is Encrypted Saved Objects.
+    const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
+      config: this.config.configDistributor,
+      logger: this.logger.get('config-distributor'),
+    });
+
     const routeRegistrationOptions = {
       dependencies: {
         server: this.server,
@@ -279,6 +308,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
+        unitConfigHooks,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

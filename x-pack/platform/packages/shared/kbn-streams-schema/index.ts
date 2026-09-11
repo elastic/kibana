@@ -8,6 +8,19 @@
 export { Streams, streamDefinitionSchema } from './src/models/streams';
 export type * as StreamsV2 from './src/v2';
 export * as StreamsV2Examples from './src/v2/__examples__';
+export {
+  collectUnitComponentIds,
+  findDuplicateUnitComponentIds,
+  streamsSignalSchema,
+  streamsSupportedTelemetrySchema,
+  streamsUnitIdentifierSchema,
+  streamsUnitResponseSchema,
+  streamsUnitSchema,
+  streamsUnitSecretsSchema,
+  streamsUnitUiMetadataSchema,
+  streamsUnitUpsertRequestSchema,
+} from './src/models/unit';
+export type { StreamsUnit } from './src/models/unit';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {

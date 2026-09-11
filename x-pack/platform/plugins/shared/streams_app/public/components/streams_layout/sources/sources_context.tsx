@@ -23,6 +23,7 @@ import {
   type SourcesTablePagination,
   type SourcesTableSortingColumn,
 } from './state_machines/sources_table_state_machine';
+import { createUnitRepository } from '../../../services/unit_repository';
 
 export interface SourcesController {
   sources: SourceViewModel[];
@@ -93,14 +94,26 @@ export const useSourcesTable = (): SourcesTableController => {
     core: {
       notifications: { toasts },
     },
+    dependencies: {
+      start: { streams },
+    },
   } = useKibana();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
+  const unitDefinitionRepository = useMemo(
+    () =>
+      createUnitRepository({
+        streamsRepositoryClient: streams.streamsRepositoryClient,
+      }),
+    [streams.streamsRepositoryClient]
+  );
   const tableActorRef = useActorRef(sourcesTableStateMachine, {
     input: {
       apiKeyGenerationDeps,
       toasts,
       loadSourceEnvironment,
+      loadUnitDefinition: unitDefinitionRepository.load,
+      persistUnitDefinition: unitDefinitionRepository.persist,
     },
   });
   const sourcesActorRef = useSelector(tableActorRef, (state) => state.context.sourcesRef);

@@ -91,6 +91,7 @@ dependsOn:
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-sml-plugin'
+  - '@kbn/server-http-tools'
 tags:
   - plugin
   - prod

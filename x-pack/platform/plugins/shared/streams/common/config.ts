@@ -9,6 +9,28 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
+  canvas: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  /**
+   * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`
+   * and `POST /v1/validate`). When `url` is unset, unit publish and validation
+   * are skipped so local canvas saves still work.
+   */
+  configDistributor: schema.object(
+    {
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      ssl: schema.object(
+        {
+          certificatePath: schema.maybe(schema.string({ maxLength: 4096 })),
+          keyPath: schema.maybe(schema.string({ maxLength: 4096 })),
+          certificateAuthoritiesPath: schema.maybe(schema.string({ maxLength: 4096 })),
+        },
+        { defaultValue: {} }
+      ),
+    },
+    { defaultValue: { ssl: {} } }
+  ),
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),

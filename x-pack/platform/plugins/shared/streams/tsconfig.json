@@ -88,6 +88,7 @@
     "@kbn/elastic-agent-utils",
     "@kbn/sample-log-parser",
     "@kbn/workflows-extensions",
-    "@kbn/agent-builder-sml-plugin"
+    "@kbn/agent-builder-sml-plugin",
+    "@kbn/server-http-tools"
   ]
 }
