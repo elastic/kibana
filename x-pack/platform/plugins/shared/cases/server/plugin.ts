@@ -241,6 +241,21 @@ export class CasePlugin
           })
         : undefined;
 
+    // Resolves a request-scoped workflow run context. Defined here and threaded directly into
+    // the route so that `getCasesWorkflowRunContext` does not need to live on `CaseRequestContext`
+    // (which would expose it to all ~20 plugins that depend on the `cases` context).
+    const getWorkflowRunContext = workflowRunService
+      ? async (request: KibanaRequest) => {
+          const [coreStart] = await core.getStartServices();
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+            savedObjectsService: coreStart.savedObjects,
+            clientSource: 'rest_api',
+          });
+        }
+      : undefined;
+
     registerRoutes({
       router,
       routes: [
@@ -252,7 +267,9 @@ export class CasePlugin
         ...getInternalRoutes(
           this.userProfileService,
           this.caseConfig,
-          workflowRunService ? { service: workflowRunService, getSpaceId } : undefined
+          workflowRunService && getWorkflowRunContext
+            ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
+            : undefined
         ),
       ],
       logger: this.logger,
@@ -560,17 +577,6 @@ export class CasePlugin
           const coreContext = await context.core;
 
           return this.clientFactory.create({
-            request,
-            scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
-            savedObjectsService: savedObjects,
-            clientSource: 'rest_api',
-          });
-        },
-        getCasesWorkflowRunContext: async () => {
-          const [{ savedObjects }] = await core.getStartServices();
-          const coreContext = await context.core;
-
-          return this.clientFactory.createWorkflowRunContext({
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,

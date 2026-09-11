@@ -25,7 +25,10 @@ describe('run workflow route', () => {
     run: jest.fn(),
   } as unknown as jest.Mocked<CasesWorkflowRunService>;
   const getSpaceId = jest.fn().mockReturnValue('space-1');
-  const route = createRunWorkflowRoute({ service, getSpaceId });
+  const getWorkflowRunContext = jest
+    .fn()
+    .mockResolvedValue({ casesClient, workflowOperations });
+  const route = createRunWorkflowRoute({ service, getSpaceId, getWorkflowRunContext });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,13 +64,7 @@ describe('run workflow route', () => {
       },
     };
     const response = { ok: jest.fn() };
-    const context = {
-      cases: {
-        getCasesWorkflowRunContext: jest
-          .fn()
-          .mockResolvedValue({ casesClient, workflowOperations }),
-      },
-    };
+    const context = {};
 
     await route.handler({
       context,

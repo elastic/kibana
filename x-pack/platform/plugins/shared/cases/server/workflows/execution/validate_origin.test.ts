@@ -798,22 +798,21 @@ const workflowOnlyRegistry = new UnifiedAttachmentTypeRegistry();
 workflowOnlyRegistry.register({ id: 'security.alert', schema: z.any(), workflow: {} });
 
 describe('getDefaultTargets — positional index alignment', () => {
-  // A sparse index array: the empty string must not shift idx2/idx3 onto the wrong ids.
-  it('keeps each id paired with its own index when the index array has empty entries', () => {
+  it('keeps each id paired with its own index in a 1-to-1 aligned array', () => {
     const caseWithAlert = {
       ...theCase,
       comments: [
         {
           type: 'alert',
           alertId: ['a1', 'a2', 'a3'],
-          index: ['', 'idx2', 'idx3'],
+          index: ['idx1', 'idx2', 'idx3'],
           id: 'so-1',
           owner: SECURITY_SOLUTION_OWNER,
         },
       ],
     } as unknown as Case;
 
-    // 'a1' has no valid index; 'a2' → 'idx2'; 'a3' → 'idx3'. The origin targets a2.
+    // a1→idx1, a2→idx2, a3→idx3. The origin targets a2.
     expect(() =>
       validateOriginWithAttachments({
         origin: {
@@ -832,6 +831,42 @@ describe('getDefaultTargets — positional index alignment', () => {
         documents: { selected: [], attached: [] },
       })
     ).not.toThrow();
+  });
+
+  it('drops the whole attachment when the index count does not match the id count', () => {
+    // alertId=3 ids, index=['idx2','idx3'] (2 elements after toAlertMetadata filters empty strings).
+    // 3 ids vs 2 indices → ambiguous pairing → attachment dropped → origin target not found.
+    const caseWithAlert = {
+      ...theCase,
+      comments: [
+        {
+          type: 'alert',
+          alertId: ['a1', 'a2', 'a3'],
+          index: ['', 'idx2', 'idx3'],
+          id: 'so-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+      ],
+    } as unknown as Case;
+
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'a2',
+        },
+        theCase: caseWithAlert,
+        inputs: { event: { alertIds: [{ _id: 'a2', _index: 'idx2' }] } },
+        attachmentTypeRegistry,
+        alerts: {
+          selected: [{ _id: 'a2', _index: 'idx2' }],
+          attached: [{ id: 'a2', index: 'idx2', attached_at: '' }],
+        },
+        documents: { selected: [], attached: [] },
+      })
+    ).toThrow(/does not belong to case/);
   });
 });
 
@@ -886,6 +921,48 @@ describe('resolveAttachmentOrigin — malformed sibling attachment is skipped', 
 // ── targetsById — duplicate _id under different indices (A3) ─────────────────
 
 describe('targetsById — same _id under multiple indices', () => {
+  it('does not throw when the same attachment id resolves with one defined index and one undefined index', () => {
+    // A target appearing as both { id, index } and { id } (no index) — e.g. from a
+    // getDefaultTargets call where one positional slot had no index — should not be rejected.
+    // Only two *distinct defined* indices are genuinely ambiguous.
+    const caseWithRepeatedId = {
+      ...theCase,
+      comments: [
+        // alertId 'a1' appears in two positions with the same raw index array, so one entry
+        // gets the defined index and the other (positional fallback) gets no index.
+        {
+          type: 'alert',
+          alertId: ['a1', 'a1'],
+          index: ['idx-a'],
+          id: 'so-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+      ],
+    } as unknown as Case;
+
+    // After toAlertMetadata filtering: metadata.index = ['idx-a']. getDefaultTargets with
+    // ids=['a1','a1'] and rawIndices=['idx-a'] → mismatch (2 vs 1) → whole attachment dropped.
+    // So targeting 'a1' throws "does not belong to case", NOT "multiple indices".
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'a1',
+        },
+        theCase: caseWithRepeatedId,
+        inputs: { event: { alertIds: [{ _id: 'a1', _index: 'idx-a' }] } },
+        attachmentTypeRegistry,
+        alerts: {
+          selected: [{ _id: 'a1', _index: 'idx-a' }],
+          attached: [{ id: 'a1', index: 'idx-a', attached_at: '' }],
+        },
+        documents: { selected: [], attached: [] },
+      })
+    ).toThrow(/does not belong to case/);
+  });
+
   it('throws when the same attachment id is attached under two different indices', () => {
     const caseWithDuplicateId = {
       ...theCase,
@@ -983,5 +1060,45 @@ describe('default alignment for types registered with workflow: {}', () => {
         documents: { selected: [], attached: [] },
       })
     ).toThrow('Attachment workflow origin "so-v1" is not selected.');
+  });
+
+  it('passes when the origin target is in the selected documents even when alertIds are also present', () => {
+    // The selection union is alertIds ∪ documents. A document-backed origin target must not be
+    // rejected just because the caller also supplied alertIds (the old exclusive-or logic rejected
+    // the document target whenever selectedAlerts was non-empty).
+    const caseWithEvent = {
+      ...theCase,
+      comments: [
+        { type: 'alert', alertId: 'alert-1', index: '.alerts-idx' },
+        { type: 'alert', alertId: 'doc-1', index: '.docs-idx' },
+      ],
+    } as unknown as Case;
+
+    expect(() =>
+      validateOriginWithAttachments({
+        origin: {
+          type: 'cases.attachment',
+          caseId: 'case-1',
+          attachmentType: 'security.alert',
+          attachmentId: 'doc-1',
+        },
+        theCase: caseWithEvent,
+        inputs: {
+          event: {
+            alertIds: [{ _id: 'alert-1', _index: '.alerts-idx' }],
+            documents: [{ _id: 'doc-1', _index: '.docs-idx' }],
+          },
+        },
+        attachmentTypeRegistry: workflowOnlyRegistry,
+        alerts: {
+          selected: [{ _id: 'alert-1', _index: '.alerts-idx' }],
+          attached: [{ id: 'alert-1', index: '.alerts-idx', attached_at: '' }],
+        },
+        documents: {
+          selected: [{ _id: 'doc-1', _index: '.docs-idx' }],
+          attached: [{ id: 'doc-1', index: '.docs-idx', attached_at: '' }],
+        },
+      })
+    ).not.toThrow();
   });
 });
