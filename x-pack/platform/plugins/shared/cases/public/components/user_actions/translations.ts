@@ -67,10 +67,6 @@ export const RESUME_EDITING_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SHOW_MORE = i18n.translate('xpack.cases.caseView.userActions.showMore', {
-  defaultMessage: 'Show more',
-});
-
 export const CREATE_CASE = i18n.translate('xpack.cases.caseView.userActions.createCase', {
   defaultMessage: 'Created case',
 });

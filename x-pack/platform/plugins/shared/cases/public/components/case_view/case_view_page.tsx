@@ -20,51 +20,47 @@ import { CaseViewTabContent } from './components/case_view_tab_content';
 import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
 
-export type CaseViewPageRedesignProps = Omit<CaseViewPageProps, 'fetchCase'>;
+export type CaseViewPageComponentProps = Omit<CaseViewPageProps, 'fetchCase'>;
 
-export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
-  ({ caseData, refreshRef }) => {
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const [showMetrics, setShowMetrics] = useState(true);
+export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, refreshRef }) => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showMetrics, setShowMetrics] = useState(true);
 
-    const onSearch = useCallback(
-      (newSearch: string) => {
-        setSearchTerm(newSearch.trim());
-      },
-      [setSearchTerm]
-    );
+  const onSearch = useCallback(
+    (newSearch: string) => {
+      setSearchTerm(newSearch.trim());
+    },
+    [setSearchTerm]
+  );
 
-    useCasesTitleBreadcrumbs(caseData.title);
+  useCasesTitleBreadcrumbs(caseData.title);
 
-    const { onUpdateField, isLoading } = useOnUpdateField({ caseData });
-    useCaseRefreshRef({ refreshRef, isLoading });
+  const { onUpdateField, isLoading } = useOnUpdateField({ caseData });
+  useCaseRefreshRef({ refreshRef, isLoading });
 
-    return (
-      <>
-        <CaseDetailsAppHeader
+  return (
+    <>
+      <CaseDetailsAppHeader
+        caseData={caseData}
+        onUpdateField={onUpdateField}
+        showMetrics={showMetrics}
+        onShowMetricsChange={setShowMetrics}
+      />
+      <CasesPageBody>
+        {showMetrics && <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />}
+        <EuiSpacer size="l" />
+        {KibanaServices.getConfig()?.attachments?.enabled === true && (
+          <LensAttachReturnConsumer caseId={caseData.id} />
+        )}
+        <CaseViewTabContent
           caseData={caseData}
+          searchTerm={searchTerm}
+          onSearch={onSearch}
           onUpdateField={onUpdateField}
-          showMetrics={showMetrics}
-          onShowMetricsChange={setShowMetrics}
         />
-        <CasesPageBody>
-          {showMetrics && (
-            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
-          )}
-          <EuiSpacer size="l" />
-          {KibanaServices.getConfig()?.attachments?.enabled === true && (
-            <LensAttachReturnConsumer caseId={caseData.id} />
-          )}
-          <CaseViewTabContent
-            caseData={caseData}
-            searchTerm={searchTerm}
-            onSearch={onSearch}
-            onUpdateField={onUpdateField}
-          />
-        </CasesPageBody>
-        <CaseDetailsTour caseData={caseData} />
-      </>
-    );
-  }
-);
-CaseViewPageRedesign.displayName = 'CaseViewPageRedesign';
+      </CasesPageBody>
+      <CaseDetailsTour caseData={caseData} />
+    </>
+  );
+});
+CaseViewPage.displayName = 'CaseViewPage';

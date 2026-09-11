@@ -15,12 +15,12 @@ import { CaseViewLoading } from './case_view_loading';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
-import { CaseViewPageRedesign } from './case_view_page';
+import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
 import { useCasePageViewEbt } from './use_case_page_view_ebt';
 import * as i18n from './translations';
 
-export const CaseViewRedesign = React.memo(({ timelineIntegration, refreshRef }: CaseViewProps) => {
+export const CaseView = React.memo(({ timelineIntegration, refreshRef }: CaseViewProps) => {
   const { spaces: spacesApi } = useKibana().services;
   const { detailName: caseId } = useCaseViewParams();
   const { basePath } = useCasesContext();
@@ -62,12 +62,12 @@ export const CaseViewRedesign = React.memo(({ timelineIntegration, refreshRef }:
   ) : data ? (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       {getLegacyUrlConflictCallout()}
-      <CaseViewPageRedesign caseData={data.case} refreshRef={refreshRef} />
+      <CaseViewPage caseData={data.case} refreshRef={refreshRef} />
     </CasesTimelineIntegrationProvider>
   ) : null;
 });
 
-CaseViewRedesign.displayName = 'CaseViewRedesign';
+CaseView.displayName = 'CaseView';
 
 // eslint-disable-next-line import/no-default-export
-export { CaseViewRedesign as default };
+export { CaseView as default };
