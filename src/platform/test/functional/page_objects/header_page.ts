@@ -68,7 +68,15 @@ export class HeaderPageObject extends FtrService {
 
   public async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    // The Kibana loading indicator is driven by a 250ms debounce on
+    // http.getLoadingCount$ (LOADING_DEBOUNCE_TIME in core's chrome_hooks.ts).
+    // 500ms gives the indicator time to flip to the "loading" state with a
+    // safety buffer for slow CI; longer waits are pure waste when the page is
+    // already idle (the common case for this helper). The disappear step in
+    // awaitGlobalLoadingIndicatorHidden still bounds the overall wait at
+    // defaultFindTimeout * 10, which is the authoritative "loading finished"
+    // signal. See https://github.com/elastic/kibana/issues/222306.
+    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 500 });
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
