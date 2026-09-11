@@ -379,7 +379,8 @@ export function getDashboardApi({
     creationOptions?.searchSessionSettings,
     incomingEmbeddables,
     dashboardApi,
-    internalApi
+    internalApi,
+    dataLoadingManager.internalApi.waitForPanelsToLoad$
   );
 
   return {

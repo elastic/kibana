@@ -18,6 +18,7 @@ import type { DashboardState } from '../../../common/types';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import type { DashboardCreationOptions } from '../..';
 import { screenshotModeService } from '../../services/kibana_services';
+import { dashboardCacheService } from '../../services/dashboard_cache_service';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import type { DashboardEmbedSettings } from '../types';
 import {
@@ -37,6 +38,7 @@ interface UseCreationOptionsProps {
   embedSettings?: DashboardEmbedSettings;
   incomingEmbeddables: IncomingEmbeddables;
   validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'];
+  savedDashboardId?: string;
 }
 
 export const useCreationOptions = ({
@@ -46,9 +48,15 @@ export const useCreationOptions = ({
   embedSettings,
   incomingEmbeddables,
   validateOutcome,
+  savedDashboardId,
 }: UseCreationOptionsProps) => {
   return useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
+    // Check if there's a cached session for this dashboard
+    const cachedEntry = savedDashboardId
+      ? dashboardCacheService.getCacheEntry(savedDashboardId)
+      : undefined;
 
     const getInitialInput = () => {
       const scopedHistory = getScopedHistory();
@@ -114,6 +122,9 @@ export const useCreationOptions = ({
       searchSessionSettings: {
         createSessionRestorationDataProvider,
         sessionIdToRestore: searchSessionIdFromURL,
+        // Pass cached session ID separately - uses `continue` (not `restore`) to
+        // avoid setting isRestore=true which would bypass the client-side response cache.
+        cachedSessionId: cachedEntry?.sessionId,
         sessionIdUrlChangeObservable: getSessionURLObservable(history),
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
@@ -136,5 +147,6 @@ export const useCreationOptions = ({
     getScopedHistory,
     kbnUrlStateStorage,
     incomingEmbeddables,
+    savedDashboardId,
   ]);
 };
