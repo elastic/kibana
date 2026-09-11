@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -23,6 +24,8 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiToolTip,
+  copyToClipboard,
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
@@ -51,6 +54,21 @@ const shrinkableContainerCss = css`
   flex-direction: row;
 `;
 
+const copyIndexPatternStrings = {
+  getCopyLabel: () =>
+    i18n.translate('unifiedSearch.query.queryBar.indexPattern.copyIndexPatternButton', {
+      defaultMessage: 'Copy index pattern to clipboard',
+    }),
+  getCopiedToastTitle: () =>
+    i18n.translate('unifiedSearch.query.queryBar.indexPattern.indexPatternCopiedToast', {
+      defaultMessage: 'Index pattern copied to clipboard',
+    }),
+  getCopyMenuItem: () =>
+    i18n.translate('unifiedSearch.query.queryBar.indexPattern.copyIndexPatternMenuItem', {
+      defaultMessage: 'Copy index pattern',
+    }),
+};
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
@@ -77,7 +95,7 @@ export function ChangeDataView({
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { application, data, dataViews, dataViewEditor } = kibana.services;
+  const { application, data, dataViews, dataViewEditor, notifications } = kibana.services;
 
   const isMobile = useIsWithinBreakpoints(['xs']);
 
@@ -87,6 +105,22 @@ export function ChangeDataView({
     theme: euiTheme,
     isMobile,
   });
+
+  const indexPatternToCopy = useMemo(() => {
+    const currentDataView = dataViewsList.find((dataView) => dataView.id === currentDataViewId);
+    return currentDataView?.title || trigger.title || trigger.label;
+  }, [currentDataViewId, dataViewsList, trigger.label, trigger.title]);
+
+  const onCopyIndexPattern = useCallback(() => {
+    if (!indexPatternToCopy) {
+      return;
+    }
+    copyToClipboard(indexPatternToCopy);
+    notifications?.toasts?.addSuccess({
+      title: copyIndexPatternStrings.getCopiedToastTitle(),
+      text: indexPatternToCopy,
+    });
+  }, [indexPatternToCopy, notifications]);
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
@@ -220,6 +254,21 @@ export function ChangeDataView({
 
   const items = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
+    if (indexPatternToCopy) {
+      panelItems.push(
+        <EuiContextMenuItem
+          key="copy-index-pattern"
+          icon="copy"
+          data-test-subj="indexPattern-copy-name-menu"
+          onClick={() => {
+            onCopyIndexPattern();
+            closePopover();
+          }}
+        >
+          {copyIndexPatternStrings.getCopyMenuItem()}
+        </EuiContextMenuItem>
+      );
+    }
     if (onAddField) {
       panelItems.push(
         <EuiContextMenuItem
@@ -248,9 +297,11 @@ export function ChangeDataView({
           </EuiContextMenuItem>
         ) : (
           <React.Fragment key="empty" />
-        ),
-        <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
+        )
       );
+    }
+    if (panelItems.length > 0) {
+      panelItems.push(<EuiHorizontalRule margin="none" key="dataviewActions-divider" />);
     }
     panelItems.push(
       <React.Fragment key="add-dataview">
@@ -317,6 +368,7 @@ export function ChangeDataView({
     euiTheme.size.s,
     onAddField,
     onChangeDataView,
+    onCopyIndexPattern,
     onCreateDefaultAdHocDataView,
     onCreate,
     onDataViewCreated,
@@ -324,6 +376,7 @@ export function ChangeDataView({
     onEditDataView,
     searchListInputId,
     selectableProps,
+    indexPatternToCopy,
   ]);
 
   return (
@@ -339,6 +392,23 @@ export function ChangeDataView({
                     defaultMessage: 'Data view',
                   })
                 : undefined
+            }
+            append={
+              !isDisabled && indexPatternToCopy ? (
+                <EuiToolTip
+                  content={copyIndexPatternStrings.getCopyLabel()}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="copy"
+                    color="text"
+                    size="xs"
+                    aria-label={copyIndexPatternStrings.getCopyLabel()}
+                    data-test-subj="indexPattern-copy-name"
+                    onClick={onCopyIndexPattern}
+                  />
+                </EuiToolTip>
+              ) : undefined
             }
             {...(trigger.fullWidth && { fullWidth: true })}
           >
