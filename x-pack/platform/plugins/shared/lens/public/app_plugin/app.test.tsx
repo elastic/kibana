@@ -235,9 +235,7 @@ describe('Lens App', () => {
         })
       );
 
-      const registeredConfig = (services.chrome.appHeader.set as jest.Mock).mock.calls.at(
-        -1
-      )?.[0];
+      const registeredConfig = (services.chrome.appHeader.set as jest.Mock).mock.calls.at(-1)?.[0];
       const event = { preventDefault: jest.fn() };
       registeredConfig.back.onClick(event);
       expect(event.preventDefault).toHaveBeenCalled();

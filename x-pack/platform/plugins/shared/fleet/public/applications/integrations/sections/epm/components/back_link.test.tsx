@@ -166,9 +166,7 @@ describe('BackLink', () => {
 
     renderBackLink(<BackLink queryParams={queryParams} integrationsPath="/browse" />, chrome);
 
-    expect(chrome.appHeader.set).toHaveBeenCalledWith(
-      expect.objectContaining({ back: false })
-    );
+    expect(chrome.appHeader.set).toHaveBeenCalledWith(expect.objectContaining({ back: false }));
   });
 
   it('does not suppress the chrome back button when return params are absent', () => {
