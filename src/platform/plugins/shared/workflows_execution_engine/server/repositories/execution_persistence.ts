@@ -104,6 +104,12 @@ export class InMemoryExecutionPersistence
           delete copy[key];
         }
       }
+      // Mirror the ES-backed normalisation: when the caller explicitly requested
+      // `output` but the stored value is absent, return null (FAILED) rather than
+      // leaving the key missing (evicted). The engine relies on this distinction.
+      if (sourceIncludes?.includes('output') && copy.output === undefined) {
+        copy.output = null;
+      }
       return [copy as unknown as EsWorkflowStepExecution];
     });
   }
