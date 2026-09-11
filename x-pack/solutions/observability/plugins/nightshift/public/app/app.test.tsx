@@ -16,11 +16,14 @@ import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
 import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_fetch_investigations');
+jest.mock('../hooks/use_fetch_severity_counts', () => ({
+  useFetchSeverityCounts: jest.fn(() => ({ data: undefined })),
+}));
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
 jest.mock('../investigation/investigation_list', () => ({
-  INVESTIGATION_LIST_PAGE_SIZES: [20, 50, 100],
+  INVESTIGATION_LIST_PAGE_SIZE: 20,
   InvestigationList: ({
     investigations,
     isInitialLoading,
