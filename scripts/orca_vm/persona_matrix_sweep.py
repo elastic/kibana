@@ -957,6 +957,13 @@ def deploy(ip: str) -> None:
     selfhost_env = base / ".selfhost.env"
     if selfhost_env.exists():
         scp(str(selfhost_env), ip, "/tmp/selfhost.env")
+    # Omniroute judge route (.selfhost-judge.env): when EVAL_CONNECTOR_ID is a
+    # selfhost-* judge (e.g. selfhost-omni-opus-5), run_model.sh synthesizes
+    # its connector from these values (public omniroute URL + key). Ship only
+    # when present so EIS-judge runs need nothing extra.
+    judge_env = base / ".selfhost-judge.env"
+    if judge_env.exists():
+        scp(str(judge_env), ip, "/tmp/judge.env")
     # Matrix config carries the OpenRouter API model ids (matchIds) that the
     # connectors cache does NOT. The VM's Kibana checkout is main, not this
     # branch — it lacks the persona-matrix suite entirely, so ship the config.

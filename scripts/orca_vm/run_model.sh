@@ -288,6 +288,79 @@ print(c['$MODEL']['config']['providerConfig']['api_key'])")
 fi
 export KIBANA_TESTING_AI_CONNECTORS=$CONNS
 
+# ─── Omniroute/selfhost JUDGE path (judge selfhost-*, candidate eis-*) ───────
+# Runs AFTER the final CONNS export above so nothing clobbers the synthesized
+# entry. EVAL_CONNECTOR_ID must name a connector the stack can resolve; EIS
+# judges ride the connector cache, a selfhost-* judge has none — synthesize it
+# (same shape as the selfhost-candidate branch) plus the SSE-normalizing proxy
+# and the endpoint watcher. Without this the judge's converse calls 404
+# mid-suite and the run reads as an eval failure instead of a missing judge
+# connector. The proxy is REQUIRED even for omniroute: the cursor failover
+# route emits `reasoning` deltas ES's streaming processor rejects — the exact
+# defect class the proxy exists to strip.
+JUDGE_IS_SELFHOST=0
+case "$EVAL_CONNECTOR_ID" in selfhost-*) JUDGE_IS_SELFHOST=1 ;; esac
+if [ "$JUDGE_IS_SELFHOST" = "1" ]; then
+  if [ -f /tmp/judge.env ]; then
+    # .selfhost-judge.env shipped by deploy(): public omniroute URL + key.
+    source /tmp/judge.env   # exports SELFHOST_UPSTREAM, SELFHOST_API_KEY
+  fi
+  if [ -z "${SELFHOST_UPSTREAM:-}" ] || [ -z "${SELFHOST_API_KEY:-}" ]; then
+    echo "FATAL: selfhost judge $EVAL_CONNECTOR_ID requires /tmp/judge.env" >&2
+    echo "       (SELFHOST_UPSTREAM/SELFHOST_API_KEY from .selfhost-judge.env)" >&2
+    exit 3
+  fi
+  JUDGE_MODEL_ID="${EVAL_CONNECTOR_ID#selfhost-}"   # e.g. omni-opus-5 combo id
+  echo "=== judge connector synthesis: $EVAL_CONNECTOR_ID -> $SELFHOST_UPSTREAM (model: $JUDGE_MODEL_ID) ==="
+  # Add/overwrite the judge entry in the exported base64 connector map.
+  # Endpoint id MUST equal the connector id: converse resolves the model by
+  # CONNECTOR id, not inferenceId (same trap as the openrouter-* branch).
+  CONNS=$(CONNS_B64="$CONNS" JUDGE_ID="$EVAL_CONNECTOR_ID" OR_PORT=8088 \
+    JUDGE_MODEL_ID="$JUDGE_MODEL_ID" JUDGE_KEY="$SELFHOST_API_KEY" python3 -c "
+import json, base64, os
+conns = json.loads(base64.b64decode(os.environ['CONNS_B64']))
+judge = os.environ['JUDGE_ID']
+conns[judge] = {
+    'name': judge,
+    'actionTypeId': '.inference',
+    'config': {
+        'provider': 'openai',
+        'taskType': 'chat_completion',
+        'inferenceId': judge + '-chat_completion',
+        'providerConfig': {
+            'model_id': os.environ['JUDGE_MODEL_ID'],
+            'url': 'http://127.0.0.1:' + os.environ['OR_PORT'],
+            'api_key': os.environ['JUDGE_KEY'],
+        },
+    },
+    'secrets': {},
+}
+print(base64.b64encode(json.dumps(conns).encode()).decode())
+") || { echo "FATAL: judge connector synthesis failed" >&2; exit 3; }
+  export KIBANA_TESTING_AI_CONNECTORS="$CONNS"
+  # Proxy up before the endpoint references it; kill stale instances first
+  # (an old process keeps serving the previous upstream).
+  kill -9 $(lsof -t -i:8088 2>/dev/null) 2>/dev/null || true
+  PROXY_UPSTREAM="$SELFHOST_UPSTREAM" nohup python3 /tmp/openrouter_proxy.py --port 8088 > /tmp/or-proxy-judge.log 2>&1 &
+  for i in $(seq 1 30); do
+    CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8088/ 2>/dev/null)
+    [ "$CODE" != "000" ] && break
+    sleep 1
+  done
+  echo "judge proxy ready (HTTP $CODE)"
+  # Watcher loop: the eval retry loop wipes ES data between attempts, deleting
+  # the inference endpoint; re-create idempotently until the run completes
+  # (create_openrouter_endpoint.py reuses a correct existing endpoint).
+  nohup bash -c '
+    while [ ! -f /tmp/unit.done ]; do
+      python3 /tmp/create_openrouter_endpoint.py "$1" "$2" "$3" "$4" >> /tmp/or-endpoint-judge.log 2>&1
+      sleep 10
+    done
+  ' _ "$EVAL_CONNECTOR_ID" "$JUDGE_MODEL_ID" "$SELFHOST_API_KEY" 8088 \
+    > /dev/null 2>&1 &
+  echo "judge endpoint watcher started (log: /tmp/or-endpoint-judge.log)"
+fi
+
 # ─── Full stop + clean data ──────────────────────────────────────────────────
 echo "=== Stopping any prior stack ==="
 node scripts/evals stop 2>/dev/null || true
