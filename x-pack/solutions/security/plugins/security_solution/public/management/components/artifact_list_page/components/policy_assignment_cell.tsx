@@ -63,15 +63,7 @@ export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCel
       });
     }, [item, policies]);
 
-    const { firstPolicy, additionalPolicies } = useMemo<{
-      firstPolicy: ContextMenuItemNavByRouterProps | undefined;
-      additionalPolicies: ContextMenuItemNavByRouterProps[];
-    }>(() => {
-      return {
-        firstPolicy: policyNavLinks[0],
-        additionalPolicies: policyNavLinks.slice(1),
-      };
-    }, [policyNavLinks]);
+    const firstPolicy = policyNavLinks[0];
 
     if (firstPolicy === undefined) {
       return (
@@ -81,7 +73,7 @@ export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCel
       );
     }
 
-    const additionalCount = additionalPolicies.length;
+    const additionalCount = policyNavLinks.length - 1;
     const isFirstPolicyClickable = Boolean(canReadPolicyManagement && firstPolicy.href);
 
     return (
@@ -119,7 +111,7 @@ export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCel
         {additionalCount > 0 && (
           <EuiFlexItem grow={false}>
             <WithContextMenu
-              policies={additionalPolicies}
+              policies={policyNavLinks}
               loadingPoliciesList={loadingPoliciesList}
               canReadPolicies={canReadPolicyManagement}
               data-test-subj={getTestId('popupMenu')}

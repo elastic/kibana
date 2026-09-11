@@ -403,7 +403,7 @@ describe('ArtifactSimpleTable', () => {
       ).toHaveTextContent('+2');
     });
 
-    it('opens the policies popup listing only the additional policies when the count badge is clicked', async () => {
+    it('opens the policies popup listing all assigned policies when the count badge is clicked', async () => {
       const policies: MenuItemPropsByPolicyId = {
         'policy-1': {
           children: 'Policy one',
@@ -435,7 +435,9 @@ describe('ArtifactSimpleTable', () => {
       expect(
         renderResult.getByTestId('testTable-columnPolicyAssignment-popupMenu-popoverPanel')
       ).toBeInTheDocument();
-      expect(renderResult.queryByTestId('policyMenuItem-1')).not.toBeInTheDocument();
+      expect(renderResult.getByTestId('policyMenuItem-1')).toHaveTextContent(
+        'Policy oneView details'
+      );
       expect(renderResult.getByTestId('policyMenuItem-2')).toHaveTextContent(
         'Policy twoView details'
       );
