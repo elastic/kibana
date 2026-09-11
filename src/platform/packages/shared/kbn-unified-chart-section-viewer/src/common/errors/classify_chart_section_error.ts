@@ -40,16 +40,17 @@ export interface ChartSectionErrorMeta {
  */
 const USER_INPUT_ERROR_TYPES: readonly string[] = ['parsing_exception', 'verification_exception'];
 
+const HTTP_BAD_REQUEST = 400;
+const HTTP_NOT_FOUND = 404;
+
 /**
- * Elasticsearch maps `circuit_breaking_exception` to 429.
+ * HTTP statuses that Elasticsearch only returns for something the user
+ * typed: a query it cannot parse or resolve (400) or an index pattern that
+ * matches nothing (404). Every other status, including the rest of the 4xx
+ * range (e.g. 401, 403, 429), is outside the user's control and therefore
+ * counted as an application failure.
  */
-const HTTP_TOO_MANY_REQUESTS = 429;
-
-const isClientErrorStatus = (status: number): boolean =>
-  status >= 400 && status < 500 && status !== HTTP_TOO_MANY_REQUESTS;
-
-const isServerErrorStatus = (status: number): boolean =>
-  status >= 500 || status === HTTP_TOO_MANY_REQUESTS;
+const USER_INPUT_STATUSES: readonly number[] = [HTTP_BAD_REQUEST, HTTP_NOT_FOUND];
 
 const toRecord = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
@@ -134,12 +135,9 @@ export const classifyChartSectionError = (error: unknown): ChartSectionErrorCate
   const { status } = getChartSectionErrorMeta(error);
 
   if (status !== undefined) {
-    if (isClientErrorStatus(status)) {
-      return ERROR_CATEGORY.USER_INPUT;
-    }
-    if (isServerErrorStatus(status)) {
-      return ERROR_CATEGORY.APPLICATION;
-    }
+    return USER_INPUT_STATUSES.includes(status)
+      ? ERROR_CATEGORY.USER_INPUT
+      : ERROR_CATEGORY.APPLICATION;
   }
 
   const causeTypes = collectCauseTypes(getErrorCause(error));

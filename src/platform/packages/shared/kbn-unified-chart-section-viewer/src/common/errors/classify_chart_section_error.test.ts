@@ -33,7 +33,7 @@ const createEsErrorLike = (
 
 describe('classifyChartSectionError', () => {
   describe('user_input', () => {
-    it('classifies a 4xx status as user input', () => {
+    it('classifies a 400 status as user input', () => {
       const error = new EsqlResponseError(
         { type: 'verification_exception', reason: 'unknown column x' },
         { status: 400 }
@@ -42,7 +42,7 @@ describe('classifyChartSectionError', () => {
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.USER_INPUT);
     });
 
-    it('classifies any other 4xx status as user input', () => {
+    it('classifies a 404 status as user input', () => {
       const error = new EsqlResponseError({ type: 'index_not_found_exception' }, { status: 404 });
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.USER_INPUT);
@@ -66,7 +66,7 @@ describe('classifyChartSectionError', () => {
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.USER_INPUT);
     });
 
-    it('classifies a search-interceptor error carrying a 4xx body status as user input', () => {
+    it('classifies a search-interceptor error carrying a 400 body status as user input', () => {
       const error = createEsErrorLike(
         { type: 'parsing_exception', reason: "line 1:42: extraneous input '|' expecting <EOF>" },
         { status: 400 }
@@ -122,6 +122,24 @@ describe('classifyChartSectionError', () => {
 
     it('prefers a 5xx status over a user-input error type', () => {
       const error = new EsqlResponseError({ type: 'parsing_exception' }, { status: 503 });
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
+    });
+
+    it('classifies a 401 status as an application error', () => {
+      const error = new EsqlResponseError(
+        { type: 'security_exception', reason: 'missing authentication credentials' },
+        { status: 401 }
+      );
+
+      expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
+    });
+
+    it('classifies a 403 status as an application error', () => {
+      const error = new EsqlResponseError(
+        { type: 'security_exception', reason: 'action is unauthorized' },
+        { status: 403 }
+      );
 
       expect(classifyChartSectionError(error)).toBe(ERROR_CATEGORY.APPLICATION);
     });
