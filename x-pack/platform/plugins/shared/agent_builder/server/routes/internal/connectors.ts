@@ -58,7 +58,7 @@ export function registerInternalConnectorRoutes({ router, coreSetup, logger }: R
       path: `${internalApiPath}/connector/{connectorId}/sub_actions`,
       validate: {
         params: schema.object({
-          connectorId: schema.string({ minLength: 1 }),
+          connectorId: schema.string({ minLength: 1, maxLength: 512 }),
         }),
       },
       options: { access: 'internal' },
@@ -69,7 +69,20 @@ export function registerInternalConnectorRoutes({ router, coreSetup, logger }: R
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
 
       const { connectorId } = request.params;
-      const connector = await actionsClient.get({ id: connectorId });
+
+      let connector: Awaited<ReturnType<typeof actionsClient.get>>;
+      try {
+        connector = await actionsClient.get({ id: connectorId });
+      } catch (e) {
+        const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
+        if (statusCode === 404) {
+          return response.notFound({
+            body: { message: `Connector '${connectorId}' not found.` },
+          });
+        }
+        throw e;
+      }
+
       const spec = getConnectorSpec(connector.actionTypeId);
 
       if (!spec) {

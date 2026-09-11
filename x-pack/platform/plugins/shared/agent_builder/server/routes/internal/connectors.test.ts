@@ -171,6 +171,19 @@ describe('registerInternalConnectorRoutes', () => {
       expect(handlers.has(`${internalApiPath}/connector/{connectorId}/sub_actions`)).toBe(true);
     });
 
+    it('returns 404 when the connector does not exist', async () => {
+      const boomNotFound = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+      mockGet.mockRejectedValue(boomNotFound);
+
+      const result = (await callSubActions('nonexistent')) as {
+        type: string;
+        body: { message: string };
+      };
+
+      expect(result.type).toBe('notFound');
+      expect(result.body.message).toMatch('nonexistent');
+    });
+
     it('returns 404 when the connector type has no spec', async () => {
       mockGet.mockResolvedValue(makeConnector({ actionTypeId: '.email' }));
       mockGetConnectorSpec.mockReturnValue(undefined);

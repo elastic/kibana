@@ -17,6 +17,7 @@ const getConnectorSubActionsSchema = z.object({
   connector_id: z
     .string()
     .min(1)
+    .max(512)
     .describe(
       'The id of the connector instance to describe. Use a value returned by list_connectors — never invent an id.'
     ),
