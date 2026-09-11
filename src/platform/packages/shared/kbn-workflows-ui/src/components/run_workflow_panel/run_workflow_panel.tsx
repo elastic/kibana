@@ -8,7 +8,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
@@ -81,6 +81,8 @@ export interface RunWorkflowPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /** Optional callback invoked after workflow execution settles while the panel is mounted. */
+  onExecutionSettled?: () => void;
   /**
    * When false, the panel skips its built-in success toast so the caller can
    * report the outcome itself (e.g. a multi-target run). Defaults to true.
@@ -94,6 +96,12 @@ interface RunWorkflowPanelServices {
   rendering?: ToMountPointParams;
 }
 
+const getWorkflowExecutionError = (error: unknown): Error =>
+  new Error(
+    (error as { body?: { message?: string } })?.body?.message ??
+      (error instanceof Error ? error.message : String(error))
+  );
+
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
@@ -103,6 +111,7 @@ export const RunWorkflowPanel = ({
   filterWorkflow,
   onClose,
   onExecute,
+  onExecutionSettled,
   showSuccessToast = true,
 }: RunWorkflowPanelProps) => {
   const {
@@ -114,6 +123,14 @@ export const RunWorkflowPanel = ({
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
@@ -168,15 +185,18 @@ export const RunWorkflowPanel = ({
       };
 
       const onSettled = () => {
+        if (!isMounted.current) return;
         setIsLoading(false);
+        onExecutionSettled?.();
         onClose();
       };
 
       if (runWorkflowExecutor) {
         void runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs })
           .then(onSuccess, (err: unknown) => {
-            const error = err instanceof Error ? err : new Error(String(err));
-            notifications.toasts.addError(error, { title: i18n.WORKFLOW_START_FAILED_TOAST });
+            notifications.toasts.addError(getWorkflowExecutionError(err), {
+              title: i18n.WORKFLOW_START_FAILED_TOAST,
+            });
           })
           .finally(onSettled);
       } else {
@@ -185,10 +205,9 @@ export const RunWorkflowPanel = ({
           {
             onSuccess,
             onError: (err) => {
-              notifications.toasts.addError(
-                new Error((err as { body?: { message?: string } }).body?.message ?? err.message),
-                { title: i18n.WORKFLOW_START_FAILED_TOAST }
-              );
+              notifications.toasts.addError(getWorkflowExecutionError(err), {
+                title: i18n.WORKFLOW_START_FAILED_TOAST,
+              });
             },
             onSettled,
           }
@@ -205,6 +224,7 @@ export const RunWorkflowPanel = ({
       rendering,
       onClose,
       onExecute,
+      onExecutionSettled,
       showSuccessToast,
     ]
   );

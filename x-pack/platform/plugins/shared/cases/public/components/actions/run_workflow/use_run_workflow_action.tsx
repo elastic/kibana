@@ -61,11 +61,6 @@ export const useRunWorkflowAction = ({
     [onAction, openModal]
   );
 
-  const handleClose = useCallback(() => {
-    closeModal();
-    onActionSuccess();
-  }, [closeModal, onActionSuccess]);
-
   const getAction = useCallback(
     (selectedCasesForRun: CasesUI): EuiContextMenuPanelItemDescriptor => {
       const overLimit = selectedCasesForRun.length > MAX_CASES_PER_WORKFLOW_RUN;
@@ -92,9 +87,18 @@ export const useRunWorkflowAction = ({
       filterWorkflow,
       sortWorkflow,
       showSuccessToast,
-      onClose: handleClose,
+      onClose: closeModal,
+      onExecutionSettled: onActionSuccess,
     }),
-    [inputs, runWorkflow, filterWorkflow, sortWorkflow, showSuccessToast, handleClose]
+    [
+      inputs,
+      runWorkflow,
+      filterWorkflow,
+      sortWorkflow,
+      showSuccessToast,
+      closeModal,
+      onActionSuccess,
+    ]
   );
 
   return {

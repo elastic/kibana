@@ -15,7 +15,13 @@ import * as i18n from './translations';
 interface RunCaseWorkflowModalProps
   extends Pick<
     RunWorkflowPanelProps,
-    'inputs' | 'runWorkflow' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'showSuccessToast'
+    | 'inputs'
+    | 'runWorkflow'
+    | 'sortWorkflow'
+    | 'filterWorkflow'
+    | 'onExecute'
+    | 'onExecutionSettled'
+    | 'showSuccessToast'
   > {
   onClose: () => void;
   /** Ref to the button that opened this modal; when set, focus is returned to it on close. */
@@ -34,6 +40,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   filterWorkflow,
   onClose,
   onExecute,
+  onExecutionSettled,
   showSuccessToast,
   focusButtonRef,
 }) => {
@@ -58,6 +65,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
           filterWorkflow={filterWorkflow}
           onClose={onClose}
           onExecute={onExecute}
+          onExecutionSettled={onExecutionSettled}
           showSuccessToast={showSuccessToast}
         />
       </EuiModalBody>
