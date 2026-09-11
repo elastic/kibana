@@ -69,7 +69,10 @@ describe('ConversationProposalsService', () => {
 
     await service.list(query, request, spaceId);
 
-    expect(proposalsService.listByWindow).toHaveBeenCalledWith(query, spaceId);
+    expect(proposalsService.listByWindow).toHaveBeenCalledWith(
+      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
+      spaceId
+    );
   });
 
   it('deduplicates conversation ids before fetching titles', async () => {
@@ -117,7 +120,7 @@ describe('ConversationProposalsService', () => {
     expect(result.groups.investigate[1]).not.toHaveProperty('conversationTitle');
   });
 
-  it('passes total and truncated through from listByWindow', async () => {
+  it('derives total from grouped items; passes truncated through from listByWindow', async () => {
     const proposalsService = makeProposalsService([makeProposal()], {
       total: 501,
       truncated: true,
@@ -126,7 +129,9 @@ describe('ConversationProposalsService', () => {
 
     const result = await service.list(query, request, spaceId);
 
-    expect(result.total).toBe(501);
+    // total reflects what actually made it into groups (1 proposal → 1 grouped item),
+    // not the raw ES hit count, so the UI count never overstates visible items.
+    expect(result.total).toBe(1);
     expect(result.truncated).toBe(true);
   });
 
