@@ -17,10 +17,13 @@ import type {
 import {
   buildTopFailingTable,
   classifiedEntries,
+  DEFAULT_TERMINAL_WIDTH,
   displaySummary,
   flakiestBranch,
+  flexColumnWidths,
   formatAge,
   groupByFile,
+  terminalWidth,
   wrapOn,
   type ClassifiedEntry,
 } from './flaky_tests_summary';
@@ -172,6 +175,36 @@ describe('classifiedEntries', () => {
   });
 });
 
+describe('terminalWidth', () => {
+  it('uses the terminal columns when available', () => {
+    expect(terminalWidth(120)).toBe(120);
+  });
+
+  it('falls back to the Buildkite width when stdout is not a terminal', () => {
+    expect(terminalWidth(undefined)).toBe(DEFAULT_TERMINAL_WIDTH);
+    expect(terminalWidth(0)).toBe(DEFAULT_TERMINAL_WIDTH);
+    expect(terminalWidth(NaN)).toBe(DEFAULT_TERMINAL_WIDTH);
+  });
+});
+
+describe('flexColumnWidths', () => {
+  it('gives wider terminals wider columns', () => {
+    const narrow = flexColumnWidths(160);
+    const wide = flexColumnWidths(200);
+    expect(wide.owners).toBeGreaterThan(narrow.owners);
+    expect(wide.title).toBeGreaterThan(narrow.title);
+    expect(wide.file).toBeGreaterThan(narrow.file);
+  });
+
+  it('never shrinks a column below its minimum', () => {
+    expect(flexColumnWidths(40)).toEqual({ owners: 20, title: 20, file: 20 });
+  });
+
+  it('stops growing past the layout cap', () => {
+    expect(flexColumnWidths(300)).toEqual(flexColumnWidths(220));
+  });
+});
+
 describe('buildTopFailingTable', () => {
   it('renders one row per test with a shared file cell and the flakiest branch', () => {
     const first = flaky({ testId: 't1', title: 'first test' });
@@ -271,7 +304,12 @@ describe('displaySummary', () => {
       from: new Date('2026-08-31T12:00:00.000Z'),
       to: now,
     },
-    scope: { pipelines: ['kibana-on-merge'], branches: [], frameworks: ['jest', 'playwright'] },
+    scope: {
+      pipelines: ['kibana-on-merge'],
+      branches: [],
+      frameworks: ['jest', 'playwright'],
+      classifications: ['flaky', 'consistently-failing'],
+    },
     thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
     summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
@@ -286,24 +324,51 @@ describe('displaySummary', () => {
     buildFailRate: 1,
   });
 
-  const renderSummary = (input: FlakyTestReport, limit: number): string => {
+  const renderSummary = (input: FlakyTestReport, limit: number, width?: number): string => {
     const writes: string[] = [];
     const log = new ToolingLog();
     log.write = jest.fn((...args: unknown[]) => {
       writes.push(String(args[0]));
     }) as unknown as ToolingLog['write'];
-    displaySummary(input, limit, log);
+    displaySummary(input, limit, log, width);
     return stripAnsi(writes.join(''));
   };
+
+  const widestLine = (output: string): number =>
+    Math.max(...output.split('\n').map((line) => line.length));
+
+  it('fits the panel in the terminal width, using the Buildkite width by default', () => {
+    const longNames = entry({
+      testId: 'long',
+      title:
+        'a very long test title that goes on and on describing every detail of the scenario under test',
+      filePath:
+        'x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/default_status_alert.spec.ts',
+      owners: ['elastic/actionable-obs-team', 'elastic/obs-signals-logs-team'],
+      byBranch: [
+        branch({
+          branch: '8.19',
+          buildFailRate: 1,
+          latestRun: { status: 'interrupted', timestamp: now },
+        }),
+      ],
+    });
+    const input = { ...report, flaky: [longNames, ...report.flaky] };
+
+    expect(widestLine(renderSummary(input, 10))).toBeLessThanOrEqual(DEFAULT_TERMINAL_WIDTH);
+    expect(widestLine(renderSummary(input, 10, 200))).toBeLessThanOrEqual(200);
+    expect(widestLine(renderSummary(input, 10, 200))).toBeGreaterThan(DEFAULT_TERMINAL_WIDTH);
+  });
 
   it('prints window, scope, totals and the capped top list', () => {
     const output = renderSummary(report, 1);
 
     expect(output).toContain('Flaky tests summary');
     expect(output).toContain('Lookback : 7d');
-    expect(output).toContain('Pipelines  : kibana-on-merge');
-    expect(output).toContain('Branches   : any');
-    expect(output).toContain('Frameworks : jest, playwright');
+    expect(output).toContain('Pipelines       : kibana-on-merge');
+    expect(output).toContain('Branches        : any');
+    expect(output).toContain('Frameworks      : jest, playwright');
+    expect(output).toContain('Classifications : flaky, consistently-failing');
     expect(output).toContain('Min builds        : 10');
     expect(output).toContain('Min failed builds : 2');
     expect(output).toContain('Max tests         : 200 per list');

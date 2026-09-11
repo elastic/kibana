@@ -40,12 +40,14 @@ describe('statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate', () => {
 
     expect(orphanedInvalidationTargets).toEqual([{ apiKeyId: 'id-a', uiamApiKey: 'YTpmb28' }]);
     expect(provisioningStatusForFailedTasks).toHaveLength(1);
-    expect(provisioningStatusForFailedTasks[0].id).toBe('a');
+    expect(provisioningStatusForFailedTasks[0].id).toBe('task:a');
+    expect(provisioningStatusForFailedTasks[0].attributes.entityId).toBe('a');
     expect(provisioningStatusForFailedTasks[0].attributes.status).toBe(
       UiamApiKeyProvisioningStatus.FAILED
     );
     expect(provisioningStatusForCompletedTasks).toHaveLength(1);
-    expect(provisioningStatusForCompletedTasks[0].id).toBe('b');
+    expect(provisioningStatusForCompletedTasks[0].id).toBe('task:b');
+    expect(provisioningStatusForCompletedTasks[0].attributes.entityId).toBe('b');
     expect(provisioningStatusForCompletedTasks[0].attributes.status).toBe(
       UiamApiKeyProvisioningStatus.COMPLETED
     );

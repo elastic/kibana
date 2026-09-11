@@ -12,9 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';
-import { ConfigureCases } from '../configure_cases';
 import type { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import {
@@ -40,8 +38,6 @@ import type { AllFieldDefinitionsPageProps } from '../field_library/pages/all_fi
 import { useCasesConfig } from '../../common/lib/kibana';
 import { CasesPageLayout } from './cases_page_layout';
 
-const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
-
 const AllTemplatesLazy: FC = lazy(() => import('../templates_v2/pages/all_templates_page'));
 
 const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
@@ -56,13 +52,9 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
   () => import('../field_library/pages/all_field_definitions_page')
 );
 
-// Temporary: placeholder pages for the Cases UX redesign (elastic/security-team#17398).
-// These will progressively replace the current pages and the FF will be removed.
-const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
-const CaseViewRedesignLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesRedesignLazy = lazy(
-  () => import('../cases_redesign/configure_cases/configure_cases')
-);
+const AllCasesLazy = lazy(() => import('../cases_redesign/all_cases'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
+const ConfigureCasesLazy = lazy(() => import('../cases_redesign/configure_cases/configure_cases'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();
@@ -75,7 +67,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
-  const { templatesEnabled: isTemplatesEnabled, casesRedesign } = useCasesConfig();
+  const { templatesEnabled: isTemplatesEnabled } = useCasesConfig();
 
   return (
     <>
@@ -83,13 +75,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
       <CasesPageLayout basePath={basePath}>
         <Routes>
           <Route strict exact path={basePath}>
-            {casesRedesign.list ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllCasesRedesignLazy />
-              </Suspense>
-            ) : (
-              <AllCases />
-            )}
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <AllCasesLazy />
+            </Suspense>
           </Route>
 
           <Route path={getCreateCasePath(basePath)}>
@@ -154,13 +142,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
 
           <Route path={getCasesConfigurePath(basePath)}>
             {permissions.settings ? (
-              casesRedesign.settings ? (
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <ConfigureCasesRedesignLazy />
-                </Suspense>
-              ) : (
-                <ConfigureCases />
-              )
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <ConfigureCasesLazy />
+              </Suspense>
             ) : (
               <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
             )}
@@ -169,14 +153,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
           {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
           <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
             <Suspense fallback={<EuiLoadingSpinner />}>
-              {casesRedesign.details ? (
-                <CaseViewRedesignLazy
-                  refreshRef={refreshRef}
-                  timelineIntegration={timelineIntegration}
-                />
-              ) : (
-                <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
-              )}
+              <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
             </Suspense>
           </Route>
 
