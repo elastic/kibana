@@ -102,7 +102,7 @@ const TYPE_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map([
 const ALERT_GROUP_LABELS = {
   firing: i18n.translate(
     'xpack.streams.entityCentricLab.entities.groupBy.alerts.firing',
-    { defaultMessage: 'Resources with firing alerts' }
+    { defaultMessage: 'Resources with active alerts' }
   ),
   noSetup: i18n.translate(
     'xpack.streams.entityCentricLab.entities.groupBy.alerts.noSetup',
@@ -110,7 +110,7 @@ const ALERT_GROUP_LABELS = {
   ),
   ok: i18n.translate(
     'xpack.streams.entityCentricLab.entities.groupBy.alerts.ok',
-    { defaultMessage: 'Resources with no firing alerts' }
+    { defaultMessage: 'Resources with no active alerts' }
   ),
 };
 
@@ -170,8 +170,8 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
   },
 ];
 
-const tagGroupByFields = (isElasticOn: boolean): GroupByFieldDef[] =>
-  getVisibleTagKeys(isElasticOn).map((key) => ({
+const tagGroupByFields = (isElasticOn: boolean, isPhase1 = false): GroupByFieldDef[] =>
+  getVisibleTagKeys(isElasticOn, isPhase1).map((key) => ({
     id: `tag:${key}`,
     label: TAG_KEY_LABEL[key],
     valueOf: (entity: Entity) => entity.tags[key] || UNKNOWN,
@@ -201,7 +201,7 @@ export const getGroupByFields = (
         valueOf: (entity: Entity) => entity.attributes?.[def.key] || UNKNOWN,
       }))
     : [];
-  return [...fields, ...alertsField, ...tagGroupByFields(isElasticOn), ...attrFields];
+  return [...fields, ...alertsField, ...tagGroupByFields(isElasticOn, isPhase1), ...attrFields];
 };
 
 export const getGroupByFieldDef = (

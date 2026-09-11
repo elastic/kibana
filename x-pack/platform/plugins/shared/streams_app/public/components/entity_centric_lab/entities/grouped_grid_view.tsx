@@ -37,7 +37,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
-  EuiRadioGroup,
+
   EuiRange,
   EuiSelect,
   EuiSpacer,
@@ -1472,7 +1472,6 @@ const BucketMetricControlsFlyout = ({
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketControlsFlyout' });
   const colorModeGroupId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketColorMode' });
   const paletteTypeGroupId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketPaletteType' });
-  const sortGroupId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketSort' });
   const metrics = getBucketMetrics(bucketKey);
   const metricOptions = useMemo(
     () => metrics.map((descriptor) => ({ value: descriptor.id, text: descriptor.label })),
@@ -1683,38 +1682,19 @@ const BucketMetricControlsFlyout = ({
             label={i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.sort', {
               defaultMessage: 'Sort',
             })}
+            helpText={i18n.translate(
+              'xpack.streams.entityCentricLab.entities.bucket.controls.sortHelp',
+              { defaultMessage: 'Show worst things first, best last' }
+            )}
             fullWidth
           >
-            <EuiRadioGroup
-              name={sortGroupId}
-              idSelected={draftColoring.sortReverse ? 'reverse' : 'metricValue'}
-              onChange={(id) => updateColoring({ sortReverse: id === 'reverse' })}
-              options={[
-                {
-                  id: 'metricValue',
-                  label: (
-                    <>
-                      {i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.bucket.controls.sortMetricValue',
-                        { defaultMessage: 'Metric value' }
-                      )}
-                      <EuiText size="xs" color="subdued">
-                        {i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.bucket.controls.sortMetricValueHelp',
-                          { defaultMessage: 'Show worst things first, best last' }
-                        )}
-                      </EuiText>
-                    </>
-                  ),
-                },
-                {
-                  id: 'reverse',
-                  label: i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.bucket.controls.sortReverse',
-                    { defaultMessage: 'Reverse order' }
-                  ),
-                },
-              ]}
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.sortReverse',
+                { defaultMessage: 'Reverse order' }
+              )}
+              checked={draftColoring.sortReverse ?? false}
+              onChange={(e) => updateColoring({ sortReverse: e.target.checked })}
               data-test-subj={`entityCentricLabBucketSort-${bucketKey}`}
             />
           </EuiFormRow>
@@ -2221,12 +2201,10 @@ const KubernetesCard = ({
   const { euiTheme } = useEuiTheme();
   const subRowClass = css`
     padding: ${euiTheme.size.m} 0;
-    border-top: 1px solid ${euiTheme.colors.lightShade};
   `;
   const nestedContentClass = css`
     margin-left: ${euiTheme.size.xl};
     padding-left: ${euiTheme.size.l};
-    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   // Cluster filter state — transient (not persisted) so it behaves
@@ -2319,7 +2297,6 @@ const KubernetesCard = ({
         <EuiFlexItem grow={false}>
           <CategoryHeader category="kubernetes" total={visibleEntities.length} />
         </EuiFlexItem>
-        <EuiFlexItem />
         {clusterNames.length > 0 ? (
           <EuiFlexItem grow={false}>
             <KubernetesClusterFilter
@@ -2363,12 +2340,10 @@ const MultiTypeCategoryCard = ({
   const hideHeader = useContext(HideCategoryHeaderContext);
   const subRowClass = css`
     padding: ${euiTheme.size.m} 0;
-    border-top: 1px solid ${euiTheme.colors.lightShade};
   `;
   const nestedContentClass = css`
     margin-left: ${euiTheme.size.xl};
     padding-left: ${euiTheme.size.l};
-    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   const orderedTypes = useMemo(() => groupEntitiesByType(entities), [entities]);
@@ -2459,12 +2434,10 @@ const CloudProviderCard = ({
   const { euiTheme } = useEuiTheme();
   const subRowClass = css`
     padding: ${euiTheme.size.m} 0;
-    border-top: 1px solid ${euiTheme.colors.lightShade};
   `;
   const nestedContentClass = css`
     margin-left: ${euiTheme.size.xl};
     padding-left: ${euiTheme.size.l};
-    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   const serviceGroups = useMemo(
@@ -2537,7 +2510,6 @@ const CloudGroupedCards = ({
   const nestedContentClass = css`
     margin-left: 12px;
     padding-left: 12px;
-    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   // Flatten all provider groups into a single ordered list of service rows.
@@ -2598,7 +2570,6 @@ const CloudGroupedCards = ({
                 <div
                   style={{
                     padding: `${euiTheme.size.m} 0`,
-                    borderTop: `1px solid ${euiTheme.colors.lightShade}`,
                   }}
                 />
               ) : null}
@@ -3086,12 +3057,10 @@ const CustomGroupCard = ({
   const nestedChildClass = css`
     margin-left: ${euiTheme.size.xl};
     padding-left: ${euiTheme.size.l};
-    border-left: 1px solid ${euiTheme.colors.lightShade};
   `;
   const childDividerClass = css`
     margin-top: ${euiTheme.size.m};
     padding-top: ${euiTheme.size.m};
-    border-top: 1px solid ${euiTheme.colors.lightShade};
   `;
 
   return (

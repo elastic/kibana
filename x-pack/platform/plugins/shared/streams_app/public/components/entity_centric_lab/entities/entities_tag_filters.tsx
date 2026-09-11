@@ -50,6 +50,11 @@ interface Props {
    * Team / Application / Environment / Region set.
    */
   readonly isElasticOn?: boolean;
+  /**
+   * Phase 1 keeps only Environment + Region (no Team, no Application).
+   * Takes priority over `isElasticOn` when both are true.
+   */
+  readonly isPhase1?: boolean;
 }
 
 const TagFilterPopover = ({
@@ -146,8 +151,12 @@ export const EntitiesTagFilters = ({
   compressed = false,
   hideClear = false,
   isElasticOn = false,
+  isPhase1 = false,
 }: Props) => {
-  const visibleKeys = useMemo(() => getVisibleTagKeys(isElasticOn), [isElasticOn]);
+  const visibleKeys = useMemo(
+    () => getVisibleTagKeys(isElasticOn, isPhase1),
+    [isElasticOn, isPhase1]
+  );
   const totalActive = useMemo(
     () => visibleKeys.reduce((sum, key) => sum + activeFilters[key].length, 0),
     [activeFilters, visibleKeys]
@@ -184,14 +193,17 @@ export const EntitiesTagFilters = ({
             own?") is the most common entry point on this page; keeping
             it consistent everywhere avoids muscle-memory misclicks.
             ElasticOn drops Application (infra-first).
+            Phase 1 keeps only Environment + Region.
           */}
-          <TagFilterPopover
-            tagKey="team"
-            options={facets.team}
-            selected={activeFilters.team}
-            onChange={handleKeyChange('team')}
-            isElasticOn={isElasticOn}
-          />
+          {visibleKeys.includes('team') ? (
+            <TagFilterPopover
+              tagKey="team"
+              options={facets.team}
+              selected={activeFilters.team}
+              onChange={handleKeyChange('team')}
+              isElasticOn={isElasticOn}
+            />
+          ) : null}
           {visibleKeys.includes('application') ? (
             <TagFilterPopover
               tagKey="application"

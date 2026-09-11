@@ -280,14 +280,14 @@ const ENTITY_ALERTS_VALUES: readonly CategoricalValue[] = [
   {
     id: 'active',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.active', {
-      defaultMessage: 'Resources with firing alerts',
+      defaultMessage: 'Resources with active alerts',
     }),
     tone: 'danger',
   },
   {
     id: 'clear',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.clear', {
-      defaultMessage: 'Resources with no firing alerts',
+      defaultMessage: 'Resources with no active alerts',
     }),
     tone: 'good',
   },
@@ -1448,7 +1448,7 @@ export const resolveMetricReading = (
 
   // Shared "Alerts" metric mirrors the entity's alert status directly.
   // The tooltip displayValue uses the actual count for a richer label
-  // (e.g. "3 firing alerts") instead of the generic legend label.
+  // (e.g. "3 active alerts") instead of the generic legend label.
   if (metric.id === ENTITY_ALERTS_METRIC_ID && metric.kind === 'categorical') {
     const hintId = alertHint ?? 'na';
     const value =
@@ -1459,9 +1459,9 @@ export const resolveMetricReading = (
     if (hintId === 'na') {
       tooltipLabel = 'No alert set up';
     } else if (hintId === 'active' && alertActiveCount !== undefined) {
-      tooltipLabel = `${alertActiveCount} firing alert${alertActiveCount > 1 ? 's' : ''}`;
+      tooltipLabel = `${alertActiveCount} active alert${alertActiveCount > 1 ? 's' : ''}`;
     } else if (hintId === 'clear') {
-      tooltipLabel = '0 firing alert';
+      tooltipLabel = '0 active alerts';
     } else {
       tooltipLabel = value.label;
     }

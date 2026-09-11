@@ -56,6 +56,7 @@ import {
   type EntitySelectionContext,
   type OnSelectEntity,
   type FlyoutCustomLink,
+  type LinkedDashboardOverride,
 } from '@kbn/entity-centric-lab-flyout';
 
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -134,6 +135,7 @@ const PageTabContent = ({
   overview,
   tabsData,
   customLinks,
+  linkedDashboards,
   onSelectEntity,
   hideAiSummary = false,
 }: {
@@ -144,6 +146,7 @@ const PageTabContent = ({
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
   readonly customLinks?: readonly FlyoutCustomLink[];
+  readonly linkedDashboards?: readonly LinkedDashboardOverride[];
   readonly onSelectEntity?: OnSelectEntity;
   readonly hideAiSummary?: boolean;
 }) => {
@@ -194,6 +197,7 @@ const PageTabContent = ({
           entityName={entityName}
           entityType={entityType}
           renderDashboard={renderDash}
+          linkedDashboards={linkedDashboards}
         />
       );
     case 'profiling':
@@ -240,9 +244,10 @@ const EntityDetailPageInner = () => {
   const isPhase1 = phaseVariation === 'phase1';
   // Track whether we arrived via in-app navigation (expandable flyout) so
   // we can use history.goBack() to restore the flyout on "Back".
-  const cameFromApp = useRef(
-    typeof window !== 'undefined' && window.history.state?.key !== undefined
-  );
+  // history.action === 'PUSH' means the user navigated here from another
+  // in-app page; 'POP' means a direct URL load, refresh, or browser
+  // back/forward — in those cases goBack() is unreliable.
+  const cameFromApp = useRef(history.action === 'PUSH');
   const dataset = useMemo(() => buildFakeEntities(dataVariation), [dataVariation]);
 
   const entityByName = useMemo(() => {
@@ -299,11 +304,19 @@ const EntityDetailPageInner = () => {
   // Tab list
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(() => {
     const isAllowedTabId = (id: string): boolean => FULL_TAB_IDS.includes(id);
+    // Default tab order must match the flyout (entity_flyout.tsx) so that
+    // expanding / collapsing never shuffles the tab bar.
     const defaultTabs: Array<{ id: TabId; label: string; appendBadge?: number }> = [
       {
         id: 'overview',
         label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.overview', {
           defaultMessage: 'Overview',
+        }),
+      },
+      {
+        id: 'dashboards',
+        label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.dashboards', {
+          defaultMessage: 'Dashboards',
         }),
       },
       {
@@ -338,12 +351,6 @@ const EntityDetailPageInner = () => {
         id: 'relationships',
         label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.relationships', {
           defaultMessage: 'Relationships',
-        }),
-      },
-      {
-        id: 'dashboards',
-        label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.dashboards', {
-          defaultMessage: 'Dashboards',
         }),
       },
       {
@@ -383,15 +390,32 @@ const EntityDetailPageInner = () => {
     return overrideTabs;
   }, [templateOverride, tabsData.traces]);
 
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  // Phase-1 exclusion: drop Custom and Relationships tabs.
+  const visibleTabs = useMemo(
+    () =>
+      isPhase1 ? tabs.filter((tab) => tab.id !== 'custom' && tab.id !== 'relationships') : tabs,
+    [tabs, isPhase1]
+  );
+
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    const STORED_TAB_KEY = 'entityCentricLab_activeTab';
+    try {
+      const stored = sessionStorage.getItem(STORED_TAB_KEY);
+      sessionStorage.removeItem(STORED_TAB_KEY);
+      if (stored) return stored as TabId;
+    } catch {
+      // sessionStorage unavailable
+    }
+    return 'overview';
+  });
 
   // Fall back when active tab disappears
   useEffect(() => {
-    if (tabs.length === 0) return;
-    if (!tabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab(tabs[0].id);
+    if (visibleTabs.length === 0) return;
+    if (!visibleTabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab(visibleTabs[0].id);
     }
-  }, [tabs, activeTab]);
+  }, [visibleTabs, activeTab]);
 
   // Child entity flyout (opened from Relationships tab)
   const [childEntityName, setChildEntityName] = useState<string | null>(null);
@@ -420,10 +444,17 @@ const EntityDetailPageInner = () => {
 
   const { rangeFrom, rangeTo } = useTimeRange();
 
-  // Dashboards tab: embed a specific dashboard by its saved-object title
+  // Dashboards tab: embed a specific dashboard by its saved-object title.
+  // User-linked dashboards carry a `savedObjectId` directly so the renderer
+  // skips the title-based lookup.
   const renderTabDashboard = useCallback(
     (
-      dashboard: { savedObjectTitle: string; scopeField: string; hiddenPanelIds?: ReadonlySet<string> },
+      dashboard: {
+        savedObjectTitle: string;
+        scopeField: string;
+        hiddenPanelIds?: ReadonlySet<string>;
+        savedObjectId?: string;
+      },
       name: string
     ) => (
       <K8sDetailDashboard
@@ -435,6 +466,7 @@ const EntityDetailPageInner = () => {
         resourceName={name}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        directSavedObjectId={dashboard.savedObjectId}
       />
     ),
     [rangeFrom, rangeTo]
@@ -456,7 +488,13 @@ const EntityDetailPageInner = () => {
   // (in-app navigation), use history.goBack() so the list view URL —
   // including the `flyoutEntity` query param — is restored and the flyout
   // re-opens automatically. Otherwise fall back to a fresh router push.
+  // In both cases, persist the current tab so the destination can restore it.
   const handleBack = useCallback(() => {
+    try {
+      sessionStorage.setItem('entityCentricLab_activeTab', activeTab);
+    } catch {
+      // ignore
+    }
     if (detailVariation === 'flyoutExpandable' && cameFromApp.current) {
       history.goBack();
       return;
@@ -469,7 +507,7 @@ const EntityDetailPageInner = () => {
     } else {
       router.push('/entities', { path: {}, query: {} });
     }
-  }, [entity, router, detailVariation, history]);
+  }, [entity, router, detailVariation, history, activeTab]);
 
   // "Take action" popover (mirrors flyout footer)
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
@@ -723,27 +761,31 @@ const EntityDetailPageInner = () => {
                   </EuiButtonEmpty>,
                 ]
               : []),
-            <EuiToolTip
-              key="manage"
-              content={i18n.translate(
-                'xpack.streams.entityCentricLab.detailPage.manageEntityType',
-                { defaultMessage: 'Manage resource type' }
-              )}
-            >
-              <EuiButtonIcon
-                iconType="gear"
-                color="primary"
-                display="empty"
-                size="m"
-                onClick={handleManageEntityType}
-                aria-label={i18n.translate(
-                  'xpack.streams.entityCentricLab.detailPage.manageEntityTypeAriaLabel',
-                  { defaultMessage: 'Manage resource type' }
-                )}
-              />
-            </EuiToolTip>,
+            ...(isPhase1
+              ? []
+              : [
+                  <EuiToolTip
+                    key="manage"
+                    content={i18n.translate(
+                      'xpack.streams.entityCentricLab.detailPage.manageEntityType',
+                      { defaultMessage: 'Manage resource type' }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      iconType="gear"
+                      color="primary"
+                      display="empty"
+                      size="m"
+                      onClick={handleManageEntityType}
+                      aria-label={i18n.translate(
+                        'xpack.streams.entityCentricLab.detailPage.manageEntityTypeAriaLabel',
+                        { defaultMessage: 'Manage resource type' }
+                      )}
+                    />
+                  </EuiToolTip>,
+                ]),
           ]}
-          tabs={tabs.map((tab) => ({
+          tabs={visibleTabs.map((tab) => ({
             label: tab.label,
             isSelected: tab.id === activeTab,
             onClick: () => setActiveTab(tab.id),
@@ -768,12 +810,13 @@ const EntityDetailPageInner = () => {
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
             <PageTabContent
               activeTab={activeTab}
-              activeTabLabel={tabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
+              activeTabLabel={visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
               entityName={entityName}
               entityType={entityType}
               overview={overview}
               tabsData={tabsData}
               customLinks={templateOverride?.customLinks}
+              linkedDashboards={templateOverride?.linkedDashboards}
               onSelectEntity={openChildEntity}
               hideAiSummary={isPhase1}
             />
@@ -796,6 +839,7 @@ const EntityDetailPageInner = () => {
           hideHealthBadge={isPhase1}
           alertsBadge={isPhase1 ? computeChildAlertsBadge(childEntity) : undefined}
           hideAiSummary={isPhase1}
+          hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
         />
       ) : null}
     </EntityFlyoutServicesProvider>

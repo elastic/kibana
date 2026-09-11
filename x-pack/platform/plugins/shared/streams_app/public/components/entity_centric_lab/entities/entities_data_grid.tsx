@@ -97,8 +97,8 @@ const alertStatusId = (entity: Entity): string => {
 const alertBadgeLabel = (entity: Entity): string => {
   if (!entity.alerts) return 'No alert set up';
   const { active } = entity.alerts;
-  if (active > 0) return `${active} firing alert${active > 1 ? 's' : ''}`;
-  return '0 firing alert';
+  if (active > 0) return `${active} active alert${active > 1 ? 's' : ''}`;
+  return '0 active alerts';
 };
 
 const METRIC_PREFIX = 'metric:';

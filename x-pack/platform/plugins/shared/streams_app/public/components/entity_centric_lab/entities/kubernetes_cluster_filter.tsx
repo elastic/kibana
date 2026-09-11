@@ -125,26 +125,29 @@ export const KubernetesClusterFilter = ({
   onChange,
 }: KubernetesClusterFilterProps) => {
   const isElasticOn = useIsElasticOn();
+  const allClustersLabel = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.allOption',
+    { defaultMessage: 'All clusters' }
+  );
   const options = useMemo(
     () => [
       {
         value: KUBERNETES_CLUSTER_FILTER_ALL,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.allOption',
-          { defaultMessage: 'All clusters' }
-        ),
+        text: allClustersLabel,
       },
-      ...clusterNames.map((name) => ({ value: name, text: name })),
+      ...clusterNames.map((name) => ({
+        value: name,
+        text: i18n.translate(
+          'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.clusterOption',
+          { defaultMessage: 'Cluster: {name}', values: { name } }
+        ),
+      })),
     ],
-    [clusterNames]
+    [clusterNames, allClustersLabel]
   );
   return (
     <EuiSelect
       compressed
-      prepend={i18n.translate(
-        'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.label',
-        { defaultMessage: 'Cluster' }
-      )}
       options={options}
       value={value}
       onChange={(event) => onChange(event.target.value)}

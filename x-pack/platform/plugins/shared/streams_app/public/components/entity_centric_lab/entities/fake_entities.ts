@@ -168,8 +168,17 @@ export const TAG_KEY_LABEL: Record<TagKey, string> = {
 /** ElasticOn inventory drops Application (infra-first; tags stay on the data). */
 export const ELASTICON_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['application']);
 
-export const getVisibleTagKeys = (isElasticOn: boolean): readonly TagKey[] =>
-  isElasticOn ? TAG_KEYS.filter((key) => !ELASTICON_HIDDEN_TAG_KEYS.has(key)) : TAG_KEYS;
+/** Phase 1 keeps only Environment + Region (no Team, no Application). */
+export const PHASE1_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['team', 'application']);
+
+export const getVisibleTagKeys = (
+  isElasticOn: boolean,
+  isPhase1 = false
+): readonly TagKey[] => {
+  if (isPhase1) return TAG_KEYS.filter((key) => !PHASE1_HIDDEN_TAG_KEYS.has(key));
+  if (isElasticOn) return TAG_KEYS.filter((key) => !ELASTICON_HIDDEN_TAG_KEYS.has(key));
+  return TAG_KEYS;
+};
 
 export type EntityTags = Record<TagKey, string>;
 
@@ -948,15 +957,19 @@ export const EMPTY_TAG_FILTERS: ActiveTagFilters = {
   region: [],
 };
 
-export const isAnyFilterActive = (filters: ActiveTagFilters, isElasticOn = false): boolean =>
-  getVisibleTagKeys(isElasticOn).some((key) => filters[key].length > 0);
+export const isAnyFilterActive = (
+  filters: ActiveTagFilters,
+  isElasticOn = false,
+  isPhase1 = false
+): boolean => getVisibleTagKeys(isElasticOn, isPhase1).some((key) => filters[key].length > 0);
 
 export const matchesTagFilters = (
   entity: Entity,
   filters: ActiveTagFilters,
-  isElasticOn = false
+  isElasticOn = false,
+  isPhase1 = false
 ): boolean => {
-  for (const key of getVisibleTagKeys(isElasticOn)) {
+  for (const key of getVisibleTagKeys(isElasticOn, isPhase1)) {
     const values = filters[key];
     if (values.length > 0 && !values.includes(entity.tags[key])) {
       return false;

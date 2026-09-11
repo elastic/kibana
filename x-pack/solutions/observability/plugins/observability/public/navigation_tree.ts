@@ -461,8 +461,15 @@ function createNavTree({
   const orderedSavedViews = elasticOnEnabled
     ? [...filteredSavedViews].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
     : filteredSavedViews;
+  // Phase 1 hides manage-entity-types and saved views from the nav;
+  // read directly from localStorage since we're outside React context.
+  // Default is 'phase1' (null when key absent), so only phase3 is NOT phase1.
+  const isPhase1Nav =
+    typeof window !== 'undefined' &&
+    window.localStorage.getItem('elasticOn_v_phase') !== 'phase3';
+
   const savedViewsSection =
-    latestEnabled && orderedSavedViews.length > 0
+    latestEnabled && orderedSavedViews.length > 0 && !isPhase1Nav
       ? {
           id: 'entityCentricLab-savedViews',
           title: i18n.translate('xpack.observability.obltNav.savedViews', {
@@ -834,7 +841,7 @@ function createNavTree({
         ...(savedViewsSection ? [savedViewsSection] : []),
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
         ...(elasticOnCategoryChildren.length > 0 ? [{ children: elasticOnCategoryChildren }] : []),
-        manageEntityTypesSection,
+        ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ]
     : latestEnabled
     ? [
@@ -852,14 +859,14 @@ function createNavTree({
         ...(latestCategoryChildrenBottom.length > 0
           ? [{ children: latestCategoryChildrenBottom }]
           : []),
-        manageEntityTypesSection,
+        ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ]
     : [
         entitiesAllSection,
         {
           children: entityCentricCategoryChildren,
         },
-        manageEntityTypesSection,
+        ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ];
 
   // Universal Profiling stays available under the "Infrastructure" item in every

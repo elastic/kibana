@@ -836,7 +836,7 @@ const AllEntitiesViewInner = ({
       const predicate = compileEntityKql(search);
       return scopedEntities.filter(
         (entity) =>
-          matchesTagFilters(entity, activeTagFilters, true) &&
+          matchesTagFilters(entity, activeTagFilters, true, isPhase1) &&
           matchesExtraFilters(entity, activeExtraFilters, extraFilterDefs) &&
           predicate(entity) &&
           entityMatchesFilters(labFilters, entity)
@@ -845,13 +845,14 @@ const AllEntitiesViewInner = ({
     const query = search.trim().toLowerCase();
     return scopedEntities.filter((entity) => {
       if (query && !entity.name.toLowerCase().includes(query)) return false;
-      return matchesTagFilters(entity, activeTagFilters);
+      return matchesTagFilters(entity, activeTagFilters, false, isPhase1);
     });
   }, [
     scopedEntities,
     search,
     activeTagFilters,
     isElasticOn,
+    isPhase1,
     labFilters,
     activeExtraFilters,
     extraFilterDefs,
@@ -1030,21 +1031,33 @@ const AllEntitiesViewInner = ({
   // the *current* URL (via `history.replace`) so that when the user
   // presses "back" on the detail page, the list view re-opens with the
   // flyout already visible for that entity.
-  const handleExpandToFullPage = useCallback(() => {
-    if (!selectedEntityName) return;
-    // Stamp the current URL so the flyout re-opens on back-navigation.
-    const params = new URLSearchParams(location.search);
-    params.set('flyoutEntity', selectedEntityName);
-    history.replace({ ...location, search: params.toString() });
+  const handleExpandToFullPage = useCallback(
+    (currentTab?: string) => {
+      if (!selectedEntityName) return;
+      // Stamp the current URL so the flyout re-opens on back-navigation.
+      const params = new URLSearchParams(location.search);
+      params.set('flyoutEntity', selectedEntityName);
+      history.replace({ ...location, search: params.toString() });
 
-    setSelectedEntityName(null);
-    setChildEntityName(null);
-    setChildEntityContext(null);
-    router.push('/entities/detail/{entityName}', {
-      path: { entityName: encodeURIComponent(selectedEntityName) },
-      query: {},
-    });
-  }, [selectedEntityName, router, location, history]);
+      // Persist the active tab so the detail page can restore it.
+      if (currentTab) {
+        try {
+          sessionStorage.setItem('entityCentricLab_activeTab', currentTab);
+        } catch {
+          // ignore
+        }
+      }
+
+      setSelectedEntityName(null);
+      setChildEntityName(null);
+      setChildEntityContext(null);
+      router.push('/entities/detail/{entityName}', {
+        path: { entityName: encodeURIComponent(selectedEntityName) },
+        query: {},
+      });
+    },
+    [selectedEntityName, router, location, history]
+  );
 
   // Closing the parent tears the whole session down (the child can't
   // outlive its parent); closing the child leaves the parent open.
@@ -1100,9 +1113,16 @@ const AllEntitiesViewInner = ({
 
   // Dashboards tab: embed a specific dashboard by its saved-object title,
   // scoped to the entity via a phrase filter on `scopeField`.
+  // User-linked dashboards carry a `savedObjectId` directly so the renderer
+  // skips the title-based lookup.
   const renderTabDashboard = useCallback(
     (
-      dashboard: { savedObjectTitle: string; scopeField: string; hiddenPanelIds?: ReadonlySet<string> },
+      dashboard: {
+        savedObjectTitle: string;
+        scopeField: string;
+        hiddenPanelIds?: ReadonlySet<string>;
+        savedObjectId?: string;
+      },
       entityName: string
     ) => (
       <K8sDetailDashboard
@@ -1114,6 +1134,7 @@ const AllEntitiesViewInner = ({
         resourceName={entityName}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        directSavedObjectId={dashboard.savedObjectId}
       />
     ),
     [rangeFrom, rangeTo]
@@ -1354,7 +1375,7 @@ const AllEntitiesViewInner = ({
                 color="hollow"
               />
             </EuiFlexItem>
-            {loadedView && isLoadedViewModified ? (
+            {!isPhase1 && loadedView && isLoadedViewModified ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning" data-test-subj="entityCentricLabUnsavedBadgeHeader">
                   {i18n.translate(
@@ -1405,22 +1426,26 @@ const AllEntitiesViewInner = ({
           isInfraShortTerm
             ? []
             : [
-                <EuiButton
-                  key="manage"
-                  iconType="gear"
-                  size={isElasticOn ? 's' : 'm'}
-                  color={isElasticOn ? 'text' : 'primary'}
-                  onClick={() => {
-                    router.push('/manage-entity-types', { path: {}, query: {} });
-                  }}
-                  data-test-subj="entityCentricLabManageEntityTypesButton"
-                >
-                  {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
-                    defaultMessage: 'Manage {thing} types',
-                    values: { thing: labThing(isElasticOn) },
-                  })}
-                </EuiButton>,
-                ...(isElasticOn
+                ...(isPhase1
+                  ? []
+                  : [
+                      <EuiButton
+                        key="manage"
+                        iconType="gear"
+                        size={isElasticOn ? 's' : 'm'}
+                        color={isElasticOn ? 'text' : 'primary'}
+                        onClick={() => {
+                          router.push('/manage-entity-types', { path: {}, query: {} });
+                        }}
+                        data-test-subj="entityCentricLabManageEntityTypesButton"
+                      >
+                        {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
+                          defaultMessage: 'Manage {thing} types',
+                          values: { thing: labThing(isElasticOn) },
+                        })}
+                      </EuiButton>,
+                    ]),
+                ...(isElasticOn && !isPhase1
                   ? [
                       <SaveViewButton
                         key="save-view"
@@ -1540,6 +1565,7 @@ const AllEntitiesViewInner = ({
                       compressed
                       hideClear
                       isElasticOn
+                      isPhase1={isPhase1}
                     />
                   </EuiFlexItem>
                   {extraFilterDefs.length > 0 ? (
@@ -1695,7 +1721,7 @@ const AllEntitiesViewInner = ({
               section), so it renders only the compact "Save view" button in
               the filters row below instead of this full bar.
             */}
-                {isLatest ? null : (
+                {isLatest || isPhase1 ? null : (
                   <>
                     <SavedViewsBar
                       currentState={currentViewState}
@@ -1730,6 +1756,7 @@ const AllEntitiesViewInner = ({
                       facets={tagFacets}
                       activeFilters={activeTagFilters}
                       onChange={setActiveTagFilters}
+                      isPhase1={isPhase1}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -1743,7 +1770,7 @@ const AllEntitiesViewInner = ({
                       data-test-subj="entityCentricLabEntitiesTimePicker"
                     />
                   </EuiFlexItem>
-                  {isLatest ? (
+                  {isLatest && !isPhase1 ? (
                     <EuiFlexItem grow={false}>
                       {/*
                         Latest: the saved-views list lives in the left nav, so
@@ -1869,7 +1896,7 @@ const AllEntitiesViewInner = ({
             onSelectEntity={openChildEntity}
             onNavigateEntity={openEntity}
             onManageEntityType={
-              isInfraShortTerm ? undefined : () => manageEntityType(selectedEntity)
+              isInfraShortTerm || isPhase1 ? undefined : () => manageEntityType(selectedEntity)
             }
             minimalTabs={isInfraShortTerm}
             onExpand={
@@ -1878,6 +1905,7 @@ const AllEntitiesViewInner = ({
             hideHealthBadge={isPhase1}
             alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
             hideAiSummary={isPhase1}
+            hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
           />
           {childEntityName ? (
             <EntityFlyout
@@ -1891,12 +1919,13 @@ const AllEntitiesViewInner = ({
               onSelectEntity={openChildEntity}
               onNavigateEntity={openChildEntity}
               onManageEntityType={
-                isInfraShortTerm ? undefined : () => manageEntityType(childEntity)
+                isInfraShortTerm || isPhase1 ? undefined : () => manageEntityType(childEntity)
               }
               minimalTabs={isInfraShortTerm}
               hideHealthBadge={isPhase1}
               alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
               hideAiSummary={isPhase1}
+              hiddenTabIds={isPhase1 ? ['custom', 'relationships'] : undefined}
             />
           ) : null}
         </EntityFlyoutServicesProvider>

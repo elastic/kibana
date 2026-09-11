@@ -64,7 +64,7 @@ import {
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import { resolveEntityTypeIdForName } from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
-import type { FlyoutCustomLink } from './flyout_template_overrides';
+import type { FlyoutCustomLink, LinkedDashboardOverride } from './flyout_template_overrides';
 import { useEntityDisplayName } from './entity_display_name';
 import { getEffectiveEntityHealth, setChaosModeEnabled, useChaosModeEnabled } from './chaos_mode';
 
@@ -161,7 +161,7 @@ interface EntityFlyoutProps {
    * the close X, allowing the user to transition from flyout to full-page
    * detail view (progressive disclosure pattern).
    */
-  readonly onExpand?: () => void;
+  readonly onExpand?: (currentTab: TabId) => void;
   /**
    * When true, the health indicator badge (Healthy / At risk / Unhealthy) is
    * hidden from the header and replaced by an alerts badge (if
@@ -176,6 +176,12 @@ interface EntityFlyoutProps {
   readonly alertsBadge?: { label: string; color: string };
   /** When true the AI-generated summary is hidden from the Overview tab (Phase 1). */
   readonly hideAiSummary?: boolean;
+  /**
+   * Tab IDs to exclude from the flyout. Used by Phase 1 to hide
+   * Relationships and Custom. Filtered after the allowed-set and
+   * template-override logic so it always wins.
+   */
+  readonly hiddenTabIds?: readonly string[];
 }
 
 type BuiltInTabId =
@@ -264,6 +270,7 @@ export const EntityFlyout = ({
   hideHealthBadge = false,
   alertsBadge,
   hideAiSummary = false,
+  hiddenTabIds,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -669,30 +676,52 @@ export const EntityFlyout = ({
     return overrideTabs;
   }, [templateOverride, tabsData.traces, minimalTabs]);
 
+  // Phase-1 exclusion: drop tabs the caller explicitly hides.
+  const visibleTabs = useMemo(
+    () =>
+      hiddenTabIds && hiddenTabIds.length > 0
+        ? tabs.filter((tab) => !hiddenTabIds.includes(tab.id))
+        : tabs,
+    [tabs, hiddenTabIds]
+  );
+
   // If the active tab disappears (override toggled it off, or the user
   // reordered everything and the previously-selected tab is gone), fall
   // back to the first tab so the body doesn't render an empty switch.
   useEffect(() => {
-    if (tabs.length === 0) return;
-    if (!tabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab(tabs[0].id);
+    if (visibleTabs.length === 0) return;
+    if (!visibleTabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab(visibleTabs[0].id);
     }
-  }, [tabs, activeTab]);
+  }, [visibleTabs, activeTab]);
 
   // Snap the active tab to whatever the override puts in the first slot.
   // Fires on initial mount (`prevEntityRef` starts as `null`, so the very
   // first render rebases off the `'overview'` seed) and on every entity
   // swap (PayFlow story chain, Dependencies-row click, etc.). Skips the
-  // rebase when `tabs` momentarily resolves to `[]` so we don't permanently
-  // pin the entity to a stale default — the ref only advances once the
-  // rebase actually runs.
+  // rebase when `visibleTabs` momentarily resolves to `[]` so we don't
+  // permanently pin the entity to a stale default — the ref only advances
+  // once the rebase actually runs.
   const prevEntityRef = useRef<string | null>(null);
   useEffect(() => {
     if (prevEntityRef.current === entityName) return;
-    if (tabs.length === 0) return;
+    if (visibleTabs.length === 0) return;
     prevEntityRef.current = entityName;
-    setActiveTab(tabs[0].id);
-  }, [entityName, tabs]);
+    // When returning from a full-page expand (back-navigation), restore
+    // the tab the user was on instead of resetting to the first tab.
+    const STORED_TAB_KEY = 'entityCentricLab_activeTab';
+    try {
+      const storedTab = sessionStorage.getItem(STORED_TAB_KEY);
+      sessionStorage.removeItem(STORED_TAB_KEY);
+      if (storedTab && visibleTabs.some((t) => t.id === storedTab)) {
+        setActiveTab(storedTab as TabId);
+        return;
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+    setActiveTab(visibleTabs[0].id);
+  }, [entityName, visibleTabs]);
 
   return (
     <EuiFlyout
@@ -757,7 +786,7 @@ export const EntityFlyout = ({
                       )}
                       color="text"
                       display="empty"
-                      onClick={onExpand}
+                      onClick={() => onExpand?.(activeTab)}
                       data-test-subj="entityCentricLabFlyoutExpand"
                     />
                   </EuiToolTip>
@@ -791,7 +820,7 @@ export const EntityFlyout = ({
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiTabs bottomBorder={false}>
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <EuiTab
               key={tab.id}
               isSelected={tab.id === activeTab}
@@ -813,12 +842,13 @@ export const EntityFlyout = ({
       <EuiFlyoutBody>
         <TabContent
           activeTab={activeTab}
-          activeTabLabel={tabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
+          activeTabLabel={visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab}
           entityName={entityName}
           entityType={entityType}
           overview={overview}
           tabsData={tabsData}
           customLinks={templateOverride?.customLinks}
+          linkedDashboards={templateOverride?.linkedDashboards}
           onSelectEntity={onSelectEntity}
           hideAiSummary={hideAiSummary}
         />
@@ -918,6 +948,7 @@ const TabContent = ({
   overview,
   tabsData,
   customLinks,
+  linkedDashboards,
   onSelectEntity,
   hideAiSummary = false,
 }: {
@@ -928,6 +959,7 @@ const TabContent = ({
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
   readonly customLinks?: readonly FlyoutCustomLink[];
+  readonly linkedDashboards?: readonly LinkedDashboardOverride[];
   readonly onSelectEntity?: OnSelectEntity;
   readonly hideAiSummary?: boolean;
 }) => {
@@ -980,6 +1012,7 @@ const TabContent = ({
           entityName={entityName}
           entityType={entityType}
           renderDashboard={renderTabDashboard}
+          linkedDashboards={linkedDashboards}
         />
       );
     case 'profiling':

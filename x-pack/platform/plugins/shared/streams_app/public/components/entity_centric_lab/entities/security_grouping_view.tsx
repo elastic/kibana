@@ -193,7 +193,7 @@ const AccordionBadges = ({
             'xpack.streams.entityCentricLab.securityGrouping.stats.alertingCount',
             {
               defaultMessage:
-                '{count, plural, one {# resource with firing alerts} other {# resources with firing alerts}}',
+                '{count, plural, one {# resource with active alerts} other {# resources with active alerts}}',
               values: { count: alertingCount },
             }
           )}
