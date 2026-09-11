@@ -147,6 +147,7 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
+  - name: Fleet cloud onboarding deployments
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -1170,6 +1171,13 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    post_execution_workflow_ids:
+                      items:
+                        description: Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.
+                        maxLength: 512
+                        type: string
+                      maxItems: 100
+                      type: array
                     skill_ids:
                       description: Array of skill IDs to be available to the agent.
                       items:
@@ -1685,6 +1693,13 @@ paths:
                       description: Array of plugin IDs to assign to the agent.
                       items:
                         description: Plugin ID to assign to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
+                    post_execution_workflow_ids:
+                      items:
+                        description: Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.
+                        maxLength: 512
                         type: string
                       maxItems: 100
                       type: array
@@ -2654,6 +2669,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: Whether to include deleted attachments in the list.
           in: query
@@ -2732,6 +2748,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -2771,18 +2788,22 @@ paths:
                   nullable: true
                 description:
                   description: Human-readable description of the attachment.
+                  maxLength: 2048
                   type: string
                 hidden:
                   description: Whether the attachment should be hidden from the user.
                   type: boolean
                 id:
                   description: Optional custom ID for the attachment.
+                  maxLength: 256
                   type: string
                 origin:
                   description: Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  maxLength: 2048
                   type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
+                  maxLength: 256
                   type: string
               required:
                 - type
@@ -2839,12 +2860,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to delete.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: If true, permanently removes the attachment (only for unreferenced attachments).
           in: query
@@ -2875,6 +2898,59 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a single attachment by ID for a conversation.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-conversations-conversation-id-attachments-attachment-id
+      parameters:
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The unique identifier of the attachment.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAttachmentResponseExample:
+                  description: Example response containing a single attachment
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: My text file
+                      id: attachment-1
+                      type: text
+                      versions:
+                        - content_hash: abc123
+                          created_at: '2025-01-01T10:00:00.000Z'
+                          data: File content
+                          estimated_tokens: 2
+                          version: 1
+          description: Indicates a successful response
+      summary: Get conversation attachment
+      tags:
+        - agent builder
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     patch:
       description: |-
         **Spaces method and path for this operation:**
@@ -2898,12 +2974,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to rename.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -2919,6 +2997,7 @@ paths:
               properties:
                 description:
                   description: The new description/name for the attachment.
+                  maxLength: 2048
                   type: string
               required:
                 - description
@@ -2974,12 +3053,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to update.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -3003,6 +3084,7 @@ paths:
                   nullable: true
                 description:
                   description: Optional new description for the attachment.
+                  maxLength: 2048
                   type: string
               required:
                 - data
@@ -3064,12 +3146,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to restore.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -3124,12 +3208,14 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
         - description: The unique identifier of the attachment to update.
           in: path
           name: attachment_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -3145,6 +3231,7 @@ paths:
               properties:
                 origin:
                   description: The origin string (e.g., saved object ID for visualizations and dashboards).
+                  maxLength: 2048
                   type: string
               required:
                 - origin
@@ -3199,6 +3286,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -3462,6 +3550,17 @@ paths:
                   description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
                   type: boolean
                   x-state: Technical Preview; added in 9.6.0
+                reasoning_level:
+                  description: 'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+                  enum:
+                    - none
+                    - minimal
+                    - low
+                    - medium
+                    - high
+                    - xhigh
+                  type: string
+                  x-state: Experimental; added in 9.6.0
       responses:
         '200':
           content:
@@ -3931,6 +4030,17 @@ paths:
                   description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
                   type: boolean
                   x-state: Technical Preview; added in 9.6.0
+                reasoning_level:
+                  description: 'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+                  enum:
+                    - none
+                    - minimal
+                    - low
+                    - medium
+                    - high
+                    - xhigh
+                  type: string
+                  x-state: Experimental; added in 9.6.0
       responses:
         '200':
           content:
@@ -44576,6 +44686,1252 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/cloud_onboarding_deployments:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new Fleet cloud onboarding deployment.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: post-fleet-cloud-onboarding-deployments
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postCloudOnboardingDeploymentAgentBasedRequestExample:
+                description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
+                value:
+                  connectorId: cloud-connector-id-1
+                  mechanisms:
+                    - agent_based
+                  provider: aws
+                  services:
+                    - cloudwatch_metrics
+                  serviceVars:
+                    cloudwatch_metrics:
+                      namespace: AWS/EC2
+                      regions:
+                        - us-east-1
+              postCloudOnboardingDeploymentEcfRequestExample:
+                description: Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)
+                value:
+                  connectorId: cloud-connector-id-1
+                  mechanisms:
+                    - ecf
+                  provider: aws
+                  services:
+                    - cloudfront_logs
+                  serviceVars:
+                    cloudfront_logs:
+                      regions:
+                        - us-east-1
+                      s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
+              postCloudOnboardingDeploymentRequestExample:
+                description: Create a new AWS cloud onboarding deployment using identity federation (managed integration)
+                value:
+                  connectorId: cloud-connector-id-1
+                  mechanisms:
+                    - managed_integration
+                  provider: aws
+                  services:
+                    - cloudwatch_metrics
+                    - cloudtrail
+                  serviceVars:
+                    cloudtrail:
+                      regions:
+                        - us-east-1
+                      s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                    cloudwatch_metrics:
+                      namespace: AWS/EC2
+                      regions:
+                        - us-east-1
+                        - eu-west-1
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                authMethod:
+                  description: Authentication method for managed integrations.
+                  enum:
+                    - identity_federation
+                    - static_keys
+                  type: string
+                connectorId:
+                  description: ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                dataFormat:
+                  description: 'Data format: ecs or otel.'
+                  enum:
+                    - ecs
+                    - otel
+                  type: string
+                globalRegion:
+                  description: Global AWS region from the Service Settings step.
+                  maxLength: 64
+                  type: string
+                mechanisms:
+                  description: Delivery mechanisms active in this deployment.
+                  items:
+                    description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                    enum:
+                      - managed_integration
+                      - ecf
+                      - agent_based
+                    type: string
+                  maxItems: 10
+                  type: array
+                provider:
+                  description: Cloud provider.
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+                services:
+                  description: Service IDs to be covered by this deployment.
+                  items:
+                    minLength: 1
+                    type: string
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+                serviceVars:
+                  additionalProperties:
+                    additionalProperties:
+                      nullable: true
+                    type: object
+                  description: Per-service config keyed by instance ID.
+                  type: object
+              required:
+                - provider
+                - mechanisms
+                - services
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postCloudOnboardingDeploymentAgentBasedExample:
+                  description: Agent-based deployment — agentPolicyId set after the agent policy is selected or created
+                  value:
+                    item:
+                      agentPolicyId: agent-policy-id-1
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-2
+                      mechanisms:
+                        - agent_based
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                      serviceVars:
+                        cloudwatch_metrics:
+                          namespace: AWS/EC2
+                          regions:
+                            - us-east-1
+                      status: pending
+                postCloudOnboardingDeploymentEcfExample:
+                  description: ECF deployment — apiKeyId set after the Elasticsearch API key is created for the ECF service
+                  value:
+                    item:
+                      apiKeyId: es-api-key-id-1
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-3
+                      mechanisms:
+                        - ecf
+                      provider: aws
+                      services:
+                        - cloudfront_logs
+                      serviceVars:
+                        cloudfront_logs:
+                          regions:
+                            - us-east-1
+                          s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
+                      status: pending
+                postCloudOnboardingDeploymentExample:
+                  description: Managed integration deployment — packagePolicyIds set after deployment completes
+                  value:
+                    item:
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-1
+                      mechanisms:
+                        - managed_integration
+                      packagePolicyIds:
+                        - package-policy-id-1
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                        - cloudtrail
+                      serviceVars:
+                        cloudtrail:
+                          regions:
+                            - us-east-1
+                          s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                        cloudwatch_metrics:
+                          namespace: AWS/EC2
+                          regions:
+                            - us-east-1
+                            - eu-west-1
+                      status: pending
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                        type: string
+                      apiKeyId:
+                        description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                        type: string
+                      attemptCount:
+                        description: Number of deployment attempts, including the current one.
+                        minimum: 1
+                        type: number
+                      authMethod:
+                        description: Authentication method for managed integrations.
+                        enum:
+                          - identity_federation
+                          - static_keys
+                        type: string
+                      connectorId:
+                        description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                        type: string
+                      dataFormat:
+                        description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
+                        type: string
+                      deploymentId:
+                        description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                        type: string
+                      deploymentName:
+                        description: Opaque deployment name; for AWS, the CFN stack name.
+                        type: string
+                      ecfStacks:
+                        description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            family:
+                              description: ECF template family.
+                              enum:
+                                - unified
+                                - otel
+                                - crowdstrike
+                              type: string
+                            stackName:
+                              description: CloudFormation stack name (128-char AWS limit).
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            templateVersion:
+                              description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                          required:
+                            - family
+                            - stackName
+                            - templateVersion
+                        maxItems: 10
+                        type: array
+                      globalRegion:
+                        description: Global AWS region from the Service Settings step.
+                        type: string
+                      id:
+                        type: string
+                      mechanisms:
+                        items:
+                          description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                          enum:
+                            - managed_integration
+                            - ecf
+                            - agent_based
+                          type: string
+                        maxItems: 10
+                        type: array
+                      packagePolicyIds:
+                        description: Package policy IDs created for managed_integration services.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      provider:
+                        description: Cloud provider.
+                        enum:
+                          - aws
+                          - azure
+                          - gcp
+                        type: string
+                      services:
+                        description: Service IDs covered by this deployment.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      serviceVars:
+                        additionalProperties:
+                          additionalProperties:
+                            nullable: true
+                          type: object
+                        description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                        type: object
+                      status:
+                        description: Deployment status.
+                        enum:
+                          - pending
+                          - deploying
+                          - succeeded
+                          - failed
+                        type: string
+                      statusMessage:
+                        description: Error context when status is failed.
+                        type: string
+                    required:
+                      - id
+                      - provider
+                      - mechanisms
+                      - services
+                      - status
+                      - attemptCount
+                required:
+                  - item
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Create cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/cloud_onboarding_deployments/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: delete-fleet-cloud-onboarding-deployments-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The saved object ID of the cloud onboarding deployment.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteCloudOnboardingDeploymentExample:
+                  description: The cloud onboarding deployment was successfully deleted
+                  value:
+                    id: onboarding-deployment-id-1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Delete cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-onboarding-deployments-id
+      parameters:
+        - description: The saved object ID of the cloud onboarding deployment.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCloudOnboardingDeploymentExample:
+                  description: A cloud onboarding deployment that has succeeded
+                  value:
+                    item:
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                      deploymentName: elastic-aws-onboarding
+                      id: onboarding-deployment-id-1
+                      mechanisms:
+                        - managed_integration
+                      packagePolicyIds:
+                        - package-policy-id-1
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                        - cloudtrail
+                      serviceVars:
+                        cloudtrail:
+                          - regions:
+                              - us-east-1
+                            s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                        cloudwatch_metrics:
+                          - namespace: AWS/EC2
+                            regions:
+                              - us-east-1
+                              - eu-west-1
+                      status: succeeded
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                        type: string
+                      apiKeyId:
+                        description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                        type: string
+                      attemptCount:
+                        description: Number of deployment attempts, including the current one.
+                        minimum: 1
+                        type: number
+                      authMethod:
+                        description: Authentication method for managed integrations.
+                        enum:
+                          - identity_federation
+                          - static_keys
+                        type: string
+                      connectorId:
+                        description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                        type: string
+                      dataFormat:
+                        description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
+                        type: string
+                      deploymentId:
+                        description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                        type: string
+                      deploymentName:
+                        description: Opaque deployment name; for AWS, the CFN stack name.
+                        type: string
+                      ecfStacks:
+                        description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            family:
+                              description: ECF template family.
+                              enum:
+                                - unified
+                                - otel
+                                - crowdstrike
+                              type: string
+                            stackName:
+                              description: CloudFormation stack name (128-char AWS limit).
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            templateVersion:
+                              description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                          required:
+                            - family
+                            - stackName
+                            - templateVersion
+                        maxItems: 10
+                        type: array
+                      globalRegion:
+                        description: Global AWS region from the Service Settings step.
+                        type: string
+                      id:
+                        type: string
+                      mechanisms:
+                        items:
+                          description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                          enum:
+                            - managed_integration
+                            - ecf
+                            - agent_based
+                          type: string
+                        maxItems: 10
+                        type: array
+                      packagePolicyIds:
+                        description: Package policy IDs created for managed_integration services.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      provider:
+                        description: Cloud provider.
+                        enum:
+                          - aws
+                          - azure
+                          - gcp
+                        type: string
+                      services:
+                        description: Service IDs covered by this deployment.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      serviceVars:
+                        additionalProperties:
+                          additionalProperties:
+                            nullable: true
+                          type: object
+                        description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                        type: object
+                      status:
+                        description: Deployment status.
+                        enum:
+                          - pending
+                          - deploying
+                          - succeeded
+                          - failed
+                        type: string
+                      statusMessage:
+                        description: Error context when status is failed.
+                        type: string
+                    required:
+                      - id
+                      - provider
+                      - mechanisms
+                      - services
+                      - status
+                      - attemptCount
+                required:
+                  - item
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Get cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: put-fleet-cloud-onboarding-deployments-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The saved object ID of the cloud onboarding deployment.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putCloudOnboardingDeploymentRequestExample:
+                description: Update a cloud onboarding deployment after the CFN stack has been submitted
+                value:
+                  deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                  deploymentName: elastic-aws-onboarding
+                  status: deploying
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agentPolicyId:
+                  maxLength: 255
+                  type: string
+                apiKeyId:
+                  maxLength: 255
+                  type: string
+                attemptCount:
+                  description: Incremented by callers performing a retry.
+                  minimum: 1
+                  type: number
+                deploymentId:
+                  description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
+                  maxLength: 2048
+                  type: string
+                deploymentName:
+                  maxLength: 255
+                  type: string
+                ecfStacks:
+                  description: ECF CloudFormation stacks to record for this deployment.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      family:
+                        description: ECF template family.
+                        enum:
+                          - unified
+                          - otel
+                          - crowdstrike
+                        type: string
+                      stackName:
+                        description: CloudFormation stack name (128-char AWS limit).
+                        maxLength: 128
+                        minLength: 1
+                        type: string
+                      templateVersion:
+                        description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                        maxLength: 32
+                        minLength: 1
+                        type: string
+                    required:
+                      - family
+                      - stackName
+                      - templateVersion
+                  maxItems: 10
+                  type: array
+                packagePolicyIds:
+                  items:
+                    maxLength: 255
+                    type: string
+                  maxItems: 100
+                  type: array
+                serviceVars:
+                  additionalProperties:
+                    additionalProperties:
+                      nullable: true
+                    type: object
+                  description: Per-service config keyed by instance ID.
+                  type: object
+                status:
+                  description: Deployment status.
+                  enum:
+                    - pending
+                    - deploying
+                    - succeeded
+                    - failed
+                  type: string
+                statusMessage:
+                  description: Error context; set when transitioning to failed.
+                  maxLength: 1000
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putCloudOnboardingDeploymentExample:
+                  description: The updated cloud onboarding deployment
+                  value:
+                    item:
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                      deploymentName: elastic-aws-onboarding
+                      id: onboarding-deployment-id-1
+                      mechanisms:
+                        - managed_integration
+                      packagePolicyIds:
+                        - package-policy-id-1
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                        - cloudtrail
+                      status: deploying
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                        type: string
+                      apiKeyId:
+                        description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                        type: string
+                      attemptCount:
+                        description: Number of deployment attempts, including the current one.
+                        minimum: 1
+                        type: number
+                      authMethod:
+                        description: Authentication method for managed integrations.
+                        enum:
+                          - identity_federation
+                          - static_keys
+                        type: string
+                      connectorId:
+                        description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                        type: string
+                      dataFormat:
+                        description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
+                        type: string
+                      deploymentId:
+                        description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                        type: string
+                      deploymentName:
+                        description: Opaque deployment name; for AWS, the CFN stack name.
+                        type: string
+                      ecfStacks:
+                        description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            family:
+                              description: ECF template family.
+                              enum:
+                                - unified
+                                - otel
+                                - crowdstrike
+                              type: string
+                            stackName:
+                              description: CloudFormation stack name (128-char AWS limit).
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            templateVersion:
+                              description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                          required:
+                            - family
+                            - stackName
+                            - templateVersion
+                        maxItems: 10
+                        type: array
+                      globalRegion:
+                        description: Global AWS region from the Service Settings step.
+                        type: string
+                      id:
+                        type: string
+                      mechanisms:
+                        items:
+                          description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                          enum:
+                            - managed_integration
+                            - ecf
+                            - agent_based
+                          type: string
+                        maxItems: 10
+                        type: array
+                      packagePolicyIds:
+                        description: Package policy IDs created for managed_integration services.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      provider:
+                        description: Cloud provider.
+                        enum:
+                          - aws
+                          - azure
+                          - gcp
+                        type: string
+                      services:
+                        description: Service IDs covered by this deployment.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      serviceVars:
+                        additionalProperties:
+                          additionalProperties:
+                            nullable: true
+                          type: object
+                        description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                        type: object
+                      status:
+                        description: Deployment status.
+                        enum:
+                          - pending
+                          - deploying
+                          - succeeded
+                          - failed
+                        type: string
+                      statusMessage:
+                        description: Error context when status is failed.
+                        type: string
+                    required:
+                      - id
+                      - provider
+                      - mechanisms
+                      - services
+                      - status
+                      - attemptCount
+                required:
+                  - item
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Update cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/cloud_onboarding_deployments/connector/{connectorId}:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/connector/{connectorId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all cloud onboarding deployments for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-onboarding-deployments-connector-connectorid
+      parameters:
+        - description: The fleet-cloud-connector ID to list deployments for.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCloudOnboardingDeploymentsByConnectorIdExample:
+                  description: List of cloud onboarding deployments for a connector
+                  value:
+                    items:
+                      - attemptCount: 1
+                        connectorId: cloud-connector-id-1
+                        deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                        deploymentName: elastic-aws-onboarding
+                        id: onboarding-deployment-id-1
+                        mechanisms:
+                          - managed_integration
+                        packagePolicyIds:
+                          - package-policy-id-1
+                        provider: aws
+                        services:
+                          - cloudwatch_metrics
+                        status: succeeded
+                      - attemptCount: 1
+                        connectorId: cloud-connector-id-1
+                        id: onboarding-deployment-id-2
+                        mechanisms:
+                          - managed_integration
+                          - ecf
+                        provider: aws
+                        services:
+                          - cloudfront_logs
+                        serviceVars:
+                          cloudfront_logs:
+                            regions:
+                              - us-east-1
+                            s3_bucket_arn: arn:aws:s3:::my-cloudfront-logs-bucket
+                        status: deploying
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agentPolicyId:
+                          description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                          type: string
+                        apiKeyId:
+                          description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                          type: string
+                        attemptCount:
+                          description: Number of deployment attempts, including the current one.
+                          minimum: 1
+                          type: number
+                        authMethod:
+                          description: Authentication method for managed integrations.
+                          enum:
+                            - identity_federation
+                            - static_keys
+                          type: string
+                        connectorId:
+                          description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                          type: string
+                        dataFormat:
+                          description: 'Data format: ecs or otel.'
+                          enum:
+                            - ecs
+                            - otel
+                          type: string
+                        deploymentId:
+                          description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                          type: string
+                        deploymentName:
+                          description: Opaque deployment name; for AWS, the CFN stack name.
+                          type: string
+                        ecfStacks:
+                          description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              family:
+                                description: ECF template family.
+                                enum:
+                                  - unified
+                                  - otel
+                                  - crowdstrike
+                                type: string
+                              stackName:
+                                description: CloudFormation stack name (128-char AWS limit).
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              templateVersion:
+                                description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                                maxLength: 32
+                                minLength: 1
+                                type: string
+                            required:
+                              - family
+                              - stackName
+                              - templateVersion
+                          maxItems: 10
+                          type: array
+                        globalRegion:
+                          description: Global AWS region from the Service Settings step.
+                          type: string
+                        id:
+                          type: string
+                        mechanisms:
+                          items:
+                            description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                            enum:
+                              - managed_integration
+                              - ecf
+                              - agent_based
+                            type: string
+                          maxItems: 10
+                          type: array
+                        packagePolicyIds:
+                          description: Package policy IDs created for managed_integration services.
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
+                        provider:
+                          description: Cloud provider.
+                          enum:
+                            - aws
+                            - azure
+                            - gcp
+                          type: string
+                        services:
+                          description: Service IDs covered by this deployment.
+                          items:
+                            type: string
+                          maxItems: 1000
+                          type: array
+                        serviceVars:
+                          additionalProperties:
+                            additionalProperties:
+                              nullable: true
+                            type: object
+                          description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                          type: object
+                        status:
+                          description: Deployment status.
+                          enum:
+                            - pending
+                            - deploying
+                            - succeeded
+                            - failed
+                          type: string
+                        statusMessage:
+                          description: Error context when status is failed.
+                          type: string
+                      required:
+                        - id
+                        - provider
+                        - mechanisms
+                        - services
+                        - status
+                        - attemptCount
+                    maxItems: 100
+                    type: array
+                required:
+                  - items
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get cloud onboarding deployments by connector ID
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/data_streams:
     get:
       description: |-
@@ -75801,7 +77157,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        List managed entity resolution rules and their effective enabled state for this space. Each rule description states what it bridges, which data sources it needs, and when to disable it.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-rules
       parameters: []
       responses:
@@ -75814,13 +77170,35 @@ paths:
                   summary: Managed resolution rules
                   value:
                     rules:
-                      - enabled: false
+                      - description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.
+                        enabled: true
+                        id: email_exact_match
+                        kind: same_field
+                        managed: true
+                      - description: Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.
+                        enabled: true
+                        id: windows_sid_bridge
+                        kind: same_field
+                        managed: true
+                      - description: Links Microsoft Defender (`m365_defender`) identities to Entra ID by GUID-shaped `user.id`. Needs Defender identity events and Entra entity analytics. Disable if Defender SID IAM events leak through the GUID gate.
+                        enabled: true
+                        id: entra_guid_bridge
+                        kind: same_field
+                        managed: true
+                      - description: Links CrowdStrike user entities to Active Directory by SID-prefixed `user.id` (filters out Linux UIDs). Needs CrowdStrike FDR IAM events and Active Directory entity analytics. Disable if CrowdStrike SID coverage is noisy in your tenant.
+                        enabled: true
+                        id: crowdstrike_sid_bridge
+                        kind: same_field
+                        managed: true
+                      - description: Links Microsoft 365 audit actors (`user.id` UPN) to Entra users (`user.name` UPN), compared case-insensitively. Needs o365 audit user-lifecycle events and Entra entity analytics. Covers admins who perform AAD user operations; disable if that population should stay separate.
+                        enabled: true
+                        id: upn_cross_field_bridge
+                        kind: cross_field
+                        managed: true
+                      - description: Related user alias resolution across identity providers
+                        enabled: false
                         id: related_user_alias_resolution
                         kind: related_user_alias_resolution
-                        managed: true
-                      - enabled: true
-                        id: email_exact_match
-                        kind: email_exact_match
                         managed: true
           description: Entity resolution rules.
       summary: List entity resolution rules
@@ -75865,6 +77243,7 @@ paths:
                   description: The related user alias resolution rule was disabled in the current space.
                   summary: Rule disabled
                   value:
+                    description: Related user alias resolution across identity providers
                     enabled: false
                     id: related_user_alias_resolution
                     kind: related_user_alias_resolution
@@ -75924,6 +77303,7 @@ paths:
                   description: The related user alias resolution rule was enabled in the current space.
                   summary: Rule enabled
                   value:
+                    description: Related user alias resolution across identity providers
                     enabled: true
                     id: related_user_alias_resolution
                     kind: related_user_alias_resolution
@@ -108668,15 +110048,698 @@ components:
       title: Field filters
       type: array
     Kibana_HTTP_APIs_kbn-field-format:
-      additionalProperties: false
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-boolean'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-bytes'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-color'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-currency'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-date_nanos'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-date'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-duration'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-geo_point'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-histogram'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-ip'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-number'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-percent'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-relative_date'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-static_lookup'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-string'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-truncate'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format-url'
+        - additionalProperties: false
+          description: Fallback for custom formatter IDs only. Known formatter IDs must match their dedicated schema and are validated at runtime.
+          properties:
+            params: {}
+            type:
+              type: string
+          required:
+            - type
+          title: Extensible format
+          type: object
       description: Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.
+      title: Format
+    Kibana_HTTP_APIs_kbn-field-format-boolean:
+      additionalProperties: false
+      description: Formats a field into a true/false value.
       properties:
-        params: {}
         type:
+          enum:
+            - boolean
           type: string
       required:
         - type
-      title: Format
+      title: Boolean field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-bytes:
+      additionalProperties: false
+      description: Formats a field into a bytes value following the numeral.js format pattern. The default pattern is defined by the format:bytes:defaultPattern advanced setting.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+        type:
+          enum:
+            - bytes
+          type: string
+      required:
+        - type
+      title: Bytes field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-color:
+      additionalProperties: false
+      description: Formats a field into a color value.
+      properties:
+        params:
+          discriminator:
+            propertyName: field_type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                colors:
+                  items:
+                    type: object
+                    properties:
+                      background:
+                        description: The background color to use for the field.
+                        title: Background color
+                        type: string
+                      regex:
+                        description: When the field type is a string, this regex is used to determine the color.
+                        title: Regex
+                        type: string
+                      text:
+                        description: The text color to use for the field.
+                        title: Text color
+                        type: string
+                    required:
+                      - text
+                      - background
+                      - regex
+                  type: array
+                field_type:
+                  enum:
+                    - string
+                  type: string
+              required:
+                - field_type
+                - colors
+            - additionalProperties: false
+              type: object
+              properties:
+                colors:
+                  items:
+                    type: object
+                    properties:
+                      background:
+                        description: The background color to use for the field.
+                        title: Background color
+                        type: string
+                      range:
+                        description: When the field type is a number, this range is used to determine the color.
+                        title: Range
+                        type: string
+                      text:
+                        description: The text color to use for the field.
+                        title: Text color
+                        type: string
+                    required:
+                      - text
+                      - background
+                      - range
+                  type: array
+                field_type:
+                  enum:
+                    - number
+                  type: string
+              required:
+                - field_type
+                - colors
+            - additionalProperties: false
+              type: object
+              properties:
+                colors:
+                  items:
+                    type: object
+                    properties:
+                      background:
+                        description: The background color to use for the field.
+                        title: Background color
+                        type: string
+                      boolean:
+                        description: When the field type is a boolean, this boolean is used to determine the color.
+                        title: Boolean
+                        type: boolean
+                      text:
+                        description: The text color to use for the field.
+                        title: Text color
+                        type: string
+                    required:
+                      - text
+                      - background
+                      - boolean
+                  type: array
+                field_type:
+                  enum:
+                    - boolean
+                  type: string
+              required:
+                - field_type
+                - colors
+        type:
+          enum:
+            - color
+          type: string
+      required:
+        - type
+        - params
+      title: Color field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-currency:
+      additionalProperties: false
+      description: Formats a field into a currency value. The format is determined by the pattern of the format:currency:defaultPattern advanced setting.
+      properties:
+        type:
+          enum:
+            - currency
+          type: string
+      required:
+        - type
+      title: Currency field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-date:
+      additionalProperties: false
+      description: Formats a field into a date value following the defined pattern.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              default: MMM D, YYYY @ HH:mm:ss.SSS
+              description: Moment.js format pattern. See https://momentjs.com/ to learn more.
+              title: Moment.js pattern
+              type: string
+        type:
+          enum:
+            - date
+          type: string
+      required:
+        - type
+      title: Date field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-date_nanos:
+      additionalProperties: false
+      description: Formats a field into a date nanos value following the defined pattern.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              default: MMM D, YYYY @ HH:mm:ss.SSSSSSSSS
+              description: Moment.js format pattern. See https://momentjs.com/ to learn more.
+              title: Moment.js pattern
+              type: string
+        type:
+          enum:
+            - date_nanos
+          type: string
+      required:
+        - type
+      title: Date nanos field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-duration:
+      additionalProperties: false
+      description: Formats a field into a duration value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            include_space_with_suffix:
+              default: true
+              description: When true or not provided, the formatted duration includes a space between the value and suffix. When false, no space is included.
+              title: Include space with suffix
+              type: boolean
+            input_format:
+              anyOf:
+                - enum:
+                    - picoseconds
+                  title: Picoseconds
+                  type: string
+                - enum:
+                    - nanoseconds
+                  title: Nanoseconds
+                  type: string
+                - enum:
+                    - microseconds
+                  title: Microseconds
+                  type: string
+                - enum:
+                    - milliseconds
+                  title: Milliseconds
+                  type: string
+                - enum:
+                    - seconds
+                  title: Seconds
+                  type: string
+                - enum:
+                    - minutes
+                  title: Minutes
+                  type: string
+                - enum:
+                    - hours
+                  title: Hours
+                  type: string
+                - enum:
+                    - days
+                  title: Days
+                  type: string
+                - enum:
+                    - weeks
+                  title: Weeks
+                  type: string
+                - enum:
+                    - months
+                  title: Months
+                  type: string
+                - enum:
+                    - years
+                  title: Years
+                  type: string
+              description: The unit of the field value before formatting.
+              title: Input format
+            output_format:
+              anyOf:
+                - description: 'Displays the duration in the largest whole unit that applies, rounded. For example: "2 hours" or "a day".'
+                  enum:
+                    - humanize
+                  title: Human-readable (approximate)
+                  type: string
+                - description: 'Displays the duration in the largest whole unit that applies, with decimal precision. For example: "2.35 hours".'
+                  enum:
+                    - humanize_precise
+                  title: Human-readable (precise)
+                  type: string
+                - enum:
+                    - as_milliseconds
+                  title: Milliseconds
+                  type: string
+                - enum:
+                    - as_seconds
+                  title: Seconds
+                  type: string
+                - enum:
+                    - as_minutes
+                  title: Minutes
+                  type: string
+                - enum:
+                    - as_hours
+                  title: Hours
+                  type: string
+                - enum:
+                    - as_days
+                  title: Days
+                  type: string
+                - enum:
+                    - as_weeks
+                  title: Weeks
+                  type: string
+                - enum:
+                    - as_months
+                  title: Months
+                  type: string
+                - enum:
+                    - as_years
+                  title: Years
+                  type: string
+              description: The unit to convert the field value into for display.
+              title: Output format
+            output_precision:
+              default: 2
+              description: The number of decimal places to display in the duration value.
+              title: Output precision
+              type: number
+            show_suffix:
+              description: When true, the formatted duration includes a suffix (such as "seconds", "milliseconds", or "years"). When false or not provided, no suffix is shown.
+              title: Show suffix
+              type: boolean
+            use_short_suffix:
+              default: false
+              description: When true, the formatted duration uses short suffixes (such as "s", "ms", or "h"). When false or not provided, full suffixes are used.
+              title: Use short suffix
+              type: boolean
+          required:
+            - input_format
+            - output_format
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - params
+      title: Duration field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-geo_point:
+      additionalProperties: false
+      description: Formats a field into a geo point value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            transform:
+              anyOf:
+                - description: Transforms the geo point into a string in the format "latitude,longitude". For example "40.7128,-74.0060".
+                  enum:
+                    - lat_lon_string
+                  title: Lat lon string
+                  type: string
+                - description: Transforms the geo point into a Well-Known Text (WKT) string. For example "POINT (123.456 78.901)".
+                  enum:
+                    - wkt
+                  title: WKT
+                  type: string
+                - description: Transforms the geo point into a string in the format "latitude,longitude (degrees, minutes, seconds)". For example "40°42′50.2″N 73°59′45.6″W".
+                  enum:
+                    - dms
+                  title: DMS
+                  type: string
+                - description: Transforms the geo point into a string in the format "latitude,longitude (Military Grid Reference System)". For example "18SUJ1234567890".
+                  enum:
+                    - mgrs
+                  title: MGRS
+                  type: string
+                - description: 'Transforms the geo point to all the previous formats. For example: "Lat Long: 40.7128,-74.0060, WKT: POINT (123.456 78.901), DMS: 40°42′50.2″N 73°59′45.6″W, MGRS: 18SUJ1234567890".'
+                  enum:
+                    - multi
+                  title: Multi
+                  type: string
+              description: The transform to apply to the geo point value.
+              title: Transform
+          required:
+            - transform
+        type:
+          enum:
+            - geo_point
+          type: string
+      required:
+        - type
+      title: Geo point field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-histogram:
+      additionalProperties: false
+      description: Formats a histogram field into a numeric value following the defined pattern. The default pattern is defined by format:bytes:defaultPattern, format:percent:defaultPattern or format:number:defaultPattern advanced settings depending on the selected format.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            format:
+              anyOf:
+                - enum:
+                    - bytes
+                  type: string
+                - enum:
+                    - percent
+                  type: string
+                - enum:
+                    - number
+                  type: string
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+          required:
+            - format
+        type:
+          enum:
+            - histogram
+          type: string
+      required:
+        - type
+        - params
+      title: Histogram field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-ip:
+      additionalProperties: false
+      description: Formats a field into an IP address.
+      properties:
+        type:
+          enum:
+            - ip
+          type: string
+      required:
+        - type
+      title: IP field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-number:
+      additionalProperties: false
+      description: Formats a field into a numeric value following the defined pattern. The default pattern is defined by format:number:defaultPattern advanced setting.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+        type:
+          enum:
+            - number
+          type: string
+      required:
+        - type
+      title: Number field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-percent:
+      additionalProperties: false
+      description: Formats a field into a percentage value following the defined pattern. The default pattern is defined by format:percent:defaultPattern advanced setting.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            pattern:
+              description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+              title: Numeral pattern
+              type: string
+        type:
+          enum:
+            - percent
+          type: string
+      required:
+        - type
+      title: Percent field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-relative_date:
+      additionalProperties: false
+      description: 'Formats a field into a relative date value. For example: "1 day ago".'
+      properties:
+        type:
+          enum:
+            - relative_date
+          type: string
+      required:
+        - type
+      title: Relative date field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-static_lookup:
+      additionalProperties: false
+      description: Formats a field into a static value based on the lookup entries or the unknown key value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            lookup_entries:
+              description: The lookup entries to use for the static lookup. The key refers to the field value, and the value refers to the new value to display.
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+                required:
+                  - key
+                  - value
+              title: Lookup entries
+              type: array
+            unknown_key_value:
+              description: The value to display for unknown key values. If not provided, the field value will be displayed.
+              title: Unknown key value
+              type: string
+          required:
+            - lookup_entries
+        type:
+          enum:
+            - static_lookup
+          type: string
+      required:
+        - type
+        - params
+      title: Static lookup field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-string:
+      additionalProperties: false
+      description: Formats a field into a string value.
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            transform:
+              anyOf:
+                - description: 'Converts the field value to lowercase. For example: "Some Text" -> "some text".'
+                  enum:
+                    - lower
+                  title: Lower case
+                  type: string
+                - description: 'Converts the field value to uppercase. For example: "Some Text" -> "SOME TEXT".'
+                  enum:
+                    - upper
+                  title: Upper case
+                  type: string
+                - description: 'Converts the field value to title case. For example: "some text" -> "Some Text".'
+                  enum:
+                    - title
+                  title: Title
+                  type: string
+                - description: 'Shortens each dot-separated segment of the field value to its first character, except for the last segment. For example: "dot.notated.string" -> "d.n.string".'
+                  enum:
+                    - short
+                  title: Short dots
+                  type: string
+                - description: 'Decodes the field value from base64. For example: "U29tZSBUZXh0" -> "Some Text".'
+                  enum:
+                    - base64
+                  title: Base64 decode
+                  type: string
+                - description: 'Decodes the field value from URL parameter. For example: "Some%20Text" -> "Some Text".'
+                  enum:
+                    - urlparam
+                  title: URL parameter decode
+                  type: string
+        type:
+          enum:
+            - string
+          type: string
+      required:
+        - type
+      title: String field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-truncate:
+      additionalProperties: false
+      description: Truncates the field value to the specified length. If the field value is longer than the specified length, it will be truncated and the remaining text will be replaced with "...".
+      properties:
+        params:
+          additionalProperties: false
+          type: object
+          properties:
+            field_length:
+              type: number
+        type:
+          enum:
+            - truncate
+          type: string
+      required:
+        - type
+      title: Truncate field format
+      type: object
+    Kibana_HTTP_APIs_kbn-field-format-url:
+      additionalProperties: false
+      description: Formats a field into a link, image or audio.
+      properties:
+        params:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - additionalProperties: false
+              type: object
+              properties:
+                label_template:
+                  description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
+                  title: Label template
+                  type: string
+                open_link_in_current_tab:
+                  description: When true, the URL opens in the current tab. When false or not provided, the URL opens in a new tab.
+                  title: Open link in current tab
+                  type: boolean
+                type:
+                  description: Displays the field value as a hyperlink.
+                  enum:
+                    - a
+                  title: Link
+                  type: string
+                url_template:
+                  description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
+                  title: URL template
+                  type: string
+              required:
+                - type
+            - additionalProperties: false
+              type: object
+              properties:
+                height:
+                  description: The height of the image. If not provided, the image will be displayed at the original height.
+                  title: Height
+                  type: number
+                label_template:
+                  description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
+                  title: Label template
+                  type: string
+                type:
+                  description: Displays the field value as an image.
+                  enum:
+                    - img
+                  title: Image
+                  type: string
+                url_template:
+                  description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
+                  title: URL template
+                  type: string
+                width:
+                  description: The width of the image. If not provided, the image will be displayed at the original width.
+                  title: Width
+                  type: number
+              required:
+                - type
+            - additionalProperties: false
+              type: object
+              properties:
+                label_template:
+                  description: 'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".'
+                  title: Label template
+                  type: string
+                type:
+                  description: Displays the field value as an audio player.
+                  enum:
+                    - audio
+                  title: Audio
+                  type: string
+                url_template:
+                  description: 'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:''{{risonValue}}''). For example: "https://example.com/{{value}}".'
+                  title: URL template
+                  type: string
+              required:
+                - type
+        type:
+          enum:
+            - url
+          type: string
+      required:
+        - type
+        - params
+      title: URL field format
       type: object
     Kibana_HTTP_APIs_kbn-field-settings-entry:
       anyOf:
@@ -132360,6 +134423,9 @@ components:
         alert_updated_by_user_name:
           description: The optional username of the user who updated the attack discovery alert
           type: string
+        alert_workflow_reason:
+          description: The optional kibana.alert.workflow_reason of this attack discovery, which records why the workflow status was last changed
+          type: string
         alert_workflow_status:
           description: The optional kibana.alert.workflow_status of this attack discovery
           type: string
@@ -133909,6 +135975,7 @@ components:
             - isolate
           type: string
         comment:
+          maxLength: 30000
           type: string
       required:
         - command
@@ -133917,11 +135984,14 @@ components:
         type: object
         properties:
           field:
+            maxLength: 2000
             type: string
           value:
             oneOf:
-              - type: string
+              - maxLength: 30000
+                type: string
               - items:
+                  maxLength: 30000
                   type: string
                 type: array
       description: 'Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}'
@@ -135084,6 +137154,7 @@ components:
           type: string
         comment:
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          maxLength: 30000
           type: string
         config:
           type: object
@@ -136242,6 +138313,7 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_EcsMapping'
         pack_id:
           description: 'To specify a query pack, use the packId field. Example: "packId": "processes_elastic"'
+          maxLength: 256
           type: string
         queries:
           items:
@@ -136249,9 +138321,11 @@ components:
           type: array
         query:
           description: 'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
+          maxLength: 30000
           type: string
         saved_query_id:
           description: 'To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"'
+          maxLength: 256
           type: string
         timeout:
           description: 'A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.'
@@ -136263,11 +138337,14 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_EcsMapping'
         id:
           description: Query ID
+          maxLength: 256
           type: string
         platform:
+          maxLength: 256
           type: string
         query:
           description: Query to run
+          maxLength: 30000
           type: string
         removed:
           type: boolean
@@ -136275,6 +138352,7 @@ components:
           type: boolean
         version:
           description: Query version
+          maxLength: 256
           type: string
       required:
         - id
@@ -137509,9 +139587,11 @@ components:
       properties:
         scriptId:
           description: The ID of the script to run (from the Kibana Script library)
+          maxLength: 256
           type: string
         scriptInput:
           description: The arguments to pass to the script (if any)
+          maxLength: 8192
           type: string
         timeout:
           description: Specify the timeout in seconds for the script execution
@@ -137527,6 +139607,7 @@ components:
           type: string
         comment:
           description: Add a note that explains or describes the action. You can find your comment in the response actions history log
+          maxLength: 30000
           type: string
         config:
           type: object
@@ -138254,6 +140335,7 @@ components:
           type: string
         comment:
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          maxLength: 30000
           type: string
         config:
           type: object

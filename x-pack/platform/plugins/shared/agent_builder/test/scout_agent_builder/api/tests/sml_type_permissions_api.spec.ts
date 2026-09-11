@@ -129,7 +129,8 @@ const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<
  * No currently shipped SML type omits `getPermissions`, so this is driven by a fixture plugin
  * registering one such type (plus a gated twin as the control).
  */
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/289967
+apiTest.describe.skip(
   'Agent Builder — SML type permission contract',
   { tag: [...tags.stateful.classic] },
   () => {

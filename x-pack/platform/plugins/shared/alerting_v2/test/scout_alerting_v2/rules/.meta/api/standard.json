@@ -1,5 +1,5 @@
 {
-  "sha1": "7ca4b6f6c397eac2819de0b43d0dc0b46ef8ed72",
+  "sha1": "30f03f73e7502f5e448a08c643c91f3b143b8b7e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2989,8 +2989,138 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 22,
+        "line": 90,
+        "column": 65
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-7b736d6af43d0dd",
+      "title": "Matcher value suggestions API filters static suggestions by the query prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-7759773fc3b7aae",
+      "title": "Matcher value suggestions API rule.name: narrows the saved object search to names matching the query prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 122,
+        "column": 11
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-1d340d0aaa0c2a4",
+      "title": "Matcher value suggestions API rule.tags: returns the deduplicated tags across all rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 143,
+        "column": 38
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-950c0b50dd2bec5",
+      "title": "Matcher value suggestions API rule.tags: caps the result at 10 suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 171,
+        "column": 14
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-ae4eacfacd29bcf",
+      "title": "Matcher value suggestions API group_hash: aggregates the values stored on the alert events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 191,
+        "column": 8
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-4c588e12a602687",
+      "title": "Matcher value suggestions API group_hash: escapes regexp characters in the query before filtering",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 207,
         "column": 20
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-aa6a5a5030167bd",
+      "title": "Matcher value suggestions API episode_id: aggregates the episode ids stored on the alert events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 223,
+        "column": 20
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-ab26cc265213838",
+      "title": "Matcher value suggestions API data.*: aggregates the values of a field nested under data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 239,
+        "column": 39
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-a61d08cfa525bbd",
+      "title": "Matcher value suggestions API returns an empty list for an unsupported field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 256,
+        "column": 20
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-76e03773677b2a5",
+      "title": "Matcher value suggestions API space isolation: only suggests rules that live in the requested space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 267,
+        "column": 46
       }
     },
     {
@@ -3002,8 +3132,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 43,
-        "column": 14
+        "line": 300,
+        "column": 20
       }
     },
     {
@@ -3015,8 +3145,112 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 62,
-        "column": 8
+        "line": 313,
+        "column": 44
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-09b083e49980cc0",
+      "title": "Matcher value suggestions API validation: rejects a body without a query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 330,
+        "column": 41
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-7ea1d44df32572a",
+      "title": "Matcher value suggestions API validation: rejects an empty field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 339,
+        "column": 4
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-610d3cb3eed6846",
+      "title": "Matcher value suggestions API validation: rejects a field longer than the schema limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 349,
+        "column": 12
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-afd4948b30028f0",
+      "title": "Matcher value suggestions API validation: rejects a query longer than the schema limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 357,
+        "column": 6
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-6edb9c3ac567327",
+      "title": "Matcher value suggestions API authorization: returns 200 for a user with read privileges on rules and alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 367,
+        "column": 7
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-eee7b28cce8c718",
+      "title": "Matcher value suggestions API authorization: returns 403 for a user with rules privileges but no alerts privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 378,
+        "column": 18
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-07c6ad3743dc2b3",
+      "title": "Matcher value suggestions API authorization: returns 403 for a user with alerts privileges but no rules privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 393,
+        "column": 9
+      }
+    },
+    {
+      "id": "fc474d7c402bdfc-78d17c6a5108239",
+      "title": "Matcher value suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
+        "line": 405,
+        "column": 24
       }
     },
     {

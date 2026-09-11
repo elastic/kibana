@@ -1,5 +1,5 @@
 {
-  "sha1": "0e20897affa4f9c475a52469be8b4f04f0fc65b6",
+  "sha1": "664952f0bb11a2367d7f2441b61fcd341f0da4c6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -288,8 +288,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
-        "line": 110,
-        "column": 9
+        "line": 119,
+        "column": 26
       }
     },
     {
