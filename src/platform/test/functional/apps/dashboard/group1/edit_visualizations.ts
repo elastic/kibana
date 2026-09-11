@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const retry = getService('retry');
 
   const fillSpecAndGo = async (newSpec: string) => {
     await vegaChart.fillSpec(newSpec);
@@ -42,8 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const expectVegaText = async (text: string) => {
-    const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
-    expect(await vegaText.getVisibleText()).to.eql(text);
+    await retry.try(async () => {
+      const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
+      expect(await vegaText.getVisibleText()).to.eql(text);
+    });
   };
 
   const createVegaVis = async (title?: string) => {
@@ -94,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectVegaText('Test');
       await editVegaVis();
       await visualize.saveVisualizationAndReturn();
-      expect(await (await vegaChart.getViewContainer()).getVisibleText()).to.eql('Modified');
+      await expectVegaText('Modified');
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {

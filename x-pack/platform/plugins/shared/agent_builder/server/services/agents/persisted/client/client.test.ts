@@ -263,6 +263,135 @@ describe('AgentClient', () => {
     });
   });
 
+  describe('post-execution workflow configuration', () => {
+    const toolsService = {
+      getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
+    };
+
+    const buildClient = (isAdmin: boolean): Promise<AgentClient> => {
+      getUserFromRequestMock.mockResolvedValue({ ...mockUser, isAdmin });
+      return createClient({
+        space: testSpace,
+        logger,
+        request: {} as never,
+        security: {} as never,
+        toolsService: toolsService as never,
+        elasticsearch: {
+          client: {
+            asScoped: jest.fn(() => ({
+              asCurrentUser: {},
+              asInternalUser: {},
+            })),
+          },
+        } as never,
+      });
+    };
+
+    const buildCreateProfile = (postExecutionWorkflowIds?: string[]) => ({
+      id: 'agent-1',
+      name: 'Agent 1',
+      description: 'desc',
+      configuration: {
+        tools: [],
+        ...(postExecutionWorkflowIds !== undefined
+          ? { post_execution_workflow_ids: postExecutionWorkflowIds }
+          : {}),
+      },
+    });
+
+    const buildDoc = (postExecutionWorkflowIds?: string[]) => ({
+      _id: 'agent-1',
+      _source: {
+        id: 'agent-1',
+        name: 'Agent 1',
+        type: 'chat',
+        space: testSpace,
+        description: 'desc',
+        created_by_id: mockUser.id,
+        created_by_name: mockUser.username,
+        access_control: { access_mode: 'public', entries: [] },
+        config: {
+          tools: [],
+          ...(postExecutionWorkflowIds !== undefined
+            ? { post_execution_workflow_ids: postExecutionWorkflowIds }
+            : {}),
+        },
+        created_at: '2020-01-01T00:00:00.000Z',
+        updated_at: '2020-01-01T00:00:00.000Z',
+      },
+    });
+
+    describe('create', () => {
+      it('rejects a non-admin attaching post_execution_workflow_ids', async () => {
+        const nonAdminClient = await buildClient(false);
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+        await expect(nonAdminClient.create(buildCreateProfile(['wf-1']) as never)).rejects.toThrow(
+          'Only administrators can configure post-execution workflows.'
+        );
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('allows a non-admin to create without post_execution_workflow_ids', async () => {
+        const nonAdminClient = await buildClient(false);
+        mockEsClient.search
+          .mockResolvedValueOnce({ hits: { hits: [] } })
+          .mockResolvedValue({ hits: { hits: [buildDoc()] } });
+
+        await nonAdminClient.create(buildCreateProfile() as never);
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('allows an admin to attach post_execution_workflow_ids', async () => {
+        const adminClient = await buildClient(true);
+        mockEsClient.search
+          .mockResolvedValueOnce({ hits: { hits: [] } })
+          .mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
+
+        await adminClient.create(buildCreateProfile(['wf-1']) as never);
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('update', () => {
+      it('rejects a non-admin changing post_execution_workflow_ids', async () => {
+        const nonAdminClient = await buildClient(false);
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
+
+        await expect(
+          nonAdminClient.update('agent-1', {
+            configuration: { post_execution_workflow_ids: ['wf-2'] },
+          } as never)
+        ).rejects.toThrow('Only administrators can configure post-execution workflows.');
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('allows a non-admin to echo back the unchanged post_execution_workflow_ids', async () => {
+        const nonAdminClient = await buildClient(false);
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
+
+        await nonAdminClient.update('agent-1', {
+          configuration: { post_execution_workflow_ids: ['wf-1'] },
+        } as never);
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('allows an admin to change post_execution_workflow_ids', async () => {
+        const adminClient = await buildClient(true);
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc(['wf-1'])] } });
+
+        await adminClient.update('agent-1', {
+          configuration: { post_execution_workflow_ids: ['wf-2'] },
+        } as never);
+
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
   describe('ensureDefaultAgent', () => {
     const profile = {
       id: 'agent-1',

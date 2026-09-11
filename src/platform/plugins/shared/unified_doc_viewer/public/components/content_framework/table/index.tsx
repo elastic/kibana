@@ -22,8 +22,6 @@ import { FormattedValue } from './components/formatted_value';
 import { NamePopoverContent } from './components/name_popover_content';
 import { ValuePopoverContent } from './components/value_popover_content';
 
-const DEFAULT_INITIAL_PAGE_SIZE = 25;
-
 export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
@@ -230,7 +228,6 @@ export function ContentFrameworkTable({
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
         columns={columns}
-        initialPageSize={DEFAULT_INITIAL_PAGE_SIZE}
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
         gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
