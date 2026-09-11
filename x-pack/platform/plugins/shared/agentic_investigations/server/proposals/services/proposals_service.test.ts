@@ -763,7 +763,10 @@ describe('ProposalsService', () => {
   });
 
   describe('listByWindow', () => {
-    const activityQuery = (windowHours = 24) => ({ windowHours });
+    const activityQuery = (decidedWithinHours = 24) => ({
+      includeStatuses: ['pending' as const],
+      decidedWithinHours,
+    });
 
     it('includes pending proposals regardless of age', async () => {
       const storage = createStorage(baseDocument({ status: 'pending' }));
@@ -786,7 +789,7 @@ describe('ProposalsService', () => {
       expect(bool.minimum_should_match).toBe(1);
       expect(bool.should).toEqual(
         expect.arrayContaining([
-          { term: { status: 'pending' } },
+          { terms: { status: ['pending'] } },
           { range: { decidedAt: { gte: 'now-48h' } } },
         ])
       );
