@@ -29,7 +29,6 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     syntheticsMonitorClient,
     savedObjectsClient,
     spaceId,
-    server,
   }): Promise<any> => {
     const monitor = request.body as MonitorFields;
     const { monitorId } = request.params;
@@ -37,11 +36,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return response.badRequest({ body: { message: 'Monitor data is empty.' } });
     }
 
-    const validationResult = validateMonitor(
-      monitor,
-      spaceId,
-      server.config.enableApiJourneyPublicLocations
-    );
+    const validationResult = validateMonitor(monitor, spaceId);
 
     const decodedMonitor = validationResult.decodedMonitor;
     if (!validationResult.valid || !decodedMonitor) {

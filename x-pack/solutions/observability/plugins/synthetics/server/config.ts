@@ -25,14 +25,10 @@ const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   service: schema.maybe(serviceConfig),
   enabled: schema.boolean({ defaultValue: true }),
-  enableApiJourneyPublicLocations: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
-  exposeToBrowser: {
-    enableApiJourneyPublicLocations: true,
-  },
   deprecations: ({ unused }) => [
     unused('experimental.ccs.enabled', { level: 'warning' }),
     unused('rebalancePrivateLocationShardsTaskEnabled', { level: 'warning' }),

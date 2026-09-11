@@ -79,7 +79,6 @@ describe('<BulkLocationsFlyout />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    kibanaService.enableApiJourneyPublicLocations = false;
     useGetUrlParamsMock.mockReturnValue({ spaceId: 'default' } as ReturnType<
       typeof useGetUrlParams
     >);
@@ -128,28 +127,6 @@ describe('<BulkLocationsFlyout />', () => {
     await waitFor(() => expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledTimes(1));
     const arg = fetchBulkUpdateMonitorsMock.mock.calls[0][0];
     expect(arg.updates.map((u) => u.id)).toEqual(['http-1']);
-  });
-
-  it('adds Elastic managed locations to API Journey monitors when the feature flag is enabled', async () => {
-    kibanaService.enableApiJourneyPublicLocations = true;
-    const monitors = [
-      makeMonitor('api-1', 'API Journey', {
-        locations: [{ id: 'qa_private', label: 'QA private', isServiceManaged: false }],
-        type: MonitorTypeEnum.API,
-      }),
-    ];
-    fetchBulkUpdateMonitorsMock.mockResolvedValue({ result: [{ id: 'api-1', updated: true }] });
-
-    const { getByTestId } = render(
-      <BulkLocationsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
-    );
-
-    selectUsEast(getByTestId);
-    clickSave(getByTestId);
-
-    await waitFor(() => expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledTimes(1));
-    const arg = fetchBulkUpdateMonitorsMock.mock.calls[0][0];
-    expect(arg.updates.map((u) => u.id)).toEqual(['api-1']);
   });
 
   it('adds the selected location only to monitors that do not already have it', async () => {

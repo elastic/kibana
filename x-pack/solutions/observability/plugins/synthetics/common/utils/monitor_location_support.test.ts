@@ -14,7 +14,6 @@ import {
 describe('monitorTypeRequiresPrivateLocations', () => {
   it('is true only for API Journey monitors', () => {
     expect(monitorTypeRequiresPrivateLocations(MonitorTypeEnum.API)).toBe(true);
-    expect(monitorTypeRequiresPrivateLocations(MonitorTypeEnum.API, true)).toBe(false);
     expect(monitorTypeRequiresPrivateLocations(MonitorTypeEnum.BROWSER)).toBe(false);
     expect(monitorTypeRequiresPrivateLocations(MonitorTypeEnum.HTTP)).toBe(false);
     expect(monitorTypeRequiresPrivateLocations(undefined)).toBe(false);

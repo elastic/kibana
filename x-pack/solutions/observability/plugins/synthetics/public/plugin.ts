@@ -78,7 +78,6 @@ import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embed
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
-import type { SyntheticsPublicConfig } from '../common/config';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
@@ -153,11 +152,9 @@ export class SyntheticsPlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
   private readonly _packageInfo: Readonly<PackageInfo>;
-  private readonly enableApiJourneyPublicLocations: boolean;
 
-  constructor(private readonly initContext: PluginInitializerContext<SyntheticsPublicConfig>) {
+  constructor(private readonly initContext: PluginInitializerContext) {
     this._packageInfo = initContext.env.packageInfo;
-    this.enableApiJourneyPublicLocations = initContext.config.get().enableApiJourneyPublicLocations;
   }
 
   public setup(
@@ -178,7 +175,6 @@ export class SyntheticsPlugin
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
         isCCSEnabled: !this._isServerless,
-        enableApiJourneyPublicLocations: this.enableApiJourneyPublicLocations,
       });
     });
 

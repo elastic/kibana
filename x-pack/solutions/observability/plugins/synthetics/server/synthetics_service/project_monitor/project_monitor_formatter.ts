@@ -225,7 +225,7 @@ export class ProjectMonitorFormatter {
           },
           publicLocations,
           privateLocations,
-          this.server.config.enableApiJourneyPublicLocations
+          this.server.cloud?.isServerlessEnabled
         ),
         monitorId: monitor.id,
       });
@@ -239,7 +239,7 @@ export class ProjectMonitorFormatter {
         validationResult: validateMonitor(
           normalizedMonitor as MonitorFields,
           this.spaceId,
-          this.server.config.enableApiJourneyPublicLocations
+          this.server.cloud?.isServerlessEnabled
         ),
         monitorId: monitor.id,
       });

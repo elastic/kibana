@@ -117,7 +117,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const validationResult = validateMonitor(
         monitorWithDefaults,
         spaceId,
-        server.config.enableApiJourneyPublicLocations
+        server.cloud?.isServerlessEnabled
       );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {

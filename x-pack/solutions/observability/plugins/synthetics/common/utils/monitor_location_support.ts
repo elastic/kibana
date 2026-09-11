@@ -7,11 +7,9 @@
 
 import { MonitorTypeEnum } from '../runtime_types';
 
-/** API Journey uses private locations unless public locations are explicitly enabled. */
-export const monitorTypeRequiresPrivateLocations = (
-  type?: string,
-  enableApiJourneyPublicLocations = false
-): boolean => type === MonitorTypeEnum.API && !enableApiJourneyPublicLocations;
+/** API Journey monitors can only run on private locations. */
+export const monitorTypeRequiresPrivateLocations = (type?: string): boolean =>
+  type === MonitorTypeEnum.API;
 
 export const hasPublicServiceLocation = (
   locations?: Array<{ isServiceManaged?: boolean }>

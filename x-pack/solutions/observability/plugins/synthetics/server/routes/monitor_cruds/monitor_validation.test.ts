@@ -298,16 +298,28 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when api monitor uses Elastic managed locations and the feature flag is enabled', () => {
+    it('when api monitor is created on Serverless', () => {
       const testMonitor = {
         ...testBrowserFields,
         [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
         [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
         [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
       } as MonitorFields;
       const result = validateMonitor(testMonitor, 'default', true);
-
-      expect(result.valid).toBe(true);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
+        payload: testMonitor,
+      });
     });
 
     it('when browser timeout is less than 30 seconds with private locations', () => {
@@ -711,32 +723,6 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when api monitor uses public locations and the feature flag is enabled', () => {
-      const result = validateProjectMonitor(
-        {
-          type: MonitorTypeEnum.API,
-          id: 'api-1',
-          name: 'API Journey',
-          schedule: 5,
-          locations: ['us_central'],
-          content: 'apiJourney("orders", () => {})',
-        },
-        [
-          {
-            id: 'us_central',
-            label: 'US Central',
-            isServiceManaged: true,
-            geo: { lat: 0, lon: 0 },
-            url: 'https://example.com',
-          },
-        ],
-        [],
-        true
-      );
-
-      expect(result.valid).toBe(true);
-    });
-
     it('when api monitor uses only private locations', () => {
       const result = validateProjectMonitor(
         {
@@ -762,6 +748,35 @@ describe('validateMonitor', () => {
         valid: true,
         reason: '',
         details: '',
+      });
+    });
+
+    it('when api project monitor is created on Serverless', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ],
+        true
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
       });
     });
   });
