@@ -2533,10 +2533,8 @@ const CloudGroupedCards = ({
   if (hideHeader) {
     return (
       <>
-        {allServiceRows.map((service, index) => (
-          <React.Fragment key={service.entityType}>
-            {index > 0 ? <EuiSpacer size="m" /> : null}
-            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+        {allServiceRows.map((service) => (
+          <EuiPanel key={service.entityType} hasBorder hasShadow={false} paddingSize="m">
               <SubTypeRow
                 bucketKey={bucketKeyFor('cloud', service.entityType)}
                 label={service.label}
@@ -2544,7 +2542,6 @@ const CloudGroupedCards = ({
                 onSelectEntity={onSelectEntity}
               />
             </EuiPanel>
-          </React.Fragment>
         ))}
       </>
     );
@@ -2557,7 +2554,6 @@ const CloudGroupedCards = ({
           <EuiFlexItem grow={false}>
             <CategoryHeader category="cloud" total={visibleEntities.length} />
           </EuiFlexItem>
-          <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <CloudProviderFilter value={providerFilter} onChange={setProviderFilter} />
           </EuiFlexItem>

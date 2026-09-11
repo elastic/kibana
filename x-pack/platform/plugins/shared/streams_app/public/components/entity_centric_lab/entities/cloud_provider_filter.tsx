@@ -44,29 +44,29 @@ interface CloudProviderFilterProps {
  */
 export const CloudProviderFilter = ({ value, onChange }: CloudProviderFilterProps) => {
   const isElasticOn = useIsElasticOn();
+  const allProvidersLabel = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.cloudProviderFilter.allOption',
+    { defaultMessage: 'All providers' }
+  );
   const options = useMemo(
     () => [
       {
         value: CLOUD_PROVIDER_FILTER_ALL,
-        text: i18n.translate(
-          'xpack.streams.entityCentricLab.entities.cloudProviderFilter.allOption',
-          { defaultMessage: 'All providers' }
-        ),
+        text: allProvidersLabel,
       },
       ...CLOUD_PROVIDERS.map((provider) => ({
         value: provider.id,
-        text: provider.label,
+        text: i18n.translate(
+          'xpack.streams.entityCentricLab.entities.cloudProviderFilter.providerOption',
+          { defaultMessage: 'Provider: {name}', values: { name: provider.label } }
+        ),
       })),
     ],
-    []
+    [allProvidersLabel]
   );
   return (
     <EuiSelect
       compressed
-      prepend={i18n.translate(
-        'xpack.streams.entityCentricLab.entities.cloudProviderFilter.label',
-        { defaultMessage: 'Provider' }
-      )}
       options={options}
       value={value}
       onChange={(event) => onChange(event.target.value)}
