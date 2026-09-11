@@ -15,7 +15,7 @@ import {
   getMockMitreSubtechnique,
 } from '../../mocks/mitre_entities.mock';
 import { createMitreAttackDataClient } from './mitre_attack_data_client';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../saved_objects';
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 import { mitreAttackDataServiceMock } from '../__mocks__/mitre_attack_data_service';
 
 describe('MitreAttackDataClient.list', () => {

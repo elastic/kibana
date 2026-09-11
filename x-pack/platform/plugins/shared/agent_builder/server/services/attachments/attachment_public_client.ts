@@ -84,7 +84,8 @@ export const createAttachmentPublicClient = ({
         attachment = await stateManager.add(
           { id, type, data, origin, description, hidden } as AttachmentInput,
           ATTACHMENT_REF_ACTOR.user,
-          resolveContext
+          resolveContext,
+          { request }
         );
       } catch (e) {
         throw createAttachmentInvalidError((e as Error).message);
@@ -116,7 +117,8 @@ export const createAttachmentPublicClient = ({
         updated = await stateManager.update(
           attachmentId,
           { data, description },
-          ATTACHMENT_REF_ACTOR.user
+          ATTACHMENT_REF_ACTOR.user,
+          { request }
         );
       } catch (e) {
         throw createAttachmentInvalidError((e as Error).message);

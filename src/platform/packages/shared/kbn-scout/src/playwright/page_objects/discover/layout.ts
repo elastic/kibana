@@ -728,6 +728,9 @@ export abstract class LayoutMixin extends SaveMixin {
       state: 'visible',
     });
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
+    await expect(
+      this.page.testSubj.locator('unifiedHistogramBreakdownSelectorSelectable')
+    ).toHaveAttribute('data-is-searching', 'false');
     await this.page
       .locator(
         `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
