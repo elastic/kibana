@@ -14,6 +14,7 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
 import type {
@@ -188,19 +189,26 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
   impact: record.impact,
 });
 
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
-  ...toListInvestigationItem(record),
-  trigger_type: record.trigger_type,
-  error: record.error,
-  summary: record.summary,
-  conclusion: record.conclusion,
-  hypotheses: record.hypotheses,
-  recommendations: record.recommendations,
-  blind_spots: record.blind_spots,
-  trigger_feedback: record.trigger_feedback,
-  conversation_id: record.conversation_id,
-  impact: record.impact,
-});
+const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
+  const recommendations = investigationStateSchema.shape.recommendations.safeParse(
+    record.recommendations
+  );
+  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
+
+  return {
+    ...toListInvestigationItem(record),
+    trigger_type: record.trigger_type,
+    error: record.error,
+    summary: record.summary,
+    conclusion: record.conclusion,
+    hypotheses: record.hypotheses,
+    recommendations: recommendations.success ? recommendations.data : undefined,
+    blind_spots: blindSpots.success ? blindSpots.data : undefined,
+    trigger_feedback: record.trigger_feedback,
+    conversation_id: record.conversation_id,
+    impact: record.impact,
+  };
+};
 
 const parseExecutionInvestigationMetadata = (
   executionContext: Record<string, unknown> | undefined

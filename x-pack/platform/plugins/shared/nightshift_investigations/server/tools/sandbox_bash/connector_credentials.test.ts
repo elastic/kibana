@@ -52,15 +52,12 @@ const setup = ({
   withActions?: boolean;
 } = {}) => {
   const actionsClient = actionsClientMock.create();
-  // The actions client omits `config` for preconfigured connectors unless they set
-  // `exposeConfig`, so the mock must too; config is only readable via inMemoryConnectors.
-  const { config, ...connectorWithoutConfig } = connector;
-  actionsClient.get.mockResolvedValue(connectorWithoutConfig as any);
+  actionsClient.get.mockResolvedValue(connector as any);
   const authorization = actionsAuthorizationMock.create();
   const actions = actionsMock.createStart();
   actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
   actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
-  actions.inMemoryConnectors = inMemory ? [{ ...connector, config, secrets } as any] : [];
+  actions.inMemoryConnectors = inMemory ? [{ ...connector, secrets } as any] : [];
 
   const resolve = createConnectorCredentialResolver({
     getDeps: () => ({ actions: withActions ? actions : undefined }),

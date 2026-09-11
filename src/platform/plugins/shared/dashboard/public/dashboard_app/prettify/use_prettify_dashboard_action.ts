@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { type UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { useEffect, useMemo, useState } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { catchError, EMPTY, from, of, startWith, switchMap } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
@@ -27,9 +22,14 @@ const getPrettifyAction = async (): Promise<Action<PrettifyDashboardActionContex
     PRETTIFY_DASHBOARD_ACTION_ID
   )) as Action<PrettifyDashboardActionContext>;
 
-export const PrettifyDashboardButton = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
+export interface UsePrettifyDashboardAction {
+  execute: () => Promise<void>;
+}
+
+export const usePrettifyDashboardAction = (
+  dashboardApi: DashboardApi
+): UsePrettifyDashboardAction | null => {
   const [action, setAction] = useState<Action<PrettifyDashboardActionContext> | null>(null);
-  const styles = useMemoCss(buttonStyles);
   const context = useMemo(
     () => ({
       dashboardApi,
@@ -67,40 +67,13 @@ export const PrettifyDashboardButton = ({ dashboardApi }: { dashboardApi: Dashbo
     };
   }, [context]);
 
-  if (!action) {
-    return null;
-  }
-
-  return (
-    <div css={styles.overlay}>
-      <AiButton
-        variant="base"
-        size="s"
-        iconType="sparkles"
-        data-test-subj="dashboardPrettifyButton"
-        onClick={async () => {
-          await action.execute(context);
-        }}
-      >
-        {action.getDisplayName(context)}
-      </AiButton>
-    </div>
+  return useMemo(
+    () =>
+      action
+        ? {
+            execute: () => action.execute(context),
+          }
+        : null,
+    [action, context]
   );
-};
-
-const buttonStyles = {
-  overlay: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      position: 'fixed',
-      bottom: `calc(${layoutVar('application.content.bottom', '0px')} + ${euiTheme.size.l})`,
-      left: layoutVar('application.content.left', '0px'),
-      right: layoutVar('application.content.right', '0px'),
-      display: 'flex',
-      justifyContent: 'center',
-      pointerEvents: 'none',
-      zIndex: euiTheme.levels.header,
-      '& > *': {
-        pointerEvents: 'auto',
-      },
-    }),
 };

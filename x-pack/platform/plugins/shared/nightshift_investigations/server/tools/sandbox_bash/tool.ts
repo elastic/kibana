@@ -9,11 +9,11 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
-import { getConversationId, getSandboxCallContext } from './tool_utils';
+import { getScopedConversationId, getSandboxCallContext } from './tool_utils';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -44,16 +44,18 @@ const sandboxBashSchema = z.object({
 export const createSandboxBashTool = ({
   connectionManager,
   resolveConnectorCredentials,
+  getSpaceId,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To reach Elasticsearch or any other external service, pass the relevant connector id as `connector_id`: read /workspace/elastic.md for querying cluster telemetry and /workspace/connectors.md for everything else. The connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`).',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
@@ -66,7 +68,7 @@ export const createSandboxBashTool = ({
   handler: async (params, context) => {
     const { command, working_directory, env, timeout_seconds, connector_id } = params;
 
-    const conversationId = getConversationId(context);
+    const conversationId = getScopedConversationId(context, getSpaceId);
 
     if (!conversationId) {
       return {

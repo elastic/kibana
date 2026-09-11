@@ -8,8 +8,6 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -34,7 +32,6 @@ export interface NightshiftInvestigationsServerStart {
 
 export interface NightshiftInvestigationsSetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
-  contextEngine?: ContextEnginePluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -43,7 +40,6 @@ export interface NightshiftInvestigationsSetupDeps {
 export interface NightshiftInvestigationsStartDeps {
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
-  inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaces?: SpacesPluginStart;
