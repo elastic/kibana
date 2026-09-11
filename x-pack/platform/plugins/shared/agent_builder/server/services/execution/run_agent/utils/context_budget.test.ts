@@ -66,11 +66,11 @@ describe('computeContextBudget', () => {
 describe('shouldTriggerCompaction', () => {
   const budget = computeContextBudget(createMockConnector(128000)); // triggerThreshold 71680
 
-  it('should not trigger when total entry tokens are under the threshold', () => {
+  it('should not trigger when total round tokens are under the threshold', () => {
     expect(shouldTriggerCompaction([100, 200, 300], budget)).toBe(false);
   });
 
-  it('should trigger when total entry tokens exceed the threshold', () => {
+  it('should trigger when total round tokens exceed the threshold', () => {
     expect(shouldTriggerCompaction([50_000, 30_000], budget)).toBe(true); // 80_000 > 71_680
   });
 

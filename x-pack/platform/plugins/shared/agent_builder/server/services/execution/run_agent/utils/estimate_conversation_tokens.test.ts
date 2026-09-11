@@ -17,11 +17,11 @@ import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ProcessedConversationRound } from '../../../../test_utils/timeline';
 import {
   estimateMessagesTokens,
-  estimateTimelineEntryTokens as estimateTimelineTokens,
+  estimatePerRoundTokens as estimateTimelineTokens,
 } from './estimate_conversation_tokens';
 import { timelineFromRounds } from '../../../../test_utils/timeline';
 
-const estimateTimelineEntryTokens = (
+const estimatePerRoundTokens = (
   rounds: ProcessedConversationRound[],
   deps: Parameters<typeof estimateTimelineTokens>[1]
 ) => estimateTimelineTokens(timelineFromRounds(rounds), deps);
@@ -98,9 +98,9 @@ describe('estimateMessagesTokens', () => {
   });
 });
 
-describe('estimateTimelineEntryTokens', () => {
-  it('returns one positive count per timeline entry', async () => {
-    const counts = await estimateTimelineEntryTokens(
+describe('estimatePerRoundTokens', () => {
+  it('returns one positive count per round', async () => {
+    const counts = await estimatePerRoundTokens(
       [createMockRound('data'), createMockRound('data')],
       {
         toolManager: createMockToolManager(),
@@ -114,12 +114,12 @@ describe('estimateTimelineEntryTokens', () => {
   it('reflects tool-result summarization in the estimate', async () => {
     const bigRound = createMockRound('x'.repeat(4000));
 
-    const rawCounts = await estimateTimelineEntryTokens([bigRound], {
+    const rawCounts = await estimatePerRoundTokens([bigRound], {
       toolManager: createMockToolManager(),
       toolRegistry: createMockToolRegistry(),
     });
 
-    const summarizedCounts = await estimateTimelineEntryTokens([bigRound], {
+    const summarizedCounts = await estimatePerRoundTokens([bigRound], {
       toolManager: createMockToolManager(
         new Map([
           [

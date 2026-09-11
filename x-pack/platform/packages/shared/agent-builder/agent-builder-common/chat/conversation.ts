@@ -759,10 +759,6 @@ export interface CompactionStructuredData {
  * until the context window fills up again and regeneration is needed.
  */
 export interface CompactionSummary {
-  /** Event-based coverage; absent on older round-count summaries. */
-  timeline_version?: 1;
-  through_event_id?: string;
-  summarized_entry_count?: number;
   /** Number of rounds that were summarized */
   summarized_round_count: number;
   /** When the summary was generated */

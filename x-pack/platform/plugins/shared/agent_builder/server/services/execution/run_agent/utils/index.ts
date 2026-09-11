@@ -31,8 +31,5 @@ export {
   type ToolCallResultTransformerOptions,
   createSummarizationTransformer,
 } from './tool_summarization';
-export {
-  estimateMessagesTokens,
-  estimateTimelineEntryTokens,
-} from './estimate_conversation_tokens';
+export { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
 export { createImageResolver, type CreateImageResolverOptions } from './image_resolver';

@@ -49,25 +49,21 @@ export const computeContextBudget = (connector: InferenceConnector): ContextBudg
 const sumTokens = (counts: number[]): number => counts.reduce((total, count) => total + count, 0);
 
 /**
- * Determines whether compaction should be triggered given precomputed timeline-entry
+ * Determines whether compaction should be triggered given precomputed per-round
  * token counts, the context budget, and any existing compaction summary.
  *
  * When an existing summary is provided, the effective token count is the summary's
- * token cost plus only the entries not yet covered by the summary, rather than the
- * raw total of all stored entries.
+ * token cost plus only the rounds not yet covered by the summary, rather than the
+ * raw total of all stored rounds.
  */
 export const shouldTriggerCompaction = (
-  timelineEntryTokenCounts: number[],
+  perRoundTokenCounts: number[],
   budget: ContextBudget,
   existingSummary?: CompactionSummary
 ): boolean => {
   const effectiveTokens = existingSummary
     ? existingSummary.token_count +
-      sumTokens(
-        timelineEntryTokenCounts.slice(
-          existingSummary.summarized_entry_count ?? existingSummary.summarized_round_count
-        )
-      )
-    : sumTokens(timelineEntryTokenCounts);
+      sumTokens(perRoundTokenCounts.slice(existingSummary.summarized_round_count))
+    : sumTokens(perRoundTokenCounts);
   return effectiveTokens > budget.triggerThreshold;
 };

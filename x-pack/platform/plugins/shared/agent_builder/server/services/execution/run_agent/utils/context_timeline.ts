@@ -200,12 +200,3 @@ export const groupTimelineEntries = <E extends AnyTimelineEvent>(
       (positions.get(left.userMessage.id) ?? 0) - (positions.get(right.userMessage.id) ?? 0)
   );
 };
-
-export const sliceTimelineEntries = <E extends AnyTimelineEvent>(
-  timeline: E[],
-  start: number,
-  end?: number
-): E[] =>
-  groupTimelineEntries(timeline)
-    .slice(start, end)
-    .flatMap((entry) => entry.events);
