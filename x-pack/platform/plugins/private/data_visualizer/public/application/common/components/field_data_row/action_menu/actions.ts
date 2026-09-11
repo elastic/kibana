@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import type { MutableRefObject } from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Refresh } from '@kbn/ml-date-picker';
@@ -51,13 +52,18 @@ export function getActions(
       icon: 'lensApp',
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
-      onClick: (item: FieldVisConfig) => {
+      onClick: (item: FieldVisConfig, event: MouseEvent) => {
         const lensAttributes = getLensAttributes(dataView, combinedQuery, filters, item);
         if (lensAttributes) {
-          lensPlugin.navigateToPrefilledEditor({
-            id: `dataVisualizer-${item.fieldName}`,
-            attributes: lensAttributes,
-          });
+          lensPlugin.navigateToPrefilledEditor(
+            {
+              id: `dataVisualizer-${item.fieldName}`,
+              attributes: lensAttributes,
+              // when opening in a new tab, the time range travels in the URL instead of the shared timefilter
+              time_range: data?.query.timefilter.timefilter.getTime(),
+            },
+            { openInNewTab: hasActiveModifierKey(event) }
+          );
         }
       },
       'data-test-subj': 'dataVisualizerActionViewInLensButton',
