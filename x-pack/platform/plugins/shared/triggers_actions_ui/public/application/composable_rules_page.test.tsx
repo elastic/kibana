@@ -92,7 +92,25 @@ describe('ComposableClassicRulesPage', () => {
     const deps = getLatestDeps();
     expect(deps.setBreadcrumbs).toBe(setBreadcrumbs);
     expect(deps.history).toBe(history);
+    expect(deps.hideListBackButton).toBeUndefined();
     expect(getFeatures).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards hideListBackButton onto RulesPageApp deps', async () => {
+    const getFeatures = jest.fn().mockResolvedValue([]);
+
+    render(
+      <ComposableClassicRulesPage
+        coreStart={coreStart}
+        setBreadcrumbs={setBreadcrumbs}
+        hideListBackButton
+        internalDeps={createInternalDeps(getFeatures)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getLatestDeps().hideListBackButton).toBe(true);
+    });
   });
 
   it('falls back to empty kibanaFeatures when getFeatures rejects', async () => {

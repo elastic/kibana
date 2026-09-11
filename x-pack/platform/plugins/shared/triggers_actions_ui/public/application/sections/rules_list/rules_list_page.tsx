@@ -36,6 +36,7 @@ export const RulesListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
+    hideListBackButton,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -113,12 +114,16 @@ export const RulesListContainer = () => {
   return (
     <>
       <RulesPageHeader
-        back={{
-          href: alertsBackHref,
-          label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
-            defaultMessage: 'Alerts',
-          }),
-        }}
+        back={
+          hideListBackButton
+            ? undefined
+            : {
+                href: alertsBackHref,
+                label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
+                  defaultMessage: 'Alerts',
+                }),
+              }
+        }
         tabs={rulesListTabs}
         menu={rulesListMenu}
         docLink={docLink}

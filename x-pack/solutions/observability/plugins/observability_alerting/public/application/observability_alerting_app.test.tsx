@@ -47,7 +47,7 @@ const createTestHistory = (pathname: string): ScopedHistory => {
 };
 
 const mockTriggersActionsUi = {
-  getClassicRulesPage: () => <Placeholder name="classicRulesPage" />,
+  getClassicRulesPage: jest.fn(() => <Placeholder name="classicRulesPage" />),
 };
 
 const renderAt = (pathname: string) => {
@@ -70,6 +70,10 @@ const renderAt = (pathname: string) => {
 };
 
 describe('ObservabilityAlertingApp', () => {
+  beforeEach(() => {
+    mockTriggersActionsUi.getClassicRulesPage.mockClear();
+  });
+
   it('redirects / to inbox', () => {
     const { history } = renderAt('/');
 
@@ -91,6 +95,12 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
     expect(history.createSubHistory).toHaveBeenCalledWith(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hideListBackButton: true,
+        history,
+      })
+    );
   });
 
   it('renders RulesPage at /rules/v2', async () => {

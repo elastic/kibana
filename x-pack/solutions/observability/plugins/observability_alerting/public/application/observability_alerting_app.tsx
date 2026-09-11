@@ -50,6 +50,7 @@ const ClassicRulesV1Route = ({
     coreStart,
     setBreadcrumbs,
     history: classicRulesHistory,
+    hideListBackButton: true,
   });
 };
 

@@ -89,6 +89,7 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
+    useKibanaMock().services.hideListBackButton = undefined;
   });
 
   it('renders rule list components', async () => {
@@ -123,6 +124,15 @@ describe('rulesPage', () => {
     renderRulesPage(history);
 
     expect(await screen.findAllByRole('tab')).toHaveLength(1);
+  });
+
+  it('omits the list back button when hideListBackButton is set', async () => {
+    useKibanaMock().services.hideListBackButton = true;
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
   });
 
   it('points the back button at Alerts on the rules list', async () => {
