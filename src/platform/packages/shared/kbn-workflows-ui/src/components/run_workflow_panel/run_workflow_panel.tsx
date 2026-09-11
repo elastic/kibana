@@ -110,7 +110,7 @@ export const RunWorkflowPanel = ({
   } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
-  const defaultRunWorkflow = useRunWorkflow();
+  const { mutate: runDefaultWorkflow } = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
@@ -180,7 +180,7 @@ export const RunWorkflowPanel = ({
           })
           .finally(onSettled);
       } else {
-        defaultRunWorkflow.mutate(
+        runDefaultWorkflow(
           { id: selectedId, inputs: mergedInputs },
           {
             onSuccess,
@@ -198,7 +198,7 @@ export const RunWorkflowPanel = ({
     [
       application,
       selectedId,
-      defaultRunWorkflow,
+      runDefaultWorkflow,
       runWorkflowExecutor,
       inputs,
       notifications,
