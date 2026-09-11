@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/response-ops-rules-apis'
   - '@kbn/cps'
+  - '@kbn/triggers-actions-ui-types'
 tags:
   - shared-browser
   - package

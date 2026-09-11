@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/core-i18n-browser'
   - '@kbn/test-jest-helpers'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-common'
 tags:
   - shared-common
   - package
