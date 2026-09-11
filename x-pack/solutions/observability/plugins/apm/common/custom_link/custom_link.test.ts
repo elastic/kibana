@@ -100,5 +100,58 @@ describe('Custom link', () => {
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe('https://kibana.com/app/apm/foo%20%26%20bar/overview');
     });
+
+    it('does not encode URL values with http:// protocol', () => {
+      const url = 'https://kibana.com/redirect?url={{labels.targetUrl}}';
+      const transaction = {
+        labels: { targetUrl: 'http://elastic.co' },
+      } as Transaction;
+      const result = getEncodedCustomLinkUrl(url, transaction);
+      expect(result).toBe('https://kibana.com/redirect?url=http://elastic.co');
+    });
+
+    it('does not encode URL values with https:// protocol', () => {
+      const url = 'https://kibana.com/redirect?url={{labels.targetUrl}}';
+      const transaction = {
+        labels: { targetUrl: 'https://elastic.co' },
+      } as Transaction;
+      const result = getEncodedCustomLinkUrl(url, transaction);
+      expect(result).toBe('https://kibana.com/redirect?url=https://elastic.co');
+    });
+
+    it('does not encode URL values with query parameters', () => {
+      const url = 'https://kibana.com/redirect?url={{labels.targetUrl}}';
+      const transaction = {
+        labels: { targetUrl: 'https://elastic.co/page?param=value&other=test' },
+      } as Transaction;
+      const result = getEncodedCustomLinkUrl(url, transaction);
+      expect(result).toBe(
+        'https://kibana.com/redirect?url=https://elastic.co/page?param=value&other=test'
+      );
+    });
+
+    it('still encodes non-URL values that contain special characters', () => {
+      const url = 'https://kibana.com/app/apm/{{service.name}}?label={{labels.info}}';
+      const transaction = {
+        service: { name: 'my service' },
+        labels: { info: 'not a url: with special chars!' },
+      } as Transaction;
+      const result = getEncodedCustomLinkUrl(url, transaction);
+      expect(result).toBe(
+        'https://kibana.com/app/apm/my%20service?label=not%20a%20url%3A%20with%20special%20chars!'
+      );
+    });
+
+    it('handles mixed URL and non-URL values', () => {
+      const url = 'https://kibana.com/app/{{service.name}}/redirect?url={{labels.targetUrl}}';
+      const transaction = {
+        service: { name: 'opbeans java' },
+        labels: { targetUrl: 'https://elastic.co/docs' },
+      } as Transaction;
+      const result = getEncodedCustomLinkUrl(url, transaction);
+      expect(result).toBe(
+        'https://kibana.com/app/opbeans%20java/redirect?url=https://elastic.co/docs'
+      );
+    });
   });
 });
