@@ -34,7 +34,10 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
     if (!subAction) {
       editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
     }
-  }, [editAction, index, isTest, subAction]);
+    if (body === undefined) {
+      editSubActionParams({ body: '' });
+    }
+  }, [editAction, index, isTest, subAction, body, editSubActionParams]);
 
   const editSubActionParams = useCallback(
     (params: D3SecurityRunActionParams) => {
