@@ -61,7 +61,7 @@ describe('StaleEventCleanupSection', () => {
     });
   });
 
-  it('disables cleanup without the Streams manage privilege', () => {
+  it('disables cleanup without Nightshift manage', () => {
     renderSection(false);
 
     expect(screen.getByTestId('streams-settings-stale-event-cleanup-button')).toBeDisabled();

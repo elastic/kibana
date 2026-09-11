@@ -45,6 +45,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/nightshift-shared",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/react-hooks",
     "@kbn/react-query",

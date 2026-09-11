@@ -1298,6 +1298,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver'
   - 'x-pack/platform/packages/shared/kbn-mcp-client'
   - 'x-pack/platform/packages/shared/kbn-nightshift-ai'
+  - 'x-pack/platform/packages/shared/kbn-nightshift-shared'
   - 'x-pack/platform/packages/shared/kbn-profiler-cli'
   - 'x-pack/platform/packages/shared/kbn-sample-parser'
   - 'x-pack/platform/packages/shared/kbn-search-index-documents'

@@ -1909,6 +1909,8 @@
       "@kbn/nightshift-investigations-plugin/*": ["./x-pack/platform/plugins/shared/nightshift_investigations/*"],
       "@kbn/nightshift-plugin": ["./x-pack/solutions/observability/plugins/nightshift"],
       "@kbn/nightshift-plugin/*": ["./x-pack/solutions/observability/plugins/nightshift/*"],
+      "@kbn/nightshift-shared": ["./x-pack/platform/packages/shared/kbn-nightshift-shared"],
+      "@kbn/nightshift-shared/*": ["./x-pack/platform/packages/shared/kbn-nightshift-shared/*"],
       "@kbn/no-data-page-plugin": ["./src/platform/plugins/shared/no_data_page"],
       "@kbn/no-data-page-plugin/*": ["./src/platform/plugins/shared/no_data_page/*"],
       "@kbn/node-libs-browser-webpack-plugin": ["./src/platform/packages/private/kbn-node-libs-browser-webpack-plugin"],

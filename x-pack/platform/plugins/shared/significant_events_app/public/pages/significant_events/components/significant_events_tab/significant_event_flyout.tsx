@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
@@ -165,8 +166,14 @@ const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
     services: { focusedSignificantEventService },
-    core: { notifications },
+    core: {
+      notifications,
+      application: {
+        capabilities: { nightshift },
+      },
+    },
   } = useKibana();
+  const { canManage } = getNightshiftCapabilities(nightshift);
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
@@ -235,7 +242,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       hideCloseButton
     >
       <FlyoutToolbarHeader>
-        {!isClosed && (
+        {!isClosed && canManage && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}
@@ -373,33 +380,35 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                activityBlockTooltip ??
-                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
-              }
-            >
-              <EuiButton
-                iconType="inspect"
-                onClick={() => {
-                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
-                }}
-                isDisabled={isTriggering || blocksActivity}
-                hasAriaDisabled={blocksActivity}
-                isLoading={isTriggering}
-                fill
-                size="s"
-                data-test-subj="sigEventRunInvestigationButton"
+      {canManage && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  activityBlockTooltip ??
+                  (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
+                }
               >
-                {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+                <EuiButton
+                  iconType="inspect"
+                  onClick={() => {
+                    if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
+                  }}
+                  isDisabled={isTriggering || blocksActivity}
+                  hasAriaDisabled={blocksActivity}
+                  isLoading={isTriggering}
+                  fill
+                  size="s"
+                  data-test-subj="sigEventRunInvestigationButton"
+                >
+                  {isInvestigationRunning ? RESTART_LABEL : RUN_LABEL}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

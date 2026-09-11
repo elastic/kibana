@@ -17,6 +17,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsDiscoveryApi } from '../../../hooks/use_significant_events_discovery_api';
 import { getFormattedError } from '../../../util/errors';
@@ -56,9 +57,13 @@ export function SignificantEventsPageProvider({
 }: SignificantEventsPageProviderProps) {
   const {
     core: {
+      application: {
+        capabilities: { nightshift },
+      },
       notifications: { toasts },
     },
   } = useKibana();
+  const { canShow } = getNightshiftCapabilities(nightshift);
 
   const queryClient = useQueryClient();
 
@@ -73,6 +78,7 @@ export function SignificantEventsPageProvider({
   const { data } = useQuery({
     queryKey: ['significant_events_discovery_status'],
     queryFn: getSignificantEventsDiscoveryStatus,
+    enabled: canShow,
     refetchInterval: (result) =>
       result?.status === SignificantEventsWorkflowStatus.InProgress
         ? RUNNING_POLL_INTERVAL_MS

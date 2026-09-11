@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
+import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import { createServerRoute } from '../../../create_server_route';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type {
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,

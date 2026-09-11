@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
@@ -82,6 +83,7 @@ const setElementInert = (element: HTMLDivElement | null): void => {
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const history = useHistory();
   const { search } = useLocation();
   const needsActionSectionRef = useRef<HTMLElement>(null);
@@ -301,7 +303,7 @@ export function NightshiftApp(): React.ReactElement {
     closingEventUuid,
     investigationStatuses,
     onChatClick,
-    onCloseClick: handleCloseSignificantEvent,
+    onCloseClick: canManage ? handleCloseSignificantEvent : undefined,
     onEventClick: handleEventClick,
     selectedEventUuid: selectedEvent?.event_uuid,
   };

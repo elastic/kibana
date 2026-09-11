@@ -2594,6 +2594,9 @@ importers:
       '@kbn/nightshift-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/nightshift
+      '@kbn/nightshift-shared':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-nightshift-shared
       '@kbn/no-data-page-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/no_data_page
@@ -8800,6 +8803,8 @@ importers:
   x-pack/platform/packages/shared/kbn-mcp-client: {}
 
   x-pack/platform/packages/shared/kbn-nightshift-ai: {}
+
+  x-pack/platform/packages/shared/kbn-nightshift-shared: {}
 
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
 

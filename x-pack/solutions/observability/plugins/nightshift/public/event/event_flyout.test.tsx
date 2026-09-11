@@ -114,6 +114,11 @@ jest.mock('../hooks/use_kibana', () => ({
         },
       },
       application: {
+        capabilities: {
+          nightshift: {
+            show: true,
+          },
+        },
         getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
     },
