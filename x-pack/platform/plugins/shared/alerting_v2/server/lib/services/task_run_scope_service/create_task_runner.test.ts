@@ -48,6 +48,8 @@ const createRunContext = (overrides: Partial<RunContext> = {}): RunContext =>
   ({
     taskInstance: { id: 'task-1' },
     signal: new AbortController().signal,
+    executionUuid: 'execution-1',
+    setCustomTaskRunEventFields: jest.fn(),
     ...overrides,
   } as unknown as RunContext);
 
@@ -175,6 +177,8 @@ describe('createTaskRunnerFactory', () => {
     expect(runner.run).toHaveBeenCalledWith({
       taskInstance: runContext.taskInstance,
       signal: runContext.signal,
+      executionUuid: runContext.executionUuid,
+      setCustomTaskRunEventFields: runContext.setCustomTaskRunEventFields,
     });
     expect(result).toEqual(runResult);
     expect(scope.unbindAllAsync).toHaveBeenCalledTimes(1);

@@ -16,6 +16,7 @@ import { buildGroupHash } from './build_alert_events';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
+import { RULE_EXECUTION_FAILURE_REASONS, resolveReasonForError } from './execution_outcome';
 
 describe('executeRecoveryQuery', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -224,6 +225,27 @@ describe('executeRecoveryQuery', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBeUndefined();
+  });
+
+  it('tags failures as recovery_query without losing the task error source', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({ statusCode: 400 } as DiagnosticResult)
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_FAILURE_REASONS.RECOVERY_QUERY);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
   });
 
   it('forwards the executionContext abort signal to the recovery ES|QL call', async () => {

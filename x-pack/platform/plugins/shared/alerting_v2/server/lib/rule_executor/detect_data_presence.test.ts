@@ -15,6 +15,7 @@ import { createQueryService } from '../services/query_service/query_service.mock
 import { buildGroupHash } from './build_alert_events';
 import type { RuleResponse } from '../rules_client';
 import { detectDataPresence } from './detect_data_presence';
+import { RULE_EXECUTION_FAILURE_REASONS, resolveReasonForError } from './execution_outcome';
 
 const HOST = 'abc';
 const groupingFields = ['host.name'];
@@ -227,6 +228,24 @@ describe('detectDataPresence', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(getErrorSource(error as Error)).toBeUndefined();
+  });
+
+  it('tags failures as no_data_query without losing the task error source', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({ statusCode: 400 } as DiagnosticResult)
+    );
+
+    const error = await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input: createRuleExecutionInput(),
+      logger: loggerService,
+    }).catch((e: Error) => e);
+
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_FAILURE_REASONS.NO_DATA_QUERY);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
   });
 
   it('forwards the executionContext abort signal to the data-presence ES|QL call', async () => {

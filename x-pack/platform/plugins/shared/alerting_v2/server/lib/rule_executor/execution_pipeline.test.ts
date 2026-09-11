@@ -23,6 +23,7 @@ import { createMockRuleExecutorEventPublisher } from '../events/rule_executor_ev
 import { MetricsMiddleware } from './metrics/metrics_middleware';
 import { EmittedCountersRecorder } from './metrics/recorders/emitted_counters_recorder';
 import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
+import { getRunReport } from './execution_outcome/run_report';
 
 describe('RuleExecutionPipeline', () => {
   describe('execute', () => {
@@ -377,6 +378,83 @@ describe('RuleExecutionPipeline', () => {
         durationMs: expect.any(Number),
         counters: {},
       });
+    });
+
+    /** Passes every upstream emission through, then fails the run. */
+    const createPassThenThrowStep = (name: string): RuleExecutionStep => ({
+      name,
+      executeStream: async function* passThenThrow(input) {
+        for await (const result of input) {
+          yield result;
+        }
+        throw new Error('Step blew up');
+      },
+    });
+
+    it('tags a thrown error with the counters recorded so far', async () => {
+      const { loggerService } = createLoggerService();
+
+      const throwingStep = createMockStep('store_alert_events', (input) =>
+        pipeStream(input, () => {
+          throw new Error('Step blew up');
+        })
+      );
+
+      const pipeline = new RuleExecutionPipeline(
+        [
+          createEmittingStep('step1', { [RULE_EXECUTION_COUNTERS.signalsGenerated]: 6 }),
+          throwingStep,
+        ],
+        [createMetricsMiddleware(loggerService)],
+        createMetricCollectorFactory({ startedAt }),
+        createMockRuleExecutorEventPublisher()
+      );
+
+      const thrown = await pipeline.execute(createRuleExecutionPipelineInput()).catch((e) => e);
+
+      // Counters survive a failure at any point: the collector is shared and
+      // written as each step emits, rather than rebuilt from what propagates.
+      expect(getRunReport(thrown)?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.signalsGenerated]: 6,
+      });
+    });
+
+    it('includes the rule version once an emission has crossed the whole chain', async () => {
+      const rule = createRuleResponse();
+
+      const pipeline = new RuleExecutionPipeline(
+        [createRuleStep(rule), createPassThenThrowStep('store_alert_events')],
+        [],
+        createMetricCollectorFactory({ startedAt }),
+        createMockRuleExecutorEventPublisher()
+      );
+
+      const thrown = await pipeline.execute(createRuleExecutionPipelineInput()).catch((e) => e);
+
+      expect(getRunReport(thrown)?.ruleVersion).toBe(rule.metadata.version);
+    });
+
+    it('omits the rule version when the run fails before its first full emission', async () => {
+      const rule = createRuleResponse();
+
+      const throwingStep = createMockStep('store_alert_events', (input) =>
+        pipeStream(input, () => {
+          throw new Error('Step blew up');
+        })
+      );
+
+      const pipeline = new RuleExecutionPipeline(
+        [createRuleStep(rule), throwingStep],
+        [],
+        createMetricCollectorFactory({ startedAt }),
+        createMockRuleExecutorEventPublisher()
+      );
+
+      const thrown = await pipeline.execute(createRuleExecutionPipelineInput()).catch((e) => e);
+
+      // `pipelineState` only advances on emissions that reach the pipeline's
+      // own loop, and nested step generators mean none has yet.
+      expect(getRunReport(thrown)?.ruleVersion).toBeUndefined();
     });
 
     it('sums step-emitted counters across multiple emissions into the snapshot', async () => {
