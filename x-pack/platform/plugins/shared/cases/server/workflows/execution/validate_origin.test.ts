@@ -88,11 +88,7 @@ attachmentTypeRegistry.register({ id: 'custom.disabled', schema: z.any() });
 const validateOrigin = (
   params: Omit<
     Parameters<typeof validateOriginWithAttachments>[0],
-    | 'attachedAlerts'
-    | 'selectedAlerts'
-    | 'attachedEvents'
-    | 'selectedDocuments'
-    | 'attachmentTypeRegistry'
+    'alerts' | 'documents' | 'attachmentTypeRegistry'
   > & {
     inputs: Record<string, unknown>;
   }
@@ -110,15 +106,12 @@ const validateOrigin = (
   );
   const selectedAlerts = parseSelectedAlertPairs(params.inputs);
   const selectedDocuments = parseSelectedDocumentPairs(params.inputs);
-  const { inputs: _inputs, ...rest } = params;
   validateOriginWithAttachments({
-    ...rest,
-    selectedAlerts,
-    attachedAlerts,
-    selectedDocuments,
-    attachedEvents,
-    attachmentTypeRegistry,
+    ...params,
+    alerts: { selected: selectedAlerts, attached: attachedAlerts },
+    documents: { selected: selectedDocuments, attached: attachedEvents },
     inputs: params.inputs,
+    attachmentTypeRegistry,
   });
 };
 
@@ -129,7 +122,6 @@ describe('cases.case origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.case', caseId: 'case-1' },
-        caseId: 'case-1',
         inputs: {},
         theCase,
       })
@@ -140,7 +132,6 @@ describe('cases.case origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.case', caseId: 'case-2' },
-        caseId: 'case-1',
         inputs: {},
         theCase,
       })
@@ -158,7 +149,6 @@ describe('cases.case origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.case', caseId: 'case-1' },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'unattached-alert', _index: '.alerts' }] } },
         theCase: caseWithAlert,
       })
@@ -174,7 +164,6 @@ describe('cases.case origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.case', caseId: 'case-1' },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlert,
       })
@@ -194,7 +183,6 @@ describe('cases.observable origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -205,7 +193,6 @@ describe('cases.observable origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.observable', caseId: 'case-2', observableId: 'obs-1' },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -216,7 +203,6 @@ describe('cases.observable origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-99' },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -232,7 +218,6 @@ describe('cases.observable origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'unattached-alert', _index: '.alerts' }] } },
         theCase: caseWithBoth,
       })
@@ -260,7 +245,6 @@ describe('cases.attachment origin', () => {
           attachmentType: 'security.alert',
           attachmentId: 'alert-1',
         },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
       })
@@ -276,7 +260,6 @@ describe('cases.attachment origin', () => {
           attachmentType: 'security.alert',
           attachmentId: 'alert-1',
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithAlerts,
       })
@@ -292,7 +275,6 @@ describe('cases.attachment origin', () => {
           attachmentType: 'security.alert',
           attachmentId: 'alert-99',
         },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
       })
@@ -309,7 +291,6 @@ describe('cases.attachment origin', () => {
           attachmentType: 'security.alert',
           attachmentId: 'alert-1',
         },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-wrong-index' }] } },
         theCase: caseWithAlerts,
       })
@@ -325,7 +306,6 @@ describe('cases.attachment origin', () => {
           attachmentType: 'security.alert',
           attachmentId: 'alert-2',
         },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
       })
@@ -341,7 +321,6 @@ describe('cases.attachment origin', () => {
           attachmentType: 'security.alert',
           attachmentId: 'alert-1',
         },
-        caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
       })
@@ -369,7 +348,6 @@ describe('cases.attachments origin', () => {
           attachmentType: 'security.alert',
           attachmentIds: ['alert-1'],
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithAlerts,
       })
@@ -385,7 +363,6 @@ describe('cases.attachments origin', () => {
           attachmentType: 'security.alert',
           attachmentIds: ['alert-1'],
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithAlerts,
       })
@@ -401,7 +378,6 @@ describe('cases.attachments origin', () => {
           attachmentType: 'security.alert',
           attachmentIds: ['alert-1', 'alert-2'],
         },
-        caseId: 'case-1',
         inputs: {
           event: {
             alertIds: [
@@ -424,7 +400,6 @@ describe('cases.attachments origin', () => {
           attachmentType: 'security.alert',
           attachmentIds: ['alert-1', 'alert-1'],
         },
-        caseId: 'case-1',
         inputs: {
           event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] },
         },
@@ -442,7 +417,6 @@ describe('cases.attachments origin', () => {
           attachmentType: 'custom.unknown',
           attachmentId: 'target-1',
         },
-        caseId: 'case-1',
         inputs: {},
         theCase,
       })
@@ -458,7 +432,6 @@ describe('cases.attachments origin', () => {
           attachmentType: 'custom.disabled',
           attachmentId: 'target-1',
         },
-        caseId: 'case-1',
         inputs: {},
         theCase,
       })
@@ -492,7 +465,6 @@ describe('unified v2 alert attachment', () => {
           attachmentType: OBSERVABILITY_ALERT_TYPE,
           attachmentId: 'alert-unified-1',
         },
-        caseId: 'case-1',
         inputs: {
           event: { alertIds: [{ _id: 'alert-unified-1', _index: '.alerts-observability' }] },
         },
@@ -521,7 +493,6 @@ describe('unified v2 alert attachment', () => {
           attachmentType: OBSERVABILITY_ALERT_TYPE,
           attachmentId: 'alert-unified-1',
         },
-        caseId: 'case-1',
         inputs: {
           event: { alertIds: [{ _id: 'alert-unified-1', _index: '.alerts-wrong' }] },
         },
@@ -614,7 +585,6 @@ describe('cases.observables origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.observables', caseId: 'case-1', observableIds: ['obs-1', 'obs-2'] },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -625,7 +595,6 @@ describe('cases.observables origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.observables', caseId: 'case-1', observableIds: ['obs-1'] },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -640,7 +609,6 @@ describe('cases.observables origin', () => {
           caseId: 'case-1',
           observableIds: ['obs-1', 'unknown-id'],
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -655,7 +623,6 @@ describe('cases.observables origin', () => {
           caseId: 'case-1',
           observableIds: ['obs-1', 'obs-1'],
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -670,7 +637,6 @@ describe('cases.observables origin', () => {
           caseId: 'case-other',
           observableIds: ['obs-1'],
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
       })
@@ -695,7 +661,6 @@ describe('event attachment origin', () => {
           attachmentType: 'security.event',
           attachmentId: 'event-1',
         },
-        caseId: 'case-1',
         inputs: { event: { documents: [{ _id: 'event-1', _index: '.ds-logs-default' }] } },
         theCase: caseWithEvent,
       })
@@ -711,7 +676,6 @@ describe('event attachment origin', () => {
           attachmentType: 'security.event',
           attachmentId: 'unattached-event',
         },
-        caseId: 'case-1',
         inputs: { event: { documents: [{ _id: 'unattached-event', _index: '.ds-logs-default' }] } },
         theCase: caseWithEvent,
       })
@@ -727,7 +691,6 @@ describe('event attachment origin', () => {
           attachmentType: 'security.event',
           attachmentId: 'event-other',
         },
-        caseId: 'case-1',
         // event-1 is attached, but event-other is the origin
         inputs: { event: { documents: [{ _id: 'event-1', _index: '.ds-logs-default' }] } },
         theCase: caseWithEvent,
@@ -744,7 +707,6 @@ describe('event attachment origin', () => {
           attachmentType: 'security.event',
           attachmentId: 'event-1',
         },
-        caseId: 'case-1',
         inputs: {},
         theCase: caseWithEvent,
       })
@@ -756,7 +718,6 @@ describe('event attachment origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.case', caseId: 'case-1' },
-        caseId: 'case-1',
         inputs: { event: { documents: [{ _id: 'unattached', _index: '.ds-logs-default' }] } },
         theCase: caseWithEvent,
       })
@@ -767,7 +728,6 @@ describe('event attachment origin', () => {
     expect(() =>
       validateOrigin({
         origin: { type: 'cases.case', caseId: 'case-1' },
-        caseId: 'case-1',
         inputs: { event: { documents: [{ _id: 'event-1', _index: '.ds-logs-default' }] } },
         theCase: caseWithEvent,
       })
@@ -862,14 +822,14 @@ describe('getDefaultTargets — positional index alignment', () => {
           attachmentType: 'security.alert',
           attachmentId: 'a2',
         },
-        caseId: 'case-1',
-        selectedAlerts: [{ _id: 'a2', _index: 'idx2' }],
-        attachedAlerts: [{ id: 'a2', index: 'idx2', attached_at: '' }],
-        selectedDocuments: [],
-        attachedEvents: [],
-        attachmentTypeRegistry,
-        inputs: { event: { alertIds: [{ _id: 'a2', _index: 'idx2' }] } },
         theCase: caseWithAlert,
+        inputs: { event: { alertIds: [{ _id: 'a2', _index: 'idx2' }] } },
+        attachmentTypeRegistry,
+        alerts: {
+          selected: [{ _id: 'a2', _index: 'idx2' }],
+          attached: [{ id: 'a2', index: 'idx2', attached_at: '' }],
+        },
+        documents: { selected: [], attached: [] },
       })
     ).not.toThrow();
   });
@@ -910,14 +870,14 @@ describe('resolveAttachmentOrigin — malformed sibling attachment is skipped', 
           attachmentType: 'security.alert',
           attachmentId: 'a9',
         },
-        caseId: 'case-1',
-        selectedAlerts: [{ _id: 'a9', _index: '.idx' }],
-        attachedAlerts: [{ id: 'a9', index: '.idx', attached_at: '' }],
-        selectedDocuments: [],
-        attachedEvents: [],
-        attachmentTypeRegistry,
-        inputs: { event: { alertIds: [{ _id: 'a9', _index: '.idx' }] } },
         theCase: caseWithMixed,
+        inputs: { event: { alertIds: [{ _id: 'a9', _index: '.idx' }] } },
+        attachmentTypeRegistry,
+        alerts: {
+          selected: [{ _id: 'a9', _index: '.idx' }],
+          attached: [{ id: 'a9', index: '.idx', attached_at: '' }],
+        },
+        documents: { selected: [], attached: [] },
       })
     ).not.toThrow();
   });
@@ -955,14 +915,14 @@ describe('targetsById — same _id under multiple indices', () => {
           attachmentType: 'security.alert',
           attachmentId: 'a1',
         },
-        caseId: 'case-1',
-        selectedAlerts: [{ _id: 'a1', _index: 'idx-a' }],
-        attachedAlerts: [{ id: 'a1', index: 'idx-a', attached_at: '' }],
-        selectedDocuments: [],
-        attachedEvents: [],
-        attachmentTypeRegistry,
-        inputs: { event: { alertIds: [{ _id: 'a1', _index: 'idx-a' }] } },
         theCase: caseWithDuplicateId,
+        inputs: { event: { alertIds: [{ _id: 'a1', _index: 'idx-a' }] } },
+        attachmentTypeRegistry,
+        alerts: {
+          selected: [{ _id: 'a1', _index: 'idx-a' }],
+          attached: [{ id: 'a1', index: 'idx-a', attached_at: '' }],
+        },
+        documents: { selected: [], attached: [] },
       })
     ).toThrow(/multiple indices/);
   });
@@ -987,15 +947,15 @@ describe('default alignment for types registered with workflow: {}', () => {
           attachmentType: 'security.alert',
           attachmentId: 'so-v1',
         },
-        caseId: 'case-1',
         // so-v1 is attached to the case (membership passes) but no alerts are selected.
-        selectedAlerts: [],
-        attachedAlerts: [{ id: 'so-v1', index: '.alerts-idx', attached_at: '' }],
-        selectedDocuments: [],
-        attachedEvents: [],
-        attachmentTypeRegistry: workflowOnlyRegistry,
-        inputs: {},
         theCase: caseWithAlert,
+        inputs: {},
+        attachmentTypeRegistry: workflowOnlyRegistry,
+        alerts: {
+          selected: [],
+          attached: [{ id: 'so-v1', index: '.alerts-idx', attached_at: '' }],
+        },
+        documents: { selected: [], attached: [] },
       })
     ).toThrow('Attachment workflow origins require selected alert or document inputs.');
   });
@@ -1009,18 +969,18 @@ describe('default alignment for types registered with workflow: {}', () => {
           attachmentType: 'security.alert',
           attachmentId: 'so-v1',
         },
-        caseId: 'case-1',
         // Selection references a different alert — disjoint from the origin target `so-v1`.
-        selectedAlerts: [{ _id: 'other-id', _index: 'idx' }],
-        attachedAlerts: [
-          { id: 'so-v1', index: '.alerts-idx', attached_at: '' },
-          { id: 'other-id', index: 'idx', attached_at: '' },
-        ],
-        selectedDocuments: [],
-        attachedEvents: [],
-        attachmentTypeRegistry: workflowOnlyRegistry,
-        inputs: { event: { alertIds: [{ _id: 'other-id', _index: 'idx' }] } },
         theCase: caseWithAlert,
+        inputs: { event: { alertIds: [{ _id: 'other-id', _index: 'idx' }] } },
+        attachmentTypeRegistry: workflowOnlyRegistry,
+        alerts: {
+          selected: [{ _id: 'other-id', _index: 'idx' }],
+          attached: [
+            { id: 'so-v1', index: '.alerts-idx', attached_at: '' },
+            { id: 'other-id', index: 'idx', attached_at: '' },
+          ],
+        },
+        documents: { selected: [], attached: [] },
       })
     ).toThrow('Attachment workflow origin "so-v1" is not selected.');
   });
