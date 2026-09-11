@@ -258,6 +258,8 @@ describe('generateYamlSchemaFromConnectors', () => {
       ['an expression with literal text between two others', '${{ a }} literal ${{ b }}'],
       ['leading whitespace (the runtime check does not trim)', '  ${{ expr }}'],
       ['trailing whitespace (the runtime check does not trim)', '${{ expr }}  '],
+      ['an empty expression body', '${{}}'],
+      ['a whitespace-only expression body', '${{   }}'],
     ])('rejects %s for an array param', (_label, recipients) => {
       expect(parse({ recipients, subject: 'hi' }).success).toBe(false);
     });

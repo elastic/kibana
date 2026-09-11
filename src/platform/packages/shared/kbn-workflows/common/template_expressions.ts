@@ -22,13 +22,17 @@
  * - **No inner `}}`.** `evaluateExpression` slices from the first `{{` to the last `}}`, so a
  *   concatenation like `"${{ a }}-${{ b }}"` would be parsed as the single invalid expression
  *   `a }}-${{ b` and throw at execution time.
+ * - **A non-empty expression body.** `${{}}` evaluates nothing, and keeping it out also keeps
+ *   this a subset of the `DYNAMIC_VALUE_REGEX` form that `parseWorkflowYamlToJSON` already
+ *   tolerates, so widening a param can never admit a value the workflow YAML gate would reject.
  *
  * The invariant this encodes is one-directional: everything matched here is type-preserved at
  * runtime. The engine itself accepts a superset, and those extra forms stringify or throw —
  * which is exactly why callers should validate against this rather than re-deriving the shape.
  * `template_expressions_runtime.test.ts` in `workflows_execution_engine` pins the invariant.
  */
-export const WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX = /^\$\{\{(?:(?!\}\})[\s\S])*\}\}$/;
+export const WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX =
+  /^\$\{\{(?:(?!\}\})\s)*(?:(?!\}\})\S)(?:(?!\}\})[\s\S])*\}\}$/;
 
 /**
  * Upper bound on a whole-value Liquid template expression accepted where a connector param
