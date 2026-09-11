@@ -32,13 +32,3 @@ export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
   margin: '0 auto',
   width: '100%',
 });
-
-export const navCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: euiTheme.colors.emptyShade,
-  borderBottom: euiTheme.border.thin,
-  padding: `${euiTheme.size.l} ${euiTheme.size.l} 0 ${euiTheme.size.l}`,
-  '.euiTabs': {
-    paddingLeft: '3px',
-    marginLeft: '-3px',
-  },
-});

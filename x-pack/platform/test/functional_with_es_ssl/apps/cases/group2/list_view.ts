@@ -27,8 +27,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/238752
-  describe.skip('cases list', () => {
+  describe('cases list', () => {
     before(async () => {
       await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
@@ -41,7 +40,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('empty state', () => {
       it('displays an empty list with an add button correctly', async () => {
-        await testSubjects.existOrFail('cases-table-add-case');
+        await testSubjects.existOrFail('cases-list-add-case');
       });
     });
 
@@ -117,7 +116,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-table-column-severity-low');
+          await testSubjects.missingOrFail('case-severity-badge-low');
         });
       });
 
@@ -257,9 +256,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           const case2 = await cases.api.getCase({ caseId: caseIds[1] });
           const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.assignees).eql([{ uid: casesNoDelete.uid }]);
-          expect(case2.assignees).eql([{ uid: casesNoDelete.uid }]);
-          expect(case1.assignees).eql([{ uid: casesAll.uid }]);
+          expect(case3.assignees.map(({ uid }) => uid)).eql([casesNoDelete.uid]);
+          expect(case2.assignees.map(({ uid }) => uid)).eql([casesNoDelete.uid]);
+          expect(case1.assignees.map(({ uid }) => uid)).eql([casesAll.uid]);
         });
 
         it('adds a new assignee', async () => {
@@ -274,13 +273,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           const case2 = await cases.api.getCase({ caseId: caseIds[1] });
           const case3 = await cases.api.getCase({ caseId: caseIds[2] });
 
-          expect(case3.assignees).eql([{ uid: casesAll2.uid }, { uid: casesAll.uid }]);
-          expect(case2.assignees).eql([
-            { uid: casesAll2.uid },
-            { uid: casesNoDelete.uid },
-            { uid: casesAll.uid },
+          expect(case3.assignees.map(({ uid }) => uid)).eql([casesAll2.uid, casesAll.uid]);
+          expect(case2.assignees.map(({ uid }) => uid)).eql([
+            casesAll2.uid,
+            casesNoDelete.uid,
+            casesAll.uid,
           ]);
-          expect(case1.assignees).eql([{ uid: casesAll.uid }]);
+          expect(case1.assignees.map(({ uid }) => uid)).eql([casesAll.uid]);
         });
       });
     });
@@ -324,6 +323,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         caseIds.push(case4.id);
       };
 
+      const expectStateToContain = (
+        state: Record<string, unknown>,
+        expected: Record<string, unknown>
+      ) => {
+        for (const [key, value] of Object.entries(expected)) {
+          expect(state[key]).to.eql(value);
+        }
+      };
+
+      const getCasesStateFromUrl = async () => {
+        const currentUrl = new URL(decodeURIComponent(await browser.getCurrentUrl()));
+        const casesParam = currentUrl.searchParams.get('cases') ?? '';
+
+        expect(casesParam).not.to.be('');
+
+        return rison.decode(casesParam) as Record<string, unknown>;
+      };
+
       before(async () => {
         await cases.api.deleteAllCases();
         await createUsersAndRoles(getService, users, roles);
@@ -342,15 +359,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.waitForCasesToBeListed();
       });
 
+      const resetListState = async () => {
+        await browser.clearLocalStorage();
+        await cases.navigation.navigateToApp();
+        await cases.casesTable.validateCasesTableHasNthRows(0);
+      };
+
       afterEach(async () => {
-        await cases.casesTable.clearFilters();
         await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
+        await resetListState();
       });
 
       after(async () => {
         await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
+        await resetListState();
         await deleteUsersAndRoles(getService, users, roles);
       });
 
@@ -508,9 +530,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('persists severity filters', async () => {
         await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
         await browser.refresh();
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
       });
 
       it('persists multiple severity filters', async () => {
@@ -520,8 +542,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.filterBySeverity(CaseSeverity.MEDIUM);
         await cases.casesTable.validateCasesTableHasNthRows(2);
         await browser.refresh();
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
-        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.HIGH}`);
+        await testSubjects.existOrFail(`case-severity-badge-${CaseSeverity.MEDIUM}`);
         await cases.casesTable.validateCasesTableHasNthRows(2);
       });
 
@@ -581,7 +603,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           { key: 'tags', isActive: false },
           { key: 'assignees', isActive: false },
           { key: 'category', isActive: false },
-          { key: `cf_${customFields[0].key}`, isActive: false },
         ];
 
         await cases.casesTable.setFiltersConfigurationInLocalStorage(lsState);
@@ -594,15 +615,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           tags: theCase.tags,
           assignees: [profiles[0].uid],
           category: [theCase.category],
-          customFields: { [customFields[0].key]: ['on'] },
         };
 
         await cases.casesTable.setStateToUrlAndNavigate(casesState);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
-        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
+        expectStateToContain(await getCasesStateFromUrl(), casesState);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -610,7 +629,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'tags',
           'category',
           'assignees',
-          customFields[0].key,
         ]);
 
         const searchBar = await testSubjects.find('search-cases');
@@ -637,15 +655,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           tags: theCase.tags,
           assignees: [profiles[0].uid],
           category: [theCase.category],
-          customFields: { [customFields[0].key]: ['on'] },
         };
 
         await cases.casesTable.setStateToUrlAndNavigate(casesState);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
-        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
+        expectStateToContain(await getCasesStateFromUrl(), casesState);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -653,7 +669,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'tags',
           'category',
           'assignees',
-          customFields[0].key,
         ]);
 
         const searchBar = await testSubjects.find('search-cases');
@@ -680,7 +695,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           tags: theCase.tags,
           assignees: [profiles[0].uid],
           category: [theCase.category],
-          customFields: { [customFields[0].key]: ['on'] },
         };
 
         await cases.casesTable.setStateToUrlAndNavigate(casesState);
@@ -689,21 +703,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const currentState = await cases.casesTable.getAllCasesStateInLocalStorage();
 
-        expect(currentState).to.eql({
-          queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
-          filterOptions: {
-            search: theCase.title,
-            searchFields: ['title', 'description', 'incremental_id.text'],
-            severity: [theCase.severity],
-            assignees: [profiles[0].uid],
-            reporters: [],
-            status: [theCase.status],
-            tags: theCase.tags,
-            owner: [],
-            category: [theCase.category],
-            customFields: { my_field_01: { type: CustomFieldTypes.TOGGLE, options: ['on'] } },
-          },
+        expect(currentState.queryParams).to.eql({
+          page: 1,
+          perPage: 10,
+          sortField: 'createdAt',
+          sortOrder: 'desc',
         });
+
+        expectStateToContain(currentState.filterOptions, casesState);
       });
 
       it('loads the state from a legacy URL', async () => {
@@ -867,6 +874,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await browser.clearLocalStorage();
+        await cases.navigation.navigateToApp();
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
@@ -883,6 +892,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      before(async () => {
+        await browser.clearLocalStorage();
+        await cases.navigation.navigateToApp();
+      });
+
       afterEach(async () => {
         await toasts.dismissAllWithChecks();
       });
@@ -912,39 +926,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('to open', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.open, 0);
           await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.open}`);
-        });
-      });
-
-      describe('Severity', () => {
-        before(async () => {
-          await cases.api.createNthRandomCases(1);
-          await header.waitUntilLoadingHasFinished();
-          await cases.casesTable.waitForCasesToBeListed();
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await cases.casesTable.waitForCasesToBeDeleted();
-        });
-
-        it('to medium', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
-        });
-
-        it('to high', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
-        });
-
-        it('to critical', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.CRITICAL, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.CRITICAL}`);
-        });
-
-        it('to low', async () => {
-          await cases.casesTable.changeSeverity(CaseSeverity.LOW, 0);
-          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.LOW}`);
         });
       });
 

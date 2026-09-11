@@ -9,6 +9,13 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_pagination_config.ts
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, scoped to the rendering consequence only. The mode resolution
+ * itself is covered by
+ * profile_providers/observability/logs_data_source_profile/accessors/get_pagination_config.test.ts,
+ * so assert that `singlePage` suppresses the controls (and that a non-log source renders them),
+ * not that the mode resolves.
+ */
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

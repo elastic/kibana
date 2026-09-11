@@ -11,6 +11,7 @@ import React, { type ReactNode } from 'react';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type {
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeAiButton,
   ChromeNewsfeedHandler,
@@ -84,6 +85,38 @@ export function createChromeApi({
   };
 
   let appHeaderRegistrationId = 0;
+
+  const appHeader: InternalChromeStart['appHeader'] = {
+    get$: () => state.appHeader.$,
+    set: (config: ChromeAppHeaderConfig) => {
+      const registrationId = ++appHeaderRegistrationId;
+      state.appHeader.set(config);
+      return () => {
+        if (registrationId === appHeaderRegistrationId) {
+          state.appHeader.set(undefined);
+        }
+      };
+    },
+  };
+  const inlineAppHeader: InternalChromeStart['inlineAppHeader'] = {
+    get$: () => state.inlineAppHeader.$,
+    register: (title?: AppHeaderTitle) => {
+      const registrationId = ++state.inlineAppHeaderOwnerId;
+      state.inlineAppHeader.set(title === undefined ? {} : { title });
+      return {
+        update: (nextTitle?: AppHeaderTitle) => {
+          if (registrationId === state.inlineAppHeaderOwnerId) {
+            state.inlineAppHeader.set(nextTitle === undefined ? {} : { title: nextTitle });
+          }
+        },
+        unregister: () => {
+          if (registrationId === state.inlineAppHeaderOwnerId) {
+            state.inlineAppHeader.set(undefined);
+          }
+        },
+      };
+    },
+  };
 
   const controls: InternalChromeStart['controls'] = {
     aiButton: {
@@ -234,28 +267,16 @@ export function createChromeApi({
     project,
     controls,
     help,
+    appHeader,
+    inlineAppHeader,
     next: {
       aiButton: controls.aiButton,
       globalSearch: controls.globalSearch,
       contextSwitcher: controls.contextSwitcher,
       projectPicker: controls.projectPicker,
       userMenu: controls.userMenu,
-      inlineAppHeader: {
-        get$: () => state.inlineAppHeader.$,
-        set: state.inlineAppHeader.set,
-      },
-      appHeader: {
-        get$: () => state.appHeader.$,
-        set: (config: ChromeAppHeaderConfig) => {
-          const registrationId = ++appHeaderRegistrationId;
-          state.appHeader.set(config);
-          return () => {
-            if (registrationId === appHeaderRegistrationId) {
-              state.appHeader.set(undefined);
-            }
-          };
-        },
-      },
+      inlineAppHeader,
+      appHeader,
       registerFeedbackHandler: help.registerFeedbackHandler,
       getFeedbackHandler$: help.getFeedbackHandler$,
       registerNewsfeedHandler: help.registerNewsfeedHandler,
