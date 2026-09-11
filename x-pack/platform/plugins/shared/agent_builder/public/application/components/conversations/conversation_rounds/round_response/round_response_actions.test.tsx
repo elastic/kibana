@@ -21,14 +21,6 @@ jest.mock('../../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_conversation_stream', () => ({
-  useConversationStream: () => ({
-    regenerate: jest.fn(),
-    isRegenerating: false,
-    isResponseLoading: false,
-  }),
-}));
-
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { plugins: {} } }),
 }));
@@ -108,20 +100,16 @@ describe('RoundResponseActions', () => {
     expect(addSuccessToast).toHaveBeenCalledWith('Prompt copied to clipboard');
   });
 
-  it('hides the regenerate action for read-only conversations while keeping copy available', () => {
-    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: true, isLoading: false });
+  it.each([
+    { isReadOnly: false, isLoading: false },
+    { isReadOnly: true, isLoading: false },
+    { isReadOnly: false, isLoading: true },
+  ])('keeps copy available without regeneration when %j', (readOnlyState) => {
+    useConversationReadOnlyMock.mockReturnValue(readOnlyState);
 
-    render(<RoundResponseActions content="the answer" isVisible isLastRound />);
+    render(<RoundResponseActions content="the answer" isVisible />);
 
     expect(screen.getByRole('button', { name: 'Copy response' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();
-  });
-
-  it('hides the regenerate action while read-only state is loading', () => {
-    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: true });
-
-    render(<RoundResponseActions content="the answer" isVisible isLastRound />);
-
     expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();
   });
 

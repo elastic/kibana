@@ -38,7 +38,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   ) {
     const config = pluginConfigAccessor.get<PluginConfig>();
     this.queryRowLimit = getQueryRowLimit(config);
-    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize;
+    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize.getValueInBytes();
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
