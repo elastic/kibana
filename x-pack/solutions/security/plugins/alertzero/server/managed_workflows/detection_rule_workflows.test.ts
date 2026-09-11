@@ -413,8 +413,14 @@ describe('detection rule workflows', () => {
 
         expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
 
+        // record_outcome reads from record_apply_results to avoid Liquid parentheses.
         const outcome = reviewSteps.find(({ name }) => name === 'record_outcome')!;
         expect(String(outcome.with?.rule_patched)).toContain(
+          'steps.record_apply_results.output.query_applied == true'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.query_applied)).toContain(
           'steps.apply_query_tuning.error == null'
         );
       });
