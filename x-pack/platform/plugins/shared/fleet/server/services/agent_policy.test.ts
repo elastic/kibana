@@ -2115,5 +2115,4 @@ describe('Agent policy', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
     });
   });
-
 });
