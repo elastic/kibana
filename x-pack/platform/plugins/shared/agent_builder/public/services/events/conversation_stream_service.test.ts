@@ -51,6 +51,20 @@ describe('ConversationStreamService', () => {
     sub.unsubscribe();
   });
 
+  it('does not subscribe to the source until the returned observable is subscribed', () => {
+    const { source, getSubject } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    // Obtained but never subscribed - no source subscription, no map entry to leak
+    service.getActiveStream$('A');
+    expect(getSubject('A').observed).toBe(false);
+    expect(service.isStreamActive('A')).toBe(false);
+
+    const sub = service.getActiveStream$('A').subscribe(() => {});
+    expect(getSubject('A').observed).toBe(true);
+    sub.unsubscribe();
+  });
+
   it('emits accumulated states in order as events are pushed', () => {
     const { source, getSubject } = makeFakeSource();
     const service = new ConversationStreamService(source);

@@ -6,7 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, finalize, scan } from 'rxjs';
+import { BehaviorSubject, defer, finalize, scan } from 'rxjs';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import type { ActiveStreamState } from './active_stream_state';
 import { activeStreamReducer, initialActiveStreamState } from './active_stream_state';
@@ -57,8 +57,9 @@ export class ConversationStreamService {
    * and receive the folded `ActiveStreamState` as the agent runs.
    */
   getActiveStream$(conversationId: string): Observable<ActiveStreamState> {
-    const { state$ } = this.ensure(conversationId);
-    return state$.pipe(finalize(() => this.maybeTeardown(conversationId)));
+    return defer(() => this.ensure(conversationId).state$).pipe(
+      finalize(() => this.maybeTeardown(conversationId))
+    );
   }
 
   /** Non-reactive snapshot: is this conversation mid-run right now. */
