@@ -47,7 +47,13 @@ evaluate.describe('Nightshift investigations: smoke', { tag: tags.stateful.class
           expect(scores.every((score) => score === 1)).toBe(true);
 
           const recorded = await evalsClient.getExperimentScores(experiment.id);
-          expect(recorded.length).toBeGreaterThanOrEqual(evaluators.length);
+          const recordedScores = new Map(
+            recorded.map(({ evaluator }) => [evaluator.name, evaluator.score])
+          );
+
+          for (const { name } of evaluators) {
+            expect(recordedScores.get(name)).toBe(1);
+          }
         }
       );
     });
