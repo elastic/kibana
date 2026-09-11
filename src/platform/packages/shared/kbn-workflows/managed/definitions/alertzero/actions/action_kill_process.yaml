@@ -1,0 +1,75 @@
+version: "1"
+name: Kill process
+description: >
+  AlertZero action: terminates a process on an Elastic Defend endpoint.
+enabled: true
+tags:
+  - action
+  - alertzero
+consts:
+  actionMetadata:
+    name: Kill process
+    description: Terminates a process on an endpoint via the Elastic Defend response action. Identify the process by PID or entity_id. This action is not reversible.
+    category: contain
+    impact: medium
+    reversible: false
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Kill-process parameters. Every action workflow takes a single
+            `actionInput` object so the generic gate workflow never needs to
+            know an action's parameter names.
+          properties:
+            endpoint_ids:
+              type: array
+              items:
+                type: string
+              description: Elastic Defend agent IDs (agent.id) of the endpoints.
+            parameters:
+              type: object
+              description: Process selector — provide exactly one of pid or entity_id.
+              properties:
+                pid:
+                  type: number
+                  description: Process ID (PID) of the process to kill.
+                entity_id:
+                  type: string
+                  description: Elastic Defend entity_id of the process to kill.
+            comment:
+              type: string
+              description: Optional comment.
+          required:
+            - endpoint_ids
+            - parameters
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: action_id
+    type: string
+  - name: was_successful
+    type: boolean
+  - name: message
+    type: string
+steps:
+  - name: kill_process
+    type: security.endpointKillProcess
+    with:
+      endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
+      parameters: "${{ inputs.actionInput.parameters }}"
+      comment: "{{ inputs.actionInput.comment | default: '' }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      action_id: "{{ steps.kill_process.output.action_id }}"
+      was_successful: "${{ steps.kill_process.output.was_successful }}"
+      message: "{{ steps.kill_process.output.message }}"

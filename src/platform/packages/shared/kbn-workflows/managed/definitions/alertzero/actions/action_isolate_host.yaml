@@ -1,0 +1,63 @@
+version: "1"
+name: Isolate host
+description: >
+  AlertZero action: network-isolates one or more Elastic Defend endpoints.
+enabled: true
+tags:
+  - action
+  - alertzero
+consts:
+  actionMetadata:
+    name: Isolate host
+    description: Disconnects one or more endpoints from the network via the Elastic Defend response action. Only Elastic Defend retains connectivity. The host can be unisolated to reverse the action.
+    category: contain
+    impact: high
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Isolate-host parameters. Every action workflow takes a single
+            `actionInput` object so the generic gate workflow never needs to
+            know an action's parameter names.
+          properties:
+            endpoint_ids:
+              type: array
+              items:
+                type: string
+              description: Elastic Defend agent IDs (agent.id) of the endpoints to isolate.
+            comment:
+              type: string
+              description: Optional comment explaining why these hosts are being isolated.
+          required:
+            - endpoint_ids
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: action_id
+    type: string
+  - name: was_successful
+    type: boolean
+  - name: message
+    type: string
+steps:
+  - name: isolate_host
+    type: security.endpointIsolateHost
+    with:
+      endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
+      comment: "{{ inputs.actionInput.comment | default: '' }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      action_id: "{{ steps.isolate_host.output.action_id }}"
+      was_successful: "${{ steps.isolate_host.output.was_successful }}"
+      message: "{{ steps.isolate_host.output.message }}"

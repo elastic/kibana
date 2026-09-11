@@ -8,6 +8,9 @@
  */
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
+import { ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID } from './actions/action_isolate_host';
+import { ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID } from './actions/action_kill_process';
+import { ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID } from './actions/action_suspend_process';
 import { ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './dark_continuous_threat_hunt';
 import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
@@ -37,6 +40,18 @@ export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './actions/action_create_detection_rule';
+export {
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW,
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+} from './actions/action_isolate_host';
+export {
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+} from './actions/action_kill_process';
+export {
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+} from './actions/action_suspend_process';
 export {
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -78,4 +93,9 @@ export const ALERTZERO_RULE_WORKFLOW_IDS = [
  * Action workflows AlertZero may propose. Discovery is normally by the generic
  * `action` tag; this list is the install set and the fallback.
  */
-export const ALERTZERO_ACTION_WORKFLOW_IDS = [ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID] as const;
+export const ALERTZERO_ACTION_WORKFLOW_IDS = [
+  ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+] as const;
