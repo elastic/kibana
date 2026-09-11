@@ -163,6 +163,7 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
   trigger_feedback: record.trigger_feedback,
   conversation_id: record.conversation_id,
   impact: record.impact,
+  canvas: record.canvas,
 });
 
 const parseExecutionInvestigationMetadata = (
