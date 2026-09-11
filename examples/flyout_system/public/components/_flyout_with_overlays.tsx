@@ -194,6 +194,15 @@ const ChildFlyoutTriggers: React.FC<ChildFlyoutTriggersProps> = ({
     returnFocusRef.current?.focus();
   };
 
+  useEffect(() => {
+    return () => {
+      overlayARef.current?.close();
+      overlayBRef.current?.close();
+      overlayARef.current = null;
+      overlayBRef.current = null;
+    };
+  }, []);
+
   return (
     <>
       <EuiButton
@@ -342,6 +351,15 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     handleCloseFlyout,
     setIsFlyoutOpen,
   ]);
+
+  // The overlay renders into core's DOM target, outside this app's React root, so unmounting
+  // while open would leave it on screen with nothing left to dismiss it.
+  useEffect(() => {
+    return () => {
+      overlayRef.current?.close();
+      overlayRef.current = null;
+    };
+  }, []);
 
   return (
     <>
