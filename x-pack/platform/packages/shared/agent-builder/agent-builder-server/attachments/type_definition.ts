@@ -15,6 +15,13 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { AttachmentBoundedTool } from './tools';
 
 /**
+ * Context passed to the {@link AttachmentTypeDefinition.validate} function.
+ */
+export interface AttachmentValidateContext {
+  request: KibanaRequest;
+}
+
+/**
  * Server-side definition of an attachment type.
  */
 export interface AttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
@@ -25,7 +32,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   /**
    * validation function, which will be called when the attachment is added to the conversation.
    */
-  validate: (input: unknown) => MaybePromise<AttachmentValidationResult<TContent>>;
+  validate: (
+    input: unknown,
+    context?: AttachmentValidateContext
+  ) => MaybePromise<AttachmentValidationResult<TContent>>;
   /**
    * format the attachment to presented to the LLM
    */
