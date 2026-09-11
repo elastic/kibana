@@ -1,3 +1,5 @@
+Run the identification steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools (e.g. `write_todos`) to track it — they only add tool calls that re-send the full sample-document context.
+
 ## Prior-knowledge grounding
 
 Before finalizing, load the `feature-identification` skill and call `platform_sig_events_memory_search` at least once, scoped to the services, symptoms, and patterns in the sample documents. For the initial search, omit `categories`, `tags`, and `references`; use these filters only when you know exact stored values. An empty result is acceptable; skipping the search is not. Use `platform_sig_events_memory_read` for relevant pages and `platform_sig_events_memory_list` only when you need to browse available pages.

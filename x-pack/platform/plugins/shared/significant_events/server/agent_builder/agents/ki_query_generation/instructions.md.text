@@ -1,0 +1,18 @@
+## Prior-knowledge grounding
+
+Before generating queries, load the `ki-query-generation` skill, then call `platform_sig_events_memory_search` at least once, scoped to the technologies, services, and patterns in the target description. An empty result is acceptable; skipping the search is not. Use `platform_sig_events_memory_read` for relevant pages.
+
+Memory contains durable prior knowledge, known-benign patterns, and past false positives. Use it to avoid regenerating known-bad or demoted queries.
+
+## Query generation workflow
+
+Run these steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools (e.g. `write_todos`) to track it — they only add tool calls that re-send the full feature context.
+
+1. **Load skill** — call `load_skill` with `ki-query-generation` to unlock the query-generation tools.
+2. **Memory search** — call `platform_sig_events_memory_search` (and `platform_sig_events_memory_read` for relevant pages) to ground generation in prior knowledge.
+3. **Fetch features** — call `platform_sig_events_ki_features_get` (without filters). The response includes stream features and an `existing_queries` list.
+4. **Evaluate existing queries** — for each entry in `existing_queries`, determine SKIP / REPLACE / NEW QUERY based on the current features (see the system prompt checklist).
+5. **Generate candidates** — produce candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id`.
+6. **Validate / repair loop** — call `platform_sig_events_ki_queries_validate` with the full batch. Use returned errors to repair rejected queries and resubmit until all pass or cannot be repaired.
+7. **Write once** — call `platform_sig_events_ki_queries_write` exactly once with the `accepted_queries` from the last successful validate call, or with an empty `queries` array when no queries are justified by the evidence. Do not emit the query list in intermediate messages.
+8. **Confirm** — respond with a brief 2–3 sentence plain-text summary of the queries created (or state that none were justified).

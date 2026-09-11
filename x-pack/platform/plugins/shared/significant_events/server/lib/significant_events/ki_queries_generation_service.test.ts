@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Streams } from '@kbn/streams-schema';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import {
   generateKIQueries,
   type GenerateKIQueriesDependencies,
 } from './ki_queries_generation_service';
-import { identifyKIQueries } from './identify_ki_queries';
+import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
-jest.mock('./identify_ki_queries', () => ({
-  identifyKIQueries: jest.fn(),
+jest.mock('./identify_ki_queries_via_agent', () => ({
+  executeKIQueryGenerationAgent: jest.fn(),
 }));
-jest.mock('../feature_flags/is_significant_events_feature_flag_enabled', () => ({
-  isSignificantEventsFeatureFlagEnabled: jest.fn().mockResolvedValue(false),
-}));
-jest.mock(
-  '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled',
-  () => ({
-    isSignificantEventsSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(false),
-  })
-);
 
-const identifyKIQueriesMock = identifyKIQueries as jest.MockedFunction<typeof identifyKIQueries>;
+const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as jest.MockedFunction<
+  typeof executeKIQueryGenerationAgent
+>;
 
 const definition = { name: 'logs.test' } as Streams.all.Definition;
 
@@ -39,14 +32,7 @@ const makeDeps = (
   streamsClient: {
     getStream: jest.fn().mockResolvedValue(definition),
   } as unknown as GenerateKIQueriesDependencies['streamsClient'],
-  inferenceClient: {} as InferenceClient,
-  soClient: {
-    get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-  } as unknown as SavedObjectsClientContract,
-  kiClient: {} as never,
-  esClient: {} as never,
-  streamDataEsClient: {} as never,
-  featureFlags: {} as never,
+  agentBuilder: {} as AgentBuilderPluginStart,
   searchInferenceEndpoints: undefined,
   request: {} as GenerateKIQueriesDependencies['request'],
   logger: loggerMock.create(),
@@ -54,22 +40,16 @@ const makeDeps = (
   telemetry: {
     trackSignificantEventsQueriesGenerated: jest.fn(),
   } as unknown as EbtTelemetryClient,
-  agentBuilderTools: undefined,
   ...overrides,
 });
-
-const toolUsage = {
-  get_stream_features: { calls: 1, failures: 0, latency_ms: 10 },
-  add_queries: { calls: 1, failures: 0, latency_ms: 20 },
-};
 
 describe('generateKIQueries', () => {
   let logger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    identifyKIQueriesMock.mockReset();
-    identifyKIQueriesMock.mockResolvedValue({
+    executeKIQueryGenerationAgentMock.mockReset();
+    executeKIQueryGenerationAgentMock.mockResolvedValue({
       queries: [
         {
           type: 'match',
@@ -82,12 +62,10 @@ describe('generateKIQueries', () => {
         },
       ],
       tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
-      toolUsage,
-      reasoningDiagnostics: { externalContentToolContinuations: 4 },
     });
   });
 
-  it('reports the external_content_tool_continuations counter to telemetry', async () => {
+  it('reports telemetry with count, connector_id, and token usage', async () => {
     const telemetry = {
       trackSignificantEventsQueriesGenerated: jest.fn(),
     } as unknown as EbtTelemetryClient;
@@ -101,7 +79,8 @@ describe('generateKIQueries', () => {
       expect.objectContaining({
         count: 1,
         connector_id: 'test-connector',
-        external_content_tool_continuations: 4,
+        input_tokens_used: 10,
+        output_tokens_used: 20,
       })
     );
   });
@@ -131,18 +110,5 @@ describe('generateKIQueries', () => {
       tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
       connectorId: 'test-connector',
     });
-    expect(result).not.toHaveProperty('reasoningDiagnostics');
-    expect(result).not.toHaveProperty('toolUsage');
-  });
-
-  it('forwards maxDurationMs to the query generation wrapper', async () => {
-    await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector', maxDurationMs: 300000 },
-      makeDeps({ logger })
-    );
-
-    expect(identifyKIQueriesMock.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ maxDurationMs: 300000, connectorId: 'test-connector' })
-    );
   });
 });

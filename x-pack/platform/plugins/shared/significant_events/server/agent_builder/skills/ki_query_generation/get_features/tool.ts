@@ -11,6 +11,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import {
+  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   toFeatureForLlmContext,
 } from '@kbn/nightshift-ai';
@@ -19,6 +20,9 @@ import type { GetScopedClients } from '../../../../routes/types';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
+
+/** Bounds the description of each existing query surfaced to the LLM. */
+const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
 
 const getFeaturesSchema = z.object({
   target_id: z.string().max(MAX_ID_LENGTH).describe('Target identifier for KI feature lookup.'),
@@ -68,19 +72,33 @@ export const createGetFeaturesTool = ({
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const { hits } = await kiClient.getFeatures(target.id, {
-          type: featureTypes,
-          minConfidence,
-          limit,
-          excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
-        });
+        const [{ hits }, { [target.id]: existingLinks }] = await Promise.all([
+          kiClient.getFeatures(target.id, {
+            type: featureTypes,
+            minConfidence,
+            limit,
+            excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+          }),
+          kiClient.getStreamToQueryLinksMap([target.id]),
+        ]);
         const features = hits.map(toFeatureForLlmContext);
+        const existingQueries = existingLinks
+          .map(({ query }) => ({
+            id: query.id,
+            title: query.title,
+            type: query.type,
+            severity_score: query.severity_score,
+            description: query.description.slice(0, MAX_EXISTING_QUERY_DESCRIPTION_LENGTH),
+            esql: query.esql.query,
+          }))
+          .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
+          .slice(0, DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT);
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { features, count: features.length },
+              data: { features, count: features.length, existing_queries: existingQueries },
             },
           ],
         };

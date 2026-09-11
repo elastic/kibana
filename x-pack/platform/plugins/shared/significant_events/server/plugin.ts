@@ -101,6 +101,10 @@ import {
   installFeatureIdentificationAgent,
   registerSignificantEventsFeatureIdentificationAgentTypes,
 } from './agent_builder/agents/feature_identification';
+import {
+  installKIQueryGenerationAgent,
+  registerSignificantEventsKIQueryGenerationAgentTypes,
+} from './agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
@@ -299,6 +303,9 @@ export class SignificantEventsPlugin
     if (plugins.agentBuilder) {
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       registerSignificantEventsFeatureIdentificationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+      });
+      registerSignificantEventsKIQueryGenerationAgentTypes({
         agentBuilder: plugins.agentBuilder,
       });
       void core
@@ -541,6 +548,13 @@ export class SignificantEventsPlugin
         availability,
       }).catch((error: unknown) => {
         this.logManagedResourceError('feature identification agent', error);
+      });
+      void installKIQueryGenerationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('KI query generation agent', error);
       });
     }
 

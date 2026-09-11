@@ -10,6 +10,7 @@ import type { MemoryToolsOptions } from '../../../memory_and_investigation/tools
 import { platformStreamsMemoryTools } from '../../../memory_and_investigation/tools/memory/tool_ids';
 import { SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID } from './get_features/tool';
 import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from './validate_queries/tool';
+import { WRITE_QUERIES_TOOL_ID } from './write_queries/tool';
 import { createKIQueryGenerationSkill } from '.';
 
 describe('createKIQueryGenerationSkill', () => {
@@ -26,6 +27,7 @@ describe('createKIQueryGenerationSkill', () => {
       expect.objectContaining({ id: platformStreamsMemoryTools.memoryList }),
       expect.objectContaining({ id: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID }),
       expect.objectContaining({ id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID }),
+      expect.objectContaining({ id: WRITE_QUERIES_TOOL_ID }),
     ]);
     expect(skill.getRegistryTools).toBeUndefined();
   });
