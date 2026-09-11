@@ -9,14 +9,16 @@
 
 import React from 'react';
 import type { EuiDataGridCustomToolbarProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
   gridProps: {
     additionalControls?: React.ReactNode;
-    inTableSearchControl?: React.ReactNode;
+    inTableSearchButton?: React.ReactNode;
+    inTableSearchInput?: React.ReactNode;
   };
 }
 
@@ -45,7 +47,7 @@ export const internalRenderCustomToolbar = (
       keyboardShortcutsControl,
       displayControl,
     },
-    gridProps: { additionalControls, inTableSearchControl },
+    gridProps: { additionalControls, inTableSearchButton, inTableSearchInput },
   } = props;
 
   const buttons = hasRoomForGridControls ? (
@@ -99,55 +101,26 @@ export const internalRenderCustomToolbar = (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             {Boolean(leftSide) && buttons}
+            {Boolean(inTableSearchInput) && (
+              <EuiFlexItem grow={false}>{inTableSearchInput}</EuiFlexItem>
+            )}
             {Boolean(
-              keyboardShortcutsControl ||
-                displayControl ||
-                fullScreenControl ||
-                inTableSearchControl
+              keyboardShortcutsControl || displayControl || fullScreenControl || inTableSearchButton
             ) && (
               <EuiFlexItem grow={false}>
-                <div className="unifiedDataTableToolbarControlGroup" css={styles.controlGroup}>
-                  {Boolean(inTableSearchControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {inTableSearchControl}
-                    </div>
-                  )}
-                  {Boolean(keyboardShortcutsControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {keyboardShortcutsControl}
-                    </div>
-                  )}
-                  {Boolean(displayControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {displayControl}
-                    </div>
-                  )}
-                  {Boolean(fullScreenControl) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {fullScreenControl}
-                    </div>
-                  )}
-                  {Boolean(saveToDashboardButton) && (
-                    <div
-                      className="unifiedDataTableToolbarControlIconButton"
-                      css={styles.controlGroupIconButton}
-                    >
-                      {saveToDashboardButton}
-                    </div>
-                  )}
-                </div>
+                <EuiButtonGroup
+                  variant="segmented"
+                  legend={i18n.translate('unifiedDataTable.toolbarControlGroupLegend', {
+                    defaultMessage: 'Data grid controls',
+                  })}
+                  className="unifiedDataTableToolbarControlGroup"
+                >
+                  {inTableSearchButton}
+                  {keyboardShortcutsControl}
+                  {displayControl}
+                  {fullScreenControl}
+                  {saveToDashboardButton}
+                </EuiButtonGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
