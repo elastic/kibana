@@ -6,10 +6,8 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
-  isPrivatelySharedConversation,
   normalizeConversationAccessControl,
   type ConversationAccessControl,
 } from '@kbn/agent-builder-common';
@@ -17,44 +15,6 @@ import type { UpdateConversationAccessControlRequestBody } from '../../../common
 import { queryKeys } from '../query_keys';
 import { mutationKeys } from '../mutation_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
-import { useConversation } from './use_conversation';
-import { useUserProfiles } from './use_user_profiles';
-
-export const useInviteMembersSummary = () => {
-  const { conversation } = useConversation();
-
-  const accessControl = normalizeConversationAccessControl(conversation?.access_control);
-  const hasSummary = isPrivatelySharedConversation(accessControl);
-
-  const memberIdsByLatestAdded = [...accessControl.entries]
-    .sort((firstEntry, secondEntry) => {
-      const firstAddedAtTime = Date.parse(firstEntry.added_at);
-      const secondAddedAtTime = Date.parse(secondEntry.added_at);
-
-      return secondAddedAtTime - firstAddedAtTime;
-    })
-    .map((entry) => entry.id);
-
-  const visibleMemberIds = memberIdsByLatestAdded.slice(0, 2);
-
-  const { data: visibleMemberProfiles = [] } = useUserProfiles({
-    uids: visibleMemberIds,
-    enabled: hasSummary && visibleMemberIds.length > 0,
-  });
-
-  const visibleMemberProfileByUid = new Map(
-    visibleMemberProfiles.map((profile) => [profile.uid, profile])
-  );
-  const profiles = visibleMemberIds
-    .map((memberId) => visibleMemberProfileByUid.get(memberId))
-    .filter((profile): profile is UserProfileWithAvatar => Boolean(profile));
-
-  return {
-    profiles,
-    extraCount: Math.max(accessControl.entries.length - profiles.length, 0),
-    shouldShowSummary: hasSummary && profiles.length > 0,
-  };
-};
 
 export const useUpdateConversationAccessControl = ({
   conversationId,
