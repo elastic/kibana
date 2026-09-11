@@ -44,7 +44,7 @@ export const AttackDiscoveryApiScheduleParams = lazySchema(() =>
     /**
      * The index pattern to get alerts from
      */
-    alerts_index_pattern: z.string(),
+    alerts_index_pattern: z.string().describe('The index pattern to get alerts from'),
     /**
      * LLM API configuration.
      */
@@ -53,9 +53,9 @@ export const AttackDiscoveryApiScheduleParams = lazySchema(() =>
         /**
          * The name of the connector
          */
-        name: z.string(),
+        name: z.string().describe('The name of the connector'),
       })
-    ),
+    ).describe('LLM API configuration.'),
     end: z.string().optional(),
     query: Query.optional(),
     filters: Filters.optional(),
@@ -71,7 +71,7 @@ export const IntervalApiSchedule = lazySchema(() =>
     /**
      * The schedule interval
      */
-    interval: z.string(),
+    interval: z.string().describe('The schedule interval'),
   })
 );
 export type IntervalApiSchedule = z.infer<typeof IntervalApiSchedule>;
@@ -139,7 +139,11 @@ export const AttackDiscoveryApiScheduleActionFrequency = lazySchema(() =>
     /**
      * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
      */
-    summary: z.boolean(),
+    summary: z
+      .boolean()
+      .describe(
+        'Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert'
+      ),
     notify_when: AttackDiscoveryApiScheduleActionNotifyWhen,
     throttle: AttackDiscoveryApiScheduleActionThrottle.nullable(),
   })
@@ -153,7 +157,7 @@ export const AttackDiscoveryApiScheduleGeneralAction = lazySchema(() =>
     /**
      * The action type used for sending notifications.
      */
-    action_type_id: z.string(),
+    action_type_id: z.string().describe('The action type used for sending notifications.'),
     group: AttackDiscoveryApiScheduleActionGroup,
     id: AttackDiscoveryApiScheduleActionId,
     params: AttackDiscoveryApiScheduleActionParams,
@@ -171,7 +175,7 @@ export const AttackDiscoveryApiScheduleSystemAction = lazySchema(() =>
     /**
      * The action type used for sending notifications.
      */
-    action_type_id: z.string(),
+    action_type_id: z.string().describe('The action type used for sending notifications.'),
     id: AttackDiscoveryApiScheduleActionId,
     params: AttackDiscoveryApiScheduleActionParams,
     uuid: NonEmptyString.optional(),
@@ -208,15 +212,15 @@ export const AttackDiscoveryApiScheduleExecution = lazySchema(() =>
     /**
      * Date of the execution
      */
-    date: z.string().datetime(),
+    date: z.string().datetime().describe('Date of the execution'),
     /**
      * Duration of the execution
      */
-    duration: z.number().optional(),
+    duration: z.number().optional().describe('Duration of the execution'),
     /**
      * Status of the execution
      */
-    status: AttackDiscoveryApiScheduleExecutionStatus,
+    status: AttackDiscoveryApiScheduleExecutionStatus.describe('Status of the execution'),
     message: z.string().optional(),
   })
 );
@@ -232,47 +236,53 @@ export const AttackDiscoveryApiSchedule = lazySchema(() =>
     /**
      * UUID of Attack Discovery schedule
      */
-    id: z.string(),
+    id: z.string().describe('UUID of Attack Discovery schedule'),
     /**
      * The name of the schedule
      */
-    name: z.string(),
+    name: z.string().describe('The name of the schedule'),
     /**
      * The name of the user that created the schedule
      */
-    created_by: z.string(),
+    created_by: z.string().describe('The name of the user that created the schedule'),
     /**
      * The name of the user that updated the schedule
      */
-    updated_by: z.string(),
+    updated_by: z.string().describe('The name of the user that updated the schedule'),
     /**
      * The date the schedule was created
      */
-    created_at: z.string().datetime(),
+    created_at: z.string().datetime().describe('The date the schedule was created'),
     /**
      * The date the schedule was updated
      */
-    updated_at: z.string().datetime(),
+    updated_at: z.string().datetime().describe('The date the schedule was updated'),
     /**
      * Indicates whether the schedule is enabled
      */
-    enabled: z.boolean(),
+    enabled: z.boolean().describe('Indicates whether the schedule is enabled'),
     /**
      * The Attack Discovery schedule configuration parameters
      */
-    params: AttackDiscoveryApiScheduleParams,
+    params: AttackDiscoveryApiScheduleParams.describe(
+      'The Attack Discovery schedule configuration parameters'
+    ),
     /**
      * The Attack Discovery schedule interval
      */
-    schedule: IntervalApiSchedule,
+    schedule: IntervalApiSchedule.describe('The Attack Discovery schedule interval'),
     /**
      * The Attack Discovery schedule actions
      */
-    actions: z.array(AttackDiscoveryApiScheduleAction),
+    actions: z
+      .array(AttackDiscoveryApiScheduleAction)
+      .describe('The Attack Discovery schedule actions'),
     /**
      * The Attack Discovery schedule last execution summary
      */
-    last_execution: AttackDiscoveryApiScheduleExecution.optional(),
+    last_execution: AttackDiscoveryApiScheduleExecution.optional().describe(
+      'The Attack Discovery schedule last execution summary'
+    ),
   })
 );
 export type AttackDiscoveryApiSchedule = z.infer<typeof AttackDiscoveryApiSchedule>;
@@ -285,23 +295,28 @@ export const AttackDiscoveryApiScheduleCreateProps = lazySchema(() =>
     /**
      * The name of the schedule
      */
-    name: z.string(),
+    name: z.string().describe('The name of the schedule'),
     /**
      * Indicates whether the schedule is enabled
      */
-    enabled: z.boolean().optional(),
+    enabled: z.boolean().optional().describe('Indicates whether the schedule is enabled'),
     /**
      * The Attack Discovery schedule configuration parameters
      */
-    params: AttackDiscoveryApiScheduleParams,
+    params: AttackDiscoveryApiScheduleParams.describe(
+      'The Attack Discovery schedule configuration parameters'
+    ),
     /**
      * The Attack Discovery schedule interval
      */
-    schedule: IntervalApiSchedule,
+    schedule: IntervalApiSchedule.describe('The Attack Discovery schedule interval'),
     /**
      * The Attack Discovery schedule actions
      */
-    actions: z.array(AttackDiscoveryApiScheduleAction).optional(),
+    actions: z
+      .array(AttackDiscoveryApiScheduleAction)
+      .optional()
+      .describe('The Attack Discovery schedule actions'),
   })
 );
 export type AttackDiscoveryApiScheduleCreateProps = z.infer<
@@ -316,19 +331,23 @@ export const AttackDiscoveryApiScheduleUpdateProps = lazySchema(() =>
     /**
      * The name of the schedule
      */
-    name: z.string(),
+    name: z.string().describe('The name of the schedule'),
     /**
      * The Attack Discovery schedule configuration parameters
      */
-    params: AttackDiscoveryApiScheduleParams,
+    params: AttackDiscoveryApiScheduleParams.describe(
+      'The Attack Discovery schedule configuration parameters'
+    ),
     /**
      * The Attack Discovery schedule interval
      */
-    schedule: IntervalApiSchedule,
+    schedule: IntervalApiSchedule.describe('The Attack Discovery schedule interval'),
     /**
      * The Attack Discovery schedule actions
      */
-    actions: z.array(AttackDiscoveryApiScheduleAction),
+    actions: z
+      .array(AttackDiscoveryApiScheduleAction)
+      .describe('The Attack Discovery schedule actions'),
   })
 );
 export type AttackDiscoveryApiScheduleUpdateProps = z.infer<

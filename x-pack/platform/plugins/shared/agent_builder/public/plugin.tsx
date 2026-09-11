@@ -14,6 +14,11 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -70,6 +75,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { appPaths } from './application/utils/app_paths';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -100,6 +106,7 @@ export class AgentBuilderPlugin
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
+  private sidebarOpenSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -116,6 +123,12 @@ export class AgentBuilderPlugin
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
     this.isEarsEnabled = deps.actions.isEarsEnabled;
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
+
+    deps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+    });
 
     registerApp({
       core,
@@ -157,6 +170,10 @@ export class AgentBuilderPlugin
       () => ProjectRoutingAccess.EDITABLE
     );
 
+    const filesClient = startDependencies.files.filesClientFactory.asScoped(
+      CHAT_ATTACHMENT_IMAGES_FILE_KIND
+    );
+
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
     const renderersService = new RenderersService();
@@ -181,7 +198,14 @@ export class AgentBuilderPlugin
     const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+    const agentBuilderSidebar = core.chrome.sidebar.getApp('agentBuilder');
+    this.sidebarOpenSubscription = agentBuilderSidebar.isOpen$().subscribe((isOpen) => {
+      if (!isOpen) {
+        this.activeSidebarRef = null;
+        this.sidebarCallbacks = null;
+        clearSidebarRuntimeContext();
+      }
+    });
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
       const { conversationId, ...openOptions } = options ?? {};
@@ -194,7 +218,7 @@ export class AgentBuilderPlugin
       }
 
       // If already open, update props instead of creating new
-      if (this.activeSidebarRef && this.sidebarCallbacks) {
+      if (agentBuilderSidebar.isOpen() && this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
         return { chatRef: this.activeSidebarRef };
       }
@@ -205,22 +229,12 @@ export class AgentBuilderPlugin
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },
-        onClose: () => {
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
       });
 
-      sidebar.open();
+      agentBuilderSidebar.open();
 
       const sidebarRef: ConversationSidebarRef = {
-        close: () => {
-          sidebar.close();
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
+        close: agentBuilderSidebar.close,
       };
 
       this.activeSidebarRef = sidebarRef;
@@ -244,6 +258,7 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
+      filesClient,
       agentService,
       attachmentsService,
       renderersService,
@@ -331,11 +346,25 @@ export class AgentBuilderPlugin
         }));
       });
 
+    const publicAttachmentsService = createPublicAttachmentContract({ attachmentsService });
+
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
-      attachments: createPublicAttachmentContract({ attachmentsService }),
+      attachments: publicAttachmentsService,
       conversationTemplates: createPublicConversationTemplatesContract({
         conversationTemplatesService,
+        context: {
+          attachmentsService: publicAttachmentsService,
+          openSidebarConversation: (conversationId) => {
+            openSidebarInternal({ conversationId });
+          },
+          openFullscreenConversation: ({ conversationId, agentId }) => {
+            agentBuilderSidebar.close();
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
+              path: appPaths.agent.conversations.byId({ agentId, conversationId }),
+            });
+          },
+        },
       }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
@@ -374,13 +403,8 @@ export class AgentBuilderPlugin
         return openSidebarInternal(options);
       },
       toggleChat: (options?: OpenConversationSidebarOptions) => {
-        if (this.activeSidebarRef) {
-          const sidebarRef = this.activeSidebarRef;
-          // Be defensive: clear local references immediately in case the sidebar doesn't
-          // synchronously invoke our onClose callback.
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          sidebarRef.close();
+        if (agentBuilderSidebar.isOpen()) {
+          agentBuilderSidebar.close();
           return;
         }
 
@@ -411,5 +435,6 @@ export class AgentBuilderPlugin
 
   stop() {
     this.experimentalDeepLinksSubscription?.unsubscribe();
+    this.sidebarOpenSubscription?.unsubscribe();
   }
 }

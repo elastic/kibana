@@ -71,6 +71,16 @@ const EditSavedQueryPageComponent = () => {
   });
 
   const pageTitle = useMemo(() => {
+    if (error) {
+      return viewMode
+        ? i18n.translate('xpack.osquery.viewSavedQuery.loadError.pageTitle', {
+            defaultMessage: 'Saved query',
+          })
+        : i18n.translate('xpack.osquery.editSavedQuery.loadError.pageTitle', {
+            defaultMessage: 'Edit saved query',
+          });
+    }
+
     if (!savedQueryDetails?.id) {
       return undefined;
     }
@@ -86,7 +96,7 @@ const EditSavedQueryPageComponent = () => {
       defaultMessage: 'Edit "{savedQueryId}"',
       values: { savedQueryId: savedQueryDetails.id },
     });
-  }, [savedQueryDetails?.id, viewMode]);
+  }, [error, savedQueryDetails?.id, viewMode]);
 
   useOsquerySubpageTitle(pageTitle);
 

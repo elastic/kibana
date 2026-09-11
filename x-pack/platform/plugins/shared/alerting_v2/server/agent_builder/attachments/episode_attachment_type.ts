@@ -17,9 +17,9 @@ import {
   episodeAttachmentDataSchema,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { alertEpisodeToEpisodeAttachment } from '@kbn/alerting-v2-utils';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
-import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import { loadRuleMetadata } from '../common/load_rule_metadata';

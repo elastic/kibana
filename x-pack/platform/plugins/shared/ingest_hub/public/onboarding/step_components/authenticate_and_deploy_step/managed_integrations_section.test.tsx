@@ -27,6 +27,14 @@ jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(),
+}));
+
+jest.mock('./static_keys_replace_view', () => ({
+  StaticKeysReplaceView: jest.fn(),
+}));
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetPackageInfoByKeyQuery,
@@ -35,6 +43,11 @@ import {
   LazyAwsStaticKeysForm,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useLocation } from 'react-router-dom';
+import { StaticKeysReplaceView } from './static_keys_replace_view';
+
+const mockUseLocation = useLocation as jest.Mock;
+const MockStaticKeysReplaceView = StaticKeysReplaceView as unknown as jest.Mock;
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
@@ -50,21 +63,40 @@ import { ManagedIntegrationsSection } from './managed_integrations_section';
 function setupMocks({
   cloud = undefined,
   setConnectorId = jest.fn(),
-}: { cloud?: object; setConnectorId?: jest.Mock } = {}) {
+  setStaticKeys = jest.fn(),
+  connectorId = undefined,
+  authMethod = undefined,
+  searchParams = '',
+}: {
+  cloud?: object;
+  setConnectorId?: jest.Mock;
+  setStaticKeys?: jest.Mock;
+  connectorId?: string;
+  authMethod?: 'identity_federation' | 'static_keys';
+  searchParams?: string;
+} = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
-  mockUseOnboardingFlow.mockReturnValue({ setConnectorId });
+  mockUseLocation.mockReturnValue({ search: searchParams });
+  mockUseOnboardingFlow.mockReturnValue({
+    setConnectorId,
+    setStaticKeys,
+    authenticateAndDeployStep: { connectorId, authMethod },
+  });
 
   MockIdentityFederation.mockImplementation(
     ({
       onReadyChange,
       onConnectorIdChange,
+      initialConnectorId: initId,
     }: {
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
+      initialConnectorId?: string;
     }) => (
       <div data-test-subj="identity-federation">
+        {initId && <span data-test-subj="initial-connector-id">{initId}</span>}
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
@@ -73,9 +105,39 @@ function setupMocks({
   );
 
   MockStaticKeys.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="static-keys">
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
+        <button
+          onClick={() => onFieldsChange?.({ access_key_id: 'AKIA', secret_access_key: 'secret' })}
+        >
+          fire-fields
+        </button>
+      </div>
+    )
+  );
+
+  MockStaticKeysReplaceView.mockImplementation(
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
+      <div data-test-subj="static-keys-replace-view">
+        <button onClick={() => onReadyChange?.(true)}>replace-ready</button>
+        <button
+          onClick={() => onFieldsChange?.({ access_key_id: 'NEW', secret_access_key: 'newsecret' })}
+        >
+          replace-fields
+        </button>
       </div>
     )
   );
@@ -231,6 +293,33 @@ describe('ManagedIntegrationsSection', () => {
     });
   });
 
+  describe('initialConnectorId restoration', () => {
+    it('passes persisted connectorId as initialConnectorId to AwsIdentityFederationSetup', () => {
+      setupMocks({ connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('initial-connector-id')).toHaveTextContent('persisted-connector');
+    });
+
+    it('passes initialConnectorId after accordion collapse and reopen', () => {
+      setupMocks({ connectorId: 'persisted-connector' });
+      renderSection({ showIdentityFederation: true });
+
+      // Collapse
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+
+      // Reopen — component remounts; initialConnectorId must still be passed
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(screen.getByTestId('initial-connector-id')).toHaveTextContent('persisted-connector');
+    });
+
+    it('does not render initial-connector-id span when no connectorId in state', () => {
+      setupMocks({ connectorId: undefined });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.queryByTestId('initial-connector-id')).not.toBeInTheDocument();
+    });
+  });
+
   describe('deploy button interaction', () => {
     it('calls onDeploy when clicked after credentials ready', () => {
       const onDeploy = jest.fn();
@@ -332,6 +421,56 @@ describe('ManagedIntegrationsSection', () => {
     it('renders plural "services" label for count > 1', () => {
       renderSection({ serviceCount: 5 });
       expect(screen.getByText('5 services')).toBeInTheDocument();
+    });
+  });
+
+  describe('static-keys edit mode (isStaticKeysEditMode)', () => {
+    it('shows StaticKeysReplaceView when ?deploymentId= in URL and no connectorId', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: true });
+      expect(screen.getByTestId('static-keys-replace-view')).toBeInTheDocument();
+      expect(screen.queryByTestId('static-keys')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+    });
+
+    it('shows LazyAwsStaticKeysForm (not replace view) when no deploymentId in URL', () => {
+      setupMocks({ searchParams: '', connectorId: undefined });
+      renderSection({ showIdentityFederation: false });
+      expect(screen.getByTestId('static-keys')).toBeInTheDocument();
+      expect(screen.queryByTestId('static-keys-replace-view')).not.toBeInTheDocument();
+    });
+
+    it('initialises preferredMethod to access_keys on static-keys resume', () => {
+      setupMocks({ searchParams: '?deploymentId=dep-123', authMethod: 'static_keys' });
+      renderSection({ showIdentityFederation: true });
+      const radio = screen.getByRole('radio', { name: /access keys/i }) as HTMLInputElement;
+      expect(radio.checked).toBe(true);
+    });
+
+    it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
+      const setStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '?deploymentId=dep-123',
+        authMethod: 'static_keys',
+        setStaticKeys,
+      });
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByText('replace-fields'));
+      expect(setStaticKeys).toHaveBeenCalledWith({
+        access_key_id: 'NEW',
+        secret_access_key: 'newsecret',
+      });
+    });
+
+    it('onFieldsChange on LazyAwsStaticKeysForm calls setStaticKeys', () => {
+      const setStaticKeys = jest.fn();
+      setupMocks({ searchParams: '', connectorId: undefined, setStaticKeys });
+      renderSection({ showIdentityFederation: false });
+      fireEvent.click(screen.getByText('fire-fields'));
+      expect(setStaticKeys).toHaveBeenCalledWith({
+        access_key_id: 'AKIA',
+        secret_access_key: 'secret',
+      });
     });
   });
 });
