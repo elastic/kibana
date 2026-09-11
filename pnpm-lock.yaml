@@ -4728,6 +4728,9 @@ importers:
         specifier: 3.25.0
         version: 3.25.0(zod@4.4.3)
     devDependencies:
+      '@ampproject/remapping':
+        specifier: 2.3.0
+        version: 2.3.0
       '@apidevtools/swagger-parser':
         specifier: 12.1.0
         version: 12.1.0(openapi-types@12.1.3)
@@ -4839,9 +4842,6 @@ importers:
       '@jest/types':
         specifier: 29.6.3
         version: 29.6.3
-      '@jridgewell/remapping':
-        specifier: 2.3.5
-        version: 2.3.5
       '@kbn/ai-tools-cli':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-tools-cli
@@ -9585,6 +9585,10 @@ packages:
   '@alcalzone/ansi-tokenize@0.1.3':
     resolution: {integrity: sha512-3yWxPTq3UQ/FY9p1ErPxIyfT64elWaMvM9lIHnaqpyft63tkxodF5aUElYHrdisWve5cETkh1+KBw1yJuW0aRw==}
     engines: {node: '>=14.13.1'}
+
+  '@ampproject/remapping@2.3.0':
+    resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
+    engines: {node: '>=6.0.0'}
 
   '@apidevtools/json-schema-ref-parser@14.0.1':
     resolution: {integrity: sha512-Oc96zvmxx1fqoSEdUmfmvvb59/KDOnUoJ7s2t7bISyAn0XEz57LCCw8k2Y4Pf3mwKaZLMciESALORLgfe2frCw==}
@@ -26052,6 +26056,11 @@ snapshots:
     dependencies:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 4.0.0
+
+  '@ampproject/remapping@2.3.0':
+    dependencies:
+      '@jridgewell/gen-mapping': 0.3.13
+      '@jridgewell/trace-mapping': 0.3.31
 
   '@apidevtools/json-schema-ref-parser@14.0.1':
     dependencies:

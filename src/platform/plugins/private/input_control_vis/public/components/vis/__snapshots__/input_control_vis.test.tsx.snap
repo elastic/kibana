@@ -4,7 +4,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div>
   <div>
     <div
-      class="eui-scrollBar css-1bj44k1-stagingButtons"
+      class="eui-scrollBar css-y7fsuy-stagingButtons"
     >
       <div
         class="css-ubh23m-icvContainerStyles"
@@ -169,7 +169,7 @@ exports[`Clear btns enabled when there are values 1`] = `
 <div>
   <div>
     <div
-      class="eui-scrollBar css-1bj44k1-stagingButtons"
+      class="eui-scrollBar css-y7fsuy-stagingButtons"
     >
       <div
         class="css-ubh23m-icvContainerStyles"
@@ -335,7 +335,7 @@ exports[`Renders list control 1`] = `
 <div>
   <div>
     <div
-      class="eui-scrollBar css-1bj44k1-stagingButtons"
+      class="eui-scrollBar css-y7fsuy-stagingButtons"
     >
       <div
         class="css-ubh23m-icvContainerStyles"
@@ -502,7 +502,7 @@ exports[`Renders range control 1`] = `
 <div>
   <div>
     <div
-      class="eui-scrollBar css-1bj44k1-stagingButtons"
+      class="eui-scrollBar css-y7fsuy-stagingButtons"
     >
       <div
         class="css-ubh23m-icvContainerStyles"

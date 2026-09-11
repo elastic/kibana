@@ -2,48 +2,48 @@
 
 exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
 <div
-  class="css-rf3mjl-tooltip"
+  class="css-1a6dbbm-tooltip"
 >
   <dl
-    class="css-75cfz4-descriptionList"
+    class="css-1jwe4k8-descriptionList"
   >
     <dt
-      class="css-19ok79k-title"
+      class="css-1ak2aid-title"
     >
       job ID
     </dt>
     <dd
-      class="css-u27lcz-description"
+      class="css-j9mxa0-description"
     >
       mock-job-id
     </dd>
     <dt
-      class="css-19ok79k-title"
+      class="css-1ak2aid-title"
     >
       aggregation interval
     </dt>
     <dd
-      class="css-u27lcz-description"
+      class="css-j9mxa0-description"
     >
       15m
     </dd>
     <dt
-      class="css-19ok79k-title"
+      class="css-1ak2aid-title"
     >
       chart function
     </dt>
     <dd
-      class="css-u27lcz-description"
+      class="css-j9mxa0-description"
     >
       avg responsetime
     </dd>
     <dt
-      class="css-19ok79k-title"
+      class="css-1ak2aid-title"
     >
       airline
     </dt>
     <dd
-      class="css-u27lcz-description"
+      class="css-j9mxa0-description"
     >
       JAL
     </dd>

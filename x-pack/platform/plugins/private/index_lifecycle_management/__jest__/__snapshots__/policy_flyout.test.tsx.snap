@@ -61,7 +61,7 @@ exports[`View policy flyout shows all phases 1`] = `
                       class="css-1yy3wq3-phasesContainer"
                     >
                       <div
-                        class="css-1swaesg-phase-hotPhase"
+                        class="css-cgnyvk-phase-hotPhase"
                         data-test-subj="ilmTimelinePhase-hot"
                       >
                         <div
@@ -87,7 +87,7 @@ exports[`View policy flyout shows all phases 1`] = `
                         </div>
                       </div>
                       <div
-                        class="css-1kraihe-phase-warmPhase"
+                        class="css-nptu4y-phase-warmPhase"
                         data-test-subj="ilmTimelinePhase-warm"
                       >
                         <div
@@ -113,7 +113,7 @@ exports[`View policy flyout shows all phases 1`] = `
                         </div>
                       </div>
                       <div
-                        class="css-1cac6oh-phase-coldPhase"
+                        class="css-iqoxjo-phase-coldPhase"
                         data-test-subj="ilmTimelinePhase-cold"
                       >
                         <div
@@ -139,7 +139,7 @@ exports[`View policy flyout shows all phases 1`] = `
                         </div>
                       </div>
                       <div
-                        class="css-1gewg98-phase-frozenPhase"
+                        class="css-1t18685-phase-frozenPhase"
                         data-test-subj="ilmTimelinePhase-frozen"
                       >
                         <div

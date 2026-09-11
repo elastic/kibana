@@ -97,7 +97,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
     data-test-subj="table-topCountriesSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-1fo8g3b-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -786,7 +786,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
     data-test-subj="table-topCountriesSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-1fo8g3b-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div

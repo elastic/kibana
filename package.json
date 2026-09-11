@@ -1671,6 +1671,7 @@
     "zod-to-json-schema": "3.25.0"
   },
   "devDependencies": {
+    "@ampproject/remapping": "2.3.0",
     "@apidevtools/swagger-parser": "12.1.0",
     "@axe-core/playwright": "4.13.0",
     "@babel/core": "7.29.7",
@@ -1708,7 +1709,6 @@
     "@jest/reporters": "29.7.0",
     "@jest/transform": "29.7.0",
     "@jest/types": "29.6.3",
-    "@jridgewell/remapping": "2.3.5",
     "@kbn/ai-tools-cli": "workspace:*",
     "@kbn/alerting-api-integration-helpers": "workspace:*",
     "@kbn/ambient-common-types": "workspace:*",

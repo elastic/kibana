@@ -29,8 +29,7 @@ Array [
       <code>
         xpack.monitoring.collection.enabled
       </code>
-      
-              is set to 
+       is set to 
       <code>
         -1
       </code>
