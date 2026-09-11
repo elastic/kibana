@@ -948,8 +948,7 @@ describe('Agent policy', () => {
         );
         expect(deleteAgentlessAgentSpy).toHaveBeenCalled();
 
-        const unenrollOrder =
-          jest.mocked(unenrollForAgentPolicyId).mock.invocationCallOrder[0];
+        const unenrollOrder = jest.mocked(unenrollForAgentPolicyId).mock.invocationCallOrder[0];
         const deleteOrder = deleteAgentlessAgentSpy.mock.invocationCallOrder[0];
         expect(unenrollOrder).toBeLessThan(deleteOrder);
       } finally {
