@@ -15,7 +15,6 @@ import { loadPage } from '../../tasks/common';
 
 const formTestSubj = getPolicySettingsFormTestSubjects('endpointPolicyForm');
 const perOsMalware = formTestSubj.perOsMalware;
-const perOsRansomware = formTestSubj.perOsRansomware;
 const DETECT_LABEL = 'Detect';
 
 const loadSettingsUrl = (policyId: string) =>
@@ -66,32 +65,9 @@ describe(
       }
     });
 
-    it('renders the per-OS form when the flag is on', () => {
-      loadSettingsUrl(policy.id);
-      cy.getByTestSubj(perOsMalware.card).should('exist');
-      cy.getByTestSubj(perOsRansomware.card).should('exist');
-    });
-
-    it('changing Windows malware mode does not change macOS or Linux', () => {
-      loadSettingsUrl(policy.id);
-      cy.getByTestSubj(perOsMalware.mac.modeSelect)
-        .invoke('text')
-        .then((macBefore) => {
-          cy.getByTestSubj(perOsMalware.linux.modeSelect)
-            .invoke('text')
-            .then((linuxBefore) => {
-              selectOsProtectionMode(perOsMalware.windows.modeSelect, DETECT_LABEL);
-              expectModeSelectValue(perOsMalware.windows.modeSelect, DETECT_LABEL);
-              cy.getByTestSubj(perOsMalware.mac.modeSelect).should(($el) => {
-                expect($el.text().trim()).to.eq(macBefore.trim());
-              });
-              cy.getByTestSubj(perOsMalware.linux.modeSelect).should(($el) => {
-                expect($el.text().trim()).to.eq(linuxBefore.trim());
-              });
-            });
-        });
-    });
-
+    // The other three Cypress cases live in RTL: per_os/per_os_malware_protections_card.test.tsx
+    // (cross-OS isolation) and per_os/per_os_ransomware_protection_card.test.tsx (no Linux row).
+    // This one stays because save-plus-reload persistence needs a real stack.
     it('persists Windows Detect across save and reload without changing other OSs', () => {
       loadSettingsUrl(policy.id);
       cy.getByTestSubj(perOsMalware.mac.modeSelect)
@@ -112,13 +88,6 @@ describe(
               });
             });
         });
-    });
-
-    it('does not render a Linux row on the per-OS Ransomware card', () => {
-      loadSettingsUrl(policy.id);
-      cy.getByTestSubj(perOsRansomware.windows.row).should('exist');
-      cy.getByTestSubj(perOsRansomware.mac.row).should('exist');
-      cy.getByTestSubj(`${perOsRansomware.card}-linux`).should('not.exist');
     });
   }
 );
