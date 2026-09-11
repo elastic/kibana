@@ -75,14 +75,14 @@ describe('InMemoryExecutionPersistence', () => {
     expect(fresh!.scopeStack).toHaveLength(1);
   });
 
-  it('throws a descriptive error when workflow execution state contains a non-cloneable value', async () => {
-    const persistence = new InMemoryExecutionPersistence({
-      ...execution,
-      context: { fn: () => {} } as any,
-    });
-    await expect(
-      persistence.getWorkflowExecutionById(execution.id, execution.spaceId)
-    ).rejects.toThrow(/Failed to clone workflow execution execution-1.*non-serializable/);
+  it('throws a descriptive error when workflow execution state contains a non-cloneable value', () => {
+    expect(
+      () =>
+        new InMemoryExecutionPersistence({
+          ...execution,
+          context: { fn: () => {} } as any,
+        })
+    ).toThrow(/Failed to initialise workflow execution persistence.*non-serializable/);
   });
 
   it('does not overwrite identity fields via updateWorkflowExecution', async () => {

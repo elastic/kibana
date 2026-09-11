@@ -39,7 +39,19 @@ export class InMemoryExecutionPersistence
 {
   private readonly stepExecutions = new Map<string, Partial<EsWorkflowStepExecution>>();
 
-  constructor(private execution: EsWorkflowExecution) {}
+  private execution: EsWorkflowExecution;
+
+  constructor(execution: EsWorkflowExecution) {
+    try {
+      this.execution = structuredClone(execution);
+    } catch (err) {
+      throw new Error(
+        `Failed to initialise workflow execution persistence: execution state contains a non-serializable value. Root cause: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
 
   public async getWorkflowExecutionById(
     workflowExecutionId: string,
@@ -65,7 +77,15 @@ export class InMemoryExecutionPersistence
   ): Promise<void> {
     // Strip identity fields — they locate the document and must not be mutated.
     const { id: _id, spaceId: _spaceId, ...update } = workflowExecution;
-    this.execution = { ...this.execution, ...update };
+    try {
+      this.execution = { ...this.execution, ...structuredClone(update) };
+    } catch (err) {
+      throw new Error(
+        `Failed to update workflow execution: update contains a non-serializable value. Root cause: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
   public async getStepExecutionsByIds(
     ids: string[],
