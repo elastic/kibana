@@ -17,6 +17,7 @@ import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '.
 import type {
   FindInvestigationsQuery,
   FindInvestigationsResult,
+  InvestigationDateFilters,
   InvestigationAttributes,
   InvestigationPatch,
   InvestigationRecord,
@@ -24,6 +25,7 @@ import type {
   SeverityCounts,
   SeverityCountsQuery,
 } from './types';
+import type { ImpactEntity } from '../../common';
 
 const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
   id,
@@ -184,5 +186,27 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       '40-medium': buckets.get('40-medium') ?? 0,
       '20-low': buckets.get('20-low') ?? 0,
     };
+  }
+
+  async findImpactEntities(query: InvestigationDateFilters): Promise<ImpactEntity[]> {
+    const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, 'impact'>>({
+      type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+      filter: buildBaseInvestigationFilter(query),
+      perPage: 1000,
+      fields: ['impact'],
+    });
+    const entities = new Map<string, ImpactEntity>();
+
+    for (const { attributes } of result.saved_objects) {
+      for (const { name, type } of attributes.impact?.entities ?? []) {
+        entities.set(JSON.stringify([name, type]), type === undefined ? { name } : { name, type });
+      }
+    }
+
+    return [...entities.values()].sort(
+      (a, b) =>
+        a.name.localeCompare(b.name) ||
+        (a.type === undefined ? -1 : b.type === undefined ? 1 : a.type.localeCompare(b.type))
+    );
   }
 }

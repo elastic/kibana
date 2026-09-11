@@ -11,6 +11,7 @@ import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
 import { listInvestigationsRoute } from './list_investigations';
 import { getSeverityCountsRoute } from './get_severity_counts';
+import { getImpactEntitiesRoute } from './get_impact_entities';
 import { updateInvestigationRoute } from './update_investigation';
 import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
@@ -22,6 +23,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...ensureInvestigationRoute,
   ...listInvestigationsRoute,
   ...getSeverityCountsRoute,
+  ...getImpactEntitiesRoute,
   ...updateInvestigationRoute,
   ...followInvestigationRoute,
   ...getInvestigationAvailabilityRoute,

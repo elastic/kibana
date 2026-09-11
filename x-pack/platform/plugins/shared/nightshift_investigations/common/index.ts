@@ -9,6 +9,7 @@ import type {
   InvestigationBlindSpot,
   InvestigationHypothesis,
   InvestigationImpact,
+  InvestigationImpactEntity,
   InvestigationRecommendation,
   Severity,
   TriggerFeedback,
@@ -145,7 +146,16 @@ export interface InvestigationStatusEvent {
   status: InvestigationStatus;
 }
 
-export interface ListInvestigationsRequest {
+export interface InvestigationDateFilterRequest {
+  created_after?: string;
+  created_before?: string;
+  started_after?: string;
+  started_before?: string;
+  completed_after?: string;
+  completed_before?: string;
+}
+
+export interface ListInvestigationsRequest extends InvestigationDateFilterRequest {
   statuses?: InvestigationStatus[];
   severities?: Severity[];
   subject_types?: InvestigationSubjectType[];
@@ -154,12 +164,6 @@ export interface ListInvestigationsRequest {
    */
   query?: string;
   concurrency_key?: string;
-  created_after?: string;
-  created_before?: string;
-  started_after?: string;
-  started_before?: string;
-  completed_after?: string;
-  completed_before?: string;
   sort_field?: 'created_at' | 'completed_at' | 'severity';
   sort_order?: 'asc' | 'desc';
   page?: number;
@@ -205,6 +209,14 @@ export type SeverityCounts = Record<Severity, number>;
 
 export interface SeverityCountsResponse {
   severity_counts: SeverityCounts;
+}
+
+export type ImpactEntity = Pick<InvestigationImpactEntity, 'name' | 'type'>;
+
+export type ImpactEntitiesRequest = InvestigationDateFilterRequest;
+
+export interface ImpactEntitiesResponse {
+  impact_entities: ImpactEntity[];
 }
 
 export {

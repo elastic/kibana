@@ -119,6 +119,7 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
   countBySeverity: jest
     .fn()
     .mockResolvedValue({ '80-critical': 0, '60-high': 0, '40-medium': 0, '20-low': 0 }),
+  findImpactEntities: jest.fn().mockResolvedValue([]),
 });
 
 beforeEach(() => {
@@ -365,6 +366,50 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
     const result = await makeClient().list({});
     expect(result.results[0].severity).toBe('80-critical');
+  });
+});
+
+describe('NightshiftInvestigationsClient.getImpactEntities()', () => {
+  it('maps date bounds and returns the entity pairs', async () => {
+    repository.findImpactEntities.mockResolvedValue([
+      { name: 'checkout', type: 'service' },
+      { name: 'host-1' },
+    ]);
+
+    await expect(
+      makeClient().getImpactEntities({
+        created_after: '2024-01-01T00:00:00Z',
+        created_before: '2024-01-31T00:00:00Z',
+        started_after: '2024-01-02T00:00:00Z',
+        started_before: '2024-01-30T00:00:00Z',
+        completed_after: '2024-01-03T00:00:00Z',
+        completed_before: '2024-01-29T00:00:00Z',
+      })
+    ).resolves.toEqual({
+      impact_entities: [{ name: 'checkout', type: 'service' }, { name: 'host-1' }],
+    });
+
+    expect(repository.findImpactEntities).toHaveBeenCalledWith({
+      createdAfter: '2024-01-01T00:00:00Z',
+      createdBefore: '2024-01-31T00:00:00Z',
+      startedAfter: '2024-01-02T00:00:00Z',
+      startedBefore: '2024-01-30T00:00:00Z',
+      completedAfter: '2024-01-03T00:00:00Z',
+      completedBefore: '2024-01-29T00:00:00Z',
+    });
+  });
+
+  it('queries without date bounds when none are provided', async () => {
+    await makeClient().getImpactEntities();
+
+    expect(repository.findImpactEntities).toHaveBeenCalledWith({
+      createdAfter: undefined,
+      createdBefore: undefined,
+      startedAfter: undefined,
+      startedBefore: undefined,
+      completedAfter: undefined,
+      completedBefore: undefined,
+    });
   });
 });
 

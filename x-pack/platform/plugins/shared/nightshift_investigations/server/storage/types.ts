@@ -6,6 +6,7 @@
  */
 
 import type {
+  ImpactEntity,
   InvestigationStatus,
   InvestigationStructuredOutput,
   InvestigationSubjectType,
@@ -58,7 +59,16 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
  * Excludes `severities`, pagination and sort: none of them apply to a facet count.
  * `FindInvestigationsQuery` extends this with the parts that are list-only.
  */
-export interface SeverityCountsQuery {
+export interface InvestigationDateFilters {
+  createdAfter?: string;
+  createdBefore?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  completedAfter?: string;
+  completedBefore?: string;
+}
+
+export interface SeverityCountsQuery extends InvestigationDateFilters {
   statuses?: InvestigationStatus[];
   subjectTypes?: InvestigationSubjectType[];
   /**
@@ -67,12 +77,6 @@ export interface SeverityCountsQuery {
    */
   query?: string;
   concurrencyKey?: string;
-  createdAfter?: string;
-  createdBefore?: string;
-  startedAfter?: string;
-  startedBefore?: string;
-  completedAfter?: string;
-  completedBefore?: string;
 }
 
 export interface FindInvestigationsQuery<
@@ -101,6 +105,7 @@ export interface InvestigationRepository {
     query: FindInvestigationsQuery<Fields>
   ): Promise<FindInvestigationsResult<Fields>>;
   countBySeverity(query: SeverityCountsQuery): Promise<SeverityCounts>;
+  findImpactEntities(query: InvestigationDateFilters): Promise<ImpactEntity[]>;
 }
 
 export type FindInvestigationsAcrossSpacesResult<

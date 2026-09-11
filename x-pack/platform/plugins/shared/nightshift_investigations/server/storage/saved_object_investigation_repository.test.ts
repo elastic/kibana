@@ -392,4 +392,93 @@ describe('SavedObjectInvestigationRepository', () => {
       );
     });
   });
+
+  describe('findImpactEntities()', () => {
+    it('loads the first 1,000 matching investigations and returns distinct entity pairs', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...savedObject,
+            id: 'inv-1',
+            attributes: {
+              impact: {
+                entities: [
+                  { name: 'zebra', type: 'host' },
+                  { name: 'api', type: 'database' },
+                  { name: 'api', type: 'database' },
+                  { name: 'api' },
+                ],
+              },
+            },
+          },
+          {
+            ...savedObject,
+            id: 'inv-2',
+            attributes: {
+              impact: {
+                entities: [
+                  { name: 'api', type: 'service' },
+                  { name: 'api' },
+                  { name: 'database', type: 'database' },
+                ],
+              },
+            },
+          },
+        ],
+        total: 1_001,
+        page: 1,
+        per_page: 1_000,
+      });
+
+      await expect(
+        repository.findImpactEntities({
+          createdAfter: '2024-01-01T00:00:00Z',
+          createdBefore: '2024-01-31T00:00:00Z',
+          startedAfter: '2024-01-02T00:00:00Z',
+          startedBefore: '2024-01-30T00:00:00Z',
+          completedAfter: '2024-01-03T00:00:00Z',
+          completedBefore: '2024-01-29T00:00:00Z',
+        })
+      ).resolves.toEqual([
+        { name: 'api' },
+        { name: 'api', type: 'database' },
+        { name: 'api', type: 'service' },
+        { name: 'database', type: 'database' },
+        { name: 'zebra', type: 'host' },
+      ]);
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: TYPE,
+        filter:
+          `${TYPE}.attributes.created_at >= "2024-01-01T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.created_at <= "2024-01-31T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.started_at >= "2024-01-02T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.started_at <= "2024-01-30T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.completed_at >= "2024-01-03T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.completed_at <= "2024-01-29T00:00:00Z"`,
+        perPage: 1_000,
+        fields: ['impact'],
+      });
+    });
+
+    it('omits the filter when no date bounds are given', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1_000,
+      });
+
+      await repository.findImpactEntities({});
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: TYPE,
+        filter: undefined,
+        perPage: 1_000,
+        fields: ['impact'],
+      });
+    });
+  });
 });
