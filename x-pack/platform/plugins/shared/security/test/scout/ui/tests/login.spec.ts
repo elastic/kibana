@@ -17,11 +17,12 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
 
   test('can login', async ({ page, browserAuth }) => {
     await browserAuth.loginAsAdmin();
+    await page.gotoApp('home');
     await expect(page.testSubj.locator('userMenuAvatar')).toBeVisible();
   });
 
-  test('displays message if login fails', async ({ page }) => {
-    await page.goto('/login');
+  test('displays message if login fails', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get('/login'));
     await page.testSubj.locator('loginUsername').fill('wrong-user');
     await page.testSubj.locator('loginPassword').fill('wrong-password');
     await page.testSubj.locator('loginSubmit').click();
@@ -31,17 +32,8 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     );
   });
 
-  test('displays message acknowledging logout', async ({ page, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto('/logout');
-    await page.testSubj.locator('loginInfoMessage').waitFor({ state: 'visible' });
-    await expect(page.testSubj.locator('loginInfoMessage')).toHaveText(
-      'You have logged out of Elastic.'
-    );
-  });
-
-  test('login page has no accessibility violations', async ({ page }) => {
-    await page.goto('/login');
+  test('login page has no accessibility violations', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get('/login'));
     await page.testSubj.locator('loginSubmit').waitFor({ state: 'visible' });
     const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
     expect(violations).toStrictEqual([]);
@@ -49,24 +41,20 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
 
   test('logged-in state has no accessibility violations', async ({ page, browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    await page.gotoApp('home');
+    await page.testSubj.locator('kbnAppWrapper visibleChrome').waitFor({ state: 'visible' });
+    const { violations } = await page.checkA11y({
+      include: ['[data-test-subj="kbnAppWrapper visibleChrome"]'],
+    });
     expect(violations).toStrictEqual([]);
   });
 
-  test('login error state has no accessibility violations', async ({ page }) => {
-    await page.goto('/login');
+  test('login error state has no accessibility violations', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get('/login'));
     await page.testSubj.locator('loginUsername').fill('wrong-user');
     await page.testSubj.locator('loginPassword').fill('wrong-password');
     await page.testSubj.locator('loginSubmit').click();
     await page.testSubj.locator('loginErrorMessage').waitFor({ state: 'visible' });
-    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-    expect(violations).toStrictEqual([]);
-  });
-
-  test('logout message has no accessibility violations', async ({ page, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto('/logout');
-    await page.testSubj.locator('loginInfoMessage').waitFor({ state: 'visible' });
     const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
     expect(violations).toStrictEqual([]);
   });

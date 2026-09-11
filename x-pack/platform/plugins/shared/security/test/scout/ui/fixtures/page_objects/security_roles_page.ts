@@ -70,6 +70,7 @@ export class SecurityRolesPage {
   }
 
   async clickEditRole(roleName: string) {
+    await this.searchRolesInput.fill(roleName);
     await this.page.getByRole('link', { name: roleName }).click();
     await this.roleFormNameInput.waitFor({ state: 'visible' });
   }
