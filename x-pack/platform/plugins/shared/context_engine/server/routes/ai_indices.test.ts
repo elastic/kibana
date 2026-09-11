@@ -10,7 +10,9 @@ import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
@@ -795,6 +797,25 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
       });
+    });
+  });
+
+  describe('space scoping', () => {
+    it('resolves the space id from the spaces plugin and threads it through to the service', async () => {
+      const spaces = spacesMock.createStart();
+      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+      getSpaces.mockResolvedValue(spaces);
+      aiIndexService.list.mockResolvedValue([]);
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('GET', aiIndexPath, {});
+      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+
+      expect(aiIndexService.list).toHaveBeenCalledWith('marketing');
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'marketing');
+      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', 'marketing');
     });
   });
 

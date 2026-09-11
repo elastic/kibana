@@ -958,6 +958,49 @@ describe('AiIndexService', () => {
       expect(ensure).toHaveBeenCalledWith('elastic', DEFAULT_SPACE);
       expect(storageClient.search).toHaveBeenCalledTimes(2);
     });
+
+    it('logs and continues when one managed AI index fails to bootstrap, returning the rest', async () => {
+      const okDocument: AiIndexDocument = { ...aiIndexDocument, id: 'ok', managed: true };
+      const emptySearch = {
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+      } as unknown as Awaited<ReturnType<AiIndexStorageClient['search']>>;
+      const filledSearch = {
+        ...emptySearch,
+        hits: {
+          hits: [
+            {
+              _id: docId('ok'),
+              _index: '.contextengine-ai-indices',
+              _source: okDocument,
+            },
+          ],
+        },
+      } as unknown as Awaited<ReturnType<AiIndexStorageClient['search']>>;
+      storageClient.search.mockResolvedValueOnce(emptySearch).mockResolvedValueOnce(filledSearch);
+      const logger = loggingSystemMock.createLogger();
+      const ensure = jest.fn().mockImplementation(async (id: string) => {
+        if (id === 'broken') {
+          throw new InvalidAiIndexDestError('dest is invalid');
+        }
+      });
+      service = new AiIndexService({
+        esClient,
+        logger,
+        managedBootstrap: {
+          isManaged: (id) => id === 'ok' || id === 'broken',
+          getManagedIds: () => ['ok', 'broken'],
+          ensure,
+        },
+      });
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(okDocument)]);
+      expect(ensure).toHaveBeenCalledWith('ok', DEFAULT_SPACE);
+      expect(ensure).toHaveBeenCalledWith('broken', DEFAULT_SPACE);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('broken'));
+    });
   });
 
   describe('delete', () => {

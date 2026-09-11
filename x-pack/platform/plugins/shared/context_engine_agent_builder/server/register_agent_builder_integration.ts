@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
+import { resolveSpaceId } from '@kbn/context-engine-plugin/server/utils/resolve_space_id';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
@@ -47,7 +48,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
       return [];
     }
 
-    const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+    const spaceId = resolveSpaceId(spaces, request);
     const aiIndexService = contextEngine.getAiIndexService();
     const requestedIds = new Set(ids);
     const aiIndices = await aiIndexService.list(spaceId);

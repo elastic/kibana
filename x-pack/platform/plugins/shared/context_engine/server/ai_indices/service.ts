@@ -89,6 +89,7 @@ export class AiIndexService {
   private readonly esClient: ElasticsearchClient;
   private readonly storageClient: AiIndexStorageClient;
   private readonly managedBootstrap?: AiIndexManagedBootstrap;
+  private readonly logger: Logger;
 
   constructor({
     esClient,
@@ -102,6 +103,7 @@ export class AiIndexService {
     this.esClient = esClient;
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
     this.managedBootstrap = managedBootstrap;
+    this.logger = logger;
   }
 
   /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
@@ -274,11 +276,11 @@ export class AiIndexService {
       throw new AiIndexNotFoundError(aiIndexId);
     }
     await this.managedBootstrap.ensure(aiIndexId, spaceId);
-    const newManagedAIIndex = await this.findDocument(aiIndexId, spaceId);
-    if (!newManagedAIIndex) {
+    const newManagedAiIndex = await this.findDocument(aiIndexId, spaceId);
+    if (!newManagedAiIndex) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return toAiIndexItem(newManagedAIIndex.document);
+    return toAiIndexItem(newManagedAiIndex.document);
   }
 
   /**
@@ -354,7 +356,21 @@ export class AiIndexService {
       return items;
     }
 
-    await Promise.all(missingManagedIds.map((id) => this.managedBootstrap?.ensure(id, spaceId)));
+    // Bootstrap failures (e.g. an invalid managed dest) are isolated per id so
+    // that one broken managed entry doesn't hide the rest of the space's list.
+    await Promise.all(
+      missingManagedIds.map(async (id) => {
+        try {
+          await this.managedBootstrap?.ensure(id, spaceId);
+        } catch (error) {
+          this.logger.warn(
+            `Failed to bootstrap managed AI index '${id}' in space '${spaceId}': ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      })
+    );
     return this.searchSpace(spaceId);
   }
 
