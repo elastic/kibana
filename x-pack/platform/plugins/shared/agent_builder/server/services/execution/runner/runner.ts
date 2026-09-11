@@ -48,7 +48,6 @@ import {
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { DeductiveRuntimeConfig } from '@kbn/agent-builder-server/agents';
 import type {
   ConversationStateManager,
@@ -93,7 +92,6 @@ export interface CreateScopedRunnerDeps {
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
-  featureFlags: FeatureFlagsStart;
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
@@ -345,7 +343,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
             request,
             uiSettings: runnerDeps.uiSettings,
             savedObjects: runnerDeps.savedObjects,
-            featureFlags: runnerDeps.featureFlags,
           })
         : undefined;
 

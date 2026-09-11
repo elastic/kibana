@@ -17,17 +17,21 @@ import {
 } from '@kbn/management-settings-ids';
 import type { AgentsServiceSetup } from '../../../agents';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../../../types';
-import { DEDUCTIVE_AGENT_ID, DEDUCTIVE_AVATAR_ICON, DEDUCTIVE_ENABLED_FLAG } from './config';
+import { DEDUCTIVE_AGENT_ID, DEDUCTIVE_AVATAR_ICON } from './config';
 
 /**
- * Shared definition (registered in both per-user and global scope so a single
- * Global Advanced Settings entry applies to every user of the deployment).
+ * Global-scope Advanced Settings for the Deductive AI integration. Registered only when
+ * the deployment opts in via `xpack.agentBuilder.deductive.register`, so customer
+ * deployments never see or expose them.
+ *
+ * `deductiveEnabled` is the runtime kill switch; `deductiveEndpoint` / `deductiveApiKey`
+ * are per-deployment configuration.
  */
 const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
   [AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID]: {
     description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEnabled.description', {
       defaultMessage:
-        'Enables routing the Deductive AI agent to the external Deductive backend (per-deployment feature flag must also be on).',
+        'Enables routing the Deductive AI agent to the external Deductive backend for this deployment.',
     }),
     name: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEnabled.name', {
       defaultMessage: 'Elastic Agent Builder: Deductive AI Agent',
@@ -36,8 +40,6 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     value: false,
     experimental: true,
     requiresPageReload: false,
-    readonly: true,
-    readonlyMode: 'ui',
   },
   [AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID]: {
     description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEndpoint.description', {
@@ -51,8 +53,6 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     value: 'https://turing.deductive.ai',
     experimental: true,
     requiresPageReload: false,
-    readonly: true,
-    readonlyMode: 'ui',
   },
   [AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID]: {
     description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveApiKey.description', {
@@ -67,33 +67,34 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     sensitive: true,
     experimental: true,
     requiresPageReload: false,
-    readonly: true,
-    readonlyMode: 'ui',
   },
 };
 
 /**
  * Registers the external Deductive execution path with the plugin: the built-in
- * `deductive.ai` agent plus its Advanced Settings. Kept in the Deductive module so the
- * entire temporary integration can be removed by deleting this folder and its wiring.
+ * `deductive.ai` agent plus its Global Advanced Settings. Kept in the Deductive module so
+ * the entire temporary integration can be removed by deleting this folder and its wiring.
  *
- * The agent is registered for every user, but its availability is gated on the
- * `agentBuilder:deductiveEnabled` Advanced Setting (which admins turn on together with
- * the per-deployment feature flag). When disabled, the agent disappears from the agents
- * list for everyone.
+ * Registration is gated on the static `xpack.agentBuilder.deductive.register` config so
+ * it only happens on deployments that explicitly opt in. The agent's availability and the
+ * execution path are then gated on the `agentBuilder:deductiveEnabled` Global Advanced
+ * Setting, which acts as the runtime kill switch.
  */
 export const registerDeductiveAgent = ({
   coreSetup,
   uiSettings,
   agents,
+  register,
 }: {
   coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
   uiSettings: UiSettingsServiceSetup;
   agents: AgentsServiceSetup;
+  register: boolean;
 }) => {
-  // Advanced Settings are registered in BOTH scopes so they can be configured once in
-  // Global Advanced Settings and apply to every user of the deployment.
-  uiSettings.register(DEDUCTIVE_UI_SETTINGS);
+  if (!register) {
+    return;
+  }
+
   uiSettings.registerGlobal(DEDUCTIVE_UI_SETTINGS);
 
   agents.register({
@@ -107,30 +108,18 @@ export const registerDeductiveAgent = ({
     avatar_icon: DEDUCTIVE_AVATAR_ICON,
     availability: {
       cacheMode: 'none',
-      handler: async ({ request, uiSettings: scopedUiSettings }) => {
-        // Availability must honor the GLOBAL (deployment-wide) setting too, so an admin
-        // configures `agentBuilder:deductiveEnabled` once and every user sees the agent —
-        // and the per-deployment feature flag, so flipping it off removes the agent
-        // entirely (settings stop having any effect).
+      handler: async ({ request }) => {
+        // Availability follows the GLOBAL (deployment-wide) `agentBuilder:deductiveEnabled`
+        // setting, so the kill switch hides the agent from every user immediately.
         const [coreStart] = await coreSetup.getStartServices().catch(() => [undefined]);
-        const flagEnabled = await coreStart?.featureFlags
-          ?.getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
-          .catch(() => false);
-        if (!flagEnabled) {
-          return {
-            status: 'unavailable',
-            reason: 'Deductive AI is not enabled for this deployment',
-          };
-        }
         const globalClient = coreStart?.uiSettings?.globalAsScopedToClient(
           coreStart.savedObjects.getScopedClient(request)
         );
-        const read = async (client: typeof scopedUiSettings | undefined) =>
-          client?.get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID).catch(() => false) ??
-          false;
-        const userEnabled = await read(scopedUiSettings);
-        const globalEnabled = globalClient ? await read(globalClient) : false;
-        const enabled = userEnabled || globalEnabled;
+        const enabled = globalClient
+          ? await globalClient
+              .get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID)
+              .catch(() => false)
+          : false;
         return enabled
           ? { status: 'available' }
           : { status: 'unavailable', reason: 'Deductive AI agent is disabled' };

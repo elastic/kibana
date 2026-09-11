@@ -16,7 +16,6 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -455,7 +454,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
@@ -507,7 +505,6 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),

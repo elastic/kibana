@@ -195,8 +195,8 @@ describe('runDeductiveAgent', () => {
   });
 
   it.each([
-    ['feature flag off', { enabled: false, endpoint: 'https://app.deductive.ai', apiKey: 'k' }],
-    ['advanced setting off (no context)', undefined],
+    ['runtime setting off', { enabled: false, endpoint: 'https://app.deductive.ai', apiKey: 'k' }],
+    ['no resolved config (unregistered / setting off)', undefined],
   ])('kill-switch %s: rejects before any Deductive call', async (_name, dedCtx) => {
     const ctx = context();
     // an available cache (or stale context) must not permit a run when the gate is off

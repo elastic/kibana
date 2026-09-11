@@ -173,6 +173,7 @@ export class AgentBuilderPlugin
       coreSetup,
       uiSettings: coreSetup.uiSettings,
       agents: serviceSetups.agents,
+      register: this.config.deductive?.register ?? false,
     });
 
     this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {

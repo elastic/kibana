@@ -8,7 +8,6 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { DeductiveRuntimeConfig } from '@kbn/agent-builder-server/agents';
 import {
   AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID,
@@ -23,13 +22,6 @@ import {
  * Stack Connector's secrets). All values are read lazily at call time so tests
  * and deployments can vary them per-process without restart plumbing.
  */
-
-/**
- * LaunchDarkly feature flag that per-deployment enables the external Deductive
- * execution path (self-managed / LD-unreachable deployments stay off).
- * Registered in elastic/kibana-feature-flags for the controlled rollout.
- */
-export const DEDUCTIVE_ENABLED_FLAG = 'agentBuilder.deductiveEnabled';
 
 export const DEFAULT_DEDUCTIVE_ENDPOINT = 'https://turing.deductive.ai';
 export const DEDUCTIVE_AGENT_ID = 'deductive.ai';
@@ -133,36 +125,33 @@ export const shouldUseDeductive = (agentId: string | undefined): boolean => {
 
 /**
  * Resolves the runtime Deductive configuration from the GLOBAL (deployment-wide) Advanced
- * Settings. Config is global-scope only (readonly for users) so endpoint+key always come
- * from the same deployment-wide source — a user cannot point the endpoint at a host of
- * their choosing to leak the shared key (SSRF/credential-exfiltration mitigation).
+ * Settings. Config is global-scope only so endpoint+key always come from the same
+ * deployment-wide source — a user cannot point the endpoint at a host of their choosing to
+ * leak the shared key (SSRF/credential-exfiltration mitigation).
  *
- * `enabled` = per-deployment feature flag AND the `agentBuilder:deductiveEnabled` Advanced
- * Setting, matching the agent availability gate so visibility and execution share one
- * kill-switch. The runner only calls this for the `deductive.ai` agent, so ordinary agents
- * never read the flag/credentials.
+ * `enabled` reflects the `agentBuilder:deductiveEnabled` Advanced Setting. The settings are
+ * only registered when the deployment opts in via `xpack.agentBuilder.deductive.register`,
+ * so on customer deployments the read fails and the path stays disabled. The runner only
+ * calls this for the `deductive.ai` agent, so ordinary agents never read the credentials.
  */
 export const getDeductiveConfig = async ({
   request,
   uiSettings,
   savedObjects,
-  featureFlags,
 }: {
   request: KibanaRequest;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
-  featureFlags: FeatureFlagsStart;
 }): Promise<DeductiveRuntimeConfig> => {
   const global = uiSettings.globalAsScopedToClient(savedObjects.getScopedClient(request));
   const readGlobal = async (key: string) => global.get<string>(key).catch(() => undefined);
-  const [flagEnabled, globalEndpoint, globalKey, globalEnabled] = await Promise.all([
-    featureFlags.getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false).catch(() => false),
+  const [globalEndpoint, globalKey, globalEnabled] = await Promise.all([
     readGlobal(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID),
     readGlobal(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID),
     global.get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID).catch(() => undefined),
   ]);
   return {
-    enabled: flagEnabled && globalEnabled === true,
+    enabled: globalEnabled === true,
     endpoint: globalEndpoint?.trim().replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
     apiKey: globalKey,
   };
