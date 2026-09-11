@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import type { PackSavedObject, SavedQuerySavedObject } from '../../../common/types';
+import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
 import { templatePacks, templateSavedQueries } from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { TELEMETRY_EBT_PACK_EVENT, TELEMETRY_EBT_SAVED_QUERY_EVENT } from './constants';
