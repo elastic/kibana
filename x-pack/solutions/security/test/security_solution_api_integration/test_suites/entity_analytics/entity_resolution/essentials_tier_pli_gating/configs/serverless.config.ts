@@ -18,6 +18,8 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'essentials' },
     ])}`,
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

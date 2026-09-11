@@ -19,6 +19,10 @@ import { useEditFailedLifecycleFlyout } from './use_edit_failed_lifecycle_flyout
 let mockInheritedValue: unknown = null;
 let mockInheritedLoading = false;
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 jest.mock('../../../../../../hooks/use_streams_app_fetch', () => ({
   useStreamsAppFetch: () => ({
     value: mockInheritedValue,

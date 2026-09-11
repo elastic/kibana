@@ -12,7 +12,15 @@ const criteria: EvaluationCriterion[] = [{ id: 'c1', text: 'Should do the thing'
 
 const createJudge = () => {
   const evaluate = jest.fn(async () => ({ score: 0.5, explanation: 'judged' }));
-  const criteriaFn = jest.fn(() => ({ name: 'criteria', kind: 'LLM', evaluate } as Evaluator));
+  const criteriaFn = jest.fn(
+    () =>
+      ({
+        name: 'criteria',
+        kind: 'LLM',
+        direction: 'maximize',
+        evaluate,
+      } as Evaluator)
+  );
   return { criteriaFn, evaluate };
 };
 

@@ -22,7 +22,10 @@ describe('TitleArea', () => {
 
   it('keeps the back button next to the placeholder', () => {
     render(
-      <TitleArea back="/app/my-app" placeholder={<div data-test-subj="title-placeholder" />} />
+      <TitleArea
+        back={{ href: '/app/my-app', label: 'My app' }}
+        placeholder={<div data-test-subj="title-placeholder" />}
+      />
     );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(

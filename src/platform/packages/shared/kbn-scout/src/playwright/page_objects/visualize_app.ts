@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
@@ -27,7 +28,9 @@ export class VisualizeApp {
 
   constructor(private readonly page: ScoutPage) {
     this.landingPage = this.page.testSubj.locator('visualizationLandingPage');
-    this.newItemButton = this.page.testSubj.locator('newItemButton');
+    this.newItemButton = this.page.locator(
+      `[data-test-subj="${APP_HEADER_TEST_SUBJECTS.root}"] [data-test-subj="newItemButton"]`
+    );
     this.visNewDialogGroups = this.page.testSubj.locator('visNewDialogGroups');
     this.visNewDialogTypes = this.page.testSubj.locator('visNewDialogTypes');
     this.legacyTab = this.page.testSubj.locator('groupModalLegacyTab');
@@ -44,7 +47,41 @@ export class VisualizeApp {
     await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
   }
 
+  private async revealAppMenuItem(item: typeof this.visualizeSaveButton) {
+    if (await item.isVisible()) {
+      return;
+    }
+
+    const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
+    const popover = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.popover);
+
+    // Poll separately: `.or().waitFor()` throws in strict mode when both
+    // locators are visible, and `.first()` is banned.
+    await expect
+      .poll(async () => (await item.isVisible()) || (await overflowButton.isVisible()))
+      .toBeTruthy();
+    if (await item.isVisible()) {
+      return;
+    }
+
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await overflowButton.click();
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+    await item.waitFor({ state: 'visible' });
+  }
+
   async openNewVisualizationWizard() {
+    await this.revealAppMenuItem(this.newItemButton);
     await this.newItemButton.click();
     await expect(this.visNewDialogGroups).toBeVisible();
   }
@@ -89,6 +126,7 @@ export class VisualizeApp {
   }
 
   async openSaveModal() {
+    await this.revealAppMenuItem(this.visualizeSaveButton);
     await this.visualizeSaveButton.click();
     await expect(this.saveModal.modal).toBeVisible();
   }
@@ -137,7 +175,13 @@ export class VisualizeApp {
   }
 
   async clickEditInLensButton() {
+    await this.revealAppMenuItem(this.editInLensButton);
     await this.editInLensButton.click();
+  }
+
+  async expectEditInLensButtonVisible() {
+    await this.revealAppMenuItem(this.editInLensButton);
+    await expect(this.editInLensButton).toBeVisible();
   }
 
   getEditInLensButton() {

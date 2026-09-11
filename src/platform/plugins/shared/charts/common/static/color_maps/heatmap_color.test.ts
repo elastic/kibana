@@ -16,45 +16,45 @@ describe('Vislib Heatmap Color Module Test Suite', () => {
   it('should throw an error if schema is invalid', () => {
     expect(() => {
       getHeatmapColors(4, 'invalid schema');
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('should throw an error if input is not a number', () => {
     expect(() => {
       getHeatmapColors([200], 'Greens');
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       getHeatmapColors('help', 'Greens');
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       getHeatmapColors(true, 'Greens');
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       getHeatmapColors(undefined, 'Greens');
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       getHeatmapColors(nullValue, 'Greens');
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       getHeatmapColors(emptyObject, 'Greens');
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('should throw an error if input is less than 0', () => {
     expect(() => {
       getHeatmapColors(-2, 'Greens');
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('should throw an error if input is greater than 1', () => {
     expect(() => {
       getHeatmapColors(2, 'Greens');
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('should be a function', () => {

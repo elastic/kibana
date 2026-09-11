@@ -60,7 +60,8 @@
       "kibanaReact",
       "unifiedSearch",
       "presentationUtil",
-      "esql"
+      "esql",
+      "share"
     ],
     "extraPublicDirs": [
       "common"

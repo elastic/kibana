@@ -1,8 +1,7 @@
 {
-  "sha1": "a59d25d0a175549454aee50cf1d4afd3f296bc9d",
+  "sha1": "bf9c1637f90800425b07bb0ea069b8d1690f4622",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -27,7 +26,7 @@
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
         "line": 23,
-        "column": 13
+        "column": 51
       }
     },
     {
@@ -40,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 40,
+        "line": 42,
         "column": 23
       }
     },
@@ -54,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 68,
+        "line": 70,
         "column": 14
       }
     },
@@ -68,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
-        "line": 71,
+        "line": 73,
         "column": 26
       }
     },
@@ -82,8 +81,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_saved_search.spec.ts",
-        "line": 27,
-        "column": 35
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -427,13 +426,12 @@
       "title": "index based random sampler controls with small data sets",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_random_sampler.spec.ts",
-        "line": 82,
-        "column": 32
+        "line": 86,
+        "column": 15
       }
     },
     {

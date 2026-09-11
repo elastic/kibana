@@ -33,6 +33,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
 import { spacesManagementApp } from './spaces_management_app';
@@ -57,7 +58,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const spacesManager = spacesManagerMock.create();
   if (spaceId) {
     spacesManager.getSpace.mockResolvedValue({
-      id: spaceId,
+      id: asSpaceId(spaceId),
       name: `space with id ${spaceId}`,
       disabledFeatures: [],
     });

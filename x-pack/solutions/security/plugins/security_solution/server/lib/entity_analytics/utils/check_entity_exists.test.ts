@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { checkEntityExists, EntityStoreAccessError } from './check_entity_exists';
 
 describe('checkEntityExists', () => {
   const listEntities = jest.fn();
-  const crudClient = { listEntities } as unknown as EntityStoreCRUDClient;
+  const latestIndexName = jest.fn();
+  const hasPrivileges = jest.fn();
+  const crudClient = { listEntities, latestIndexName } as unknown as EntityStoreCRUDClient;
+  const esClient = {
+    security: { hasPrivileges },
+  } as unknown as ElasticsearchClient;
 
   beforeEach(() => {
     listEntities.mockReset();
+    latestIndexName.mockReset();
+    hasPrivileges.mockReset();
+    latestIndexName.mockResolvedValue('.entities.v2.latest.default-00001');
+    hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 
   it('returns the entity record when a matching entity is found', async () => {
@@ -22,6 +32,7 @@ describe('checkEntityExists', () => {
 
     const result = await checkEntityExists({
       crudClient,
+      esClient,
       entityId: 'host:abc123',
       entityType: 'host',
     });
@@ -34,6 +45,7 @@ describe('checkEntityExists', () => {
 
     const result = await checkEntityExists({
       crudClient,
+      esClient,
       entityId: 'host:does-not-exist',
       entityType: 'host',
     });
@@ -44,7 +56,12 @@ describe('checkEntityExists', () => {
   it('filters by both entity.id and entity.EngineMetadata.Type', async () => {
     listEntities.mockResolvedValue({ entities: [] });
 
-    await checkEntityExists({ crudClient, entityId: 'user:jane@okta', entityType: 'user' });
+    await checkEntityExists({
+      crudClient,
+      esClient,
+      entityId: 'user:jane@okta',
+      entityType: 'user',
+    });
 
     expect(listEntities).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -56,13 +73,38 @@ describe('checkEntityExists', () => {
     );
   });
 
-  it('throws EntityStoreAccessError when Elasticsearch denies the lookup', async () => {
+  it('throws EntityStoreAccessError when user lacks read privilege on the index', async () => {
+    hasPrivileges.mockResolvedValue({ has_all_requested: false });
+
+    await expect(
+      checkEntityExists({ crudClient, esClient, entityId: 'host:abc123', entityType: 'host' })
+    ).rejects.toThrow(EntityStoreAccessError);
+
+    expect(listEntities).not.toHaveBeenCalled();
+  });
+
+  it('checks privileges against the resolved latest index name', async () => {
+    listEntities.mockResolvedValue({ entities: [] });
+
+    await checkEntityExists({
+      crudClient,
+      esClient,
+      entityId: 'host:abc123',
+      entityType: 'host',
+    });
+
+    expect(hasPrivileges).toHaveBeenCalledWith({
+      index: [{ names: ['.entities.v2.latest.default-00001'], privileges: ['read'] }],
+    });
+  });
+
+  it('throws EntityStoreAccessError when Elasticsearch denies the lookup with 403', async () => {
     listEntities.mockRejectedValue(
       Object.assign(new Error('security_exception: unauthorized'), { statusCode: 403 })
     );
 
     await expect(
-      checkEntityExists({ crudClient, entityId: 'host:abc123', entityType: 'host' })
+      checkEntityExists({ crudClient, esClient, entityId: 'host:abc123', entityType: 'host' })
     ).rejects.toThrow(EntityStoreAccessError);
   });
 
@@ -71,7 +113,7 @@ describe('checkEntityExists', () => {
     listEntities.mockRejectedValue(error);
 
     await expect(
-      checkEntityExists({ crudClient, entityId: 'host:abc123', entityType: 'host' })
+      checkEntityExists({ crudClient, esClient, entityId: 'host:abc123', entityType: 'host' })
     ).rejects.toThrow(error);
   });
 });

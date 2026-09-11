@@ -186,7 +186,7 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --entityId 123wer');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --entityId, --pid'
+      'This command requires (only) one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -195,7 +195,7 @@ describe('When using the kill-process action from response actions console', () 
     await enterConsoleCommand(renderResult, user, 'kill-process');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --entityId, --pid'
+      'This command requires (only) one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -510,9 +510,9 @@ describe('When using the kill-process action from response actions console', () 
       });
     });
 
-    it('should error if the Endpoint does not support the `kill_process_descendents` capability', async () => {
+    it('should error if the Endpoint does not support the `kill_process_descendants` capability', async () => {
       setConsoleCommands(
-        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'kill_process_descendents')
+        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'kill_process_descendants')
       );
       await render();
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --kill-descendants');

@@ -38,7 +38,7 @@ describe('VegaEditorFlyout', () => {
       <VegaEditorFlyout
         ariaLabelledBy="vega-flyout-title"
         closeFlyout={closeFlyout}
-        initialSpec="{ mark: point }"
+        initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
         isNewPanel={isNewPanel}
         onPreview={onPreview}
         onRevert={onRevert}
@@ -67,7 +67,7 @@ describe('VegaEditorFlyout', () => {
 
     await user.click(previewButton);
     expect(onPreview).toHaveBeenCalledTimes(1);
-    expect(onPreview).toHaveBeenCalledWith('{ mark: bar }');
+    expect(onPreview).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
     // After previewing, Preview is disabled again until further edits.
     expect(previewButton).toBeDisabled();
   });
@@ -104,7 +104,7 @@ describe('VegaEditorFlyout', () => {
     await user.paste('{ mark: bar }');
 
     await user.click(screen.getByTestId('vegaEditorFlyoutSaveButton'));
-    expect(onSave).toHaveBeenCalledWith('{ mark: bar }');
+    expect(onSave).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
     expect(closeFlyout).toHaveBeenCalledTimes(1);
     // Save persists directly; it does not depend on a prior Preview.
     expect(onPreview).not.toHaveBeenCalled();

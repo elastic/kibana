@@ -72,11 +72,19 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters, EPM_API_ROUTES, CLOUD_CONNECTOR_API_ROUTES } from './constants';
+export {
+  pagePathGetters,
+  EPM_API_ROUTES,
+  CLOUD_CONNECTOR_API_ROUTES,
+  OBLT_DEFAULT_CATEGORIES,
+} from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
+export { AssetTitleMap } from './applications/integrations/sections/epm/constants';
 export { CardIcon, PackageIcon } from './components/package_icon';
+export { DataStreamTypeSelector } from './components/data_stream_type_selector';
+export type { DataStreamTypeSelectorProps } from './components/data_stream_type_selector';
 // Export Package editor components for custom editors
 export { PackagePolicyEditorDatastreamPipelines } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
 export type { PackagePolicyEditorDatastreamPipelinesProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
@@ -124,6 +132,19 @@ export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
+export {
+  sendCreateCloudOnboardingDeployment,
+  sendGetCloudOnboardingDeployment,
+  sendUpdateCloudOnboardingDeployment,
+} from './hooks/use_request/cloud_onboarding_deployment';
+export type {
+  CloudOnboardingDeploymentAuthMethod,
+  DeploymentMethod,
+} from '../common/types/models/cloud_onboarding_deployment';
+export type {
+  CreateCloudOnboardingDeploymentRequest,
+  UpdateCloudOnboardingDeploymentRequest,
+} from '../common/types/rest_spec/cloud_onboarding_deployment';
 export { sendGetPackageInfoByKey } from './hooks/use_request/epm';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';

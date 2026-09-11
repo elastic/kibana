@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
@@ -16,6 +16,7 @@ import { UserCapabilities } from '../../services/user_capabilities';
 import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
 import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
@@ -32,9 +33,11 @@ import {
   StatusFilter,
   TagsFilter,
 } from './rules_list_filters';
+import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
+import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -46,11 +49,24 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
-  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
-    useComposeDiscoverFlyout();
+  const {
+    flyout,
+    confirmationModal,
+    openCreateFlyout,
+    openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
+
+  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const { rulesLocators } = useAlertingLocators();
+  const navigateToSequenceBuilder = useCallback(() => {
+    rulesLocators.navigateSync({ page: 'sequence_create' });
+  }, [rulesLocators]);
   // We always render the "Create with agent" entry points; when the skill is unavailable they
   // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
@@ -153,9 +169,11 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
+          onBuildSequence={navigateToSequenceBuilder}
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
+        <CentralizedActionPoliciesBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
@@ -181,6 +199,7 @@ export const RulesListPage = () => {
         />
       ) : null}
       {flyout}
+      {confirmationModal}
     </div>
   );
 };

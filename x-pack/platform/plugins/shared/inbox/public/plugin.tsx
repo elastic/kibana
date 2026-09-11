@@ -64,7 +64,7 @@ export class InboxPublicPlugin
       title: APP_TITLE,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
-      euiIconType: 'email',
+      euiIconType: 'mail',
       status: AppStatus.accessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 100,

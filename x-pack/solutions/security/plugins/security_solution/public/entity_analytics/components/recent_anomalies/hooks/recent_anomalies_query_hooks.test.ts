@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { getEntitiesAlias } from '@kbn/entity-store/common';
 import { useRecentAnomaliesQuery } from './recent_anomalies_query_hooks';
 import {
   useRecentAnomaliesTopRowsEsqlSource,
@@ -24,7 +24,10 @@ jest.mock('@kbn/esql-utils', () => ({
   prettifyQuery: jest.fn((q) => q),
   getESQLResults: jest.fn(),
 }));
-jest.mock('@kbn/entity-store/common', () => ({ getLatestEntitiesIndexName: jest.fn() }));
+jest.mock('@kbn/entity-store/common', () => ({
+  getEntitiesAlias: jest.fn(),
+  ENTITY_LATEST: 'latest',
+}));
 jest.mock('./recent_anomalies_esql_source_query_hooks', () => ({
   useRecentAnomaliesTopRowsEsqlSource: jest.fn(),
   useRecentAnomaliesDataEsqlSource: jest.fn(),
@@ -41,7 +44,7 @@ jest.mock('../../../../common/hooks/use_error_toast', () => ({ useErrorToast: je
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockGetESQLResults = getESQLResults as jest.Mock;
-const mockGetLatestEntitiesIndexName = getLatestEntitiesIndexName as jest.Mock;
+const mockGetEntitiesAlias = getEntitiesAlias as jest.Mock;
 const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as jest.Mock;
 const mockDataSource = useRecentAnomaliesDataEsqlSource as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
@@ -102,7 +105,7 @@ describe('useRecentAnomaliesQuery', () => {
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
     mockUseSecurityJobIds.mockReturnValue({ jobIds: ['security-job-01'], loading: false });
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: EMPTY_BOOL });
-    mockGetLatestEntitiesIndexName.mockReturnValue('entities-latest-default');
+    mockGetEntitiesAlias.mockReturnValue('entities-latest-default');
     mockTopRowsSource.mockReturnValue(TOP_ROWS_SQL);
     mockDataSource.mockReturnValue(DATA_SQL);
     mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });

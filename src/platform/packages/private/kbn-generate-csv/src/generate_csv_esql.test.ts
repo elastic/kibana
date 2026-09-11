@@ -317,7 +317,7 @@ describe('CsvESQLGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
@@ -396,7 +396,7 @@ describe('CsvESQLGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',

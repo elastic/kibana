@@ -20,7 +20,7 @@ import {
 import { Box } from '@kbn/ui-chrome-layout/src/__stories__/box';
 import { css, Global } from '@emotion/react';
 
-import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
+import { PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
 import { Navigation } from '../components/navigation';
 import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
 import { NAVIGATION_ROOT_SELECTOR, NAVIGATION_SELECTOR_PREFIX } from '../constants';
@@ -65,12 +65,6 @@ export default {
       primaryItems: PRIMARY_MENU_ITEMS,
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
       overflowItems: [],
-    },
-    logo: {
-      id: 'observability',
-      href: LOGO.href,
-      label: LOGO.label,
-      iconType: LOGO.iconType,
     },
     setWidth: () => {},
   },

@@ -14,6 +14,7 @@ import type {
   ServicesStartDeps,
   ServiceSetupDeps,
 } from './types';
+import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
@@ -33,6 +34,7 @@ import {
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
+import { createSpaceSettingsService } from './space_settings';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -121,7 +123,8 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
-  }: ServicesStartDeps): InternalStartServices {
+    conversationEventBus,
+  }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -199,6 +202,7 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
+      eventBus: conversationEventBus,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -276,6 +280,8 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    const spaceSettings = createSpaceSettingsService({ savedObjects });
+
     this.internalStart = {
       tools,
       agents,
@@ -297,6 +303,7 @@ export class ServiceManager {
       consumption,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      spaceSettings,
       conversationTemplates: conversationTemplatesStart,
     };
 

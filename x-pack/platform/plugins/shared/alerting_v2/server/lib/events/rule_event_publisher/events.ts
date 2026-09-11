@@ -14,7 +14,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
  * ({@link RuleResponse}, exactly what the public API returns) plus the
  * envelope fields that are not part of the rule itself (`spaceId`,
  * `correlationId`). Consumers project from this: the workflow subscriber
- * exposes only `{ ruleId, spaceId }`, while the change-history subscriber
+ * exposes `{ ruleId, spaceId, tags }`, while the change-history subscriber
  * uses the full `rule` as its snapshot.
  */
 export interface RuleEventPayload {

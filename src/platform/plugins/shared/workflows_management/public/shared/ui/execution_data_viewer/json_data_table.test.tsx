@@ -357,7 +357,7 @@ describe('JSONDataTable', () => {
       render(<JSONDataTable data={mockData} />);
 
       expect(usePager).toHaveBeenCalledWith({
-        initialPageSize: 20,
+        initialPageSize: 10,
         totalItems: expect.any(Number),
       });
     });

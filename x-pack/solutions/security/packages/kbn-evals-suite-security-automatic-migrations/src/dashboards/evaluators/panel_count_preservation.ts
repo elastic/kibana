@@ -16,6 +16,7 @@ export const createPanelCountPreservationEvaluator = (): Evaluator<
 > => ({
   name: 'Panel Count Preservation',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({
     output,
     expected,

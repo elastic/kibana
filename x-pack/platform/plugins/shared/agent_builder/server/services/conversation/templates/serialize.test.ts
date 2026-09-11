@@ -6,7 +6,13 @@
  */
 
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
-import { serializeMetadataValue, deserializeMetadataValue, deserializeMetadata } from './serialize';
+import {
+  serializeMetadataValue,
+  deserializeMetadataValue,
+  deserializeMetadata,
+  buildMetadataFromTemplate,
+  withDeserializedMetadata,
+} from './serialize';
 
 describe('serializeMetadataValue', () => {
   it('converts boolean true to the string "true"', () => {
@@ -183,5 +189,73 @@ describe('deserializeMetadata', () => {
   it('returns an empty object for empty input', () => {
     const template = makeTemplate({ foo: { input_type: 'TEXT' } });
     expect(deserializeMetadata({}, template)).toEqual({});
+  });
+});
+
+describe('buildMetadataFromTemplate', () => {
+  it('serializes template default values and skips fields without defaults', () => {
+    const template: ConversationTemplate = {
+      id: 'test-template',
+      name: 'Test',
+      version: 1,
+      fields: {
+        is_urgent: { input_type: 'TOGGLE', default_value: true },
+        priority: { input_type: 'NUMBER', default_value: 3 },
+        tags: { input_type: 'TEXT_ARRAY', default_value: ['alpha', 'beta'] },
+        omitted: { input_type: 'TEXT' },
+      },
+    };
+
+    expect(buildMetadataFromTemplate(template)).toEqual({
+      is_urgent: 'true',
+      priority: '3',
+      tags: ['alpha', 'beta'],
+    });
+  });
+});
+
+describe('withDeserializedMetadata', () => {
+  const template: ConversationTemplate = {
+    id: 'test-template',
+    name: 'Test',
+    version: 1,
+    fields: {
+      is_urgent: { input_type: 'TOGGLE' },
+      priority: { input_type: 'NUMBER' },
+    },
+  };
+
+  it('resolves the template through the injected resolver', () => {
+    const resolveTemplate = jest.fn().mockReturnValue(template);
+
+    const result = withDeserializedMetadata(
+      {
+        id: 'conversation-1',
+        template_id: 'test-template',
+        metadata: { is_urgent: 'true', priority: '2' },
+      },
+      resolveTemplate
+    );
+
+    expect(resolveTemplate).toHaveBeenCalledWith('test-template');
+    expect(result.metadata).toEqual({ is_urgent: true, priority: 2 });
+  });
+
+  it('returns the original conversation when the template cannot be resolved', () => {
+    const conversation = {
+      id: 'conversation-1',
+      template_id: 'missing-template',
+      metadata: { is_urgent: 'true' },
+    };
+
+    expect(withDeserializedMetadata(conversation, () => undefined)).toBe(conversation);
+  });
+
+  it('does not call the resolver when template_id or metadata are missing', () => {
+    const resolveTemplate = jest.fn();
+    const conversation = { id: 'conversation-1' };
+
+    expect(withDeserializedMetadata(conversation, resolveTemplate)).toEqual(conversation);
+    expect(resolveTemplate).not.toHaveBeenCalled();
   });
 });

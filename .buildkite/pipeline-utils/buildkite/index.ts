@@ -8,5 +8,6 @@
  */
 
 export * from './client.ts';
+export * from './kibana_distributable.ts';
 export * from './types/index.ts';
 export * from './utils.ts';

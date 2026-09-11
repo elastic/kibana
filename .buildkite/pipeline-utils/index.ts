@@ -11,7 +11,10 @@ export * from './affected-packages/index.ts';
 export * from './agent_images.ts';
 export * from './buildkite/index.ts';
 export * as CiStats from './ci-stats/index.ts';
-export { isScoutTestsOnlyDiff } from './ci-stats/pick_test_group_run_order/selective_scout.ts';
+export {
+  isScoutTestPath,
+  isScoutTestsOnlyDiff,
+} from './ci-stats/pick_test_group_run_order/selective_scout.ts';
 export * from './github/index.ts';
 export * as TestFailures from './test-failures/index.ts';
 export * from './utils.ts';

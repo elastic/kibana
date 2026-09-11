@@ -63,11 +63,13 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  // Skip legacy options (backwards-compat entries) so they are never
-  // auto-selected as the default when creating a new connector.
+  // Never default to a legacy option (backwards-compat only) or a Kibana-managed one (set
+  // programmatically, nothing for a user to fill in).
   return (
-    options.find((option) => !Boolean((getMeta(option) as Record<string, unknown>).isLegacy)) ??
-    options[0]
+    options.find((option) => {
+      const optionMeta = getMeta(option) as Record<string, unknown>;
+      return !Boolean(optionMeta.isLegacy) && !Boolean(optionMeta.isKibanaManaged);
+    }) ?? options[0]
   );
 };
 
@@ -141,12 +143,12 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const label = optionMeta.label;
         const isRecommended = Boolean((optionMeta as Record<string, unknown>).isRecommended);
         const isLegacy = Boolean((optionMeta as Record<string, unknown>).isLegacy);
+        const isKibanaManaged = Boolean((optionMeta as Record<string, unknown>).isKibanaManaged);
         const isChecked = selectedOption === discriminatorValue;
 
-        // Legacy auth types are kept only for existing connectors.
-        // Don't render them as selectable choices, but do render if currently active
-        // so the user can still view/edit credentials on an existing connector.
-        if (isLegacy && !isChecked) return null;
+        // Neither is offered as a choice, but both still render while active so an existing
+        // connector's credentials stay viewable.
+        if ((isLegacy || isKibanaManaged) && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {

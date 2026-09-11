@@ -31,7 +31,7 @@ import type {
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import { useImpactedServices } from '../hooks/use_impacted_services';
+import { getImpactedServices } from '../common/impacted_services';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import {
   filterOccurrencesForDetection,
@@ -439,8 +439,10 @@ export function DetectionsList({
   }, [detections, hasOverflow, isExpanded, selectedDetectionId]);
   const hiddenCount = detections.length - visibleDetections.length;
 
-  const { services } = useImpactedServices(event);
-  const impactedServiceLabels = useMemo(() => services.map(({ name }) => name), [services]);
+  const impactedServiceLabels = useMemo(
+    () => getImpactedServices(event).map(({ name }) => name),
+    [event]
+  );
 
   // Only skeleton on first load — keep cached cards visible during background refetch.
   const isInitialLoading = isLoading && (data?.detections?.length ?? 0) === 0;

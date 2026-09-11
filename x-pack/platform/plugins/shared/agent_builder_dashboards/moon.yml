@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
@@ -52,6 +53,8 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
+  - '@kbn/files-plugin'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod

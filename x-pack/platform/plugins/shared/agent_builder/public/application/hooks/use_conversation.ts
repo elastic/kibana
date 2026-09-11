@@ -7,31 +7,31 @@
 
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
-  agentBuilderDefaultAgentId,
   ConversationRoundStatus,
+  isSharedConversation,
   type Conversation,
 } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { createNewRound } from '../utils/new_conversation';
+import { createNewRound, pendingRoundId } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
-import { storageKeys } from '../storage_keys';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
-import { useActiveSpaceId } from '../context/active_space_context';
-import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
+import { useLastAgentId } from './use_last_agent_id';
+import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+
+const POLL_INTERVAL_MS = 5_000;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { activeStreams, byConversationId } = useStreamingContext();
+  const { byConversationId } = useStreamingContext();
 
   // Disable the query when this conversation is being written to by a stream, OR when
   // its cached state shows a HITL pause, OR when there's an unpersisted error in the
@@ -43,7 +43,7 @@ export const useConversation = () => {
     queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
     ConversationRoundStatus.awaitingPrompt;
 
-  const isThisConversationStreaming = Boolean(conversationId && activeStreams.has(conversationId));
+  const isThisConversationStreaming = useIsCurrentConversationStreaming();
 
   const hasUnpersistedError = conversationId
     ? Boolean(byConversationId[conversationId]?.error)
@@ -79,6 +79,9 @@ export const useConversation = () => {
     // Refetching an errored query (no cached success) resets status `error` → `loading`,
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
+    // Shared conversations can be written to by other participants, so poll for their rounds.
+    refetchInterval: (data) =>
+      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
@@ -121,45 +124,42 @@ export const useConversationError = () => {
   };
 };
 
-const useGetNewConversationAgentId = () => {
-  const spaceId = useActiveSpaceId();
-  const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
-  const validateAgentId = useValidateAgentId();
-
-  // Ensure we always return a string
-  return (): string => {
-    const isAgentIdValid = validateAgentId(agentIdStorage);
-    if (isAgentIdValid) {
-      return agentIdStorage;
-    }
-    return agentBuilderDefaultAgentId;
-  };
-};
-
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const context = useConversationContext();
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
-  const getNewConversationAgentId = useGetNewConversationAgentId();
+  const { agentId: lastAgentId } = useLastAgentId();
 
-  // For new conversations, URL (context.agentId) is the source of truth
   if (isNewConversation) {
-    return context.agentId ?? getNewConversationAgentId();
+    return context.agentId ?? lastAgentId;
   }
 
-  // For existing conversations, use the conversation's stored agent_id
   if (conversation?.agent_id) {
     return conversation.agent_id;
   }
 
-  // Fallback to context (URL) for edge cases
   return context.agentId;
 };
 
 export const useConversationTitle = () => {
   const { conversation, isLoading } = useConversation();
-  return { title: conversation?.title ?? '', isLoading };
+  return {
+    title: conversation?.title ?? '',
+    isLoading,
+  };
+};
+
+export const useConversationReadOnly = () => {
+  const conversationId = useConversationId();
+  const { conversation, isFetching } = useConversation();
+
+  return {
+    isReadOnly: conversation?.read_only ?? false,
+    // Not `isLoading`: v4 reports it for disabled queries too, and this query stays disabled
+    // for the whole stream that creates a conversation.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
+  };
 };
 
 export const useConversationRounds = () => {
@@ -172,7 +172,6 @@ export const useConversationRounds = () => {
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
-        roundId: '',
         steps: errorSteps,
       });
       return [...rounds, pendingRound];
@@ -203,6 +202,17 @@ export const useHasActiveConversation = () => {
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
+};
+
+export const useIsUnpersistedConversation = (conversation?: Conversation) => {
+  const conversationId = useConversationId();
+  const { pendingMessage, error } = useStreamRecord(conversationId);
+  const isConversationStreaming = useIsCurrentConversationStreaming();
+
+  return Boolean(
+    (isConversationStreaming && conversation?.rounds[0]?.id === pendingRoundId) ||
+      (error && pendingMessage && conversation?.rounds.length === 0)
+  );
 };
 
 export const useIsAwaitingPrompt = () => {

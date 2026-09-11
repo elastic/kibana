@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI. Browser-only — asserts profile state survives localStorage,
+ * URL state, the history stack, tab restore/duplicate, and share links. The underlying state
+ * plumbing is unit tested (context_awareness/in_memory_toolkit.test.ts,
+ * context_awareness/profile_state_adapter.test.ts); the persistence itself is not.
+ */
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -173,10 +179,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openProfileStateDocView = async () => {
-    await dataGrid.clickRowToggle({
-      rowIndex: 0,
-      defaultTabId: 'doc_view_profile_state_example',
-    });
+    const profileStateTabId = 'doc_view_profile_state_example';
+
+    if (await dataGrid.isShowingDocViewer()) {
+      await dataGrid.clickDocViewerTab(profileStateTabId);
+    } else {
+      await dataGrid.clickRowToggle({
+        rowIndex: 0,
+        defaultTabId: profileStateTabId,
+      });
+    }
   };
 
   const waitForPersistentProfileStateInStorage = async (expectedValue: string) => {

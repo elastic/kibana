@@ -1,21 +1,9 @@
 {
   "sha1": "683822bc62f4e190206d96395dd1b2e10e969d0d",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "a3d53032c82c5f4-65d0c8d48f21667",
-      "title": "Teardown security experience tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/security_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "6b601b236419c13-9ac2ce5428e3040",
       "title": "Setup security experience tests data",
@@ -207,6 +195,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/security_experience/ui/parallel_tests/profile_gating.spec.ts",
         "line": 34,
         "column": 51
+      }
+    },
+    {
+      "id": "a3d53032c82c5f4-65d0c8d48f21667",
+      "title": "Teardown security experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/security_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]
