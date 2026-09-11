@@ -311,7 +311,8 @@ steps:
       continue: true
 
   # Preview verdicts come from the worker's outputs; a failed or skipped child
-  # leaves both verdicts false so decide_action routes to a manual proposal.
+  # leaves both verdicts false, which the proposal reports as inconclusive. The
+  # backtest informs the analyst; it never decides whether the action is offered.
   - name: record_preview_outcome
     type: data.set
     with:
@@ -327,20 +328,6 @@ steps:
       proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
-
-  # Whether approval can be carried out by the edit-rule action: only a query change
-  # on a plain query rule whose two backtests both succeeded. The backtest verdicts
-  # are known before the proposal exists, so an inconclusive preview turns the
-  # proposal into a manual one instead of an approval that silently applies nothing.
-  - name: decide_action
-    type: data.set
-    with:
-      eligible: >-
-        ${{ steps.record_apply_path.output.auto == true
-          and steps.record_preview_outcome.output.current_succeeded == true
-          and steps.record_preview_outcome.output.current_is_aborted == false
-          and steps.record_preview_outcome.output.proposed_succeeded == true
-          and steps.record_preview_outcome.output.proposed_is_aborted == false }}
 
   # Rendered as markdown by the proposal card. Composed once here because the two
   # gate calls below cannot share a step: the gate types actionInput as an object,
@@ -377,10 +364,10 @@ steps:
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
         Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
-        {% if steps.decide_action.output.eligible %}
+        {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false and steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}
         Approving applies the proposed query to the rule.
         {% else %}
-        A backtest was inconclusive, so approving does not change the rule or tag its alerts; a later sweep can retry with current data.
+        The backtest could not verify the proposed query, so judge it from the diagnosis and the queries above. Approving still applies it to the rule.
         {% endif %}
         {% else %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
@@ -411,7 +398,7 @@ steps:
     type: workflow.execute
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.decide_action.output.eligible == true }}
+        and steps.record_apply_path.output.auto == true }}
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -432,7 +419,7 @@ steps:
     type: workflow.execute
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.decide_action.output.eligible == false }}
+        and steps.record_apply_path.output.auto == false }}
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -518,9 +505,7 @@ steps:
 
   # An approved change the pipeline does not apply itself is the analyst's to act
   # on. Tagging retires these alerts so later sweeps do not re-open the same gate;
-  # the rule returns once new false positives accumulate past the watermark. The
-  # auto-apply path stays untagged when a backtest was inconclusive, so a later
-  # sweep can retry with current data.
+  # the rule returns once new false positives accumulate past the watermark.
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
     if: >-

@@ -198,11 +198,11 @@ describe('detection rule workflows', () => {
         id: '{{ inputs.rule_uuid }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
-      expect(action.if).toContain('steps.decide_action.output.eligible == true');
+      expect(action.if).toContain('steps.record_apply_path.output.auto == true');
 
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
-      expect(manual.if).toContain('steps.decide_action.output.eligible == false');
+      expect(manual.if).toContain('steps.record_apply_path.output.auto == false');
 
       for (const proposal of proposals) {
         expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
@@ -526,17 +526,16 @@ describe('detection rule workflows', () => {
         );
       });
 
-      // The verdicts are known before the proposal exists, so an inconclusive preview
-      // turns it into a manual proposal instead of an approval that applies nothing.
-      it('requires both previews before proposing an automatic query change', () => {
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_action')!;
-        const condition = String(eligibility.with?.eligible);
+      // The backtest informs the analyst but never decides whether the edit-rule
+      // action is offered: an inconclusive preview is reported in the proposal text.
+      it('reports an inconclusive backtest without withholding the action', () => {
+        const action = reviewSteps.find(({ name }) => name === 'propose_action')!;
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const comment = String((compose.with as Record<string, string>).comment);
 
-        expect(condition).toContain('steps.record_apply_path.output.auto == true');
-        expect(condition).toContain('current_succeeded == true');
-        expect(condition).toContain('current_is_aborted == false');
-        expect(condition).toContain('proposed_succeeded == true');
-        expect(condition).toContain('proposed_is_aborted == false');
+        expect(String(action.if)).not.toContain('record_preview_outcome');
+        expect(comment).toContain('The backtest could not verify the proposed query');
+        expect(comment).toContain('Approving still applies it to the rule.');
       });
 
       // A partial or timed-out alert count would understate a backtest, so the
