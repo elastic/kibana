@@ -162,11 +162,6 @@ export const ConfigureValuesQuery = ({
     [editorState.esql_query]
   );
 
-  const singleColumn = useMemo(
-    () => (previewColumns.length === 1 ? previewColumns[0] : null),
-    [previewColumns]
-  );
-
   const controlsContext = useMemo(() => {
     const supportsControls = apiCanAddNewPanel(parentApi) || apiCanPinPanels(parentApi);
     if (!supportsControls) return undefined;
@@ -235,7 +230,7 @@ export const ConfigureValuesQuery = ({
         </EuiPanel>
       ) : (
         <>
-          {singleColumn && (
+          {previewColumns.length === 1 && (
             <>
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -258,7 +253,7 @@ export const ConfigureValuesQuery = ({
                       </>
                     }
                   >
-                    <EuiCode>{singleColumn.name}</EuiCode>
+                    <EuiCode>{previewColumns[0].name}</EuiCode>
                   </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
