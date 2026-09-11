@@ -12,6 +12,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkGetRulesResponse,
   BulkResponse,
   CreateRuleData,
@@ -42,6 +44,7 @@ export interface RulesApiService {
   enable: (id: string) => Promise<RuleResponse>;
   disable: (id: string) => Promise<RuleResponse>;
   bulkDelete: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkCreate: (params: BulkCreateRulesParams) => Promise<BulkCreateRulesResponse>;
   bulkDisable: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkEnable: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkUpdateApiKey: (params: BulkByIdsParams) => Promise<BulkResponse>;
@@ -168,6 +171,16 @@ export const getRulesApiService = ({
         return response.data;
       }),
     bulkDelete,
+    bulkCreate: (params: BulkCreateRulesParams) =>
+      measurePerformanceAsync(log, 'rules.bulkCreate', async () => {
+        const response = await kbnClient.request<BulkCreateRulesResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_create`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
     bulkDisable: (params: BulkByIdsParams) =>
       measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
         const response = await kbnClient.request<BulkResponse>({
