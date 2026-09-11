@@ -246,7 +246,7 @@ describe('saved search embeddable', () => {
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
     });
 
-    it('should render a custom error prompt instead of the grid when the query fails', async () => {
+    it('should defer to the platform blocking panel when the query fails outside inline editing', async () => {
       const searchError = new Error('Query failed');
       const { search, rejectSearch } = createSearchErrorFnMock(searchError);
       runtimeState = getInitialRuntimeState({ searchMock: search });
@@ -267,13 +267,18 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading$.getValue()).toBe(false);
 
       await waitFor(() => {
-        expect(discoverComponent.getByTestId('discoverEmbeddableErrorCallout')).toBeInTheDocument();
         expect(discoverComponent.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
 
       // outside inline editing, search errors surface in the platform's blocking panel,
       // consistent with other embeddables
       expect(api.blockingError$.getValue()).toBe(searchError);
+
+      // rendering the prompt here too would duplicate the platform's error panel in the DOM
+      expect(
+        discoverComponent.queryByTestId('discoverEmbeddableErrorCallout')
+      ).not.toBeInTheDocument();
+      expect(discoverComponent.queryByTestId('embeddableError')).not.toBeInTheDocument();
     });
 
     it('should keep a query failure non-blocking while inline editing so apply/discard stay reachable', async () => {

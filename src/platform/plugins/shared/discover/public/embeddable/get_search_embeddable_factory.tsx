@@ -444,7 +444,9 @@ export const getSearchEmbeddableFactory = ({
           }
 
           if (searchError) {
-            return (
+            // Outside inline editing the platform renders the blocking panel over this content,
+            // so rendering the prompt too would duplicate the error panel in the DOM
+            return isInlineEditing ? (
               // The reused platform error panel styles itself from the Emotion theme
               <KibanaRenderContextProvider {...discoverServices.core}>
                 <SearchEmbeddableErrorPrompt
@@ -457,7 +459,7 @@ export const getSearchEmbeddableFactory = ({
                   }}
                 />
               </KibanaRenderContextProvider>
-            );
+            ) : null;
           }
 
           return (
