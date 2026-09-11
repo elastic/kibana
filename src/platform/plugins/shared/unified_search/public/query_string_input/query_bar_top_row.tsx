@@ -375,13 +375,11 @@ export const QueryBarTopRow = React.memo(
     }, [props.isLoading]);
 
     const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
-    // refreshInitialState() must run after React commits the new initialState prop
-    // to the HOC (so latestInitialState.current is up-to-date). useEffect fires
-    // post-commit, which makes the timing correct; a synchronous call would read
-    // stale state.
+
+    // Temporary, the empty page will change and we wont need to control it
     useEffect(() => {
       esqlEditorRef.current?.refreshInitialState();
-    }, [props.esqlEditorInitialState?.isHistoryOpen]);
+    }, [props.esqlEditorInitialState]);
 
     const {
       showQueryInput = true,
