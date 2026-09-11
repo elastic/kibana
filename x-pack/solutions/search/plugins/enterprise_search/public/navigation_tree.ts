@@ -194,11 +194,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [
-                    { link: 'searchSynonyms:synonyms' },
-                    { link: 'searchQueryRules' },
-                    { link: 'searchPlayground' },
-                  ],
+                  children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
                   id: 'search_relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.relevance.title', {
                     defaultMessage: 'Relevance',

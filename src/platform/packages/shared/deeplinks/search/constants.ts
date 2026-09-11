@@ -15,7 +15,6 @@ export const ENTERPRISE_SEARCH_APPLICATIONS_APP_ID = 'enterpriseSearchApplicatio
 export const ENTERPRISE_SEARCH_ANALYTICS_APP_ID = 'enterpriseSearchAnalytics';
 export const SERVERLESS_ES_CONNECTORS_ID = 'serverlessConnectors';
 export const SERVERLESS_ES_WEB_CRAWLERS_ID = 'serverlessWebCrawlers';
-export const ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';
 export const ES_SEARCH_SYNONYMS_ID = 'searchSynonyms';
 export const SEARCH_QUERY_RULES_ID = 'searchQueryRules';
 export const SEARCH_HOMEPAGE = 'searchHomepage';

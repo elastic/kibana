@@ -24,7 +24,6 @@ import {
 import {
   analyticsTitle,
   enterpriseSearchContentTitle,
-  generateTitle,
   searchApplicationsTitle,
   searchTitle,
 } from './generate_title';
@@ -90,22 +89,6 @@ export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ tra
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchContentBreadcrumbs(crumbs);
-
-  useEffect(() => {
-    setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
-  }, [trail]);
-
-  return null;
-};
-
-export const SetSearchPlaygroundChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = generateTitle(title);
-
-  const breadcrumbs = useEnterpriseSearchApplicationsBreadcrumbs(useGenerateBreadcrumbs(trail));
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

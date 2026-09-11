@@ -142,7 +142,6 @@ export const applicationUsageSchema = {
   context_engine: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
-  searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
   elasticRamen: commonSchema,

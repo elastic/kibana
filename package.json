@@ -1119,7 +1119,6 @@
     "@kbn/search-inference-endpoints-fixture-plugin": "workspace:*",
     "@kbn/search-navigation": "workspace:*",
     "@kbn/search-notebooks": "workspace:*",
-    "@kbn/search-playground": "workspace:*",
     "@kbn/search-queries": "workspace:*",
     "@kbn/search-query-rules": "workspace:*",
     "@kbn/search-response-warnings": "workspace:*",

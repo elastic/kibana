@@ -7,7 +7,6 @@
 
 import {
   GenerativeAIForObservabilityConnectorFeatureId,
-  GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
   AgentBuilderConnectorFeatureId,
@@ -45,7 +44,6 @@ export const getMcpConnectorType = (): SubActionConnectorType<
   ],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
-    GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
     WorkflowsConnectorFeatureId,
     AgentBuilderConnectorFeatureId,

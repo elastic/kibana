@@ -85,12 +85,6 @@ When extending functionality:
 ### Local Development
 
 ```bash
-# Start test server for API integration tests
-node scripts/functional_tests_server.js --config x-pack/solutions/search/test/api_integration/apis/search_playground/config.ts
-
-# Run API integration tests
-node scripts/functional_test_runner.js --config x-pack/solutions/search/test/api_integration/apis/search_playground/config.ts
-
 # Start test server for functional tests
 node scripts/functional_tests_server.js --config x-pack/solutions/search/test/functional_search/config.ts
 
