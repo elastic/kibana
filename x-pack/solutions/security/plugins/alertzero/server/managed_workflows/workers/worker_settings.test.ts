@@ -8,6 +8,7 @@
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -17,8 +18,9 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 
-const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
+const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID, HUNT_WORKER_ID];
 
 /** Every other Worker is alert- or event-triggered and owns no schedule. */
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
@@ -160,6 +162,33 @@ describe('createWorkerSettingsRegistration', () => {
 
       expect(applied).toEqual({
         values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '6h' },
+      });
+    });
+  });
+
+  describe('schedule interval — continuous threat hunt (opted in)', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    it('defaults to 4h and projects it', () => {
+      expect(registration.createDefaultValues()).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '4h',
+      });
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: HUNT_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+      });
+    });
+
+    it('applies an interval patch', () => {
+      const applied = registration.applyPatch(registration.createDefaultValues(), {
+        scheduleInterval: '12h',
+      });
+
+      expect(applied).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '12h' },
       });
     });
   });

@@ -38,7 +38,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     scheduleInterval: '24h',
     triggerTypes: ['scheduled'],
   },
-  'system-security-dark-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
+  // Keeps manual alongside the schedule so a sweep can be kicked on demand.
+  'system-security-hunt-continuous-threat-hunt': {
+    settingsVersion: 1,
+    scheduleInterval: '4h',
+    triggerTypes: ['scheduled', 'manual'],
+  },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,

@@ -8,19 +8,22 @@
  */
 
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
-import DARK_CONTINUOUS_THREAT_HUNT_YAML from './dark_continuous_threat_hunt.yaml';
-import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
+import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
+import {
+  renderScheduledWorkerYaml,
+  type ScheduledWorkerTemplateValues,
+} from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
-  'system-security-dark-continuous-threat-hunt';
+export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
+  'system-security-hunt-continuous-threat-hunt';
 
-export const ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
+export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  id: ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
-  yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(DARK_CONTINUOUS_THREAT_HUNT_YAML, values),
-} as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;
+  version: 4,
+  yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
+    renderScheduledWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, values),
+} as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;
