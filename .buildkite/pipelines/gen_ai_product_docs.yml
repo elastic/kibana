@@ -40,6 +40,8 @@ steps:
       FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
       FTR_GEN_AI: '1'
       FTR_EIS_CCM: '1'
+      # Keep ES/Kibana server logs on disk so mocha log capture does not OOM on ML-heavy suites
+      FTR_EXTRA_ARGS: '--writeLogsToPath=data/ftr_servers_logs'
     timeout_in_minutes: 180
     parallelism: 1
     agents:
@@ -47,6 +49,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+      # ES|QL enrichment + multi-product semantic indices need more than the default boot disk
+      diskSizeGb: 180
       preemptible: true
     retry:
       automatic:
