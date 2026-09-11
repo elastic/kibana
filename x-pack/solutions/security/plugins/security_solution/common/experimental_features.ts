@@ -358,7 +358,9 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Threat-intel supply pipeline (indices, ingest adapters, create
    * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
-   * off. Enable with:
+   * off. Direct index access is not yet cross-space hardened, so this must remain
+   * disabled until that isolation is implemented or the administrator trust model
+   * is explicitly accepted. Enable with:
    *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
    */
   threatIntelSupplyEnabled: false,
