@@ -61,7 +61,7 @@ export interface ListSourcesItem {
   report_count: number;
   /** Latest `lineage.ingested_at` across reports for this source. */
   last_ingested_at?: string;
-  /** Sum of `corroboration.alert_hits_total` across reports for this source. */
+  /** Sum of `evidence.alert_hits_total` across reports for this source. */
   env_hits_total: number;
 }
 
@@ -204,12 +204,12 @@ export const loadSourceReportStatsByAdapterId = async ({
             // Nested + filtered to the caller space (plain sum on nested is 0;
             // unfiltered nested sum would count every space).
             env_hits: {
-              nested: { path: 'corroboration' },
+              nested: { path: 'evidence' },
               aggs: {
                 this_space: {
-                  filter: { term: { 'corroboration.space_id': spaceId } },
+                  filter: { term: { 'evidence.space_id': spaceId } },
                   aggs: {
-                    total: { sum: { field: 'corroboration.alert_hits_total' } },
+                    total: { sum: { field: 'evidence.alert_hits_total' } },
                   },
                 },
               },

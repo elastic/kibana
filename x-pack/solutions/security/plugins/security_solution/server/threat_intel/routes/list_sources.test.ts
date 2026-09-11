@@ -113,7 +113,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
   });
 
   it('sums env hits through a nested agg filtered to the caller space', async () => {
-    // `corroboration` is nested (v30). A plain `sum` on a nested field silently
+    // `evidence` is nested (v30). A plain `sum` on a nested field silently
     // returns 0, and an unfiltered nested sum would count every space's element.
     const esClient = {
       search: jest.fn().mockResolvedValue({
@@ -132,12 +132,12 @@ describe('loadSourceReportStatsByAdapterId', () => {
           by_adapter_id: expect.objectContaining({
             aggs: expect.objectContaining({
               env_hits: {
-                nested: { path: 'corroboration' },
+                nested: { path: 'evidence' },
                 aggs: {
                   this_space: {
-                    filter: { term: { 'corroboration.space_id': 'default' } },
+                    filter: { term: { 'evidence.space_id': 'default' } },
                     aggs: {
-                      total: { sum: { field: 'corroboration.alert_hits_total' } },
+                      total: { sum: { field: 'evidence.alert_hits_total' } },
                     },
                   },
                 },

@@ -98,58 +98,58 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     const loadStep = findStepByName(workflow.steps, 'load_reports_with_extractions');
     expect(loadStep).toBeDefined();
     const filter = JSON.stringify(loadStep?.with);
-    // Space-keyed corroboration is what makes including '*' safe: each space
+    // Space-keyed evidence is what makes including '*' safe: each space
     // writes its own nested element instead of clobbering a shared flat object.
     expect(filter).toContain('"space_id":["{{ variables.spaceId }}","*"]');
   });
 
-  it('holds the corroboration script in a data.set step as a block scalar', () => {
-    const scriptStep = findStepByName(workflow.steps, 'set_corroboration_script');
+  it('holds the evidence script in a data.set step as a block scalar', () => {
+    const scriptStep = findStepByName(workflow.steps, 'set_evidence_script');
     expect(scriptStep).toBeDefined();
-    const source = scriptStep?.with?.corroboration_script;
+    const source = scriptStep?.with?.evidence_script;
     expect(typeof source).toBe('string');
     // The per-space dedupe guard. A Liquid-mangled body would lose this.
     expect(source as string).toContain('instanceof List');
     // Liquid must not consume any of the script source.
     expect(source as string).not.toContain('{{');
     expect(source as string).not.toContain('{%');
-    // The corroboration write must not advance the report revision.
+    // The evidence write must not advance the report revision.
     expect(source as string).not.toContain('revision');
   });
 
-  // corroboration is shared with Hunt Watch's writer, which sets a disjoint set
+  // evidence is shared with Hunt Watch's writer, which sets a disjoint set
   // of keys (last_hunt_*, corroborated_rank_score) on the same per-space element.
   it('only assigns alert_hits keys, never the whole matched element', () => {
-    const source = findStepByName(workflow.steps, 'set_corroboration_script')?.with
-      ?.corroboration_script as string;
-    expect(source).toMatch(/corroboration\[i\]\.alert_hits\s*=/);
-    expect(source).toMatch(/corroboration\[i\]\.alert_hits_total\s*=/);
-    // A wholesale `corroboration[i] = ...` replace would erase Hunt Watch's
+    const source = findStepByName(workflow.steps, 'set_evidence_script')?.with
+      ?.evidence_script as string;
+    expect(source).toMatch(/evidence\[i\]\.alert_hits\s*=/);
+    expect(source).toMatch(/evidence\[i\]\.alert_hits_total\s*=/);
+    // A wholesale `evidence[i] = ...` replace would erase Hunt Watch's
     // last_hunt_*/corroborated_rank_score keys on that same per-space element.
-    expect(source).not.toMatch(/corroboration\[i\]\s*=\s*[^.]/);
+    expect(source).not.toMatch(/evidence\[i\]\s*=\s*[^.]/);
     expect(source).not.toContain('last_hunt');
   });
 
   it('writes via elasticsearch.update, not bulk', () => {
     // Bulk API rejects scripted updates on indices that contain semantic_text
     // fields (the reports index does). The Update API accepts them.
-    const writeStep = findStepByName(workflow.steps, 'write_corroboration');
+    const writeStep = findStepByName(workflow.steps, 'write_evidence');
     expect(writeStep?.type).toBe('elasticsearch.update');
     expect(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW.yaml).not.toContain('elasticsearch.bulk');
   });
 
-  describe('write_corroboration renders a scripted per-space upsert', () => {
+  describe('write_evidence renders a scripted per-space upsert', () => {
     const engine = createWorkflowLiquidEngine();
-    const corroborationScript = findStepByName(workflow.steps, 'set_corroboration_script')?.with
-      ?.corroboration_script as string;
-    const writeStep = findStepByName(workflow.steps, 'write_corroboration');
+    const evidenceScript = findStepByName(workflow.steps, 'set_evidence_script')?.with
+      ?.evidence_script as string;
+    const writeStep = findStepByName(workflow.steps, 'write_evidence');
 
     const context = {
       variables: {
         layer1_count: 3,
         layer2_count: 4,
         spaceId: 'space-a',
-        corroboration_script: corroborationScript,
+        evidence_script: evidenceScript,
       },
       foreach: { item: { _id: 'report-1', _index: '.kibana-threat-reports' } },
       now: '2024-06-01T00:00:00.000Z',
@@ -174,7 +174,7 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
       expect(rendered.doc).toBeUndefined();
       expect(rendered.upsert).toBeUndefined();
       expect(rendered.script.lang).toBe('painless');
-      expect(rendered.script.source).toBe(corroborationScript);
+      expect(rendered.script.source).toBe(evidenceScript);
       expect(rendered.script.source).toContain('instanceof List');
       expect(rendered.script.params).toEqual({
         space_id: 'space-a',

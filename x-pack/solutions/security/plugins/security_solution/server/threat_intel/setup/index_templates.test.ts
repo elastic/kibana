@@ -58,8 +58,8 @@ const fullyMigratedReportMappings = () => ({
       properties: {},
     },
     lineage: { properties: { content_scrubbed_at: {} } },
-    // v30: corroboration is a space-keyed nested array; the guard checks the leaf.
-    corroboration: { properties: { space_id: {} } },
+    // v30: evidence is a space-keyed nested array; the guard checks the leaf.
+    evidence: { properties: { space_id: {} } },
     extracted: {
       properties: {
         diamond: {},
@@ -532,7 +532,7 @@ describe('index_templates — mapping coverage guard', () => {
     expect(properties).toEqual(expect.objectContaining({ revision: { type: 'integer' } }));
   });
 
-  it('reports template declares corroboration as a space-keyed nested array (v30)', async () => {
+  it('reports template declares evidence as a space-keyed nested array (v30)', async () => {
     const { byIndex } = await runInstall();
 
     const properties = (
@@ -541,7 +541,7 @@ describe('index_templates — mapping coverage guard', () => {
       }
     ).properties;
 
-    expect(properties.corroboration).toEqual(
+    expect(properties.evidence).toEqual(
       expect.objectContaining({
         type: 'nested',
         properties: expect.objectContaining({ space_id: { type: 'keyword' } }),
@@ -552,7 +552,7 @@ describe('index_templates — mapping coverage guard', () => {
   // Merged from the former separate `attribution` (Attribute Alerts) and
   // `feedback` (Hunt Watch) fields: neither's keys overlapped, and both are
   // per-space evidence about the same report, so one element covers both.
-  it('corroboration carries both alert-attribution and hunt-feedback fields', async () => {
+  it('evidence carries both alert-attribution and hunt-feedback fields', async () => {
     const { byIndex } = await runInstall();
 
     const properties = (
@@ -561,9 +561,7 @@ describe('index_templates — mapping coverage guard', () => {
       }
     ).properties;
 
-    expect(
-      (properties.corroboration as { properties: Record<string, unknown> }).properties
-    ).toEqual(
+    expect((properties.evidence as { properties: Record<string, unknown> }).properties).toEqual(
       expect.objectContaining({
         alert_hits_total: { type: 'integer' },
         last_hunt_status: { type: 'keyword' },
@@ -572,15 +570,15 @@ describe('index_templates — mapping coverage guard', () => {
     );
   });
 
-  it('corroboration.space_id is a required report field so a stale index fails bootstrap loudly', () => {
-    // v30 flipped attribution/feedback into corroboration, object -> nested,
+  it('evidence.space_id is a required report field so a stale index fails bootstrap loudly', () => {
+    // v30 flipped attribution/feedback into evidence, object -> nested,
     // which cannot be applied to an existing index. This entry is the only
     // detection for a stale index: without it the write is rejected by
     // dynamic: strict and swallowed by on-failure: continue.
-    expect(src).toContain("{ path: 'corroboration.space_id' }");
+    expect(src).toContain("{ path: 'evidence.space_id' }");
   });
 
-  it('TEMPLATE_VERSION is 30 for the corroboration reshape', () => {
+  it('TEMPLATE_VERSION is 30 for the evidence reshape', () => {
     expect(src).toContain('const TEMPLATE_VERSION = 30;');
   });
 

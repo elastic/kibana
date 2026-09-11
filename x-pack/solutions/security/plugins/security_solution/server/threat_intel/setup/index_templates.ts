@@ -277,7 +277,7 @@ const threatReportsTemplate = {
             content_scrubbed_at: { type: 'date' as const },
           },
         },
-        // Per-space environment corroboration: alert-matching evidence from the
+        // Per-space environment evidence: alert-matching hits from the
         // Attribute Alerts task (hourly) and hunt outcomes from Hunt Watch's
         // writer (per hunt run, not yet landed), one element per space. Nested +
         // `space_id` so a global (`*`) report can carry every space's element
@@ -286,7 +286,7 @@ const threatReportsTemplate = {
         // report and neither's fields overlapped. No migration: `object` ->
         // `nested` cannot be applied in place; pre-GA / flag-off means
         // drop+recreate. `REQUIRED_REPORT_FIELDS` makes a stale index fail loudly.
-        corroboration: {
+        evidence: {
           type: 'nested' as const,
           properties: {
             space_id: { type: 'keyword' as const },
@@ -463,7 +463,7 @@ const COMPANION_INDEX_TEMPLATES: Array<{
 
 /**
  * Concrete report indices to patch. Reports live in a regular index (they are
- * updated in place by enrich and corroboration), so there is no data
+ * updated in place by enrich and evidence), so there is no data
  * stream to ask for backing indices — resolving the pattern is the only way to
  * find them.
  */
@@ -1384,10 +1384,10 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
   { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
-  // v30: attribution/feedback merged into corroboration, object -> nested. Not
+  // v30: attribution/feedback merged into evidence, object -> nested. Not
   // putMapping-able; without this leaf a stale index rejects writes under
   // dynamic:strict and the workflow swallows it.
-  { path: 'corroboration.space_id' },
+  { path: 'evidence.space_id' },
   { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.reference', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
@@ -1574,7 +1574,7 @@ export const installIndexTemplates = async ({
     await esClient.indices.putIndexTemplate(template.body);
   }
 
-  // Reports are a regular hidden index (enrich/corroboration update by id),
+  // Reports are a regular hidden index (enrich/evidence update by id),
   // not a data stream. Companions are sources + indicators only.
   await ensureCompanionIndex(esClient, THREAT_REPORTS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_SOURCES_INDEX, log);

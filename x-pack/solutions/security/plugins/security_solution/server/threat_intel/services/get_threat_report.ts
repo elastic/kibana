@@ -64,17 +64,17 @@ export const getThreatReport = async (
   // Nested per-space array (v30). Project the caller's element only (never '*');
   // a legacy flat object is left alone so stale indexes stay distinguishable
   // from "not hunted here".
-  if (Array.isArray(source.corroboration)) {
-    const element = source.corroboration.find(
+  if (Array.isArray(source.evidence)) {
+    const element = source.evidence.find(
       (el): el is Record<string, unknown> =>
         typeof el === 'object' &&
         el !== null &&
         (el as Record<string, unknown>).space_id === spaceId
     );
     if (element) {
-      result.corroboration = element;
+      result.evidence = element;
     } else {
-      delete result.corroboration;
+      delete result.evidence;
     }
   }
 

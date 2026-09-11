@@ -3,7 +3,7 @@ version: "1"
 # alerts in the last 7d tie back to that report, then write the totals onto the doc.
 # IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
 # with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
-# Includes `space_id: "*"` catalog rows. `corroboration` is a nested per-space array
+# Includes `space_id: "*"` catalog rows. `evidence` is a nested per-space array
 # (shared with Hunt Watch's hunt-outcome writer), so spaces cannot clobber each
 # other. This task only ever sets its own keys (`alert_hits*`) on the matched
 # element, never the whole element, so it cannot wipe out that space's hunt
@@ -65,20 +65,20 @@ steps:
   # reference it without embedding a multi-line string inside Liquid.
   #
   # Sets only `alert_hits`/`alert_hits_total` on the matched (or newly appended)
-  # element, never the whole element: `corroboration` is shared with Hunt
+  # element, never the whole element: `evidence` is shared with Hunt
   # Watch's writer, which sets a disjoint set of keys (`last_hunt_*`,
   # `corroborated_rank_score`) on the same per-space element. A blind replace
   # here would erase that space's hunt fields whenever this task runs after it.
-  - name: set_corroboration_script
+  - name: set_evidence_script
     type: data.set
     with:
-      corroboration_script: |
-        if (!(ctx._source.corroboration instanceof List)) { ctx._source.corroboration = new ArrayList(); }
+      evidence_script: |
+        if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
         boolean found = false;
-        for (int i = 0; i < ctx._source.corroboration.size(); i++) {
-          if (ctx._source.corroboration[i].space_id == params.space_id) {
-            ctx._source.corroboration[i].alert_hits = ['window': params.window, 'computed_at': params.computed_at, 'ioc_match_hits': params.ioc_match_hits, 'technique_overlap_hits': params.technique_overlap_hits];
-            ctx._source.corroboration[i].alert_hits_total = params.alert_hits_total;
+        for (int i = 0; i < ctx._source.evidence.size(); i++) {
+          if (ctx._source.evidence[i].space_id == params.space_id) {
+            ctx._source.evidence[i].alert_hits = ['window': params.window, 'computed_at': params.computed_at, 'ioc_match_hits': params.ioc_match_hits, 'technique_overlap_hits': params.technique_overlap_hits];
+            ctx._source.evidence[i].alert_hits_total = params.alert_hits_total;
             found = true;
           }
         }
@@ -87,7 +87,7 @@ steps:
           el.space_id = params.space_id;
           el.alert_hits = ['window': params.window, 'computed_at': params.computed_at, 'ioc_match_hits': params.ioc_match_hits, 'technique_overlap_hits': params.technique_overlap_hits];
           el.alert_hits_total = params.alert_hits_total;
-          ctx._source.corroboration.add(el);
+          ctx._source.evidence.add(el);
         }
 
   # One search for all layer-1 counts. Per-report `term` queries inside foreach
@@ -171,11 +171,11 @@ steps:
           layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'alert_count' | map: 'doc_count' | first | default: 0 }}"
           layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
 
-      # Scripted per-space upsert into the nested `corroboration` array.
+      # Scripted per-space upsert into the nested `evidence` array.
       # Update API (not Bulk): Bulk rejects scripts on indices with `semantic_text`.
       # No upsert body: the report was just loaded, so a missing doc must fail
       # loudly rather than materialize a partial row. Never touches `revision`.
-      - name: write_corroboration
+      - name: write_evidence
         type: elasticsearch.update
         with:
           index: "{{ foreach.item._index }}"
@@ -183,7 +183,7 @@ steps:
           retry_on_conflict: 3
           script:
             lang: painless
-            source: "${{ variables.corroboration_script }}"
+            source: "${{ variables.evidence_script }}"
             params:
               space_id: "{{ variables.spaceId }}"
               window: "7d"

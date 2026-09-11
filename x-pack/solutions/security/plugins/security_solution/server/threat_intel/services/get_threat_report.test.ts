@@ -120,12 +120,12 @@ describe('getThreatReport', () => {
     );
   });
 
-  describe('space-keyed corroboration projection', () => {
+  describe('space-keyed evidence projection', () => {
     const twoSpaceSource = {
       revision: 3,
       space_id: '*',
       content: { title: 'Shared report' },
-      corroboration: [
+      evidence: [
         {
           space_id: 'default',
           alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 2 },
@@ -152,7 +152,7 @@ describe('getThreatReport', () => {
     it('returns only the caller space element, flattened, on a shared report', async () => {
       const result = await getThreatReport(mockHit(twoSpaceSource), defaultArgs);
 
-      expect(result.corroboration).toEqual({
+      expect(result.evidence).toEqual({
         space_id: 'default',
         alert_hits: { window: '7d', ioc_match_hits: 1, technique_overlap_hits: 2 },
         alert_hits_total: 3,
@@ -161,22 +161,22 @@ describe('getThreatReport', () => {
       expect(JSON.stringify(result)).not.toContain('team-b');
     });
 
-    it('omits corroboration when no element exists for the caller space', async () => {
+    it('omits evidence when no element exists for the caller space', async () => {
       const esClient = mockHit(twoSpaceSource);
       const result = await getThreatReport(esClient, { ...defaultArgs, spaceId: 'team-c' });
 
-      expect(result.corroboration).toBeUndefined();
-      expect('corroboration' in result).toBe(false);
+      expect(result.evidence).toBeUndefined();
+      expect('evidence' in result).toBe(false);
     });
 
-    it('passes a legacy flat corroboration object through unchanged rather than hiding it', async () => {
+    it('passes a legacy flat evidence object through unchanged rather than hiding it', async () => {
       // A stale (not recreated) index holds the pre-v30 flat shape. Collapsing
       // that into "absent" would make a broken deployment look like "not hunted
       // here", so the legacy object is returned as-is.
       const legacy = {
         revision: 1,
         space_id: 'default',
-        corroboration: {
+        evidence: {
           alert_hits: { window: '7d', ioc_match_hits: 5, technique_overlap_hits: 0 },
           alert_hits_total: 5,
         },
@@ -184,7 +184,7 @@ describe('getThreatReport', () => {
 
       const result = await getThreatReport(mockHit(legacy), defaultArgs);
 
-      expect(result.corroboration).toEqual(legacy.corroboration);
+      expect(result.evidence).toEqual(legacy.evidence);
     });
   });
 });
