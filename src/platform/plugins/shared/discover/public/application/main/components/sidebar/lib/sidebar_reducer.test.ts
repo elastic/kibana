@@ -19,6 +19,7 @@ import {
   getInitialState,
 } from './sidebar_reducer';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('sidebar reducer', function () {
@@ -76,8 +77,7 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isEsqlMode: false,
-        dataView: stubDataViewWithoutTimeField,
+        dataSource: new DataViewSource(stubDataViewWithoutTimeField),
         fieldCounts,
       },
     });
@@ -100,10 +100,7 @@ describe('sidebar reducer', function () {
     const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isEsqlMode: true,
-        dataView: stubDataViewWithoutTimeField,
-        fieldCounts: {},
-        esqlSource: createMockEsqlSource([], [
+        dataSource: createMockEsqlSource([], [
           {
             id: '1',
             name: 'text1',
@@ -116,10 +113,11 @@ describe('sidebar reducer', function () {
             meta: { type: 'string', esType: 'keyword' },
           },
         ]),
+        fieldCounts: {},
       },
     });
     expect(resultForEsqlQuery).toStrictEqual({
-      dataView: stubDataViewWithoutTimeField,
+      dataView,
       allFields: [
         new DataViewField({
           name: 'text1',
@@ -147,8 +145,7 @@ describe('sidebar reducer', function () {
     const resultWhileLoading = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isEsqlMode: false,
-        dataView: stubDataViewWithoutTimeField,
+        dataSource: new DataViewSource(stubDataViewWithoutTimeField),
         fieldCounts: null,
       },
     });

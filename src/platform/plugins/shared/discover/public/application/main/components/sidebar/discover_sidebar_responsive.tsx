@@ -22,6 +22,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { of } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewSource } from '@kbn/data-source';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import {
   UnifiedFieldListSidebarContainer,
@@ -222,10 +223,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
+              dataSource:
+                documentState.esqlSource ??
+                (selectedDataViewRef.current
+                  ? new DataViewSource(selectedDataViewRef.current)
+                  : undefined),
               fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
-              esqlSource: documentState.esqlSource,
-              isEsqlMode,
             },
           });
           break;
@@ -233,9 +236,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
+              dataSource: undefined,
               fieldCounts: EMPTY_FIELD_COUNTS,
-              isEsqlMode,
             },
           });
           break;
