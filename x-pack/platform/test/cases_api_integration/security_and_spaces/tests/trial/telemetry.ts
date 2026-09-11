@@ -453,7 +453,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(totalEnabled + totalDisabled).toBe(total);
 
           expect(casesTelemetry.templates).toEqual({
-            featureEnabled: true,
             all: {
               // The edited template counts once despite its three versions, and the
               // soft-deleted one does not count at all.
@@ -558,7 +557,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(casesTelemetry.fieldLibrary.sec.totalReusable).toBe(2);
 
           expect(casesTelemetry.fieldLibrary).toEqual({
-            featureEnabled: true,
             all: { total: 5, totalGlobal: 3, totalReusable: 2 },
             sec: { total: 4, totalGlobal: 2, totalReusable: 2 },
             obs: zeroedScope,
