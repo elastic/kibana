@@ -47,6 +47,28 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     expect(renderResult.getByRole('option', { name: 'Block all' })).toBeInTheDocument();
   });
 
+  it('renders all four access-level options with translated labels in severity order', async () => {
+    render();
+
+    await userEvent.click(renderResult.getByTestId(testSubj));
+
+    const optionLabels = renderResult.getAllByRole('option').map((option) => option.textContent);
+    expect(optionLabels).toEqual([
+      'Allow read, write and execute',
+      'Read and write',
+      'Read only',
+      'Block all',
+    ]);
+
+    const allowAllOption = renderResult.getByRole('option', {
+      name: /^Allow read, write and execute$/,
+    });
+    expect(allowAllOption.querySelector('[color="danger"]')).toBeInTheDocument();
+
+    const blockAllOption = renderResult.getByRole('option', { name: /^Block all$/ });
+    expect(blockAllOption.querySelector('[color="success"]')).toBeInTheDocument();
+  });
+
   it.each([
     [DeviceControlAccessLevel.audit, 'Allow read, write and execute'],
     [DeviceControlAccessLevel.no_execute, 'Read and write'],

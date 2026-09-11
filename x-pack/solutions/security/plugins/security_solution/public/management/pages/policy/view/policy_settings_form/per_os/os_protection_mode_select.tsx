@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiFlexItem, EuiHealth, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
+import { buildOsControlSelectOptions } from './os_control_select_options';
 
 const PREVENT_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.perOs.protectionMode.detectAndPrevent',
@@ -40,33 +40,11 @@ const PROTECTION_MODE_SELECT_ARIA_LABEL = i18n.translate(
   }
 );
 
-const MODE_LABELS: Record<ProtectionModes, string> = {
-  [ProtectionModes.prevent]: PREVENT_LABEL,
-  [ProtectionModes.detect]: DETECT_LABEL,
-  [ProtectionModes.off]: OFF_LABEL,
-};
-
-const MODE_HEALTH_COLOR: Record<ProtectionModes, 'success' | 'warning' | 'danger'> = {
-  [ProtectionModes.prevent]: 'success',
-  [ProtectionModes.detect]: 'warning',
-  [ProtectionModes.off]: 'danger',
-};
-
-const renderModeOption = (mode: ProtectionModes) => (
-  <EuiHealth color={MODE_HEALTH_COLOR[mode]} textSize="inherit">
-    {MODE_LABELS[mode]}
-  </EuiHealth>
-);
-
-const PROTECTION_MODE_OPTIONS: Array<EuiSuperSelectOption<ProtectionModes>> = [
-  ProtectionModes.off,
-  ProtectionModes.detect,
-  ProtectionModes.prevent,
-].map((mode) => ({
-  value: mode,
-  inputDisplay: renderModeOption(mode),
-  dropdownDisplay: renderModeOption(mode),
-}));
+const PROTECTION_MODE_OPTIONS = buildOsControlSelectOptions([
+  { value: ProtectionModes.off, label: OFF_LABEL, healthColor: 'danger' },
+  { value: ProtectionModes.detect, label: DETECT_LABEL, healthColor: 'warning' },
+  { value: ProtectionModes.prevent, label: PREVENT_LABEL, healthColor: 'success' },
+]);
 
 export interface OsProtectionModeSelectProps {
   mode: ProtectionModes;

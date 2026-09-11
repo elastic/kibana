@@ -131,11 +131,11 @@ describe('PerOsAntivirusRegistrationCard', () => {
 
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
 
-    expect(renderResult.getByRole('option', { name: 'Enabled' })).toBeInTheDocument();
-    expect(renderResult.getByRole('option', { name: 'Disabled' })).toBeInTheDocument();
-    expect(
-      renderResult.getByRole('option', { name: 'Sync with malware protection level' })
-    ).toBeInTheDocument();
+    const optionLabels = renderResult.getAllByRole('option').map((option) => option.textContent);
+    expect(optionLabels).toEqual(['Disabled', 'Sync with malware protection level', 'Enabled']);
+
+    const disabledOption = renderResult.getByRole('option', { name: /^Disabled$/ });
+    expect(disabledOption.querySelector('[color="danger"]')).toBeInTheDocument();
   });
 
   it('selecting a mode updates windows.antivirus_registration.mode and leaves mac and linux byte-identical', async () => {

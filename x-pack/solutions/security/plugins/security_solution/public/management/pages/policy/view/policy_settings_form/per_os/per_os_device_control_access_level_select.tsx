@@ -6,12 +6,12 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
+import { buildOsControlSelectOptions } from './os_control_select_options';
 
 const ALLOW_ALL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.allowReadWrite',
@@ -48,23 +48,28 @@ const ACCESS_LEVEL_SELECT_ARIA_LABEL = i18n.translate(
   }
 );
 
-const ACCESS_LEVEL_LABELS: Record<DeviceControlAccessLevel, string> = {
-  [DeviceControlAccessLevelEnum.audit]: ALLOW_ALL_LABEL,
-  [DeviceControlAccessLevelEnum.read_only]: READ_ONLY_LABEL,
-  [DeviceControlAccessLevelEnum.no_execute]: BLOCK_EXECUTE_LABEL,
-  [DeviceControlAccessLevelEnum.deny_all]: BLOCK_LABEL,
-};
-
-const ACCESS_LEVEL_OPTIONS: Array<EuiSuperSelectOption<DeviceControlAccessLevel>> = [
-  DeviceControlAccessLevelEnum.audit,
-  DeviceControlAccessLevelEnum.no_execute,
-  DeviceControlAccessLevelEnum.read_only,
-  DeviceControlAccessLevelEnum.deny_all,
-].map((accessLevel) => ({
-  value: accessLevel,
-  inputDisplay: ACCESS_LEVEL_LABELS[accessLevel],
-  dropdownDisplay: ACCESS_LEVEL_LABELS[accessLevel],
-}));
+const ACCESS_LEVEL_OPTIONS = buildOsControlSelectOptions([
+  {
+    value: DeviceControlAccessLevelEnum.audit,
+    label: ALLOW_ALL_LABEL,
+    healthColor: 'danger',
+  },
+  {
+    value: DeviceControlAccessLevelEnum.no_execute,
+    label: BLOCK_EXECUTE_LABEL,
+    healthColor: 'warning',
+  },
+  {
+    value: DeviceControlAccessLevelEnum.read_only,
+    label: READ_ONLY_LABEL,
+    healthColor: 'warning',
+  },
+  {
+    value: DeviceControlAccessLevelEnum.deny_all,
+    label: BLOCK_LABEL,
+    healthColor: 'success',
+  },
+]);
 
 export interface PerOsDeviceControlAccessLevelSelectProps {
   accessLevel: DeviceControlAccessLevel;

@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +25,7 @@ import { PerOsSettingCard } from './per_os_setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { OsRow } from './os_row';
 import { OS_CONTROL_WIDTH } from './os_control_layout';
+import { buildOsControlSelectOptions } from './os_control_select_options';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';
 
 const CARD_TITLE = i18n.translate(
@@ -67,12 +67,6 @@ const ANTIVIRUS_REGISTRATION_MODE_SELECT_ARIA_LABEL = i18n.translate(
   }
 );
 
-const MODE_LABELS: Record<AntivirusRegistrationModes, string> = {
-  [AntivirusRegistrationModes.disabled]: DISABLED_LABEL,
-  [AntivirusRegistrationModes.enabled]: ENABLED_LABEL,
-  [AntivirusRegistrationModes.sync]: SYNC_LABEL,
-};
-
 const OS_RESTRICTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
   {
@@ -81,16 +75,23 @@ const OS_RESTRICTION = i18n.translate(
   }
 );
 
-const ANTIVIRUS_REGISTRATION_MODE_OPTIONS: Array<EuiSuperSelectOption<AntivirusRegistrationModes>> =
-  [
-    AntivirusRegistrationModes.enabled,
-    AntivirusRegistrationModes.disabled,
-    AntivirusRegistrationModes.sync,
-  ].map((registrationMode) => ({
-    value: registrationMode,
-    inputDisplay: MODE_LABELS[registrationMode],
-    dropdownDisplay: MODE_LABELS[registrationMode],
-  }));
+const ANTIVIRUS_REGISTRATION_MODE_OPTIONS = buildOsControlSelectOptions([
+  {
+    value: AntivirusRegistrationModes.disabled,
+    label: DISABLED_LABEL,
+    healthColor: 'danger',
+  },
+  {
+    value: AntivirusRegistrationModes.sync,
+    label: SYNC_LABEL,
+    healthColor: 'warning',
+  },
+  {
+    value: AntivirusRegistrationModes.enabled,
+    label: ENABLED_LABEL,
+    healthColor: 'success',
+  },
+]);
 
 export type PerOsAntivirusRegistrationCardProps = PolicyFormComponentCommonProps;
 
