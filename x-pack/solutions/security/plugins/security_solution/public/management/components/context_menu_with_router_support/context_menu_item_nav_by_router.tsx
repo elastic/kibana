@@ -9,6 +9,7 @@ import React, { memo, useCallback } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import type { MouseEventHandler } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -19,7 +20,7 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   /** Additional options for the navigation action via react-router */
   navigateOptions?: NavigateToAppOptions;
   /**
-   * if `true`, the `children` will be wrapped in a `div` that contains CSS Classname `eui-textTruncate`.
+   * if `true`, the `children` will be wrapped in a truncate wrapper.
    * **NOTE**: When this component is used in combination with `ContextMenuWithRouterSupport` and `maxWidth`
    * is set on the menu component, this prop will be overridden
    */
@@ -28,6 +29,28 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   isNavigationDisabled?: boolean;
   children: React.ReactNode;
 }
+
+/**
+ * Keep truncated labels on one line with EUI's auto-injected external-link icon.
+ * `EuiContextMenuItem` appends that icon as a sibling of `children` inside
+ * `.euiContextMenuItem__text`, which otherwise wraps because the truncate wrapper is block-level.
+ */
+const truncatedItemCss = css`
+  .euiContextMenuItem__text {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+
+    > * + * {
+      margin-block-start: 0;
+    }
+  }
+`;
+
+const truncatedLabelCss = css`
+  flex: 1;
+  min-width: 0;
+`;
 
 /**
  * Just like `EuiContextMenuItem`, but allows for additional props to be defined which will
@@ -68,11 +91,13 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     return (
       <EuiContextMenuItem
         {...otherMenuItemProps}
+        css={textTruncate ? truncatedItemCss : undefined}
         onClick={handleItemClick}
         href={isNavigationDisabled ? undefined : href}
       >
         {textTruncate ? (
-          <div
+          <span
+            css={truncatedLabelCss}
             className="eui-textTruncate"
             data-test-subj={getTestId('truncateWrapper')}
             {
@@ -81,7 +106,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
             }
           >
             {children}
-          </div>
+          </span>
         ) : (
           children
         )}
