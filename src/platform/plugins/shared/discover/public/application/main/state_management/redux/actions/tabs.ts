@@ -429,6 +429,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
     return {
       userId,
       spaceId,
+      // The prepared session, so the fulfilled reducer keeps the same baseline setTabs stored.
       persistedDiscoverSession: initialTabsState.updatedDiscoverSession,
     };
   }

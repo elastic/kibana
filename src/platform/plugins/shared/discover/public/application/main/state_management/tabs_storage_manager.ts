@@ -454,6 +454,8 @@ export const createTabsStorageManager = ({
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
 
+    // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
+    // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
     if (persistedDiscoverSession && prepareSession) {
       const localTabs =
         persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];

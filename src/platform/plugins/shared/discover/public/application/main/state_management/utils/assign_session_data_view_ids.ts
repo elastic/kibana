@@ -20,7 +20,7 @@ import type { TabState } from '../redux/types';
 /** Fills missing inline IDs using matching local views, with the incoming link first for its tab. */
 export const assignSessionDataViewIds = (
   session: DiscoverSession,
-  tabs: TabState[],
+  localTabs: TabState[],
   navigation?: { tabId: string | undefined; dataViewSpec: DataViewSpec | undefined }
 ) => {
   // An inline API spec describes the view itself, not a saved reference, so its runtime ID stays local.
@@ -28,43 +28,61 @@ export const assignSessionDataViewIds = (
     const dataView = getInlineDataView(tab.serializedSearchSource);
     return dataView !== undefined && dataView.id === undefined;
   });
+
   if (!needsInlineIds) {
     // Legacy sessions already have IDs. Returning them unchanged preserves that behavior without a flag.
     return session;
   }
 
-  const restoredDataViews = new Map<string, DataViewSpec>();
-  const inlineDataViewIds = new Map<string, string>();
-  for (const tab of tabs) {
+  // Collect all local candidates first, so a tab can reuse an ID from a later tab too.
+  const localViewsByTab = new Map<string, DataViewSpec>();
+  const idsBySpec = new Map<string, string>();
+  for (const tab of localTabs) {
     const dataView = getInlineDataView(tab.initialInternalState?.serializedSearchSource);
     if (dataView?.id) {
-      restoredDataViews.set(tab.id, dataView);
-      inlineDataViewIds.set(getDataViewSpecKey(dataView), dataView.id);
+      localViewsByTab.set(tab.id, dataView);
+      idsBySpec.set(getDataViewSpecKey(dataView), dataView.id);
     }
   }
 
   const locationDataView = getInlineDataView({ index: navigation?.dataViewSpec });
   const targetTab = session.tabs.find((tab) => tab.id === navigation?.tabId);
   const targetDataView = getInlineDataView(targetTab?.serializedSearchSource);
-  if (targetTab && targetDataView && locationDataView?.id) {
-    const specKey = getDataViewSpecKey(locationDataView);
-    if (specKey === getDataViewSpecKey(targetDataView)) {
-      // Loading gives the link precedence over storage. Reuse its ID only for an unchanged view.
-      restoredDataViews.set(targetTab.id, locationDataView);
-      inlineDataViewIds.set(specKey, locationDataView.id);
+  let linkDataViewId: string | undefined;
+  if (targetDataView && locationDataView?.id) {
+    const specKey = getDataViewSpecKey(targetDataView);
+    linkDataViewId = getMatchingDataViewId(locationDataView, specKey);
+
+    if (linkDataViewId) {
+      // Other tabs with this spec can reuse the link ID even before its target tab is processed.
+      idsBySpec.set(specKey, linkDataViewId);
     }
   }
 
   const sessionTabs = session.tabs.map((tab) => {
-    const searchSource = assignInlineDataViewId(
-      tab.serializedSearchSource,
-      restoredDataViews.get(tab.id),
-      inlineDataViewIds
-    );
-    if (searchSource === tab.serializedSearchSource) {
+    const searchSource = tab.serializedSearchSource;
+    const dataView = getInlineDataView(searchSource);
+    if (!dataView || dataView.id !== undefined) {
       return tab;
     }
-    return { ...tab, serializedSearchSource: searchSource };
+
+    // Choose: matching link for this tab, matching local tab, same spec, then a new UUID.
+    const specKey = getDataViewSpecKey(dataView);
+    const linkId = tab.id === navigation?.tabId ? linkDataViewId : undefined;
+    const localId = getMatchingDataViewId(localViewsByTab.get(tab.id), specKey);
+    const dataViewId = linkId ?? localId ?? idsBySpec.get(specKey) ?? uuidv4();
+
+    idsBySpec.set(specKey, dataViewId);
+
+    // Apply the chosen ID to the view and filters without an explicit Data View reference.
+    return {
+      ...tab,
+      serializedSearchSource: {
+        ...searchSource,
+        index: { ...dataView, id: dataViewId },
+        filter: assignFilterDataViewId(searchSource.filter, dataViewId),
+      },
+    };
   });
 
   return {
@@ -73,30 +91,11 @@ export const assignSessionDataViewIds = (
   };
 };
 
-/** Assigns an ID only when absent; an unchanged restored view takes precedence over deduplication. */
-const assignInlineDataViewId = (
-  searchSource: SerializedSearchSourceFields,
-  restoredDataView: DataViewSpec | undefined,
-  inlineDataViewIds: Map<string, string>
-) => {
-  const dataView = getInlineDataView(searchSource);
-  if (!dataView || dataView.id !== undefined) {
-    return searchSource;
+const getMatchingDataViewId = (dataView: DataViewSpec | undefined, specKey: string) => {
+  if (dataView?.id && getDataViewSpecKey(dataView) === specKey) {
+    return dataView.id;
   }
-
-  const specKey = getDataViewSpecKey(dataView);
-  let dataViewId = inlineDataViewIds.get(specKey);
-  if (restoredDataView?.id && getDataViewSpecKey(restoredDataView) === specKey) {
-    dataViewId = restoredDataView.id;
-  }
-  dataViewId ??= uuidv4();
-  inlineDataViewIds.set(specKey, dataViewId);
-
-  return {
-    ...searchSource,
-    index: { ...dataView, id: dataViewId },
-    filter: assignFilterDataViewId(searchSource.filter, dataViewId),
-  };
+  return undefined;
 };
 
 /** Finds classic inline specs without treating ES|QL's generated Data Views as classic ones. */
