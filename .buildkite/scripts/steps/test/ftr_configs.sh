@@ -114,15 +114,14 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-  # Only sound when the whole config ran (no --bail) and FTR exited with the code it reserves for
-  # "tests failed, nothing else went wrong" (FTR_TEST_FAILURES_EXIT_CODE in
-  # src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_ftr.ts). Any other nonzero
-  # code means a runner/server/config error that the JUnit report does not describe.
+  # Only sound when FTR exited with the code it reserves for "every test ran and only tests failed"
+  # (FTR_TEST_FAILURES_EXIT_CODE in src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_ftr.ts).
+  # FTR emits 1 instead when --bail (from BAIL_ARG, FTR_EXTRA_ARGS or the config's mochaOpts.bail)
+  # or a server crash stopped the run early, or when a runner/server/config error occurred; the
+  # JUnit report does not describe any of those.
   if [[ $lastCode -ne 0 ]]; then
-    if [[ -n "$BAIL_ARG" ]]; then
-      skipped_on_main_skipped "$config" "--bail is on, config did not run to completion"
-    elif [[ $lastCode -ne 11 ]]; then
-      skipped_on_main_skipped "$config" "exit code $lastCode is not the test-failures code (11); a runner error occurred"
+    if [[ $lastCode -ne 11 ]]; then
+      skipped_on_main_skipped "$config" "exit code $lastCode is not the test-failures code (11): the run stopped early or hit a runner error"
     elif skipped_on_main_applicable; then
       junitArgs=()
       while IFS= read -r junitFile; do

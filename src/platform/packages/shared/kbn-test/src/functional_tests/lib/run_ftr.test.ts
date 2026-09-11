@@ -23,12 +23,17 @@ jest.mock('../../functional_test_runner', () => ({
 }));
 
 const log = new ToolingLog();
-const config = {} as Config;
 const esVersion = {} as EsVersion;
+const configWith = (bail: boolean): Config =>
+  ({ get: (key: string) => (key === 'mochaOpts.bail' ? bail : undefined) } as unknown as Config);
+const config = configWith(false);
 
-const runAndCatch = async (signal?: AbortSignal): Promise<FailError> => {
+const runAndCatch = async ({
+  signal,
+  config: cfg = config,
+}: { signal?: AbortSignal; config?: Config } = {}): Promise<FailError> => {
   try {
-    await runFtr({ log, config, esVersion, signal });
+    await runFtr({ log, config: cfg, esVersion, signal });
   } catch (error) {
     if (!isFailError(error)) {
       throw error;
@@ -61,7 +66,13 @@ describe('runFtr', () => {
       ctrl.abort();
       return 1;
     });
-    const error = await runAndCatch(ctrl.signal);
+    const error = await runAndCatch({ signal: ctrl.signal });
+    expect(error.exitCode).toBe(1);
+  });
+
+  it('exits with 1 when bail is on (CLI flag, FTR_EXTRA_ARGS or mochaOpts), since the run stopped at the first failure', async () => {
+    mockRun.mockResolvedValue(1);
+    const error = await runAndCatch({ config: configWith(true) });
     expect(error.exitCode).toBe(1);
   });
 });
