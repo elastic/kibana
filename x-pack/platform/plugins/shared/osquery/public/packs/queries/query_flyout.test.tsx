@@ -600,4 +600,226 @@ describe('QueryFlyout', () => {
       });
     });
   });
+
+  describe('V5: consolidated pack-defaults override toggle', () => {
+    it('hides the override toggle when the pack has no execution defaults', () => {
+      renderFlyout({ uniqueQueryIds: [] });
+      expect(screen.queryByTestId('osquery-query-override-pack-defaults')).not.toBeInTheDocument();
+    });
+
+    it('shows a single override toggle when the pack sets any default', () => {
+      renderFlyout({ uniqueQueryIds: [], packMinOsqueryVersion: '5.10.0' });
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).toBeInTheDocument();
+      // The old per-field toggles are gone.
+      expect(screen.queryByTestId('osquery-query-override-pack-version')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('osquery-query-override-pack-result-type')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('osquery-query-override-pack-platform')).not.toBeInTheDocument();
+    });
+
+    it('shows the toggle when only the pack result type is set', () => {
+      renderFlyout({ uniqueQueryIds: [], packResultType: 'differential' });
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).toBeInTheDocument();
+    });
+
+    it('shows the toggle when only the pack platform is set', () => {
+      renderFlyout({ uniqueQueryIds: [], packPlatform: 'linux' });
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).toBeInTheDocument();
+    });
+
+    it('strips every execution default when the toggle is off', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        packMinOsqueryVersion: '5.10.0',
+        packPlatform: 'linux',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          version: '5.12.0',
+        },
+      });
+
+      // A stored per-query version means the toggle starts ON.
+      const toggle = screen.getByTestId('osquery-query-override-pack-defaults');
+      expect(toggle).toBeChecked();
+
+      act(() => {
+        fireEvent.click(toggle);
+      });
+      expect(toggle).not.toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      // The pack defaults both of these, so turning the toggle off makes the
+      // query inherit them.
+      expect(saved).not.toHaveProperty('version');
+      expect(saved).not.toHaveProperty('platform');
+    });
+
+    // Regression: the override-off branch used to delete `version`,
+    // `result_type` and `platform` unconditionally, while only the
+    // snapshot/removed delete was gated on the matching pack default. Because
+    // the toggle is shown when *any* pack default is set, turning it off wiped
+    // per-query values for fields the pack had no default for — the query
+    // inherited nothing and silently lost its own setting.
+    it('should keep a per-query value for a field the pack does not default when the toggle is off', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        // Only a result-type default: version and platform are NOT defaulted.
+        packResultType: 'snapshot',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          version: '5.12.0',
+          platform: 'windows',
+        },
+      });
+
+      // The query stores its own version and platform, so the toggle starts ON.
+      const toggle = screen.getByTestId('osquery-query-override-pack-defaults');
+      expect(toggle).toBeChecked();
+
+      act(() => {
+        fireEvent.click(toggle);
+      });
+      expect(toggle).not.toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      // The pack defaults neither of these, so the query's own values survive.
+      expect(saved.version).toBe('5.12.0');
+      expect(saved.platform).toBe('windows');
+      // The pack does default the result type, so that one is inherited.
+      expect(saved).not.toHaveProperty('result_type');
+    });
+
+    it('emits a per-query value that differs from the pack default', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q2'],
+        packMinOsqueryVersion: '5.10.0',
+        defaultValue: {
+          id: 'q2',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          version: '5.12.0',
+        },
+      });
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0].version).toBe('5.12.0');
+    });
+
+    // The point of "emit only what differs": a query overriding one field
+    // keeps inheriting the others, so later pack-level changes still reach it.
+    it('does not emit a per-query value equal to the pack default', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q3'],
+        packMinOsqueryVersion: '5.10.0',
+        packPlatform: 'linux',
+        defaultValue: {
+          id: 'q3',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          // Matches the pack default exactly.
+          version: '5.10.0',
+          platform: 'windows',
+        },
+      });
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved).not.toHaveProperty('version');
+      expect(saved.platform).toBe('windows');
+    });
+
+    // Regression: with the toggle ON, the serializer deleted `result_type` when
+    // it matched the pack default but left the seeded `snapshot`/`removed` pair
+    // behind. The server decodes that pair as an explicit per-query override, so
+    // a later pack-level result-type change would never reach this query — the
+    // opposite of the inheritance this branch is supposed to preserve.
+    it('does not leak seeded snapshot/removed when overriding only another field', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q4'],
+        packResultType: 'differential',
+        packPlatform: 'linux',
+        defaultValue: {
+          id: 'q4',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+          // Overrides the OS only, so the toggle is ON while the result type
+          // is still inherited from the pack.
+          platform: 'windows',
+        },
+      });
+
+      const toggle = screen.getByTestId('osquery-query-override-pack-defaults');
+      expect(toggle).toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      // The real override survives.
+      expect(saved.platform).toBe('windows');
+      // The inherited result type leaves nothing behind, in any encoding.
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+
+    // Seeding the inherited result type also writes the `snapshot`/`removed`
+    // booleans the field reads. Those must not leak to the wire for an
+    // inheriting query — the pack default already fans out server-side.
+    it('does not leak seeded snapshot/removed booleans for an inheriting query', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q4'],
+        packResultType: 'differential',
+        defaultValue: {
+          id: 'q4',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+        },
+      });
+
+      // No stored per-query value → toggle OFF → fully inheriting.
+      expect(screen.getByTestId('osquery-query-override-pack-defaults')).not.toBeChecked();
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      const saved = onSave.mock.calls[0][0];
+      expect(saved).not.toHaveProperty('result_type');
+      expect(saved).not.toHaveProperty('snapshot');
+      expect(saved).not.toHaveProperty('removed');
+    });
+  });
 });

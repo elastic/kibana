@@ -63,7 +63,18 @@ interface QueryFlyoutProps {
   onSave: (payload: PackSOQueryFormData) => void;
   onClose: () => void;
   packSchedule?: UsePackQueryFormProps['packSchedule'];
+  /** Pack-level min osquery version (V5). When set, shows per-query override toggle. */
+  packMinOsqueryVersion?: string;
+  /** Pack-level result type (V5). When set, shows per-query override toggle. */
+  packResultType?: UsePackQueryFormProps['packResultType'];
+  /** Pack-level platform (V5). When set, shows per-query override toggle. */
+  packPlatform?: string;
 }
+
+const ALL_VERSIONS_PLACEHOLDER = i18n.translate(
+  'xpack.osquery.queriesTable.osqueryVersionAllLabel',
+  { defaultMessage: 'All' }
+);
 
 const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   uniqueQueryIds,
@@ -71,6 +82,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
   packSchedule,
+  packMinOsqueryVersion,
+  packResultType,
+  packPlatform,
 }) => {
   const {
     application: {
@@ -84,6 +98,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     uniqueQueryIds,
     defaultValue,
     packSchedule,
+    packMinOsqueryVersion,
+    packResultType,
+    packPlatform,
   });
 
   const {
@@ -95,6 +112,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   } = hooksForm;
 
   const overridePackSchedule = watch('override_pack_schedule');
+  const overridePackDefaults = watch('override_pack_defaults');
   const schedule = watch('schedule');
 
   const queryOwnInterval = defaultValue?.interval ? parseInt(defaultValue.interval, 10) : undefined;
@@ -167,6 +185,49 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       setValue('override_pack_schedule', next, { shouldDirty: true });
     },
     [setValue]
+  );
+
+  const handleToggleDefaultsOverride = useCallback(
+    (next: boolean) => {
+      setValue('override_pack_defaults', next, { shouldDirty: true });
+    },
+    [setValue]
+  );
+
+  // The pack exposes at least one execution default, so the query can override.
+  const packHasDefaults = !!packMinOsqueryVersion || !!packResultType || !!packPlatform;
+
+  const platformFieldProps = useMemo(
+    () => ({ isDisabled: !overridePackDefaults }),
+    [overridePackDefaults]
+  );
+
+  const resultTypeFieldProps = useMemo(
+    () => ({ isDisabled: !overridePackDefaults }),
+    [overridePackDefaults]
+  );
+
+  const versionFieldProps = useMemo(
+    () => ({
+      noSuggestions: false,
+      singleSelection: { asPlainText: true },
+      placeholder: packMinOsqueryVersion ?? ALL_VERSIONS_PLACEHOLDER,
+      options: ALL_OSQUERY_VERSIONS_OPTIONS,
+      onCreateOption: undefined,
+      isDisabled: !overridePackDefaults,
+    }),
+    [packMinOsqueryVersion, overridePackDefaults]
+  );
+
+  const plainVersionFieldProps = useMemo(
+    () => ({
+      noSuggestions: false,
+      singleSelection: { asPlainText: true },
+      placeholder: ALL_VERSIONS_PLACEHOLDER,
+      options: ALL_OSQUERY_VERSIONS_OPTIONS,
+      onCreateOption: undefined,
+    }),
+    []
   );
 
   const handleScheduleChange = useCallback(
@@ -299,43 +360,83 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               <EuiSpacer />
             </>
           ) : null}
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              {!isRruleSchedulingEnabled ? (
-                <>
-                  <IntervalField
-                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                    euiFieldProps={{ append: 's' }}
-                  />
-                  <EuiSpacer />
-                </>
-              ) : null}
-              <VersionField
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                euiFieldProps={{
-                  noSuggestions: false,
-                  singleSelection: { asPlainText: true },
-                  placeholder: i18n.translate('xpack.osquery.queriesTable.osqueryVersionAllLabel', {
-                    defaultMessage: 'ALL',
-                  }),
-                  options: ALL_OSQUERY_VERSIONS_OPTIONS,
-                  onCreateOption: undefined,
-                }}
-              />
+          {/* One toggle governs all three pack execution defaults. The
+              serializer still emits only the fields whose value differs from
+              the pack default, so overriding the OS alone leaves version and
+              result type inheriting. */}
+          {packHasDefaults ? (
+            <>
+              <ToggleableRow
+                title={i18n.translate('xpack.osquery.queryFlyout.overridePackDefaultsToggleLabel', {
+                  defaultMessage: 'Override pack defaults',
+                })}
+                description={i18n.translate(
+                  'xpack.osquery.queryFlyout.overridePackDefaultsToggleDescription',
+                  {
+                    defaultMessage:
+                      'Set this query\u2019s minimum osquery version, result type and operating systems instead of inheriting the pack\u2019s.',
+                  }
+                )}
+                enabled={!!overridePackDefaults}
+                onToggle={handleToggleDefaultsOverride}
+                dataTestSubj="osquery-query-override-pack-defaults"
+              >
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <VersionField euiFieldProps={versionFieldProps} />
+                    <EuiSpacer />
+                    <ResultsTypeField euiFieldProps={resultTypeFieldProps} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <PlatformCheckBoxGroupField euiFieldProps={platformFieldProps} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </ToggleableRow>
               <EuiSpacer />
-              <ResultsTypeField />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup direction={'column'} justifyContent={'spaceBetween'}>
+              <EuiFlexGroup>
                 <EuiFlexItem>
-                  <PlatformCheckBoxGroupField />
+                  {!isRruleSchedulingEnabled ? (
+                    <IntervalField
+                      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                      euiFieldProps={{ append: 's' }}
+                    />
+                  ) : null}
                 </EuiFlexItem>
-                <EuiFlexItem grow={0}>
+                <EuiFlexItem>
                   <TimeoutField euiFieldProps={timeoutFieldProps} />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </>
+          ) : (
+            /* No pack defaults: the per-query fields are the sole source, so
+               they render unconditionally with no override affordance. */
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                {!isRruleSchedulingEnabled ? (
+                  <>
+                    <IntervalField
+                      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                      euiFieldProps={{ append: 's' }}
+                    />
+                    <EuiSpacer />
+                  </>
+                ) : null}
+                <VersionField euiFieldProps={plainVersionFieldProps} />
+                <EuiSpacer />
+                <ResultsTypeField />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction={'column'} justifyContent={'spaceBetween'}>
+                  <EuiFlexItem>
+                    <PlatformCheckBoxGroupField />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={0}>
+                    <TimeoutField euiFieldProps={timeoutFieldProps} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem css={overflowCss}>

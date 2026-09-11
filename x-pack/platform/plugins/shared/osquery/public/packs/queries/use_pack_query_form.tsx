@@ -13,6 +13,12 @@ import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
+import type { ResultType } from '../../../common/result_type';
+import {
+  mapResultTypeToWire,
+  mapWireToResultType,
+  mapWireToExplicitResultType,
+} from '../../../common/result_type';
 import type { Shard } from '../../../common/utils/converters';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { DeserializeScheduleInput } from '../form/schedule_serializer';
@@ -34,6 +40,12 @@ export interface UsePackQueryFormProps {
     // inheritance target for a non-override query — see elastic/kibana#277700.
     hasExplicitSchedule?: boolean;
   };
+  /** Pack-level min osquery version default (V5). When set, the flyout shows an override toggle. */
+  packMinOsqueryVersion?: string;
+  /** Pack-level result type default (V5). When set, the flyout shows an override toggle. */
+  packResultType?: ResultType;
+  /** Pack-level platform default (V5). When set, the flyout shows an override toggle. */
+  packPlatform?: string;
 }
 
 export interface PackSOQueryFormData {
@@ -51,6 +63,15 @@ export interface PackSOQueryFormData {
   schedule_type?: ScheduleType;
   /** Per-query RRULE schedule override. Only present when `schedule_type === 'rrule'`. */
   rrule_schedule?: RRuleScheduleConfig;
+  /** Per-query enabled flag. When false the query is filtered from the Fleet emit. Default: true. */
+  enabled?: boolean;
+  /** Per-query result type override. Only present when it differs from the pack default. */
+  result_type?: ResultType;
+  /**
+   * Form-only flag: whether this query overrides the pack's execution defaults
+   * (min osquery version / result type / platform). Never persisted.
+   */
+  override_pack_defaults?: boolean;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
@@ -75,6 +96,17 @@ export interface PackQueryFormData {
   schedule?: ScheduleFormData;
   schedule_type?: ScheduleType;
   rrule_schedule?: RRuleScheduleConfig;
+  /** Whether this query is enabled. When false it is filtered from the Fleet emit. Default: true. */
+  enabled?: boolean;
+  /** Per-query result type override value. */
+  result_type?: ResultType;
+  /**
+   * When true, this query overrides the pack's execution defaults. A single
+   * toggle governs min osquery version, result type and platform together;
+   * the serializer still emits only the individual fields whose value actually
+   * differs from the pack default, so an unchanged field keeps inheriting.
+   */
+  override_pack_defaults?: boolean;
 }
 
 const isSameScheduleMode = (
@@ -158,34 +190,112 @@ const deserializeQuerySchedule = (
 
 const deserializer = (
   payload: PackSOQueryFormData,
-  deserializedSchedule: ScheduleFormData
+  deserializedSchedule: ScheduleFormData,
+  packMinOsqueryVersion?: string,
+  packResultType?: ResultType,
+  packPlatform?: string
 ): PackQueryFormData => {
   const hasOverride = payload.schedule_type !== undefined;
   const queryInterval = payload.interval ? parseInt(payload.interval, 10) : undefined;
+
+  // The single toggle is ON when this query stores its own value for any of
+  // the three execution defaults.
+  //
+  // Deliberately *not* gated on the matching pack default. The toggle governs
+  // all three fields at once, so a query that stores a platform while the pack
+  // only defaults a result type still holds a value the toggle is responsible
+  // for. Gating each predicate on its own pack default rendered the toggle OFF
+  // while the disabled controls displayed the query's real values — the state
+  // shown did not match the state stored.
+  //
+  // `result_type` is read alongside the legacy `snapshot`/`removed` pair so a
+  // pre-V5 query that only ever stored the booleans is still recognised as
+  // holding its own result type.
+  //
+  // Two different decoders are needed here, because "what should the control
+  // display" and "does this query hold an override" are different questions:
+  //
+  //  - display uses the faithful inverse, so a query storing `snapshot: true`
+  //    still renders as Snapshot;
+  //  - the override predicate uses the explicit-only decoder, because the
+  //    flyout used to seed `snapshot: true, removed: false` into every new
+  //    query. Counting that pair as an override would force the toggle ON for
+  //    virtually every pre-existing query in every pack.
+  const storedResultType =
+    payload.result_type ??
+    mapWireToResultType({ snapshot: payload.snapshot, removed: payload.removed });
+  const hasStoredResultType =
+    (payload.result_type ??
+      mapWireToExplicitResultType({ snapshot: payload.snapshot, removed: payload.removed })) !==
+    undefined;
+  const hasVersionOverride = payload.version !== undefined;
+  // Not gated on `packResultType`, matching the two predicates around it. The
+  // toggle governs all three fields at once, so gating this one alone rendered
+  // the toggle OFF while the enabled Result type control displayed the query's
+  // own stored value — the state shown did not match the state stored.
+  const hasResultTypeOverride = hasStoredResultType;
+  const hasPlatformOverride = !!payload.platform;
+  const hasAnyOverride = hasVersionOverride || hasResultTypeOverride || hasPlatformOverride;
+
+  // Seed each execution-default field with the pack's value when the query has
+  // none of its own, so the (disabled) controls show what the query actually
+  // inherits rather than the field's own hardcoded default. The serializer
+  // drops any value equal to the pack default, so seeding cannot turn an
+  // inheriting query into an overriding one.
+  const effectivePlatform = payload.platform || packPlatform || DEFAULT_PLATFORM;
+  const effectiveVersion = payload.version ?? packMinOsqueryVersion;
+  // The query's own stored type (including a legacy boolean-only one) wins
+  // over the pack default, otherwise opening a legacy differential query in a
+  // pack that defaults to snapshot would display — and then save — snapshot.
+  const effectiveResultType = storedResultType ?? packResultType;
+
+  // `ResultsTypeField` derives its display from the `snapshot`/`removed`
+  // booleans, not from `result_type`, so the inherited value has to be
+  // projected onto them. `mapResultTypeToWire` returns `{}` for 'snapshot'
+  // (absence means snapshot on the wire), which the field reads as
+  // `snapshot: undefined` → falsy → Differential. Default explicitly instead.
+  const inheritedResultBooleans =
+    effectiveResultType !== undefined
+      ? { snapshot: true, removed: false, ...mapResultTypeToWire(effectiveResultType) }
+      : { snapshot: payload.snapshot, removed: payload.removed };
 
   return {
     id: payload.id,
     query: payload.query,
     interval: queryInterval ?? 3600,
     timeout: payload.timeout || QUERY_TIMEOUT.DEFAULT,
-    snapshot: payload.snapshot,
-    removed: payload.removed,
-    platform: payload.platform || DEFAULT_PLATFORM,
-    version: payload.version ? [payload.version] : [],
+    ...inheritedResultBooleans,
+    platform: effectivePlatform,
+    version: effectiveVersion ? [effectiveVersion] : [],
     ecs_mapping: payload.ecs_mapping ?? {},
     override_pack_schedule: hasOverride,
     schedule: deserializedSchedule,
+    override_pack_defaults: hasAnyOverride,
+    ...(effectiveResultType !== undefined ? { result_type: effectiveResultType } : {}),
+    ...(payload.enabled !== undefined ? { enabled: payload.enabled } : {}),
   };
 };
 
+interface PackDefaultsForSerializer {
+  packMinOsqueryVersion?: string;
+  packResultType?: ResultType;
+  packPlatform?: string;
+}
+
 const serializer = (
   payload: PackQueryFormData,
-  packSchedule?: UsePackQueryFormProps['packSchedule']
+  packSchedule?: UsePackQueryFormProps['packSchedule'],
+  packDefaults: PackDefaultsForSerializer = {}
 ): PackSOQueryFormData => {
   // The schedule fields live outside the immer-produced shape because the
   // PackSOQueryFormData wire type tightens `schedule_type` / `rrule_schedule`
   // and drops `override_pack_schedule` / `schedule`.
-  const { override_pack_schedule: overridePackSchedule, schedule, ...rest } = payload;
+  const {
+    override_pack_schedule: overridePackSchedule,
+    override_pack_defaults: overridePackDefaults,
+    schedule,
+    ...rest
+  } = payload;
 
   const base = produce(
     rest as unknown as PackSOQueryFormData,
@@ -212,6 +322,68 @@ const serializer = (
 
       if (isEmpty(draft.ecs_mapping)) {
         delete draft.ecs_mapping;
+      }
+
+      // A single toggle governs all three execution defaults. When it is OFF
+      // the query inherits every one of them, so none are emitted.
+      //
+      // When it is ON we still emit only the fields whose value actually
+      // differs from the pack default: a query that overrides just the OS
+      // keeps inheriting version and result type, so a later pack-level change
+      // still reaches it. `override_pack_defaults === undefined` means the pack
+      // has no defaults at all (the toggle is hidden), in which case the
+      // per-query fields are the sole source and are emitted unconditionally.
+      if (overridePackDefaults === false) {
+        // Each delete is gated on the *matching* pack default. The toggle is
+        // shown when the pack has any one of the three defaults, so an
+        // ungated delete here would erase a per-query value for a field the
+        // pack has no default for — the query would inherit nothing and
+        // silently lose its own setting (an OS restriction or version floor
+        // dropped on a pack whose only default is a result type).
+        if (packDefaults.packMinOsqueryVersion) {
+          delete draft.version;
+        }
+
+        if (packDefaults.packPlatform) {
+          delete draft.platform;
+        }
+
+        // The deserializer seeds `snapshot`/`removed` from the pack's result
+        // type so the disabled control displays the inherited value. Those are
+        // display-only for an inheriting query: leaving `snapshot: false` on
+        // the wire would hit the server's legacy branch
+        // (`snapshot === false ? { removed, snapshot } : {}`) and be read as an
+        // explicit per-query differential override.
+        if (packDefaults.packResultType) {
+          delete draft.result_type;
+          delete draft.snapshot;
+          delete draft.removed;
+        }
+      } else if (overridePackDefaults === true) {
+        if (
+          packDefaults.packMinOsqueryVersion &&
+          draft.version === packDefaults.packMinOsqueryVersion
+        ) {
+          delete draft.version;
+        }
+
+        // Drop the companion booleans alongside `result_type`, not just
+        // `result_type` itself. The deserializer seeds `snapshot`/`removed`
+        // from the effective result type so the control can display it, so a
+        // query that overrides only (say) the OS still carries a seeded pair
+        // here. Deleting `result_type` while leaving that pair behind sends the
+        // pack default's own value back as a per-query field, where the server
+        // decodes it as an explicit override — and a later pack-level change
+        // would then never reach this query, the exact opposite of inheriting.
+        if (packDefaults.packResultType && draft.result_type === packDefaults.packResultType) {
+          delete draft.result_type;
+          delete draft.snapshot;
+          delete draft.removed;
+        }
+
+        if (packDefaults.packPlatform && draft.platform === packDefaults.packPlatform) {
+          delete draft.platform;
+        }
       }
 
       return draft;
@@ -254,6 +426,9 @@ export const usePackQueryForm = ({
   uniqueQueryIds,
   defaultValue,
   packSchedule,
+  packMinOsqueryVersion,
+  packResultType,
+  packPlatform,
 }: UsePackQueryFormProps) => {
   const idSet = useMemo<Set<string>>(
     () => new Set<string>(xor(uniqueQueryIds, defaultValue?.id ? [defaultValue.id] : [])),
@@ -266,20 +441,32 @@ export const usePackQueryForm = ({
   );
 
   return {
-    serializer: (payload: PackQueryFormData) => serializer(payload, packSchedule),
+    serializer: (payload: PackQueryFormData) =>
+      serializer(payload, packSchedule, { packMinOsqueryVersion, packResultType, packPlatform }),
     idSet,
     deserializedSchedule,
     ...useHookForm<PackQueryFormData>({
       defaultValues: defaultValue
-        ? deserializer(defaultValue, deserializedSchedule)
+        ? deserializer(
+            defaultValue,
+            deserializedSchedule,
+            packMinOsqueryVersion,
+            packResultType,
+            packPlatform
+          )
         : {
             id: '',
             query: '',
             interval: 3600,
-            snapshot: true,
-            removed: false,
-            platform: DEFAULT_PLATFORM,
+            // Seed a new query from the pack's execution defaults so the
+            // disabled controls show what it will actually inherit.
+            ...(packResultType
+              ? { snapshot: true, removed: false, ...mapResultTypeToWire(packResultType) }
+              : { snapshot: true, removed: false }),
+            platform: packPlatform || DEFAULT_PLATFORM,
+            version: packMinOsqueryVersion ? [packMinOsqueryVersion] : [],
             override_pack_schedule: false,
+            override_pack_defaults: false,
             schedule: deserializedSchedule,
           },
     }),

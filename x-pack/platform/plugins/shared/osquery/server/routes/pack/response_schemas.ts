@@ -41,6 +41,17 @@ const packQuerySchema = schema.object(
     saved_query_id: schema.maybe(schema.nullable(schema.string())),
     name: schema.maybe(schema.string()),
     schedule_id: schema.maybe(schema.string()),
+    // V5: per-query enabled flag and result type override
+    enabled: schema.maybe(schema.nullable(schema.boolean())),
+    result_type: schema.maybe(
+      schema.nullable(
+        schema.oneOf([
+          schema.literal('snapshot'),
+          schema.literal('differential'),
+          schema.literal('differential_added_only'),
+        ])
+      )
+    ),
   },
   { unknowns: 'allow' }
 );
@@ -81,6 +92,18 @@ const packDataSchema = schema.object(
       )
     ),
     read_only: schema.maybe(schema.boolean()),
+    // V5/V6: pack-level execution defaults
+    min_osquery_version: schema.maybe(schema.nullable(schema.string())),
+    platform: schema.maybe(schema.nullable(schema.string())),
+    result_type: schema.maybe(
+      schema.nullable(
+        schema.oneOf([
+          schema.literal('snapshot'),
+          schema.literal('differential'),
+          schema.literal('differential_added_only'),
+        ])
+      )
+    ),
   },
   { unknowns: 'allow' }
 );

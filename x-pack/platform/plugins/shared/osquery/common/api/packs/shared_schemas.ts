@@ -48,6 +48,12 @@ export const rruleScheduleConfigPartialRt = t.partial({
   timeout: toNumberRt,
 });
 
+export const resultTypeRt = t.union([
+  t.literal('snapshot'),
+  t.literal('differential'),
+  t.literal('differential_added_only'),
+]);
+
 const basePackQueryFields = {
   interval: toNumberRt,
   snapshot: t.boolean,
@@ -62,6 +68,9 @@ const basePackQueryFields = {
     })
   ),
   schedule_type: t.union([t.literal('interval'), t.literal('rrule')]),
+  // V5: per-query enabled flag and result type override
+  enabled: t.boolean,
+  result_type: resultTypeRt,
 };
 
 export const packQueryRecordRt = t.record(

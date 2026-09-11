@@ -167,6 +167,12 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             saved_object_id: newPackSO.id,
             // Discriminated response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
+            // V5: pack-level execution defaults (copied from source via restAttributes)
+            ...(attributes.min_osquery_version != null
+              ? { min_osquery_version: attributes.min_osquery_version }
+              : {}),
+            ...(attributes.result_type != null ? { result_type: attributes.result_type } : {}),
+            ...(attributes.platform != null ? { platform: attributes.platform } : {}),
           };
 
           return response.ok({

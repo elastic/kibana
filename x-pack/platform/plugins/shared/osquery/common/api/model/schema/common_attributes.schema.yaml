@@ -377,3 +377,28 @@ components:
     PackIntervalOrUndefined:
       $ref: '#/components/schemas/PackInterval'
       nullable: true
+
+    ResultType:
+      description: |
+        Controls the result document type emitted by osquerybeat for this pack or query.
+        - `snapshot`: Full table snapshot on every scheduled run (default).
+        - `differential`: Rows added or removed since the previous run.
+        - `differential_added_only`: Only rows added since the previous run (no removals).
+      type: string
+      enum:
+        - snapshot
+        - differential
+        - differential_added_only
+
+    ResultTypeOrUndefined:
+      $ref: '#/components/schemas/ResultType'
+      nullable: true
+
+    MinOsqueryVersion:
+      description: 'Minimum osquery agent version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.'
+      type: string
+      example: '5.10.0'
+
+    MinOsqueryVersionOrUndefined:
+      $ref: '#/components/schemas/MinOsqueryVersion'
+      nullable: true

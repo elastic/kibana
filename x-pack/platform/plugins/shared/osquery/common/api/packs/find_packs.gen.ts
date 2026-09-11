@@ -25,6 +25,9 @@ import {
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   PackIntervalOrUndefined,
+  MinOsqueryVersion,
+  ResultType,
+  Platform,
   ObjectQueries,
   Shards,
 } from '../model/schema/common_attributes.gen';
@@ -103,6 +106,9 @@ export const FindPacksResponse = lazySchema(() =>
           schedule_type: ScheduleTypeOrUndefined.optional(),
           interval: PackIntervalOrUndefined.optional(),
           rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+          min_osquery_version: MinOsqueryVersion.optional(),
+          result_type: ResultType.optional(),
+          platform: Platform.optional(),
         })
       )
       .describe('An array of pack objects.'),
@@ -158,6 +164,9 @@ export const FindPackResponse = lazySchema(() =>
         schedule_type: ScheduleTypeOrUndefined.optional(),
         interval: PackIntervalOrUndefined.optional(),
         rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+        min_osquery_version: MinOsqueryVersion.optional(),
+        result_type: ResultType.optional(),
+        platform: Platform.optional(),
       })
       .describe('The pack details.'),
   })

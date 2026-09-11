@@ -34,6 +34,8 @@ import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
+import type { ResultType } from '../../../common/result_type';
+import { mapResultTypeToWire, mapWireToExplicitResultType } from '../../../common/result_type';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import { parseRRule } from '../../../common/utils/rrule_parser';
@@ -70,6 +72,10 @@ export interface PackQueryInput {
   schedule_type?: ScheduleType;
   /** Per-query RRULE override (only present when `schedule_type === 'rrule'`). */
   rrule_schedule?: RRuleScheduleConfig;
+  /** Whether this query is enabled. When false it is omitted from the Fleet emit. Default: true. */
+  enabled?: boolean;
+  /** Per-query result type override. Present when the query overrides the pack default. */
+  result_type?: ResultType;
 }
 
 export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
@@ -77,7 +83,7 @@ export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
   name: string;
 }
 
-// Byte-identical to the pre-rrule pick list.
+// Byte-identical to the pre-rrule pick list (plus V5 fields).
 const INTERVAL_MODE_PICK = [
   'name',
   'query',
@@ -89,6 +95,8 @@ const INTERVAL_MODE_PICK = [
   'timeout',
   'schedule_id',
   'start_date',
+  'enabled',
+  'result_type',
 ] as const;
 
 const RRULE_MODE_PICK = [
@@ -101,6 +109,8 @@ const RRULE_MODE_PICK = [
   'timeout',
   'schedule_id',
   'start_date',
+  'enabled',
+  'result_type',
 ] as const;
 
 export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>): SOPackQuery[] =>
@@ -353,6 +363,24 @@ export const convergePerQueryIntervals = (
   );
 };
 
+export interface PackExecutionDefaults {
+  /** Pack-level minimum osquery version default. Fans out to inheriting queries. */
+  min_osquery_version?: string | null;
+  /** Pack-level result type default. Fans out to inheriting queries. */
+  result_type?: ResultType | null;
+  /**
+   * Pack-level platform default (comma-separated osquery platform tokens).
+   * Fans out to inheriting queries exactly like the two fields above.
+   *
+   * This is deliberately NOT osquery's native `Pack.Platform`, which is an
+   * init-time gate that skips the *whole pack* when it fails. Kibana never
+   * emits that field; this value is expanded onto each inheriting query as a
+   * per-query `platform`, so a query's own value always wins and a mismatch
+   * only ever skips that one query.
+   */
+  platform?: string | null;
+}
+
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
@@ -363,6 +391,8 @@ export interface ConvertSOQueriesToPackConfigOptions {
   // The pack's created_at. When absent or unparseable the epoch sentinel is
   // emitted — deterministic, so the reconciler's diff gate holds.
   fallbackStartDate?: string;
+  /** V5: Pack-level execution defaults to fan out onto inheriting queries. */
+  packExecutionDefaults?: PackExecutionDefaults;
 }
 
 export interface PackConfigOutput {
@@ -374,11 +404,39 @@ export interface PackConfigOutput {
 
 // Builds the Fleet packs.{key}.queries config plus pack-level defaults;
 // per-query fields only emitted when they override the pack default.
+/**
+ * True when a platform string names every OS in {@link DEFAULT_PLATFORM},
+ * regardless of token order or spacing.
+ *
+ * The comparison is set-based rather than a string equality check: the stored
+ * value's token order depends on how it was produced (the flyout's seeded
+ * default, a pack upload, or a hand-edited saved object), so
+ * `'linux,darwin,windows'` and `'linux,windows,darwin'` must be treated alike.
+ */
+const ALL_PLATFORM_TOKENS = new Set(DEFAULT_PLATFORM.split(',').map((token) => token.trim()));
+
+const isAllPlatforms = (value?: string): boolean => {
+  if (!value) {
+    return false;
+  }
+
+  const tokens = value
+    .split(',')
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+
+  return (
+    tokens.length === ALL_PLATFORM_TOKENS.size &&
+    tokens.every((token) => ALL_PLATFORM_TOKENS.has(token))
+  );
+};
+
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
-  const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate } = options;
+  const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate, packExecutionDefaults } =
+    options;
   // Never `now()`: a time-of-write anchor differs on every call, so the
   // reconciler would rewrite the policy (re-anchoring execution numbering) on
   // every restart. Validate rather than `?? EPOCH` — `created_at` is
@@ -410,11 +468,42 @@ export const convertSOQueriesToPackConfig = (
         rrule_schedule: queryRrule,
         start_date: legacyStartDate,
         schedule_id: scheduleId,
+        // V5: strip SO-only fields from ...rest so they don't leak to the wire
+        enabled: queryEnabled,
+        result_type: queryResultType,
         ...rest
       }: SOPackQuery,
       key: number
     ) => {
-      const resultType = snapshot === false ? { removed, snapshot } : {};
+      // V5: disabled queries are filtered before fan-out (D7 / Path A)
+      if (queryEnabled === false) {
+        return null;
+      }
+
+      // V5: Path A fan-out — compute effective result type (per-query override
+      // or pack default).
+      //
+      // A pre-V5 query records its result type only as the stored
+      // `snapshot`/`removed` pair, and a *deliberate* pair outranks the pack
+      // default exactly as `result_type` does: reading the pack default first
+      // would silently rewrite a legacy differential query to snapshot the
+      // moment a curator set any pack-level result type — an unannounced change
+      // on the agent wire.
+      //
+      // Only `snapshot === false` counts as deliberate, which is why this uses
+      // `mapWireToExplicitResultType` rather than the plain inverse. The flyout
+      // used to seed `snapshot: true, removed: false` into every new query, so
+      // honouring that pair as an override would leave a pack-level result type
+      // applying to no pre-existing query at all.
+      const packDefaultResultType = packExecutionDefaults?.result_type ?? undefined;
+      const storedResultType: ResultType | undefined =
+        queryResultType ?? mapWireToExplicitResultType({ snapshot, removed });
+      const effectiveResultType: ResultType | undefined =
+        storedResultType ?? packDefaultResultType ?? undefined;
+      const wireResultType: Record<string, unknown> = effectiveResultType
+        ? mapResultTypeToWire(effectiveResultType)
+        : {};
+
       const index = deriveEffectiveQueryKey({ id: queryId }, key);
 
       let scheduleFields: Record<string, unknown> = {};
@@ -454,9 +543,31 @@ export const convertSOQueriesToPackConfig = (
                 : resolvedFallback,
           };
 
+      // V5: Path A fan-out for min_osquery_version (per-query value or pack default)
+      const packDefaultVersion = packExecutionDefaults?.min_osquery_version ?? undefined;
+      // `version` lives in rest; extract to compute the effective value
+      const { version: perQueryVersion, ...restWithoutVersion } = rest as PackQueryInput & {
+        version?: string;
+      };
+      const effectiveVersion = perQueryVersion ?? packDefaultVersion;
+
+      // V5: Path A fan-out for platform. Same rule as version — the per-query
+      // value wins outright when present, otherwise the pack default applies.
+      // `DEFAULT_PLATFORM` (all three OSes) stays suppressed from the wire in
+      // both cases: emitting it is a no-op for osquery and would bloat every
+      // query in every pack.
+      // A per-query value naming every supported OS is not a restriction — it
+      // is what the flyout seeds when a query has no platform of its own, so it
+      // is common in stored data. Treating it as an override would discard the
+      // pack default and run the query everywhere, the opposite of what the
+      // curator configured.
+      const packDefaultPlatform = packExecutionDefaults?.platform ?? undefined;
+      const perQueryPlatform = isAllPlatforms(platform) ? undefined : platform;
+      const effectivePlatform = perQueryPlatform ?? packDefaultPlatform;
+
       queriesOut[index] = omitBy(
         {
-          ...rest,
+          ...restWithoutVersion,
           // Emitted flag-independent: it's a stable results-join key, not an rrule field.
           schedule_id: scheduleId,
           ...startDateField,
@@ -467,8 +578,11 @@ export const convertSOQueriesToPackConfig = (
               ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
               : { ecs_mapping }
             : {}),
-          ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
-          ...resultType,
+          ...(isAllPlatforms(effectivePlatform) || effectivePlatform === undefined
+            ? {}
+            : { platform: effectivePlatform }),
+          ...wireResultType,
+          ...(effectiveVersion ? { version: effectiveVersion } : {}),
           ...(spaceId ? { space_id: spaceId } : {}),
         },
         isUndefined

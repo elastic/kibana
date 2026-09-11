@@ -119,6 +119,12 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
           // Discriminated read response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
+          // V5: pack-level execution defaults
+          ...(attributes.min_osquery_version != null
+            ? { min_osquery_version: attributes.min_osquery_version }
+            : {}),
+          ...(attributes.result_type != null ? { result_type: attributes.result_type } : {}),
+          ...(attributes.platform != null ? { platform: attributes.platform } : {}),
         };
 
         return response.ok({

@@ -883,4 +883,165 @@ describe('PackForm', () => {
       expect(table.queryByText('80s')).not.toBeInTheDocument();
     });
   });
+
+  describe('V5: pack-level execution defaults UI', () => {
+    const basePackValue = {
+      id: 'v5-pack',
+      saved_object_id: 'v5-pack-so',
+      name: 'v5-pack',
+      description: '',
+      enabled: true,
+      queries: {},
+      created_at: '2024-01-01',
+      created_by: 'test-user',
+      updated_at: '2024-01-01',
+      updated_by: 'test-user',
+      policy_ids: [],
+      references: [],
+    };
+
+    it('renders PackVersionField with data-test-subj "pack-version-field"', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('pack-version-field')).toBeInTheDocument();
+    });
+
+    it('renders PackResultTypeField with data-test-subj "pack-result-type-field"', () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(getByTestId('pack-result-type-field')).toBeInTheDocument();
+    });
+
+    it('does not show migration advisory for a new pack (editMode=false)', () => {
+      const { queryByTestId } = renderWithContext(<PackForm editMode={false} />);
+      expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+    });
+
+    it('does not show migration advisory for a pack with uniform per-query settings', () => {
+      const uniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, snapshot: true, removed: false, ecs_mapping: {} },
+          q2: { query: 'SELECT 2;', interval: 60, snapshot: true, removed: false, ecs_mapping: {} },
+        },
+      };
+      const { queryByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={uniformPack} />
+      );
+      expect(queryByTestId('pack-migration-advisory')).not.toBeInTheDocument();
+    });
+
+    it('shows migration advisory for a pack with non-uniform per-query result types', () => {
+      const nonUniformPack = {
+        ...basePackValue,
+        queries: {
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            snapshot: true,
+            removed: false,
+            ecs_mapping: {},
+          },
+          q2: {
+            query: 'SELECT 2;',
+            interval: 60,
+            snapshot: false,
+            removed: true,
+            ecs_mapping: {},
+          },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={nonUniformPack} />
+      );
+      expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
+    });
+
+    // Platform is now an editable pack-level *default* that fans out onto
+    // queries which do not set their own, replacing the earlier read-only
+    // badge group derived from the queries' union.
+    it('renders the pack-level Operating systems field', () => {
+      const packWithQuery = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery} />
+      );
+      expect(getByTestId('pack-platform-field')).toBeInTheDocument();
+    });
+
+    it('deserializes an existing pack-level platform default into the field', () => {
+      const packWithPlatform = {
+        ...basePackValue,
+        platform: 'linux',
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithPlatform} />
+      );
+      expect(getByTestId('pack-platform-field')).toHaveTextContent('Linux');
+    });
+
+    it('renders no OS selection when the pack has no platform default', () => {
+      const packWithQuery = {
+        ...basePackValue,
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, platform: 'linux', ecs_mapping: {} },
+        },
+      };
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={packWithQuery} />
+      );
+      // A per-query platform must not be reflected as a pack-level default.
+      expect(getByTestId('pack-platform-field')).not.toHaveTextContent('Linux');
+    });
+
+    it('emits min_osquery_version and result_type in serializer on create', async () => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      // Fill in required name field via native input selector
+      const nameInput = document.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
+
+      fireEvent.click(getByTestId('save-pack-button'));
+
+      await waitFor(() => expect(mockCreateAsync).toHaveBeenCalled());
+
+      const submitted = mockCreateAsync.mock.calls[0][0];
+      // Untouched optional fields are absent rather than empty strings.
+      expect(submitted).not.toHaveProperty('min_osquery_version');
+      // Pack-level defaults are opt-in. Persisting 'snapshot' on every new pack
+      // made `packHasDefaults` true everywhere, forcing the query flyout's
+      // "Override pack defaults" toggle on for a value the curator never chose.
+      expect(submitted).not.toHaveProperty('result_type');
+    });
+
+    it('does not force a result_type onto an existing pack that has none', async () => {
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'legacy-pack' } });
+      const legacyPack = {
+        ...basePackValue,
+        name: 'legacy-pack',
+        queries: {
+          q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
+        },
+      };
+      // `basePackValue` carries no `result_type`, mirroring a pre-V5 pack.
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={legacyPack} />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      // Defaulting this to 'snapshot' on open would silently convert the
+      // pack's differential queries the first time a user saved it.
+      expect(submitted).not.toHaveProperty('result_type');
+    });
+  });
 });

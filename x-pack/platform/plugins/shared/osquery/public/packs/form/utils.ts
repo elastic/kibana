@@ -28,6 +28,13 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
           'ecs_mapping',
           'schedule_type',
           'rrule_schedule',
+          'enabled',
+          // `result_type` is the canonical field; the `snapshot`/`removed` pair
+          // above is only its legacy wire encoding. Omitting it here dropped a
+          // per-query override on edit-save for any query that stores
+          // `result_type` without the booleans (an API-created query), silently
+          // reverting it to the pack default.
+          'result_type',
         ]),
       } as PackQueryFormData);
 

@@ -117,6 +117,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           schedule_type: rawScheduleType,
           interval: rawInterval,
           rrule_schedule: rawRruleSchedule,
+          // V5: pack-level execution defaults
+          min_osquery_version: rawMinOsqueryVersion,
+          result_type: rawResultType,
+          platform: rawPlatform,
         } = request.body;
 
         const scheduleType = isRruleFeatureEnabled ? rawScheduleType : undefined;
@@ -225,6 +229,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               ? { interval: packInterval }
               : {}),
             ...(scheduleType === 'rrule' && rruleSchedule ? { rrule_schedule: rruleSchedule } : {}),
+            // V5: pack-level execution defaults (stored verbatim; undefined means "not set")
+            ...(rawMinOsqueryVersion != null ? { min_osquery_version: rawMinOsqueryVersion } : {}),
+            ...(rawResultType != null ? { result_type: rawResultType } : {}),
+            ...(rawPlatform != null ? { platform: rawPlatform } : {}),
           },
           {
             references,
@@ -267,6 +275,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         },
                         isRruleFeatureEnabled,
                         fallbackStartDate: packSO.attributes.created_at,
+                        packExecutionDefaults: {
+                          min_osquery_version: rawMinOsqueryVersion,
+                          result_type: rawResultType ?? undefined,
+                          platform: rawPlatform ?? undefined,
+                        },
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
@@ -310,6 +323,14 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
             isRruleFeatureEnabled
           ),
+          // V5: pack-level execution defaults
+          ...(packSO.attributes.min_osquery_version != null
+            ? { min_osquery_version: packSO.attributes.min_osquery_version }
+            : {}),
+          ...(packSO.attributes.result_type != null
+            ? { result_type: packSO.attributes.result_type }
+            : {}),
+          ...(packSO.attributes.platform != null ? { platform: packSO.attributes.platform } : {}),
         };
 
         return response.ok({

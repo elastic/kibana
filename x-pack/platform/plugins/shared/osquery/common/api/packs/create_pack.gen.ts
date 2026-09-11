@@ -26,6 +26,9 @@ import {
   ScheduleType,
   PackInterval,
   RRuleScheduleConfig,
+  MinOsqueryVersion,
+  ResultType,
+  Platform,
 } from '../model/schema/common_attributes.gen';
 
 export const CreatePacksRequestBody = lazySchema(() =>
@@ -39,6 +42,9 @@ export const CreatePacksRequestBody = lazySchema(() =>
     schedule_type: ScheduleType.optional(),
     interval: PackInterval.optional(),
     rrule_schedule: RRuleScheduleConfig.optional(),
+    min_osquery_version: MinOsqueryVersion.optional(),
+    result_type: ResultType.optional(),
+    platform: Platform.optional(),
   })
 );
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
@@ -115,6 +121,9 @@ export const CreatePacksResponse = lazySchema(() =>
       schedule_type: ScheduleType.optional(),
       interval: PackInterval.optional(),
       rrule_schedule: RRuleScheduleConfig.optional(),
+      min_osquery_version: MinOsqueryVersion.optional(),
+      result_type: ResultType.optional(),
+      platform: Platform.optional(),
     }),
   })
 );

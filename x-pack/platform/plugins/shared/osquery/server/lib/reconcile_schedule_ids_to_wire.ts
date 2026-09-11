@@ -418,6 +418,11 @@ export const reconcileScheduleIdsToWire = async ({
               },
               isRruleFeatureEnabled,
               fallbackStartDate: packAttrs.created_at,
+              packExecutionDefaults: {
+                min_osquery_version: packAttrs.min_osquery_version,
+                result_type: packAttrs.result_type ?? undefined,
+                platform: packAttrs.platform ?? undefined,
+              },
             }
           );
 

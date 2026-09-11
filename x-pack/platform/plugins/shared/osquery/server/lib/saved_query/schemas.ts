@@ -61,6 +61,17 @@ const packQuerySchema = schema.object(
     ecs_mapping: schema.maybe(ecsMappingSchema),
     snapshot: schema.maybe(schema.boolean()),
     removed: schema.maybe(schema.boolean()),
+    // V5: declared for validation honesty. The queries map is `dynamic: false`
+    // with `unknowns: 'allow'`, so no mappings addition is needed.
+    enabled: schema.maybe(schema.boolean()),
+    // Per-query result_type override value.
+    result_type: schema.maybe(
+      schema.oneOf([
+        schema.literal('snapshot'),
+        schema.literal('differential'),
+        schema.literal('differential_added_only'),
+      ])
+    ),
   },
   { unknowns: 'allow' }
 );
@@ -122,3 +133,33 @@ export const packSchemaV3 = packSchemaV2.extends({
 // V4 adds no new schema surface — new fields live under `queries`, already
 // `unknowns: 'allow'`.
 export const packSchemaV4 = packSchemaV3;
+
+// V5 adds two pack-level execution defaults: `min_osquery_version` (string
+// keyword) and `result_type` (enum keyword). The field name
+// `min_osquery_version` avoids colliding with the pack-asset `version: long`.
+// The third default, `platform`, lands in V6 below.
+//
+// These are *defaults that fan out onto inheriting queries*, never pack-level
+// gates — a query's own value always wins.
+export const packSchemaV5 = packSchemaV4.extends({
+  min_osquery_version: schema.maybe(schema.nullable(schema.string())),
+  result_type: schema.maybe(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal('snapshot'),
+        schema.literal('differential'),
+        schema.literal('differential_added_only'),
+      ])
+    )
+  ),
+});
+
+// V6 adds the third pack-level execution default, `platform` (comma-separated
+// keyword). It is a separate model version rather than an in-place extension of
+// V5 because a cluster that already migrated to V5 records that version in the
+// SO index `_meta`; adding a field to V5 after the fact is silently skipped,
+// leaving the mapping without the field. Same semantics as its two siblings:
+// a default that fans out onto inheriting queries, never a pack-level gate.
+export const packSchemaV6 = packSchemaV5.extends({
+  platform: schema.maybe(schema.nullable(schema.string())),
+});

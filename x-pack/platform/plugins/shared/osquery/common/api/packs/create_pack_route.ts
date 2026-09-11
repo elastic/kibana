@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { packQueryRecordRt, rruleScheduleConfigRt } from './shared_schemas';
+import { packQueryRecordRt, resultTypeRt, rruleScheduleConfigRt } from './shared_schemas';
 
 export const createPackRequestBodySchema = t.intersection([
   t.type({
@@ -22,6 +22,10 @@ export const createPackRequestBodySchema = t.intersection([
     schedule_type: t.union([t.literal('interval'), t.literal('rrule')]),
     interval: toNumberRt,
     rrule_schedule: rruleScheduleConfigRt,
+    // V5: pack-level execution defaults
+    min_osquery_version: t.string,
+    result_type: resultTypeRt,
+    platform: t.string,
   }),
 ]);
 

@@ -99,6 +99,13 @@ components:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIntervalOrUndefined'
               rrule_schedule:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
+              # V5: Pack-level execution defaults. Absent when not set.
+              min_osquery_version:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/MinOsqueryVersion'
+              result_type:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
+              platform:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
       example:
         page: 1
         per_page: 10
@@ -188,6 +195,13 @@ components:
               $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIntervalOrUndefined'
             rrule_schedule:
               $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
+            # V5: Pack-level execution defaults. Absent when not set.
+            min_osquery_version:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/MinOsqueryVersion'
+            result_type:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ResultType'
+            platform:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Platform'
       example:
         data:
           saved_object_id: "3c42c847-eb30-4452-80e0-728584042334"
