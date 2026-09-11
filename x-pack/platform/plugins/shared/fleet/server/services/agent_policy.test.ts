@@ -932,26 +932,26 @@ describe('Agent policy', () => {
         perPage: 10,
       });
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
-      const callOrder: string[] = [];
 
-      jest.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
-        callOrder.push('unenrollForAgentPolicyId');
-      });
       const deleteAgentlessAgentSpy = jest
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
-        .mockImplementationOnce(async () => {
-          callOrder.push('deleteAgentlessAgent');
-          return undefined as any;
-        });
+        .mockResolvedValue(undefined as any);
 
       try {
         await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
 
-        const unenrollIdx = callOrder.indexOf('unenrollForAgentPolicyId');
-        const deleteIdx = callOrder.indexOf('deleteAgentlessAgent');
-        expect(unenrollIdx).toBeGreaterThanOrEqual(0);
-        expect(deleteIdx).toBeGreaterThanOrEqual(0);
-        expect(unenrollIdx).toBeLessThan(deleteIdx);
+        expect(jest.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
+          agentlessSoClient,
+          esClient,
+          'mocked',
+          { revoke: true }
+        );
+        expect(deleteAgentlessAgentSpy).toHaveBeenCalled();
+
+        const unenrollOrder =
+          jest.mocked(unenrollForAgentPolicyId).mock.invocationCallOrder[0];
+        const deleteOrder = deleteAgentlessAgentSpy.mock.invocationCallOrder[0];
+        expect(unenrollOrder).toBeLessThan(deleteOrder);
       } finally {
         deleteAgentlessAgentSpy.mockRestore();
       }
