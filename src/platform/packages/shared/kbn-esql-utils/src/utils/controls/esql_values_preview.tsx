@@ -29,21 +29,12 @@ export const ESQLValuesPreview: React.FC<{
   updateQuery: (column: string) => void;
   selectedControlType?: DataControlType;
 }> = ({ values, error, columns, updateQuery, selectedControlType }) => {
-  const isEmpty = useMemo(() => values.length === 0, [values]);
-
-  const multiColumnResult = useMemo(() => columns.length > 1, [columns]);
-  const singleColumn = useMemo(
-    () => (columns.length === 1 ? columns[0] : null),
-    [columns]
-  );
-
   const range = useMemo(() => {
-    if (selectedControlType === RANGE_SLIDER_CONTROL && isNumericType(singleColumn?.type)) {
-      const optionsAsNumbers = values.map((v) => Number(v));
-      return { min: min(optionsAsNumbers), max: max(optionsAsNumbers) };
-    }
-    return null;
-  }, [values, selectedControlType, singleColumn]);
+    if (selectedControlType !== RANGE_SLIDER_CONTROL || !isNumericType(columns?.[0]?.type)) return;
+
+    const valuesAsNumbers = values.map((v) => Number(v));
+    return { min: min(valuesAsNumbers), max: max(valuesAsNumbers) };
+  }, [values, selectedControlType, columns]);
 
   if (error) {
     return (
@@ -61,7 +52,7 @@ export const ESQLValuesPreview: React.FC<{
     );
   }
 
-  if (multiColumnResult) {
+  if (columns.length > 1) {
     return (
       <EuiCallOut
         announceOnMount
@@ -86,7 +77,7 @@ export const ESQLValuesPreview: React.FC<{
     );
   }
 
-  if (isEmpty) {
+  if (values.length === 0) {
     return (
       <EuiCallOut
         announceOnMount
