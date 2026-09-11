@@ -77,7 +77,7 @@ export const RuleSummaryFlyout = ({
     | AgentBuilderPluginStart
     | undefined;
   useRuleAutoAttach(rule, { chrome, agentBuilder });
-  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id });
+  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
   return (
     <RuleProvider rule={rule}>

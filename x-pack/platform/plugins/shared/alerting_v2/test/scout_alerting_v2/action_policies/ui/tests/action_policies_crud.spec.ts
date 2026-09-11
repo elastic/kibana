@@ -73,7 +73,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
     await test.step('the form returns to the list with the new policy', async () => {
       await expect(actionPoliciesList.detailsLink(CREATED_POLICY_NAME)).toBeVisible();
-      expect(page.url()).toContain('/app/management/alertingV2/action_policies');
+      await expect(page).toHaveURL(/\/app\/management\/alertingV2\/action_policies(\?|$|#|\/)/);
     });
 
     await test.step('the persisted policy matches the submitted form', async () => {
@@ -119,7 +119,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       await actionPolicyForm.setName(EDITED_POLICY_NAME);
       await actionPolicyForm.submit();
       await expect(actionPoliciesList.detailsLink(EDITED_POLICY_NAME)).toBeVisible();
-      expect(page.url()).toContain('/app/management/alertingV2/action_policies');
+      await expect(page).toHaveURL(/\/app\/management\/alertingV2\/action_policies(\?|$|#|\/)/);
     });
 
     await test.step('the update carries the hydrated fields back unchanged', async () => {

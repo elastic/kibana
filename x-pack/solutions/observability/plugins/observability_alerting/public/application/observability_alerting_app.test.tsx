@@ -7,6 +7,7 @@
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createAlertingV2HostApp } from '@kbn/alerting-v2-plugin/public';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
@@ -30,9 +31,7 @@ const mockAlertingVTwo = {
   ActionPoliciesPage: () => <Placeholder name="actionPoliciesPage" />,
   ExecutionHistoryPage: () => <Placeholder name="executionHistoryPage" />,
   CreateRuleOptionsFlyout: () => null,
-  createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
-    Object.fromEntries(Object.entries(paths).map(([k, v]) => [k, { app: appId, basePath: v }]))
-  ),
+  createAlertingV2HostApp: jest.fn(createAlertingV2HostApp),
 };
 
 const createTestHistory = (pathname: string): ScopedHistory => {

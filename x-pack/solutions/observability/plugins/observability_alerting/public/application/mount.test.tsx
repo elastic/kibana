@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { createAlertingV2HostApp } from '@kbn/alerting-v2-plugin/public';
 import React from 'react';
 import { mountObservabilityAlertingApp } from './mount';
 
@@ -22,9 +23,7 @@ describe('mountObservabilityAlertingApp', () => {
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
-      createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
-        Object.fromEntries(Object.entries(paths).map(([k, v]) => [k, { app: appId, basePath: v }]))
-      ),
+      createAlertingV2HostApp: jest.fn(createAlertingV2HostApp),
     };
     const triggersActionsUi = {
       getClassicRulesPage: () => <div />,
