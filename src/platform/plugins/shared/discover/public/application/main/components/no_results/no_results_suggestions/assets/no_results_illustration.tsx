@@ -16,6 +16,6 @@ export const NoResultsIllustration = () => (
     type={notFound}
     alt=""
     fullWidth={false}
-    style={{ maxInlineSize: 240, marginInline: 'auto' }}
+    style={{ maxInlineSize: 180, marginInline: 'auto' }}
   />
 );
