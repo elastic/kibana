@@ -429,6 +429,32 @@ describe('CasesWorkflowRunService', () => {
       ).rejects.toThrow('Alert inputs can only be used with a single case.');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
+
+    it('rejects observable inputs when origin is absent (no silent drop)', async () => {
+      // observableIds is a server-owned key that gets stripped by SERVER_OWNED_EVENT_KEYS.
+      // Without the guard, a bulk run carrying observableIds would silently receive an empty
+      // {{ event.observableIds }} — the same silent-empty outcome the guard prevents for the
+      // origin-present path. The guard must fire regardless of whether origin is provided.
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: { event: { observableIds: ['obs-1'] } },
+        })
+      ).rejects.toThrow('Observable inputs can only be used with observable origins.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
+
+    it('rejects observable inputs when origin is a non-observable type', async () => {
+      casesClient.cases.get.mockResolvedValue({ ...theCase, observables: [] } as unknown as Case);
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { observableIds: ['obs-1'] } },
+          origin: { type: 'cases.case', caseId: 'case-1' },
+        })
+      ).rejects.toThrow('Observable inputs can only be used with observable origins.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   describe('single-case (sub-entity) origin types reject multiple caseIds', () => {

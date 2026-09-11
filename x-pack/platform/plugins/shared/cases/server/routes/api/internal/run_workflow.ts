@@ -13,6 +13,7 @@ import {
   MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
 } from '../../../../common/constants';
 import { RunCaseWorkflowRequestSchema } from '../../../../common/types/api/workflow/latest';
+import type { CasesWorkflowRunContext } from '../../../client/workflows/operations';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -26,9 +27,19 @@ export const runCaseWorkflowParamsSchema = schema.object({
 interface RunWorkflowRouteDeps {
   service: CasesWorkflowRunService;
   getSpaceId: (request: KibanaRequest) => string;
+  /**
+   * Resolves a request-scoped Cases client and workflow operations object. This is injected
+   * rather than read from `context.cases` to avoid exposing workflow run capabilities to all
+   * plugins that depend on the `cases` request context.
+   */
+  getWorkflowRunContext: (request: KibanaRequest) => Promise<CasesWorkflowRunContext>;
 }
 
-export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRouteDeps) =>
+export const createRunWorkflowRoute = ({
+  service,
+  getSpaceId,
+  getWorkflowRunContext,
+}: RunWorkflowRouteDeps) =>
   createCasesRoute({
     method: 'post',
     path: INTERNAL_CASE_WORKFLOW_RUN_URL,
@@ -59,8 +70,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
       description: 'Runs a workflow with server-owned execution metadata for the authorized cases.',
     },
     handler: async ({ context, request, response }) => {
-      const caseContext = await context.cases;
-      const { casesClient, workflowOperations } = await caseContext.getCasesWorkflowRunContext();
+      const { casesClient, workflowOperations } = await getWorkflowRunContext(request);
       const { workflow_id: workflowId } = request.params;
       const result = await service.run({
         workflowId,
