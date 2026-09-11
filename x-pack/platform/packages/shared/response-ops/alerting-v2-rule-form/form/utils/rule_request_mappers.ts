@@ -50,14 +50,6 @@ export const resolveRecoveryStrategy = (
   return formValues.query.recovery != null ? ('query' as const) : undefined;
 };
 
-/**
- * Recovery is enabled only for condition-based strategies (`no_breach` / `query`).
- * `none`/unset means condition-based recovery never fires, so the recovering delay
- * thresholds (`recovering_count` / `recovering_timeframe`) are inert and must not be
- * emitted — the write API rejects them (see `isRecoveryTransitionConsistentWithStrategy`).
- * `no_data_strategy: 'recover'` does NOT re-enable them: the director bypasses recovering
- * gating for no-data recovery (see `count_timeframe_strategy`).
- */
 export const isRecoveryEnabled = (
   formValues: Pick<FormValues, 'kind' | 'recoveryStrategy' | 'query'>
 ): boolean => {

@@ -42,8 +42,6 @@ const mapStateTransition = (formValues: FormValues) => {
     if (stateTransition?.pendingCount != null) out.pending_count = stateTransition.pendingCount;
   }
 
-  // Recovering thresholds are only meaningful when recovery is enabled; emitting them
-  // while recovery is disabled is inert and rejected by the write API.
   if (isRecoveryEnabled(formValues)) {
     if (recoveryMode === DELAY_IMMEDIATE) {
       out.recovering_count = 0;
