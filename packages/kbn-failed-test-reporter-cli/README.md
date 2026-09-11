@@ -43,6 +43,3 @@ GITHUB_TOKEN=... node scripts/check_flaky_test_issues --input .scout/flaky_tests
 The result is logged per suite and written as JSON to `--summary-path`. `--github-repo owner/name`
 checks another repository, e.g. a sandbox. Closed issues last updated before the
 `--closed-since-days` horizon never count as tracking a suite; open ones always do.
-
-The [kibana / scout / report-flaky-tests](https://buildkite.com/elastic/kibana-scout-report-flaky-tests)
-pipeline runs both commands daily and annotates the build with the tracked and untracked suites.
