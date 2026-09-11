@@ -10,6 +10,9 @@
 import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from './agentic_investigations';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_DETECTION_COVERAGE_WORKFLOW,
   ALERTZERO_RULE_CREATION_WORKFLOW,
@@ -102,6 +105,9 @@ export { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID } from './agentic_investigati
 export {
   ALERTZERO_DETECTION_COVERAGE_WORKFLOW_ID,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -170,8 +176,13 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_DETECTION_COVERAGE_WORKFLOW,
   // Generic proposal gate, owned by the agenticInvestigations plugin.
   CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
-  // AlertZero action catalog.
+  // AlertZero action catalog. Every id in `ALERTZERO_ACTION_WORKFLOW_IDS` must appear here:
+  // the alertzero plugin installs that list verbatim at start, and an id the registry cannot
+  // resolve fails its install and blocks reconciliation of the worker workflows.
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
+  ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW,
+  ALERT_ZERO_ACTION_KILL_PROCESS_WORKFLOW,
+  ALERT_ZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
   // in start() only when `threatIntelSupplyEnabled` is on.

@@ -8,7 +8,23 @@
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
+import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
 import { securityTool } from '../../tools/constants';
+
+interface InvestigationIoc {
+  value: string;
+  comment?: string;
+}
+
+/**
+ * The categories this tool can fill from telemetry fields alone. Ransom notes, encryption markers,
+ * and compromised identities require interpreting the attack, so the agent adds those itself.
+ */
+type ExtractedIocCategory = Extract<
+  InvestigationIocCategory,
+  'shas' | 'ips' | 'file_paths' | 'malicious_commands' | 'affected_hosts'
+>;
 
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = 'endpoint-forensic-analysis';
 
@@ -109,21 +125,60 @@ Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
 
 ### 4. Attack timeline
 Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
-Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the
-named host — not a prose paragraph. **Only include events supported by query results.** If telemetry is sparse or
+The answer is an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the
+named host — never a prose paragraph. **Only include events supported by query results.** If telemetry is sparse or
 unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host),
 so the response remains a scoped chronological narrative. State the data gap explicitly and optionally provide a
 clearly labeled investigation plan (suggested ES|QL queries / indices to check).
 
+Every event must name the host it happened on and describe what happened with the specifics an analyst can act on:
+the process and its parent, PIDs, the acting user, the command line (truncated if long), file paths, destination
+address and port, the registry key written, and the alert rule name or MITRE technique when the telemetry carries one.
+"Lateral movement observed" is a classification, not a description — say which process on which host reached which
+destination over which protocol.
+
+Where the timeline goes depends on how you were asked to answer:
+- Answering an analyst directly: render it as the timestamp-labeled sequence described above.
+- Answering with a structured output schema that has a timeline field: that field is the ordered event array
+  itself, earliest first, with each event as \`{ timestamp, host, description }\`. \`description\` carries the same
+  detail you would have written for an analyst — do not shorten it to a label because it is going into a
+  structured field. Do not also render the timeline in a free-text field.
+
 ### 5. IoC extraction
 After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and
-time window to produce a structured IoC summary. Present the result as a markdown table with one row per indicator type:
+time window. It returns indicators grouped by category, each a deduplicated list of \`{ value, comment }\`. Echo the
+values verbatim — never rewrite, merge, or re-categorize one.
 
-| Indicator type | Value | First seen | Source event |
-|---|---|---|---|
+The categories are:
+- \`shas\` — file hashes
+- \`ips\` — C2 and other network destinations
+- \`file_paths\` — dropped payloads, staging paths, persistence keys
+- \`malicious_commands\` — the command lines you attributed to the attack
+- \`ransom_note\` — ransom note paths
+- \`encryption_marker\` — markers of encryption such as a renamed file extension
+- \`compromised_identities\` — accounts that were used by the attacker or stolen
+- \`affected_hosts\` — every host the attack touched
 
-Always surface at least the categories the tool returns (file hash, network destination, registry persistence key). If a category has no hits, show "—". Never present IoCs as a prose
-paragraph — use the table so downstream hunts and response actions can cite specific values.
+The tool is a **floor, not the full set**: it can only fill \`shas\`, \`ips\`, \`file_paths\`, \`malicious_commands\`,
+and \`affected_hosts\` from telemetry fields. You must add \`ransom_note\`, \`encryption_marker\`, and
+\`compromised_identities\` yourself from the reconstruction, and enrich the categories it did return. If the tool
+returns an \`error\` field, the missing categories mean the query failed, not that the hosts were clean — fall back
+entirely to your own reconstruction and say so.
+
+Give every indicator a \`comment\` saying what makes it meaningful; a bare hash or address is not actionable. A
+hash's comment says what it was dropped as and on which hosts ("seen as dropped update.dll on WKSTN-RECV01, as
+svc.exe on SRV-DC01"). A C2 address's says which hosts contacted it and over what protocol. An identity's says how it
+was compromised and what it was then used for. An affected host's says its role — patient zero, encrypted domain
+controller, spread with no alert coverage.
+
+Omit a category entirely when the reconstruction found nothing in it. Never emit a category whose values you cannot
+tie to evidence.
+
+Where the indicators go depends on how you were asked to answer:
+- Answering an analyst directly: render one labelled group per category, one line per indicator, as
+  \`value — comment\`. Never present IoCs as a prose paragraph.
+- Answering with a structured output schema that has an indicators field: return the categories in that field and do
+  not also render them in a free-text field.
 
 ### 6. Lateral movement
 
@@ -135,7 +190,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 ## Tool Selection Guardrails
 
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
-- **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured IoC table for downstream hunts.
+- **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured indicators for downstream hunts.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
 - Do **not** use \`platform.core.search\` or \`relevance_search\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
@@ -193,26 +248,44 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions, ' +
-        'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
+        'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
+        `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
+        'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
+        'response actions. It only returns what telemetry fields can be typed mechanically — add ransom notes, ' +
+        'encryption markers, and compromised identities from your own analysis.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
         const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
         const hostFilter = hosts.map((h) => `"${h}"`).join(', ');
+        // Sorting ascending before the limit keeps the truncated set anchored on the start of the
+        // attack, so the comment each indicator keeps describes its earliest occurrence.
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.extension, event.action, host.name, @timestamp`,
+          `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
+          `| SORT @timestamp ASC`,
           `| LIMIT 500`,
         ].join(' ');
 
-        const iocs: Record<string, unknown[]> = {
-          file_hashes: [],
-          process_chain: [],
-          network_destinations: [],
-          registry_persistence_keys: [],
-          file_extensions: [],
+        // One map per category, keyed by value so a repeated indicator keeps the first comment it
+        // was given — which, because the query sorts ascending, is its earliest occurrence.
+        const byCategory = new Map<ExtractedIocCategory, Map<string, InvestigationIoc>>();
+
+        const addIndicator = (category: ExtractedIocCategory, value: unknown, comment?: string) => {
+          if (typeof value !== 'string' || value === '') {
+            return;
+          }
+          const existing = byCategory.get(category) ?? new Map<string, InvestigationIoc>();
+          byCategory.set(category, existing);
+          // The per-category cap keeps a host with thousands of distinct command lines from
+          // crowding out hashes and network destinations.
+          if (existing.has(value) || existing.size >= MAX_IOCS_PER_CATEGORY) {
+            return;
+          }
+          existing.set(value, { value, ...(comment ? { comment } : {}) });
         };
+
+        let queryError: string | undefined;
 
         try {
           const { columns, values } = await context.esClient.asCurrentUser.esql.query({
@@ -223,73 +296,120 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 
           const hashIdx = colIndex('process.hash.sha256');
           const exeIdx = colIndex('process.executable');
+          const processNameIdx = colIndex('process.name');
+          const cmdIdx = colIndex('process.command_line');
           const parentNameIdx = colIndex('process.parent.name');
           const parentCmdIdx = colIndex('process.parent.command_line');
           const ipIdx = colIndex('destination.ip');
           const domainIdx = colIndex('destination.domain');
           const regIdx = colIndex('registry.path');
-          const extIdx = colIndex('file.extension');
+          const regValueIdx = colIndex('registry.value');
+          const filePathIdx = colIndex('file.path');
+          const userIdx = colIndex('user.name');
+          const actionIdx = colIndex('event.action');
+          const hostIdx = colIndex('host.name');
 
           for (const row of values) {
             const v = row as unknown[];
-            const hash = hashIdx >= 0 ? v[hashIdx] : null;
-            const exe = exeIdx >= 0 ? v[exeIdx] : null;
-            const parentName = parentNameIdx >= 0 ? v[parentNameIdx] : null;
-            const parentCmd = parentCmdIdx >= 0 ? v[parentCmdIdx] : null;
-            const ip = ipIdx >= 0 ? v[ipIdx] : null;
-            const domain = domainIdx >= 0 ? v[domainIdx] : null;
-            const regPath = regIdx >= 0 ? v[regIdx] : null;
-            const ext = extIdx >= 0 ? v[extIdx] : null;
+            const at = (index: number) => (index >= 0 ? v[index] : null);
+            const asText = (index: number) => {
+              const value = at(index);
+              return typeof value === 'string' && value !== '' ? value : undefined;
+            };
 
-            if (hash && typeof hash === 'string' && !iocs.file_hashes.includes(hash)) {
-              iocs.file_hashes.push(hash);
-            }
-            if (exe && typeof exe === 'string' && parentName && typeof parentName === 'string') {
-              const chain = `${parentName} → ${exe}`;
-              if (!iocs.process_chain.includes(chain)) {
-                iocs.process_chain.push(chain);
-              }
-            }
-            if (
-              parentCmd &&
-              typeof parentCmd === 'string' &&
-              parentName &&
-              !iocs.process_chain.includes(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`)
-            ) {
-              iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
-            }
-            const netDest = domain ?? ip;
-            if (
-              netDest &&
-              typeof netDest === 'string' &&
-              !iocs.network_destinations.includes(netDest)
-            ) {
-              iocs.network_destinations.push(netDest);
-            }
-            if (
-              regPath &&
-              typeof regPath === 'string' &&
-              !iocs.registry_persistence_keys.includes(regPath)
-            ) {
-              iocs.registry_persistence_keys.push(regPath);
-            }
-            if (ext && typeof ext === 'string' && !iocs.file_extensions.includes(ext)) {
-              iocs.file_extensions.push(ext);
-            }
+            const host = asText(hostIdx);
+            const exe = asText(exeIdx);
+            const processName = asText(processNameIdx) ?? exe;
+            const parentName = asText(parentNameIdx);
+            const user = asText(userIdx);
+            const action = asText(actionIdx);
+            const registryValue = asText(regValueIdx);
+
+            const seenOn = host ? ` on ${host}` : '';
+            const actor = [
+              processName ? `by ${processName}` : undefined,
+              user ? `as ${user}` : undefined,
+            ]
+              .filter(Boolean)
+              .join(' ');
+
+            addIndicator(
+              'shas',
+              at(hashIdx),
+              exe ? `SHA256 of ${exe}${seenOn}` : `Observed${seenOn}`.trim()
+            );
+            addIndicator(
+              'ips',
+              at(ipIdx),
+              `Outbound destination contacted${seenOn}${actor ? ` ${actor}` : ''}`
+            );
+            addIndicator(
+              'ips',
+              at(domainIdx),
+              `Domain resolved and contacted${seenOn}${actor ? ` ${actor}` : ''}`
+            );
+            addIndicator(
+              'file_paths',
+              exe,
+              parentName ? `Executable launched by ${parentName}${seenOn}` : `Executable${seenOn}`
+            );
+            addIndicator(
+              'file_paths',
+              at(filePathIdx),
+              `${action ? `File ${action}` : 'File touched'}${seenOn}${actor ? ` ${actor}` : ''}`
+            );
+            addIndicator(
+              'file_paths',
+              at(regIdx),
+              [
+                `Registry key written${seenOn}`,
+                registryValue ? `set to ${registryValue}` : undefined,
+              ]
+                .filter(Boolean)
+                .join(', ')
+            );
+            addIndicator(
+              'malicious_commands',
+              at(cmdIdx),
+              parentName ? `Run by ${processName} under ${parentName}${seenOn}` : `Run${seenOn}`
+            );
+            addIndicator(
+              'malicious_commands',
+              at(parentCmdIdx),
+              processName
+                ? `Parent command line of ${processName}${seenOn}`
+                : `Parent command${seenOn}`
+            );
+            addIndicator('affected_hosts', host, 'Telemetry matched the investigation scope');
           }
-        } catch {
-          // Index missing or query error — return empty structure so the agent can report "no hits"
+        } catch (error) {
+          // Surfaced rather than swallowed: an empty result caused by a missing index or a broken
+          // query must not be reported to the analyst as "these hosts had no indicators".
+          queryError = error instanceof Error ? error.message : String(error);
         }
+
+        const iocs = Object.fromEntries(
+          [...byCategory.entries()]
+            .filter(([, values]) => values.size > 0)
+            .map(([category, values]) => [category, [...values.values()]])
+        );
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                hosts,
+                ...iocs,
+                scoped_hosts: hosts,
                 time_window_hours: timeWindowHours,
-                iocs,
-                guidance: 'Present as a markdown table (one row per indicator type).',
+                ...(queryError ? { error: queryError } : {}),
+                guidance: queryError
+                  ? 'The extraction query failed, so no categories were returned for that reason and not ' +
+                    'because the hosts were clean. Fall back to the indicators you identified during reconstruction.'
+                  : 'These categories are deduplicated — echo the values verbatim rather than rewriting or ' +
+                    'merging them, and enrich each comment with what your reconstruction established. They are ' +
+                    'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
+                    'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
               },
             },
           ],
