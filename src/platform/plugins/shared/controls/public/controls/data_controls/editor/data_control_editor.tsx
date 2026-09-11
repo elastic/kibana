@@ -163,11 +163,7 @@ const CompatibleControlTypesComponent = ({
               data-test-subj={`create__${action.type}`}
               isSelected={action.type === selectedAction}
               disabled={disabled}
-              onClick={() =>
-                setSelectedAction(
-                  action.type as DataControlType
-                )
-              }
+              onClick={() => setSelectedAction(action.type as DataControlType)}
               label={action.getDisplayName(controlTypeContext)}
             >
               <EuiIcon
@@ -342,10 +338,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           }
           return undefined;
         })();
-        if (firstCompatible)
-          setSelectedControlType(
-            firstCompatible.type as DataControlType
-          );
+        if (firstCompatible) setSelectedControlType(firstCompatible.type as DataControlType);
       }
 
       /**
