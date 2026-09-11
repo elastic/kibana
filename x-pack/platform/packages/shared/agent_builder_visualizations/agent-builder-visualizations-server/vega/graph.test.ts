@@ -239,7 +239,7 @@ describe('createVegaGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(mockedExecuteEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: PROVIDED_ESQL })
+      expect.objectContaining({ query: PROVIDED_ESQL, dropNullColumns: false })
     );
     const spec = JSON.parse(state.spec!);
     expect(spec.data.url.query).toBe(PROVIDED_ESQL);

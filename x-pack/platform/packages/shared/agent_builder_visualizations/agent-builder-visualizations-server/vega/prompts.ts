@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { formatColumnsBlock } from '../shared/format_columns';
 
 // Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
@@ -24,14 +25,6 @@ Therefore, for EVERY time-based chart — time series AND plain metrics/categori
 Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
 - RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
 - This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
-
-const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
-  if (!columns || columns.length === 0) {
-    return 'No column information is available; infer fields from the ES|QL query.';
-  }
-
-  return columns.map((column) => `- "${column.name}" (${column.type})`).join('\n');
-};
 
 export const createAuthorVegaSpecPrompt = ({
   nlQuery,
@@ -73,14 +66,11 @@ ${existingSpec}
     : ''
 }
 DATA SOURCE RULES:
-1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
-2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
+1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": ${esqlQueryJson} } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
+2. The spec is built around this query; bind only the executed result columns listed below.
 3. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
 
-Columns available in the data (reference these EXACT names):
-<columns>
-${formatColumns(columns)}
-</columns>
+${formatColumnsBlock(columns, esqlQuery)}
 
 ENCODING TYPES:
 - Pick the correct "type" for every encoded field: "nominal" (unordered categories), "ordinal" (ordered categories), "quantitative" (continuous numbers), "temporal" (dates/times).
