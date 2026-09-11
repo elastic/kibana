@@ -79,13 +79,28 @@ export class MonitorValidationError extends Error {
   }
 }
 
+// TODO: API Journey isn't supported on Serverless yet; remove this helper and
+// its call sites once it ships there (planned after the 9.6.0 stack release).
+const getApiServerlessValidationError = (
+  monitorType: string | undefined,
+  isServerless: boolean,
+  payload: object
+): ValidationResult | undefined => {
+  if (monitorType === MonitorTypeEnum.API && isServerless) {
+    return {
+      valid: false,
+      reason: API_NOT_SUPPORTED_ON_SERVERLESS_ERROR,
+      details: API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS,
+      payload,
+    };
+  }
+};
+
 /**
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
  * @param spaceId
  */
-// TODO: API Journey isn't supported on Serverless yet; remove this gate once
-// it ships there (planned after the 9.6.0 stack release).
 export function validateMonitor(
   monitorFields: MonitorFields,
   spaceId: string,
@@ -94,13 +109,9 @@ export function validateMonitor(
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
 
-  if (monitorType === MonitorTypeEnum.API && isServerless) {
-    return {
-      valid: false,
-      reason: API_NOT_SUPPORTED_ON_SERVERLESS_ERROR,
-      details: API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS,
-      payload: monitorFields,
-    };
+  const serverlessError = getApiServerlessValidationError(monitorType, isServerless, monitorFields);
+  if (serverlessError) {
+    return serverlessError;
   }
 
   if (
@@ -438,21 +449,19 @@ const validateJSON = (jsonString: string | any) => {
   }
 };
 
-// TODO: API Journey isn't supported on Serverless yet; remove this gate once
-// it ships there (planned after the 9.6.0 stack release).
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
   privateLocations: SyntheticsPrivateLocations,
   isServerless = false
 ): ValidationResult {
-  if (monitorFields.type === MonitorTypeEnum.API && isServerless) {
-    return {
-      valid: false,
-      reason: API_NOT_SUPPORTED_ON_SERVERLESS_ERROR,
-      details: API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS,
-      payload: monitorFields,
-    };
+  const serverlessError = getApiServerlessValidationError(
+    monitorFields.type,
+    isServerless,
+    monitorFields
+  );
+  if (serverlessError) {
+    return serverlessError;
   }
 
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
