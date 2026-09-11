@@ -34,6 +34,7 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
+import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
@@ -54,6 +55,7 @@ export class AlertZeroPlugin
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
   private workersService?: WorkersService;
+  private conversationProposalsService?: ConversationProposalsService;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -62,7 +64,13 @@ export class AlertZeroPlugin
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
-    { agentBuilder, features, workflowsExtensions, workflowsManagement }: AlertZeroSetupDependencies
+    {
+      agentBuilder,
+      agenticInvestigations: _agenticInvestigationsSetup,
+      features,
+      workflowsExtensions,
+      workflowsManagement,
+    }: AlertZeroSetupDependencies
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
@@ -107,6 +115,7 @@ export class AlertZeroPlugin
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
+      getConversationProposalsService: () => this.requireConversationProposalsService(),
     });
 
     return {};
@@ -143,6 +152,12 @@ export class AlertZeroPlugin
       return undefined;
     });
 
+    this.conversationProposalsService = new ConversationProposalsService(
+      plugins.agenticInvestigations.getProposalsService(),
+      plugins.agentBuilder,
+      this.logger
+    );
+
     // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
     this.watchesService = new WatchesService();
     this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
@@ -169,6 +184,15 @@ export class AlertZeroPlugin
       throw new Error('Workers service is not available until the AlertZero plugin has started');
     }
     return this.workersService;
+  }
+
+  private requireConversationProposalsService(): ConversationProposalsService {
+    if (!this.conversationProposalsService) {
+      throw new Error(
+        'ConversationProposalsService is not available until the AlertZero plugin has started'
+      );
+    }
+    return this.conversationProposalsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

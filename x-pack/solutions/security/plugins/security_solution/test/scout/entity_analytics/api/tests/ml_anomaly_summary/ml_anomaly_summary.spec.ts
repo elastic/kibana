@@ -133,43 +133,63 @@ apiTest.describe(
       });
       packagePolicyId = packagePolicyRes.body?.item?.id ?? '';
 
-      // The pad-ml module registers asynchronously after the PAD integration install, so retry
-      // until it is recognized instead of firing a setup that fails silently before it exists.
+      // The pad-ml module is registered asynchronously by the PAD integration install above, so it
+      // may not exist yet when we reach module setup. Rather than re-posting the setup *action* in a
+      // fixed window — which raced the install and gave up before it finished on real serverless
+      // projects — poll the module-registration read signal (`getModule`, the same module
+      // definitions `getSecurityMlJobIds` reads) until the module is present, then set it up once.
+      // security_auth is a built-in module and resolves on the first poll.
       // NOTE: job/datafeed *creation* succeeding here is not sufficient — see
       // `waitForDatafeedReady` below for why we still have to wait after this returns.
-      const setupMlModuleWithRetry = async (
-        module: string,
-        body: Record<string, unknown>
-      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
-        const maxAttempts = 10;
+      const waitForModuleRegistered = async (module: string): Promise<void> => {
+        const maxAttempts = 40;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+          const response = await apiClient.get(`/internal/ml/modules/get_module/${module}`, {
             headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
             responseType: 'json',
-            body,
           });
-          const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
-            response.body?.jobs ?? [];
-          const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
-            response.body?.datafeeds ?? [];
-
-          const jobsCreated =
-            jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
-          const datafeedsCreated =
-            datafeeds.length > 0 &&
-            datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
-
-          if (response.statusCode === 200 && jobsCreated && datafeedsCreated) {
-            return {
-              jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
-              datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
-            };
+          if (response.statusCode === 200 && (response.body?.jobs?.length ?? 0) > 0) {
+            return;
           }
           if (attempt < maxAttempts) {
             await setTimeoutAsync(3000);
           }
         }
-        throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
+        throw new Error(`ML module "${module}" was not registered in time`);
+      };
+
+      const setupMlModule = async (
+        module: string,
+        body: Record<string, unknown>
+      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
+        await waitForModuleRegistered(module);
+        const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body,
+        });
+        const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          response.body?.jobs ?? [];
+        const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          response.body?.datafeeds ?? [];
+
+        const jobsCreated =
+          jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+        const datafeedsCreated =
+          datafeeds.length > 0 &&
+          datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
+
+        if (response.statusCode !== 200 || !jobsCreated || !datafeedsCreated) {
+          throw new Error(
+            `Failed to set up ML module "${module}" (status ${
+              response.statusCode
+            }): ${JSON.stringify(response.body)}`
+          );
+        }
+        return {
+          jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
+          datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
+        };
       };
 
       // Job/datafeed *creation* succeeding (checked above) does not mean the datafeed is
@@ -235,7 +255,7 @@ apiTest.describe(
 
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      const padSetup = await setupMlModuleWithRetry('pad-ml', {
+      const padSetup = await setupMlModule('pad-ml', {
         prefix: '',
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
@@ -282,7 +302,7 @@ apiTest.describe(
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      const authSetup = await setupMlModuleWithRetry('security_auth', {
+      const authSetup = await setupMlModule('security_auth', {
         prefix: '',
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
