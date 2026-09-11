@@ -14,6 +14,11 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -70,6 +75,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { appPaths } from './application/utils/app_paths';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -118,6 +124,12 @@ export class AgentBuilderPlugin
     this.isEarsEnabled = deps.actions.isEarsEnabled;
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
+    deps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+    });
+
     registerApp({
       core,
       getServices: () => {
@@ -156,6 +168,10 @@ export class AgentBuilderPlugin
     startDependencies.cps?.cpsManager?.registerAppAccess(
       AGENTBUILDER_APP_ID,
       () => ProjectRoutingAccess.EDITABLE
+    );
+
+    const filesClient = startDependencies.files.filesClientFactory.asScoped(
+      CHAT_ATTACHMENT_IMAGES_FILE_KIND
     );
 
     const agentService = new AgentService({ http });
@@ -242,6 +258,7 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
+      filesClient,
       agentService,
       attachmentsService,
       renderersService,
@@ -329,11 +346,25 @@ export class AgentBuilderPlugin
         }));
       });
 
+    const publicAttachmentsService = createPublicAttachmentContract({ attachmentsService });
+
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
-      attachments: createPublicAttachmentContract({ attachmentsService }),
+      attachments: publicAttachmentsService,
       conversationTemplates: createPublicConversationTemplatesContract({
         conversationTemplatesService,
+        context: {
+          attachmentsService: publicAttachmentsService,
+          openSidebarConversation: (conversationId) => {
+            openSidebarInternal({ conversationId });
+          },
+          openFullscreenConversation: ({ conversationId, agentId }) => {
+            agentBuilderSidebar.close();
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
+              path: appPaths.agent.conversations.byId({ agentId, conversationId }),
+            });
+          },
+        },
       }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),

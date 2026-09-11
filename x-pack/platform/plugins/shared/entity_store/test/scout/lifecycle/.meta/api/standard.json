@@ -1,5 +1,5 @@
 {
-  "sha1": "36203c08032281beda0f7110f0741083aaeb8121",
+  "sha1": "6eabdcba66e44f02511810ca90d5e80b84c19f0f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -352,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 37,
-        "column": 11
+        "line": 43,
+        "column": 8
       }
     },
     {
@@ -368,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 61,
-        "column": 15
+        "line": 70,
+        "column": 8
       }
     },
     {
@@ -384,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 74,
-        "column": 11
+        "line": 80,
+        "column": 9
       }
     },
     {
@@ -400,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 83,
-        "column": 5
+        "line": 91,
+        "column": 14
       }
     },
     {
@@ -416,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 100,
-        "column": 69
+        "line": 108,
+        "column": 7
       }
     },
     {
@@ -432,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 115,
-        "column": 11
+        "line": 122,
+        "column": 7
       }
     },
     {
@@ -448,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 145,
-        "column": 21
+        "line": 152,
+        "column": 7
       }
     },
     {
@@ -464,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 152,
-        "column": 21
+        "line": 159,
+        "column": 12
       }
     },
     {
@@ -480,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 171,
+        "column": 16
       }
     },
     {
@@ -496,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 170,
-        "column": 37
+        "line": 180,
+        "column": 21
       }
     },
     {

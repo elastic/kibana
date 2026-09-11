@@ -205,7 +205,15 @@ export async function deployGroup(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(connectorId ? { cloud_connector: { enabled: true, cloud_connector_id: connectorId } } : {}),
+    ...(connectorId
+      ? {
+          cloud_connector: {
+            enabled: true,
+            cloud_connector_id: connectorId,
+            target_csp: 'aws' as const,
+          },
+        }
+      : {}),
   });
 
   return { policyId: (response as any)?.data?.item?.policy_ids?.[0] };

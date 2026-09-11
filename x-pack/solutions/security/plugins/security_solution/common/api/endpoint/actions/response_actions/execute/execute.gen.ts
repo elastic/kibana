@@ -28,11 +28,20 @@ export const ExecuteRouteRequestBody = lazySchema(() =>
         /**
          * The shell command to execute on the endpoint.
          */
-        command: z.string().min(1).max(8192),
+        command: z
+          .string()
+          .min(1)
+          .max(8192)
+          .describe('The shell command to execute on the endpoint.'),
         /**
          * The maximum timeout value in seconds before the command is terminated.
          */
-        timeout: z.number().int().min(1).optional(),
+        timeout: z
+          .number()
+          .int()
+          .min(1)
+          .optional()
+          .describe('The maximum timeout value in seconds before the command is terminated.'),
       }),
     })
   )

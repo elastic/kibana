@@ -23,6 +23,8 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
+  SeverityCountsRequest,
+  SeverityCountsResponse,
   UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
@@ -124,6 +126,8 @@ const LIST_INVESTIGATION_ITEM_FIELDS = {
   concurrency_key: ['concurrency_key'],
   executed_by: ['executed_by'],
   subject: ['subject_type', 'subject_id', 'subject_summary'],
+  summary: ['summary'],
+  impact: ['impact'],
 } as const satisfies Record<
   keyof ListInvestigationItem,
   readonly (keyof InvestigationAttributes)[]
@@ -149,6 +153,8 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
     subjectId: record.subject_id,
     subjectSummary: record.subject_summary,
   }),
+  summary: record.summary,
+  impact: record.impact,
 });
 
 const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
@@ -245,7 +251,7 @@ export class NightshiftInvestigationsClient {
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly investigationRepository: InvestigationRepository;
-  private readonly isAvailable: () => Promise<boolean>;
+  private readonly checkAvailability: () => Promise<boolean>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -255,8 +261,10 @@ export class NightshiftInvestigationsClient {
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
     this.investigationRepository = deps.investigationRepository;
-    this.isAvailable = deps.isAvailable;
+    this.checkAvailability = deps.isAvailable;
   }
+
+  public isAvailable = (): Promise<boolean> => this.checkAvailability();
 
   private getSpaceId(): string {
     return (
@@ -637,6 +645,10 @@ export class NightshiftInvestigationsClient {
 
   async list({
     statuses,
+    severities,
+    subject_types,
+    query,
+    concurrency_key,
     created_after,
     created_before,
     started_after,
@@ -650,6 +662,10 @@ export class NightshiftInvestigationsClient {
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
     const result = await this.investigationRepository.find({
       statuses,
+      severities,
+      subjectTypes: subject_types,
+      query,
+      concurrencyKey: concurrency_key,
       createdAfter: created_after,
       createdBefore: created_before,
       startedAfter: started_after,
@@ -670,5 +686,39 @@ export class NightshiftInvestigationsClient {
       size: result.size,
       total: result.total,
     };
+  }
+
+  /**
+   * Severity facet counts under the given filters, for the homepage tiles.
+   *
+   * Separate from `list()` because the counts are independent of pagination and sort — bundling
+   * them would recompute an identical aggregation on every page change.
+   */
+  async getSeverityCounts({
+    statuses,
+    subject_types,
+    query,
+    concurrency_key,
+    created_after,
+    created_before,
+    started_after,
+    started_before,
+    completed_after,
+    completed_before,
+  }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
+    const severityCounts = await this.investigationRepository.countBySeverity({
+      statuses,
+      subjectTypes: subject_types,
+      query,
+      concurrencyKey: concurrency_key,
+      createdAfter: created_after,
+      createdBefore: created_before,
+      startedAfter: started_after,
+      startedBefore: started_before,
+      completedAfter: completed_after,
+      completedBefore: completed_before,
+    });
+
+    return { severity_counts: severityCounts };
   }
 }
