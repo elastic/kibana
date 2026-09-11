@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
@@ -44,10 +44,12 @@ const sandboxBashSchema = z.object({
 export const createSandboxBashTool = ({
   connectionManager,
   resolveConnectorCredentials,
+  getSpaceId,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
@@ -66,9 +68,9 @@ export const createSandboxBashTool = ({
   handler: async (params, context) => {
     const { command, working_directory, env, timeout_seconds, connector_id } = params;
 
-    const conversationId = getConversationId(context);
+    const rawConversationId = getConversationId(context);
 
-    if (!conversationId) {
+    if (!rawConversationId) {
       return {
         results: [
           {
@@ -80,6 +82,7 @@ export const createSandboxBashTool = ({
     }
 
     const callContext = getSandboxCallContext(context);
+    const conversationId = `${getSpaceId(context.request)}:${rawConversationId}`;
 
     // Connector credentials are resolved in Kibana and scoped to this one command's environment.
     // The sandbox never holds a credential-retrieval primitive of its own.

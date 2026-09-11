@@ -119,6 +119,9 @@ export class NightshiftInvestigationsPlugin
       const config = this.ctx.config.get();
       if (config.sandbox) {
         const sandboxLogger = this.logger.get('sandbox_bash_tool');
+        const getSpaceId = (req: KibanaRequest) =>
+          this.spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
+
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: sandboxLogger,
@@ -155,17 +158,18 @@ export class NightshiftInvestigationsPlugin
           createSandboxBashTool({
             connectionManager,
             resolveConnectorCredentials,
+            getSpaceId,
             logger: sandboxLogger,
           })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxViewFileTool({ connectionManager, logger: sandboxLogger })
+          createSandboxViewFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxStrReplaceTool({ connectionManager, logger: sandboxLogger })
+          createSandboxStrReplaceTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
+          createSandboxWriteFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
 
         plugins.agentBuilder.hooks.register({
@@ -174,12 +178,15 @@ export class NightshiftInvestigationsPlugin
             [HookLifecycle.afterExecution]: {
               mode: HookExecutionMode.nonBlocking,
               handler: (context) => {
-                const conversationId = context.conversationId;
+                const { conversationId, request } = context;
                 if (!conversationId) return;
-                workspaceManager.backupWorkspace(conversationId).catch((err) => {
+                const scopedConversationId = `${getSpaceId(request)}:${conversationId}`;
+                workspaceManager.backupWorkspace(scopedConversationId).catch((err) => {
                   sandboxLogger
                     .get('workspace')
-                    .warn(`Workspace backup failed for conversation ${conversationId}: ${err}`);
+                    .warn(
+                      `Workspace backup failed for conversation ${scopedConversationId}: ${err}`
+                    );
                 });
               },
             },

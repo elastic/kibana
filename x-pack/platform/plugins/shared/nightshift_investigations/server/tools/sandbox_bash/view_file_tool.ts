@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
 import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 
@@ -40,9 +40,11 @@ const viewFileSchema = z.object({
 
 export const createSandboxViewFileTool = ({
   connectionManager,
+  getSpaceId,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
+  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof viewFileSchema> => ({
   id: SANDBOX_VIEW_FILE_TOOL_ID,
@@ -59,8 +61,8 @@ export const createSandboxViewFileTool = ({
     openWorldHint: false,
   },
   handler: async (params, context) => {
-    const conversationId = getConversationId(context);
-    if (!conversationId) {
+    const rawConversationId = getConversationId(context);
+    if (!rawConversationId) {
       return {
         results: [
           { type: ToolResultType.error, data: { message: 'No conversation context available.' } },
@@ -68,6 +70,7 @@ export const createSandboxViewFileTool = ({
       };
     }
 
+    const conversationId = `${getSpaceId(context.request)}:${rawConversationId}`;
     const resolvedPath = resolveAbsolutePath(params.file_path);
     logger.debug(
       `sandbox_view_file: ${resolvedPath} lines ${params.start_line ?? 1}-${
