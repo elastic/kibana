@@ -12,6 +12,7 @@ import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_s
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
+import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
 
 const mockLocators = createMockLocators();
 
@@ -159,6 +160,27 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     );
     expect(screen.getByText('Open notification policies')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
+  });
+
+  it('open link params resolve to management action policies list URL', async () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      totalCount: 2,
+      catchAllCount: 1,
+      matchingCriteriaCount: 1,
+      isLoading: false,
+      isError: false,
+      isCountTruncated: false,
+      error: null,
+    });
+
+    renderSubsection();
+
+    const [params] = jest.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    expect(location).toMatchObject({
+      app: 'management',
+      path: '/alertingV2/action_policies',
+    });
   });
 
   it('shows a truncated count indicator when linked policy counts may be incomplete', () => {

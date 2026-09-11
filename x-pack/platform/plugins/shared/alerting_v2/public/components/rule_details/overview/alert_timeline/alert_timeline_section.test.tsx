@@ -10,6 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertTimelineSection } from './alert_timeline_section';
+import { AlertingV2EpisodesLocatorDefinition } from '../../../../locators';
 
 const mockLocators = createMockLocators();
 
@@ -148,6 +149,19 @@ describe('AlertTimelineSection', () => {
       undefined,
       ['rule-1', windowStartMs, windowEndMs]
     );
+    jest.useRealTimers();
+  });
+
+  it('episodes link params resolve to management episodes URL with filters', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    renderSection();
+
+    const { episodesLocators } = mockLocators;
+    const [params] = jest.mocked(episodesLocators.useUrl).mock.calls[0];
+    const location = await AlertingV2EpisodesLocatorDefinition.getLocation(params);
+    expect(location.app).toBe('management');
+    expect(location.path).toMatch(/^\/alertingV2\/episodes\?_a=/);
     jest.useRealTimers();
   });
 

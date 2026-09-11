@@ -18,6 +18,7 @@ import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+import { AlertingV2RulesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
 
@@ -234,6 +235,17 @@ describe('RuleDetailPage', () => {
     const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
     expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
     expect(backButton).toHaveAttribute('href', '/mock-locator-url');
+  });
+
+  it('back link params resolve to management rules list URL', async () => {
+    renderPage(baseRule);
+
+    const [params] = jest.mocked(mockLocators.rulesLocators.useUrl).mock.calls[0];
+    const location = await AlertingV2RulesLocatorDefinition.getLocation(params);
+    expect(location).toMatchObject({
+      app: 'management',
+      path: '/alertingV2/rules',
+    });
   });
 
   it('renders native kind, status, and tag badges in the app header', () => {

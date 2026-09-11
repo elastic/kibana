@@ -14,28 +14,31 @@ import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mock
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 import { LocatorProvider, type AlertingV2Locators } from '../application/locator_context';
+import type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from '../locators';
 
-const createMockLocator = () => ({
-  useUrl: jest.fn().mockReturnValue('/mock-locator-url'),
-  getUrl: jest.fn().mockResolvedValue('/mock-locator-url'),
-  getRedirectUrl: jest.fn().mockReturnValue('/mock-locator-url'),
-  navigate: jest.fn().mockResolvedValue(undefined),
-  navigateSync: jest.fn(),
-  getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
-  getTimeRange: jest.fn(),
-  setTimeRange: jest.fn().mockImplementation((p: unknown) => p),
-});
+const createMockLocator = <P extends SerializableRecord>() => {
+  const m = sharePluginMock.createLocator<P>();
+  m.useUrl.mockReturnValue('/mock-locator-url');
+  m.getUrl.mockResolvedValue('/mock-locator-url');
+  m.getRedirectUrl.mockReturnValue('/mock-locator-url');
+  return m;
+};
 
 export const createMockLocators = (): AlertingV2Locators => ({
-  rulesLocators: createMockLocator() as unknown as AlertingV2Locators['rulesLocators'],
-  ruleLibraryLocators: createMockLocator() as unknown as AlertingV2Locators['ruleLibraryLocators'],
-  episodesLocators: createMockLocator() as unknown as AlertingV2Locators['episodesLocators'],
-  actionPolicyLocators:
-    createMockLocator() as unknown as AlertingV2Locators['actionPolicyLocators'],
-  executionHistoryLocators:
-    createMockLocator() as unknown as AlertingV2Locators['executionHistoryLocators'],
+  rulesLocators: createMockLocator<AlertingV2RulesLocatorParams>(),
+  ruleLibraryLocators: createMockLocator<AlertingV2RuleLibraryLocatorParams>(),
+  episodesLocators: createMockLocator<AlertingV2EpisodesLocatorParams>(),
+  actionPolicyLocators: createMockLocator<AlertingV2ActionPoliciesLocatorParams>(),
+  executionHistoryLocators: createMockLocator<AlertingV2ExecutionHistoryLocatorParams>(),
 });
 
 export function MockLocatorProvider({

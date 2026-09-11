@@ -12,6 +12,7 @@ import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../../test_utils/test_providers';
+import { AlertingV2RulesLocatorDefinition } from '../../../locators';
 
 const mockLocators = createMockLocators();
 
@@ -139,6 +140,21 @@ describe('RuleSummaryFlyout', () => {
       );
     });
 
+    it('View details params resolve to management rule details URL', async () => {
+      renderFlyout();
+      openMenu();
+
+      const { rulesLocators } = mockLocators;
+      const useUrlCall = jest.mocked(rulesLocators.useUrl).mock.calls.find(
+        ([p]) => p.ruleId === 'rule-1'
+      );
+      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      expect(location).toMatchObject({
+        app: 'management',
+        path: '/alertingV2/rules/rule-1',
+      });
+    });
+
     it('forwards the raw rule id to the details locator', () => {
       const { rulesLocators } = mockLocators;
       renderFlyout({
@@ -153,6 +169,23 @@ describe('RuleSummaryFlyout', () => {
         'href',
         '/mock-locator-url'
       );
+    });
+
+    it('rule id with special characters resolves to a properly encoded management URL', async () => {
+      renderFlyout({
+        rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
+      });
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+      const { rulesLocators } = mockLocators;
+      const useUrlCall = jest.mocked(rulesLocators.useUrl).mock.calls.find(
+        ([p]) => p.ruleId === 'rule with spaces/and slash'
+      );
+      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      expect(location).toMatchObject({
+        app: 'management',
+        path: '/alertingV2/rules/rule%20with%20spaces%2Fand%20slash',
+      });
     });
 
     it('forwards write action callbacks with the rule', () => {

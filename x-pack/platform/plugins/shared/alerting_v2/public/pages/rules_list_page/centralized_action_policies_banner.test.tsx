@@ -13,6 +13,7 @@ import {
   CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
 } from './centralized_action_policies_banner';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+import { AlertingV2ActionPoliciesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
 const mockNavigateToUrl = jest.fn();
@@ -94,6 +95,19 @@ describe('CentralizedActionPoliciesBanner', () => {
     expect(createBtn).toHaveAttribute('href', '/mock-locator-url');
     fireEvent.click(createBtn);
     expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
+  });
+
+  it('Create action policy CTA params resolve to management action policies create URL', async () => {
+    renderBanner();
+
+    fireEvent.click(screen.getByTestId('centralizedActionPoliciesCreate'));
+
+    const [params] = jest.mocked(mockLocators.actionPolicyLocators.navigateSync).mock.calls[0];
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    expect(location).toMatchObject({
+      app: 'management',
+      path: '/alertingV2/action_policies/create',
+    });
   });
 
   it('Learn more CTA has correct href and opens in a new tab', () => {
