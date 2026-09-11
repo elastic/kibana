@@ -91,7 +91,7 @@ export const ESQLValuesPreview: React.FC<{
         color="warning"
         iconType="warning"
         size="s"
-        data-test-subj="esqlMoreThanOneColumnCallout"
+        data-test-subj="esqlNoValuesForControlCallout"
       >
         <p>
           {i18n.translate('esqlUtils.valuesPreview.emptyText', {

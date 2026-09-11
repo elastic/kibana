@@ -249,7 +249,7 @@ describe('ValueControlForm', () => {
         );
 
         // values preview panel should be rendered
-        expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();
+        expect(await findByTestId('esqlValuesPreviewStrings')).toBeInTheDocument();
       });
 
       it('should be able to change in fields type', async () => {
