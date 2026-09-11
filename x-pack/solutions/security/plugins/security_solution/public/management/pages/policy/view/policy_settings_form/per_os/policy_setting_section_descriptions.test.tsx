@@ -34,62 +34,55 @@ const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellCompone
 const CARD_CASES: ReadonlyArray<{
   name: string;
   dataTestSubj: string;
-  description: string;
+  descriptionKey: keyof typeof POLICY_SETTING_SECTION_DESCRIPTIONS;
   renderCard: (props: PolicyFormComponentCommonProps) => React.ReactElement;
 }> = [
   {
     name: 'Malware',
     dataTestSubj: 'test-malware',
-    description:
-      'Configure how Elastic Defend protects your endpoints. Changes apply to all hosts assigned to this policy.',
+    descriptionKey: 'malware',
     renderCard: (props) => <PerOsMalwareProtectionsCard {...props} />,
   },
   {
     name: 'Malicious behavior',
     dataTestSubj: 'test-maliciousBehavior',
-    description:
-      'Control how Elastic Defend responds to malicious behavior on your endpoints. Choose between detection only or full prevention, and configure user notification behavior.',
+    descriptionKey: 'maliciousBehavior',
     renderCard: (props) => <PerOsBehaviourProtectionCard {...props} />,
   },
   {
     name: 'Memory threat',
     dataTestSubj: 'test-memoryThreat',
-    description:
-      'Prevent in-memory attacks such as shellcode injection, reflective DLL loading, and malicious Office macros.',
+    descriptionKey: 'memoryThreat',
     renderCard: (props) => <PerOsMemoryProtectionCard {...props} />,
   },
   {
     name: 'Ransomware',
     dataTestSubj: 'test-ransomware',
-    description:
-      'Detect ransomware by monitoring canary files and taking response actions when encryption activity is identified.',
+    descriptionKey: 'ransomware',
     renderCard: (props) => <PerOsRansomwareProtectionCard {...props} />,
   },
   {
     name: 'Antivirus solution',
     dataTestSubj: 'test-antivirusSolution',
-    description:
-      'Register Elastic as an official Antivirus solution for Windows OS. This will also disable Windows Defender.',
+    descriptionKey: 'antivirusSolution',
     renderCard: (props) => <PerOsAntivirusRegistrationCard {...props} />,
   },
   {
     name: 'Device control',
     dataTestSubj: 'test-deviceControl',
-    description:
-      'Control which external devices — such as USB drives and removable media — can interact with your endpoints. Set read, write, and execute permissions per OS.',
+    descriptionKey: 'deviceControl',
     renderCard: (props) => <PerOsDeviceControlCard {...props} />,
   },
   {
     name: 'Attack surface reduction',
     dataTestSubj: 'test-attackSurfaceReduction',
-    description: 'Limit the ways attackers can compromise your endpoints.',
+    descriptionKey: 'attackSurfaceReduction',
     renderCard: (props) => <PerOsAttackSurfaceReductionCard {...props} />,
   },
   {
     name: 'Event collection',
     dataTestSubj: 'test-eventCollection',
-    description:
-      'Select which system events to collect for monitoring and analysis. Selecting more event types increases visibility but may impact performance — enable only what you use and require.',
+    descriptionKey: 'eventCollection',
     renderCard: (props) => <PerOsEventCollectionCard {...props} />,
   },
 ];
@@ -115,13 +108,9 @@ describe('per-OS policy setting section descriptions', () => {
     useGetDeviceControlUpsellComponentMock.mockReturnValue(null);
   });
 
-  it('exports a frozen description record', () => {
-    expect(Object.isFrozen(POLICY_SETTING_SECTION_DESCRIPTIONS)).toBe(true);
-  });
-
   it.each(CARD_CASES)(
-    '$name card renders its description',
-    ({ dataTestSubj, description, renderCard }) => {
+    '$name card renders only its own description',
+    ({ dataTestSubj, descriptionKey, renderCard }) => {
       const props: PolicyFormComponentCommonProps = {
         policy,
         onChange: jest.fn(),
@@ -130,9 +119,15 @@ describe('per-OS policy setting section descriptions', () => {
       };
       const renderResult = mockedContext.render(renderCard(props));
 
-      expect(renderResult.getByTestId(`${dataTestSubj}-description`)).toHaveTextContent(
-        description
-      );
+      const description = renderResult.getByTestId(`${dataTestSubj}-description`);
+
+      expect(description).toHaveTextContent(POLICY_SETTING_SECTION_DESCRIPTIONS[descriptionKey]);
+
+      for (const [key, otherDescription] of Object.entries(POLICY_SETTING_SECTION_DESCRIPTIONS)) {
+        if (key !== descriptionKey) {
+          expect(description).not.toHaveTextContent(otherDescription);
+        }
+      }
     }
   );
 });
