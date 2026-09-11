@@ -208,7 +208,12 @@ apiTest.describe(
       }
     });
 
-    apiTest('project monitors - handles api monitors', async ({ apiClient }) => {
+    apiTest('project monitors - handles api monitors', async ({ apiClient, config }) => {
+      apiTest.skip(
+        config.serverless,
+        'API Journey monitors are not yet supported on Serverless (see the dedicated Serverless test below)'
+      );
+
       const monitors = withUniqueIds(projectApiMonitorFixture.monitors);
       monitors[0] = {
         ...monitors[0],
@@ -220,6 +225,7 @@ apiTest.describe(
 
       try {
         const res = await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
+
         expect(res.body).toStrictEqual({
           updatedMonitors: [],
           createdMonitors: successfulMonitors.map((monitor) => monitor.id),
@@ -314,6 +320,42 @@ apiTest.describe(
         );
       }
     });
+
+    apiTest(
+      'project monitors - rejects api monitors on Serverless',
+      async ({ apiClient, config }) => {
+        apiTest.skip(!config.serverless, 'only relevant on Serverless');
+
+        const monitors = withUniqueIds(projectApiMonitorFixture.monitors);
+        monitors[0] = {
+          ...monitors[0],
+          locations: [],
+          privateLocations: [privateLocations[0].label],
+        };
+        const project = `test-project-${uuidv4()}`;
+
+        try {
+          const res = await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
+
+          // API Journey monitors aren't supported on Serverless yet; the push
+          // is rejected rather than creating the monitor.
+          expect(res.body).toStrictEqual({
+            updatedMonitors: [],
+            createdMonitors: [],
+            failedMonitors: [
+              {
+                id: monitors[0].id,
+                details: 'API Journey monitor support is not yet available on Serverless.',
+                reason: 'API Journey monitors are not yet supported on Serverless',
+                payload: monitors[0],
+              },
+            ],
+          });
+        } finally {
+          await deleteByJourneyId(apiClient, monitors[0].id);
+        }
+      }
+    );
 
     apiTest('project monitors - handles http monitors', async ({ apiClient, kbnClient }) => {
       const kibanaVersion = await kbnClient.version.get();
