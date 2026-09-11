@@ -16,10 +16,22 @@ import {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
-import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
+import {
+  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+} from './tools/features_tool';
 import { createGetStreamFeaturesTool } from '../features/tool';
+import { getComputedFeatureInstructions } from '../features/computed';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
+
+/** System prompt with `{{{available_feature_types}}}` and `{{{computed_feature_instructions}}}` rendered. */
+export const significantEventsAgentPrompt = significantEventsSystemPrompt
+  .replaceAll('{{{available_feature_types}}}', SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '))
+  .replaceAll(
+    '{{{computed_feature_instructions}}}',
+    getComputedFeatureInstructions(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES)
+  );
 
 export function createGenerateSignificantEventsPrompt({
   systemPrompt,

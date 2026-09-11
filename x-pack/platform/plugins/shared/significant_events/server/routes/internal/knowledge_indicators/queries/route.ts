@@ -46,9 +46,6 @@ import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cl
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
-// Leave five minutes under the route's idle-socket limit for an in-flight
-// validation call and the agent's forced-completion turn to finish.
-const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -615,19 +612,6 @@ const generateQueriesRoute = createServerRoute({
           .describe(
             'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
           ),
-        maxExistingQueriesForContext: z
-          .number()
-          .optional()
-          .describe('Max number of existing queries to include as context for the LLM.'),
-        queryValidationTimeoutMs: z
-          .number()
-          .int()
-          .min(1_000)
-          .max(240_000)
-          .optional()
-          .describe(
-            'Per-query deadline (ms) for the ES|QL validation step. When omitted the server-side tuning default is used.'
-          ),
       })
       .nullish(),
   }),
@@ -652,50 +636,31 @@ const generateQueriesRoute = createServerRoute({
     telemetry,
   }): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> => {
     const scopedClients = await getScopedClients({ request });
-    const {
-      streamsClient,
-      inferenceClient,
-      soClient,
-      scopedClusterClient,
-      streamDataEsClient,
-      licensing,
-      tuningConfig,
-    } = scopedClients;
+    const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
-    const {
-      connectorId,
-      maxExistingQueriesForContext,
-      queryValidationTimeoutMs = tuningConfig.query_validation_timeout_ms,
-    } = params.body ?? {};
+    const { connectorId } = params.body ?? {};
 
-    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    if (!server.agentBuilder) {
+      throw new Error('Agent Builder is required to generate significant events queries');
+    }
 
     const result = await generateKIQueries(
       {
         streamName,
         connectorId,
-        maxExistingQueriesForContext,
-        maxDurationMs: QUERY_GENERATION_MAX_DURATION_MS,
-        queryValidationTimeoutMs,
       },
       {
         streamsClient,
-        inferenceClient,
-        soClient,
-        kiClient,
-        esClient: scopedClusterClient.asCurrentUser,
-        streamDataEsClient,
-        featureFlags: server.core.featureFlags,
+        agentBuilder: server.agentBuilder,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),
         telemetry,
-        agentBuilderTools: server.agentBuilder?.tools,
       }
     );
 

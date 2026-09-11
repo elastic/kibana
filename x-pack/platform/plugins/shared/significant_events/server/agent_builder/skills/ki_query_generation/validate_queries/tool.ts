@@ -109,7 +109,7 @@ export const createValidateQueriesTool = ({
         const featureIds = [...new Set(queries.flatMap(({ feature_ids: ids }) => ids))];
         const [{ hits: features }, { [target.id]: existingLinks }] = await Promise.all([
           kiClient.getFeatures(target.id, {
-            id: featureIds,
+            featureIds,
             excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
           }),
           kiClient.getStreamToQueryLinksMap([target.id]),
@@ -150,7 +150,7 @@ export const createValidateQueriesTool = ({
               data: {
                 queries: results,
                 accepted_queries: acceptedQueries.map(
-                  ({ category: _category, expects_matches: _expectsMatches, esql, ...query }) => ({
+                  ({ expects_matches: _expectsMatches, esql, ...query }) => ({
                     ...query,
                     esql: { query: esql },
                   })

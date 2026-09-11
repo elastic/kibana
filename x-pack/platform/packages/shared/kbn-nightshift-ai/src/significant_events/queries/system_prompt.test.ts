@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantEventsPrompt } from './prompt';
+import { significantEventsAgentPrompt, significantEventsPrompt } from './prompt';
 
 // The override route stores this string as-is and validates it with
 // `z.string().max(50_000)` (significant_events/server/routes/internal/prompts/route.ts).
@@ -31,5 +31,17 @@ describe('significant events system prompt', () => {
     // If the prompt stops saying them, prompt and tool disagree.
     expect(significantEventsPrompt).toContain('BUCKET(@timestamp, 1 minute)');
     expect(significantEventsPrompt).toContain('KEEP bucket, metric_value');
+  });
+});
+
+describe('significantEventsAgentPrompt', () => {
+  it('has no unreplaced mustache placeholders', () => {
+    expect(significantEventsAgentPrompt).not.toContain('{{{');
+    expect(significantEventsAgentPrompt).not.toContain('}}}');
+  });
+
+  it('keeps the STATS metric-series contract', () => {
+    expect(significantEventsAgentPrompt).toContain('BUCKET(@timestamp, 1 minute)');
+    expect(significantEventsAgentPrompt).toContain('KEEP bucket, metric_value');
   });
 });

@@ -15,10 +15,14 @@ import {
 } from '../../../memory_and_investigation/tools/memory';
 import { createGetFeaturesTool } from './get_features/tool';
 import { createValidateQueriesTool } from './validate_queries/tool';
+import { writeQueriesTool } from './write_queries/tool';
 import description from './description.text';
 import content from './skill.md.text';
 
 export const KI_QUERY_GENERATION_SKILL_ID = 'ki-query-generation' as const;
+
+export { WRITE_QUERIES_TOOL_ID } from './write_queries/tool';
+export type { AcceptedQuery } from './write_queries/tool';
 
 export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
   const { getScopedClients, logger } = options;
@@ -43,6 +47,7 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
         getScopedClients,
         logger: logger.get('ki_queries_validate_tool'),
       }),
+      writeQueriesTool,
     ],
   });
 };

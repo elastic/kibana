@@ -137,7 +137,7 @@ describe('ki_queries_validate tool', () => {
 
     expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
-      id: ['feature-1'],
+      featureIds: ['feature-1'],
       excludedType: ['log_samples'],
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
@@ -171,6 +171,7 @@ describe('ki_queries_validate tool', () => {
               esql: { query: 'FROM logs.test | WHERE message:"failure"' },
               title: 'Failures',
               description: 'Detects failures',
+              category: 'error',
               severity_score: 60,
               features: [{ id: 'feature-1', run_id: 'run-1' }],
             },
