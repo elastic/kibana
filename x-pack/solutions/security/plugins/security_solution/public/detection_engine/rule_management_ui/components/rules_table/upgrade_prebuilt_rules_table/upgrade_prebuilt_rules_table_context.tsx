@@ -146,14 +146,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   const findRulesSortField = useMemo<FindRulesSortField>(
     () =>
-      ((
-        {
+      (
+        ({
           'current_rule.name': 'name',
           'current_rule.risk_score': 'risk_score',
           'current_rule.severity': 'severity',
           'current_rule.last_updated': 'updated_at',
-        } as const
-      )[sortingOptions.field]),
+        }) as const
+      )[sortingOptions.field],
     [sortingOptions.field]
   );
 

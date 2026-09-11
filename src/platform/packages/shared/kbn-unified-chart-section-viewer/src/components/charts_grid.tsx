@@ -22,8 +22,10 @@ import {
   METRICS_GRID_RESTRICT_BODY_CLASS,
 } from '../common/constants';
 
-export interface ChartsGridProps
-  extends Pick<ChartSectionTemplateProps, 'toolbar' | 'toolbarCss' | 'toolbarWrapAt' | 'id'> {
+export interface ChartsGridProps extends Pick<
+  ChartSectionTemplateProps,
+  'toolbar' | 'toolbarCss' | 'toolbarWrapAt' | 'id'
+> {
   isFullscreen?: boolean;
   isComponentVisible?: boolean;
   onToggleFullscreen?: () => void;

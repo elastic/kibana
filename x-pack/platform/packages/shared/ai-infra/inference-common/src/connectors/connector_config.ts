@@ -63,8 +63,8 @@ export const getConnectorPlatform = (connector: InferenceConnector): ModelPlatfo
       return connector.config?.apiProvider === 'OpenAI'
         ? ModelPlatform.OpenAI
         : connector.config?.apiProvider === 'Azure OpenAI'
-        ? ModelPlatform.AzureOpenAI
-        : ModelPlatform.Other;
+          ? ModelPlatform.AzureOpenAI
+          : ModelPlatform.Other;
 
     case InferenceConnectorType.Gemini:
       return ModelPlatform.GoogleVertex;

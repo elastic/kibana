@@ -14,9 +14,9 @@ import type { LocatorDefinition } from '@kbn/share-plugin/common';
 
 export type { UptimeOverviewLocatorInfraParams, UptimeOverviewLocatorParams };
 
-export class UptimeOverviewLocatorDefinition
-  implements LocatorDefinition<UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams>
-{
+export class UptimeOverviewLocatorDefinition implements LocatorDefinition<
+  UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
+> {
   public readonly id = uptimeOverviewLocatorID;
 
   public readonly getLocation = async (

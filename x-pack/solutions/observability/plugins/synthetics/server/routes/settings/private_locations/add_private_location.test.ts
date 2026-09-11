@@ -18,7 +18,7 @@ import { PrivateLocationRepository } from '../../../repositories/private_locatio
 
 jest.mock('./migrate_legacy_private_locations');
 
-const agentPolicy = (space_ids?: string[]) => ({ space_ids } as AgentPolicy);
+const agentPolicy = (space_ids?: string[]) => ({ space_ids }) as AgentPolicy;
 
 describe('getAgentPolicySpaceIds', () => {
   it('maps an empty space_ids to all spaces when Fleet space awareness is off', () => {

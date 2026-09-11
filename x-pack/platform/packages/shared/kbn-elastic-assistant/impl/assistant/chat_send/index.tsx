@@ -40,7 +40,10 @@ export const ChatSend: React.FC<Props> = ({
       promptTextAreaRef?.current.focus();
     }
   }, [shouldRefocusPrompt]);
-  const promptValue = useMemo(() => (isDisabled ? '' : userPrompt ?? ''), [isDisabled, userPrompt]);
+  const promptValue = useMemo(
+    () => (isDisabled ? '' : (userPrompt ?? '')),
+    [isDisabled, userPrompt]
+  );
 
   const onSendMessage = useCallback(() => {
     handleChatSend(promptTextAreaRef.current?.value?.trim() ?? '');

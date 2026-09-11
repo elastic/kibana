@@ -180,8 +180,9 @@ export interface RunApprovals {
  * Params for {@link RunToolFn}
  * Adds the fields that only a caller establishing a new run can supply.
  */
-export interface RunToolParams<TParams = Record<string, unknown>>
-  extends ToolInvocationParams<TParams> {
+export interface RunToolParams<
+  TParams = Record<string, unknown>,
+> extends ToolInvocationParams<TParams> {
   /**
    * The request that initiated that run.
    */

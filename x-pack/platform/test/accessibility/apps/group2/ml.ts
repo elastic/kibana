@@ -67,9 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
         const dfaClassificationJobDepVar = 'y';
         const dfaClassificationJobTrainingPercent = 30;
 
-        const uploadFilePath = require.resolve(
-          '../../../fixtures/ml/files_to_import/artificial_server_log'
-        );
+        const uploadFilePath =
+          require.resolve('../../../fixtures/ml/files_to_import/artificial_server_log');
 
         before(async () => {
           await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');

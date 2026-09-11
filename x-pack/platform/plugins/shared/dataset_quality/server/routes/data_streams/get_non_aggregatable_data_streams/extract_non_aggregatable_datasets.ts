@@ -12,25 +12,31 @@ export const extractNonAggregatableDatasets = (
   indices: Indices,
   nonAggregatableIndices: Indices
 ) => {
-  const groupedDatasets = (Array.isArray(indices) ? indices : [indices]).reduce((acc, index) => {
-    const dataset = extractIndexNameFromBackingIndex(index);
+  const groupedDatasets = (Array.isArray(indices) ? indices : [indices]).reduce(
+    (acc, index) => {
+      const dataset = extractIndexNameFromBackingIndex(index);
 
-    return {
-      ...acc,
-      [dataset]: [...(acc[dataset] ?? []), index],
-    };
-  }, {} as Record<string, string[]>);
+      return {
+        ...acc,
+        [dataset]: [...(acc[dataset] ?? []), index],
+      };
+    },
+    {} as Record<string, string[]>
+  );
 
   const groupedNonAggregatableIndices = (
     Array.isArray(nonAggregatableIndices) ? nonAggregatableIndices : [nonAggregatableIndices]
-  ).reduce((acc, index) => {
-    const dataset = extractIndexNameFromBackingIndex(index);
+  ).reduce(
+    (acc, index) => {
+      const dataset = extractIndexNameFromBackingIndex(index);
 
-    return {
-      ...acc,
-      [dataset]: [...(acc[dataset] ?? []), index],
-    };
-  }, {} as Record<string, string[]>);
+      return {
+        ...acc,
+        [dataset]: [...(acc[dataset] ?? []), index],
+      };
+    },
+    {} as Record<string, string[]>
+  );
 
   return Object.entries(groupedNonAggregatableIndices)
     .filter(

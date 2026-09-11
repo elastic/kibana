@@ -58,7 +58,7 @@ const makeParams = (
     stepIoService: {
       flush: jest.fn().mockResolvedValue(undefined),
     },
-  } as unknown as jest.Mocked<WorkflowExecutionLoopParams>);
+  }) as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
 
 const makeStepRuntime = (
   overrides: Partial<StepExecutionRuntime> = {}
@@ -68,7 +68,7 @@ const makeStepRuntime = (
     abortController: new AbortController(),
     node: { stepType: 'wait' },
     ...overrides,
-  } as unknown as jest.Mocked<StepExecutionRuntime>);
+  }) as unknown as jest.Mocked<StepExecutionRuntime>;
 
 describe('handleExecutionDelay', () => {
   describe('WAITING_FOR_INPUT step (HITL)', () => {

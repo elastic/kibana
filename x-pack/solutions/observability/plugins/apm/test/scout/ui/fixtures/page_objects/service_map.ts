@@ -53,7 +53,10 @@ export class ServiceMapPage {
   private readonly serviceMapEditorServiceNameComboBoxLoading: Locator;
   private readonly serviceMapEditorEnvironmentComboBoxLoading: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.serviceMap = page.testSubj.locator('serviceMap');
     this.serviceMapGraph = page.testSubj.locator('serviceMapGraph');
     this.serviceMapViewport = this.serviceMapGraph.locator('.react-flow__viewport');

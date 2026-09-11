@@ -59,40 +59,38 @@ interface DetailedEventSignal {
   collected_at?: string;
 }
 
-export interface CompactEventSearchItem
-  extends Pick<
-    SignificantEvent,
-    | '@timestamp'
-    | 'blast_radius'
-    | 'causal_features'
-    | 'confidence'
-    | 'event_id'
-    | 'event_uuid'
-    | 'severity'
-    | 'status'
-    | 'stream_names'
-    | 'summary'
-    | 'symptom_hypothesis'
-    | 'title'
-  > {
+export interface CompactEventSearchItem extends Pick<
+  SignificantEvent,
+  | '@timestamp'
+  | 'blast_radius'
+  | 'causal_features'
+  | 'confidence'
+  | 'event_id'
+  | 'event_uuid'
+  | 'severity'
+  | 'status'
+  | 'stream_names'
+  | 'summary'
+  | 'symptom_hypothesis'
+  | 'title'
+> {
   signal_rule_uuids: string[];
   signal_counts: SignalSummary;
   unresolved_rule_uuids: string[];
 }
 
-interface DetailedEventSearchItem
-  extends Pick<
-    SignificantEvent,
-    | '@timestamp'
-    | 'confidence'
-    | 'event_id'
-    | 'event_uuid'
-    | 'severity'
-    | 'status'
-    | 'stream_names'
-    | 'symptom_hypothesis'
-    | 'title'
-  > {
+interface DetailedEventSearchItem extends Pick<
+  SignificantEvent,
+  | '@timestamp'
+  | 'confidence'
+  | 'event_id'
+  | 'event_uuid'
+  | 'severity'
+  | 'status'
+  | 'stream_names'
+  | 'symptom_hypothesis'
+  | 'title'
+> {
   signals: DetailedEventSignal[];
   signals_page: number;
   signals_per_page: number;
@@ -238,7 +236,7 @@ const buildSearchParams = (view: EventSearchView, params: EventSearchInput) => {
   const maxPerPage = view === 'full' ? 1 : EVENT_SEARCH_MAX_PER_PAGE;
 
   return {
-    page: view === 'full' ? 1 : params.page ?? 1,
+    page: view === 'full' ? 1 : (params.page ?? 1),
     perPage: Math.min(requestedPerPage, maxPerPage),
     search: normalizeEventSearchQuery(params.query),
     stream: params.stream_names,

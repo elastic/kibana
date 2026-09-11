@@ -19,7 +19,7 @@ import { omit } from 'lodash';
 
 export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
-  TClientOptions extends Record<string, any> = {}
+  TClientOptions extends Record<string, any> = {},
 >(core: {
   http: {
     fetch: HttpHandler;

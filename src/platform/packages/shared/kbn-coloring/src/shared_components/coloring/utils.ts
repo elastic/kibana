@@ -90,16 +90,22 @@ export function updateRangeType(
   params.rangeMin = checkIsMinContinuity(continuity)
     ? Number.NEGATIVE_INFINITY
     : activePalette.name === CUSTOM_PALETTE
-    ? newColorStops[0].stop
-    : params.stops[0].stop;
+      ? newColorStops[0].stop
+      : params.stops[0].stop;
 
   params.rangeMax = checkIsMaxContinuity(continuity)
     ? Number.POSITIVE_INFINITY
     : activePalette.params?.rangeMax
-    ? calculateStop(activePalette.params.rangeMax, newMin, oldMin, oldMax - oldMin, newMax - newMin)
-    : lastStop > newMax
-    ? lastStop + 1
-    : newMax;
+      ? calculateStop(
+          activePalette.params.rangeMax,
+          newMin,
+          oldMin,
+          oldMax - oldMin,
+          newMax - newMin
+        )
+      : lastStop > newMax
+        ? lastStop + 1
+        : newMax;
 
   return params;
 }
@@ -117,7 +123,7 @@ export function changeColorPalette(
     name: newPalette.name,
     colorStops: undefined,
     continuity: disableSwitchingContinuity
-      ? activePalette.params?.continuity ?? DEFAULT_CONTINUITY
+      ? (activePalette.params?.continuity ?? DEFAULT_CONTINUITY)
       : DEFAULT_CONTINUITY,
     reverse: false, // restore the reverse flag
   };
@@ -345,11 +351,11 @@ export function toColorRanges(
         start:
           isFirst && checkIsMinContinuity(continuity)
             ? Number.NEGATIVE_INFINITY
-            : colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin,
+            : (colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin),
         end:
           isLast && checkIsMaxContinuity(continuity)
             ? Number.POSITIVE_INFINITY
-            : array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax,
+            : (array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax),
       };
     }
   );

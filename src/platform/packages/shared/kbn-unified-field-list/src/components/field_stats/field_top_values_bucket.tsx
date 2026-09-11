@@ -150,8 +150,8 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                         defaultMessage: 'Other',
                       })
                     : formattedFieldValue === ''
-                    ? EMPTY_LABEL
-                    : '-'}
+                      ? EMPTY_LABEL
+                      : '-'}
                 </EuiText>
               )}
             </div>

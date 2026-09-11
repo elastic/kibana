@@ -43,7 +43,7 @@ export interface EditAssigneeActionDeps {
  * value across the selection.
  */
 const getCurrentAssigneeUid = (episodes: AlertEpisode[]): string | null =>
-  episodes.length === 1 ? episodes[0].last_assignee_uid ?? null : null;
+  episodes.length === 1 ? (episodes[0].last_assignee_uid ?? null) : null;
 
 const applyAssignee = async (
   deps: EditAssigneeActionDeps,

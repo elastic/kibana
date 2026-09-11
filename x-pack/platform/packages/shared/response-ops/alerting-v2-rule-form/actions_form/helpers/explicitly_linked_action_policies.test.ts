@@ -34,7 +34,7 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     updatedBy: 'user',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as ActionPolicyResponse);
+  }) as ActionPolicyResponse;
 
 describe('isExplicitlyLinkedToRule', () => {
   it('returns true for the simple-action rule.id matcher', () => {

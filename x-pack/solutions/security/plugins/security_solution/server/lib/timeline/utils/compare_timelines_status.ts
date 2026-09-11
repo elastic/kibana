@@ -258,8 +258,8 @@ export class CompareTimelinesStatus {
 
   public get timelineVersion() {
     const version = this.isHandlingTemplateTimeline
-      ? this.templateTimelineInput.data?.version ?? this.timelineInput.getVersion
-      : this.timelineInput.data?.version ?? this.timelineInput.getVersion;
+      ? (this.templateTimelineInput.data?.version ?? this.timelineInput.getVersion)
+      : (this.timelineInput.data?.version ?? this.timelineInput.getVersion);
     return version != null ? version.toString() : null;
   }
 

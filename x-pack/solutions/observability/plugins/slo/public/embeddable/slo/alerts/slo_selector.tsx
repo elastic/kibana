@@ -90,8 +90,8 @@ function mapSlosToOptions(
           slo.slo_instance_id !== ALL_VALUE
             ? `${name} (${slo.slo_instance_id})`
             : hasSloGroupBy(entry?.groupBy)
-            ? `${name} (${ALL_INSTANCES_LABEL})`
-            : name;
+              ? `${name} (${ALL_INSTANCES_LABEL})`
+              : name;
       } else {
         label =
           slo.slo_instance_id !== ALL_VALUE ? `${slo.slo_id} (${slo.slo_instance_id})` : slo.slo_id;

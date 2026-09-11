@@ -25,12 +25,10 @@ const mockItems = [
 ];
 
 const createFindItems = (items = mockItems, total?: number) =>
-  jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items,
-      total: total ?? items.length,
-    })
-  );
+  jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items,
+    total: total ?? items.length,
+  }));
 
 const createWrapper =
   (options?: {
@@ -267,21 +265,20 @@ describe('ContentListTable', () => {
      */
     const makeLoadingWrapper =
       (providerId: string, initialPageSize = 20) =>
-      ({ children }: { children: React.ReactNode }) =>
-        (
-          <ContentListProvider
-            id={providerId}
-            labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-            features={{ pagination: { initialPageSize } }}
-            dataSource={{
-              findItems: jest.fn(
-                () => new Promise<{ items: typeof mockItems; total: number }>(() => {})
-              ),
-            }}
-          >
-            {children}
-          </ContentListProvider>
-        );
+      ({ children }: { children: React.ReactNode }) => (
+        <ContentListProvider
+          id={providerId}
+          labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+          features={{ pagination: { initialPageSize } }}
+          dataSource={{
+            findItems: jest.fn(
+              () => new Promise<{ items: typeof mockItems; total: number }>(() => {})
+            ),
+          }}
+        >
+          {children}
+        </ContentListProvider>
+      );
 
     it('renders the skeleton (not the real table) while the initial query is in flight', async () => {
       const LoadingWrapper = makeLoadingWrapper('skeleton-smoke-test');

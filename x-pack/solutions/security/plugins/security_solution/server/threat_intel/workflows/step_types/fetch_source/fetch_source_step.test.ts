@@ -27,7 +27,7 @@ const buildContext = (input: unknown): StepHandlerContext<unknown, unknown> =>
   ({
     input,
     abortSignal: new AbortController().signal,
-  } as unknown as StepHandlerContext<unknown, unknown>);
+  }) as unknown as StepHandlerContext<unknown, unknown>;
 
 const buildStep = () => {
   const logger = loggingSystemMock.createLogger();

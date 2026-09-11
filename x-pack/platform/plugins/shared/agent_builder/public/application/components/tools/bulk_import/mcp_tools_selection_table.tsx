@@ -29,11 +29,13 @@ const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 const tableContainerStyles = (isDisabled = false) => css`
-  ${isDisabled &&
-  `
+  ${
+    isDisabled &&
+    `
     opacity: 0.5;
     pointer-events: none;
-  `}
+  `
+  }
 `;
 
 export interface McpToolsSelectionTableProps {

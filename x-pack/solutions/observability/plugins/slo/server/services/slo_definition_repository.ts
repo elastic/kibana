@@ -36,7 +36,10 @@ export interface SLODefinitionRepository {
 }
 
 export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     const { storedSLO, references } = this.toStoredSLO(slo);

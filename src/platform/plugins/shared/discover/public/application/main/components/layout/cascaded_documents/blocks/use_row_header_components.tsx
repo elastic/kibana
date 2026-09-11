@@ -169,16 +169,15 @@ const contextRowActions: Array<
   },
 ];
 
-interface ContextMenuProps
-  extends Pick<
-    RowClickActionContext,
-    | 'editorQuery'
-    | 'openInNewTab'
-    | 'dataView'
-    | 'esqlVariables'
-    | 'statsFieldSummary'
-    | 'updateESQLQuery'
-  > {
+interface ContextMenuProps extends Pick<
+  RowClickActionContext,
+  | 'editorQuery'
+  | 'openInNewTab'
+  | 'dataView'
+  | 'esqlVariables'
+  | 'statsFieldSummary'
+  | 'updateESQLQuery'
+> {
   row: RowContext;
   close: RowClickActionContext['closeActionMenu'];
 }

@@ -90,10 +90,13 @@ export class ProjectNavigationService {
 
     const deepLinksMap$ = navLinks.getNavLinks$().pipe(
       map((links) =>
-        links.reduce((acc, navLink) => {
-          acc[navLink.id] = navLink;
-          return acc;
-        }, {} as Record<string, ChromeNavLink>)
+        links.reduce(
+          (acc, navLink) => {
+            acc[navLink.id] = navLink;
+            return acc;
+          },
+          {} as Record<string, ChromeNavLink>
+        )
       )
     );
 

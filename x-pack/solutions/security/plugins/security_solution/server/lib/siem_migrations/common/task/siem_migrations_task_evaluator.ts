@@ -34,7 +34,7 @@ export type SiemMigrationEvaluatorConstructor<
   I extends ItemDocument = ItemDocument,
   P extends object = {},
   C extends object = {},
-  O extends object = {}
+  O extends object = {},
 > = new (
   ...params: ConstructorParameters<typeof SiemMigrationsBaseEvaluator<M, I, P, C, O>>
 ) => SiemMigrationsBaseEvaluator<M, I, P, C, O>;
@@ -44,7 +44,7 @@ export abstract class SiemMigrationsBaseEvaluator<
   I extends ItemDocument = ItemDocument,
   P extends object = {},
   C extends object = {},
-  O extends object = {}
+  O extends object = {},
 > {
   /**
    * Custom evaluators are the functions that will be used to evaluate the quality if the results  in langchain.

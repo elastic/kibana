@@ -156,7 +156,7 @@ export const ESQL_LIMIT_CAP = 10_000;
 /** Normalizes `hits.total`, which ES returns as either a bare number or `{ value }`. */
 const getTotalHits = (hits: SearchResponse['hits'] | undefined): number => {
   const total = hits?.total;
-  return typeof total === 'number' ? total : total?.value ?? 0;
+  return typeof total === 'number' ? total : (total?.value ?? 0);
 };
 
 export interface ResolutionGroupBucket {

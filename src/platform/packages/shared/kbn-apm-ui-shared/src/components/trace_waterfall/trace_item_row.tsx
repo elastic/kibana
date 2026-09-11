@@ -99,8 +99,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
             isSelected
               ? `background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};`
               : isContext
-              ? `background-color: ${euiTheme.colors.backgroundBaseWarning};`
-              : undefined
+                ? `background-color: ${euiTheme.colors.backgroundBaseWarning};`
+                : undefined
           }
           ${
             !!onClick &&

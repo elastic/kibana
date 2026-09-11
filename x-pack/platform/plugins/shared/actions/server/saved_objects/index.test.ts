@@ -40,7 +40,7 @@ describe('setupSavedObjects - onImport', () => {
       references: [],
       namespaces: ['default'],
       ...overrides,
-    } as unknown as SavedObject<RawAction> & { destinationId?: string });
+    }) as unknown as SavedObject<RawAction> & { destinationId?: string };
 
   let onImport: (connectors: SavedObject[]) => Promise<{ warnings: unknown[] }>;
 

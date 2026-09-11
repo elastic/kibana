@@ -66,7 +66,7 @@ const DiscoverCellActionsPanel = ({
     };
   }, []);
 
-  const copyValue = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
+  const copyValue = typeof value === 'string' ? value : (JSON.stringify(value) ?? '');
   const actions = useUIFieldActions({ field, value, formattedValue: copyValue });
   const visibleActions = useMemo(
     () =>

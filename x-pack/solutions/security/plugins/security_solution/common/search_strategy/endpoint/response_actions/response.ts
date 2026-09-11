@@ -23,8 +23,7 @@ export interface ActionResponsesRequestOptions extends RequestBasicOptions {
   ccsEnabled?: boolean;
 }
 
-export interface ActionResponsesRequestStrategyResponse
-  extends ActionResponsesRequestStrategyParseResponse {
+export interface ActionResponsesRequestStrategyResponse extends ActionResponsesRequestStrategyParseResponse {
   isCompleted: boolean;
   wasSuccessful: boolean;
   isExpired: boolean;
@@ -32,24 +31,23 @@ export interface ActionResponsesRequestStrategyResponse
   edges: ResultEdges<LogsEndpointActionResponse>;
 }
 
-export interface ActionResponsesRequestStrategyParseResponse
-  extends IKibanaSearchResponse<
-    estypes.SearchResponse<
-      LogsEndpointActionResponse,
-      {
-        aggs: {
-          responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
-            rows_count: estypes.AggregationsSumAggregate;
-            responses: {
-              buckets: Array<{
-                key: string;
-                doc_count: number;
-              }>;
-            };
+export interface ActionResponsesRequestStrategyParseResponse extends IKibanaSearchResponse<
+  estypes.SearchResponse<
+    LogsEndpointActionResponse,
+    {
+      aggs: {
+        responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
+          rows_count: estypes.AggregationsSumAggregate;
+          responses: {
+            buckets: Array<{
+              key: string;
+              doc_count: number;
+            }>;
           };
         };
-      }
-    >
-  > {
+      };
+    }
+  >
+> {
   inspect?: Maybe<Inspect>;
 }

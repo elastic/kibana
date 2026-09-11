@@ -69,7 +69,7 @@ const buildWorstByLine = (errors: YamlValidationResult[]): Map<number, StepSever
       const prev = worstByLine.get(line);
       if (prev !== 'error') {
         // 'error' beats 'warning'; set on first visit or upgrade warning → error.
-        worstByLine.set(line, err.severity === 'error' ? 'error' : prev ?? err.severity);
+        worstByLine.set(line, err.severity === 'error' ? 'error' : (prev ?? err.severity));
       }
     }
   }
@@ -106,8 +106,8 @@ export const buildStepSeverityMap = (
       ownWorst === 'error' || inheritedWorst === 'error'
         ? 'error'
         : ownWorst === 'warning' || inheritedWorst === 'warning'
-        ? 'warning'
-        : null;
+          ? 'warning'
+          : null;
 
     result.set(stepId, { severity, isOwn: ownWorst !== null });
   }

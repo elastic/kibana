@@ -23,10 +23,13 @@ export const _loadDocumentation = async (): Promise<EsqlLoadedDocumentation> => 
   const entries = Object.values(EsqlDocEntry);
   const contents = await Promise.all(entries.map((entry) => loadFile(entry)));
 
-  const docs = entries.reduce((acc, entry, index) => {
-    acc[entry] = contents[index];
-    return acc;
-  }, {} as Record<EsqlDocEntry, string>);
+  const docs = entries.reduce(
+    (acc, entry, index) => {
+      acc[entry] = contents[index];
+      return acc;
+    },
+    {} as Record<EsqlDocEntry, string>
+  );
 
   return {
     getDocContent: (entry: EsqlDocEntry) => docs[entry],

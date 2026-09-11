@@ -25,7 +25,7 @@ const createContext = () =>
       elasticsearch: { client: { asCurrentUser: {} } },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },
     }),
-  } as unknown as InfraPluginRequestHandlerContext);
+  }) as unknown as InfraPluginRequestHandlerContext;
 
 const createLibs = () =>
   ({
@@ -37,7 +37,7 @@ const createLibs = () =>
         },
       },
     },
-  } as unknown as InfraBackendLibs);
+  }) as unknown as InfraBackendLibs;
 
 describe('getApmDataAccessClient', () => {
   beforeEach(() => {

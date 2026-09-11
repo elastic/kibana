@@ -51,13 +51,13 @@ const sourceResponse = (docs: SignificantEvent[], createdAt?: string): ESQLSearc
       ...(createdAt === undefined ? [] : [{ name: 'created_at', type: 'date' }]),
     ],
     values: docs.map((doc) => [doc, ...(createdAt === undefined ? [] : [createdAt])]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const createSearchClient = ({
   hits,

@@ -45,13 +45,13 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
   const borderColor = isSuccess
     ? colors.success
     : isFailed
-    ? colors.danger
-    : colors.backgroundLightPrimary;
+      ? colors.danger
+      : colors.backgroundLightPrimary;
   const headerBg = isSuccess
     ? colors.backgroundBaseSuccess
     : isFailed
-    ? colors.backgroundBaseDanger
-    : colors.backgroundLightPrimary;
+      ? colors.backgroundBaseDanger
+      : colors.backgroundLightPrimary;
   const iconColor = isSuccess ? colors.success : isFailed ? colors.danger : colors.primary;
 
   return (

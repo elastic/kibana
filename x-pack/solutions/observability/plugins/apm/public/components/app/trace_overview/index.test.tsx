@@ -134,7 +134,7 @@ describe('TraceOverview', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalled();
     const [args] = mockGetRedirectUrl.mock.calls.at(-1) as [
-      { timeRange: { from: string; to: string }; query: { esql: string } }
+      { timeRange: { from: string; to: string }; query: { esql: string } },
     ];
     expect(args.timeRange).toEqual({ from: 'now-15m', to: 'now' });
     expect(args.query.esql).toContain(`FROM ${TRACES_INDEX}`);

@@ -130,9 +130,12 @@ export function parseJobTypeBucket(
   jobTypeBuckets: AggregationsBuckets<AggregationsStringTermsBucketKeys>
 ) {
   const buckets = jobTypeBuckets as AggregationsStringTermsBucketKeys[];
-  return (buckets ?? []).reduce((acc, bucket: AggregationsStringTermsBucketKeys) => {
-    const jobType: string = `${bucket.key}`;
-    acc[jobType] = bucket.doc_count ?? 0;
-    return acc;
-  }, {} as Record<string, number>);
+  return (buckets ?? []).reduce(
+    (acc, bucket: AggregationsStringTermsBucketKeys) => {
+      const jobType: string = `${bucket.key}`;
+      acc[jobType] = bucket.doc_count ?? 0;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 }

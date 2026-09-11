@@ -233,7 +233,9 @@ export class EvaluatorDefinitionClient {
         space_ids: [this.spaceId],
         created_at: timestamp,
         updated_at: timestamp,
-        ...(createdBy ?? current.created_by ? { created_by: createdBy ?? current.created_by } : {}),
+        ...((createdBy ?? current.created_by)
+          ? { created_by: createdBy ?? current.created_by }
+          : {}),
       };
 
       const id = getEvaluatorDefinitionId(this.spaceId, name, nextVersion);

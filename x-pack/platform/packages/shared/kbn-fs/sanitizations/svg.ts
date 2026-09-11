@@ -49,7 +49,7 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const dompurifyModule = require('dompurify') as
       | typeof import('dompurify')
-      | typeof import('dompurify')['default'];
+      | (typeof import('dompurify'))['default'];
     const DOMPurify =
       typeof dompurifyModule === 'function'
         ? dompurifyModule

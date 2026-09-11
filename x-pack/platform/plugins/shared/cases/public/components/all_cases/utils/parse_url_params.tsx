@@ -91,7 +91,7 @@ const parseLegacyUrl = (urlParams: URLSearchParams): AllCasesURLQueryParams => {
 
 const parseValue = (values: Set<string>, defaultValue: unknown): string | string[] => {
   const valuesAsArray = Array.from(values.values());
-  return Array.isArray(defaultValue) ? valuesAsArray : valuesAsArray[0] ?? '';
+  return Array.isArray(defaultValue) ? valuesAsArray : (valuesAsArray[0] ?? '');
 };
 
 const notAll = (option: string) => option !== 'all';

@@ -75,7 +75,7 @@ const createMockLabelNode = (): NodeProps =>
       color: 'primary',
       shape: 'label',
     },
-  } as unknown as NodeProps);
+  }) as unknown as NodeProps;
 
 describe('useLabelNodeExpandPopover', () => {
   const scopeId = 'test-scope-id';

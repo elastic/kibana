@@ -35,7 +35,7 @@ const makeMeta = (
     overallStatus: 'pending',
     locations: [{ id: 'us_east', label: 'US East', status: 'pending' }],
     ...overrides,
-  } as OverviewStatusMetaData);
+  }) as OverviewStatusMetaData;
 
 const makeStatus = (overrides: Partial<OverviewStatus> = {}): OverviewStatus =>
   ({
@@ -56,7 +56,7 @@ const makeStatus = (overrides: Partial<OverviewStatus> = {}): OverviewStatus =>
     staleConfigs: {},
     disabledConfigs: {},
     ...overrides,
-  } as OverviewStatus);
+  }) as OverviewStatus;
 
 const makePaginated = (
   configs: OverviewStatusMetaData[],
@@ -67,7 +67,7 @@ const makePaginated = (
     configs,
     total: configs.length,
     ...overrides,
-  } as unknown as PaginatedOverviewStatus);
+  }) as unknown as PaginatedOverviewStatus;
 
 // `isRunStale` uses a 15-minute floor, so a run hours old is reliably stale and
 // a run minutes old is reliably fresh — no need to freeze the clock.

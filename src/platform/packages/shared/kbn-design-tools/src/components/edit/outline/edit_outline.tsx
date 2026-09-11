@@ -61,8 +61,8 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
     mode === 'none'
       ? []
       : mode === 'corners'
-      ? ALL_HANDLES.filter((h) => h.length === 2)
-      : ALL_HANDLES;
+        ? ALL_HANDLES.filter((h) => h.length === 2)
+        : ALL_HANDLES;
 
   const handlePositions = getHandlePositions(rect.width, rect.height, RESIZE_HANDLE_SIZE);
 

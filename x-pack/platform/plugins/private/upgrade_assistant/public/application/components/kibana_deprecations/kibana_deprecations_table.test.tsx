@@ -15,8 +15,9 @@ import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 
 const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
-interface ConfigDeprecationOverrides
-  extends Partial<Omit<KibanaDeprecationDetails, 'deprecationType' | 'configPath' | 'filterType'>> {
+interface ConfigDeprecationOverrides extends Partial<
+  Omit<KibanaDeprecationDetails, 'deprecationType' | 'configPath' | 'filterType'>
+> {
   configPath: string;
 }
 

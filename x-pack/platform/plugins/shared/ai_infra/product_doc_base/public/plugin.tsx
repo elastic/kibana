@@ -17,15 +17,12 @@ import type {
 import { InstallationService } from './services/installation';
 import type { ProductDocInstallParams } from '../common/http_api/installation';
 
-export class ProductDocBasePlugin
-  implements
-    Plugin<
-      ProductDocBasePluginSetup,
-      ProductDocBasePluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class ProductDocBasePlugin implements Plugin<
+  ProductDocBasePluginSetup,
+  ProductDocBasePluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<PublicPluginConfig>) {

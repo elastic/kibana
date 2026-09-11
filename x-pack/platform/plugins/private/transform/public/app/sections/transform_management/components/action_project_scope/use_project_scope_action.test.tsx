@@ -14,7 +14,7 @@ import { useTransformCapabilities, useUpdateTransformsProjectScope } from '../..
 import { useProjectScopeAction } from './use_project_scope_action';
 
 const mockUseGetTransformCpsEnabled = jest.fn(
-  (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
+  (_args?: { enabled: boolean }) => ({ data: true }) as { data: boolean | undefined }
 );
 
 jest.mock('../../../../app_dependencies');
@@ -52,7 +52,7 @@ const createTransformItem = (id: string) =>
       source: { index: ['source-index'], project_routing: PROJECT_ROUTING.ORIGIN },
       dest: { index: 'dest-index' },
     },
-  } as unknown as TransformListRow);
+  }) as unknown as TransformListRow;
 
 const transformItem = createTransformItem('transform-1');
 const secondTransformItem = createTransformItem('transform-2');

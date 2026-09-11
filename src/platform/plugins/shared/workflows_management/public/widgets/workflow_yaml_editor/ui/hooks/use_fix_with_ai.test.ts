@@ -91,7 +91,7 @@ describe('useFixWithAi', () => {
     render();
 
     const { isEditorModel } = registerProviderMock.mock.calls[0][0];
-    const asModel = (uri: string) => ({ uri: { toString: () => uri } } as monaco.editor.ITextModel);
+    const asModel = (uri: string) => ({ uri: { toString: () => uri } }) as monaco.editor.ITextModel;
 
     expect(isEditorModel(asModel('inmemory://workflow.yaml'))).toBe(true);
     expect(isEditorModel(asModel('inmemory://preview.yaml'))).toBe(false);

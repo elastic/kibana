@@ -19,9 +19,7 @@ export interface ShortUrlRedirectLocatorParams extends SerializableRecord {
 /**
  * Locator that points to a frontend short URL redirect app by slug.
  */
-export class ShortUrlRedirectLocatorDefinition
-  implements LocatorDefinition<ShortUrlRedirectLocatorParams>
-{
+export class ShortUrlRedirectLocatorDefinition implements LocatorDefinition<ShortUrlRedirectLocatorParams> {
   public readonly id = SHORT_URL_REDIRECT_LOCATOR;
 
   public async getLocation(params: ShortUrlRedirectLocatorParams): Promise<KibanaLocation> {

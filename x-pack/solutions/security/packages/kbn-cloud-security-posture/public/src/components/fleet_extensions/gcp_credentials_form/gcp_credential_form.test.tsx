@@ -123,7 +123,7 @@ const createMockGcpPackageInfo = (): PackageInfo =>
     data_streams: [],
     assets: [],
     owner: { github: 'elastic/security-team' },
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 const createMockGcpPolicy = (input: NewPackagePolicyInput): NewPackagePolicy => ({
   name: 'gcp-test',

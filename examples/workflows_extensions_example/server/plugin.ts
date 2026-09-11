@@ -46,15 +46,12 @@ export interface WorkflowsExtensionsExamplePluginStartDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
-export class WorkflowsExtensionsExamplePlugin
-  implements
-    Plugin<
-      WorkflowsExtensionsExamplePluginSetup,
-      WorkflowsExtensionsExamplePluginStart,
-      WorkflowsExtensionsExamplePluginSetupDeps,
-      WorkflowsExtensionsExamplePluginStartDeps
-    >
-{
+export class WorkflowsExtensionsExamplePlugin implements Plugin<
+  WorkflowsExtensionsExamplePluginSetup,
+  WorkflowsExtensionsExamplePluginStart,
+  WorkflowsExtensionsExamplePluginSetupDeps,
+  WorkflowsExtensionsExamplePluginStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

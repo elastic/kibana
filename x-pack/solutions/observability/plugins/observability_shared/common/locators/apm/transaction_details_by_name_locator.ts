@@ -11,9 +11,7 @@ import { TRANSACTION_DETAILS_BY_NAME_LOCATOR } from '@kbn/deeplinks-observabilit
 
 export type TransactionDetailsByNameLocator = LocatorPublic<TransactionDetailsByNameParams>;
 
-export class TransactionDetailsByNameLocatorDefinition
-  implements LocatorDefinition<TransactionDetailsByNameParams>
-{
+export class TransactionDetailsByNameLocatorDefinition implements LocatorDefinition<TransactionDetailsByNameParams> {
   public readonly id = TRANSACTION_DETAILS_BY_NAME_LOCATOR;
 
   public readonly getLocation = async ({

@@ -22,8 +22,9 @@ import type { History, LocationDescriptorObject, Href } from 'history';
  *
  * @public
  */
-export interface ScopedHistory<HistoryLocationState = unknown>
-  extends History<HistoryLocationState> {
+export interface ScopedHistory<
+  HistoryLocationState = unknown,
+> extends History<HistoryLocationState> {
   /**
    * Creates a `ScopedHistory` for a subpath of this `ScopedHistory`. Useful for applications that may have sub-apps
    * that do not need access to the containing application's history.

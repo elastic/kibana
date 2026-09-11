@@ -93,12 +93,12 @@ const getEventsResponse = (
     scenario === 'empty'
       ? []
       : scenario === 'allClear'
-      ? [resolvedPaymentEvent]
-      : scenario === 'openOnly'
-      ? [checkoutEvent, inventoryEvent]
-      : scenario === 'dismissed'
-      ? [...nightshiftEvents, dismissedShippingEvent]
-      : nightshiftEvents;
+        ? [resolvedPaymentEvent]
+        : scenario === 'openOnly'
+          ? [checkoutEvent, inventoryEvent]
+          : scenario === 'dismissed'
+            ? [...nightshiftEvents, dismissedShippingEvent]
+            : nightshiftEvents;
 
   return {
     hits,

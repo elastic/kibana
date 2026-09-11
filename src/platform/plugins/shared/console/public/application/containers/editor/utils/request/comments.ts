@@ -30,7 +30,7 @@ const replaceCommentToken = (token: RequestDataToken): string => {
     return token.value;
   }
 
-  const lineEnding = token.kind === 'lineComment' ? token.value.match(/\r?\n$/)?.[0] ?? '' : '';
+  const lineEnding = token.kind === 'lineComment' ? (token.value.match(/\r?\n$/)?.[0] ?? '') : '';
   return ` ${lineEnding}`;
 };
 

@@ -16,7 +16,7 @@ const buildManagementApi = (): ManagementApi =>
     getWorkflow: jest.fn().mockResolvedValue({ id: 'workflow-1' }),
     runWorkflow: jest.fn().mockResolvedValue('inline-run-id'),
     scheduleWorkflow: jest.fn().mockResolvedValue('scheduled-run-id'),
-  } as unknown as ManagementApi);
+  }) as unknown as ManagementApi;
 
 describe('wrapManagementApiForScheduledExecution', () => {
   beforeEach(() => {

@@ -28,7 +28,7 @@ const buildApi = (
     getAvailableConnectors:
       overrides.getAvailableConnectors ??
       jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
-  } as any);
+  }) as any;
 
 beforeEach(() => {
   getAllConnectorsMock.mockReset();

@@ -47,8 +47,8 @@ export function printScopeSummary(
     totalProjectCount < 50
       ? { label: 'light', bullet: chalk.green('●') }
       : totalProjectCount < 200
-      ? { label: 'medium', bullet: chalk.yellow('●') }
-      : { label: 'heavy', bullet: chalk.red('●') };
+        ? { label: 'medium', bullet: chalk.yellow('●') }
+        : { label: 'heavy', bullet: chalk.red('●') };
 
   log.info(
     `${bullet} ${label}  ${totalProjectCount} project${totalProjectCount === 1 ? '' : 's'} to check`
@@ -108,8 +108,8 @@ function renderBar(
     dependentCount === 0
       ? ' '.repeat(BAR_DOWN_W)
       : dependentCount <= 50
-      ? chalk.yellow(downRaw)
-      : chalk.red(downRaw);
+        ? chalk.yellow(downRaw)
+        : chalk.red(downRaw);
 
   return `▕${project}${deps}${downstream}▏`;
 }

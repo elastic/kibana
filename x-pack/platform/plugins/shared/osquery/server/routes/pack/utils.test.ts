@@ -1603,7 +1603,7 @@ describe('fetchAllPackagePolicies (shared keyset drain for create/delete/update/
           yield batch;
         }
       }),
-    } as unknown as PackagePolicyClient);
+    }) as unknown as PackagePolicyClient;
 
   it('drains ALL batches (not just the first ≤1000 offset page)', async () => {
     const service = serviceYielding([[{ id: 'pp-1' }, { id: 'pp-2' }], [{ id: 'pp-3' }]]);
@@ -1685,7 +1685,7 @@ describe('hasQueries (shared mint/reconcile emptiness predicate)', () => {
 // concurrent updates against the same package-policy id from a stale base.
 describe('groupAgentPolicyIdsByPackagePolicy (dedup write targets)', () => {
   const packagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
-    ({ id, policy_ids: policyIds } as PackagePolicy);
+    ({ id, policy_ids: policyIds }) as PackagePolicy;
 
   it('groups two agent policy ids that resolve to the same package policy into one entry', () => {
     const sharedPolicy = packagePolicy('pp-shared', ['agent-a', 'agent-b']);

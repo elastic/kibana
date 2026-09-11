@@ -22,9 +22,7 @@ async function waitForFleetServer(): Promise<void> {
       const response = await fetch(FLEET_SERVER_HEALTH_URL, {
         // Fleet Server uses a self-signed cert
         // @ts-ignore - Node 18+ supports this
-        dispatcher: new (
-          await import('undici')
-        ).Agent({
+        dispatcher: new (await import('undici')).Agent({
           connect: { rejectUnauthorized: false },
         }),
       });

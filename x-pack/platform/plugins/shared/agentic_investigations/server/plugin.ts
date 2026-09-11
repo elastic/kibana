@@ -30,15 +30,12 @@ import type {
   AgenticInvestigationsStartDependencies,
 } from './types';
 
-export class AgenticInvestigationsPlugin
-  implements
-    Plugin<
-      AgenticInvestigationsPluginSetup,
-      AgenticInvestigationsPluginStart,
-      AgenticInvestigationsSetupDependencies,
-      AgenticInvestigationsStartDependencies
-    >
-{
+export class AgenticInvestigationsPlugin implements Plugin<
+  AgenticInvestigationsPluginSetup,
+  AgenticInvestigationsPluginStart,
+  AgenticInvestigationsSetupDependencies,
+  AgenticInvestigationsStartDependencies
+> {
   private readonly logger: Logger;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   // `workflowsManagement` is a required plugin, so this is set in setup() and

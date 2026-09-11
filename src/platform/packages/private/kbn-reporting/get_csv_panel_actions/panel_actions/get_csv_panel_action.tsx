@@ -68,7 +68,7 @@ type StartServices = [
     | 'uiSettings'
   >,
   PanelActionDependencies,
-  unknown
+  unknown,
 ];
 
 interface Params {

@@ -137,7 +137,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           const shouldKeepArray = mappedValueFields.has(fieldName);
           result[fieldName] =
             Array.isArray(fieldValue) && !shouldKeepArray
-              ? fieldValue[0] ?? fieldValue
+              ? (fieldValue[0] ?? fieldValue)
               : fieldValue;
           return result;
         }, {} as CorrelationsTableRow);

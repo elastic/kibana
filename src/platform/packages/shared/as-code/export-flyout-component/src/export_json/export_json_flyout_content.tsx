@@ -51,7 +51,7 @@ const flyoutBodyCss = css`
 
 type ExportJsonFlyoutContentProps<
   State extends object,
-  PreparedState extends object
+  PreparedState extends object,
 > = ExportJsonSharingData<State> & {
   objectType: string;
   closeFlyout: () => void;
@@ -69,7 +69,7 @@ type ExportJsonFlyoutContentProps<
 
 export const ExportJsonFlyoutContent = <
   State extends object,
-  PreparedState extends object = State
+  PreparedState extends object = State,
 >({
   title,
   objectType,

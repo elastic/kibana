@@ -300,7 +300,7 @@ const reportGenerationSuccessTelemetry = ({
 
   const discoveriesGenerated =
     orchestrationOutcome.outcome === 'validation_succeeded'
-      ? orchestrationOutcome.generationResult.attackDiscoveries?.length ?? 0
+      ? (orchestrationOutcome.generationResult.attackDiscoveries?.length ?? 0)
       : 0;
 
   const alertsContextCount =
@@ -413,14 +413,14 @@ const handleGenerationFailure = async ({
     err instanceof PipelineStepError
       ? err.errorCategory
       : err instanceof AttackDiscoveryError
-      ? err.errorCategory
-      : undefined;
+        ? err.errorCategory
+        : undefined;
   const failedWorkflowId =
     err instanceof PipelineStepError
       ? err.failedWorkflowId
       : err instanceof AttackDiscoveryError
-      ? err.workflowId
-      : undefined;
+        ? err.workflowId
+        : undefined;
 
   if (analytics != null && parsedApiConfig != null) {
     reportWorkflowError({

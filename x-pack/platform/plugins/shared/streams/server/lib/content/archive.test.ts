@@ -15,7 +15,7 @@ import { InvalidContentPackError } from './error';
 // exercised in the deployment-agnostic api_integration tests (real Node). Here we unit-test the
 // pure metadata guard, which only reads `entries.length` and `entry.header.size`.
 const entry = (entryName: string, size: number): AdmZip.IZipEntry =>
-  ({ entryName, header: { size } } as unknown as AdmZip.IZipEntry);
+  ({ entryName, header: { size } }) as unknown as AdmZip.IZipEntry;
 
 const entries = (count: number, size: number): AdmZip.IZipEntry[] =>
   Array.from({ length: count }, (_, i) => entry(`root/entry-${i}.json`, size));

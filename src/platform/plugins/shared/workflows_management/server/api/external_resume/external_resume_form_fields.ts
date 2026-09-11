@@ -63,8 +63,8 @@ function buildFieldHtml(name: string, field: FlatFieldSchema, required: Set<stri
           <span class="field-label">${label}${requiredMarker}</span>
           ${description}
           <textarea id="${escapeHtml(name)}" name="${escapeHtml(
-      name
-    )}" rows="4"${requiredAttr} placeholder="{&quot;key&quot;: &quot;value&quot;}"></textarea>
+            name
+          )}" rows="4"${requiredAttr} placeholder="{&quot;key&quot;: &quot;value&quot;}"></textarea>
         </label>`;
   }
 

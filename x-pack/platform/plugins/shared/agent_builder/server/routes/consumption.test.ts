@@ -143,7 +143,7 @@ describe('Consumption route', () => {
     };
 
     const mockGetInternalServices = () =>
-      ({ consumption: mockConsumptionService } as unknown as InternalStartServices);
+      ({ consumption: mockConsumptionService }) as unknown as InternalStartServices;
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
     const routeConfigs: Record<string, any> = {};

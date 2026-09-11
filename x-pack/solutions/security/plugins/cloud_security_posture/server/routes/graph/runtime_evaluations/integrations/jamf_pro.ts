@@ -7,14 +7,14 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const jamf_proEvaluations = {
-  integration: "jamf_pro",
+  integration: 'jamf_pro',
   evaluations: [
     {
-      id: "detection_flags",
-      section: "Detection flags (mandatory \u2014 run first)",
+      id: 'detection_flags',
+      section: 'Detection flags (mandatory \u2014 run first)',
       esql: `| EVAL
   actor_exists = (user.name IS NOT NULL AND event.action == "RestAPIOperation")
     OR service.id IS NOT NULL OR service.name IS NOT NULL
@@ -26,8 +26,8 @@ export const jamf_proEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.name = CASE(
     user.name IS NOT NULL AND event.action == "RestAPIOperation", user.name,
@@ -41,8 +41,8 @@ export const jamf_proEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   host.target.id = CASE(
     host.target.id IS NOT NULL, host.target.id,

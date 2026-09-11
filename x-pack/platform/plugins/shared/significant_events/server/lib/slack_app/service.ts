@@ -154,7 +154,7 @@ export class SlackAppService {
     const connection = available ? await this.readConnection(soClient) : undefined;
     const desiredTenantKey =
       connection?.status === RELAY_APP_CONNECTION_STATUS.connected
-        ? connection.tenantKey ?? undefined
+        ? (connection.tenantKey ?? undefined)
         : undefined;
 
     if (desiredTenantKey === this.getRegisteredTenantKey()) {

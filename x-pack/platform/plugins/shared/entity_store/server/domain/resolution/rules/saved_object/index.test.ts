@@ -86,8 +86,8 @@ describe('EntityResolutionRuleType', () => {
         id === RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE
           ? RESOLUTION_RULE_KINDS.CROSS_FIELD
           : id === RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
-          ? RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION
-          : RESOLUTION_RULE_KINDS.SAME_FIELD;
+            ? RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION
+            : RESOLUTION_RULE_KINDS.SAME_FIELD;
       const attributes = { id, kind, managed: true, enabled: true };
       expect(latestCreate?.validate(attributes)).toEqual(attributes);
     }

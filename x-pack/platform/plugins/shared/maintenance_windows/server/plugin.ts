@@ -31,15 +31,12 @@ import type {
 import { defineRoutes } from './routes';
 import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
-export class MaintenanceWindowsPlugin
-  implements
-    Plugin<
-      void,
-      MaintenanceWindowsServerStart,
-      MaintenanceWindowsServerSetupDependencies,
-      MaintenanceWindowsServerStartDependencies
-    >
-{
+export class MaintenanceWindowsPlugin implements Plugin<
+  void,
+  MaintenanceWindowsServerStart,
+  MaintenanceWindowsServerSetupDependencies,
+  MaintenanceWindowsServerStartDependencies
+> {
   private readonly logger: Logger;
   private licenseState: ILicenseState | null = null;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;

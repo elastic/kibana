@@ -47,9 +47,12 @@ const LoadingFallback = () => (
   </Suspense>
 );
 
-export class ApmSharedPlugin
-  implements Plugin<ApmSharedPluginSetup, ApmSharedPluginStart, {}, ApmSharedPluginStartDeps>
-{
+export class ApmSharedPlugin implements Plugin<
+  ApmSharedPluginSetup,
+  ApmSharedPluginStart,
+  {},
+  ApmSharedPluginStartDeps
+> {
   public setup(core: CoreSetup): ApmSharedPluginSetup {
     // Loaded lazily to keep `@kbn/apm-ui-shared` out of the page load bundle.
     import('@kbn/apm-ui-shared')

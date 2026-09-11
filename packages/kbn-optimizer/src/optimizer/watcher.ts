@@ -49,11 +49,9 @@ export class Watcher {
       // emit ChangesStarted as soon as we have been triggered
       this.change$.pipe(
         take(1),
-        map(
-          (): ChangesStarted => ({
-            type: 'changes detected',
-          })
-        )
+        map((): ChangesStarted => ({
+          type: 'changes detected',
+        }))
       ),
 
       // debounce and bufffer change events for 1 second to create
@@ -61,15 +59,13 @@ export class Watcher {
       this.change$.pipe(
         map((event) => event[0]),
         debounceTimeBuffer(1000),
-        map(
-          (changes): Changes => ({
-            type: 'changes',
-            bundles: bundles.filter((bundle) => {
-              const referencedFiles = bundle.cache.getReferencedPaths();
-              return changes.some((change) => referencedFiles?.includes(change));
-            }),
-          })
-        ),
+        map((changes): Changes => ({
+          type: 'changes',
+          bundles: bundles.filter((bundle) => {
+            const referencedFiles = bundle.cache.getReferencedPaths();
+            return changes.some((change) => referencedFiles?.includes(change));
+          }),
+        })),
         take(1)
       ),
 

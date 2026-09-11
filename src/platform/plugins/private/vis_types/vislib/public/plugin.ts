@@ -50,10 +50,12 @@ export interface VisTypeVislibPluginStartDependencies {
 export type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeVislibPlugin
-  implements
-    Plugin<void, void, VisTypeVislibPluginSetupDependencies, VisTypeVislibPluginStartDependencies>
-{
+export class VisTypeVislibPlugin implements Plugin<
+  void,
+  void,
+  VisTypeVislibPluginSetupDependencies,
+  VisTypeVislibPluginStartDependencies
+> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public setup(

@@ -18,8 +18,10 @@ import { createVm, getHostVmClient } from './vm_services';
 import { downloadAndStoreAgent } from './agent_downloads_service';
 import { enrollHostVmWithFleet, getAgentDownloadUrl, unEnrollFleetAgent } from './fleet_services';
 
-export interface CreateAndEnrollEndpointHostOptions
-  extends Pick<BaseVmCreateOptions, 'disk' | 'cpus' | 'memory'> {
+export interface CreateAndEnrollEndpointHostOptions extends Pick<
+  BaseVmCreateOptions,
+  'disk' | 'cpus' | 'memory'
+> {
   kbnClient: KbnClient;
   log: ToolingLog;
   /** The fleet Agent Policy ID to use for enrolling the agent */

@@ -434,8 +434,8 @@ export const useSettingsView = ({
       localConnectorId == null
         ? i18n.SELECT_A_CONNECTOR_TO_SAVE
         : !isWorkflowConfigurationValid
-        ? i18n.WORKFLOW_CONFIGURATION_INVALID
-        : undefined;
+          ? i18n.WORKFLOW_CONFIGURATION_INVALID
+          : undefined;
 
     return (
       <EuiFlexGroup

@@ -37,7 +37,7 @@ const createContext = (esClient = createEsClientMock()) =>
   ({
     esClient,
     request: {},
-  } as any);
+  }) as any;
 
 describe('adGetJobInfoTool', () => {
   it('has the correct ID and type', () => {

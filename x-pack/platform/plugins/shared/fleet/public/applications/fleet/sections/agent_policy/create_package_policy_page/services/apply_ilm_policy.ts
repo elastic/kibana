@@ -36,7 +36,7 @@ export async function applyIlmPolicyChange(
   // No-op check: avoid an API round trip if the stale local copy already matches.
   const existingSettings =
     'installationInfo' in packageInfo
-      ? packageInfo.installationInfo?.namespace_customization_settings ?? {}
+      ? (packageInfo.installationInfo?.namespace_customization_settings ?? {})
       : {};
   const existingIlmPolicy = existingSettings[trimmed]?.ilm_policy;
   if (existingIlmPolicy === ilmPolicy) {

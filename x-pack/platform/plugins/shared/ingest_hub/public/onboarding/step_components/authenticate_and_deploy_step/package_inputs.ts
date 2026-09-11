@@ -106,14 +106,14 @@ export function buildPackageInputs(
       const activeInputs = dsVars.enabledInputs.length
         ? dsVars.enabledInputs
         : isSingleDs
-        ? dsInfo?.inputs ?? service.inputs ?? []
-        : dsInfo?.defaultEnabledInputs?.length
-        ? dsInfo.defaultEnabledInputs
-        : dsInfo?.inputs?.length
-        ? dsInfo.inputs.slice(0, 1)
-        : service.defaultEnabledInputs?.length
-        ? service.defaultEnabledInputs.slice(0, 1)
-        : (service.inputs ?? []).slice(0, 1);
+          ? (dsInfo?.inputs ?? service.inputs ?? [])
+          : dsInfo?.defaultEnabledInputs?.length
+            ? dsInfo.defaultEnabledInputs
+            : dsInfo?.inputs?.length
+              ? dsInfo.inputs.slice(0, 1)
+              : service.defaultEnabledInputs?.length
+                ? service.defaultEnabledInputs.slice(0, 1)
+                : (service.inputs ?? []).slice(0, 1);
 
       // Fleet input key: <policyTemplateName>-<inputType>
       // Use policyTemplate when present (e.g. aws_cloudwatch_input_otel entries where id !== PT name).

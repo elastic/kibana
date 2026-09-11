@@ -162,7 +162,7 @@ export const buildNameColumn = (
   const supportsSorting = context.supports?.sorting ?? true;
 
   // Default sortable to `true` for the title field, when sorting is supported.
-  const sortable = supportsSorting ? sortableProp ?? true : false;
+  const sortable = supportsSorting ? (sortableProp ?? true) : false;
 
   return {
     field: 'title',

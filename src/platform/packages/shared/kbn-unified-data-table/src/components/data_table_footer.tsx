@@ -141,9 +141,9 @@ const UnifiedDataTableFooterContainer: React.FC<
         justify-content: center;
         flex-shrink: 0;
         background-color: ${euiTheme.colors.lightestShade};
-        padding: ${hasButton
-          ? `0 ${euiTheme.size.base}`
-          : `${euiTheme.size.s} ${euiTheme.size.base}`};
+        padding: ${
+          hasButton ? `0 ${euiTheme.size.base}` : `${euiTheme.size.s} ${euiTheme.size.base}`
+        };
         text-align: center;
       `}
     >

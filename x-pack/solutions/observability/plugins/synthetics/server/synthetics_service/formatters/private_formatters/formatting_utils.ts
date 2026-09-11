@@ -28,7 +28,7 @@ export const omitDefaultFormatter =
     if (isEqual(value, defaultValue)) {
       return null;
     }
-    return formatter ? formatter(fields, key) : (value as string) ?? null;
+    return formatter ? formatter(fields, key) : ((value as string) ?? null);
   };
 
 /**

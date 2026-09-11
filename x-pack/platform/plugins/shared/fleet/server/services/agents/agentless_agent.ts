@@ -104,8 +104,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     return isServerless
       ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
       : isCloud
-      ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
-      : undefined;
+        ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
+        : undefined;
   }
 
   /** Data output depends on the policy: connector and OTel policies stay on direct ES. */
@@ -122,10 +122,10 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         ? SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID
         : SERVERLESS_AGENTLESS_OUTPUT_ID
       : isCloud
-      ? useManagedBulk
-        ? ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID
-        : ECH_AGENTLESS_OUTPUT_ID
-      : undefined;
+        ? useManagedBulk
+          ? ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID
+          : ECH_AGENTLESS_OUTPUT_ID
+        : undefined;
   }
 
   public getDefaultSettings(agentPolicy: AgentPolicyForOutputEligibility) {

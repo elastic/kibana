@@ -18,7 +18,7 @@ import { applyExcludedDataTiersToParams } from '../utils/excluded_data_tiers';
  */
 export const useSyntheticsEsSearch = <
   DocumentSource extends unknown,
-  TParams extends estypes.SearchRequest
+  TParams extends estypes.SearchRequest,
 >(
   params: TParams,
   fnDeps: any[],

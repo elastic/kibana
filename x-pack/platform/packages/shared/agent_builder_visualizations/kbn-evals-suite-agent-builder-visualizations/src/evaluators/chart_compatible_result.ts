@@ -127,7 +127,7 @@ export function isChartCompatibleResult(
  */
 export function createChartCompatibleResultEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   esClient: ElasticsearchClient;
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];

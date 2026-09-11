@@ -81,10 +81,12 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
       height: calc(100% - ${heightHeader});
       overflow-y: auto;
 
-      ${isSearchResultEmpty &&
-      css`
-        display: flex; /* Will center vertically the empty search result */
-      `}
+      ${
+        isSearchResultEmpty &&
+        css`
+          display: flex; /* Will center vertically the empty search result */
+        `
+      }
     `,
   };
 };

@@ -78,14 +78,14 @@ export const toWorkflowExecutionState = (
         step?.type === 'waitForInput'
           ? (step as WaitForInputStep).with
           : step?.type === 'waitForApproval'
-          ? (step as WaitForApprovalStep).with
-          : undefined;
+            ? (step as WaitForApprovalStep).with
+            : undefined;
       const schema =
         step?.type === 'waitForApproval'
           ? WAIT_FOR_APPROVAL_RESPONSE_SCHEMA
           : stepConfig && 'schema' in stepConfig
-          ? stepConfig.schema
-          : undefined;
+            ? stepConfig.schema
+            : undefined;
 
       const waitContext: WaitingInputContext = {
         step_execution_id: waitingStep.id,

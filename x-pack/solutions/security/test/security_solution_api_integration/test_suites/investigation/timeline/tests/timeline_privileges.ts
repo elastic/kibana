@@ -295,7 +295,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
     describe('copy timeline', () => {
       let getTimeline: () => CreateTimelinesResponse = () =>
-        ({} as unknown as CreateTimelinesResponse);
+        ({}) as unknown as CreateTimelinesResponse;
       before(async () => {
         const superTest = supertestCache.get(roles.secTimelineAllV2.name)!;
         const { body } = await createBasicTimeline(superTest, 'test timeline');

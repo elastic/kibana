@@ -345,7 +345,9 @@ export const createVisualizationGraph = async (
 
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
+      authoringNote: lastValidateAction?.success
+        ? (lastValidateAction.authoringNote ?? null)
+        : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
     };

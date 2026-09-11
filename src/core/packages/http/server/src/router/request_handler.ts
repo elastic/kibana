@@ -55,7 +55,7 @@ export type RequestHandler<
   B = unknown,
   Context extends RequestHandlerContextBase = RequestHandlerContextBase,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = (
   context: Context,
   request: KibanaRequest<P, Q, B, Method>,
@@ -81,7 +81,7 @@ export type RequestHandlerWrapper = <
   B,
   Context extends RequestHandlerContextBase = RequestHandlerContextBase,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 >(
   handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>
 ) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;

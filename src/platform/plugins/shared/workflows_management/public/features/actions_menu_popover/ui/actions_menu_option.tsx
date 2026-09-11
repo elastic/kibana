@@ -116,8 +116,8 @@ export function renderActionOption({
   const effectiveSearch = rawSearch.startsWith(STEPS_PREFIX)
     ? rawSearch.slice(STEPS_PREFIX.length).trim()
     : rawSearch.startsWith('#')
-    ? rawSearch.slice(1).trim()
-    : rawSearch;
+      ? rawSearch.slice(1).trim()
+      : rawSearch;
 
   const keyboardOption =
     keyboardIndex != null ? actionableDisplayOptions[keyboardIndex] : undefined;

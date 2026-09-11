@@ -44,9 +44,9 @@ const soAttachment = (
     },
     createdAt,
     createdBy: { username: 'alice', fullName: 'Alice A' },
-  } as unknown as AttachmentUIV2);
+  }) as unknown as AttachmentUIV2;
 
-const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, comments } as CaseUI);
+const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, comments }) as CaseUI;
 
 describe('SavedObjectAttachmentsTable', () => {
   const mutate = jest.fn();

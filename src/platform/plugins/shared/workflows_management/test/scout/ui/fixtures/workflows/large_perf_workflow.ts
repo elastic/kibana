@@ -20,8 +20,8 @@ export const getLargePerfWorkflowYaml = () => {
     type: http
     with:
       url: "{{ consts.api_url }}/endpoint_${i}?q={{ steps.${
-      i > 0 ? `http_step_${i - 1}` : 'choose_ioc'
-    }.output | url_encode }}&key={{ consts.api_key }}"
+        i > 0 ? `http_step_${i - 1}` : 'choose_ioc'
+      }.output | url_encode }}&key={{ consts.api_key }}"
       method: GET
       headers:
         Content-Type: application/json

@@ -13,9 +13,9 @@ export type AiopsLogRateAnalysisApiVersion = '2' | '3';
 const LATEST_API_VERSION: AiopsLogRateAnalysisApiVersion = '3';
 
 export type AiopsLogRateAnalysisSchema<
-  T extends AiopsLogRateAnalysisApiVersion = typeof LATEST_API_VERSION
+  T extends AiopsLogRateAnalysisApiVersion = typeof LATEST_API_VERSION,
 > = T extends '2'
   ? AiopsLogRateAnalysisSchemaV2
   : T extends '3'
-  ? AiopsLogRateAnalysisSchemaV3
-  : never;
+    ? AiopsLogRateAnalysisSchemaV3
+    : never;

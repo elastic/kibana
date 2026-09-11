@@ -97,7 +97,7 @@ const getMetricLayerConfiguration = (
   })?.meta?.type;
   const isPrimaryMetricNumeric = Boolean(
     props.state.metricAccessor &&
-      getAccessorType(datasource, props.state.metricAccessor, primaryMetricTypeFallback).isNumeric
+    getAccessorType(datasource, props.state.metricAccessor, primaryMetricTypeFallback).isNumeric
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -132,8 +132,8 @@ const getMetricLayerConfiguration = (
 
   const isSecondaryMetricNumeric = Boolean(
     props.state.secondaryMetricAccessor &&
-      getAccessorType(datasource, props.state.secondaryMetricAccessor, secondaryMetricTypeFallback)
-        .isNumeric
+    getAccessorType(datasource, props.state.secondaryMetricAccessor, secondaryMetricTypeFallback)
+      .isNumeric
   );
 
   const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -831,8 +831,8 @@ export const getMetricVisualization = ({
           palette: (hasDynamicColoring
             ? colors
             : hasStaticColoring
-            ? [state.color]
-            : [getDefaultColor(state, isMetricNumeric)]
+              ? [state.color]
+              : [getDefaultColor(state, isMetricNumeric)]
           ).filter(nonNullable),
         },
       ],

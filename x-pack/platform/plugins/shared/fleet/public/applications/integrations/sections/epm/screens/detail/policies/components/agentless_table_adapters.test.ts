@@ -17,7 +17,7 @@ const makeInput = (overrides: Partial<PackagePolicyInput>): PackagePolicyInput =
 });
 
 const makePackagePolicy = (inputs: PackagePolicyInput[]): PackagePolicy =>
-  ({ id: 'pp1', name: 'pp', inputs } as PackagePolicy);
+  ({ id: 'pp1', name: 'pp', inputs }) as PackagePolicy;
 
 describe('getConnectorsFromPackagePolicy', () => {
   it('returns an empty array when there are no inputs', () => {

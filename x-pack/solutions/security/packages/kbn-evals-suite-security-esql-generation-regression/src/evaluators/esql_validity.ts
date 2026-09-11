@@ -46,7 +46,7 @@ interface QueryValidationDetail {
  */
 export function createEsqlValidityEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   queryExtractor: (output: TTaskOutput) => string[];
   scoreOnEmptyQueries?: number;
@@ -141,7 +141,7 @@ function pluralize(
   plural?: string,
   pluralVerb?: string
 ): string {
-  const noun = count === 1 ? singular : plural ?? `${singular}s`;
+  const noun = count === 1 ? singular : (plural ?? `${singular}s`);
   const verb = count === 1 ? singularVerb : pluralVerb;
   return verb ? `${noun} ${verb}` : noun;
 }

@@ -42,7 +42,7 @@ const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
   return Boolean(
     // Is the selected node first in a list?
     (!selectedProcessor.aboveId && selectedProcessor.id === processor.id) ||
-      isChildPath(selectedProcessor.selector, processor.selector)
+    isChildPath(selectedProcessor.selector, processor.selector)
   );
 };
 

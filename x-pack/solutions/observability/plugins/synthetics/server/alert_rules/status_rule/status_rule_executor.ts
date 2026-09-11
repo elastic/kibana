@@ -236,19 +236,25 @@ export class StatusRuleExecutor {
       );
     });
 
-    const downConfigsToMarkAsStale = Object.keys(prevDownConfigs).reduce((acc, locId) => {
-      if (!pendingConfigs[locId] && !upConfigs[locId] && !downConfigs[locId]) {
-        acc[locId] = prevDownConfigs[locId];
-      }
-      return acc;
-    }, {} as Record<string, AlertStatusMetaData>);
+    const downConfigsToMarkAsStale = Object.keys(prevDownConfigs).reduce(
+      (acc, locId) => {
+        if (!pendingConfigs[locId] && !upConfigs[locId] && !downConfigs[locId]) {
+          acc[locId] = prevDownConfigs[locId];
+        }
+        return acc;
+      },
+      {} as Record<string, AlertStatusMetaData>
+    );
 
-    const pendingConfigsToMarkAsStale = Object.keys(prevPendingConfigs).reduce((acc, locId) => {
-      if (!pendingConfigs[locId] && !upConfigs[locId] && !downConfigs[locId]) {
-        acc[locId] = prevPendingConfigs[locId];
-      }
-      return acc;
-    }, {} as Record<string, AlertPendingStatusMetaData>);
+    const pendingConfigsToMarkAsStale = Object.keys(prevPendingConfigs).reduce(
+      (acc, locId) => {
+        if (!pendingConfigs[locId] && !upConfigs[locId] && !downConfigs[locId]) {
+          acc[locId] = prevPendingConfigs[locId];
+        }
+        return acc;
+      },
+      {} as Record<string, AlertPendingStatusMetaData>
+    );
 
     const staleDownConfigs = this.markDeletedConfigs(downConfigsToMarkAsStale);
     const stalePendingConfigs = this.markDeletedConfigs(pendingConfigsToMarkAsStale);

@@ -929,9 +929,8 @@ export class ActionPolicyClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
-      id
-    );
+    const { attrs: existingAttrs, version: existingVersion } =
+      await this.getExistingActionPolicy(id);
 
     // The API key is rotated on every replace; the old key is invalidated
     // only after the SO write succeeds, so a failed replace doesn't leave

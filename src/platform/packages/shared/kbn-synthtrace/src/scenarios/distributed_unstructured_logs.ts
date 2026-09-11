@@ -144,8 +144,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         scenarioOpts.distribution === 'uniform'
           ? range.interval('1s').rate(scenarioOpts.rate)
           : scenarioOpts.distribution === 'poisson'
-          ? range.poissonEvents(scenarioOpts.rate)
-          : range.gaussianEvents(scenarioOpts.mean, scenarioOpts.width, scenarioOpts.totalPoints);
+            ? range.poissonEvents(scenarioOpts.rate)
+            : range.gaussianEvents(scenarioOpts.mean, scenarioOpts.width, scenarioOpts.totalPoints);
 
       const logs = generatorFactory.generator((timestamp) => {
         const entity = faker.helpers.arrayElement(hostEntities);

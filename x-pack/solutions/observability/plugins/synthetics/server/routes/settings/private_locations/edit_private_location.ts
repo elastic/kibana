@@ -51,7 +51,7 @@ const isPrivateLocationShardingChanged = (existing?: boolean, next?: boolean): b
   typeof next === 'boolean' && next !== Boolean(existing);
 
 const withIntendedLocationEdits = <
-  T extends { id: string; label?: string; isAgentSharding?: boolean }
+  T extends { id: string; label?: string; isAgentSharding?: boolean },
 >(
   locations: T[],
   locationId: string,

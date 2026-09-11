@@ -33,7 +33,7 @@ const zipIdsAndIndices = (ids: string[], indices: string[]): AlertInfo[] => {
   if (ids.length === 0 || indices.length === 0) return [];
   return ids.map((id, i) => ({
     id,
-    index: indices.length === 1 ? indices[0] : indices[i] ?? indices[0],
+    index: indices.length === 1 ? indices[0] : (indices[i] ?? indices[0]),
   }));
 };
 

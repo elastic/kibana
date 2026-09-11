@@ -300,9 +300,9 @@ const getDisplayOptions = ({
    */
   const searchResultsOptions = isEmpty(searchValue)
     ? []
-    : searchResultUserProfiles
+    : (searchResultUserProfiles
         ?.filter((profile) => !options.find((option) => isMatchingOption(option, profile)))
-        ?.map((profile) => toSelectableOption(profile)) ?? [];
+        ?.map((profile) => toSelectableOption(profile)) ?? []);
   /**
    * In the initial view, when the user does not perform any search,
    * we want to filter out options that are not in the initial user profile

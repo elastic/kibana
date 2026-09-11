@@ -307,7 +307,7 @@ describe('collapseInternalToolCalls', () => {
 
       const steps = JSON.parse(queryToolResponse.message.content!).steps as [
         InferenceMessage,
-        InferenceMessage
+        InferenceMessage,
       ];
 
       const [toolCallRequest, toolCallResponse] = steps;

@@ -234,8 +234,8 @@ export const getEntityAnomalyOverview = async ({
           byFieldValue: anomaly.by_field_value ?? undefined,
         })
       : anomaly.actual?.[0] != null
-      ? String(anomaly.actual[0])
-      : null;
+        ? String(anomaly.actual[0])
+        : null;
 
     return {
       recordId: anomaly._id ?? '',

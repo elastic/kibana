@@ -737,9 +737,8 @@ apiTest.describe(
       async ({ apiClient, kbnClient, apiServices }) => {
         const project = `test-project-${uuidv4()}`;
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectBrowserMonitorFixture);
         await pushProjectMonitors(
           apiClient,
@@ -760,9 +759,8 @@ apiTest.describe(
         const project = `test-project-${uuidv4()}`;
         const customNamespace = 'custom.namespace';
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectBrowserMonitorFixture);
         await pushProjectMonitors(
           apiClient,
@@ -783,9 +781,8 @@ apiTest.describe(
         const project = `test-project-${uuidv4()}`;
         const customNamespace = 'custom.namespace';
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectHttpMonitorFixture);
         await pushProjectMonitors(
           apiClient,
@@ -806,9 +803,8 @@ apiTest.describe(
         const project = `test-project-${uuidv4()}`;
         const customNamespace = 'custom-namespace';
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectBrowserMonitorFixture);
         const res = await pushProjectMonitors(
           apiClient,
@@ -837,9 +833,8 @@ apiTest.describe(
         const project = `test-project-${uuidv4()}`;
         const customNamespace = 'custom-namespace';
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectHttpMonitorFixture);
         const res = await pushProjectMonitors(
           apiClient,
@@ -867,9 +862,8 @@ apiTest.describe(
       async ({ apiClient, kbnClient, apiServices }) => {
         const project = `test-project-${uuidv4()}`;
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectBrowserMonitorFixture);
 
         await pushProjectMonitors(
@@ -914,9 +908,8 @@ apiTest.describe(
       async ({ apiClient, kbnClient, apiServices }) => {
         const project = `test project ${uuidv4()}`;
         const spaceId = await createSpace(kbnClient);
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
         const monitors = makeMonitors(projectBrowserMonitorFixture);
         await pushProjectMonitors(
           apiClient,

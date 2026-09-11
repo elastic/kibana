@@ -78,10 +78,10 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
       name: Node.isConstructSignatureDeclaration(node)
         ? 'new'
         : Node.isConstructorDeclaration(node)
-        ? 'Constructor'
-        : Node.isCallSignatureDeclaration(node)
-        ? 'Unnamed'
-        : node.getName() || 'Unnamed',
+          ? 'Constructor'
+          : Node.isCallSignatureDeclaration(node)
+            ? 'Unnamed'
+            : node.getName() || 'Unnamed',
     });
   } else if (
     Node.isPropertySignature(node) ||

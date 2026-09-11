@@ -38,7 +38,7 @@ export const QuestionAnswerList: React.FC<QuestionAnswerListProps> = ({ question
         const hasCustom = !!a.custom;
         const isLast = i === questions.length - 1;
 
-        const primaryText = hasChoice ? choiceText : a.custom ?? '';
+        const primaryText = hasChoice ? choiceText : (a.custom ?? '');
 
         return (
           <Fragment key={i}>

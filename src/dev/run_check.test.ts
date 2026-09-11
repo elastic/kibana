@@ -107,7 +107,7 @@ const createArgs = (overrides: { fix?: boolean; verbose?: boolean } = {}) => ({
         return overrides.fix ?? true;
       }
 
-      return name === 'verbose' ? overrides.verbose ?? false : false;
+      return name === 'verbose' ? (overrides.verbose ?? false) : false;
     },
   },
 });

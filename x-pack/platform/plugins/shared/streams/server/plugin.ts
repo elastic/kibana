@@ -76,15 +76,12 @@ export interface StreamsPluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginStart {}
 
-export class StreamsPlugin
-  implements
-    Plugin<
-      StreamsPluginSetup,
-      StreamsPluginStart,
-      StreamsPluginSetupDependencies,
-      StreamsPluginStartDependencies
-    >
-{
+export class StreamsPlugin implements Plugin<
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsPluginSetupDependencies,
+  StreamsPluginStartDependencies
+> {
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;

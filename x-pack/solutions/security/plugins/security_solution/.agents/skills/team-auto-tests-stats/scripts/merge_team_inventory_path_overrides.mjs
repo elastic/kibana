@@ -19,7 +19,10 @@ const OVERRIDE_FILE = path.join(SCRIPT_DIR, 'team_inventory_path_overrides.json'
  * @param {string} s
  */
 function normPathPrefix(s) {
-  return s.trim().replace(/^\/+/u, '').replace(/[/\\]*$/u, '');
+  return s
+    .trim()
+    .replace(/^\/+/u, '')
+    .replace(/[/\\]*$/u, '');
 }
 
 async function loadOverrides(teamFull) {

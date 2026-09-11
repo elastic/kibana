@@ -1088,7 +1088,7 @@ describe('utils', () => {
         run: jest.fn(),
         iconType: 'gear',
         ...overrides,
-      } as AppMenuItemType);
+      }) as AppMenuItemType;
 
     it('should return an empty array when no items are provided', () => {
       expect(processStaticItems()).toEqual([]);

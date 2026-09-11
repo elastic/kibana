@@ -278,7 +278,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const hitsTotal = response.hits.total;
     const total = Math.min(
-      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      typeof hitsTotal === 'number' ? hitsTotal : (hitsTotal?.value ?? 0),
       MAX_RESULT_WINDOW
     );
 

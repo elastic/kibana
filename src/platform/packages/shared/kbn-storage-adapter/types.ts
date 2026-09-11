@@ -43,14 +43,14 @@ type MappingPropertyOf<TType extends StorageMappingPropertyType> = Extract<
 
 type MappingPropertyFactory<
   TType extends StorageMappingPropertyType,
-  TDefaults extends Partial<MappingPropertyOf<TType> | undefined>
+  TDefaults extends Partial<MappingPropertyOf<TType> | undefined>,
 > = <TOverrides extends Partial<MappingPropertyOf<TType>> | undefined>(
   overrides?: TOverrides
 ) => MappingPropertyOf<TType> & Exclude<TDefaults, undefined> & Exclude<TOverrides, undefined>;
 
 function createFactory<
   TType extends StorageMappingPropertyType,
-  TDefaults extends Partial<MappingPropertyOf<TType>> | undefined
+  TDefaults extends Partial<MappingPropertyOf<TType>> | undefined,
 >(type: TType, defaults?: TDefaults): MappingPropertyFactory<TType, TDefaults>;
 
 function createFactory(

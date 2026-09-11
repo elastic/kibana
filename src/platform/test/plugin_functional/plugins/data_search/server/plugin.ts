@@ -15,9 +15,12 @@ export interface DataSearchTestStartDeps {
   data: DataPluginStart;
 }
 
-export class DataSearchTestPlugin
-  implements Plugin<TestPluginSetup, TestPluginStart, {}, DataSearchTestStartDeps>
-{
+export class DataSearchTestPlugin implements Plugin<
+  TestPluginSetup,
+  TestPluginStart,
+  {},
+  DataSearchTestStartDeps
+> {
   public setup(core: CoreSetup<DataSearchTestStartDeps>) {
     const router = core.http.createRouter();
 

@@ -108,8 +108,8 @@ export async function runCheckJestConfigsCli() {
         `Summary
           - ${configsWithTests.length} configs with tests.
           - ${emptyConfigs.length} configs with no tests (${
-          customizedEmptyConfigs.size
-        } customized, ${emptyConfigs.length - customizedEmptyConfigs.size} generated boilerplate).
+            customizedEmptyConfigs.size
+          } customized, ${emptyConfigs.length - customizedEmptyConfigs.size} generated boilerplate).
           - ${missingConfigs.size} test files not covered by any config.
           - ${multipleConfigs.size} test files covered by multiple configs.
         `

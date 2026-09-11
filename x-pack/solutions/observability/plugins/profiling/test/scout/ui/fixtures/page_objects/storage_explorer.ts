@@ -10,7 +10,10 @@ import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingStorageExplorerPage {
   public pageTitle: Locator;
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.pageTitle = this.page.getByRole('heading', {
       name: 'Storage explorer',
       level: 1,

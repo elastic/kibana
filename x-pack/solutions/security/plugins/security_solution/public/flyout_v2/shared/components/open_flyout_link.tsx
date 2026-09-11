@@ -112,9 +112,9 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
         // lost on refresh. Read the current root before writeOnOpen mutates the stack.
         const parentDescriptor =
           mode === 'inherit'
-            ? decodeFlyoutV2UrlParam(
+            ? (decodeFlyoutV2UrlParam(
                 new URLSearchParams(history?.location?.search ?? '').get(urlParamKey)
-              )?.[0] ?? null
+              )?.[0] ?? null)
             : null;
         writeOnOpen(flyoutDescriptor, mode);
         onClose = buildOnClose(parentDescriptor);

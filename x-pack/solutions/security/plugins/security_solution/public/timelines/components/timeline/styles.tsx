@@ -99,9 +99,9 @@ export const EventsTdContent: React.FC<EventsTdContentProps> = ({
         line-height: ${euiTheme.font.lineHeightMultiplier};
         min-width: 0;
         text-align: ${textAlign};
-        width: ${width != null
-          ? `${width}px`
-          : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+        width: ${
+          width != null ? `${width}px` : '100%'
+        }; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
         button.euiButtonIcon {
           margin-left: -${euiTheme.size.xs};

@@ -21,4 +21,4 @@ export const getRuntimeMappings = () =>
         source: threatIndicatorNamesOriginScript(),
       },
     },
-  } as const);
+  }) as const;

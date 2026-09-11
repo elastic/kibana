@@ -19,7 +19,7 @@ const { useContext, createElement, createContext } = React;
 const context = createContext<Partial<SpacesReactContextValue<Partial<CoreStart>>>>({});
 
 export const useSpaces = <
-  Services extends Partial<CoreStart>
+  Services extends Partial<CoreStart>,
 >(): SpacesReactContextValue<Services> =>
   useContext(context as unknown as React.Context<SpacesReactContextValue<Services>>);
 

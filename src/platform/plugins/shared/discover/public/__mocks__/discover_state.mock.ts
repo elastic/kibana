@@ -472,7 +472,7 @@ export function getDiscoverStateMock({
   const finalSavedSearch =
     savedSearch === false
       ? undefined
-      : savedSearch ?? (isTimeBased ? savedSearchMockWithTimeField : savedSearchMock);
+      : (savedSearch ?? (isTimeBased ? savedSearchMockWithTimeField : savedSearchMock));
   const persistedDiscoverSession: DiscoverSession | undefined = finalSavedSearch
     ? {
         ...finalSavedSearch,

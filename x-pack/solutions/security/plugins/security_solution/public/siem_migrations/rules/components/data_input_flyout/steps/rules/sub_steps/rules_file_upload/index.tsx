@@ -60,8 +60,8 @@ export const useRulesFileUploadStep = ({
     migrationSource === MigrationSource.QRADAR
       ? RulesXMLFileUpload
       : migrationSource === MigrationSource.SENTINEL
-      ? SentinelRulesJsonFileUpload
-      : RulesFileUpload;
+        ? SentinelRulesJsonFileUpload
+        : RulesFileUpload;
 
   return {
     title: i18n.RULES_DATA_INPUT_FILE_UPLOAD_TITLE,

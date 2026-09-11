@@ -12,14 +12,10 @@ import type { ReportingCore } from '../../core';
 import type { ReportingUser, ReportingRequestHandlerContext } from '../../types';
 import { getAuthorizedUser } from './get_authorized_user';
 
-export type RequestHandlerUser<P, Q, B> = RequestHandler<
-  P,
-  Q,
-  B,
-  ReportingRequestHandlerContext
-> extends (...a: infer U) => infer R
-  ? (user: ReportingUser, ...a: U) => R
-  : never;
+export type RequestHandlerUser<P, Q, B> =
+  RequestHandler<P, Q, B, ReportingRequestHandlerContext> extends (...a: infer U) => infer R
+    ? (user: ReportingUser, ...a: U) => R
+    : never;
 
 export const authorizedUserPreRouting = <P, Q, B>(
   reporting: ReportingCore,

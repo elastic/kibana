@@ -40,10 +40,10 @@ export const createProcessStep = (props: ProcessStepProps): EuiContainedStepProp
     props.setupStatus.type === 'pending'
       ? 'incomplete'
       : props.setupStatus.type === 'failed'
-      ? 'danger'
-      : props.setupStatus.type === 'succeeded'
-      ? 'complete'
-      : undefined,
+        ? 'danger'
+        : props.setupStatus.type === 'succeeded'
+          ? 'complete'
+          : undefined,
 });
 
 export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({

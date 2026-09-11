@@ -113,7 +113,7 @@ const FlyoutTemplateRoot = ({
   const menuTitleString = typeof menuTitle === 'string' ? menuTitle : undefined;
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
-  const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
+  const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : (ariaLabel ?? menuTitleString);
 
   // Feed string titles to EUI's flyout menu for history/navigation.
   const mergedMenuProps = {

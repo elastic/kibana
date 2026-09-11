@@ -25,13 +25,13 @@ export type ManagedWorkflowVisibilityContext =
   | ManagedWorkflowSolutionVisibilityContext;
 
 export const getManagedWorkflowSelectorVisibilityContext = <
-  TSelector extends ManagedWorkflowSelector
+  TSelector extends ManagedWorkflowSelector,
 >(
   selector: TSelector
 ): `selector:${TSelector}` => `selector:${selector}`;
 
 export const getManagedWorkflowSolutionVisibilityContext = <
-  TSolution extends ManagedWorkflowSolution
+  TSolution extends ManagedWorkflowSolution,
 >(
   solution: TSolution
 ): `solution:${TSolution}` => `solution:${solution}`;
@@ -63,7 +63,7 @@ type ManagedWorkflowDefinitionSource<TValues extends ManagedWorkflowTemplateValu
     };
 
 export type ManagedWorkflowDefinition<
-  TValues extends ManagedWorkflowTemplateValues = ManagedWorkflowTemplateValues
+  TValues extends ManagedWorkflowTemplateValues = ManagedWorkflowTemplateValues,
 > = {
   id: string;
   pluginId: string;

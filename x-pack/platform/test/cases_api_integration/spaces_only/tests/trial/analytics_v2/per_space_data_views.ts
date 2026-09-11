@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
       const total =
-        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+        typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
       expect(total).to.eql(1);
     });
   });
@@ -125,7 +125,7 @@ async function waitForDataViewExists(es: ESClient, id: string): Promise<void> {
         },
       });
       const total =
-        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+        typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
       if (total > 0) return;
     } catch {
       // ignore — keep polling

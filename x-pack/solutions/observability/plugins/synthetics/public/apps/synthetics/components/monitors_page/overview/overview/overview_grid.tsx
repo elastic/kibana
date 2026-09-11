@@ -70,7 +70,7 @@ export const OverviewGrid = memo(
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <OverviewPaginationInfo
-                  total={status ? total ?? monitorsSortedByStatus.length : undefined}
+                  total={status ? (total ?? monitorsSortedByStatus.length) : undefined}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

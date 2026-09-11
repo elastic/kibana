@@ -45,9 +45,8 @@ export const createGetRiskScores =
       riskScoreEntity: entityType,
     });
 
-    const response = await esClient.search<Record<EntityType, { risk: EntityRiskScoreRecord }>>(
-      query
-    );
+    const response =
+      await esClient.search<Record<EntityType, { risk: EntityRiskScoreRecord }>>(query);
 
     return response.hits.hits
       .map((hit) => (hit._source ? hit._source[entityType].risk : undefined))

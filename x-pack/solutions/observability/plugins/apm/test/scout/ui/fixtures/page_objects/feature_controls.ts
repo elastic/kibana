@@ -9,7 +9,10 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class FeatureControlsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoApm(spaceId?: string) {
     await this.page.goto(this.kbnUrl.app('apm', spaceId ? { space: spaceId } : undefined));

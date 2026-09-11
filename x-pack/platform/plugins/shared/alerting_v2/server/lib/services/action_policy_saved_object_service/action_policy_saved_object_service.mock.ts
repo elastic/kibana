@@ -48,7 +48,7 @@ const createMockEncryptedSavedObjectsClient = (): jest.Mocked<EncryptedSavedObje
   ({
     getDecryptedAsInternalUser: jest.fn(),
     createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
-  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>);
+  }) as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
 
 export function createActionPolicySavedObjectService(): {
   actionPolicySavedObjectService: ActionPolicySavedObjectService;

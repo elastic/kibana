@@ -93,7 +93,7 @@ export const getThresholdTermsHash = (
 };
 
 export const searchResultHasAggs = <
-  T extends ThresholdSingleBucketAggregationResult | ThresholdMultiBucketAggregationResult
+  T extends ThresholdSingleBucketAggregationResult | ThresholdMultiBucketAggregationResult,
 >(
   obj: SignalSearchResponse<Record<estypes.AggregateName, estypes.AggregationsAggregate>>
 ): obj is T => obj?.aggregations != null;

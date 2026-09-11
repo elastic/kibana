@@ -24,7 +24,7 @@ const createInference = (): jest.Mocked<InferenceServerStart> =>
       .fn()
       .mockImplementation(async (connectorId: string) => ({ connectorId })),
     getDefaultConnector: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<InferenceServerStart>);
+  }) as unknown as jest.Mocked<InferenceServerStart>;
 
 const createSearchInferenceEndpoints = (
   connectorId: string | undefined
@@ -37,7 +37,7 @@ const createSearchInferenceEndpoints = (
         soEntryFound: true,
       }),
     },
-  } as unknown as SearchInferenceEndpointsPluginStart);
+  }) as unknown as SearchInferenceEndpointsPluginStart;
 
 const createUiSettingsClient = (defaultConnector?: string): IUiSettingsClient =>
   ({
@@ -46,7 +46,7 @@ const createUiSettingsClient = (defaultConnector?: string): IUiSettingsClient =>
       .mockImplementation(async (key: string) =>
         key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR ? defaultConnector : undefined
       ),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 describe('resolveScopedModel', () => {
   const logger = loggingSystemMock.createLogger();

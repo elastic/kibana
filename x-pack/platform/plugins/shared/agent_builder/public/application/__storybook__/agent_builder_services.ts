@@ -107,7 +107,7 @@ const defaultServices: AgentBuilderInternalService = {
   eventsService: { track: noOp } as never,
   isEarsEnabled: false,
   isEarsExperimentalEnabled: false,
-  openSidebarConversation: () => ({} as never),
+  openSidebarConversation: () => ({}) as never,
 };
 
 export const createStorybookAgentBuilderServices = (

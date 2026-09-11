@@ -64,7 +64,7 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const transactionName = 'transactionName' in query ? query.transactionName ?? null : null;
+  const transactionName = 'transactionName' in query ? (query.transactionName ?? null) : null;
 
   const { latencyChartsData, latencyChartsStatus, bucketSizeInSeconds, start, end } =
     useTransactionLatencyChartsFetcher({

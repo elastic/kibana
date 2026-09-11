@@ -32,7 +32,7 @@ export function readLimits(path: string): Limits {
     }
   }
 
-  return yaml ? parse(yaml) ?? {} : {};
+  return yaml ? (parse(yaml) ?? {}) : {};
 }
 
 export function validateLimitsForAllBundles(
@@ -120,7 +120,7 @@ export function updateBundleLimits({
 
   const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = dropMissing
     ? {}
-    : limits.pageLoadAssetSize ?? {};
+    : (limits.pageLoadAssetSize ?? {});
 
   for (const metric of metrics) {
     if (metric.group !== 'page load bundle size') continue;

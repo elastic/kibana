@@ -104,7 +104,7 @@ export class DiscoverAppMenu {
     await this.page.waitForFunction(() =>
       Boolean(
         document.querySelector('[data-test-subj="composeDiscoverNext"]') ||
-          document.querySelector('[data-test-subj="composeDiscoverSubmit"]')
+        document.querySelector('[data-test-subj="composeDiscoverSubmit"]')
       )
     );
     await this.dismissQuerySandboxIfOpen();

@@ -1105,13 +1105,13 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
       const cidrTier: IocTier = isPrivateNetwork
         ? 'reference'
         : maskWidth >= 29
-        ? 'discriminating'
-        : 'contextual';
+          ? 'discriminating'
+          : 'contextual';
       const cidrBasis = isPrivateNetwork
         ? 'private_ip'
         : maskWidth >= 29
-        ? 'cidr_narrow'
-        : 'cidr_broad';
+          ? 'cidr_narrow'
+          : 'cidr_broad';
 
       pushIoc({
         type: 'cidr',

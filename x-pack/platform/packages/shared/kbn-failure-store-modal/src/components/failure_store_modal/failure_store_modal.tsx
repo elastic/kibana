@@ -128,14 +128,14 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   const retentionPeriodUnit = customRetentionPeriod
     ? customRetentionPeriod.unit
     : defaultRetentionPeriod
-    ? defaultRetentionPeriod.unit
-    : 'd';
+      ? defaultRetentionPeriod.unit
+      : 'd';
 
   const retentionPeriodValue = customRetentionPeriod
     ? customRetentionPeriod.size
     : defaultRetentionPeriod
-    ? defaultRetentionPeriod.size
-    : '30';
+      ? defaultRetentionPeriod.size
+      : '30';
 
   const { form } = useForm({
     defaultValue: {
@@ -143,8 +143,8 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       periodType: failureStoreProps.retentionDisabled
         ? PERIOD_TYPE.DISABLED_LIFECYCLE
         : failureStoreProps.customRetentionPeriod
-        ? PERIOD_TYPE.CUSTOM
-        : PERIOD_TYPE.DEFAULT,
+          ? PERIOD_TYPE.CUSTOM
+          : PERIOD_TYPE.DEFAULT,
       retentionPeriodValue,
       retentionPeriodUnit,
       inherit: (inheritOptions?.isCurrentlyInherited && inheritOptions.canShowInherit) ?? false,
@@ -180,16 +180,16 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         isCustomPeriod && customRetentionPeriod
           ? customRetentionPeriod.size
           : defaultRetentionPeriod
-          ? defaultRetentionPeriod.size
-          : '30'
+            ? defaultRetentionPeriod.size
+            : '30'
       );
       setFieldValue(
         'retentionPeriodUnit',
         isCustomPeriod && customRetentionPeriod
           ? customRetentionPeriod.unit
           : defaultRetentionPeriod
-          ? defaultRetentionPeriod.unit
-          : 'd'
+            ? defaultRetentionPeriod.unit
+            : 'd'
       );
     }
   }, [periodType, isCustomPeriod, customRetentionPeriod, defaultRetentionPeriod, setFieldValue]);

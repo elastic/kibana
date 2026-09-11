@@ -29,15 +29,12 @@ export interface UiActionsPublicSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UiActionsPublicStartDependencies {}
 
-export class UiActionsPlugin
-  implements
-    Plugin<
-      UiActionsPublicSetup,
-      UiActionsPublicStart,
-      UiActionsPublicSetupDependencies,
-      UiActionsPublicStartDependencies
-    >
-{
+export class UiActionsPlugin implements Plugin<
+  UiActionsPublicSetup,
+  UiActionsPublicStart,
+  UiActionsPublicSetupDependencies,
+  UiActionsPublicStartDependencies
+> {
   private readonly service = new UiActionsService();
 
   constructor(_initializerContext: PluginInitializerContext) {}

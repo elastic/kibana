@@ -356,9 +356,8 @@ export class ActionsClient {
     ];
 
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
-    const bulkGetResult = await this.context.unsecuredSavedObjectsClient.bulkGet<RawAction>(
-      bulkGetOpts
-    );
+    const bulkGetResult =
+      await this.context.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
     bulkGetResult.saved_objects.forEach((so) => {
       if (!isSavedObjectErrorResult(so) && this.context.auditLogger) {

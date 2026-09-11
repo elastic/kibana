@@ -28,9 +28,11 @@ export interface GenAiStreamingResponseExamplePublicStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class GenAiStreamingResponseExamplePlugin
-  implements Plugin<void, void, GenAiStreamingResponseExamplePublicSetupDeps>
-{
+export class GenAiStreamingResponseExamplePlugin implements Plugin<
+  void,
+  void,
+  GenAiStreamingResponseExamplePublicSetupDeps
+> {
   public setup(
     core: CoreSetup<GenAiStreamingResponseExamplePublicStartDeps, void>,
     { developerExamples }: GenAiStreamingResponseExamplePublicSetupDeps

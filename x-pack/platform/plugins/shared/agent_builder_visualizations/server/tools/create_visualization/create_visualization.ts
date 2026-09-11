@@ -245,7 +245,7 @@ Ground first: make sure the target index exists and every field you reference is
         // param and default to Lens (the common case) when it is omitted.
         const renderer: VisualizationRenderer = existingData
           ? getEffectiveRenderer(existingData)
-          : requestedRenderer ?? 'lens';
+          : (requestedRenderer ?? 'lens');
 
         // Step 3: Generate the spec/config for the chosen renderer and assemble the
         // unified attachment data.

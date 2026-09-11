@@ -11,9 +11,7 @@ import type { MapsAppTileMapLocatorParams, MapsAppTileMapLocatorDependencies } f
 
 export const MAPS_APP_TILE_MAP_LOCATOR = 'MAPS_APP_TILE_MAP_LOCATOR' as const;
 
-export class MapsAppTileMapLocatorDefinition
-  implements LocatorDefinition<MapsAppTileMapLocatorParams>
-{
+export class MapsAppTileMapLocatorDefinition implements LocatorDefinition<MapsAppTileMapLocatorParams> {
   public readonly id = MAPS_APP_TILE_MAP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppTileMapLocatorDependencies) {}

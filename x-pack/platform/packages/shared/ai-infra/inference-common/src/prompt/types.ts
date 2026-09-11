@@ -60,7 +60,7 @@ export type PromptTemplate = MustachePromptTemplate | ChatPromptTemplate | Stati
  * best fit for the given model.
  */
 export interface PromptVersion<
-  TTools extends ToolDefinitions | undefined = ToolDefinitions | undefined
+  TTools extends ToolDefinitions | undefined = ToolDefinitions | undefined,
 > {
   /**
    * A list of {@link ModelMatch} objects. If none are given, it will be
@@ -114,7 +114,7 @@ export interface Prompt<TInput = any, TPromptVersions extends PromptVersion[] = 
  */
 export interface PromptFactory<
   TInput = any,
-  TPromptVersions extends PromptVersion[] = PromptVersion[]
+  TPromptVersions extends PromptVersion[] = PromptVersion[],
 > {
   version<TNextPromptVersion extends PromptVersion>(
     version: TNextPromptVersion
@@ -126,10 +126,9 @@ export interface PromptFactory<
  * Utility function that returns the tool options for a Prompt that
  * can be used to infer the response shape.
  */
-export type ToolOptionsOfPrompt<TPrompt extends Prompt> = TPrompt['versions'] extends Array<
-  infer TPromptVersion
->
-  ? TPromptVersion extends PromptVersion
-    ? Pick<TPromptVersion, 'tools'>
-    : {}
-  : {};
+export type ToolOptionsOfPrompt<TPrompt extends Prompt> =
+  TPrompt['versions'] extends Array<infer TPromptVersion>
+    ? TPromptVersion extends PromptVersion
+      ? Pick<TPromptVersion, 'tools'>
+      : {}
+    : {};

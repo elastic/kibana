@@ -31,13 +31,17 @@ export const PipelineGroupNode = memo(({ data }: NodeProps<PipelineGroupNodeType
   const containerStyles = css`
     width: 100%;
     height: 100%;
-    border: ${data.isSelected
-      ? `2px solid ${euiTheme.colors.primary}`
-      : `1px dashed ${euiTheme.colors.borderBasePlain}`};
+    border: ${
+      data.isSelected
+        ? `2px solid ${euiTheme.colors.primary}`
+        : `1px dashed ${euiTheme.colors.borderBasePlain}`
+    };
     border-radius: ${euiTheme.border.radius.medium};
-    background: ${data.isSelected
-      ? euiTheme.colors.backgroundBasePrimary
-      : euiTheme.colors.backgroundBaseSubdued};
+    background: ${
+      data.isSelected
+        ? euiTheme.colors.backgroundBasePrimary
+        : euiTheme.colors.backgroundBaseSubdued
+    };
     cursor: pointer;
   `;
 

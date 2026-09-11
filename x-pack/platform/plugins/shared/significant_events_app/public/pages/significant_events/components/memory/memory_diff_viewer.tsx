@@ -92,11 +92,13 @@ export function MemoryDiffViewer({
                 <span
                   key={idx}
                   className={css`
-                    background: ${part.added
-                      ? euiTheme.colors.success + '33'
-                      : part.removed
-                      ? euiTheme.colors.danger + '33'
-                      : 'transparent'};
+                    background: ${
+                      part.added
+                        ? euiTheme.colors.success + '33'
+                        : part.removed
+                          ? euiTheme.colors.danger + '33'
+                          : 'transparent'
+                    };
                     text-decoration: ${part.removed ? 'line-through' : 'none'};
                   `}
                 >

@@ -1702,8 +1702,8 @@ export const alerts: Alert[] = data.map((row) =>
     (acc, { field, value }) => {
       if (field === '_id' || field === '_index') {
         (acc as Record<string, unknown>)[field] = Array.isArray(value)
-          ? value[0] ?? ''
-          : (value as string) ?? '';
+          ? (value[0] ?? '')
+          : ((value as string) ?? '');
       } else {
         (acc as Record<string, unknown>)[field] = value;
       }

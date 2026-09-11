@@ -99,7 +99,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const fetchProjectsByRouting = useCallback(
     (routing?: ProjectRouting) =>
       isMlCpsEnabled && cpsManager
-        ? cpsManager?.fetchProjects(routing) ?? Promise.resolve(null)
+        ? (cpsManager?.fetchProjects(routing) ?? Promise.resolve(null))
         : Promise.resolve(null),
     [cpsManager, isMlCpsEnabled]
   );

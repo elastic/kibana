@@ -9,9 +9,8 @@
  * Bidirectional type equality. Used to prove `z.infer` of a twin matches
  * `t.TypeOf` of the io-ts original. A mismatch fails typecheck, not a runtime test.
  */
-export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-  ? true
-  : false;
+export type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 export type Expect<T extends true> = T;
 
@@ -27,7 +26,7 @@ export type MutuallyAssignable<X, Y> = [X] extends [Y] ? ([Y] extends [X] ? true
 export type KnownKeys<T> = T extends string | number | boolean | bigint | symbol | null | undefined
   ? T
   : T extends readonly (infer U)[]
-  ? Array<KnownKeys<U>>
-  : T extends object
-  ? { [K in keyof T as string extends K ? never : K]: KnownKeys<T[K]> }
-  : T;
+    ? Array<KnownKeys<U>>
+    : T extends object
+      ? { [K in keyof T as string extends K ? never : K]: KnownKeys<T[K]> }
+      : T;

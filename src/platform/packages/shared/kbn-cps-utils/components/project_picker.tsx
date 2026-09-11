@@ -38,7 +38,8 @@ import { useProjectPickerState } from './project_picker_update/state';
 
 export { TOUR_STORAGE_KEY };
 export interface ProjectPickerProps
-  extends Pick<
+  extends
+    Pick<
       ComponentProps<typeof ProjectPickerStateProvider>,
       | 'defaultProjectRoutingGetter'
       | 'onProjectRoutingChange'

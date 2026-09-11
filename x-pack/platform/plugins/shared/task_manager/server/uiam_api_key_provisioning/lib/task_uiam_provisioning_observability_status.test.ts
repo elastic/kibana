@@ -25,7 +25,7 @@ const createSavedObjectsClientMock = (
     bulkCreate: jest.fn().mockImplementation(async (docs) => ({ saved_objects: docs })),
     bulkDelete: jest.fn().mockResolvedValue({ statuses: [] }),
     ...overrides,
-  } as unknown as ISavedObjectsRepository);
+  }) as unknown as ISavedObjectsRepository;
 
 describe('task_uiam_provisioning_observability_status', () => {
   const logger = loggingSystemMock.createLogger();

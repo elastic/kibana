@@ -297,8 +297,8 @@ function SectionPreviewPanel({
     const raw = isActionGroup(section)
       ? section.options
       : isActionConnectorGroup(section)
-      ? section.options
-      : [];
+        ? section.options
+        : [];
     return [...raw].sort((a, b) =>
       a.label.localeCompare(b.label, undefined, { sensitivity: 'base', numeric: true })
     );

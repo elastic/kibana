@@ -55,7 +55,7 @@ export const plainColumnRenderer: ColumnRenderer = {
         asPlainText={asPlainText}
         contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
         eventId={eventId}
-        fieldFormat={typeof field.format === 'string' ? field.format : field?.format?.id ?? ''}
+        fieldFormat={typeof field.format === 'string' ? field.format : (field?.format?.id ?? '')}
         fieldName={columnName}
         isAggregatable={field.aggregatable ?? false}
         fieldType={field.type ?? ''}

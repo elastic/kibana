@@ -15,9 +15,7 @@ export type BrowserShortUrlClientFactoryDependencies = BrowserShortUrlClientDepe
 
 export type BrowserShortUrlClientFactoryCreateParams = null;
 
-export class BrowserShortUrlClientFactory
-  implements IShortUrlClientFactory<BrowserShortUrlClientFactoryCreateParams>
-{
+export class BrowserShortUrlClientFactory implements IShortUrlClientFactory<BrowserShortUrlClientFactoryCreateParams> {
   constructor(private readonly dependencies: BrowserShortUrlClientFactoryDependencies) {}
 
   public get(params: BrowserShortUrlClientFactoryCreateParams): BrowserShortUrlClient {

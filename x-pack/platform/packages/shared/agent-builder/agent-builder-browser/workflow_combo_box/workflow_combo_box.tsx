@@ -16,11 +16,10 @@ export interface WorkflowComboBoxOption {
   enabled?: boolean;
 }
 
-export interface WorkflowComboBoxProps
-  extends Omit<
-    EuiComboBoxProps<string>,
-    'options' | 'selectedOptions' | 'onChange' | 'singleSelection'
-  > {
+export interface WorkflowComboBoxProps extends Omit<
+  EuiComboBoxProps<string>,
+  'options' | 'selectedOptions' | 'onChange' | 'singleSelection'
+> {
   workflows: WorkflowComboBoxOption[];
   value: string[];
   onChange: (workflowIds: string[]) => void;

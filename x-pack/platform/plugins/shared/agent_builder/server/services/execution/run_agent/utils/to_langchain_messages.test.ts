@@ -105,7 +105,7 @@ describe('prepareMessages', () => {
             id: type,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-          } as any),
+          }) as any,
       }),
       ...parts,
     };
@@ -868,17 +868,15 @@ describe('prepareMessages', () => {
 
       // Custom transformer that modifies all results from a tool call
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
-        return toolCallArg.results.map(
-          (result): ToolResult => ({
-            tool_result_id: result.tool_result_id,
-            type: ToolResultType.other,
-            data: {
-              ...(result.data as Record<string, unknown>),
-              transformedBy: 'custom',
-              toolId: toolCallArg.tool_id,
-            },
-          })
-        );
+        return toolCallArg.results.map((result): ToolResult => ({
+          tool_result_id: result.tool_result_id,
+          type: ToolResultType.other,
+          data: {
+            ...(result.data as Record<string, unknown>),
+            transformedBy: 'custom',
+            toolId: toolCallArg.tool_id,
+          },
+        }));
       });
 
       const result = await prepareMessages({
@@ -1216,7 +1214,7 @@ describe('prepareMessages', () => {
         response: { message: 'Background result' },
         completed_at: { round_id: 'round-1' },
         ...overrides,
-      } as ConversationRoundStep);
+      }) as ConversationRoundStep;
 
     it('injects system notice for background execution complete step', async () => {
       const round = createRound({
@@ -1441,16 +1439,16 @@ describe('prepareMessages — relevant_skills replay', () => {
             id: type,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-          } as any),
+          }) as any,
       }),
-    } as ProcessedConversation);
+    }) as ProcessedConversation;
 
   const relevantSkillsStep = (skills: Array<Record<string, unknown>>): ConversationRoundStep =>
     ({
       type: ConversationRoundStepType.relevantSkills,
       source: 'implicit',
       skills,
-    } as unknown as ConversationRoundStep);
+    }) as unknown as ConversationRoundStep;
 
   it('replays a relevant_skills step as a <relevant_skills> user notification', async () => {
     const result = await prepareMessages({

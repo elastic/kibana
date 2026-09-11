@@ -70,7 +70,7 @@ const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     ],
     related_integrations: [{ package: 'windows', version: '^1.0.0' }],
     ...overrides,
-  } as RuleResponse);
+  }) as RuleResponse;
 
 const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();

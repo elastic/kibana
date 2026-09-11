@@ -42,8 +42,8 @@ export const MonitorStatusHeader = ({
   const periodCaptionText = !!periodCaption
     ? periodCaption
     : isLast24Hours
-    ? labels.LAST_24_HOURS_LABEL
-    : '';
+      ? labels.LAST_24_HOURS_LABEL
+      : '';
 
   return (
     <EuiFlexGroup

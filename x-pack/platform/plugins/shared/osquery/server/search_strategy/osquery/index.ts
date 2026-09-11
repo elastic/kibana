@@ -136,8 +136,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               const indices = Array.isArray(searchDsl.index)
                 ? searchDsl.index
                 : searchDsl.index
-                ? [searchDsl.index]
-                : [];
+                  ? [searchDsl.index]
+                  : [];
 
               return shouldUseInternalSearchClient(indices, cpsActive)
                 ? data.search.searchAsInternalUser

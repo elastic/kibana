@@ -25,7 +25,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
       transformOut: <
         StoredStateType extends Partial<
           LegacyStoredESQLControlExplicitInput & OptionsListESQLControlState
-        >
+        >,
       >(
         state: StoredStateType
       ): OptionsListESQLControlState => {
