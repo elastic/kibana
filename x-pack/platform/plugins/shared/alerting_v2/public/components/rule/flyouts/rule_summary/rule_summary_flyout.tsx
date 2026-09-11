@@ -16,7 +16,7 @@ import { FlyoutAccordion, FlyoutSubsection } from '@kbn/flyout-sections';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { paths } from '../../../../constants';
+import { useAlertingLocators } from '../../../../application/locator_context';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
@@ -63,16 +63,16 @@ export const RuleSummaryFlyout = ({
   session,
   ownFocus = true,
 }: RuleSummaryFlyoutProps) => {
-  const { basePath } = useService(CoreStart('http'));
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
     | undefined;
   const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
+  const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
-  const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
+  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
   const hasRunbook = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'runbook'));
   const hasDashboards = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'dashboard'));

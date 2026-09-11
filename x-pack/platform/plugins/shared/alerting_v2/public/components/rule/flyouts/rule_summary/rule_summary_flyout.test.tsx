@@ -12,6 +12,10 @@ import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
+import { AlertingV2RulesLocatorDefinition } from '../../../../locators';
+
+const mockLocators = createMockLocators();
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   useRuleAutoAttach: jest.fn(),
@@ -103,9 +107,11 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
   };
 
   const utils = render(
-    <I18nProvider>
-      <RuleSummaryFlyout {...props} />
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <RuleSummaryFlyout {...props} />
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 
   return { ...utils, props };
@@ -187,26 +193,70 @@ describe('RuleSummaryFlyout', () => {
   describe('Take action menu', () => {
     const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-    it('opens the View details item with a basePath-prefixed rule details href', () => {
+    it('opens the View details item with a locator-built rule details href', () => {
+      const { rulesLocators } = mockLocators;
       renderFlyout();
       openMenu();
 
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' }, undefined, [
+        'rule-1',
+      ]);
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
         'href',
-        '/base/app/management/alertingV2/rules/rule-1'
+        '/mock-locator-url'
       );
     });
 
-    it('url-encodes the rule id when building the details href', () => {
+    it('View details params resolve to management rule details URL', async () => {
+      renderFlyout();
+      openMenu();
+
+      const { rulesLocators } = mockLocators;
+      const useUrlCall = jest
+        .mocked(rulesLocators.useUrl)
+        .mock.calls.find(([p]) => p.ruleId === 'rule-1');
+      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      expect(location).toMatchObject({
+        app: 'management',
+        path: '/alertingV2/rules/rule-1',
+      });
+    });
+
+    it('forwards the raw rule id to the details locator', () => {
+      const { rulesLocators } = mockLocators;
       renderFlyout({
         rule: { ...baseRule, id: 'rule with spaces/and slash' },
       });
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
+      expect(rulesLocators.useUrl).toHaveBeenCalledWith(
+        {
+          ruleId: 'rule with spaces/and slash',
+        },
+        undefined,
+        ['rule with spaces/and slash']
+      );
       expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
         'href',
-        `/base/app/management/alertingV2/rules/${encodeURIComponent('rule with spaces/and slash')}`
+        '/mock-locator-url'
       );
+    });
+
+    it('rule id with special characters resolves to a properly encoded management URL', async () => {
+      renderFlyout({
+        rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
+      });
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+      const { rulesLocators } = mockLocators;
+      const useUrlCall = jest
+        .mocked(rulesLocators.useUrl)
+        .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
+      const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
+      expect(location).toMatchObject({
+        app: 'management',
+        path: '/alertingV2/rules/rule%20with%20spaces%2Fand%20slash',
+      });
     });
 
     it('forwards write action callbacks with the rule', () => {
