@@ -65,6 +65,48 @@ describe('resolveConnectorIdStepType', () => {
       )
     ).toBe('slack_api');
   });
+
+  it('maps waitForApproval email channel connector-id to email connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'email', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('email');
+  });
+
+  it('maps waitForApproval slack2 channel connector-id to slack2 connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'slack2', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('slack2');
+  });
+
+  it('maps waitForInput email channel connector-id to email connector type', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'email', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        { ...waitForApprovalStep, stepType: 'waitForInput', stepId: 'ask-input' },
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('email');
+  });
 });
 
 describe('resolveConnectorIdTriggerType', () => {

@@ -30,6 +30,8 @@ export type HitlWaitStepType = 'waitForInput' | 'waitForApproval';
 export const WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES = {
   slack: 'slack',
   slack_api: 'slack_api',
+  slack2: 'slack2',
+  email: 'email',
 } as const satisfies Record<string, string>;
 
 export type WaitForApprovalChannelKey = keyof typeof WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES;
