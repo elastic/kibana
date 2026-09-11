@@ -138,6 +138,7 @@ describe('getContinuityTool', () => {
               docsCount: 100,
               failedDocsCount: 5,
               statsAvailable: true,
+              categories: ['Endpoint'],
             },
           ],
           actionableFindings: [
@@ -152,7 +153,36 @@ describe('getContinuityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
-      expect(data.actionableFindings![0].category).toBe('Endpoint');
+      expect(data.actionableFindings![0].categories).toEqual(['Endpoint']);
+    });
+
+    it('preserves the full multi-category union on findings (UI/agent parity)', async () => {
+      mockGetContinuity.mockResolvedValueOnce(
+        makePayload({
+          items: [
+            {
+              name: 'shared-pipeline',
+              indices: [ENDPOINT_INDEX, NETWORK_INDEX],
+              docsCount: 100,
+              failedDocsCount: 5,
+              statsAvailable: true,
+              categories: ['Endpoint', 'Network'],
+            },
+          ],
+          actionableFindings: [
+            { severity: 'CRITICAL', message: 'critical failure', resource: 'shared-pipeline' },
+          ],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
+      expect(data.items[0].categories).toEqual(['Endpoint', 'Network']);
+      expect(data.actionableFindings![0].categories).toEqual(['Endpoint', 'Network']);
     });
 
     it('filters out findings whose resource is not in any categorized pipeline', async () => {
