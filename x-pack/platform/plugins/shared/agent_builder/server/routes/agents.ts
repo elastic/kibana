@@ -366,8 +366,8 @@ export function registerAgentRoutes({
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
 
-        // Strip ai_indices from the write but leave stored values intact so they
-        // reactivate when the flag is toggled back on.
+        // When disabled, strip ai_indices from the write but leave stored values
+        // intact so they reactivate when the flag is toggled back on.
         const createBody = (() => {
           if (!contextEngineEnabled) {
             const { ai_indices: _stripped, ...restConfig } = request.body.configuration;
@@ -524,8 +524,8 @@ export function registerAgentRoutes({
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
 
-        // Strip ai_indices from the write but leave stored values intact so they
-        // reactivate when the flag is toggled back on.
+        // When disabled, strip ai_indices from the write but leave stored values
+        // intact so they reactivate when the flag is toggled back on.
         const updateBody = (() => {
           if (!contextEngineEnabled && request.body.configuration) {
             const { ai_indices: _stripped, ...restConfig } = request.body.configuration;
