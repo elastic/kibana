@@ -100,5 +100,6 @@ Follow existing patterns in the target area first; below are common defaults.
 - Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
+- When adding, changing, deprecating, or removing a `kibana.yml` setting or an Advanced Settings (`uiSettings`) entry, follow `.agents/skills/kibana-settings-docs/SKILL.md`.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
 - Only comment exported functions with one concise sentence and non-trivial code paths.
