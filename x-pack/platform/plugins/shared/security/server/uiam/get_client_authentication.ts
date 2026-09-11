@@ -10,12 +10,15 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
-/** Client authentication supplied by the caller; an empty object preserves its absence. */
+/** Client authentication supplied by the caller. */
 export interface UiamClientAuthentication {
   readonly sharedSecret?: string;
 }
 
-/** Preserves client authentication for inbound bearer tokens, including a missing header. */
+/**
+ * Client authentication that rode in with a UIAM bearer token, or `undefined` when the caller
+ * supplied none and Kibana's own shared secret should be used instead.
+ */
 export const getUiamClientAuthentication = (
   request: KibanaRequest
 ): UiamClientAuthentication | undefined => {
@@ -25,8 +28,5 @@ export const getUiamClientAuthentication = (
   }
 
   const sharedSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
-  if (typeof sharedSecret === 'string') {
-    return { sharedSecret };
-  }
-  return request.isFakeRequest ? undefined : {};
+  return typeof sharedSecret === 'string' ? { sharedSecret } : undefined;
 };

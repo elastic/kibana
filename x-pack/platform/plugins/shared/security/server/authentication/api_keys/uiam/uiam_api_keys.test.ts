@@ -208,22 +208,19 @@ describe('UiamAPIKeys', () => {
         return mockUiam.grantApiKey.mock.calls[0][2];
       };
 
-      it.each(['upstream-shared-secret', undefined])(
-        'forwards the incoming secret %s',
-        async (sharedSecret) => {
-          const request = httpServerMock.createKibanaRequest({
-            headers: {
-              authorization: 'Bearer essu_ephemeral_token',
-              ...(sharedSecret === undefined ? {} : { 'x-client-authentication': sharedSecret }),
-            },
-          });
+      it('forwards the incoming secret', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_ephemeral_token',
+            'x-client-authentication': 'upstream-shared-secret',
+          },
+        });
 
-          expect(await grantWith(request)).toEqual({
-            includeClientAuthentication: true,
-            clientAuthentication: sharedSecret === undefined ? {} : { sharedSecret },
-          });
-        }
-      );
+        expect(await grantWith(request)).toEqual({
+          includeClientAuthentication: true,
+          clientAuthentication: { sharedSecret: 'upstream-shared-secret' },
+        });
+      });
 
       it('is omitted for an external API key', async () => {
         authenticatedWithApiKey(false);
@@ -243,10 +240,10 @@ describe('UiamAPIKeys', () => {
         });
       });
 
-      it('preserves missing client authentication for an inbound access token', async () => {
+      it('defers to Kibana client authentication for an inbound access token carrying none', async () => {
         expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toEqual({
           includeClientAuthentication: true,
-          clientAuthentication: {},
+          clientAuthentication: undefined,
         });
       });
 
@@ -316,7 +313,7 @@ describe('UiamAPIKeys', () => {
           name: 'test-bearer-key',
           expiration: '30d',
         },
-        { includeClientAuthentication: true, clientAuthentication: {} }
+        { includeClientAuthentication: true, clientAuthentication: undefined }
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });

@@ -10,20 +10,25 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { getUiamClientAuthentication } from './get_client_authentication';
 
 describe('getUiamClientAuthentication', () => {
+  it.each(['Bearer', 'bearer'])('forwards supplied client authentication for %s tokens', (scheme) => {
+    for (const sharedSecret of ['upstream-secret', '']) {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `${scheme} essu_token`,
+          'x-client-authentication': sharedSecret,
+        },
+      });
+      expect(getUiamClientAuthentication(request)).toEqual({ sharedSecret });
+    }
+  });
+
   it.each(['Bearer', 'bearer'])(
-    'preserves supplied or absent client authentication for %s tokens',
+    'defers to Kibana client authentication when %s tokens carry none',
     (scheme) => {
-      for (const sharedSecret of ['upstream-secret', '', undefined]) {
-        const request = httpServerMock.createKibanaRequest({
-          headers: {
-            authorization: `${scheme} essu_token`,
-            ...(sharedSecret === undefined ? {} : { 'x-client-authentication': sharedSecret }),
-          },
-        });
-        expect(getUiamClientAuthentication(request)).toEqual(
-          sharedSecret === undefined ? {} : { sharedSecret }
-        );
-      }
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: `${scheme} essu_token` },
+      });
+      expect(getUiamClientAuthentication(request)).toBeUndefined();
     }
   );
 

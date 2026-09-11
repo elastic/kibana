@@ -293,15 +293,11 @@ export class APIKeys implements NativeAPIKeysType {
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      const uiamClientAuthentication = getUiamClientAuthentication(request);
-      if (uiamClientAuthentication === undefined) {
-        clientAuthentication = this.uiam.getClientAuthentication();
-      } else if (uiamClientAuthentication.sharedSecret !== undefined) {
-        clientAuthentication = {
-          scheme: 'SharedSecret',
-          value: uiamClientAuthentication.sharedSecret,
-        };
-      }
+      const suppliedSharedSecret = getUiamClientAuthentication(request)?.sharedSecret;
+      clientAuthentication =
+        suppliedSharedSecret !== undefined
+          ? { scheme: 'SharedSecret', value: suppliedSharedSecret }
+          : this.uiam.getClientAuthentication();
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,
