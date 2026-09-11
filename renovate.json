@@ -2058,7 +2058,7 @@
     {
       "groupName": "json-schema-to-ts",
       "matchDepNames": ["json-schema-to-ts"],
-      "reviewers": ["team:obs-ai-assistant"],
+      "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
