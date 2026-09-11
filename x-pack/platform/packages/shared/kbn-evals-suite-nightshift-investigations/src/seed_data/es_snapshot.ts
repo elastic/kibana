@@ -78,6 +78,13 @@ export const replayEsSnapshot = async ({
 
   const indices = [...new Set(result.reindexedIndices ?? [])];
 
+  // `replaySnapshot` reindexes without refreshing, so the documents are not searchable the instant
+  // it resolves. A task that queries straight away sees an empty data stream, so refresh here and
+  // let seeding mean "the data is queryable".
+  if (indices.length > 0) {
+    await esClient.indices.refresh({ index: indices.join(',') });
+  }
+
   log.info(`Replayed ${indices.length} data stream(s): ${indices.join(', ')}`);
 
   return indices;
