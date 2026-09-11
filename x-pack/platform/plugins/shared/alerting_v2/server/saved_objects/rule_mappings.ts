@@ -6,7 +6,23 @@
  */
 
 import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
+import type { BuilderTypeManifest } from '@kbn/alerting-v2-rule-builders';
 import { BUILDER_FIELDS_IGNORE_ABOVE } from '@kbn/alerting-v2-constants';
+import { assembleBuilderFieldsMappings } from './assemble_builder_fields_mappings';
+
+/**
+ * The list of builder type manifests whose sub-field mappings are assembled
+ * into `metadata.builder_fields.properties` in the static mapping.
+ *
+ * Starts empty: no builder types are registered on this branch yet. Step 3.5
+ * routes the two detection-type manifests (`securityDetectionQuery` and
+ * `securityDetectionThreshold`) in here. Two manifests declaring the same leaf
+ * path with different field types fail `alerting_v2`'s setup; identical
+ * declarations merge silently (the shared detection fragment's sub-fields).
+ *
+ * Ref: rule-type-registration.md "The fold into the saved-object registration"
+ */
+const BUILDER_MANIFESTS: BuilderTypeManifest[] = [];
 
 /**
  * Mappings for the rule saved object.
@@ -22,7 +38,11 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
         description: { type: 'text' },
         tags: { type: 'keyword', ignore_above: 128 },
-        builder_fields: { type: 'flattened', ignore_above: BUILDER_FIELDS_IGNORE_ABOVE },
+        builder_fields: {
+          type: 'flattened',
+          ignore_above: BUILDER_FIELDS_IGNORE_ABOVE,
+          properties: assembleBuilderFieldsMappings(BUILDER_MANIFESTS),
+        },
       },
     },
     enabled: { type: 'boolean' },

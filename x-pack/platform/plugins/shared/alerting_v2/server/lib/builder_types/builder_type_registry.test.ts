@@ -28,9 +28,7 @@ const makeQuery = (): GeneratedQuery => ({
 });
 
 /** A minimal valid definition that registers without errors. */
-function makeDefinition(
-  overrides: Partial<RegisteredBuilderType> = {}
-): RegisteredBuilderType {
+function makeDefinition(overrides: Partial<RegisteredBuilderType> = {}): RegisteredBuilderType {
   return {
     type: 'test.my_type',
     // name is required by the widened BuilderTypeDefinition (step 2.1).
@@ -81,9 +79,9 @@ describe('BuilderTypeRegistry.register — registration rules', () => {
   });
 
   it('rejects a null builderFieldsSchema', () => {
-    expect(() =>
-      registry.register(makeDefinition({ builderFieldsSchema: null as never }))
-    ).toThrow('requires a builderFieldsSchema');
+    expect(() => registry.register(makeDefinition({ builderFieldsSchema: null as never }))).toThrow(
+      'requires a builderFieldsSchema'
+    );
   });
 
   it('rejects an undefined builderFieldsSchema', () => {
@@ -93,9 +91,9 @@ describe('BuilderTypeRegistry.register — registration rules', () => {
   });
 
   it('rejects a missing generateQuery', () => {
-    expect(() =>
-      registry.register(makeDefinition({ generateQuery: undefined as never }))
-    ).toThrow('requires a generateQuery function');
+    expect(() => registry.register(makeDefinition({ generateQuery: undefined as never }))).toThrow(
+      'requires a generateQuery function'
+    );
   });
 
   it('rejects a non-function generateQuery', () => {
@@ -109,7 +107,8 @@ describe('BuilderTypeRegistry.register — registration rules', () => {
     expect(() =>
       registry.register(
         makeDefinition({
-          builderFieldsSchema: unboundedSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
+          builderFieldsSchema:
+            unboundedSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
         })
       )
     ).toThrow();
@@ -120,7 +119,8 @@ describe('BuilderTypeRegistry.register — registration rules', () => {
     expect(() =>
       registry.register(
         makeDefinition({
-          builderFieldsSchema: strippingSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
+          builderFieldsSchema:
+            strippingSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
         })
       )
     ).toThrow();
@@ -227,7 +227,10 @@ describe('BuilderTypeRegistry.generate — UNKNOWN_BUILDER_TYPE', () => {
     const boom = error as { isBoom: boolean; output: { statusCode: number }; data: unknown };
     expect(boom.isBoom).toBe(true);
     expect(boom.output.statusCode).toBe(400);
-    const data = boom.data as { code: string; details: { builder_type: string; registered: string[] } };
+    const data = boom.data as {
+      code: string;
+      details: { builder_type: string; registered: string[] };
+    };
     expect(data.code).toBe(ALERTING_ERROR_CODES.UNKNOWN_BUILDER_TYPE);
     expect(data.details.builder_type).toBe('no.such.type');
     expect(data.details.registered).toEqual([]);
@@ -392,9 +395,9 @@ describe('BuilderTypeRegistry.generate — parse-and-call', () => {
     generateQuery.mockImplementation(() => {
       throw originalError;
     });
-    expect(() =>
-      registry.generate('test.parse_type', { value: 'ok' }, makeRuleContext())
-    ).toThrow(originalError);
+    expect(() => registry.generate('test.parse_type', { value: 'ok' }, makeRuleContext())).toThrow(
+      originalError
+    );
   });
 
   it('passes the schema-parsed data (not raw input) to generateQuery', () => {
@@ -440,8 +443,7 @@ describe('BuilderTypeRegistry — composite: managed type registration', () => {
     return {
       type: TYPE,
       name: 'My detection type',
-      builderFieldsSchema:
-        simpleSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
+      builderFieldsSchema: simpleSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
       generateQuery: jest.fn(() => makeQuery()),
       ownership: { solution: 'security', domain: 'detection' },
       compilation: 'execution_time',
@@ -457,23 +459,23 @@ describe('BuilderTypeRegistry — composite: managed type registration', () => {
 
   it('fails with a message naming check 2 when the id format is bad', () => {
     const registry = new BuilderTypeRegistry().withFoldedVersions(makeFoldedFor(TYPE));
-    expect(() =>
-      registry.register({ ...fullManagedDefinition(), type: 'Bad-Id!' })
-    ).toThrow(/id format check/);
+    expect(() => registry.register({ ...fullManagedDefinition(), type: 'Bad-Id!' })).toThrow(
+      /id format check/
+    );
   });
 
   it('fails when compilation is missing (managed-type completeness check)', () => {
     const registry = new BuilderTypeRegistry().withFoldedVersions(makeFoldedFor(TYPE));
-    expect(() =>
-      registry.register({ ...fullManagedDefinition(), compilation: undefined })
-    ).toThrow(/managed-type completeness check/);
+    expect(() => registry.register({ ...fullManagedDefinition(), compilation: undefined })).toThrow(
+      /managed-type completeness check/
+    );
   });
 
   it('fails when manifest is missing (managed-type completeness check)', () => {
     const registry = new BuilderTypeRegistry().withFoldedVersions(makeFoldedFor(TYPE));
-    expect(() =>
-      registry.register({ ...fullManagedDefinition(), manifest: undefined })
-    ).toThrow(/managed-type completeness check/);
+    expect(() => registry.register({ ...fullManagedDefinition(), manifest: undefined })).toThrow(
+      /managed-type completeness check/
+    );
   });
 
   it('fails when the manifest version is unfolded (manifest consistency check)', () => {

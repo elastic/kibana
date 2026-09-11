@@ -16,7 +16,7 @@ import {
   currentRuleSavedObjectAttributesSchema,
   ruleSavedObjectAttributesSchemaV4 as latestV4,
 } from '../schemas/rule_saved_object_attributes';
-import { fromBuilderManifest } from './from_builder_manifest';
+import { fromBuilderManifest, assertBuilderFieldsIsOpenRecord } from './from_builder_manifest';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -403,6 +403,13 @@ describe('fromBuilderManifest', () => {
       //
       // Ref: rule-data-migration.md "Rollback behavior"
       expect(currentRuleSavedObjectAttributesSchema).toBe(latestV4);
+    });
+
+    // Production-function coverage: assertBuilderFieldsIsOpenRecord is called
+    // at module load (above), but we also exercise it here to document its
+    // contract and to fail with a named test rather than a module-load error.
+    it('assertBuilderFieldsIsOpenRecord does not throw with the current schema', () => {
+      expect(() => assertBuilderFieldsIsOpenRecord()).not.toThrow();
     });
 
     it('the v4 ruleMetadataSchema accepts an object with arbitrary unknown keys in builder_fields', () => {

@@ -12,16 +12,10 @@ import {
   MAX_BUILDER_FIELDS_BYTES,
   MAX_BUILDER_FIELDS_STRING_LENGTH,
 } from '@kbn/alerting-v2-constants';
+import { MAX_BUILDER_TYPE_LENGTH } from '@kbn/alerting-v2-schemas';
 import { assertBoundedSchema } from '../bounded_schema';
 import type { FoldedVersionsRecord } from './folded_versions';
 import type { RegisteredBuilderType } from './types';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-/** Maximum length for a builder type id, in characters. */
-const MAX_TYPE_ID_LENGTH = 64;
 
 /**
  * A valid type id consists of dot-separated segments, each containing only
@@ -90,10 +84,10 @@ export function assertValidDefinition(
   // Ref: rule-type-registration.md "Registration-time checks" item 2
   // ---------------------------------------------------------------------------
 
-  if (definition.type.length > MAX_TYPE_ID_LENGTH) {
+  if (definition.type.length > MAX_BUILDER_TYPE_LENGTH) {
     throw new Error(
       `Builder type "${definition.type}" id exceeds the maximum length of ` +
-        `${MAX_TYPE_ID_LENGTH} characters (id format check)`
+        `${MAX_BUILDER_TYPE_LENGTH} characters (id format check)`
     );
   }
   if (!TYPE_ID_PATTERN.test(definition.type)) {
