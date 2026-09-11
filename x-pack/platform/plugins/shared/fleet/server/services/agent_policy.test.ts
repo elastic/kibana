@@ -893,7 +893,12 @@ describe('Agent policy', () => {
         package_policies: ['package-1'],
         supports_agentless: true,
       });
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({ agents: [], total: 0, page: 1, perPage: 10 });
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      });
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
       const deleteAgentlessAgentSpy = jest
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
@@ -920,7 +925,12 @@ describe('Agent policy', () => {
         package_policies: ['package-1'],
         supports_agentless: true,
       });
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({ agents: [], total: 0, page: 1, perPage: 10 });
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      });
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
       const callOrder: string[] = [];
 
