@@ -14,7 +14,7 @@ import type { RuleExecutionPipelineContract } from './execution_pipeline';
 import { createRulePipelineState } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { RuleExecutionMetricsSnapshot } from './metrics/types';
-import { tagFailedStep, RULE_EXECUTION_FAILURE_REASONS } from './execution_outcome';
+import { tagFailedStep, RULE_EXECUTION_REASONS } from './execution_outcome';
 import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
 import { RuleExecutionCancellationError } from '../execution_context';
 
@@ -280,7 +280,7 @@ describe('RuleExecutorTaskRunner', () => {
       await expect(runTask()).rejects.toThrow('Pipeline failed');
     });
 
-    it('reports the failing step as the reason on the task-run event', async () => {
+    it('reports the code owned by the failing step as the reason on the task-run event', async () => {
       pipeline.execute.mockRejectedValue(
         tagFailedStep(new Error('Pipeline failed'), 'execute_rule_query')
       );
@@ -290,7 +290,7 @@ describe('RuleExecutorTaskRunner', () => {
       expect(setCustomTaskRunEventFields).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'failed',
-          reason: 'execute_rule_query',
+          reason: RULE_EXECUTION_REASONS.QUERY_FAILED,
           'rule.id': 'rule-1',
           'rule.spaceId': 'default',
         })
@@ -307,7 +307,7 @@ describe('RuleExecutorTaskRunner', () => {
       expect(setCustomTaskRunEventFields).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'timeout',
-          reason: RULE_EXECUTION_FAILURE_REASONS.CANCELLED_TIMEOUT,
+          reason: RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT,
         })
       );
     });

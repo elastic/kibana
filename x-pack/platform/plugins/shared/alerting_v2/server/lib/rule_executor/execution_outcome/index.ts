@@ -7,12 +7,10 @@
 
 export { tagFailedStep, getFailedStep } from './failed_step';
 
-export {
-  RULE_EXECUTION_FAILURE_REASONS,
-  tagFailureReason,
-  resolveReasonForError,
-} from './failure_reason';
-export type { RuleExecutionFailureReason } from './failure_reason';
+export { RULE_EXECUTION_REASONS } from './execution_reason';
+export type { RuleExecutionReason } from './execution_reason';
+
+export { tagFailureReason, resolveReasonForError } from './failure_reason';
 
 export type { TaskRunStatus } from './status';
 

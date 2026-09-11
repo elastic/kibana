@@ -9,7 +9,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import type { RuleExecutionInput } from './types';
-import { RULE_EXECUTION_FAILURE_REASONS, tagFailureReason } from './execution_outcome';
+import { RULE_EXECUTION_REASONS, tagFailureReason } from './execution_outcome';
 import { buildQueryRecoveryAlertEvents, resolveAlertEventType } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
@@ -79,7 +79,7 @@ export const executeRecoveryQuery = async ({
       type: resolveAlertEventType(rule),
     });
   } catch (error) {
-    tagFailureReason(error, RULE_EXECUTION_FAILURE_REASONS.RECOVERY_QUERY);
+    tagFailureReason(error, RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
 
     if (isMaximumResponseSizeExceededError(error) || isEsqlUserError(error)) {
       throw createTaskRunError(error as Error, TaskErrorSource.USER);

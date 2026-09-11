@@ -142,7 +142,7 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
   );
 
   apiTest(
-    'reports failed with the step that threw, and still reports counters',
+    'reports failed with the code owned by the step that threw, and still reports counters',
     async ({ apiServices }) => {
       // Targets an index that does not exist. The ES|QL parser accepts the
       // query, so rule creation succeeds and the failure happens at run time
@@ -165,9 +165,10 @@ apiTest.describe('Rule executor task-run event fields', { tag: tags.stateful.cla
         match: reportedStatus('failed'),
       });
 
-      // The reason is the name of the step that threw. Step names are the
-      // failure vocabulary of the event log, so this pins one of them.
-      expect(run.reason).toBe('execute_rule_query');
+      // `execute_rule_query` publishes `query_failed`. This asserts the
+      // published code rather than the step name, which is exactly the
+      // distinction the reason catalog exists to keep.
+      expect(run.reason).toBe('query_failed');
       expect(run['rule.id']).toBe(rule.id);
       expect(run['rule.spaceId']).toBe('default');
 

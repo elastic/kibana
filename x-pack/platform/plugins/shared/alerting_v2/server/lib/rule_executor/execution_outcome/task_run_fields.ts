@@ -11,6 +11,7 @@ import type {
   RuleExecutionPipelineResult,
 } from '../execution_pipeline';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import { HALT_EXECUTION_REASONS, type RuleExecutionReason } from './execution_reason';
 import { resolveReasonForError } from './failure_reason';
 import { getRunReport } from './run_report';
 import { resolveStatusForResult, type TaskRunStatus } from './status';
@@ -32,10 +33,10 @@ export type TaskRunEventFieldsParams = { input: RunIdentity } & (
 interface RunOutcome {
   readonly status: TaskRunStatus;
   /**
-   * Why a run did not simply succeed: its `HaltReason`, the step that threw,
-   * or a `RULE_EXECUTION_FAILURE_REASONS` code. Unset on success.
+   * Why a run did not simply succeed, as a published
+   * {@link RULE_EXECUTION_REASONS} code. Unset on success.
    */
-  readonly reason?: string;
+  readonly reason?: RuleExecutionReason;
   /** Absent when the run ended before `fetch_rule` populated state. */
   readonly ruleVersion?: number;
   readonly counters?: Readonly<Record<string, number>>;
@@ -69,7 +70,7 @@ const resolveOutcome = (params: TaskRunEventFieldsParams): RunOutcome => {
 
     return {
       status: resolveStatusForResult(result),
-      reason: result.haltReason,
+      reason: result.haltReason ? HALT_EXECUTION_REASONS[result.haltReason] : undefined,
       ruleVersion: result.finalState.rule?.metadata.version,
       counters: result.metrics.counters,
     };

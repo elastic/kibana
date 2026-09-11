@@ -6,68 +6,64 @@
  */
 
 import { isRuleExecutionCancellationError } from '../../execution_context';
+import {
+  RULE_EXECUTION_REASONS,
+  STEP_EXECUTION_REASONS,
+  type RuleExecutionReason,
+} from './execution_reason';
 import { getFailedStep } from './failed_step';
-
-/**
- * Codes written to `kibana.task.data.reason` that are not simply the name of
- * the step that failed.
- *
- * Everything else passes through as-is: a clean stop reports its `HaltReason`,
- * and a throw reports the name of the step that raised it. Keeping the
- * vocabulary derived from the pipeline rather than a hand-maintained mapping
- * means a new step or halt reason is reportable without touching this file.
- *
- * `reason` is unset on successful runs.
- */
-export const RULE_EXECUTION_FAILURE_REASONS = {
-  /** The recovery query threw - finer than the enclosing step. */
-  RECOVERY_QUERY: 'recovery_query',
-  /** The no-data query threw - finer than the enclosing step. */
-  NO_DATA_QUERY: 'no_data_query',
-  /** The task timeout fired, whatever was in flight at the time. */
-  CANCELLED_TIMEOUT: 'cancelled_timeout',
-} as const;
-
-export type RuleExecutionFailureReason =
-  (typeof RULE_EXECUTION_FAILURE_REASONS)[keyof typeof RULE_EXECUTION_FAILURE_REASONS];
 
 const failureReason = Symbol('AlertingRuleExecutionFailureReason');
 
 interface ReasonTaggedError extends Error {
-  [failureReason]?: RuleExecutionFailureReason;
+  [failureReason]?: RuleExecutionReason;
 }
 
 /**
- * Reason for a run that ended by throwing: the name of the step that raised
- * the error, unless something more specific applies.
+ * Reason published for a run that ended by throwing: the code owned by the
+ * step that raised the error, unless something more specific applies.
  *
  * A timeout outranks whatever was in flight when the signal fired, so the
  * cancellation check comes first. A {@link tagFailureReason} tag then wins over
- * the step name, being the more precise of the two. Errors that reach the task
+ * the step, being the more precise of the two. Errors that reach the task
  * runner untagged report no reason.
+ *
+ * A step missing from {@link STEP_EXECUTION_REASONS} falls back to
+ * `unexpected_error` rather than reporting nothing, since the step did throw.
+ * `execution_reason.test.ts` is what keeps that fallback unreachable.
  */
-export const resolveReasonForError = (error: unknown): string | undefined => {
+export const resolveReasonForError = (error: unknown): RuleExecutionReason | undefined => {
   if (isRuleExecutionCancellationError(error)) {
-    return RULE_EXECUTION_FAILURE_REASONS.CANCELLED_TIMEOUT;
+    return RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT;
   }
 
   if (error instanceof Error && (error as ReasonTaggedError)[failureReason] !== undefined) {
     return (error as ReasonTaggedError)[failureReason];
   }
 
-  return getFailedStep(error);
+  const failedStep = getFailedStep(error);
+
+  if (failedStep === undefined) {
+    return undefined;
+  }
+
+  return STEP_EXECUTION_REASONS[failedStep] ?? RULE_EXECUTION_REASONS.UNEXPECTED_ERROR;
 };
 
 /**
- * When a rule execution fails, the error is tagged with the step that failed.
- * This is used to determine the reason code when logging the failure in the event log.
- * Sometimes the step name alone cannot pick the right code, because one step owns several codes.
- * For example, `classify_absent_groups` owns two reason codes, which `detectDataPresence` and
- * `executeRecoveryQuery` set themselves via {@link tagFailureReason}.
+ * When a rule execution fails, the error is tagged with the step that failed,
+ * which is enough to pick a reason code for most failures.
  *
- * For scenarios like this, the error can be tagged directly with the reason code for the failure.
+ * Some steps own several codes, so the step alone cannot pick the right one.
+ * For example, `classify_absent_groups` covers both `no_data_failed` and
+ * `recovery_query_failed`, which `detectDataPresence` and `executeRecoveryQuery`
+ * set themselves via this function.
+ *
+ * Tagging with the published code rather than an internal name is deliberate:
+ * these operations are finer than a step, so there is no entry in
+ * {@link STEP_EXECUTION_REASONS} to translate them.
  */
-export const tagFailureReason = <T>(error: T, reason: RuleExecutionFailureReason): T => {
+export const tagFailureReason = <T>(error: T, reason: RuleExecutionReason): T => {
   if (error instanceof Error && (error as ReasonTaggedError)[failureReason] === undefined) {
     (error as ReasonTaggedError)[failureReason] = reason;
   }

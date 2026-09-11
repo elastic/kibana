@@ -16,7 +16,7 @@ import { buildGroupHash } from './build_alert_events';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
-import { RULE_EXECUTION_FAILURE_REASONS, resolveReasonForError } from './execution_outcome';
+import { RULE_EXECUTION_REASONS, resolveReasonForError } from './execution_outcome';
 
 describe('executeRecoveryQuery', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -227,7 +227,7 @@ describe('executeRecoveryQuery', () => {
     expect(getErrorSource(error as Error)).toBeUndefined();
   });
 
-  it('tags failures as recovery_query without losing the task error source', async () => {
+  it('tags failures as recovery_query_failed without losing the task error source', async () => {
     const { queryService, scopedEsClient } = setup();
 
     scopedEsClient.esql.query.mockRejectedValue(
@@ -244,7 +244,7 @@ describe('executeRecoveryQuery', () => {
       breachedGroupHashes: new Set(),
     }).catch((e: Error) => e);
 
-    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_FAILURE_REASONS.RECOVERY_QUERY);
+    expect(resolveReasonForError(error)).toBe(RULE_EXECUTION_REASONS.RECOVERY_QUERY_FAILED);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
   });
 

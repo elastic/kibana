@@ -8,7 +8,7 @@
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { buildTaskRunEventFields, type TaskRunEventFieldsParams } from './task_run_fields';
-import { RULE_EXECUTION_FAILURE_REASONS } from './failure_reason';
+import { RULE_EXECUTION_REASONS } from './execution_reason';
 import { tagFailedStep } from './failed_step';
 import { tagRunReport } from './run_report';
 import { RuleExecutionCancellationError } from '../../execution_context';
@@ -160,21 +160,27 @@ describe('buildTaskRunEventFields', () => {
       );
     });
 
-    it('reports a halt as skipped and passes the halt reason through', () => {
+    it('reports a halt as skipped and publishes the code owned by the halt reason', () => {
       const result = createResult({ completed: false, haltReason: 'rule_disabled' });
 
       expect(buildTaskRunEventFields({ input, result })).toEqual(
-        expect.objectContaining({ status: 'skipped', reason: 'rule_disabled' })
+        expect.objectContaining({
+          status: 'skipped',
+          reason: RULE_EXECUTION_REASONS.RULE_DISABLED,
+        })
       );
     });
   });
 
   describe('from an error', () => {
-    it('reports a failure and names the step that threw', () => {
+    it('reports a failure and publishes the code owned by the step that threw', () => {
       const error = tagFailedStep(new Error('boom'), 'execute_rule_query');
 
       expect(buildTaskRunEventFields({ input, error })).toEqual(
-        expect.objectContaining({ status: 'failed', reason: 'execute_rule_query' })
+        expect.objectContaining({
+          status: 'failed',
+          reason: RULE_EXECUTION_REASONS.QUERY_FAILED,
+        })
       );
     });
 
@@ -184,7 +190,7 @@ describe('buildTaskRunEventFields', () => {
       expect(buildTaskRunEventFields({ input, error })).toEqual(
         expect.objectContaining({
           status: 'timeout',
-          reason: RULE_EXECUTION_FAILURE_REASONS.CANCELLED_TIMEOUT,
+          reason: RULE_EXECUTION_REASONS.CANCELLED_TIMEOUT,
         })
       );
     });
