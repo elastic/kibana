@@ -1,5 +1,5 @@
 {
-  "sha1": "889deb109ceb72304b45930db3a3a2d19f11316a",
+  "sha1": "a56926b971ca39930e16177c4dfcc6e9943c25f9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -229,8 +229,8 @@
       }
     },
     {
-      "id": "66985a39c31728f-608c0105d6e978b",
-      "title": "GET /internal/nightshift/investigations each result has list fields without structured output",
+      "id": "66985a39c31728f-68fab1a4d8f59fc",
+      "title": "GET /internal/nightshift/investigations each result includes list fields, not detailed output",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
