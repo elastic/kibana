@@ -98,7 +98,7 @@ describe('updateInvestigation handler', () => {
     await expect(handler(makeResources(body, update) as never)).resolves.toEqual({
       acknowledged: true,
     });
-    expect(update).toHaveBeenCalledWith('exec-1', body);
+    expect(update).toHaveBeenCalledWith('exec-1', expect.objectContaining({ status: 'failed', error: 'Agent timed out' }));
   });
 
   it.each([

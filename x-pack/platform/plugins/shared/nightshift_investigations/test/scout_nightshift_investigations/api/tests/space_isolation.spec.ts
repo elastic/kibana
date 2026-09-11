@@ -40,10 +40,10 @@ apiTest.describe(
         id: TEST_ID,
         space: SPACE_ID,
         status: 'running',
-        subject_type: 'alert',
-        subject_id: 'alert-space',
-        trigger_type: 'automatic',
-        created_at: times.iso({ day: 0, hour: 10 }),
+        subjectType: 'alert',
+        subjectId: 'alert-space',
+        triggerType: 'automatic',
+        createdAt: times.iso({ day: 0, hour: 10 }),
         summary: 'Space-scoped investigation.',
       });
     });
@@ -97,10 +97,10 @@ apiTest.describe(
         await seedInvestigation(kbnClient, {
           id: CONTROL_ID,
           status: 'running',
-          subject_type: 'alert',
-          subject_id: 'alert-default-space',
-          trigger_type: 'automatic',
-          created_at: times.iso({ day: 0, hour: 10 }),
+          subjectType: 'alert',
+          subjectId: 'alert-default-space',
+          triggerType: 'automatic',
+          createdAt: times.iso({ day: 0, hour: 10 }),
         });
 
         const response = await listInvestigations(apiClient, cookieHeader, {

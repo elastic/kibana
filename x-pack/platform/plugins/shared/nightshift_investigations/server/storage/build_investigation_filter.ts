@@ -32,20 +32,20 @@ const buildBaseClauses = (query: SeverityCountsQuery): string[] => {
   }
 
   if (query.subjectTypes?.length) {
-    filters.push(orClause('subject_type', query.subjectTypes));
+    filters.push(orClause('subjectType', query.subjectTypes));
   }
 
   if (query.concurrencyKey) {
-    filters.push(`${attr('concurrency_key')}: "${escapeQuotes(query.concurrencyKey)}"`);
+    filters.push(`${attr('concurrencyKey')}: "${escapeQuotes(query.concurrencyKey)}"`);
   }
 
   const rangeFilters: Array<[string, string | undefined, '>=' | '<=']> = [
-    ['created_at', query.createdAfter, '>='],
-    ['created_at', query.createdBefore, '<='],
-    ['started_at', query.startedAfter, '>='],
-    ['started_at', query.startedBefore, '<='],
-    ['completed_at', query.completedAfter, '>='],
-    ['completed_at', query.completedBefore, '<='],
+    ['createdAt', query.createdAfter, '>='],
+    ['createdAt', query.createdBefore, '<='],
+    ['startedAt', query.startedAfter, '>='],
+    ['startedAt', query.startedBefore, '<='],
+    ['completedAt', query.completedAfter, '>='],
+    ['completedAt', query.completedBefore, '<='],
   ];
 
   for (const [field, value, op] of rangeFilters) {

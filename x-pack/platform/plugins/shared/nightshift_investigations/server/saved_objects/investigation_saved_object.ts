@@ -23,6 +23,7 @@ import {
   MAX_KEYWORD_LENGTH,
 } from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
+import { migrateInvestigationKeysToCamelCase } from './model_versions/migrate_investigation_keys_to_camel_case';
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
@@ -54,6 +55,10 @@ const enumOf = <T extends readonly string[]>(options: T) =>
 const opaqueArray = (maxSize: number) =>
   schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize }));
 
+/**
+ * V1 schema — snake_case keys. Kept unmodified so Kibana can validate
+ * documents that have not yet been migrated through model version 2.
+ */
 const investigationAttributesSchemaV1 = schema.object({
   status: enumOf(INVESTIGATION_STATUSES),
   subject_type: enumOf(INVESTIGATION_SUBJECT_TYPES),
@@ -83,6 +88,41 @@ const investigationAttributesSchemaV1 = schema.object({
   ),
 });
 
+/**
+ * V2 schema — camelCase keys. This schema is intentionally separate from the
+ * API schemas defined in `common/`. Today they are structurally equivalent
+ * (modulo casing), but keeping them apart lets the storage model evolve
+ * without touching the public HTTP contract.
+ */
+const investigationAttributesSchemaV2 = schema.object({
+  status: enumOf(INVESTIGATION_STATUSES),
+  subjectType: enumOf(INVESTIGATION_SUBJECT_TYPES),
+  subjectId: keyword,
+  subjectSummary: optionalText,
+  triggerType: enumOf(INVESTIGATION_TRIGGER_TYPES),
+  concurrencyKey: optionalKeyword,
+  createdAt: isoDateStringSchema,
+  startedAt: schema.maybe(isoDateStringSchema),
+  completedAt: schema.maybe(isoDateStringSchema),
+  executedBy: optionalKeyword,
+  error: optionalText,
+  summary: optionalText,
+  conclusion: optionalText,
+  severity: schema.maybe(enumOf(SEVERITY_OPTIONS)),
+  hypotheses: opaqueArray(MAX_HYPOTHESES),
+  recommendations: opaqueArray(MAX_RECOMMENDATIONS),
+  blindSpots: opaqueArray(MAX_BLIND_SPOTS),
+  triggerFeedback: opaqueArray(MAX_TRIGGER_FEEDBACK),
+  conversationId: optionalKeyword,
+  impact: schema.maybe(
+    schema.object({
+      entities: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+        maxSize: MAX_IMPACT_ENTITIES,
+      }),
+    })
+  ),
+});
+
 export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   hidden: true,
@@ -90,7 +130,8 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
   mappings: {
     dynamic: false,
     properties: {
-      status: { type: 'keyword', ignore_above: 1024 },
+      // V1 snake_case mappings — kept so pre-migration documents remain
+      // readable; ES cannot drop existing mapping keys.
       subject_type: { type: 'keyword', ignore_above: 1024 },
       subject_id: { type: 'keyword', ignore_above: 1024 },
       subject_summary: { type: 'text' },
@@ -98,10 +139,20 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       created_at: { type: 'date' },
       started_at: { type: 'date' },
       completed_at: { type: 'date' },
+      // Casing-neutral fields shared by both versions
+      status: { type: 'keyword', ignore_above: 1024 },
       summary: { type: 'text' },
       conclusion: { type: 'text' },
       severity: { type: 'keyword', ignore_above: 1024 },
       impact: { type: 'flattened', ignore_above: 1024 },
+      // V2 camelCase mappings — added by model version 2
+      subjectType: { type: 'keyword', ignore_above: 1024 },
+      subjectId: { type: 'keyword', ignore_above: 1024 },
+      subjectSummary: { type: 'text' },
+      concurrencyKey: { type: 'keyword', ignore_above: 1024 },
+      createdAt: { type: 'date' },
+      startedAt: { type: 'date' },
+      completedAt: { type: 'date' },
     },
   },
   management: {
@@ -113,6 +164,33 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV1,
         forwardCompatibility: investigationAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    2: {
+      // Renames all snake_case attribute keys to camelCase, aligning the
+      // storage model with the Kibana HTTP API design guidelines while keeping
+      // the public REST contract (common/) stable.
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            subjectType: { type: 'keyword', ignore_above: 1024 },
+            subjectId: { type: 'keyword', ignore_above: 1024 },
+            subjectSummary: { type: 'text' },
+            concurrencyKey: { type: 'keyword', ignore_above: 1024 },
+            createdAt: { type: 'date' },
+            startedAt: { type: 'date' },
+            completedAt: { type: 'date' },
+          },
+        },
+        {
+          type: 'unsafe_transform',
+          transformFn: (typeSafeGuard) => typeSafeGuard(migrateInvestigationKeysToCamelCase),
+        },
+      ],
+      schemas: {
+        create: investigationAttributesSchemaV2,
+        forwardCompatibility: investigationAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

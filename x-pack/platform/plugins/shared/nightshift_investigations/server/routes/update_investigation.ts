@@ -21,8 +21,10 @@ import {
 } from '@kbn/significant-events-schema';
 import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
+import type { UpdateInvestigationArgs } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
+import { type Complete, assertAllFieldsMapped } from './mapper_types';
 
 /**
  * Optional PATCH fields. Empty string is absent so quoted Liquid interpolations of missing
@@ -48,6 +50,36 @@ const updateInvestigationBodySchema = z.object({
   impact: orAbsent(investigationImpactSchema),
 });
 
+export const toInvestigationPatch = ({
+  status,
+  error,
+  summary,
+  conclusion,
+  severity,
+  hypotheses,
+  recommendations,
+  blind_spots: blindSpots,
+  trigger_feedback: triggerFeedback,
+  conversation_id: conversationId,
+  impact,
+  ...rest
+}: z.infer<typeof updateInvestigationBodySchema>): Complete<UpdateInvestigationArgs> => {
+  assertAllFieldsMapped(rest);
+  return {
+    status,
+    error,
+    summary,
+    conclusion,
+    severity,
+    hypotheses,
+    recommendations,
+    blindSpots,
+    triggerFeedback,
+    conversationId,
+    impact,
+  };
+};
+
 export const updateInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'PATCH /internal/nightshift/investigations/{id}',
   options: {
@@ -70,7 +102,7 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {
-      await client.update(params.path.id, params.body);
+      await client.update(params.path.id, toInvestigationPatch(params.body));
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

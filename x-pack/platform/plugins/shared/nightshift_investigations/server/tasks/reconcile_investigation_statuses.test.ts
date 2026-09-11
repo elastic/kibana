@@ -18,7 +18,7 @@ import {
 
 const HOUR_MS = 60 * 60 * 1000;
 
-type SweepFields = 'created_at';
+type SweepFields = 'createdAt';
 type SweepResult = FindInvestigationsAcrossSpacesResult<SweepFields>;
 type SweepInvestigation = SweepResult['results'][number];
 
@@ -36,7 +36,7 @@ const investigation = ({
   investigation: {
     id,
     version,
-    created_at: createdAt,
+    createdAt: createdAt,
   },
   spaceId,
 });
@@ -119,7 +119,7 @@ describe('reconcileInvestigationStatuses', () => {
     expect(update.spaceId).toBe('team-a');
     expect(update.version).toBe('v1');
     expect(update.patch.status).toBe('cancelled');
-    expect(update.patch.completed_at).toBe(FINISHED_AT);
+    expect(update.patch.completedAt).toBe(FINISHED_AT);
     expect(result).toEqual({ scanned: 1, reconciled: 1 });
   });
 
@@ -230,7 +230,7 @@ describe('reconcileInvestigationStatuses', () => {
     expect(investigationSweepRepository.updateInSpace.mock.calls[0][0].patch).toEqual({
       status: 'failed',
       error: 'Workflow execution no longer exists',
-      completed_at: expect.any(String),
+      completedAt: expect.any(String),
     });
     expect(result).toEqual({ scanned: 1, reconciled: 1 });
   });

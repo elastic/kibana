@@ -11,6 +11,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { freeFormContextSchema } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { fetchAlertSnapshot } from '../lib/alert_snapshot';
+import type { StartInvestigationArgs } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -74,18 +75,25 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
             throw serverUnavailable('Alert lookup is unavailable');
           }
           const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
-          return await client.start({
+          const args: StartInvestigationArgs = {
             subject: body.subject,
-            concurrency_key: body.concurrency_key ?? snapshot.id,
+            concurrencyKey: body.concurrency_key ?? snapshot.id,
             context: { alerts: [snapshot] },
-            trigger_type: 'manual',
-          });
+            triggerType: 'manual',
+          };
+          const result = await client.start(args);
+          return { investigation_id: result.investigation_id };
         }
-        case 'significant_event':
-          return await client.start({
-            ...body,
-            trigger_type: 'manual',
-          });
+        case 'significant_event': {
+          const args: StartInvestigationArgs = {
+            subject: body.subject,
+            concurrencyKey: body.concurrency_key,
+            context: body.context,
+            triggerType: 'manual',
+          };
+          const result = await client.start(args);
+          return { investigation_id: result.investigation_id };
+        }
       }
     } catch (error) {
       rethrowInvestigationClientError(error);

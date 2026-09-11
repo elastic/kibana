@@ -6,27 +6,47 @@
  */
 
 import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
   InvestigationStatus,
-  InvestigationStructuredOutput,
   InvestigationSubjectType,
   InvestigationTriggerType,
   PaginatedResponse,
   Severity,
 } from '../../common';
+import type { TriggerFeedback } from '@kbn/significant-events-schema';
 
-export interface InvestigationAttributes extends InvestigationStructuredOutput {
+/**
+ * Camelcase version of the structured-output fields, used by the storage layer.
+ * The API-facing shape lives in `common/InvestigationStructuredOutput` (snake_case).
+ * Only `blindSpots` and `triggerFeedback` differ in casing; the rest are identical.
+ */
+export interface InvestigationStorageStructuredOutput {
+  summary?: string;
+  conclusion?: string;
+  severity?: Severity;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blindSpots?: InvestigationBlindSpot[];
+  triggerFeedback?: TriggerFeedback[];
+  impact?: InvestigationImpact;
+}
+
+export interface InvestigationAttributes extends InvestigationStorageStructuredOutput {
   status: InvestigationStatus;
-  subject_type: InvestigationSubjectType;
-  subject_id: string;
-  subject_summary?: string;
-  trigger_type: InvestigationTriggerType;
-  concurrency_key?: string;
-  created_at: string;
-  started_at?: string;
-  completed_at?: string;
-  executed_by?: string;
+  subjectType: InvestigationSubjectType;
+  subjectId: string;
+  subjectSummary?: string;
+  triggerType: InvestigationTriggerType;
+  concurrencyKey?: string;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  executedBy?: string;
   error?: string;
-  conversation_id?: string;
+  conversationId?: string;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -43,13 +63,13 @@ export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttri
   version?: string;
 };
 
-export interface InvestigationPatch extends InvestigationStructuredOutput {
+export interface InvestigationPatch extends InvestigationStorageStructuredOutput {
   status?: InvestigationStatus;
-  started_at?: string;
-  completed_at?: string;
-  executed_by?: string;
+  startedAt?: string;
+  completedAt?: string;
+  executedBy?: string;
   error?: string;
-  conversation_id?: string;
+  conversationId?: string;
 }
 
 /**
@@ -62,7 +82,7 @@ export interface SeverityCountsQuery {
   statuses?: InvestigationStatus[];
   subjectTypes?: InvestigationSubjectType[];
   /**
-   * Full-text query across subject_summary, summary, and conclusion.
+   * Full-text query across subjectSummary, summary, and conclusion.
    * Passed as `search` + `searchFields` to the SO find API, not as part of the KQL filter.
    */
   query?: string;
@@ -79,7 +99,7 @@ export interface FindInvestigationsQuery<
   Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
 > extends SeverityCountsQuery {
   severities?: Severity[];
-  sortField?: 'created_at' | 'completed_at' | 'severity';
+  sortField?: 'createdAt' | 'completedAt' | 'severity';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;

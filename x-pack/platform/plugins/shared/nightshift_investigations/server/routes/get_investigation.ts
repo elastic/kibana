@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
+import { toInvestigationResponse } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -35,7 +36,8 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
   handler: async ({ request, params, getInvestigationsClient }) => {
     const investigationClient = getInvestigationsClient(request);
     try {
-      return await investigationClient.get(params.path.id);
+      const record = await investigationClient.get(params.path.id);
+      return toInvestigationResponse(record);
     } catch (err) {
       rethrowInvestigationClientError(err);
     }

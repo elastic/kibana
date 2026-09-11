@@ -91,7 +91,7 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
-    expect(request.concurrency_key).toBe('my-slug');
+    expect(request.concurrencyKey).toBe('my-slug');
   });
 
   it('sets subject.id to event_id and includes event_uuid in the context', async () => {
@@ -111,7 +111,7 @@ describe('triggerInvestigationWorkflow', () => {
       id: 'my-stable-id',
       summary: 'P99 latency climbed above 2s.',
     });
-    expect(request.trigger_type).toBe('manual');
+    expect(request.triggerType).toBe('manual');
     expect(request.context.event_uuid).toBe('event-42');
   });
 
@@ -127,7 +127,7 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
-    expect(request.stream_names).toEqual(['logs.checkout']);
+    expect(request.streamNames).toEqual(['logs.checkout']);
   });
 
   it('returns undefined when nightshiftInvestigations is not available', async () => {

@@ -67,7 +67,7 @@ export interface ReconciliationResult {
 }
 
 export type ReconciliationCandidate =
-  FindInvestigationsAcrossSpacesResult<'created_at'>['results'][number];
+  FindInvestigationsAcrossSpacesResult<'createdAt'>['results'][number];
 
 export interface ReconciliationOutcome {
   reconciledStatus: InvestigationStatus;

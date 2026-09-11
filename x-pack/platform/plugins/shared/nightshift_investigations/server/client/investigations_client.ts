@@ -21,14 +21,20 @@ import type {
   InvestigationSubjectType,
   InvestigationTriggerType,
   ListInvestigationItem,
-  ListInvestigationsRequest,
   ListInvestigationsResponse,
-  SeverityCountsRequest,
-  SeverityCountsResponse,
-  UpdateInvestigationRequest,
-  StartInvestigationRequest,
+  PaginatedResponse,
+  Severity,
+  SeverityCounts,
   StartInvestigationResponse,
+  UpdatableInvestigationStatus,
 } from '../../common';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
+  TriggerFeedback,
+} from '@kbn/significant-events-schema';
 import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
@@ -42,6 +48,7 @@ import type {
   InvestigationRecord,
   InvestigationRepository,
   ProjectedInvestigationRecord,
+  SeverityCountsQuery,
 } from '../storage';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
@@ -84,6 +91,40 @@ interface ExecutionInvestigationMetadata {
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
+
+/** Camelcase input for {@link NightshiftInvestigationsClient.start}. */
+export interface StartInvestigationArgs {
+  subject: InvestigationSubject;
+  triggerType?: InvestigationTriggerType;
+  message?: string;
+  streamNames?: string[];
+  concurrencyKey?: string;
+  context?: InvestigationContext | AlertInvestigationContext;
+}
+
+/** Camelcase input for {@link NightshiftInvestigationsClient.list}. */
+export interface ListInvestigationsArgs extends SeverityCountsQuery {
+  severities?: Severity[];
+  sortField?: 'createdAt' | 'completedAt' | 'severity';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  size?: number;
+}
+
+/** Camelcase input for {@link NightshiftInvestigationsClient.update}. */
+export interface UpdateInvestigationArgs {
+  status: UpdatableInvestigationStatus;
+  error?: string;
+  summary?: string;
+  conclusion?: string;
+  severity?: Severity;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blindSpots?: InvestigationBlindSpot[];
+  triggerFeedback?: TriggerFeedback[];
+  conversationId?: string;
+  impact?: InvestigationImpact;
+}
 /**
  * Context fields each subject type's id may arrive under, in precedence order. A significant event
  * has two spellings because discovery's `workflow.executeAsync` sends `event_id` while `start()`
@@ -119,13 +160,13 @@ const toSubject = ({
 const LIST_INVESTIGATION_ITEM_FIELDS = {
   investigation_id: [],
   status: ['status'],
-  created_at: ['created_at'],
-  started_at: ['started_at'],
-  completed_at: ['completed_at'],
+  created_at: ['createdAt'],
+  started_at: ['startedAt'],
+  completed_at: ['completedAt'],
   severity: ['severity'],
-  concurrency_key: ['concurrency_key'],
-  executed_by: ['executed_by'],
-  subject: ['subject_type', 'subject_id', 'subject_summary'],
+  concurrency_key: ['concurrencyKey'],
+  executed_by: ['executedBy'],
+  subject: ['subjectType', 'subjectId', 'subjectSummary'],
   summary: ['summary'],
   impact: ['impact'],
 } as const satisfies Record<
@@ -139,35 +180,43 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
   (typeof LIST_INVESTIGATION_ITEM_FIELDS)[keyof ListInvestigationItem][number]
 >;
 
-const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
+/**
+ * Converts a camelCase SO projected record to the snake_case `ListInvestigationItem` HTTP type.
+ * Exported so the list and get-by-id routes can use it at the REST boundary.
+ */
+export const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
   status: record.status,
-  created_at: record.created_at,
-  started_at: record.started_at,
-  completed_at: record.completed_at,
+  created_at: record.createdAt,
+  started_at: record.startedAt,
+  completed_at: record.completedAt,
   severity: record.severity,
-  concurrency_key: record.concurrency_key,
-  executed_by: record.executed_by,
+  concurrency_key: record.concurrencyKey,
+  executed_by: record.executedBy,
   subject: toSubject({
-    subjectType: record.subject_type,
-    subjectId: record.subject_id,
-    subjectSummary: record.subject_summary,
+    subjectType: record.subjectType,
+    subjectId: record.subjectId,
+    subjectSummary: record.subjectSummary,
   }),
   summary: record.summary,
   impact: record.impact,
 });
 
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
+/**
+ * Converts a camelCase SO `InvestigationRecord` to the snake_case `GetInvestigationResponse`.
+ * Exported so the get-by-id route can use it at the REST boundary.
+ */
+export const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
   ...toListInvestigationItem(record),
-  trigger_type: record.trigger_type,
+  trigger_type: record.triggerType,
   error: record.error,
   summary: record.summary,
   conclusion: record.conclusion,
   hypotheses: record.hypotheses,
   recommendations: record.recommendations,
-  blind_spots: record.blind_spots,
-  trigger_feedback: record.trigger_feedback,
-  conversation_id: record.conversation_id,
+  blind_spots: record.blindSpots,
+  trigger_feedback: record.triggerFeedback,
+  conversation_id: record.conversationId,
   impact: record.impact,
 });
 
@@ -190,10 +239,10 @@ const parseExecutionInvestigationMetadata = (
 
 const toSubjectFields = (
   subject: InvestigationSubject
-): Pick<InvestigationAttributes, 'subject_type' | 'subject_id' | 'subject_summary'> => ({
-  subject_type: subject.type,
-  subject_id: subject.id,
-  ...(subject.summary ? { subject_summary: subject.summary } : {}),
+): Pick<InvestigationAttributes, 'subjectType' | 'subjectId' | 'subjectSummary'> => ({
+  subjectType: subject.type,
+  subjectId: subject.id,
+  ...(subject.summary ? { subjectSummary: subject.summary } : {}),
 });
 
 /**
@@ -308,12 +357,12 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
-    trigger_type,
+    triggerType,
     message,
-    stream_names,
-    concurrency_key,
+    streamNames,
+    concurrencyKey,
     context = {},
-  }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
+  }: StartInvestigationArgs): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
@@ -350,13 +399,13 @@ export class NightshiftInvestigationsClient {
 
     const inputs = {
       message: prepared.message,
-      stream_names: stream_names ?? [],
-      ...(concurrency_key ? { concurrency_key } : {}),
+      stream_names: streamNames ?? [],
+      ...(concurrencyKey ? { concurrency_key: concurrencyKey } : {}),
       context: {
         ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
-        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        trigger_type: triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
         ...(subject.summary ? { summary: subject.summary } : {}),
       },
     };
@@ -376,8 +425,8 @@ export class NightshiftInvestigationsClient {
     await this.create({
       investigationId: executionId,
       subject,
-      triggerType: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-      concurrencyKey: concurrency_key,
+      triggerType: triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      concurrencyKey,
     }).catch((error) => {
       this.logger.warn(
         `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
@@ -412,9 +461,9 @@ export class NightshiftInvestigationsClient {
       attributes: {
         status: 'pending',
         ...toSubjectFields(subject),
-        trigger_type: triggerType,
-        concurrency_key: concurrencyKey,
-        created_at: new Date().toISOString(),
+        triggerType,
+        ...(concurrencyKey !== undefined ? { concurrencyKey } : {}),
+        createdAt: new Date().toISOString(),
       },
     });
   }
@@ -488,11 +537,11 @@ export class NightshiftInvestigationsClient {
       attributes: {
         status: 'running',
         ...toSubjectFields(subject),
-        trigger_type: triggerType,
-        concurrency_key: concurrencyKey,
-        executed_by: execution.executedBy,
-        created_at: startedAt,
-        started_at: startedAt,
+        triggerType,
+        ...(concurrencyKey !== undefined ? { concurrencyKey } : {}),
+        ...(execution.executedBy !== undefined ? { executedBy: execution.executedBy } : {}),
+        createdAt: startedAt,
+        startedAt,
       },
     });
   }
@@ -511,7 +560,7 @@ export class NightshiftInvestigationsClient {
     try {
       await this.investigationRepository.update({
         id: investigationId,
-        patch: { status: 'running', started_at: startedAt, executed_by: executedBy },
+        patch: { status: 'running', startedAt, ...(executedBy !== undefined ? { executedBy } : {}) },
         version,
       });
     } catch (error) {
@@ -557,7 +606,7 @@ export class NightshiftInvestigationsClient {
     const { results } = await this.investigationRepository.find({
       concurrencyKey,
       statuses: [...SUPERSEDED_STATUSES],
-      sortField: 'created_at',
+      sortField: 'createdAt',
       sortOrder: 'desc',
       perPage: 2,
     });
@@ -572,7 +621,7 @@ export class NightshiftInvestigationsClient {
         id: superseded.id,
         patch: {
           status: 'cancelled',
-          completed_at: new Date().toISOString(),
+          completedAt: new Date().toISOString(),
         },
         version: superseded.version,
       });
@@ -587,7 +636,7 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
+  async update(investigationId: string, state: UpdateInvestigationArgs): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
     if (!existing) {
       throw new InvestigationNotFoundError(investigationId);
@@ -608,7 +657,7 @@ export class NightshiftInvestigationsClient {
 
     const patch: InvestigationPatch = {
       status,
-      ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
+      ...(isTerminalStatus(status) && { completedAt: new Date().toISOString() }),
       ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
       ...output,
     };
@@ -633,59 +682,52 @@ export class NightshiftInvestigationsClient {
    * ensureOrCreate() did not see, timeout, or a worker dying mid-run. Complete/fail still go
    * through PATCH; a superseded run is cancelled in ensureOrCreate().
    */
-  async get(investigationId: string): Promise<GetInvestigationResponse> {
+  async get(investigationId: string): Promise<InvestigationRecord> {
     const record = await this.investigationRepository.get(investigationId);
 
     if (!record) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    return toInvestigationResponse(record);
+    return record;
   }
 
   async list({
     statuses,
     severities,
-    subject_types,
+    subjectTypes,
     query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
-    sort_field,
-    sort_order,
+    concurrencyKey,
+    createdAfter,
+    createdBefore,
+    startedAfter,
+    startedBefore,
+    completedAfter,
+    completedBefore,
+    sortField,
+    sortOrder,
     page = 1,
     size = 20,
-  }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
-    const result = await this.investigationRepository.find({
+  }: ListInvestigationsArgs = {}): Promise<PaginatedResponse<ListInvestigationRecord>> {
+    // Stored `running` is not reconciled with the engine — same edge cases as get().
+    return this.investigationRepository.find({
       statuses,
       severities,
-      subjectTypes: subject_types,
+      subjectTypes,
       query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
-      sortField: sort_field,
-      sortOrder: sort_order,
+      concurrencyKey,
+      createdAfter,
+      createdBefore,
+      startedAfter,
+      startedBefore,
+      completedAfter,
+      completedBefore,
+      sortField,
+      sortOrder,
       page,
       perPage: size,
       fields: [...LIST_INVESTIGATION_ATTRIBUTE_FIELDS],
     });
-
-    // Stored `running` is not reconciled with the engine — same edge cases as get().
-    return {
-      results: result.results.map((record) => toListInvestigationItem(record)),
-      page: result.page,
-      size: result.size,
-      total: result.total,
-    };
   }
 
   /**
@@ -696,29 +738,27 @@ export class NightshiftInvestigationsClient {
    */
   async getSeverityCounts({
     statuses,
-    subject_types,
+    subjectTypes,
     query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
-  }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
-    const severityCounts = await this.investigationRepository.countBySeverity({
+    concurrencyKey,
+    createdAfter,
+    createdBefore,
+    startedAfter,
+    startedBefore,
+    completedAfter,
+    completedBefore,
+  }: SeverityCountsQuery = {}): Promise<SeverityCounts> {
+    return this.investigationRepository.countBySeverity({
       statuses,
-      subjectTypes: subject_types,
+      subjectTypes,
       query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
+      concurrencyKey,
+      createdAfter,
+      createdBefore,
+      startedAfter,
+      startedBefore,
+      completedAfter,
+      completedBefore,
     });
-
-    return { severity_counts: severityCounts };
   }
 }

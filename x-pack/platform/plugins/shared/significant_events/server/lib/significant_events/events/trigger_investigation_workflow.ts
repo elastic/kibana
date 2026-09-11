@@ -50,10 +50,10 @@ export const triggerInvestigationWorkflow = async ({
   try {
     const response = await client.start({
       subject: { type: 'significant_event', id: event_id, summary },
-      trigger_type: 'manual',
+      triggerType: 'manual',
       message: `${title}\n\n${summary}`,
-      stream_names: stream_names ?? [],
-      concurrency_key: event_id,
+      streamNames: stream_names ?? [],
+      concurrencyKey: event_id,
       context: {
         event_uuid,
         event_id,

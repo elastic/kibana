@@ -20,7 +20,7 @@ const foundInvestigation = ({ id, namespaces }: { id: string; namespaces?: strin
   version: 'WzEsMV0=',
   references: [],
   score: 0,
-  attributes: { status: 'running' as const, created_at: '2024-01-01T00:00:00Z' },
+  attributes: { status: 'running' as const, createdAt: '2024-01-01T00:00:00Z' },
 });
 
 const findResponse = (savedObjects: Array<ReturnType<typeof foundInvestigation>>) => ({
@@ -46,8 +46,8 @@ describe('SavedObjectInvestigationSweepRepository', () => {
 
       await repository.findAcrossSpaces({
         statuses: ['pending', 'running'],
-        fields: ['status', 'created_at'],
-        sortField: 'created_at',
+        fields: ['status', 'createdAt'],
+        sortField: 'createdAt',
         sortOrder: 'asc',
         page: 2,
         perPage: 50,
@@ -57,8 +57,8 @@ describe('SavedObjectInvestigationSweepRepository', () => {
         expect.objectContaining({
           type: TYPE,
           namespaces: ['*'],
-          fields: ['status', 'created_at'],
-          sortField: 'created_at',
+          fields: ['status', 'createdAt'],
+          sortField: 'createdAt',
           sortOrder: 'asc',
           page: 2,
           perPage: 50,

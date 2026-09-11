@@ -51,8 +51,8 @@ const getCandidatesBySpace = async ({
 
     const { results } = await investigationSweepRepository.findAcrossSpaces({
       statuses: [...NON_TERMINAL_INVESTIGATION_STATUSES],
-      fields: ['created_at'],
-      sortField: 'created_at',
+      fields: ['createdAt'],
+      sortField: 'createdAt',
       sortOrder: 'asc',
       page,
       perPage: PAGE_SIZE,
@@ -179,7 +179,7 @@ export const reconcileInvestigationStatuses = async ({
           return { scanned, reconciled };
         }
 
-        const { id, version, created_at: investigationCreatedAt } = candidate.investigation;
+        const { id, version, createdAt: investigationCreatedAt } = candidate.investigation;
         const execution = executions.get(id);
         const outcome = toReconciliationOutcome({ execution, investigationCreatedAt });
 
@@ -189,7 +189,7 @@ export const reconcileInvestigationStatuses = async ({
 
         const patch: InvestigationPatch = {
           status: outcome.reconciledStatus,
-          completed_at: outcome.completedAt,
+          completedAt: outcome.completedAt,
           ...(outcome.errorMessage && { error: outcome.errorMessage }),
         };
 

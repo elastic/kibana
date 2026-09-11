@@ -41,7 +41,7 @@ interface SeverityAggregation {
 
 /** Text-mapped attributes the free-text `query` searches across. */
 const buildSearchFields = (query: SeverityCountsQuery): string[] | undefined =>
-  query.query ? ['subject_summary', 'summary', 'conclusion'] : undefined;
+  query.query ? ['subjectSummary', 'summary', 'conclusion'] : undefined;
 
 export type InvestigationSavedObjectsClient = Pick<
   SavedObjectsClientContract,
@@ -127,7 +127,7 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       filter: buildInvestigationFilter(query),
       search: query.query,
       searchFields: buildSearchFields(query),
-      sortField: query.sortField ?? 'created_at',
+      sortField: query.sortField ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,
       perPage: query.perPage,

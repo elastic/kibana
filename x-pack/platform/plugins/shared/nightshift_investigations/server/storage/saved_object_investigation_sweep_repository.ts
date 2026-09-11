@@ -37,7 +37,7 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       namespaces: ['*'],
       filter: buildInvestigationFilter(query),
-      sortField: query.sortField ?? 'created_at',
+      sortField: query.sortField ?? 'createdAt',
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,
       perPage: query.perPage,

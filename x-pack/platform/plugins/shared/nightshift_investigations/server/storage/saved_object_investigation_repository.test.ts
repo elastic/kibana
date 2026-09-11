@@ -18,10 +18,10 @@ const TYPE = NIGHTSHIFT_INVESTIGATION_SO_TYPE;
 
 const attributes: InvestigationAttributes = {
   status: 'running',
-  subject_type: 'alert',
-  subject_id: 'alert-1',
-  trigger_type: 'manual',
-  created_at: '2024-01-01T00:00:00Z',
+  subjectType: 'alert',
+  subjectId: 'alert-1',
+  triggerType: 'manual',
+  createdAt: '2024-01-01T00:00:00Z',
 };
 
 const savedObject = {
@@ -139,7 +139,7 @@ describe('SavedObjectInvestigationRepository', () => {
         startedBefore: '2024-01-20T00:00:00Z',
         completedAfter: '2024-02-01T00:00:00Z',
         completedBefore: '2024-02-28T00:00:00Z',
-        sortField: 'completed_at',
+        sortField: 'completedAt',
         sortOrder: 'asc',
         page: 2,
         perPage: 10,
@@ -149,14 +149,14 @@ describe('SavedObjectInvestigationRepository', () => {
         type: TYPE,
         filter:
           `(${TYPE}.attributes.status: "running" OR ${TYPE}.attributes.status: "completed")` +
-          ` AND ${TYPE}.attributes.concurrency_key: "key-1"` +
-          ` AND ${TYPE}.attributes.created_at >= "2024-01-01T00:00:00Z"` +
-          ` AND ${TYPE}.attributes.created_at <= "2024-01-31T00:00:00Z"` +
-          ` AND ${TYPE}.attributes.started_at >= "2024-01-15T00:00:00Z"` +
-          ` AND ${TYPE}.attributes.started_at <= "2024-01-20T00:00:00Z"` +
-          ` AND ${TYPE}.attributes.completed_at >= "2024-02-01T00:00:00Z"` +
-          ` AND ${TYPE}.attributes.completed_at <= "2024-02-28T00:00:00Z"`,
-        sortField: 'completed_at',
+          ` AND ${TYPE}.attributes.concurrencyKey: "key-1"` +
+          ` AND ${TYPE}.attributes.createdAt >= "2024-01-01T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.createdAt <= "2024-01-31T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.startedAt >= "2024-01-15T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.startedAt <= "2024-01-20T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.completedAt >= "2024-02-01T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.completedAt <= "2024-02-28T00:00:00Z"`,
+        sortField: 'completedAt',
         sortOrder: 'asc',
         page: 2,
         perPage: 10,
@@ -182,7 +182,7 @@ describe('SavedObjectInvestigationRepository', () => {
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `${TYPE}.attributes.concurrency_key: "key-\\"quoted\\""`,
+          filter: `${TYPE}.attributes.concurrencyKey: "key-\\"quoted\\""`,
         })
       );
     });
@@ -196,10 +196,10 @@ describe('SavedObjectInvestigationRepository', () => {
         per_page: 20,
       });
 
-      await repository.find({ fields: ['status', 'created_at'] });
+      await repository.find({ fields: ['status', 'createdAt'] });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ fields: ['status', 'created_at'] })
+        expect.objectContaining({ fields: ['status', 'createdAt'] })
       );
     });
 
@@ -217,7 +217,7 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith({
         type: TYPE,
         filter: undefined,
-        sortField: 'created_at',
+        sortField: 'createdAt',
         sortOrder: 'desc',
         page: undefined,
         perPage: undefined,
@@ -238,8 +238,8 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter:
-            `(${TYPE}.attributes.subject_type: "alert"` +
-            ` OR ${TYPE}.attributes.subject_type: "significant_event")`,
+            `(${TYPE}.attributes.subjectType: "alert"` +
+            ` OR ${TYPE}.attributes.subjectType: "significant_event")`,
         })
       );
     });
@@ -278,7 +278,7 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'checkout latency',
-          searchFields: ['subject_summary', 'summary', 'conclusion'],
+          searchFields: ['subjectSummary', 'summary', 'conclusion'],
         })
       );
     });
@@ -372,8 +372,8 @@ describe('SavedObjectInvestigationRepository', () => {
         expect.objectContaining({
           filter:
             `(${TYPE}.attributes.status: "running")` +
-            ` AND ${TYPE}.attributes.concurrency_key: "key-1"` +
-            ` AND ${TYPE}.attributes.created_at >= "2024-01-01T00:00:00Z"`,
+            ` AND ${TYPE}.attributes.concurrencyKey: "key-1"` +
+            ` AND ${TYPE}.attributes.createdAt >= "2024-01-01T00:00:00Z"`,
         })
       );
     });
@@ -387,7 +387,7 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'checkout',
-          searchFields: ['subject_summary', 'summary', 'conclusion'],
+          searchFields: ['subjectSummary', 'summary', 'conclusion'],
         })
       );
     });

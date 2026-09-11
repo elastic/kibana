@@ -10,8 +10,61 @@ import {
   INVESTIGATION_STATUSES,
   INVESTIGATION_SUBJECT_TYPES,
   MAX_KEYWORD_LENGTH,
+  type SeverityCountsResponse,
 } from '../../common';
+import type { SeverityCountsQuery } from '../storage/types';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { type Complete, assertAllFieldsMapped } from './mapper_types';
+
+const severityCountsQuerySchema = z.object({
+  statuses: z
+    .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .optional(),
+  subject_types: z
+    .union([
+      z.enum(INVESTIGATION_SUBJECT_TYPES),
+      z.array(z.enum(INVESTIGATION_SUBJECT_TYPES)).max(2),
+    ])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .optional(),
+  query: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+  concurrency_key: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+  created_after: z.string().max(100).datetime({ offset: true }).optional(),
+  created_before: z.string().max(100).datetime({ offset: true }).optional(),
+  started_after: z.string().max(100).datetime({ offset: true }).optional(),
+  started_before: z.string().max(100).datetime({ offset: true }).optional(),
+  completed_after: z.string().max(100).datetime({ offset: true }).optional(),
+  completed_before: z.string().max(100).datetime({ offset: true }).optional(),
+});
+
+export const toSeverityCountsArgs = ({
+  statuses,
+  subject_types: subjectTypes,
+  query,
+  concurrency_key: concurrencyKey,
+  created_after: createdAfter,
+  created_before: createdBefore,
+  started_after: startedAfter,
+  started_before: startedBefore,
+  completed_after: completedAfter,
+  completed_before: completedBefore,
+  ...rest
+}: z.infer<typeof severityCountsQuerySchema>): Complete<SeverityCountsQuery> => {
+  assertAllFieldsMapped(rest);
+  return {
+    statuses,
+    subjectTypes,
+    query,
+    concurrencyKey,
+    createdAfter,
+    createdBefore,
+    startedAfter,
+    startedBefore,
+    completedAfter,
+    completedBefore,
+  };
+};
 
 /**
  * Severity facet counts, split out from the list route.
@@ -36,28 +89,11 @@ export const getSeverityCountsRoute = createNightshiftInvestigationsServerRoute(
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
-    query: z.object({
-      statuses: z
-        .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
-        .transform((v) => (Array.isArray(v) ? v : [v]))
-        .optional(),
-      subject_types: z
-        .union([
-          z.enum(INVESTIGATION_SUBJECT_TYPES),
-          z.array(z.enum(INVESTIGATION_SUBJECT_TYPES)).max(2),
-        ])
-        .transform((v) => (Array.isArray(v) ? v : [v]))
-        .optional(),
-      query: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-      concurrency_key: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-      created_after: z.string().max(100).datetime({ offset: true }).optional(),
-      created_before: z.string().max(100).datetime({ offset: true }).optional(),
-      started_after: z.string().max(100).datetime({ offset: true }).optional(),
-      started_before: z.string().max(100).datetime({ offset: true }).optional(),
-      completed_after: z.string().max(100).datetime({ offset: true }).optional(),
-      completed_before: z.string().max(100).datetime({ offset: true }).optional(),
-    }),
+    query: severityCountsQuerySchema,
   }),
-  handler: async ({ request, params, getInvestigationsClient }) =>
-    getInvestigationsClient(request).getSeverityCounts(params.query),
+  handler: async ({ request, params, getInvestigationsClient }): Promise<SeverityCountsResponse> => {
+    const client = getInvestigationsClient(request);
+    const severityCounts = await client.getSeverityCounts(toSeverityCountsArgs(params.query));
+    return { severity_counts: severityCounts };
+  },
 });

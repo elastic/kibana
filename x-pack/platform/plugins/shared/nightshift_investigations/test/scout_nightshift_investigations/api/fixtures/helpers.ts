@@ -100,19 +100,19 @@ export interface SeedInvestigationOptions {
   id: string;
   space?: string;
   status?: string;
-  subject_type?: string;
-  subject_id?: string;
-  trigger_type?: string;
-  concurrency_key?: string;
-  executed_by?: string;
-  created_at?: string;
-  started_at?: string;
-  completed_at?: string;
+  subjectType?: string;
+  subjectId?: string;
+  triggerType?: string;
+  concurrencyKey?: string;
+  executedBy?: string;
+  createdAt?: string;
+  startedAt?: string;
+  completedAt?: string;
   error?: string;
   summary?: string;
   conclusion?: string;
-  conversation_id?: string;
-  subject_summary?: string;
+  conversationId?: string;
+  subjectSummary?: string;
   impact?: { entities: Array<Record<string, unknown>> };
 }
 
@@ -124,10 +124,10 @@ export const seedInvestigation = async (
     id,
     space,
     status = 'running',
-    subject_type = 'alert',
-    subject_id = 'test-alert-1',
-    trigger_type = 'manual',
-    created_at = new Date().toISOString(),
+    subjectType = 'alert',
+    subjectId = 'test-alert-1',
+    triggerType = 'manual',
+    createdAt = new Date().toISOString(),
     ...rest
   } = options;
 
@@ -138,10 +138,10 @@ export const seedInvestigation = async (
     space,
     attributes: {
       status,
-      subject_type,
-      subject_id,
-      trigger_type,
-      created_at,
+      subjectType,
+      subjectId,
+      triggerType,
+      createdAt,
       ...rest,
     },
   });
