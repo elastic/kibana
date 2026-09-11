@@ -267,7 +267,7 @@ export const ConfigureValuesQuery = ({
             >
               <ESQLValuesPreview
                 values={previewOptions}
-                previewColumns={previewColumns}
+                columns={previewColumns}
                 previewError={previewError}
                 updateQuery={appendColumnToESQLQuery}
                 selectedControlType={selectedControlType}

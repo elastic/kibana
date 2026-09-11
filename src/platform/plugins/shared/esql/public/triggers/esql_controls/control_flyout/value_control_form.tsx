@@ -346,7 +346,7 @@ export function ValueControlForm({
             >
               <ESQLValuesPreview
                 values={selectedValues.map((v) => v.label)}
-                previewColumns={queryColumns}
+                columns={queryColumns}
                 previewError={esqlQueryErrors?.[0]}
                 updateQuery={updateQuery}
               />

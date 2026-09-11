@@ -22,17 +22,18 @@ import { ChooseColumnPopover } from './choose_column_popover';
 export const ESQLValuesPreview: React.FC<{
   // The raw values returned by the query — shown as badges or a range stat
   values: string[] | number[];
-  previewColumns: ESQLColumn[];
+  // Columns returned by the query — used to detect multi-column errors and determine value type
+  columns: ESQLColumn[];
   previewError?: Error;
   updateQuery: (column: string) => void;
   selectedControlType?: DataControlType;
-}> = ({ values, previewError, previewColumns, updateQuery, selectedControlType }) => {
+}> = ({ values, previewError, columns, updateQuery, selectedControlType }) => {
   const isEmpty = useMemo(() => values.length === 0, [values]);
 
-  const multiColumnResult = useMemo(() => previewColumns.length > 1, [previewColumns]);
+  const multiColumnResult = useMemo(() => columns.length > 1, [columns]);
   const singleColumn = useMemo(
-    () => (previewColumns.length === 1 ? previewColumns[0] : null),
-    [previewColumns]
+    () => (columns.length === 1 ? columns[0] : null),
+    [columns]
   );
 
   const range = useMemo(() => {
@@ -75,11 +76,11 @@ export const ESQLValuesPreview: React.FC<{
           id="esqlUtils.valuesPreview.multiColumnErrorBody"
           defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {statsBy} to narrow your query down."
           values={{
-            totalColumns: previewColumns.length,
+            totalColumns: columns.length,
             statsBy: <EuiCode>STATS BY</EuiCode>,
           }}
         />
-        <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
+        <ChooseColumnPopover columns={columns} updateQuery={updateQuery} />
       </EuiCallOut>
     );
   }
