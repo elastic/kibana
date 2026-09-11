@@ -1323,7 +1323,8 @@ export class DashboardApp {
   async createUrlDrilldown(
     name: string,
     url: string,
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value',
+    openInNewTab = false
   ) {
     await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
     await this.page.testSubj.locator('drilldownNameInput').fill(name);
@@ -1336,7 +1337,24 @@ export class DashboardApp {
     await this.page.keyboard.press(selectAll);
     await this.page.keyboard.type(url);
 
+    if (openInNewTab) {
+      await this.page.testSubj.click('urlDrilldownAdditionalOptions');
+      await this.page.testSubj.click('urlDrilldownOpenInNewTab');
+    }
+
     await this.selectDrilldownTriggerAndSubmit(trigger);
+  }
+
+  /** Selects a tab while inline-editing a Discover embeddable. */
+  async selectDiscoverEmbeddableTab(tabLabel: string) {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditSelectTabAction');
+    const tabPicker = this.page.testSubj.locator('discoverEmbeddableInlineEditSelectTabPopover');
+    await tabPicker.getByRole('button', { name: tabLabel, exact: true }).click();
+  }
+
+  /** Applies pending inline edits to a Discover embeddable. */
+  async applyDiscoverEmbeddableInlineEdits() {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditApplyButton');
   }
 
   // ============================================================

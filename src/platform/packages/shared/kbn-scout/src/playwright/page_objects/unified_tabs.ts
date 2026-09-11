@@ -341,6 +341,21 @@ export class UnifiedTabs {
     await this.hideTabPreview();
   }
 
+  /** Closes a tab identified by its visible label. */
+  async closeTabByName(name: string) {
+    const tab = this.getTabsBar().getByRole('tab', { name, exact: true });
+    const tabTestSubj = await tab.getAttribute('data-test-subj');
+    if (!tabTestSubj) {
+      throw new Error(`Tab "${name}" is missing a data-test-subj attribute`);
+    }
+
+    const tabId = tabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    await tab.hover();
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.closeTabBtnPrefix}${tabId}`);
+    await tab.waitFor({ state: 'hidden' });
+    await this.hideTabPreview();
+  }
+
   async restoreRecentlyClosedTab(index: number) {
     await this.openTabsBarMenu();
     const tabs = await this.getRecentlyClosedTabs().all();
