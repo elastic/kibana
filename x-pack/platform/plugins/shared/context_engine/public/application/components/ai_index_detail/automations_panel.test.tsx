@@ -82,6 +82,7 @@ const summariesResult = (
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
