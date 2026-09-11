@@ -11,9 +11,10 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
-import { ListPageTestProviders } from '../../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
 
+const mockLocators = createMockLocators();
 const mockNavigateToUrl = jest.fn();
 const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn();
@@ -196,7 +197,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
 
 const renderTable = () =>
   render(
-    <ListPageTestProviders>
+    <ListPageTestProviders locators={mockLocators}>
       <ActionPoliciesTable />
     </ListPageTestProviders>
   );
@@ -257,9 +258,7 @@ describe('ActionPoliciesTable', () => {
     await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
     await user.click(screen.getByTestId('createActionPolicyButton'));
 
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/action_policies/create'
-    );
+    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({ page: 'create' });
   });
 
   it('opens agent chat from the header create split button', async () => {
@@ -697,9 +696,9 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       await user.click(screen.getByTestId('createActionPolicyCard'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/alertingV2/action_policies/create'
-      );
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({
+        page: 'create',
+      });
     });
 
     it('opens agent chat from the empty state create-with-agent card', async () => {

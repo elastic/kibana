@@ -42,6 +42,7 @@ export const EVALS_TRACING_PROJECT_TRACES_URL =
 export const EVALS_DATASETS_URL = `${EVALS_INTERNAL_URL}/datasets` as const;
 export const EVALS_DATASET_URL = `${EVALS_DATASETS_URL}/{datasetId}` as const;
 export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as const;
+export const EVALS_DATASET_COPY_URL = `${EVALS_DATASET_URL}/_copy` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 export const EVALS_DATASET_RESOLVE_URL = `${EVALS_DATASETS_URL}/_resolve` as const;
