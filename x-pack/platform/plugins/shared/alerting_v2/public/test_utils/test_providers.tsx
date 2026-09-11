@@ -14,7 +14,39 @@ import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mock
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import { LocatorProvider, type AlertingV2Locators } from '../application/locator_context';
+import type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from '../locators';
+
+const createMockLocator = <P extends SerializableRecord>() => {
+  const m = sharePluginMock.createLocator<P>();
+  m.useUrl.mockReturnValue('/mock-locator-url');
+  m.getUrl.mockResolvedValue('/mock-locator-url');
+  m.getRedirectUrl.mockReturnValue('/mock-locator-url');
+  return m;
+};
+
+export const createMockLocators = (): AlertingV2Locators => ({
+  rulesLocators: createMockLocator<AlertingV2RulesLocatorParams>(),
+  ruleLibraryLocators: createMockLocator<AlertingV2RuleLibraryLocatorParams>(),
+  episodesLocators: createMockLocator<AlertingV2EpisodesLocatorParams>(),
+  actionPolicyLocators: createMockLocator<AlertingV2ActionPoliciesLocatorParams>(),
+  executionHistoryLocators: createMockLocator<AlertingV2ExecutionHistoryLocatorParams>(),
+});
+
+export function MockLocatorProvider({
+  children,
+  locators = createMockLocators(),
+}: PropsWithChildren<{ locators?: AlertingV2Locators }>) {
+  return <LocatorProvider locators={locators}>{children}</LocatorProvider>;
+}
 
 export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {
   return {
@@ -33,22 +65,44 @@ export const createTestQueryClient = () =>
     },
   });
 
+export const createHookTestProviders = ({
+  locators = createMockLocators(),
+}: {
+  locators?: AlertingV2Locators;
+} = {}): React.ComponentType<PropsWithChildren> => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return ({ children }) => (
+    <MockLocatorProvider locators={locators}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </MockLocatorProvider>
+  );
+};
+
 export type TestProvidersProps = PropsWithChildren<{
   services?: AlertEpisodesKibanaServices;
   queryClient?: QueryClient;
+  locators?: AlertingV2Locators;
 }>;
 
 export function TestProviders({
   children,
   services = createDefaultServicesMock(),
   queryClient = createTestQueryClient(),
+  locators = createMockLocators(),
 }: TestProvidersProps) {
   return (
-    <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>{children}</I18nProvider>
-      </QueryClientProvider>
-    </KibanaContextProvider>
+    <LocatorProvider locators={locators}>
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>{children}</I18nProvider>
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    </LocatorProvider>
   );
 }
 
@@ -62,14 +116,21 @@ export function ListPageTestProviders({
   children,
   queryClient = createTestQueryClient(),
   initialEntries,
-}: PropsWithChildren<{ queryClient?: QueryClient; initialEntries?: string[] }>) {
+  locators = createMockLocators(),
+}: PropsWithChildren<{
+  queryClient?: QueryClient;
+  initialEntries?: string[];
+  locators?: AlertingV2Locators;
+}>) {
   return (
-    <MockChromeContextProvider>
-      <I18nProvider>
-        <MemoryRouter initialEntries={initialEntries}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </MemoryRouter>
-      </I18nProvider>
-    </MockChromeContextProvider>
+    <LocatorProvider locators={locators}>
+      <MockChromeContextProvider>
+        <I18nProvider>
+          <MemoryRouter initialEntries={initialEntries}>
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          </MemoryRouter>
+        </I18nProvider>
+      </MockChromeContextProvider>
+    </LocatorProvider>
   );
 }

@@ -59,11 +59,16 @@ const completeState: InvestigationState = {
   recommendations: [
     {
       title: 'Roll back checkout deployment',
+      confidence: 0.95,
       description: 'Revert commit abc123 and monitor error rate.',
     },
   ],
   blind_spots: [
-    { title: 'Missing trace coverage', description: 'No spans for payment gateway calls.' },
+    {
+      title: 'Missing trace coverage',
+      confidence: 0.8,
+      description: 'No spans for payment gateway calls.',
+    },
   ],
 };
 
@@ -152,6 +157,9 @@ describe('EventInvestigation', () => {
       'aria-selected',
       'true'
     );
+    expect(screen.getByText('95%')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
+    expect(screen.getByText('92%')).toBeInTheDocument();
 
     const chatButton = screen.getByTestId('nightshiftInvestigationFlyoutChatButton');
     expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
@@ -392,6 +400,7 @@ describe('EventInvestigation', () => {
         recommendations: [
           {
             title: 'Roll back checkout deployment',
+            confidence: 0.95,
             description: longRecommendationDescription,
           },
         ],

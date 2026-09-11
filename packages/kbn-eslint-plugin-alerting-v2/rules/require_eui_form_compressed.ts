@@ -77,6 +77,6 @@ export const RequireEuiFormCompressed: Rule.RuleModule = {
           });
         }
       },
-    };
+    } as unknown as Rule.RuleListener;
   },
 };
