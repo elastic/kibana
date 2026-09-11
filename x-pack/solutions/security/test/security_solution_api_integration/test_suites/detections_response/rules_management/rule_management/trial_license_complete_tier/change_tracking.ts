@@ -294,9 +294,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.items).toHaveLength(1);
 
+        const username = await utils.getUsername();
+
         const [item] = body.items;
         expect(item.action).toBe('rule_import');
-        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.user).toEqual({ name: username });
         expect(item.old_values).toBeNull();
         expect(item.metadata?.bulk_count).toBe(1);
         expect(item.rule).toMatchObject({
@@ -347,9 +349,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.items).toHaveLength(1);
 
+        const username = await utils.getUsername();
+
         const [item] = body.items;
         expect(item.action).toBe('rule_import');
-        expect(item.user).toEqual({ name: 'elastic' });
+        expect(item.user).toEqual({ name: username });
         expect(item.old_values).toBeNull();
         expect(item.metadata?.bulk_count).toBe(1);
         expect(item.rule).toMatchObject({
@@ -403,9 +407,11 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.total).toBe(2);
         expect(body.items).toHaveLength(2);
 
+        const username = await utils.getUsername();
+
         const [imported, created] = body.items;
         expect(imported.action).toBe('rule_import');
-        expect(imported.user).toEqual({ name: 'elastic' });
+        expect(imported.user).toEqual({ name: username });
         expect(imported.metadata?.bulk_count).toBe(1);
         expect(imported.rule).toMatchObject({
           id: rule.id,
