@@ -107,7 +107,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages } from './epm/packages';
-import { getAgentsByKuery } from './agents';
+import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
