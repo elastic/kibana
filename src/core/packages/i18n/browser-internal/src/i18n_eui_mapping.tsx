@@ -1310,6 +1310,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
+    'euiTimeWindowButtons.label': i18n.translate('core.euiTimeWindowButtons.label', {
+      defaultMessage: 'Time window controls',
+      description: 'ARIA legend for the SuperDatePicker time window shift and zoom buttons',
+    }),
     'euiTimeWindowButtons.invalidShiftLabel': i18n.translate(
       'core.euiTimeWindowButtons.invalidShiftLabel',
       { defaultMessage: 'Cannot shift invalid time window' }

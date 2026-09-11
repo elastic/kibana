@@ -59,9 +59,9 @@ describe('alerting_v2 config schema', () => {
   });
 
   describe('rules.maxScheduledPerMinute', () => {
-    it('defaults to 400', () => {
+    it('defaults to 32000 (the v1 hosted budget; serverless overrides to 400)', () => {
       const config = configSchema.validate({});
-      expect(config.rules.maxScheduledPerMinute).toBe(400);
+      expect(config.rules.maxScheduledPerMinute).toBe(32000);
     });
 
     it('rejects negative values', () => {

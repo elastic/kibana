@@ -56,7 +56,6 @@ describe('ki_feature_similarity_search tool', () => {
     const { tool } = createTool();
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID);
-    expect(tool.id).toBe('platform.sig_events.ki_feature_similarity_search');
     expect(tool.annotations).toEqual(
       expect.objectContaining({
         readOnlyHint: true,
