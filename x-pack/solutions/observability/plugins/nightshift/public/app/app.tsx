@@ -31,12 +31,13 @@ import { NightshiftHeader } from './header';
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { application } = useKibana().services;
+  const { application, nightshiftInvestigations } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
 
   const [size, setSize] = useState<InvestigationListPageSize>(INVESTIGATION_LIST_PAGE_SIZES[0]);
-  const { data, error, isFetching, isLoading, refetch } = useFetchInvestigations({ size });
+  const { data, error, isFetching, isInitialLoading, refetch } = useFetchInvestigations({ size });
+  const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
 
   const investigations = useMemo(() => data?.results ?? [], [data]);
   const selectedInvestigationId = useMemo(
@@ -68,8 +69,8 @@ export function NightshiftApp(): React.ReactElement {
   );
 
   usePageReady({
-    isReady: !isLoading && !error,
-    isRefreshing: isFetching && !isLoading,
+    isReady: !isInitialLoading && !error,
+    isRefreshing: isFetching && !isInitialLoading,
     customMetrics: {
       key1: 'investigation_count',
       value1: investigations.length,
@@ -88,8 +89,8 @@ export function NightshiftApp(): React.ReactElement {
 
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.
-  if (!isLoading && error && !data) {
-    if (isHttpNotFoundError(error)) {
+  if (!isInvestigationsAvailable || (!isInitialLoading && error && !data)) {
+    if (!isInvestigationsAvailable || isHttpNotFoundError(error)) {
       return (
         <EuiCallOut
           announceOnMount
@@ -120,7 +121,7 @@ export function NightshiftApp(): React.ReactElement {
       `}
     >
       <NightshiftHeader
-        isLoading={isLoading}
+        isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
       />
