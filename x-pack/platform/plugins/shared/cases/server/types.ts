@@ -58,7 +58,6 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { CasesClient } from './client';
 import type { GetCasesClientOptions } from './client/types';
-import type { CasesWorkflowRunContext } from './client/workflows/operations';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
@@ -107,7 +106,6 @@ export interface CasesServerStartDependencies {
 
 export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
-  getCasesWorkflowRunContext: () => Promise<CasesWorkflowRunContext>;
 }
 
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{

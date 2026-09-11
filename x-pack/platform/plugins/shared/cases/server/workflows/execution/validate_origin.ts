@@ -121,8 +121,9 @@ const getDefaultTargets = ({
     return [{ id: savedObjectId }];
   }
 
-  // Pair each id with its corresponding index positionally, using the raw arrays so that
-  // compaction of empties/non-strings in one array can never shift an index onto the wrong id.
+  // Pair each id with its corresponding index using the same rule as normalizeDocumentResponse
+  // and getAndValidateIndexedAttachmentInfo: a scalar metadata.index broadcasts to every id,
+  // an array pairs 1-to-1, and a length mismatch (array case) drops the whole attachment.
   // `toStringArray` is deliberately NOT used here — it filters entries, which would corrupt the
   // positional relationship.
   const rawAttachmentId = attachment.attachmentId;
@@ -132,15 +133,16 @@ const getDefaultTargets = ({
   const broadcastIndex = isNonEmptyString(rawIndex) ? rawIndex : undefined;
   const rawIndices = Array.isArray(rawIndex) ? rawIndex : [];
 
-  return rawIds.flatMap((rawId, position) => {
-    if (!isNonEmptyString(rawId)) {
-      // Skip empty or non-string ids rather than emitting a target with no meaningful identity.
-      return [];
-    }
+  const validIds = rawIds.filter(isNonEmptyString);
+  // Drop the whole attachment when indices are provided as an array that doesn't pair 1-to-1 with
+  // ids — an ambiguous pairing cannot produce reliable targets. This mirrors normalizeDocumentResponse.
+  if (!broadcastIndex && rawIndices.length > 0 && validIds.length !== rawIndices.length) {
+    return [];
+  }
+
+  return validIds.map((rawId, position) => {
     const candidateIndex = broadcastIndex ?? rawIndices[position];
-    return [
-      isNonEmptyString(candidateIndex) ? { id: rawId, index: candidateIndex } : { id: rawId },
-    ];
+    return isNonEmptyString(candidateIndex) ? { id: rawId, index: candidateIndex } : { id: rawId };
   });
 };
 
@@ -177,10 +179,9 @@ const resolveAttachmentOrigin = ({
         resolveUnifiedAttachmentType(attachment, theCase.owner) === origin.attachmentType
     )
     .flatMap((attachment) => {
-      // Skip attachments that cannot be converted (e.g. legacy alert comments with mismatched
-      // alertId/index array lengths). This mirrors the behaviour of `normalizeDocumentResponse`
-      // in `server/client/attachments/get.ts`, which also skips rather than throws so that one
-      // malformed sibling does not prevent a valid attachment from being targeted.
+      // Skip attachments that cannot be converted to unified format (e.g. attachments whose saved
+      // object schema is incompatible). One malformed sibling must not prevent a valid attachment
+      // from being targeted.
       let unifiedAttachment: UnifiedAttachmentState;
       try {
         unifiedAttachment = toUnifiedAttachmentPayload({
@@ -222,15 +223,19 @@ const resolveAttachmentOrigin = ({
         `Attachment target "${id}" of type "${origin.attachmentType}" does not belong to case "${theCase.id}".`
       );
     }
-    // Reject ambiguous cases where the same id is attached under different indices — an activity
-    // log entry records only one index (from targets[0]), so picking one silently would be wrong.
-    const uniqueIndices = new Set(matches.map((t) => t.index));
+    // Reject ambiguous cases where the same id is attached under different *defined* indices.
+    // An activity log entry records only one index, so picking silently would be wrong.
+    // Omit undefined from the set: a target may legitimately resolve both with and without an
+    // index (e.g. a positionally-absent index in `getDefaultTargets`), and only a true conflict
+    // between two distinct non-null index values is genuinely ambiguous.
+    const uniqueIndices = new Set(matches.map((t) => t.index).filter((i) => i !== undefined));
     if (uniqueIndices.size > 1) {
       throw Boom.badRequest(
         `Attachment target "${id}" of type "${origin.attachmentType}" is attached to case "${theCase.id}" under multiple indices.`
       );
     }
-    return matches[0];
+    // Prefer the match that carries a defined index so the activity row records the real index.
+    return matches.find((t) => t.index !== undefined) ?? matches[0];
   });
 
   return { targets };
@@ -254,7 +259,7 @@ const validateDefaultTargetAlignment = ({
   selectedAlerts: DocumentPair[];
   selectedDocuments: DocumentPair[];
 }): void => {
-  const selection = selectedAlerts.length > 0 ? selectedAlerts : selectedDocuments;
+  const selection = [...selectedAlerts, ...selectedDocuments];
   if (selection.length === 0) {
     throw Boom.badRequest('Attachment workflow origins require selected alert or document inputs.');
   }

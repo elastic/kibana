@@ -10,7 +10,6 @@ import { createCaseError } from '../../common/error';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { WorkflowOrigin, WorkflowPayload } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
-import { ensureAuthorizedToRunWorkflow } from '../cases/ensure_authorized_to_run_workflow';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 
 export interface PreflightWorkflowExecutionArgs {
@@ -18,14 +17,14 @@ export interface PreflightWorkflowExecutionArgs {
 }
 
 export interface RecordWorkflowExecutionArgs {
-  caseIds: string[];
+  /**
+   * Pre-fetched and pre-authorized entities returned by `ensureAuthorizedToRunWorkflow`.
+   * The function writes exactly one user action per entity; callers must not supply entities
+   * that have not already been authorized through that call.
+   */
+  entities: Array<{ id: string; owner: string }>;
   workflow: WorkflowPayload;
   origin?: WorkflowOrigin;
-  /**
-   * Pre-fetched and pre-authorized entities from `ensureAuthorizedToRunWorkflow`. When provided
-   * the function skips the redundant `getCases` + `ensureAuthorized` round-trips.
-   */
-  entities?: Array<{ id: string; owner: string }>;
 }
 
 /**
@@ -63,15 +62,12 @@ export const preflightWorkflowExecution = async (
 };
 
 /**
- * Records a workflow execution user action in the case activity log for each requested case.
- *
- * Pass `entities` (from `ensureAuthorizedToRunWorkflow`) to skip the redundant `getCases` and
- * `ensureAuthorized` round-trips — authorization is all-or-nothing and has already run. When
- * `entities` is absent the function fetches and re-authorizes itself so the function remains safe
- * to call from any context.
+ * Records a workflow execution user action in the case activity log for each authorized entity.
+ * Callers must supply `entities` from a prior `ensureAuthorizedToRunWorkflow` call — the function
+ * writes exactly one user action per entity without re-checking authorization.
  */
 export const recordWorkflowExecution = async (
-  { caseIds, workflow, origin, entities: preAuthorizedEntities }: RecordWorkflowExecutionArgs,
+  { entities, workflow, origin }: RecordWorkflowExecutionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -80,12 +76,9 @@ export const recordWorkflowExecution = async (
     services: { userActionService },
   } = clientArgs;
 
-  try {
-    // Reuse entities already fetched and authorized by ensureAuthorizedToRunWorkflow, or delegate
-    // to the same all-or-nothing authorization path when called without them.
-    const entities =
-      preAuthorizedEntities ?? (await ensureAuthorizedToRunWorkflow({ ids: caseIds }, clientArgs));
+  const caseIds = entities.map(({ id }) => id);
 
+  try {
     // Build one user action per case in a single bulk write.
     const userActions = entities.map(({ id: caseId, owner }) => ({
       type: UserActionTypes.workflow,
