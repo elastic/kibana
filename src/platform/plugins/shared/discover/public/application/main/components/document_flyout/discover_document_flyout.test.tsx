@@ -55,6 +55,11 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('@kbn/react-kibana-mount', () => ({
+  ...jest.requireActual('@kbn/react-kibana-mount'),
+  toMountPoint: jest.fn((node) => node),
+}));
+
 const [inResultsHit, outOfResultsHit] = esHitsMock;
 const expandedDocRef: ExpandedDocRef = {
   id: outOfResultsHit._id,
@@ -172,7 +177,7 @@ describe('DiscoverDocumentFlyout', () => {
     toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     const shareButton = await screen.findByRole('button', {
-      name: 'Share direct link',
+      name: 'Copy link',
     });
     expectShareButtonEbt(shareButton, 'linkable');
 
@@ -219,7 +224,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
 
     expect(shortUrlClient.createWithLocator).toHaveBeenCalledWith({
       locator: services.locator,
@@ -240,7 +245,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+    await user.click(await screen.findByRole('button', { name: 'Copy link' }));
 
     await waitFor(() => {
       expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
@@ -262,10 +267,12 @@ describe('DiscoverDocumentFlyout', () => {
     },
     {
       name: 'an ES|QL result without document metadata',
-      query: { esql: 'FROM logs' },
+      query: { esql: 'FROM logs-* | WHERE host.name == "web-01"' },
       expandedDoc: buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock),
       linkability: ExpandedDocLinkability.EsqlMissingMetadata,
       ebtDetail: 'esqlMissingMetadata',
+      toastLifeTimeMs: Infinity,
+      expectedToastText: 'FROM logs-* METADATA _id, _index',
     },
     {
       name: 'a result from a transformational ES|QL query',
@@ -276,16 +283,30 @@ describe('DiscoverDocumentFlyout', () => {
     },
   ])(
     'explains why a link cannot be copied for $name',
-    async ({ query, expandedDoc, linkability, ebtDetail }) => {
-      const { services } = await setup({
+    async ({ query, expandedDoc, linkability, ebtDetail, toastLifeTimeMs, expectedToastText }) => {
+      const services = createDiscoverServicesMock();
+      let toastText: React.ReactNode = null;
+
+      jest.mocked(services.toastNotifications.addWarning).mockImplementation((toast) => {
+        if (typeof toast === 'string') {
+          toastText = toast;
+        } else if (typeof toast.text === 'string' || React.isValidElement(toast.text)) {
+          toastText = toast.text;
+        }
+
+        return { id: 'test-toast' };
+      });
+
+      await setup({
         hits: esHitsMock,
         query,
+        services,
         initialFlyout: { type: 'openDocument', document: expandedDoc },
       });
-      const disabledReason = getExpandedDocLinkDisabledReason(linkability);
 
+      const disabledReason = getExpandedDocLinkDisabledReason(linkability);
       const shareButton = await screen.findByRole('button', {
-        name: `Cannot share direct link: ${disabledReason}`,
+        name: `Cannot copy link: ${disabledReason}`,
       });
 
       expectShareButtonEbt(shareButton, ebtDetail);
@@ -293,10 +314,14 @@ describe('DiscoverDocumentFlyout', () => {
       fireEvent.click(shareButton);
 
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith({
-        title: 'Cannot share direct link',
-        text: disabledReason,
+        title: 'Link not copied',
+        text: toastText,
         'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
+        toastLifeTimeMs,
       });
+
+      renderWithI18n(<>{toastText}</>);
+      expect(screen.getByText(expectedToastText ?? disabledReason ?? '')).toBeVisible();
       expect(copyToClipboard).not.toHaveBeenCalled();
     }
   );
@@ -508,7 +533,7 @@ describe('DiscoverDocumentFlyout', () => {
     expect(screen.getByTestId('docViewerFlyoutNotFound')).toHaveTextContent(expandedDocRef.index);
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /copy link/i })).not.toBeInTheDocument();
   });
 
   it('shows an error state when the document cannot be fetched', async () => {
@@ -656,7 +681,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
 
-    expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /copy link/i })).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
