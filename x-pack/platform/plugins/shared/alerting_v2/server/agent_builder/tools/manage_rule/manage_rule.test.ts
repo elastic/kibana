@@ -76,7 +76,7 @@ describe('manageRuleTool', () => {
     expect(tool.description).toContain('Use `set_metadata`');
     expect(tool.description).toContain('Use `set_dashboards`');
     expect(tool.description).toContain('Use `set_runbook`');
-    expect(tool.description).toContain('data: { dashboardId }');
+    expect(tool.description).toContain('data: { dashboard_id }');
     expect(tool.description).not.toMatch(/1\. set_metadata/);
   });
 
@@ -277,14 +277,14 @@ describe('manageRuleTool', () => {
 
       const addCall = ctx.attachments.add.mock.calls[0][0] as {
         data: {
-          artifacts?: Array<{ id: string; type: string; data: { dashboardId?: string } }>;
+          artifacts?: Array<{ id: string; type: string; data: { dashboard_id?: string } }>;
         };
       };
       expect(addCall.data.artifacts).toEqual([
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-abc' },
+          data: { dashboard_id: 'dash-abc' },
         },
       ]);
 

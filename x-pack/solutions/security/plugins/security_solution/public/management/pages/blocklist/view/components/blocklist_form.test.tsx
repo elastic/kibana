@@ -331,6 +331,47 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
+  it('should convert an entered signature value when switching operator then field', async () => {
+    const signatureValues = ['signer-a', 'signer-b'];
+    const { rerender } = render(
+      createProps({
+        item: createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry('file.Ext.code_signature', signatureValues)],
+        }),
+      })
+    );
+
+    await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByRole('option', { name: /^is$/i }));
+
+    const afterOperatorChange = onChangeSpy.mock.calls.at(-1)?.[0] as
+      | ArtifactFormComponentOnChangeCallbackProps
+      | undefined;
+    expect(afterOperatorChange?.item.entries).toEqual([
+      {
+        field: 'file.Ext.code_signature',
+        operator: ListOperatorEnum.INCLUDED,
+        type: ListOperatorTypeEnum.MATCH,
+        value: signatureValues.join(','),
+      },
+    ]);
+
+    rerender(<BlockListForm {...createProps({ item: afterOperatorChange?.item })} />);
+
+    await user.click(screen.getByTestId('blocklist-form-field-select'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByRole('option', { name: /path/i }));
+
+    const afterFieldChange = onChangeSpy.mock.calls.at(-1)?.[0] as
+      | ArtifactFormComponentOnChangeCallbackProps
+      | undefined;
+    expect(afterFieldChange?.item.entries).toEqual([
+      createEntry('file.path.caseless', signatureValues),
+    ]);
+  });
+
   it('should correctly create `file.path.caseless` when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');

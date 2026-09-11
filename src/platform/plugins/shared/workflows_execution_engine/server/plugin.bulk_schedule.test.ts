@@ -62,6 +62,11 @@ jest.mock('./concurrency/concurrency_manager', () => ({
 }));
 
 import { checkLicense } from './lib/check_license';
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+  UNKNOWN_EXECUTION_IDENTITY,
+} from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 
@@ -558,5 +563,65 @@ describe('bulkScheduleWorkflow', () => {
       expect.any(Object),
       expect.objectContaining({ request, cloneApiKey: true })
     );
+  });
+
+  it('fails a single execution without scheduling when no identity is attached', async () => {
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+
+    const result = await pluginStart.executeWorkflow(
+      createWorkflow('wf-no-identity'),
+      { spaceId: 'default' },
+      request
+    );
+
+    expect(result).toEqual({ workflowExecutionId: expect.any(String) });
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-no-identity',
+        status: 'failed',
+        executedBy: UNKNOWN_EXECUTION_IDENTITY,
+        error: {
+          type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+          message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+        },
+      }),
+      { refresh: false }
+    );
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+    mockAreWorkflowsEnabled.mockResolvedValue(new Map([['default:wf-a', true]]));
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [{ workflow: createWorkflow('wf-a'), context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          workflowId: 'wf-a',
+          status: 'failed',
+          executedBy: UNKNOWN_EXECUTION_IDENTITY,
+          error: {
+            type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+            message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+          },
+        }),
+      ],
+      { refresh: 'wait_for' }
+    );
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    expect(result).toEqual([
+      {
+        status: 'scheduled',
+        workflowExecutionId: expect.any(String),
+      },
+    ]);
   });
 });

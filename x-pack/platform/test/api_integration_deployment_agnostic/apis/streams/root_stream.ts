@@ -75,12 +75,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
         });
 
-        it('Should not allow fields changes', async () => {
-          // Fetch the current stream definition to get the real field definitions
+        it('Should allow adding custom field mappings', async () => {
           const currentStream = await getStream(apiClient, rootStream);
-
-          // Type assertion: we know root streams are wired streams
           const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+          const customFieldName =
+            rootStream === 'logs.otel' ? 'attributes.organization_id' : 'organization.id';
 
           const body: Streams.WiredStream.UpsertRequest = {
             ...emptyAssets,
@@ -94,7 +93,105 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ...wiredStream.stream.ingest.wired,
                   fields: {
                     ...wiredStream.stream.ingest.wired.fields,
-                    'log.level': {
+                    [customFieldName]: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body);
+          expect(response).to.have.property('acknowledged', true);
+
+          const updatedStream = (await getStream(
+            apiClient,
+            rootStream
+          )) as Streams.WiredStream.GetResponse;
+          expect(updatedStream.stream.ingest.wired.fields).to.have.property(customFieldName);
+          expect(updatedStream.stream.ingest.wired.fields[customFieldName].type).to.eql('keyword');
+        });
+
+        it('Should inherit custom root mappings to child streams', async () => {
+          const childName = `${rootStream}.orginherit`;
+          const customFieldName =
+            rootStream === 'logs.otel' ? 'attributes.organization_id' : 'organization.id';
+
+          await putStream(apiClient, childName, {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: '',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: { steps: [] },
+                settings: {},
+                wired: {
+                  routing: [],
+                  fields: {},
+                },
+                failure_store: { inherit: {} },
+              },
+            },
+          });
+
+          const childStream = (await getStream(
+            apiClient,
+            childName
+          )) as Streams.WiredStream.GetResponse;
+          expect(childStream.inherited_fields).to.have.property(customFieldName);
+          expect(childStream.inherited_fields[customFieldName].type).to.eql('keyword');
+          expect(childStream.inherited_fields[customFieldName].from).to.eql(rootStream);
+
+          await deleteStream(apiClient, childName);
+        });
+
+        it('Should not allow removing built-in fields', async () => {
+          const currentStream = await getStream(apiClient, rootStream);
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+          const { '@timestamp': _removed, ...fieldsWithoutTimestamp } =
+            wiredStream.stream.ingest.wired.fields;
+
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: '',
+              ingest: {
+                ...wiredStream.stream.ingest,
+                processing: omit(wiredStream.stream.ingest.processing, 'updated_at'),
+                wired: {
+                  ...wiredStream.stream.ingest.wired,
+                  fields: fieldsWithoutTimestamp,
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body, 400);
+          expect(response).to.have.property(
+            'message',
+            'Desired stream state is invalid: Cannot remove built-in field [@timestamp] from the root stream'
+          );
+        });
+
+        it('Should not allow overriding built-in field mappings', async () => {
+          const currentStream = await getStream(apiClient, rootStream);
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+          const builtInField = rootStream === 'logs.otel' ? 'severity_text' : 'log.level';
+
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description: '',
+              ingest: {
+                ...wiredStream.stream.ingest,
+                processing: omit(wiredStream.stream.ingest.processing, 'updated_at'),
+                wired: {
+                  ...wiredStream.stream.ingest.wired,
+                  fields: {
+                    ...wiredStream.stream.ingest.wired.fields,
+                    [builtInField]: {
                       type: 'boolean',
                     },
                   },
@@ -103,10 +200,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           };
           const response = await putStream(apiClient, rootStream, body, 400);
-
           expect(response).to.have.property(
             'message',
-            'Desired stream state is invalid: Root stream fields cannot be changed'
+            `Desired stream state is invalid: Cannot override built-in field [${builtInField}] on the root stream`
           );
         });
 

@@ -7,10 +7,10 @@
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getResearchAgentPrompt } from './research_agent';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
-  convertPreviousRounds: jest.fn().mockResolvedValue([['human', 'history']]),
+  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
 // Unique marker present only in the injected notification, not in the static pointer prose.
@@ -23,7 +23,7 @@ describe('getResearchAgentPrompt', () => {
     ({
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -65,7 +65,7 @@ describe('getResearchAgentPrompt', () => {
 
     const systemMessage = (messages[0] as ['system', string])[1];
     expect(systemMessage).not.toContain('Current date');
-    expect(convertPreviousRounds).toHaveBeenCalledWith(
+    expect(prepareMessages).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
   });
@@ -161,7 +161,13 @@ describe('getResearchAgentPrompt', () => {
   it('omits the AI indices section when AI index instructions are disabled', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        configuration: { instructions: '', aiIndices: ['elastic'] },
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
         experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       })
     );
@@ -172,7 +178,13 @@ describe('getResearchAgentPrompt', () => {
   it('renders the AI indices section with the running space when the agent declares one', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        configuration: { instructions: '', aiIndices: ['elastic'] },
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },
         spaceId: 'marketing',
       })
@@ -180,15 +192,36 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
 
     expect(system).toContain('## AI INDICES');
+    expect(system).toContain('`sml-main`');
     expect(system).toContain('This conversation runs in the space `marketing`');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
+  });
+
+  it('renders every catalog entry, including custom AI indices', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic', 'my-custom'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+            { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
+          ],
+        },
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('`sml-main`');
+    expect(system).toContain('`ai-index-idx-custom` — Support tickets');
   });
 
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],

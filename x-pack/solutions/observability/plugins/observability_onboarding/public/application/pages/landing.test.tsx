@@ -143,8 +143,6 @@ const memberHrefs = () =>
 
 beforeEach(() => {
   mockOpenCollectionCallbacks.length = 0;
-  // Call counts are assertions here, not just plumbing: one test asserts the page
-  // never asks for packages.
   mockUseAvailablePackages.mockClear();
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,
@@ -212,20 +210,19 @@ const createPackagesFeed = (initialCards: unknown[]) => {
   return { usePackages, publish };
 };
 
-// The page reads Fleet's browser-exposed experimental flags to decide whether
-// collection cards can arrive at all, so tests state that as service config.
-const fleetServiceWithGrouping = (enabled: boolean) =>
-  ({
-    config: { enableExperimental: enabled ? ['enableIntegrationCollectionTiles'] : [] },
-    authz: { fleet: { readSettings: true } },
-  } as unknown as NonNullable<ObservabilityOnboardingAppServices['fleet']>);
+// Stock and serverless config omit the grouping flag; Fleet still groups by
+// default. Tests use that empty config so a gate that required the flag to be
+// named would fail here the same way production does.
+const fleetService = {
+  config: {},
+  authz: { fleet: { readSettings: true } },
+} as unknown as NonNullable<ObservabilityOnboardingAppServices['fleet']>;
 
 const createObservabilityServices = (
-  coreStart: ReturnType<typeof coreMock.createStart>,
-  { grouping = true }: { grouping?: boolean } = {}
+  coreStart: ReturnType<typeof coreMock.createStart>
 ): ObservabilityOnboardingAppServices => ({
   ...coreStart,
-  fleet: fleetServiceWithGrouping(grouping),
+  fleet: fleetService,
   share: sharePluginMock.createStartContract(),
   context: {
     isDev: false,
@@ -255,17 +252,13 @@ const createObservabilityServices = (
   } as ObservabilityPublicStart,
 });
 
-const renderWithFlag = (
-  enabled: boolean,
-  initialPath: string = '/',
-  { grouping = true }: { grouping?: boolean } = {}
-) => {
+const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
   createCallApi(coreStart);
-  const services = createObservabilityServices(coreStart, { grouping });
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
       <KibanaContextProvider services={services}>
@@ -296,7 +289,7 @@ const renderLandingWithRouter = (enabled: boolean) => {
   );
 };
 
-const renderLandingAtPathWithSearch = (initialPath: string) => {
+const renderLandingAtPath = (initialPath: string) => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? true : fallback
@@ -421,36 +414,43 @@ describe('LandingPage search (V2, Variant A)', () => {
 });
 
 describe('LandingPage package loading (V2)', () => {
-  // Grid badges are the only reason to hold packages without a search, so a page
-  // that cannot show them should leave the registry alone.
-  it('asks Fleet for packages on arrival when grouping is on', async () => {
+  it('asks Fleet for packages on arrival', async () => {
     renderWithFlag(true);
 
     await waitFor(() => expect(mockUseAvailablePackages).toHaveBeenCalled());
   });
 
-  it('asks for nothing on arrival when grouping is off', async () => {
-    renderWithFlag(true, '/', { grouping: false });
+  it('shows the docker variants badge on arrival', async () => {
+    renderWithFlag(true);
 
-    await screen.findByTestId('addDataPageV2');
-    await act(async () => {});
-    expect(mockUseAvailablePackages).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.getByTestId('observabilityOnboardingIntegrationTile-docker')).toHaveTextContent(
+        '2 variants'
+      )
+    );
   });
 });
 
 describe('LandingPage collection chooser (V2)', () => {
   // The path a refresh and a return from a member's detail page both take.
   it('opens the chooser named in the url once packages load', async () => {
-    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    renderLandingAtPath('/?search=nginx&collection=nginx');
 
     expect(await screen.findByTestId('collectionFlyout')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Nginx' })).toBeInTheDocument();
   });
 
+  it('opens the chooser named in the url without a search', async () => {
+    renderLandingAtPath('/?collection=docker');
+
+    expect(await screen.findByTestId('collectionFlyout')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Docker' })).toBeInTheDocument();
+  });
+
   // The url names the open chooser, so a refresh or a shared link restores it.
   it('writes the collection param when the chooser opens', async () => {
     const user = userEvent.setup();
-    renderLandingAtPathWithSearch('/?search=nginx');
+    renderLandingAtPath('/?search=nginx');
 
     await user.click(screen.getByTestId('stubOpenCollection'));
     expect(await screen.findByTestId('collectionFlyout')).toBeInTheDocument();
@@ -460,7 +460,7 @@ describe('LandingPage collection chooser (V2)', () => {
   // Without the strip, a refresh after closing would resurrect the chooser.
   it('drops the collection param when the chooser closes, keeping the search', async () => {
     const user = userEvent.setup();
-    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    renderLandingAtPath('/?search=nginx&collection=nginx');
     await screen.findByTestId('collectionFlyout');
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
@@ -472,7 +472,7 @@ describe('LandingPage collection chooser (V2)', () => {
   // Covers the back button, a deep link, and the search term changing.
   it('closes the chooser when the collection param leaves the url', async () => {
     const user = userEvent.setup();
-    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    renderLandingAtPath('/?search=nginx&collection=nginx');
     await screen.findByTestId('collectionFlyout');
 
     await user.click(screen.getByTestId('stubDropCollectionParam'));
@@ -482,7 +482,7 @@ describe('LandingPage collection chooser (V2)', () => {
   it('follows refreshed package data while the chooser is open', async () => {
     const feed = createPackagesFeed(collectionCards);
     mockUseAvailablePackages.mockImplementation(feed.usePackages);
-    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    renderLandingAtPath('/?search=nginx&collection=nginx');
     await screen.findByTestId('collectionFlyout');
     expect(screen.getAllByTestId(/^collectionVariantRow-/)).toHaveLength(2);
 
@@ -497,7 +497,7 @@ describe('LandingPage collection chooser (V2)', () => {
   // has to outlive the url updates that typing produces.
   it('keeps the open-chooser callback stable while the search term changes', async () => {
     const user = userEvent.setup();
-    renderLandingAtPathWithSearch('/?search=nginx');
+    renderLandingAtPath('/?search=nginx');
     await screen.findByTestId('observabilitySearchResultsStub');
     const [firstCallback] = mockOpenCollectionCallbacks;
 
@@ -515,7 +515,7 @@ describe('LandingPage collection chooser (V2)', () => {
   // The grid stays visible during a search, so a tile can be clicked with one running.
   it('keeps the active search in member links of a chooser opened from a curated tile', async () => {
     const user = userEvent.setup();
-    renderLandingAtPathWithSearch('/?search=docker');
+    renderLandingAtPath('/?search=docker');
     await waitForCollectionTile('observabilityOnboardingIntegrationTile-docker');
 
     await user.click(screen.getByTestId('observabilityOnboardingIntegrationTile-docker'));

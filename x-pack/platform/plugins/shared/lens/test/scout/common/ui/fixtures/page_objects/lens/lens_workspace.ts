@@ -341,6 +341,25 @@ export class LensWorkspace {
     return JSON.parse(debugJson) as DebugState;
   }
 
+  /**
+   * Reads `@elastic/charts` debug state from a chart rendered inside a dashboard panel.
+   * Unlike {@link getCurrentChartDebugState}, it does not scope its locators under
+   * `lnsWorkspace`, which does not exist on dashboards. Requires `enableElasticChartDebug`
+   * (or equivalent init script) before navigation.
+   */
+  async getDashboardChartDebugState(chartTestSubj: string): Promise<DebugState> {
+    const chart = this.page.testSubj.locator(chartTestSubj);
+    // Elastic Charts status node — no Lens data-test-subj; same signal as the editor helper.
+    await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+      state: 'attached',
+    });
+    const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+    if (!debugJson) {
+      throw new Error('Elastic charts debugState not found — enable chart debug before navigation');
+    }
+    return JSON.parse(debugJson) as DebugState;
+  }
+
   async openMessageList() {
     await this.messageListTrigger.click();
   }
@@ -515,8 +534,16 @@ export class LensWorkspace {
     await tag.dispatchEvent('click');
   }
 
-  async setInputValue(testSubj: string, value: string) {
-    const input = this.page.locator(`input[data-test-subj="${testSubj}"]`);
+  /**
+   * Fills a controlled Lens input and waits for React to accept the value.
+   *
+   * Pass `inputType` when the test-subj is not unique: `EuiRange` with `showInput` stamps it on
+   * both the range slider and the number input, so the bare selector is a strict-mode violation.
+   */
+  async setInputValue(testSubj: string, value: string, options?: { inputType?: string }) {
+    const typeSelector = options?.inputType ? `[type="${options.inputType}"]` : '';
+    const selector = `input[data-test-subj="${testSubj}"]${typeSelector}`;
+    const input = this.page.locator(selector);
     await input.waitFor({ state: 'visible' });
     await input.scrollIntoViewIfNeeded();
     // fill() clears first (avoids "07747" from incomplete selection on number inputs).
@@ -537,24 +564,22 @@ export class LensWorkspace {
     // Sync until React controlled value matches (readiness wait — assertions stay in specs).
     // waitForFunction has no Scout default (unlike expect/actionTimeout).
     await this.page.waitForFunction(
-      ({ subj, expected }) => {
-        const el = document.querySelector(
-          `input[data-test-subj="${subj}"]`
-        ) as HTMLInputElement | null;
+      ({ sel, expected }) => {
+        const el = document.querySelector(sel) as HTMLInputElement | null;
         return el?.value === expected;
       },
-      { subj: testSubj, expected: value },
+      { sel: selector, expected: value },
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await input.press('Tab');
     // Blur completed — callers must poll a UI side effect (chart debug, dimension label)
     // before closing flyouts; useDebouncedValue (~256ms) has no DOM readiness hook here.
     await this.page.waitForFunction(
-      (subj) => {
-        const el = document.querySelector(`input[data-test-subj="${subj}"]`);
+      (sel) => {
+        const el = document.querySelector(sel);
         return el != null && document.activeElement !== el;
       },
-      testSubj,
+      selector,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }

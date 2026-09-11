@@ -14,6 +14,7 @@ import {
   buildOutputSummary,
   buildStepParamsSummary,
 } from './build_step_schema_for_agent';
+import { CONNECTOR_ID_MAX_LENGTH } from '../..';
 import { getShape } from '../../common/utils/zod/get_shape';
 import type { BaseConnectorContract } from '../../types/v1';
 import type { BaseStepDefinition } from '../step_definition_types';
@@ -56,6 +57,14 @@ describe('build_step_schema_for_agent', () => {
       const shape = getShape(schema);
 
       expect(shape).toHaveProperty('connector-id');
+      expect(
+        schema.safeParse({
+          name: 'notify',
+          type: 'test.connector',
+          with: { index: 'logs' },
+          'connector-id': 'x'.repeat(CONNECTOR_ID_MAX_LENGTH + 1),
+        }).success
+      ).toBe(false);
     });
 
     it('adds optional connector-id when hasConnectorId is "optional"', () => {

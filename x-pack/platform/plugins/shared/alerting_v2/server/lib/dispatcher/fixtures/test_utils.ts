@@ -9,6 +9,8 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { DEFAULT_GROUPING_MODE } from '../constants';
 import {
+  DispatchOutcome,
+  DispatchPlan,
   EpisodeScan,
   EpisodeTriage,
   PolicyCatalog,
@@ -19,6 +21,7 @@ import {
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
+  ActionGroupId,
   ActionPolicy,
   ActionPolicyId,
   AlertEpisode,
@@ -61,7 +64,7 @@ export function createDispatcherPipelineInput(
 export interface DispatcherPipelineStateOverrides
   extends Omit<
     Partial<DispatcherPipelineState>,
-    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage'
+    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
   > {
   input?: DispatcherPipelineInput;
   episodes?: AlertEpisode[];
@@ -70,13 +73,29 @@ export interface DispatcherPipelineStateOverrides
   suppressed?: SuppressedEpisode[];
   rules?: Map<RuleId, Rule>;
   policies?: Map<ActionPolicyId, ActionPolicy>;
+  dispatch?: ActionGroup[];
+  throttled?: ActionGroup[];
+  dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  dispatchFailures?: DispatchFailure[];
 }
 
 export function createDispatcherPipelineState(
   state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const { episodes, suppressions, dispatchable, suppressed, rules, policies, input, ...rest } =
-    state;
+  const {
+    episodes,
+    suppressions,
+    dispatchable,
+    suppressed,
+    rules,
+    policies,
+    dispatch,
+    throttled,
+    dispatchedExecutions,
+    dispatchFailures,
+    input,
+    ...rest
+  } = state;
   return {
     ...rest,
     ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
@@ -91,6 +110,23 @@ export function createDispatcherPipelineState(
       : {}),
     ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
     ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    ...(dispatch || throttled || dispatchable
+      ? {
+          plan: DispatchPlan.of({
+            toDispatch: dispatch ?? [],
+            throttled: throttled ?? [],
+            dispatchable: dispatchable ?? [],
+          }),
+        }
+      : {}),
+    ...(dispatchedExecutions || dispatchFailures
+      ? {
+          outcome: DispatchOutcome.of({
+            executionsByGroup: dispatchedExecutions ?? new Map(),
+            failures: dispatchFailures ?? [],
+          }),
+        }
+      : {}),
     input: input ?? createDispatcherPipelineInput(),
   };
 }

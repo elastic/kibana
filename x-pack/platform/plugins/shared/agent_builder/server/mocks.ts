@@ -21,6 +21,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     agents: {
       register: jest.fn(),
       registerType: jest.fn(),
+      registerAiIndexResolver: jest.fn(),
     },
     tools: {
       register: jest.fn(),
@@ -79,6 +80,15 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       getScopedClient: jest.fn().mockResolvedValue({
         get: jest.fn(),
         list: jest.fn(),
+      }),
+    },
+    attachments: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        create: jest.fn(),
+        get: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
       }),
     },
     conversationTemplates: {

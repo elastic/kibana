@@ -6,11 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 import type {
   ChatAgentEvent,
   AgentExecutionMode,
-  InteractivityConfig,
+  InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
@@ -30,7 +33,7 @@ export interface RunAgentParams {
   /**
    * Interactivity configuration for this run,
    */
-  interactive?: InteractivityConfig;
+  interactive?: InteractivityConfigInput;
   /**
    * The id of the parent execution that spawned this one, when applicable.
    */
@@ -73,6 +76,10 @@ export interface RunAgentParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning level forwarded to the inference plugin.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
   /**
    * Optional CPS project routing expression to scope this run's search tools to a specific projects
    */

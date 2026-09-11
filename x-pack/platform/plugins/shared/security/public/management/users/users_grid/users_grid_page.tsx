@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -13,13 +13,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  EuiSwitch,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { ApplicationStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +32,20 @@ import type { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers } from '../components';
 import type { UserAPIClient } from '../user_api_client';
 import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from '../user_utils';
+
+const usersListTitle = i18n.translate('xpack.security.management.users.usersTitle', {
+  defaultMessage: 'Users',
+});
+
+const createUserButtonLabel = i18n.translate(
+  'xpack.security.management.users.createNewUserButtonLabel',
+  { defaultMessage: 'Create user' }
+);
+
+const showReservedUsersLabel = i18n.translate(
+  'xpack.security.management.users.showReservedUsersLabel',
+  { defaultMessage: 'Show reserved users' }
+);
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
@@ -83,7 +96,7 @@ export class UsersGridPage extends Component<Props, State> {
       permissionDenied: false,
       filter,
       includeReservedUsers,
-      isTableLoading: false,
+      isTableLoading: true,
       pageIndex: Number.isFinite(pageIndex) && pageIndex >= 0 ? pageIndex : 0,
       pageSize:
         Number.isFinite(pageSize) &&
@@ -217,7 +230,6 @@ export class UsersGridPage extends Component<Props, State> {
     };
     const search = {
       toolsLeft: this.renderToolsLeft(),
-      toolsRight: this.renderToolsRight(),
       defaultQuery: this.state.filter,
       box: {
         incremental: true,
@@ -250,35 +262,32 @@ export class UsersGridPage extends Component<Props, State> {
       };
     };
 
+    const showCreateInHeader = !this.props.readOnly && !this.state.isTableLoading;
+    const menu: AppHeaderMenu = {
+      switch: {
+        id: 'showReservedUsers',
+        label: showReservedUsersLabel,
+        checked: this.state.includeReservedUsers,
+        onChange: this.onIncludeReservedUsersChange,
+        'data-test-subj': 'showReservedUsersSwitch',
+      },
+      ...(showCreateInHeader
+        ? {
+            primaryActionItem: {
+              id: 'createUser',
+              label: createUserButtonLabel,
+              iconType: 'plusCircle',
+              testId: 'createUserButton',
+              href: this.props.history.createHref({ pathname: '/create' }),
+              run: () => this.props.history.push('/create'),
+            },
+          }
+        : {}),
+    };
+
     return (
       <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.security.management.users.usersTitle"
-              defaultMessage="Users"
-            />
-          }
-          data-test-subj="securityUsersPageHeader"
-          rightSideItems={
-            this.props.readOnly
-              ? undefined
-              : [
-                  <EuiButton
-                    data-test-subj="createUserButton"
-                    {...reactRouterNavigate(this.props.history, `/create`)}
-                    fill
-                    iconType="plusCircle"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.users.createNewUserButtonLabel"
-                      defaultMessage="Create user"
-                    />
-                  </EuiButton>,
-                ]
-          }
-        />
+        <AppHeader title={usersListTitle} menu={menu} spacing="bleed" />
 
         <EuiSpacer size="l" />
 
@@ -399,32 +408,20 @@ export class UsersGridPage extends Component<Props, State> {
     );
   }
 
-  private onIncludeReservedUsersChange = (e: EuiSwitchEvent) => {
+  private onIncludeReservedUsersChange = (includeReservedUsers: boolean) => {
     this.setState(
       {
-        includeReservedUsers: e.target.checked,
+        includeReservedUsers,
         pageIndex: 0,
-        visibleUsers: this.getVisibleUsers(this.state.users, this.state.filter, e.target.checked),
+        visibleUsers: this.getVisibleUsers(
+          this.state.users,
+          this.state.filter,
+          includeReservedUsers
+        ),
       },
       () => this.updateUrlParams()
     );
   };
-
-  private renderToolsRight() {
-    return (
-      <EuiSwitch
-        data-test-subj="showReservedUsersSwitch"
-        label={
-          <FormattedMessage
-            id="xpack.security.management.users.showReservedUsersLabel"
-            defaultMessage="Show reserved users"
-          />
-        }
-        checked={this.state.includeReservedUsers}
-        onChange={this.onIncludeReservedUsersChange}
-      />
-    );
-  }
 
   private getUserStatusBadges = (user: User) => {
     const enabled = user.enabled;

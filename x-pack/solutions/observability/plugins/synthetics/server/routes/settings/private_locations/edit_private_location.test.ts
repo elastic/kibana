@@ -8,14 +8,16 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { editPrivateLocationRoute } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
+import { updatePrivateLocationMonitors } from './helpers';
+import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
   getPrivateLocations: jest.fn().mockResolvedValue([]),
   getPrivateLocationsForNamespaces: jest.fn().mockResolvedValue([]),
 }));
 
-// Only the privilege-check path (assertions below) is under test here; the
-// actual monitor-label sync is exercised by helpers.test.ts.
+// Privilege-check and sharding-sync wiring are under test here; the actual
+// monitor rewrite is exercised by helpers.test.ts.
 jest.mock('./helpers', () => {
   const actual = jest.requireActual('./helpers');
   return {
@@ -64,7 +66,10 @@ const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false
 };
 
 describe('editPrivateLocationRoute isAgentSharding', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
 
   const stubRepo = (updatedAttributes = {}, existingAttributes = {}) => {
     const location = {
@@ -90,6 +95,12 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: true }));
     expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationId: 'loc-1',
+        newLocationLabel: 'Loc',
+      })
+    );
   });
 
   it('rejects enabling isAgentSharding without an Enterprise license', async () => {
@@ -118,6 +129,12 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: false }));
     expect(result).not.toHaveProperty('isAgentSharding');
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationId: 'loc-1',
+        newLocationLabel: 'Loc',
+      })
+    );
   });
 
   it('does not write when the body omits isAgentSharding and other fields', async () => {
@@ -127,6 +144,7 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     await editPrivateLocationRoute().handler(routeContext);
 
     expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
   });
 
   it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
@@ -177,6 +195,29 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     expect(edit).not.toHaveBeenCalled();
   });
 
+  it('returns forbidden when turning sharding off and a monitor belongs to an unauthorized space', async () => {
+    const edit = stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
+    const { routeContext, response } = makeRouteContext({ isAgentSharding: false });
+    const forbidden = { statusCode: 403 };
+    response.forbidden.mockReturnValue(forbidden as any);
+    routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([
+      { namespaces: ['default', 'restricted-space'] },
+    ]);
+    routeContext.server.security = {
+      authz: {
+        checkSavedObjectsPrivilegesWithRequest: jest
+          .fn()
+          .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
+      },
+    };
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(result).toBe(forbidden);
+    expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+  });
+
   it('checks privileges across every monitor namespace, deduped, not just the first', async () => {
     const edit = stubRepo({ label: 'New label' });
     const { routeContext } = makeRouteContext({ label: 'New label' });
@@ -201,5 +242,106 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     // deduped: 'space-a' appears in both monitors but must only be checked once
     expect(spacesArg).toHaveLength(2);
     expect(edit).toHaveBeenCalled();
+  });
+
+  it('rewrites monitors before persisting a sharding change so a failed rewrite leaves the flag unchanged', async () => {
+    const edit = stubRepo({ isAgentSharding: true });
+    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalled();
+    expect(edit).toHaveBeenCalled();
+    expect((updatePrivateLocationMonitors as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      edit.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not persist isAgentSharding when monitor rewrite throws', async () => {
+    const edit = stubRepo({ isAgentSharding: true });
+    (updatePrivateLocationMonitors as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
+    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
+
+    await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('fleet down');
+    expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('passes the intended sharding flag to monitor rewrite before the saved object is persisted', async () => {
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
+      {
+        id: 'loc-2',
+        label: 'Other',
+        agentPolicyId: 'ap-2',
+        isServiceManaged: false,
+        isAgentSharding: true,
+      },
+    ]);
+    stubRepo({ isAgentSharding: true });
+    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allPrivateLocations: [
+          expect.objectContaining({ id: 'loc-1', isAgentSharding: true }),
+          expect.objectContaining({ id: 'loc-2', isAgentSharding: true }),
+        ],
+      })
+    );
+  });
+
+  it('clears isAgentSharding on the rewritten location before persisting a disable', async () => {
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      {
+        id: 'loc-1',
+        label: 'Loc',
+        agentPolicyId: 'ap-1',
+        isServiceManaged: false,
+        isAgentSharding: true,
+      },
+      {
+        id: 'loc-2',
+        label: 'Other',
+        agentPolicyId: 'ap-2',
+        isServiceManaged: false,
+        isAgentSharding: true,
+      },
+    ]);
+    stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
+    const { routeContext } = makeRouteContext({ isAgentSharding: false });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allPrivateLocations: [
+          expect.objectContaining({ id: 'loc-1', isAgentSharding: false }),
+          expect.objectContaining({ id: 'loc-2', isAgentSharding: true }),
+        ],
+      })
+    );
+  });
+
+  it('passes the new label to monitor rewrite before the saved object is persisted', async () => {
+    (getPrivateLocations as jest.Mock).mockResolvedValue([
+      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
+      { id: 'loc-2', label: 'Other', agentPolicyId: 'ap-2', isServiceManaged: false },
+    ]);
+    stubRepo({ label: 'Barcelona' });
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newLocationLabel: 'Barcelona',
+        allPrivateLocations: [
+          expect.objectContaining({ id: 'loc-1', label: 'Barcelona' }),
+          expect.objectContaining({ id: 'loc-2', label: 'Other' }),
+        ],
+      })
+    );
   });
 });

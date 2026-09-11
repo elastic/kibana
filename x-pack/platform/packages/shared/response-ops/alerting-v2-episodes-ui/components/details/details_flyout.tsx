@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -39,7 +38,7 @@ import { AlertEpisodeTimelineSection } from './timeline_section';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
-import { EpisodeActionsBar } from '../episode_actions_bar';
+import { EpisodeFooterActionMenu } from './footer_action_menu';
 
 type TabId = 'overview' | 'related' | 'timeline' | 'metadata' | 'runbook';
 
@@ -101,16 +100,6 @@ export const AlertEpisodeDetailsFlyout = ({
           responsive={false}
           alignItems="center"
         >
-          {compatibleActions.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EpisodeActionsBar
-                actions={compatibleActions}
-                episodes={episodes}
-                onSuccess={invalidateEpisodeQueries}
-                iconOnly
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.FLYOUT_CLOSE} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -118,6 +107,7 @@ export const AlertEpisodeDetailsFlyout = ({
                 color="text"
                 onClick={onClose}
                 aria-label={i18n.FLYOUT_CLOSE}
+                data-test-subj="alertingV2EpisodeFlyoutCloseIcon"
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -289,14 +279,14 @@ export const AlertEpisodeDetailsFlyout = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
-                data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
-                iconType="eye"
-              >
-                {i18n.FLYOUT_VIEW_DETAILS}
-              </EuiButton>
+              <EpisodeFooterActionMenu
+                actions={compatibleActions}
+                episodes={episodes}
+                viewDetailsHref={services.http.basePath.prepend(
+                  getAlertEpisodeDetailsPath(episodeId)
+                )}
+                onSuccess={invalidateEpisodeQueries}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

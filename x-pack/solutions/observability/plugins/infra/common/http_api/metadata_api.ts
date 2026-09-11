@@ -116,6 +116,7 @@ export const InfraMetadataInfoRT = rt.partial({
 
 export const InfraMetadataFieldsRT = rt.partial({
   fields: rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), rt.null, rt.undefined])),
+  ignored_field_values: rt.record(rt.string, rt.union([rt.string, rt.array(rt.string)])),
 });
 
 export const InfraMetadataInfoResponseRT = rt.partial({

@@ -107,14 +107,25 @@ export const useWorkflowExecutionsGridSelection = (
     };
   }, [selectedExecutionIdSet, visibleExecutionIds]);
 
-  return {
-    selectedExecutionIds,
-    selectedExecutionsCount: selectedExecutionIds.length,
-    isExecutionSelected,
-    toggleExecutionSelection,
-    selectAllVisibleExecutions,
-    deselectVisibleExecutions,
-    clearAllSelectedExecutions,
-    getVisibleSelectionState,
-  };
+  return useMemo(
+    () => ({
+      selectedExecutionIds,
+      selectedExecutionsCount: selectedExecutionIds.length,
+      isExecutionSelected,
+      toggleExecutionSelection,
+      selectAllVisibleExecutions,
+      deselectVisibleExecutions,
+      clearAllSelectedExecutions,
+      getVisibleSelectionState,
+    }),
+    [
+      clearAllSelectedExecutions,
+      deselectVisibleExecutions,
+      getVisibleSelectionState,
+      isExecutionSelected,
+      selectAllVisibleExecutions,
+      selectedExecutionIds,
+      toggleExecutionSelection,
+    ]
+  );
 };
