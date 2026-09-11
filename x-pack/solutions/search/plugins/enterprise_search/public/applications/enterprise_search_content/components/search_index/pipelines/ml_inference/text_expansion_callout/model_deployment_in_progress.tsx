@@ -7,8 +7,9 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import type { TextExpansionCallOutState } from './text_expansion_callout';
 
@@ -16,8 +17,7 @@ export const ModelDeploymentInProgress = ({
   dismiss,
   isDismissable,
 }: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
-  <EuiCallOut
-    color="success"
+  <KbnSuccessCallout
     heading="h3"
     title={i18n.translate(
       'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingTitle',

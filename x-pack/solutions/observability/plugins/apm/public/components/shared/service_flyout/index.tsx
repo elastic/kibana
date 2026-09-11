@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -22,6 +24,23 @@ import {
 import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
 import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
+
+const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
+  'latencyChart',
+  'throughput',
+  'errorRate',
+  'transactionBreakdownChart',
+  'coldstartRate',
+]
+  .map((id) => `body [id^='echTooltipPortalMainTooltip__${id}']`)
+  .join(',\n  ');
+
+// The flyout's own chart tooltips must render above the flyout. Elastic Charts
+// derives the portal z-index from the chart's ancestors, which breaks when the
+// flyout is stacked over another flyout (e.g. Discover's doc viewer) — the
+// portal ends up below the flyout and the tooltip is invisible.
+const SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR =
+  "body [id^='echTooltipPortalMainTooltip__serviceFlyout']";
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -56,11 +75,19 @@ interface ServiceFlyoutProps {
     rangeFrom: string;
     rangeTo: string;
     transactionType?: string;
+    /** Initial latency aggregation type, e.g. inherited from a rule or the host page. */
+    latencyAggregationType?: LatencyAggregationType;
   };
   telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
   historyKey?: symbol;
   contextActions?: ServiceFlyoutContextValue['contextActions'];
+  /**
+   * Set by hosts whose surrounding UI is computed from raw documents (Discover):
+   * the key metric charts then stay ES|QL over raw documents for every schema,
+   * so they agree with the host instead of the rollup-based APM chart APIs.
+   */
+  preferDocumentBasedCharts?: boolean;
 }
 
 export function ServiceFlyout({
@@ -71,8 +98,11 @@ export function ServiceFlyout({
   onClose,
   historyKey,
   contextActions,
+  preferDocumentBasedCharts,
 }: ServiceFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
+  const { latencyAggregationType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
@@ -115,57 +145,79 @@ export function ServiceFlyout({
   };
 
   return (
-    <ServiceFlyoutContextProvider
-      value={{
-        deps,
-        contextActions,
-        service,
-        capabilities,
-        indices,
-        filters: {
-          environment: flyoutEnvironment,
-          setEnvironment: setFlyoutEnvironment,
-          rangeFrom: flyoutRange.rangeFrom,
-          rangeTo: flyoutRange.rangeTo,
-          setRange: setFlyoutRange,
-          refreshToken,
-          onRefresh: () => setRefreshToken(Date.now()),
-          transactionType: flyoutTransactionType,
-          setTransactionType: setFlyoutTransactionType,
-        },
-      }}
-    >
-      <TimeRangeMetadataContextProvider
-        uiSettings={deps.core.uiSettings}
-        start={start}
-        end={end}
-        kuery=""
-        useSpanName={false}
+    <>
+      <Global
+        styles={css`
+          ${preferDocumentBasedCharts
+            ? // Document-based hosts (Discover) show the flyout's ES|QL Lens charts,
+              // whose Elastic Charts ids are generated — they can't be targeted
+              // individually, so raise all chart tooltips while the flyout is open.
+              `body [id^='echTooltipPortalMainTooltip__'] {
+                z-index: ${Number(euiTheme.levels.toast)} !important;
+              }`
+            : ''}
+          ${SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS} {
+            z-index: ${Number(euiTheme.levels.flyout) - 1} !important;
+          }
+          ${SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR} {
+            z-index: ${Number(euiTheme.levels.toast)} !important;
+          }
+        `}
+      />
+      <ServiceFlyoutContextProvider
+        value={{
+          deps,
+          contextActions,
+          service,
+          capabilities,
+          indices,
+          preferDocumentBasedCharts,
+          filters: {
+            environment: flyoutEnvironment,
+            setEnvironment: setFlyoutEnvironment,
+            rangeFrom: flyoutRange.rangeFrom,
+            rangeTo: flyoutRange.rangeTo,
+            setRange: setFlyoutRange,
+            refreshToken,
+            onRefresh: () => setRefreshToken(Date.now()),
+            transactionType: flyoutTransactionType,
+            setTransactionType: setFlyoutTransactionType,
+            latencyAggregationType,
+          },
+        }}
       >
-        <ResponsiveFlyout
-          data-test-subj="serviceFlyout"
-          flyoutMenuDisplayMode="always"
-          onClose={onClose}
-          ownFocus={false}
-          size="m"
-          paddingSize="m"
-          resizable
-          minWidth={660}
-          session="start"
-          historyKey={historyKey}
-          flyoutMenuProps={{ title }}
-          aria-labelledby={titleId}
+        <TimeRangeMetadataContextProvider
+          uiSettings={deps.core.uiSettings}
+          start={start}
+          end={end}
+          kuery=""
+          useSpanName={false}
         >
-          <ServiceFlyoutHeader
-            title={title}
-            titleId={titleId}
-            selectedTabId={selectedTabId}
-            onSelectedTabIdChange={setSelectedTabId}
-          />
-          <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-          <ServiceFlyoutFooter />
-        </ResponsiveFlyout>
-      </TimeRangeMetadataContextProvider>
-    </ServiceFlyoutContextProvider>
+          <ResponsiveFlyout
+            data-test-subj="serviceFlyout"
+            flyoutMenuDisplayMode="always"
+            onClose={onClose}
+            ownFocus={false}
+            size="m"
+            paddingSize="m"
+            resizable
+            minWidth={660}
+            session="start"
+            historyKey={historyKey}
+            flyoutMenuProps={{ title }}
+            aria-labelledby={titleId}
+          >
+            <ServiceFlyoutHeader
+              title={title}
+              titleId={titleId}
+              selectedTabId={selectedTabId}
+              onSelectedTabIdChange={setSelectedTabId}
+            />
+            <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
+            <ServiceFlyoutFooter />
+          </ResponsiveFlyout>
+        </TimeRangeMetadataContextProvider>
+      </ServiceFlyoutContextProvider>
+    </>
   );
 }

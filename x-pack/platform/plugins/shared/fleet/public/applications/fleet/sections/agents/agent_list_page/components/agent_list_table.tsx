@@ -96,11 +96,11 @@ const PolicyCell = React.memo<{
 );
 
 const CpuCell = React.memo<{ agent: Agent; agentPolicy: AgentPolicy | undefined }>(
-  ({ agent, agentPolicy }) => <>{formatAgentCPU(agent.metrics, agentPolicy)}</>
+  ({ agent, agentPolicy }) => <>{formatAgentCPU(agent.metrics, agentPolicy, agent)}</>
 );
 
 const MemoryCell = React.memo<{ agent: Agent; agentPolicy: AgentPolicy | undefined }>(
-  ({ agent, agentPolicy }) => <>{formatAgentMemory(agent.metrics, agentPolicy)}</>
+  ({ agent, agentPolicy }) => <>{formatAgentMemory(agent.metrics, agentPolicy, agent)}</>
 );
 
 const LastCheckinCell = React.memo<{ lastCheckin: string | undefined }>(({ lastCheckin }) =>

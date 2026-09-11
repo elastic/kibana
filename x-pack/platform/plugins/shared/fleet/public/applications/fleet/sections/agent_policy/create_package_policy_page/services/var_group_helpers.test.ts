@@ -5,9 +5,79 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../../../../types';
+import type { PackageInfo, RegistryVarGroup } from '../../../../types';
 
-import { getHiddenVarGroupOptionsForPolicyTemplate } from './var_group_helpers';
+import {
+  getHiddenVarGroupOptionsForDisabledProviders,
+  getHiddenVarGroupOptionsForPolicyTemplate,
+  mergeHiddenVarGroupOptions,
+} from './var_group_helpers';
+
+describe('getHiddenVarGroupOptionsForDisabledProviders', () => {
+  const varGroups: RegistryVarGroup[] = [
+    {
+      name: 'credential_type',
+      title: 'Setup Access',
+      selector_title: 'Preferred method',
+      options: [
+        { name: 'identity_federation', title: 'Identity Federation', vars: [], provider: 'aws' },
+        { name: 'direct_access_key', title: 'Direct Access Keys', vars: [] },
+      ],
+    },
+    {
+      name: 'other_group',
+      title: 'Other',
+      selector_title: 'Other',
+      options: [
+        { name: 'azure_if', title: 'Azure IF', vars: [], provider: 'azure' },
+        { name: 'plain', title: 'Plain', vars: [] },
+      ],
+    },
+  ];
+
+  it('hides options whose provider is disabled, across var_groups', () => {
+    expect(getHiddenVarGroupOptionsForDisabledProviders(varGroups, ['aws', 'azure'])).toEqual({
+      credential_type: ['identity_federation'],
+      other_group: ['azure_if'],
+    });
+  });
+
+  it('only hides options for the disabled providers', () => {
+    expect(getHiddenVarGroupOptionsForDisabledProviders(varGroups, ['aws'])).toEqual({
+      credential_type: ['identity_federation'],
+    });
+  });
+
+  it('keeps a disabled option visible when it is the saved selection for its var_group', () => {
+    expect(
+      getHiddenVarGroupOptionsForDisabledProviders(varGroups, ['aws'], {
+        credential_type: 'identity_federation',
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when no providers are disabled or there are no var_groups', () => {
+    expect(getHiddenVarGroupOptionsForDisabledProviders(varGroups, [])).toBeUndefined();
+    expect(getHiddenVarGroupOptionsForDisabledProviders(undefined, ['aws'])).toBeUndefined();
+    expect(getHiddenVarGroupOptionsForDisabledProviders([], ['aws'])).toBeUndefined();
+  });
+});
+
+describe('mergeHiddenVarGroupOptions', () => {
+  it('unions option names per var_group and dedupes', () => {
+    expect(
+      mergeHiddenVarGroupOptions({ credential_type: ['identity_federation'] }, undefined, {
+        credential_type: ['identity_federation', 'assume_role'],
+        other: ['x'],
+      })
+    ).toEqual({ credential_type: ['identity_federation', 'assume_role'], other: ['x'] });
+  });
+
+  it('returns undefined when every input is empty or undefined', () => {
+    expect(mergeHiddenVarGroupOptions(undefined, undefined)).toBeUndefined();
+    expect(mergeHiddenVarGroupOptions({}, undefined)).toBeUndefined();
+  });
+});
 
 describe('getHiddenVarGroupOptionsForPolicyTemplate', () => {
   const agentlessDeploymentModes = {

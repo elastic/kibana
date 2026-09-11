@@ -19,7 +19,7 @@ test('triggers refresh with interval', () => {
   loop$.subscribe(fn);
 
   jest.advanceTimersByTime(5000);
-  expect(fn).not.toBeCalled();
+  expect(fn).not.toHaveBeenCalled();
 
   start(1000);
 
@@ -216,7 +216,7 @@ test('pauses if page is not visible', () => {
   loop$.subscribe(fn);
 
   jest.advanceTimersByTime(5000);
-  expect(fn).not.toBeCalled();
+  expect(fn).not.toHaveBeenCalled();
 
   start(1000);
 

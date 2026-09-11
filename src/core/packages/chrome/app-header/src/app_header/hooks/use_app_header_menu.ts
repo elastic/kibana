@@ -8,13 +8,13 @@
  */
 
 import { useMemo } from 'react';
-import type { AppMenuStaticItem } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuStaticItem } from '@kbn/app-menu';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
 import { useBasePath, useCanAccessIntegrations } from './chrome';
-import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {
@@ -61,7 +61,7 @@ export const useAppHeaderStaticItems = ({
   const chrome = useChromeService();
   const basePath = useBasePath();
   const canAccessIntegrations = useCanAccessIntegrations();
-  const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
+  const feedbackHandler = useObservable(chrome.help.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {

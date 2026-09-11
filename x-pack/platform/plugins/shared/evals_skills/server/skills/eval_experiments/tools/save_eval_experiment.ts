@@ -11,6 +11,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH, isEvalsOwnedWorkflow } from '@kbn/evals-plugin/common';
 import { generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
+  assertDatasetsVisible,
   buildWorkflowLink,
   errorResult,
   evalExperimentConfigSchema,
@@ -46,12 +47,25 @@ export const saveEvalExperimentTool = (
   schema: saveSchema,
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     try {
-      const { security } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
       if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
         return errorResult(
           'You do not have the manage_evals privilege required to save evaluation experiment workflows in this space.'
         );
       }
+
+      if (!evals.datasetService) {
+        return toErrorResult(
+          new Error('the evals dataset service is unavailable'),
+          'Failed to save experiment workflow'
+        );
+      }
+
+      await assertDatasetsVisible({
+        datasetService: evals.datasetService,
+        spaceId,
+        datasetIds: config.dataset_ids,
+      });
 
       const params = toGenerateParams(config);
       const workflow = generateSavedWorkflowYaml(params);

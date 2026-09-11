@@ -47,6 +47,6 @@ export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_d
 export { getRowHeight } from './src/hooks/use_row_height';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
-export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
+export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';

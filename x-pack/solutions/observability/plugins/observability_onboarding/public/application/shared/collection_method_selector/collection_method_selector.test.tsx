@@ -9,7 +9,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import { CollectionMethodSelector } from './collection_method_selector';
 import type { CollectionMethodOption } from './types';
 
@@ -50,14 +49,12 @@ const renderSelector = (
   render(
     <I18nProvider>
       <MemoryRouter initialEntries={initialEntries}>
-        <CompatRouter>
-          <CollectionMethodSelector
-            legend="Choose collection method"
-            selectedId={selectedId}
-            options={options}
-          />
-          <LocationProbe />
-        </CompatRouter>
+        <CollectionMethodSelector
+          legend="Choose collection method"
+          selectedId={selectedId}
+          options={options}
+        />
+        <LocationProbe />
       </MemoryRouter>
     </I18nProvider>
   );
@@ -95,14 +92,12 @@ describe('CollectionMethodSelector', () => {
     rerender(
       <I18nProvider>
         <MemoryRouter initialEntries={['/host/linux']}>
-          <CompatRouter>
-            <CollectionMethodSelector
-              legend="Choose collection method"
-              selectedId="auto-detect"
-              options={buildOptions()}
-            />
-            <LocationProbe />
-          </CompatRouter>
+          <CollectionMethodSelector
+            legend="Choose collection method"
+            selectedId="auto-detect"
+            options={buildOptions()}
+          />
+          <LocationProbe />
         </MemoryRouter>
       </I18nProvider>
     );

@@ -14,6 +14,7 @@
     "public/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -94,7 +95,8 @@
     "@kbn/cps-utils",
     "@kbn/core-notifications-browser",
     "@kbn/cps-common",
-    "@kbn/mock-idp-utils"
+    "@kbn/mock-idp-utils",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

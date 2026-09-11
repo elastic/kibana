@@ -483,10 +483,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 409 when a template references the field via $ref with a local name alias', async () => {
-        // FAILURE SCENARIO: The template uses { $ref: 'priority', name: 'Custom Label' }.
-        // The `fieldDefinitions` keyword cache stores "Custom Label" as the resolved name.
+        // FAILURE SCENARIO: The template uses { $ref: 'priority', name: 'custom_priority' }.
+        // The `fieldDefinitions` keyword cache stores "custom_priority" as the resolved name.
         // A query against the cache would miss this ref. The hybrid approach (match_phrase
         // pre-filter + YAML parse) finds the $ref: priority value correctly regardless.
+        // The alias must satisfy the authoring charset (letters, digits, underscores) — it
+        // replaces the library field's name and becomes part of the storage key.
         await supertest
           .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
           .set('kbn-xsrf', 'true')
@@ -495,7 +497,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             definition: stringify({
               name: 'Aliased Ref Template',
-              fields: [{ $ref: 'priority', name: 'Custom Priority Label' }],
+              fields: [{ $ref: 'priority', name: 'custom_priority' }],
             }),
             isEnabled: true,
           })

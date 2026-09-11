@@ -357,7 +357,7 @@ describe('expand_template_defaults', () => {
 
       // The caller's .none connector is kept and the debug log makes the drop diagnosable.
       expect(expanded.connector).toEqual(baseRequest.connector);
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Dropping template connector default "deleted-connector"')
       );
     });

@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+import { DatasetTags, DatasetMaturity, RedactedSpaceIds } from '../common_attributes.gen';
 
 export const DatasetExample = lazySchema(() =>
   z.object({
@@ -24,6 +24,7 @@ export const DatasetExample = lazySchema(() =>
     input: z.object({}).catchall(z.unknown()).optional(),
     output: z.object({}).catchall(z.unknown()).optional(),
     metadata: z.object({}).catchall(z.unknown()).optional(),
+    source: z.literal('import').optional(),
     created_at: z.string(),
     updated_at: z.string(),
   })
@@ -47,6 +48,7 @@ export const GetEvaluationDatasetResponse = lazySchema(() =>
     description: z.string(),
     tags: DatasetTags.optional(),
     maturity: DatasetMaturity.optional(),
+    space_ids: RedactedSpaceIds.optional(),
     examples: z.array(DatasetExample),
     created_at: z.string(),
     updated_at: z.string(),

@@ -12,7 +12,9 @@ import {
   isFunctionExpression,
   isIdentifier,
   isInlineCast,
+  isList,
   isParamLiteral,
+  singleItems,
 } from '@elastic/esql';
 import type {
   ESQLAst,
@@ -21,6 +23,7 @@ import type {
   ESQLColumn,
   ESQLFunction,
   ESQLIdentifier,
+  ESQLSingleAstItem,
 } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
@@ -40,6 +43,15 @@ import type {
 import { resolveArgumentTypes } from '../expressions';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
+
+const getArgumentsToValidate = (
+  args: ESQLAstItem[]
+): Array<{ argument: ESQLSingleAstItem; index: number }> =>
+  [...singleItems(args)].flatMap((argument, index) =>
+    isList(argument)
+      ? argument.values.map((value) => ({ argument: value, index }))
+      : [{ argument, index }]
+  );
 
 export function validateFunction({
   fn,
@@ -202,12 +214,11 @@ class FunctionValidator {
 
     // Validate column arguments
     const columnsToValidate: Array<ESQLColumn | ESQLIdentifier> = [];
-    const flatArgs = this.fn.args.flat();
+    const flatArgs = getArgumentsToValidate(this.fn.args);
     const skipUnsupportedOrConflictingColumnValidation = isTypeConversionFunction(
       this.definition.name
     );
-    for (let i = 0; i < flatArgs.length; i++) {
-      const arg = flatArgs[i];
+    for (const { argument: arg, index: i } of flatArgs) {
       if (
         (isColumn(arg) || isIdentifier(arg)) &&
         !(this.definition.name === '=' && i === 0) && // don't validate left-hand side of assignment
@@ -254,9 +265,8 @@ class FunctionValidator {
       ? this.definition?.name
       : undefined;
 
-    const flatArgs = this.fn.args.flat();
-    for (let i = 0; i < flatArgs.length; i++) {
-      const rawArg = flatArgs[i];
+    const flatArgs = getArgumentsToValidate(this.fn.args);
+    for (const { argument: rawArg, index: i } of flatArgs) {
       const arg = removeInlineCasts(rawArg);
 
       if (this.expectsAggregationAt(i)) {

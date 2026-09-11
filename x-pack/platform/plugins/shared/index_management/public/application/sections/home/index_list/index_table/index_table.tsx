@@ -17,8 +17,13 @@ import type { History, Location } from 'history';
 import type { IndicesListColumn } from '@kbn/index-management-shared-types';
 
 import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
+import {
   EuiButton,
-  EuiCallOut,
   EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
@@ -419,9 +424,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
     return (
       <>
         <EuiSpacer />
-        <EuiCallOut
-          iconType="faceSad"
-          color="danger"
+        <KbnDangerCallout
           title={i18n.translate('xpack.idxMgmt.indexTable.invalidSearchErrorMessage', {
             defaultMessage: 'Invalid search: {errorMessage}',
 
@@ -443,22 +446,21 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
     return (
       <>
-        <EuiCallOut
-          iconType="warning"
-          color="warning"
+        <KbnWarningCallout
           data-test-subj="indicesEnrichmentErrorCallout"
           title={i18n.translate('xpack.idxMgmt.indexTable.enrichmentErrorTitle', {
             defaultMessage: 'Some index details could not be loaded',
           })}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.indexTable.enrichmentErrorDescription"
-            defaultMessage="The following data sources failed to load: {sources}."
-            values={{
-              sources: indicesEnrichmentErrors.join(', '),
-            }}
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.idxMgmt.indexTable.enrichmentErrorDescription"
+              defaultMessage="The following data sources failed to load: {sources}."
+              values={{
+                sources: indicesEnrichmentErrors.join(', '),
+              }}
+            />
+          }
+        />
         <EuiSpacer size="m" />
       </>
     );
@@ -590,9 +592,18 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
       const { type, title, message, filter, filterLabel, action } = bannerData;
 
+      const calloutComponents = {
+        primary: KbnInfoCallout,
+        success: KbnSuccessCallout,
+        warning: KbnWarningCallout,
+        danger: KbnDangerCallout,
+      } as const;
+      const CalloutComponent =
+        calloutComponents[type as keyof typeof calloutComponents] ?? KbnInfoCallout;
+
       return (
         <Fragment key={`bannerExtension${i}`}>
-          <EuiCallOut announceOnMount={false} color={type} size="m" title={title}>
+          <CalloutComponent announceOnMount={false} size="m" title={title}>
             {message && <p>{message}</p>}
             {action || filter ? (
               <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -622,7 +633,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                 ) : null}
               </EuiFlexGroup>
             ) : null}
-          </EuiCallOut>
+          </CalloutComponent>
           <EuiSpacer size="m" />
         </Fragment>
       );
@@ -805,7 +816,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
               {this.renderBanners(extensionsService)}
 
-              <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
                     <Route
@@ -855,7 +866,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         isLoading={indicesLoading}
-                        color="success"
                         onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"

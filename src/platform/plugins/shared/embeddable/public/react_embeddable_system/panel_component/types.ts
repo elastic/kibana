@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasPanelCapabilities, PublishesHideBorder } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  PublishesHideBorder,
+  PublishesRendered,
+} from '@kbn/presentation-publishing';
 import type {
   CanLockHoverActions,
   HasParentApi,
@@ -35,6 +39,14 @@ export interface PresentationPanelProps<
   };
   componentProps?: PropsType;
 
+  /**
+   * Set to true when rendering within data-shared-items-container
+   * to enable sharing "data-share-item" attribute for panel.
+   *
+   * isSharedItem is ignored when hideHeader is true
+   */
+  isSharedItem?: boolean;
+
   showShadow?: boolean;
   showBorder?: boolean;
   showBadges?: boolean;
@@ -44,7 +56,6 @@ export interface PresentationPanelProps<
    */
   hideLoader?: boolean;
   hideHeader?: boolean;
-  hideInspector?: boolean;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
@@ -66,9 +77,9 @@ export interface PresentationPanelProps<
   hidePanelChrome?: boolean;
 
   /**
-   * Optional search term to highlight in the panel title
+   * Optional search terms to highlight in the panel title
    */
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }
 
 /**
@@ -80,6 +91,7 @@ export interface DefaultPresentationPanelApi
     Partial<
       PublishesTitle &
         PublishesDataLoading &
+        PublishesRendered &
         PublishesBlockingError &
         PublishesDescription &
         PublishesDisabledActionIds &

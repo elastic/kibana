@@ -245,6 +245,9 @@ describe('config schema', () => {
         "public": Object {},
         "roleManagementEnabled": true,
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": false,
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -1716,6 +1719,38 @@ describe('config schema', () => {
           { serverless: true }
         ).roleManagementEnabled
       ).toEqual(false);
+    });
+  });
+
+  describe('serviceAccounts', () => {
+    it('should not allow xpack.security.serviceAccounts to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            serviceAccounts: { enabled: true },
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[serviceAccounts]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.serviceAccounts.enabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            serviceAccounts: { enabled: true },
+          },
+          { serverless: true }
+        ).serviceAccounts
+      ).toEqual({ enabled: true });
+    });
+
+    it('should be disabled by default inside of the serverless context', () => {
+      expect(ConfigSchema.validate({}, { serverless: true }).serviceAccounts).toEqual({
+        enabled: false,
+      });
     });
   });
 

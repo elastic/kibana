@@ -34,6 +34,11 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/UpsertDatasetExamplePayload'
+                # Only applied when the dataset is created. An upsert against an
+                # existing dataset leaves its spaces alone, so a suite run from
+                # CI can't move a dataset other spaces are reading.
+                space_ids:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/SpaceIds'
               required:
                 - name
                 - description

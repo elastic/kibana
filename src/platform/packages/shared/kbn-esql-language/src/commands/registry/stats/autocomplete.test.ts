@@ -274,7 +274,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']),
             ...getFunctionSignaturesByReturnType(
               Location.STATS_BY,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -569,8 +575,24 @@ describe('STATS Autocomplete', () => {
           );
         });
 
-        it('suggests opening a list after IN in WHERE', async () => {
-          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField IN ', ['($0)']);
+        it('suggests opening a list or subquery after IN in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField IN ', [
+            '($0)',
+            '(FROM $0)',
+            '(ROW $0)',
+            '(TS $0)',
+          ]);
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField NOT IN ', [
+            '($0)',
+            '(FROM $0)',
+            '(ROW $0)',
+            '(TS $0)',
+          ]);
+        });
+
+        it('does not suggest subqueries after IN outside WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) BY keywordField IN ', ['($0)']);
+          await statsExpectSuggestions('FROM a | STATS MIN(b) BY keywordField NOT IN ', ['($0)']);
         });
 
         it('suggests LIKE pattern values after LIKE in WHERE', async () => {
@@ -869,7 +891,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }
@@ -886,7 +914,13 @@ describe('STATS Autocomplete', () => {
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              [
+                'date',
+                'date_nanos',
+                ...ESQL_COMMON_NUMERIC_TYPES,
+                'exponential_histogram',
+                'tdigest',
+              ],
               {
                 scalar: true,
               }

@@ -216,6 +216,119 @@ describe('runExampleEvaluation failure capture', () => {
   });
 });
 
+describe('runExampleEvaluation evaluator model attribution', () => {
+  it('carries each evaluator model from /_evaluate into the ingest body, omitting it for code', async () => {
+    const recorded: RecordedCall[] = [];
+    const judgeModel = { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' };
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return {
+            status: 200,
+            headers: {},
+            body: {
+              results: [
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'correctness',
+                    version: '1',
+                    kind: 'llm',
+                    model: judgeModel,
+                  },
+                  scores: [{ name: 'correctness', score: 1 }],
+                },
+                {
+                  status: 'ok',
+                  evaluator: { name: 'input_tokens', version: '1', kind: 'code' },
+                  scores: [{ name: 'input_tokens', score: 42 }],
+                },
+              ],
+            },
+          };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return { status: 200, headers: {}, body: { ingested: 2, conflicted: 0, failed: [] } };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    const scores = ingestedScoresBody(recorded).scores;
+    expect(
+      scores.map(({ evaluator }: { evaluator: Record<string, unknown> }) => ({
+        name: evaluator.name,
+        kind: evaluator.kind,
+        model: evaluator.model,
+      }))
+    ).toEqual([
+      { name: 'correctness', kind: 'llm', model: judgeModel },
+      { name: 'input_tokens', kind: 'code', model: undefined },
+    ]);
+  });
+
+  it('carries evaluator.direction from /_evaluate into the ingest body', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return {
+            status: 200,
+            headers: {},
+            body: {
+              results: [
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'input_tokens',
+                    version: '1',
+                    kind: 'code',
+                    direction: 'minimize',
+                  },
+                  scores: [{ name: 'input_tokens', score: 42 }],
+                },
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'correctness',
+                    version: '1',
+                    kind: 'llm',
+                    direction: 'maximize',
+                  },
+                  scores: [{ name: 'correctness', score: 1 }],
+                },
+              ],
+            },
+          };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return { status: 200, headers: {}, body: { ingested: 2, conflicted: 0, failed: [] } };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    const scores = ingestedScoresBody(recorded).scores;
+    expect(
+      scores.map(({ evaluator }: { evaluator: Record<string, unknown> }) => ({
+        name: evaluator.name,
+        direction: evaluator.direction,
+      }))
+    ).toEqual([
+      { name: 'input_tokens', direction: 'minimize' },
+      { name: 'correctness', direction: 'maximize' },
+    ]);
+  });
+});
+
 describe('evaluateWorkBatch reference data', () => {
   it("forwards each example's output as reference_data (workflow batch path)", async () => {
     const recorded: RecordedCall[] = [];

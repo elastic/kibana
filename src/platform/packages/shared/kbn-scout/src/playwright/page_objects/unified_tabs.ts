@@ -97,6 +97,11 @@ export class UnifiedTabs {
     return this.getTabs().and(this.page.locator('[aria-selected="true"]'));
   }
 
+  /** Currently selected tab button. */
+  getActiveTab(): Locator {
+    return this.activeTabLocator;
+  }
+
   /**
    * Navigates to a tab by its visible label text and waits for it to become active.
    */

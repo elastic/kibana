@@ -1,10 +1,37 @@
 {
-  "sha1": "ac2d381e4e2397a152a6e96ddd5756a671bf0aeb",
+  "sha1": "80a9a162084ad61fe72097c248c9b34a57ba5dc1",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "7fe1ca7de104f44-2a47ec5f7173cba",
+      "title": "Confirm region selection modal Save opens the confirm region selection modal instead of the legacy confirm modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/confirm_region_selection_modal.spec.ts",
+        "line": 40,
+        "column": 11
+      }
+    },
+    {
+      "id": "7fe1ca7de104f44-69d56e662abfdf1",
+      "title": "Confirm region selection modal an in-use 409 keeps the confirmation open with Issues; ignore and save retries with force",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/confirm_region_selection_modal.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
     {
       "id": "42293a2b206815f-28592778db61d10",
       "title": "EIS Models Page displays page header",
@@ -188,8 +215,8 @@
       }
     },
     {
-      "id": "8dc1b555bb63e06-80dd6e8247f11bc",
-      "title": "External Inference - row actions opens the edit inference flyout from the view endpoint row action",
+      "id": "8dc1b555bb63e06-17923efcbef8144",
+      "title": "External Inference - row actions opens the edit inference flyout from the edit endpoint row action",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -874,8 +901,8 @@
       }
     },
     {
-      "id": "e7575b12bba67de-7f99ea879ab1e36",
-      "title": "Manage Region Preferences modal switching to the Regions tab shows zone accordion panels",
+      "id": "e7575b12bba67de-588f634a4a4c3d8",
+      "title": "Manage Region Preferences modal switching to the Regions tab shows zone panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -888,8 +915,8 @@
       }
     },
     {
-      "id": "e7575b12bba67de-06ff792e6d39bc5",
-      "title": "Manage Region Preferences modal Expand all on the Regions tab reveals individual region checkboxes",
+      "id": "e7575b12bba67de-7a977a12f408b38",
+      "title": "Manage Region Preferences modal switching to the Regions tab reveals individual region checkboxes directly",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -897,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 157,
-        "column": 11
+        "line": 152,
+        "column": 21
       }
     },
     {
@@ -911,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 176,
-        "column": 11
+        "line": 172,
+        "column": 21
       }
     },
     {
@@ -925,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 191,
-        "column": 21
+        "line": 188,
+        "column": 67
       }
     },
     {
@@ -939,7 +966,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 223,
+        "line": 217,
         "column": 13
       }
     },
@@ -953,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 251,
-        "column": 5
+        "line": 253,
+        "column": 7
       }
     },
     {
@@ -967,8 +994,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 286,
-        "column": 8
+        "line": 287,
+        "column": 5
       }
     },
     {
@@ -981,7 +1008,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 306,
+        "line": 311,
         "column": 13
       }
     },
@@ -1151,6 +1178,20 @@
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
         "line": 178,
         "column": 13
+      }
+    },
+    {
+      "id": "68d451451493487-ec6c544d4ba822f",
+      "title": "Model Detail Flyout shows region preferences unavailable callout when the model is denied by region policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 202,
+        "column": 8
       }
     }
   ]

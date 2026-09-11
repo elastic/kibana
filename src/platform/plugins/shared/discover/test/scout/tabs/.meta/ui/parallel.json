@@ -1,21 +1,9 @@
 {
-  "sha1": "001597df0c9a13f60a529198c65beff6e7e372f5",
+  "sha1": "0597a8793a4b4c14e3633cf1e155385806e58d50",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6c80b774cf64439-77a83c0bedb19bd",
-      "title": "Teardown tabs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "11b6599941153f8-ebb8e7d98ca43bb",
       "title": "Setup tabs tests data",
@@ -36,7 +24,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 66,
+        "line": 37,
         "column": 23
       }
     },
@@ -49,7 +37,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 76,
+        "line": 47,
         "column": 18
       }
     },
@@ -62,8 +50,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 101,
-        "column": 22
+        "line": 74,
+        "column": 20
       }
     },
     {
@@ -75,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 129,
-        "column": 33
+        "line": 101,
+        "column": 13
       }
     },
     {
@@ -88,7 +76,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 147,
+        "line": 121,
         "column": 22
       }
     },
@@ -236,6 +224,19 @@
       }
     },
     {
+      "id": "71f7ec98738b310-d006a1b3c051acc",
+      "title": "Discover tabs - keyboard navigation and reorder navigates and reorders tabs with the keyboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/keyboard_navigation.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
       "id": "c0ab452c928d6d9-139d70694ca4bd8",
       "title": "Discover tabs - new search clears tabs clears saved and unsaved tabs when starting a new session",
       "expectedStatus": "passed",
@@ -244,7 +245,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_search_clears_tabs.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 25
       }
     },
@@ -257,7 +258,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 23,
+        "line": 33,
         "column": 64
       }
     },
@@ -270,7 +271,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 60,
+        "line": 70,
         "column": 7
       }
     },
@@ -283,7 +284,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 94,
+        "line": 104,
         "column": 26
       }
     },
@@ -413,7 +414,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/refresh_uninitialized_tabs.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 25
       }
     },
@@ -519,19 +520,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
         "line": 55,
         "column": 29
-      }
-    },
-    {
-      "id": "4fa03f2bd8c05c6-1c81fcd0d15cbfe",
-      "title": "Discover tabs - restorable DocViewer table state restores DocViewer rows per page and page number per tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 97,
-        "column": 33
       }
     },
     {
@@ -660,7 +648,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 25
       }
     },
@@ -673,7 +661,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 11
       }
     },
@@ -842,8 +830,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 25
+      }
+    },
+    {
+      "id": "6c80b774cf64439-77a83c0bedb19bd",
+      "title": "Teardown tabs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

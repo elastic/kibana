@@ -9,6 +9,16 @@ import type { ReactNode } from 'react';
 
 export type WizardStep = 'ingest' | 'search';
 export type VectorPath = 'have-vectors' | 'generate-vectors';
+export type Language = 'python' | 'javascript' | 'java' | 'go' | 'rust' | 'csharp' | 'ruby';
+
+export type SnippetSet = Record<Language, string>;
+
+export interface LanguageDescriptor {
+  id: Language;
+  label: string;
+  syntax: string;
+  icon: string;
+}
 
 export interface DocsPanelProps {
   id: string;
@@ -22,4 +32,5 @@ export interface OnboardingPill {
   id: string;
   label: string;
   content: ReactNode;
+  trialOnly?: boolean;
 }

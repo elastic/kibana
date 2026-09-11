@@ -133,26 +133,3 @@ export interface MenuCalculations {
    */
   maxVisibleItems: number;
 }
-
-export interface SideNavLogo {
-  /**
-   * The route ID of the logo, used for the active state.
-   */
-  id: string;
-  /**
-   * The href of the logo link, typically the home page.
-   */
-  href: string;
-  /**
-   * The label for the logo, typically the product name.
-   */
-  label: string;
-  /**
-   * The logo type, e.g. `appObservability`, `appSecurity`, etc.
-   */
-  iconType: string;
-  /**
-   * (optional) `data-test-subj` attribute for testing and tracking purposes.
-   */
-  'data-test-subj'?: string;
-}

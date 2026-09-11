@@ -7,17 +7,14 @@
 
 import React, { useEffect } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useSelector, useDispatch } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -57,77 +54,74 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
     dispatch(dispatchedAction);
   }, [dispatchedAction, dispatch, inspectorAdapters?.requests]);
 
-  const detailsButton = (
-    <EuiButtonEmpty
-      data-test-subj="syntheticsRuleVizInspectButton"
-      onClick={inspect}
-      iconType="inspect"
-      size="xs"
-      disabled={!isInspectorEnabled}
-    >
-      {i18n.translate('xpack.synthetics.rules.details', {
-        defaultMessage: 'Details',
-      })}
-    </EuiButtonEmpty>
-  );
-
   return (
-    <EuiCallOut iconType="magnify" size="s">
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
-            defaultMessage: 'Rule applies to ',
-          })}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-            button={
-              loading ? undefined : (
-                <EuiButtonEmpty
-                  data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
-                  size="xs"
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                >
-                  {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
-                    defaultMessage:
-                      '{total} existing {total, plural, one {monitor} other {monitors}}',
-                    values: { total: data?.monitors.length },
-                  })}
-                </EuiButtonEmpty>
-              )
-            }
-            aria-labelledby={ruleVizPopoverTitleId}
-          >
-            <EuiPopoverTitle id={ruleVizPopoverTitleId}>
-              {i18n.translate('xpack.synthetics.statusRuleViz.monitorsPopoverTitleLabel', {
-                defaultMessage: 'Monitors',
-              })}
-            </EuiPopoverTitle>
-            {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFollowingPopoverLabel', {
-              defaultMessage: 'Rule applies to following existing monitors.',
-            })}
-            <EuiSpacer size="s" />
-            <RuleMonitorsTable />
-          </EuiPopover>
-        </EuiFlexItem>
-        {loading && (
+    <KbnInfoCallout
+      title={
+        <EuiFlexGroup alignItems="center" gutterSize="s" css={{ display: 'inline-flex' }}>
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="s" />
+            <span data-test-subj="syntheticsStatusRuleVizMonitorCount">
+              {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
+                defaultMessage:
+                  'Rule applies to {total} existing {total, plural, one {monitor} other {monitors}}',
+                values: { total: data?.monitors.length },
+              })}
+            </span>
           </EuiFlexItem>
-        )}
-        {/* to push detail button to end*/}
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
-          {isInspectorEnabled ? (
-            detailsButton
-          ) : (
-            <EuiToolTip content={inspectorDisabledTooltip}>{detailsButton}</EuiToolTip>
+          {loading && (
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
           )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
+        </EuiFlexGroup>
+      }
+      size="s"
+      actionProps={{
+        primary: {
+          children: i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
+            defaultMessage: 'View monitors',
+          }),
+          'data-test-subj': 'syntheticsStatusRuleVizMonitorQueryIDsButton',
+          disabled: loading,
+          onClick: () => setIsPopoverOpen(!isPopoverOpen),
+          popoverProps: {
+            isOpen: isPopoverOpen,
+            closePopover: () => setIsPopoverOpen(false),
+            'aria-labelledby': ruleVizPopoverTitleId,
+            children: (
+              <>
+                <EuiPopoverTitle id={ruleVizPopoverTitleId}>
+                  {i18n.translate('xpack.synthetics.statusRuleViz.monitorsPopoverTitleLabel', {
+                    defaultMessage: 'Monitors',
+                  })}
+                </EuiPopoverTitle>
+                {i18n.translate(
+                  'xpack.synthetics.statusRuleViz.ruleAppliesToFollowingPopoverLabel',
+                  {
+                    defaultMessage: 'Rule applies to following existing monitors.',
+                  }
+                )}
+                <EuiSpacer size="s" />
+                <RuleMonitorsTable />
+              </>
+            ),
+          },
+        },
+        secondary: {
+          children: i18n.translate('xpack.synthetics.rules.details', {
+            defaultMessage: 'Details',
+          }),
+          'data-test-subj': 'syntheticsRuleVizInspectButton',
+          disabled: !isInspectorEnabled,
+          iconType: 'inspect',
+          onClick: inspect,
+          tooltipProps: !isInspectorEnabled
+            ? {
+                content: inspectorDisabledTooltip,
+              }
+            : undefined,
+        },
+      }}
+    />
   );
 };
 

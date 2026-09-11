@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -28,6 +29,7 @@ import type {
 } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -61,6 +63,15 @@ const baseSoAttrs = createRuleSoAttributes({
   query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 });
 
+/** Wraps attributes in the shape the SO client's `find` returns per hit. */
+const soFindResult = (id: string, attributes: RuleSavedObjectAttributes) => ({
+  id,
+  type: RULE_SAVED_OBJECT_TYPE,
+  attributes,
+  references: [],
+  score: 0,
+});
+
 describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const taskManager = taskManagerMock.createStart();
@@ -69,6 +80,7 @@ describe('RulesClient', () => {
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
+  let artifactTypeRegistry: ArtifactTypeRegistry;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -78,7 +90,8 @@ describe('RulesClient', () => {
     jest.clearAllMocks();
 
     rulesSavedObjectService = createRulesSavedObjectServiceMock();
-
+    artifactTypeRegistry = new ArtifactTypeRegistry();
+    registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
@@ -106,9 +119,14 @@ describe('RulesClient', () => {
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
-        run: { alerts: { max: 10000 } },
+        run: {
+          alerts: { max: 10000 },
+          query: { maxResponseSize: ByteSizeValue.parse('50mb') },
+          maxGroupsPerExecution: 10000,
+        },
         ...rulesConfigOverrides,
       },
+      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =
@@ -123,7 +141,8 @@ describe('RulesClient', () => {
       pluginConfigAccessor,
       rulesSavedObjectService,
       ruleEventPublisher,
-      loggerService
+      loggerService,
+      artifactTypeRegistry
     );
   }
 
@@ -144,6 +163,7 @@ describe('RulesClient', () => {
           createdBy: 'elastic_profile_uid',
         }),
         id: 'rule-id-1',
+        references: [],
       });
 
       expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith({
@@ -160,12 +180,74 @@ describe('RulesClient', () => {
           id: 'rule-id-1',
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          createdBy: 'elastic_profile_uid',
-          updatedBy: 'elastic_profile_uid',
-          createdAt: '2025-01-01T00:00:00.000Z',
-          updatedAt: '2025-01-01T00:00:00.000Z',
+          created_by: 'elastic_profile_uid',
+          updated_by: 'elastic_profile_uid',
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
         })
       );
+    });
+
+    it('writes dashboard artifact references and rejects invalid registered artifact data', async () => {
+      const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-dash' });
+
+      await client.createRule({
+        data: {
+          ...baseCreateData,
+          artifacts: [
+            { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'so-dashboard-1' } },
+          ],
+        },
+        options: { id: 'rule-id-dash' },
+      });
+
+      expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          references: [
+            {
+              name: 'artifact:dashboard_id:dash-1',
+              type: 'dashboard',
+              id: 'so-dashboard-1',
+            },
+          ],
+        })
+      );
+
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            artifacts: [{ id: 'run-1', type: 'runbook', data: { content: '' } }],
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_ARTIFACT_DATA' },
+      });
+    });
+
+    it('injects remapped dashboard reference ids on get', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-1',
+        attributes: {
+          ...baseSoAttrs,
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'old-id' } }],
+        },
+        references: [
+          {
+            name: 'artifact:dashboard_id:dash-1',
+            type: 'dashboard',
+            id: 'remapped-id',
+          },
+        ],
+      });
+
+      const res = await client.getRule({ id: 'rule-id-1' });
+      expect(res.artifacts).toEqual([
+        { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'remapped-id' } },
+      ]);
     });
 
     it('cleans up the saved object if scheduling fails', async () => {
@@ -248,6 +330,7 @@ describe('RulesClient', () => {
           }),
         }),
         id: 'rule-id-desc',
+        references: [],
       });
 
       expect(res.metadata.description).toBe('My description');
@@ -310,6 +393,7 @@ describe('RulesClient', () => {
           schedule: expect.objectContaining({ every: '5m' }),
         }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -335,6 +419,7 @@ describe('RulesClient', () => {
         id: 'rule-id-disabled',
         attrs: expect.objectContaining({ enabled: false }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -359,9 +444,73 @@ describe('RulesClient', () => {
           metadata: expect.objectContaining({ description: 'New description' }),
         }),
         version: 'WzEsMV0=',
+        references: [],
       });
 
       expect(res.metadata.description).toBe('New description');
+    });
+
+    it('keeps an imported artifact reference on an update that does not touch artifacts', async () => {
+      const client = createClient();
+
+      // Import rewrites references[].id but leaves the stored data on the old id.
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-imported',
+        attributes: {
+          ...baseSoAttrs,
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'pre-import-id' } }],
+        },
+        version: 'WzEsMV0=',
+        references: [
+          { name: 'artifact:dashboard_id:dash-1', type: 'dashboard', id: 'remapped-id' },
+        ],
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-imported' });
+
+      const res = await client.updateRule({
+        id: 'rule-id-imported',
+        data: { metadata: { description: 'Unrelated change' } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          references: [
+            { name: 'artifact:dashboard_id:dash-1', type: 'dashboard', id: 'remapped-id' },
+          ],
+        })
+      );
+      expect(res.artifacts).toEqual([
+        { id: 'dash-1', type: 'dashboard', data: { dashboard_id: 'remapped-id' } },
+      ]);
+    });
+
+    it('carries an unregistered artifact reference through an unrelated update', async () => {
+      const client = createClient();
+
+      // The type was registered when the reference was written (e.g. before a
+      // plugin rollback); the framework can no longer regenerate it, so it must
+      // survive by carry-over instead of being dropped.
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-unregistered',
+        attributes: {
+          ...baseSoAttrs,
+          artifacts: [{ id: 'slo-1', type: 'obs.slo', data: { sloId: 'so-slo-1' } }],
+        },
+        version: 'WzEsMV0=',
+        references: [{ name: 'artifact:sloId:slo-1', type: 'slo', id: 'so-slo-1' }],
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-unregistered' });
+
+      await client.updateRule({
+        id: 'rule-id-unregistered',
+        data: { metadata: { description: 'Unrelated change' } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          references: [{ name: 'artifact:sloId:slo-1', type: 'slo', id: 'so-slo-1' }],
+        })
+      );
     });
 
     it('throws 409 conflict when version is stale', async () => {
@@ -546,6 +695,128 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).toHaveBeenCalled();
     });
 
+    it('throws 400 when clearing recovery_strategy leaves a stale query.recovery block', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+        recovery_strategy: 'query',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 2' },
+        },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-stale-recovery',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-stale-recovery',
+          data: { recovery_strategy: null },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'query.recovery is only allowed when recovery_strategy is "query".',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when setting recovery_strategy "query" without a query.recovery block', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-missing-recovery',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-missing-recovery',
+          data: { recovery_strategy: 'query' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'query.recovery is required when recovery_strategy is "query".',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when clearing no_data_strategy leaves a stale query.no_data block', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+        no_data_strategy: 'last_known_status',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+        },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-stale-no-data',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-stale-no-data',
+          data: { no_data_strategy: null },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message:
+          'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when setting a no_data_strategy without a query.no_data block (standalone)', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-missing-no-data',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-missing-no-data',
+          data: { no_data_strategy: 'last_known_status' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message:
+          'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {
       const client = createClient();
 
@@ -623,6 +894,7 @@ describe('RulesClient', () => {
         id: 'rule-id-clear-artifacts',
         attrs: expect.objectContaining({ artifacts: [] }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -711,6 +983,7 @@ describe('RulesClient', () => {
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           id: 'rule-id-1',
+          references: [],
         });
         expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith({
           services: { taskManager },
@@ -790,6 +1063,7 @@ describe('RulesClient', () => {
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           version: 'WzEsMV0=',
+          references: [],
         });
         expect(res.created).toBe(false);
       });
@@ -1300,16 +1574,12 @@ describe('RulesClient', () => {
 
       rulesSavedObjectService.find.mockResolvedValueOnce({
         saved_objects: [
-          {
-            id: 'rule-1',
-            attributes: createRuleSoAttributes({ metadata: { name: 'rule-1' } }),
-          },
-          {
-            id: 'rule-2',
-            attributes: createRuleSoAttributes({ metadata: { name: 'rule-2' } }),
-          },
+          soFindResult('rule-1', createRuleSoAttributes({ metadata: { name: 'rule-1' } })),
+          soFindResult('rule-2', createRuleSoAttributes({ metadata: { name: 'rule-2' } })),
         ],
         total: 2,
+        page: 2,
+        per_page: 50,
       });
 
       const res = await client.findRules({ page: 2, perPage: 50 });
@@ -1333,7 +1603,7 @@ describe('RulesClient', () => {
       );
       expect(res.total).toBe(2);
       expect(res.page).toBe(2);
-      expect(res.perPage).toBe(50);
+      expect(res.per_page).toBe(50);
     });
 
     it('uses default pagination when no page params are provided', async () => {
@@ -1341,12 +1611,14 @@ describe('RulesClient', () => {
 
       rulesSavedObjectService.find.mockResolvedValueOnce({
         saved_objects: [
-          {
-            id: 'rule-pagination-1',
-            attributes: createRuleSoAttributes({ metadata: { name: 'rule-pagination-1' } }),
-          },
+          soFindResult(
+            'rule-pagination-1',
+            createRuleSoAttributes({ metadata: { name: 'rule-pagination-1' } })
+          ),
         ],
         total: 100,
+        page: 1,
+        per_page: 20,
       });
 
       const res = await client.findRules();
@@ -1358,7 +1630,7 @@ describe('RulesClient', () => {
 
       expect(res.total).toBe(100);
       expect(res.page).toBe(1);
-      expect(res.perPage).toBe(20);
+      expect(res.per_page).toBe(20);
     });
 
     it('translates clean API filter to SO filter before passing to saved objects client', async () => {
@@ -2057,7 +2329,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
-        metadata: { name: 'enabled-rule' },
+        metadata: { name: 'enabled-rule', tags: ['critical', 'foo'] },
         schedule: { every: '5m', lookback: '1m' },
         enabled: true,
       });
@@ -2091,7 +2363,17 @@ describe('RulesClient', () => {
       ]);
 
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-        { ruleId: 'rule-1', spaceId: 'space-1' },
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          spaceId: 'space-1',
+          rule: expect.objectContaining({
+            id: 'rule-1',
+            metadata: expect.objectContaining({
+              name: 'enabled-rule',
+              tags: ['critical', 'foo'],
+            }),
+          }),
+        }),
       ]);
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
@@ -2934,6 +3216,28 @@ describe('RulesClient', () => {
         data: {
           code: 'INVALID_SIGNAL_RULE',
           details: { rule_id: 'rule-id-signal-z', rule_kind: 'signal' },
+        },
+      });
+    });
+
+    it('attaches INVALID_RULE_QUERY_CONFIG code when an update desynchronizes a strategy and its query block', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-query-config',
+        attributes: { ...baseSoAttrs, kind: 'alert' },
+        version: 'v1',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-query-config',
+          data: { recovery_strategy: 'query' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_RULE_QUERY_CONFIG',
+          details: { rule_id: 'rule-id-query-config' },
         },
       });
     });

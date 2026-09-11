@@ -87,7 +87,8 @@
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
     "@kbn/cps",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

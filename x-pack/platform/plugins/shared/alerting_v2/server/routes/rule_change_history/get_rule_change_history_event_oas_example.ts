@@ -7,9 +7,10 @@
 
 import type { RuleChangeHistoryDetail } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
-import { RULE_RESPONSE } from '../rules/rule_oas_shared_examples';
-import { buildOasOperation } from '../oas_utils';
+import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject, OasExampleEntry } from '../oas_types';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { RULE_RESPONSE } from '../rules/rule_oas_shared_examples';
 import { RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE } from './list_rule_change_history_oas_example';
 
 const { version: _occVersion, ...RULE_SNAPSHOT } = RULE_RESPONSE;
@@ -35,6 +36,19 @@ export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
   },
 };
 
+const INVALID_PATH_PARAMETERS_RESPONSE = invalidResponseExample({
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  message: 'eventId: Too small: expected string to have >=1 characters',
+  details: {
+    errors: {
+      errors: [],
+      properties: {
+        eventId: { errors: ['Too small: expected string to have >=1 characters'] },
+      },
+    },
+  },
+});
+
 export const RULE_CHANGE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'ruleChangeNotFound',
   summary: 'No change-history event exists for the given ID',
@@ -54,6 +68,7 @@ export const getRuleChangeHistoryEventOasExamples = (): AlertingOasOperationObje
         summary: 'Retrieved rule change-history event with snapshot',
         value: GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE,
       },
+      400: INVALID_PATH_PARAMETERS_RESPONSE,
       404: RULE_CHANGE_NOT_FOUND_RESPONSE,
       503: RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE,
     },

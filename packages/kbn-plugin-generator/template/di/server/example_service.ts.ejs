@@ -1,0 +1,28 @@
+import { inject, injectable } from 'inversify';
+import { SavedObjectsClient } from '@kbn/core-di-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+
+/**
+ * Sample service showing how to inject core DI tokens.
+ * Replace the Saved Objects usage below with your own type and operations.
+ */
+@injectable()
+export class ExampleService {
+  constructor(
+    @inject(SavedObjectsClient)
+    private readonly savedObjects: SavedObjectsClientContract
+  ) {}
+
+  async getExample() {
+    // Demonstrates the request-scoped Saved Objects client.
+    const findResult = await this.savedObjects.find({
+      type: 'config',
+      perPage: 0,
+    });
+
+    return {
+      time: new Date().toISOString(),
+      configSavedObjectTotal: findResult.total,
+    };
+  }
+}

@@ -12,6 +12,8 @@ import {
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import type { SkillDefinition } from './skills/type_definition';
+import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -66,6 +68,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.get_entity_graph`,
+  `${internalNamespaces.security}.get_entity_risk_score_history`,
+  `${internalNamespaces.security}.entity_relationship_history`,
   `${internalNamespaces.security}.list_watchlists`,
   `${internalNamespaces.security}.get_watchlist_id`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
@@ -82,6 +86,16 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.start_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.get_all_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_migration_rules`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_translation_stats`,
+  `${internalNamespaces.security}.siem_migration.get_missing_rule_migration_resources`,
+  `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.update_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -96,6 +110,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Custom content panels
   'custom_content_update_panel',
+
+  // Platform – Context Engine
+  `${internalNamespaces.platformContextEngine}.save_automation`,
+
+  // Nightshift – Sandbox
+  'nightshift_sandbox_bash',
+  'nightshift_sandbox_view_file',
+  'nightshift_sandbox_str_replace',
+  'nightshift_sandbox_write_file',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -137,6 +160,8 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.security}.alertzero-type`,
+  `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -180,6 +205,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'feature-identification',
   'streams-memory-synthesis',
   'streams-memory-consolidation',
   'streams-conversation-scraper',
@@ -187,8 +213,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
+  'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -208,10 +237,16 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
+  'detection-coverage',
   'pci-compliance',
   'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
+  'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-summarize',
+  'automatic-migration-rules-stop-migration',
+  'automatic-migration-rules-update-migration',
+  'automatic-migration-rules-delete-migration',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -242,6 +277,12 @@ export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderB
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };
 
+export const isAllowedSkillRegistration = (
+  skill: Pick<SkillDefinition, 'id' | 'basePath'>
+): boolean => {
+  return isAllowedBuiltinSkill(skill.id) || skill.basePath === ELASTIC_SKILLS_BASE_PATH;
+};
+
 /**
  * This is a manually maintained list of all built-in plugins registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new plugin.
@@ -267,6 +308,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'connector',
   'connector_setup',
   'skill',
+  'image',
 
   // Platform – Visualizations
   'visualization',
@@ -286,6 +328,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'workflow.yaml',
   'workflow.yaml.diff',
 
+  // Platform – Context Engine
+  'platform.context_engine.ai_index',
+
   // Platform – Cases
   'case',
   'cases',
@@ -301,6 +346,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity',
   'security.entity_analytics_dashboard',
   'security.entity_graph',
+  'security.entity_risk_score_history',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled

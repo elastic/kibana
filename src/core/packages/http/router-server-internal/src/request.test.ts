@@ -470,6 +470,27 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
+    describe('route.options.httpResponseLogLevel property', () => {
+      it.each`
+        value        | expected
+        ${'info'}    | ${'info'}
+        ${undefined} | ${undefined}
+      `('handles httpResponseLogLevel: $value', ({ value, expected }) => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                httpResponseLogLevel: value,
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.httpResponseLogLevel).toBe(expected);
+      });
+    });
+
     describe('route.options.excludeFromRateLimiter property', () => {
       it.each`
         value        | expected

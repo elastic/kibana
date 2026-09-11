@@ -12,6 +12,9 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreateFromCsv } from '../../public/application/sections/pipelines_create_from_csv';
 import { getCreateFromCsvPath, ROUTES } from '../../public/application/services/navigation';
@@ -55,15 +58,18 @@ describe('<PipelinesCreateFromCsv />', () => {
       </Router>
     );
 
-    await screen.findByTestId('pageTitle');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
   };
 
   describe('on component mount', () => {
     test('should render the correct page header and documentation link', async () => {
       await renderPipelinesCreateFromCsv();
 
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline from CSV');
-      expect(screen.getByTestId('documentationLink')).toHaveTextContent('CSV to pipeline docs');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create pipeline from CSV'
+      );
+      await openAppMenuOverflow();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
     });
 
     describe('form validation', () => {

@@ -40,9 +40,9 @@ describe('options list suggestion queries', () => {
       fieldSpec: { type: 'date' } as unknown as FieldSpec,
     };
     getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).toBeCalled();
-    expect(getExactMatchAggregationBuilder).not.toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
+    expect(getAllSuggestionsAggregationBuilder).toHaveBeenCalled();
+    expect(getExactMatchAggregationBuilder).not.toHaveBeenCalled();
+    expect(getSearchSuggestionsAggregationBuilder).not.toHaveBeenCalled();
   });
 
   test('returns generic exact match search query when search technique is `exact`', () => {
@@ -56,9 +56,9 @@ describe('options list suggestion queries', () => {
       fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };
     getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
-    expect(getExactMatchAggregationBuilder).toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
+    expect(getAllSuggestionsAggregationBuilder).not.toHaveBeenCalled();
+    expect(getExactMatchAggregationBuilder).toHaveBeenCalled();
+    expect(getSearchSuggestionsAggregationBuilder).not.toHaveBeenCalled();
   });
 
   test('returns type-specific search query when search technique is not `exact`', () => {
@@ -72,8 +72,8 @@ describe('options list suggestion queries', () => {
       fieldSpec: { type: 'keyword' } as unknown as FieldSpec,
     };
     getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
-    expect(getExactMatchAggregationBuilder).not.toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).toBeCalled();
+    expect(getAllSuggestionsAggregationBuilder).not.toHaveBeenCalled();
+    expect(getExactMatchAggregationBuilder).not.toHaveBeenCalled();
+    expect(getSearchSuggestionsAggregationBuilder).toHaveBeenCalled();
   });
 });

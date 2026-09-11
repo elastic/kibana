@@ -1,0 +1,164 @@
+{
+  "sha1": "0038ea2b0c1e7bcd6f27c68c7858270a1f0d92b1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "335a2590c3d2ee0-6b1093d7d0c4ec0",
+      "title": "Ingest ES data for Background Search UI tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 1
+      }
+    },
+    {
+      "id": "182744ca914da06-caae203f0c0002c",
+      "title": "Dashboard background search privilege gating saves and restores a background search with store_search_session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_privilege_gating.spec.ts",
+        "line": 94,
+        "column": 27
+      }
+    },
+    {
+      "id": "182744ca914da06-4e08b476bb66c9e",
+      "title": "Dashboard background search privilege gating does not offer background search without the store_search_session privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_privilege_gating.spec.ts",
+        "line": 107,
+        "column": 42
+      }
+    },
+    {
+      "id": "77e2bd827a08875-2896b6be425854e",
+      "title": "Dashboard background search restore errors out on an unknown session id, starts a fresh one on re-submit and restores it with the back button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_save_restore_session.spec.ts",
+        "line": 56,
+        "column": 15
+      }
+    },
+    {
+      "id": "77e2bd827a08875-f2c7ebfd8cdffaa",
+      "title": "Dashboard background search restore navigating to the dashboard listing drops the session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_save_restore_session.spec.ts",
+        "line": 82,
+        "column": 11
+      }
+    },
+    {
+      "id": "77e2bd827a08875-76283a17670306f",
+      "title": "Dashboard background search restore restores a TSVB and Timelion dashboard with every search it grouped",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_save_restore_session.spec.ts",
+        "line": 91,
+        "column": 34
+      }
+    },
+    {
+      "id": "19e91a4743a01d4-ecd5affde7bdf2f",
+      "title": "Dashboard background search with a relative time range saves and restores a background search with a relative time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_save_session_relative_time.spec.ts",
+        "line": 41,
+        "column": 15
+      }
+    },
+    {
+      "id": "38ea6845d2b52c7-f94505c609a1e97",
+      "title": "Dashboard search timeout reports an error when a panel outlives the search timeout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_search_timeout.spec.ts",
+        "line": 48,
+        "column": 5
+      }
+    },
+    {
+      "id": "38ea6845d2b52c7-7fdf4ab4804bf18",
+      "title": "Dashboard search timeout groups panels into one search session and reports a single timeout error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_search_timeout.spec.ts",
+        "line": 55,
+        "column": 22
+      }
+    },
+    {
+      "id": "df865fb1105a5e6-9d59e8d2a393423",
+      "title": "Background search from an unsaved dashboard restores the unsaved dashboard from the background search flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_unsaved_session.spec.ts",
+        "line": 61,
+        "column": 83
+      }
+    },
+    {
+      "id": "df865fb1105a5e6-ebb7456c5a2bdac",
+      "title": "Background search from an unsaved dashboard restores the unsaved dashboard from the background search completion toast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_unsaved_session.spec.ts",
+        "line": 73,
+        "column": 15
+      }
+    },
+    {
+      "id": "df865fb1105a5e6-4255955a6cc7f26",
+      "title": "Background search from an unsaved dashboard restores the unsaved dashboard after its draft has been discarded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_search_sessions/ui/parallel_tests/dashboard_unsaved_session.spec.ts",
+        "line": 80,
+        "column": 22
+      }
+    }
+  ]
+}

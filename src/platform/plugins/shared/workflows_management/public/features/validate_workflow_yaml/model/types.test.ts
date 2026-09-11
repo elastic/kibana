@@ -11,6 +11,8 @@ import {
   BATCHED_CUSTOM_MARKER_OWNER,
   CUSTOM_YAML_VALIDATION_MARKER_OWNERS,
   isYamlValidationMarkerOwner,
+  validationResultFingerprint,
+  type YamlValidationDiagnostic,
 } from './types';
 
 describe('isYamlValidationMarkerOwner', () => {
@@ -33,5 +35,26 @@ describe('isYamlValidationMarkerOwner', () => {
     expect(isYamlValidationMarkerOwner('typescript')).toBe(false);
     expect(isYamlValidationMarkerOwner('some-random-owner')).toBe(false);
     expect(isYamlValidationMarkerOwner('')).toBe(false);
+  });
+});
+
+describe('validationResultFingerprint', () => {
+  it('changes when the diagnostic rule changes', () => {
+    const diagnostic: YamlValidationDiagnostic = {
+      id: 'diagnostic',
+      owner: 'yaml',
+      ruleId: 'yamlSyntaxError',
+      severity: 'error',
+      message: 'Invalid workflow YAML',
+      hoverMessage: null,
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 2,
+    };
+
+    expect(validationResultFingerprint(diagnostic)).not.toBe(
+      validationResultFingerprint({ ...diagnostic, ruleId: 'schemaViolation' })
+    );
   });
 });

@@ -33,7 +33,7 @@ describe('EvaluateMatchersStep', () => {
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    step = new EvaluateMatchersStep(loggerService);
+    step = new EvaluateMatchersStep();
   });
 
   const runStep = async (
@@ -41,8 +41,12 @@ describe('EvaluateMatchersStep', () => {
     rules: Map<RuleId, Rule>,
     policies: Map<ActionPolicyId, ActionPolicy>
   ): Promise<MatchedPair[]> => {
-    const state = createDispatcherPipelineState({ dispatchable, rules, policies });
-    const result = await step.execute(state);
+    const state = createDispatcherPipelineState({
+      dispatchable,
+      rules,
+      policies,
+    });
+    const result = await step.execute(state, loggerService);
     if (result.type !== 'continue') {
       throw new Error(`expected step output 'continue', got '${result.type}'`);
     }

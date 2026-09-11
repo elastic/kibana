@@ -109,7 +109,7 @@ describe('getGroupHash', () => {
   });
 });
 
-describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
+describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
   const spaceId = 'default';
 
   const createClient = (
@@ -137,7 +137,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
 
   it('mints a new episode id when no prior episode exists', async () => {
     const { client, storageService } = createClient([]);
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
@@ -155,7 +155,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.active },
     ]);
 
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
@@ -170,7 +170,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.inactive },
     ]);
 
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
