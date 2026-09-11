@@ -78,6 +78,10 @@ describe('saved search embeddable', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('./utils/serialization_utils').deserializeState = () => runtimeState;
     mockedEditableDashboardApi.setFocusedPanelId.mockClear();
+    mockedEditableDashboardApi.setViewMode.mockClear();
+    mockedEditableDashboardApi.isEditableByUser = true;
+    editableDashboardViewMode$.next('edit');
+    discoverServiceMock.capabilities.dashboard_v2 = { showWriteControls: true };
   });
 
   const mockServices = {
@@ -148,14 +152,17 @@ describe('saved search embeddable', () => {
     phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
   });
 
+  const editableDashboardViewMode$ = new BehaviorSubject<'view' | 'edit'>('edit');
   const mockedEditableDashboardApi = {
     ...mockedDashboardApi,
     getAppContext: jest.fn().mockReturnValue({
       currentAppId: 'dashboard',
       getCurrentPath: jest.fn().mockReturnValue('/dashboard'),
     }),
+    isEditableByUser: true,
     setFocusedPanelId: jest.fn(),
-    viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
+    setViewMode: jest.fn((viewMode: 'view' | 'edit') => editableDashboardViewMode$.next(viewMode)),
+    viewMode$: editableDashboardViewMode$,
   };
 
   const finalizeEditableApiMock = (
@@ -486,6 +493,37 @@ describe('saved search embeddable', () => {
   });
 
   describe('deleted tab', () => {
+    const renderDeletedTabPrompt = async ({
+      viewMode,
+      isEditableByUser,
+    }: {
+      viewMode: 'view' | 'edit';
+      isEditableByUser: boolean;
+    }) => {
+      const { search } = createSearchFnMock(0);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: {
+          savedObjectId: 'id',
+          selectedTabId: 'removed-tab',
+          tabs: [{ id: 'tab-1' }, { id: 'tab-2' }] as SearchEmbeddableRuntimeState['tabs'],
+        },
+      });
+      mockedEditableDashboardApi.isEditableByUser = isEditableByUser;
+      editableDashboardViewMode$.next(viewMode);
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+
+      await waitOneTick();
+      return renderWithI18n(<Component />);
+    };
+
     it('should render the deleted tab prompt when the selected tab no longer exists', async () => {
       const { search } = createSearchFnMock(0);
 
@@ -512,6 +550,45 @@ describe('saved search embeddable', () => {
       await waitFor(() => {
         expect(queryByTestId('discoverEmbeddableDeletedTabCallout')).toBeInTheDocument();
         expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show editable guidance in dashboard view mode', async () => {
+      const component = await renderDeletedTabPrompt({ viewMode: 'view', isEditableByUser: true });
+
+      await waitFor(() => {
+        expect(component.getByTestId('discoverEmbeddableDeletedTabCallout')).toHaveTextContent(
+          'Edit the panel to fix it.'
+        );
+        expect(
+          component.getByTestId('discoverEmbeddableDeletedTabEditPanelLink')
+        ).toBeInTheDocument();
+        expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show inline-edit guidance in dashboard edit mode', async () => {
+      const component = await renderDeletedTabPrompt({ viewMode: 'edit', isEditableByUser: true });
+
+      await waitFor(() => {
+        expect(component.getByTestId('discoverEmbeddableDeletedTabCallout')).toHaveTextContent(
+          'Edit this panel to choose a different tab'
+        );
+        expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show read-only guidance in dashboard view mode', async () => {
+      const component = await renderDeletedTabPrompt({ viewMode: 'view', isEditableByUser: false });
+
+      await waitFor(() => {
+        expect(component.getByTestId('discoverEmbeddableDeletedTabCallout')).toHaveTextContent(
+          "Contact one of the dashboard's authors to fix it."
+        );
+        expect(
+          component.queryByTestId('discoverEmbeddableDeletedTabEditPanelLink')
+        ).not.toBeInTheDocument();
+        expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
     });
   });
