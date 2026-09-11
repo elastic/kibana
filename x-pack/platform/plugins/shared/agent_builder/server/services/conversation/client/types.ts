@@ -150,10 +150,8 @@ export interface AddAttachmentsToLastRoundRequest {
 
 export interface AppendContextMessageRequest {
   id: string;
-  messageId: string;
-  createdAt: Date;
-  message: string;
-  attachments: AttachmentInput[];
+  message?: string;
+  attachments?: AttachmentInput[];
   getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
   create?: ConversationCreateRequest;
   author?: ConversationRoundAuthor;

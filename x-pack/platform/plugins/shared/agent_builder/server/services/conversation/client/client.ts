@@ -538,16 +538,15 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<ConversationWithPermissions> {
     const {
       id,
-      messageId,
-      createdAt,
-      message,
-      attachments,
+      message = '',
+      attachments = [],
       getTypeDefinition,
       create,
       author,
       origin,
     } = request;
-    const createdAtIso = createdAt.toISOString();
+    const messageId = uuidv4();
+    const createdAtIso = new Date().toISOString();
 
     const materialize = async (
       current: Conversation
@@ -609,8 +608,6 @@ class ConversationClientImpl implements ConversationClient {
       if (!isEventsNativeVersion(current.schema_version)) {
         throw createInternalError('Standalone messages require canonical event storage');
       }
-      // Replays must return before modifying attachments or unread state, including after a conflict.
-      if (current.events?.some((event) => event.id === messageId)) return await this.get(id);
       const fields = await materialize(current);
       try {
         await writer.write({

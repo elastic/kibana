@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -115,10 +114,8 @@ export function registerChatApiRoutes({
             const author = await conversationsService.getConversationRoundAuthor({ request });
             const body = await client.appendContextMessage({
               id: conversationId,
-              messageId: uuidv4(),
-              createdAt: new Date(),
-              message: input ?? '',
-              attachments: attachments ?? [],
+              message: input,
+              attachments,
               getTypeDefinition: attachmentsService.getTypeDefinition,
               author,
             });

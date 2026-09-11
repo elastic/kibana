@@ -15,6 +15,7 @@ import {
   createAgentNotFoundError,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
+import type { TimelineEvent } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createMockedAgentRegistry } from '../../../test_utils/agents';
 import { createClient } from './client';
@@ -47,14 +48,17 @@ const initialConversation = {
   access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
 };
 
-const request = (messageId: string): AppendContextMessageRequest => ({
+const request = (message: string): AppendContextMessageRequest => ({
   id: 'conversation',
-  messageId,
-  createdAt: new Date(),
-  message: messageId,
+  message,
   attachments: [],
   getTypeDefinition: () => textType,
 });
+
+const messagesOf = (events: TimelineEvent[] = []): string[] =>
+  events.flatMap((event) =>
+    event.type === TimelineEventType.userMessage ? [event.data.message] : []
+  );
 
 describe('appendContextMessage', () => {
   const es = elasticsearchServiceMock.createElasticsearchClient();
@@ -102,7 +106,7 @@ describe('appendContextMessage', () => {
     expect(conversation.rounds).toEqual([]);
     expect(conversation.events).toEqual([
       expect.objectContaining({
-        id: 'm1',
+        id: expect.stringMatching(/^[0-9a-f-]{36}$/),
         type: TimelineEventType.userMessage,
         actor: { type: 'user', id: 'user', username: 'alice' },
         data: {
@@ -116,23 +120,23 @@ describe('appendContextMessage', () => {
     expect(agentRegistry.get).toHaveBeenCalledWith('agent', { access: 'use' });
   });
 
-  it('merges concurrent appends and checks replay identity against the fresh snapshot', async () => {
+  it('defaults the message and attachments, stamping the event with the current time', async () => {
+    const before = Date.now();
+    await client.appendContextMessage({ id: 'conversation', getTypeDefinition: () => textType });
+    const [event] = (await client.get('conversation')).events ?? [];
+    expect(event).toEqual(expect.objectContaining({ data: { message: '', attachment_refs: [] } }));
+    expect(Date.parse(event.created_at)).toBeGreaterThanOrEqual(before);
+  });
+
+  it('merges concurrent appends against the fresh snapshot', async () => {
     await Promise.all([
       client.appendContextMessage(request('m1')),
       client.appendContextMessage(request('m2')),
-      client.appendContextMessage(request('m1')),
+      client.appendContextMessage(request('m3')),
     ]);
-    expect((await client.get('conversation')).events?.map(({ id }) => id).sort()).toEqual([
-      'm1',
-      'm2',
-    ]);
-    const writes = mockIndex.mock.calls.length;
-    await client.appendContextMessage({
-      ...request('m1'),
-      attachments: [{ type: 'text', data: { text: 'changed replay' } }],
-    });
-    expect(mockIndex).toHaveBeenCalledTimes(writes);
-    expect((await client.get('conversation')).attachments ?? []).toEqual([]);
+    const conversation = await client.get('conversation');
+    expect(messagesOf(conversation.events).sort()).toEqual(['m1', 'm2', 'm3']);
+    expect(conversation.events?.map(({ id }) => id)).toHaveLength(3);
   });
 
   it('preserves messages across metadata writes and execution completion', async () => {
@@ -144,7 +148,7 @@ describe('appendContextMessage', () => {
       events: [],
       status: ConversationRoundStatus.completed,
     });
-    expect((await client.get('conversation')).events?.map(({ id }) => id)).toEqual(['m1']);
+    expect(messagesOf((await client.get('conversation')).events)).toEqual(['m1']);
   });
 
   it('rejects read-only and cross-space writes', async () => {
@@ -208,8 +212,8 @@ describe('appendContextMessage', () => {
     expect(mockIndex).toHaveBeenCalledTimes(1);
   });
 
-  it('retries creation races using the same message identity', async () => {
+  it('retries creation races against the existing conversation', async () => {
     await client.appendContextMessage({ ...request('m1'), create: initialConversation });
-    expect((await client.get('conversation')).events?.map(({ id }) => id)).toEqual(['m1']);
+    expect(messagesOf((await client.get('conversation')).events)).toEqual(['m1']);
   });
 });
