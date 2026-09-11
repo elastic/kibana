@@ -50,9 +50,7 @@ export function useAwsOverviewDashboardUrl(
       const overview = response?.items?.find(
         (item) => item.attributes?.title === AWS_OVERVIEW_DASHBOARD_TITLE
       );
-      return overview?.appLink
-        ? services.http.basePath.prepend(overview.appLink)
-        : undefined;
+      return overview?.appLink ? services.http.basePath.prepend(overview.appLink) : undefined;
     },
     enabled: dashboardRefs.length > 0,
     staleTime: Infinity,
