@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy } from 'lodash';
+import { isNil, omitBy, orderBy } from 'lodash';
 
 import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
@@ -327,6 +327,21 @@ function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
   if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
     delete dv.fieldAttrs;
   }
+
+  const normalizedFieldFormats = dv.fieldFormats ?? {};
+  for (const [key, value] of Object.entries(normalizedFieldFormats)) {
+    if (value.id === 'url') {
+      // Clean null params + parsedUrl key
+      normalizedFieldFormats[key].params = omitBy(value.params, isNil);
+      normalizedFieldFormats[key].params.parsedUrl = undefined;
+    }
+
+    if (Object.keys(value.params ?? {}).length === 0) {
+      delete normalizedFieldFormats[key].params;
+    }
+  }
+
+  dv.fieldFormats = normalizedFieldFormats;
   if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
     delete dv.fieldFormats;
   }
