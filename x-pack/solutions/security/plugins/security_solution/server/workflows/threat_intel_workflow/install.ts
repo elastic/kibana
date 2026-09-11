@@ -100,10 +100,10 @@ export const reconcileThreatIntelAttributeWorkflows = async ({
 
 /**
  * Uninstalls one workflow, tolerating not-found so a partial prior install still
- * cleans up. Already-gone is the expected case on a deployment that never had
- * the flag on, but a bare `catch {}` made a genuine failure (403, 5xx) just as
- * invisible, leaving workflows running against alerts nobody is looking at any
- * more. Debug is the level that keeps a flag-off boot quiet without dropping it.
+ * cleans up. This helper is only reached after the leftover probe decided
+ * something is installed; a 403/5xx here is the "workflows keep running against
+ * alerts" case. Warn so a production flag-off boot is not silent. The quiet
+ * never-installed path is the probe short-circuit, not this catch.
  */
 const uninstallTolerant = async (
   managedWorkflowsClient: SecurityManagedWorkflowsClient,
@@ -114,7 +114,7 @@ const uninstallTolerant = async (
   try {
     await managedWorkflowsClient.uninstall(workflowId, options);
   } catch (error) {
-    logger.debug(
+    logger.warn(
       `Failed to uninstall the threat intel workflow ${workflowId} in space '${options.spaceId}'`,
       { error }
     );

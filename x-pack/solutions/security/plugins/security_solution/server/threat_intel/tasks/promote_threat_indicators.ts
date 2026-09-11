@@ -599,11 +599,14 @@ export const registerPromoteThreatIndicatorsTask = ({
           let indicatorsWritten = 0;
           let searchAfter: Array<string | number | null> | undefined;
           let latestExtractedAt = previousState.lastSyncedAt;
-          // Only advance the cursor when the scan drained the backlog. Enrich
-          // stamps whole batches with the same `lineage.extracted_at`, so a run
-          // that stops mid-timestamp (2m timeout) would otherwise store that
-          // tick and the next run's `gt` would skip every remaining report
-          // sharing it.
+          // Only advance the cursor when the scan drained the backlog. A
+          // completed scan that stored a mid-batch tick used to skip remaining
+          // siblings: `text_indicator_list` stamps one `lineage.extracted_at`
+          // across every chunk of a large list (5_000 nested objects), so `gt`
+          // on that tick dropped the rest. Writes are idempotent (stable `_id`
+          // + report_id dedupe), so the range is `gte` and re-scanning the
+          // handful of boundary-timestamp docs every 15m is cheap. Enrich is
+          // not this writer — each persist_extractions gets its own `now`.
           let scanCompleted = false;
           // Only a *transient* item-level rejection holds the checkpoint. The
           // next run re-scans the range and the write lands, and since writes are
@@ -665,7 +668,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                     query: {
                       bool: {
                         filter: [
-                          { range: { 'lineage.extracted_at': { gt: lower } } },
+                          { range: { 'lineage.extracted_at': { gte: lower } } },
                           HAS_EXTRACTED_IOCS_FILTER,
                         ],
                       },

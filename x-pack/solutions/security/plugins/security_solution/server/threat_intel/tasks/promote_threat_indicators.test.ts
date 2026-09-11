@@ -638,11 +638,31 @@ describe('promote task runner', () => {
       const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];
       expect(searchArg.pit).toEqual(expect.objectContaining({ id: 'pit-1' }));
       expect(searchArg.index).toBeUndefined();
+      expect(searchArg.query.bool.filter).toEqual(
+        expect.arrayContaining([{ range: { 'lineage.extracted_at': { gte: 'now-30d' } } }])
+      );
       // `_shard_doc` is the stable tie-breaker a PIT makes available.
       expect(searchArg.sort).toEqual([
         { 'lineage.extracted_at': { order: 'asc' } },
         { _shard_doc: { order: 'asc' } },
       ]);
+    });
+
+    it('re-scans the last synced timestamp so same-stamp siblings are not skipped', async () => {
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+
+      await definition
+        .createTaskRunner(
+          runContext({
+            taskInstance: { state: { lastSyncedAt: EXTRACTED_AT }, params: {} } as never,
+          })
+        )
+        .run();
+
+      const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchArg.query.bool.filter).toEqual(
+        expect.arrayContaining([{ range: { 'lineage.extracted_at': { gte: EXTRACTED_AT } } }])
+      );
     });
 
     it('closes the PIT when the scan completes', async () => {

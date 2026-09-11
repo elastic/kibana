@@ -138,7 +138,7 @@ describe('threat intel managed workflow install', () => {
   // Not-found is the expected case on a deployment that never had the flag on,
   // but a bare `catch {}` made a 403 or a 5xx just as invisible, and the
   // workflows keep running against alerts nobody is looking at any more.
-  it('records an uninstall failure at debug rather than dropping it', async () => {
+  it('records an uninstall failure at warn rather than dropping it', async () => {
     const client = createClient();
     client.listInstalledWorkflowStates.mockResolvedValue([
       installedState({ workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID }),
@@ -151,12 +151,15 @@ describe('threat intel managed workflow install', () => {
       logger,
     });
 
-    expect(loggingSystemMock.collect(logger).debug).toEqual([
-      [
-        expect.stringContaining(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID),
-        { error: expect.any(Error) },
-      ],
-    ]);
+    expect(loggingSystemMock.collect(logger).warn).toEqual(
+      expect.arrayContaining([
+        [
+          expect.stringContaining(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID),
+          { error: expect.any(Error) },
+        ],
+      ])
+    );
+    expect(loggingSystemMock.collect(logger).debug).toEqual([]);
   });
 
   // The whole point of the short circuit: a deployment that never turned the
