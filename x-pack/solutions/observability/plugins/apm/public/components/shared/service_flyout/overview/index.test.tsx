@@ -79,7 +79,9 @@ const defaultProps = {
   onTransactionTypeChange: jest.fn(),
 };
 
-function renderOverview(overrides: Partial<React.ComponentProps<typeof ServiceFlyoutOverview>> = {}) {
+function renderOverview(
+  overrides: Partial<React.ComponentProps<typeof ServiceFlyoutOverview>> = {}
+) {
   return render(
     <IntlProvider locale="en">
       <ServiceFlyoutOverview {...defaultProps} {...overrides} />
