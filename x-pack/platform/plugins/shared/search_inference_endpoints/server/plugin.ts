@@ -202,10 +202,7 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: async (
-          featureId: string,
-          request: KibanaRequest
-        ) => {
+        getForFeature: async (featureId: string, request: KibanaRequest) => {
           const soClient = getInferenceSettingsClient(core.savedObjects, request);
           const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
           const uiSettingsClient = core.uiSettings.asScopedToClient(
