@@ -167,8 +167,16 @@ describe('DetectAndReviewStep', () => {
     it('has href to the [Metrics AWS] Overview dashboard when it is installed', () => {
       setupMocks({
         installedDashboards: [
-          { id: 'aws-overview-id', title: '[Metrics AWS] Overview', appLink: '/app/dashboards#/view/aws-overview-id' },
-          { id: 'aws-ec2-id', title: '[Metrics AWS] EC2 Overview', appLink: '/app/dashboards#/view/aws-ec2-id' },
+          {
+            id: 'aws-overview-id',
+            title: '[Metrics AWS] Overview',
+            appLink: '/app/dashboards#/view/aws-overview-id',
+          },
+          {
+            id: 'aws-ec2-id',
+            title: '[Metrics AWS] EC2 Overview',
+            appLink: '/app/dashboards#/view/aws-ec2-id',
+          },
         ],
       });
       renderStep();
@@ -179,7 +187,11 @@ describe('DetectAndReviewStep', () => {
     it('has no href when [Metrics AWS] Overview dashboard is not installed', () => {
       setupMocks({
         installedDashboards: [
-          { id: 'aws-ec2-id', title: '[Metrics AWS] EC2 Overview', appLink: '/app/dashboards#/view/aws-ec2-id' },
+          {
+            id: 'aws-ec2-id',
+            title: '[Metrics AWS] EC2 Overview',
+            appLink: '/app/dashboards#/view/aws-ec2-id',
+          },
         ],
       });
       renderStep();
