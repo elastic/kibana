@@ -20,7 +20,7 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
     await pageObjects.securityUsers.goto();
@@ -81,7 +81,8 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
   test('should delete user', async ({ pageObjects, esClient }) => {
     await esClient.security.putUser({
       username: 'DeleteMe',
-      body: { password: 'DeleteMePwd', roles: ['kibana_admin'] },
+      password: 'DeleteMePwd',
+      roles: ['kibana_admin'],
     });
 
     await pageObjects.securityUsers.goto();
@@ -106,22 +107,17 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
     expect(byName.kibana_user?.deprecated).toBe(true);
   });
 
-  test.describe('edit user', () => {
-    test.beforeEach(async ({ esClient }) => {
-      await esClient.security.putUser({
-        username: optionalUser.username,
-        body: { password: optionalUser.password, roles: optionalUser.roles },
-      });
+  test('update user profile when submitting form and redirects back', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putUser({
+      username: optionalUser.username,
+      password: optionalUser.password,
+      roles: optionalUser.roles,
     });
-
-    test.afterEach(async ({ esClient }) => {
-      await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
-    });
-
-    test('update user profile when submitting form and redirects back', async ({
-      pageObjects,
-      page,
-    }) => {
+    try {
       await pageObjects.securityUsers.goto();
       await pageObjects.securityUsers.updateUserProfile({
         username: optionalUser.username,
@@ -135,9 +131,22 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       const user = users.find((u) => u.username === optionalUser.username);
       expect(user!.fullname).toBe('Optional User');
       expect(user!.email).toBe('optionalUser@elastic.co');
-    });
+    } finally {
+      await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
+    }
+  });
 
-    test('change password of other user when submitting form', async ({ pageObjects, page }) => {
+  test('change password of other user when submitting form', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putUser({
+      username: optionalUser.username,
+      password: optionalUser.password,
+      roles: optionalUser.roles,
+    });
+    try {
       await pageObjects.securityUsers.goto();
       await pageObjects.securityUsers.updateUserPassword({
         username: optionalUser.username,
@@ -147,18 +156,36 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
         'Password successfully changed'
       );
-    });
+    } finally {
+      await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
+    }
+  });
 
-    test('deactivates user when confirming', async ({ pageObjects }) => {
+  test('deactivates user when confirming', async ({ pageObjects, esClient }) => {
+    await esClient.security.putUser({
+      username: optionalUser.username,
+      password: optionalUser.password,
+      roles: optionalUser.roles,
+    });
+    try {
       await pageObjects.securityUsers.goto();
       await pageObjects.securityUsers.deactivateUser(optionalUser.username);
 
       const users = await pageObjects.securityUsers.getAllUsers();
       const user = users.find((u) => u.username === optionalUser.username);
       expect(user!.enabled).toBe(false);
-    });
+    } finally {
+      await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
+    }
+  });
 
-    test('activates user when confirming', async ({ pageObjects, esClient }) => {
+  test('activates user when confirming', async ({ pageObjects, esClient }) => {
+    await esClient.security.putUser({
+      username: optionalUser.username,
+      password: optionalUser.password,
+      roles: optionalUser.roles,
+    });
+    try {
       await esClient.security.disableUser({ username: optionalUser.username });
 
       await pageObjects.securityUsers.goto();
@@ -167,12 +194,22 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       const users = await pageObjects.securityUsers.getAllUsers();
       const user = users.find((u) => u.username === optionalUser.username);
       expect(user!.enabled).toBe(true);
-    });
+    } finally {
+      await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
+    }
+  });
 
-    test('delete user when confirming closes dialog and redirects', async ({
-      pageObjects,
-      page,
-    }) => {
+  test('delete user when confirming closes dialog and redirects', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putUser({
+      username: optionalUser.username,
+      password: optionalUser.password,
+      roles: optionalUser.roles,
+    });
+    try {
       await pageObjects.securityUsers.goto();
       await pageObjects.securityUsers.deleteUser(optionalUser.username);
 
@@ -180,86 +217,88 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
 
       const users = await pageObjects.securityUsers.getAllUsers();
       expect(users.find((u) => u.username === optionalUser.username)).toBeUndefined();
-    });
+    } finally {
+      await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
+    }
   });
 
-  test.describe('accessibility', () => {
-    test('users page has no accessibility violations', async ({ pageObjects, page }) => {
-      await pageObjects.securityUsers.goto();
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-      expect(violations).toStrictEqual([]);
+  test('users page has no accessibility violations', async ({ pageObjects, page }) => {
+    await pageObjects.securityUsers.goto();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('search users has no accessibility violations', async ({ pageObjects, page }) => {
+    await pageObjects.securityUsers.goto();
+    await pageObjects.securityUsers.searchUsersInput.click();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('show reserved users toggle has no accessibility violations', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.securityUsers.goto();
+    await pageObjects.securityUsers.showReservedUsersSwitch.waitFor({ state: 'visible' });
+    await pageObjects.securityUsers.showReservedUsersSwitch.click();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('create user panel has no accessibility violations', async ({ pageObjects, page }) => {
+    await pageObjects.securityUsers.goto();
+    await pageObjects.securityUsers.clickCreateNewUser();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('delete user panel has no accessibility violations', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putUser({
+      username: 'a11yDeleteUser',
+      password: 'password',
+      roles: ['editor'],
     });
 
-    test('search users has no accessibility violations', async ({ pageObjects, page }) => {
+    try {
       await pageObjects.securityUsers.goto();
-      await pageObjects.securityUsers.searchUsersInput.click();
+      await page.testSubj.locator('checkboxSelectRow-a11yDeleteUser').click();
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
-    });
 
-    test('show reserved users toggle has no accessibility violations', async ({
-      pageObjects,
-      page,
-    }) => {
-      await pageObjects.securityUsers.goto();
-      await pageObjects.securityUsers.showReservedUsersSwitch.waitFor({ state: 'visible' });
-      await pageObjects.securityUsers.showReservedUsersSwitch.click();
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-      expect(violations).toStrictEqual([]);
-    });
-
-    test('create user panel has no accessibility violations', async ({ pageObjects, page }) => {
-      await pageObjects.securityUsers.goto();
-      await pageObjects.securityUsers.clickCreateNewUser();
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-      expect(violations).toStrictEqual([]);
-    });
-
-    test('delete user panel has no accessibility violations', async ({
-      pageObjects,
-      page,
-      esClient,
-    }) => {
-      await esClient.security.putUser({
-        username: 'a11yDeleteUser',
-        body: { password: 'password', roles: ['editor'] },
+      await pageObjects.securityUsers.deleteUserButton.click();
+      const { violations: deleteViolations } = await page.checkA11y({
+        include: ['.kbnAppWrapper'],
       });
+      expect(deleteViolations).toStrictEqual([]);
+      await page.testSubj.locator('confirmModalCancelButton').click();
+    } finally {
+      await esClient.security.deleteUser({ username: 'a11yDeleteUser' }).catch(() => {});
+    }
+  });
 
-      try {
-        await pageObjects.securityUsers.goto();
-        await page.testSubj.locator('checkboxSelectRow-a11yDeleteUser').click();
-        const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-        expect(violations).toStrictEqual([]);
-
-        await pageObjects.securityUsers.deleteUserButton.click();
-        const { violations: deleteViolations } = await page.checkA11y({
-          include: ['.kbnAppWrapper'],
-        });
-        expect(deleteViolations).toStrictEqual([]);
-        await page.testSubj.locator('confirmModalCancelButton').click();
-      } finally {
-        await esClient.security.deleteUser({ username: 'a11yDeleteUser' }).catch(() => {});
-      }
+  test('edit user panel has no accessibility violations', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putUser({
+      username: 'a11yEditUser',
+      password: 'password',
+      roles: ['editor'],
     });
 
-    test('edit user panel has no accessibility violations', async ({
-      pageObjects,
-      page,
-      esClient,
-    }) => {
-      await esClient.security.putUser({
-        username: 'a11yEditUser',
-        body: { password: 'password', roles: ['editor'] },
-      });
-
-      try {
-        await pageObjects.securityUsers.goto();
-        await pageObjects.securityUsers.clickUserByName('a11yEditUser');
-        const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-        expect(violations).toStrictEqual([]);
-      } finally {
-        await esClient.security.deleteUser({ username: 'a11yEditUser' }).catch(() => {});
-      }
-    });
+    try {
+      await pageObjects.securityUsers.goto();
+      await pageObjects.securityUsers.clickUserByName('a11yEditUser');
+      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      expect(violations).toStrictEqual([]);
+    } finally {
+      await esClient.security.deleteUser({ username: 'a11yEditUser' }).catch(() => {});
+    }
   });
 });

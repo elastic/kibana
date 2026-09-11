@@ -13,6 +13,11 @@ import { test } from '../fixtures';
 const customRole = 'myroleEast';
 const customUser = 'userEast';
 
+const manageSecurityRole = {
+  elasticsearch: { cluster: ['manage_security'] as string[], indices: [] as never[] },
+  kibana: [{ base: ['all'] as string[], feature: {} as Record<string, string[]>, spaces: ['*'] }],
+};
+
 test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
@@ -25,49 +30,42 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
     await esClient.security.deleteRole({ name: customRole }).catch(() => {});
   });
 
-  test.describe('role and user creation via UI', () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginWithCustomRole({
-        elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
-        kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-      });
+  test(`should add new role ${customRole}`, async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(manageSecurityRole);
+    await pageObjects.securityRoles.goto();
+    await pageObjects.securityRoles.createRole(customRole, {
+      elasticsearch: {
+        indices: [
+          {
+            names: ['dlstest'],
+            privileges: ['read', 'view_index_metadata'],
+            query: '{"match": {"region": "EAST"}}',
+          },
+        ],
+      },
     });
 
-    test(`should add new role ${customRole}`, async ({ pageObjects }) => {
-      await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.createRole(customRole, {
-        elasticsearch: {
-          indices: [
-            {
-              names: ['dlstest'],
-              privileges: ['read', 'view_index_metadata'],
-              query: '{"match": {"region": "EAST"}}',
-            },
-          ],
-        },
-      });
+    const roles = await pageObjects.securityRoles.getAllRoles();
+    expect(roles.some((r) => r.rolename === customRole)).toBe(true);
+    expect(roles.find((r) => r.rolename === customRole)!.reserved).toBe(false);
+  });
 
-      const roles = await pageObjects.securityRoles.getAllRoles();
-      expect(roles.some((r) => r.rolename === customRole)).toBe(true);
-      expect(roles.find((r) => r.rolename === customRole)!.reserved).toBe(false);
+  test(`should add new user ${customUser}`, async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole(manageSecurityRole);
+    await pageObjects.securityUsers.createUser({
+      username: customUser,
+      password: 'changeme',
+      confirm_password: 'changeme',
+      full_name: 'dls EAST',
+      email: 'dlstest@elastic.com',
+      roles: ['kibana_admin', customRole],
     });
 
-    test(`should add new user ${customUser}`, async ({ pageObjects }) => {
-      await pageObjects.securityUsers.createUser({
-        username: customUser,
-        password: 'changeme',
-        confirm_password: 'changeme',
-        full_name: 'dls EAST',
-        email: 'dlstest@elastic.com',
-        roles: ['kibana_admin', customRole],
-      });
-
-      const users = await pageObjects.securityUsers.getAllUsers();
-      const user = users.find((u) => u.username === customUser);
-      expect(user).toBeDefined();
-      expect(user!.roles).toContain(customRole);
-      expect(user!.reserved).toBe(false);
-    });
+    const users = await pageObjects.securityUsers.getAllUsers();
+    const user = users.find((u) => u.username === customUser);
+    expect(user).toBeDefined();
+    expect(user!.roles).toContain(customRole);
+    expect(user!.reserved).toBe(false);
   });
 
   test('user East should only see EAST doc in Discover', async ({ browserAuth, pageObjects }) => {

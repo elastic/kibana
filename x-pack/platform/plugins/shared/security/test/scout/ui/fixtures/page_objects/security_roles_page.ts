@@ -76,7 +76,7 @@ export class SecurityRolesPage {
 
   async saveRole() {
     await this.roleFormSaveButton.click();
-    await this.page.testSubj.locator('roleRow').first().waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('roleRow').nth(0).waitFor({ state: 'visible' });
   }
 
   async cancelRole() {

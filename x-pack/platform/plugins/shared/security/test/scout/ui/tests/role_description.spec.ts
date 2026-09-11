@@ -13,7 +13,7 @@ import { test } from '../fixtures';
 test.describe('Role Description', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
   });
@@ -55,64 +55,63 @@ test.describe('Role Description', { tag: tags.stateful.classic }, () => {
     await pageObjects.securityRoles.cancelRole();
   });
 
-  test.describe('accessibility', () => {
-    test('roles main page has no accessibility violations', async ({ pageObjects, page }) => {
-      await pageObjects.securityRoles.goto();
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-      expect(violations).toStrictEqual([]);
+  test('roles main page has no accessibility violations', async ({ pageObjects, page }) => {
+    await pageObjects.securityRoles.goto();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('search roles has no accessibility violations', async ({ pageObjects, page }) => {
+    await pageObjects.securityRoles.goto();
+    await pageObjects.securityRoles.searchRolesInput.fill('apm_user');
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('show reserved roles toggle has no accessibility violations', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.securityRoles.goto();
+    await pageObjects.securityRoles.showReservedRolesSwitch.waitFor({ state: 'visible' });
+    await pageObjects.securityRoles.showReservedRolesSwitch.click();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+  });
+
+  test('create role form has no accessibility violations', async ({ pageObjects, page }) => {
+    await pageObjects.securityRoles.goto();
+    await pageObjects.securityRoles.clickCreateNewRole();
+    const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+    expect(violations).toStrictEqual([]);
+    await pageObjects.securityRoles.cancelRole();
+  });
+
+  test('select and delete role UI has no accessibility violations', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putRole({
+      name: 'a11y-test-role',
+      cluster: [],
+      indices: [],
     });
 
-    test('search roles has no accessibility violations', async ({ pageObjects, page }) => {
+    try {
       await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.searchRolesInput.fill('apm_user');
+      await page.testSubj.locator('checkboxSelectRow-a11y-test-role').click();
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
-    });
 
-    test('show reserved roles toggle has no accessibility violations', async ({
-      pageObjects,
-      page,
-    }) => {
-      await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.showReservedRolesSwitch.waitFor({ state: 'visible' });
-      await pageObjects.securityRoles.showReservedRolesSwitch.click();
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-      expect(violations).toStrictEqual([]);
-    });
-
-    test('create role form has no accessibility violations', async ({ pageObjects, page }) => {
-      await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.clickCreateNewRole();
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-      expect(violations).toStrictEqual([]);
-      await pageObjects.securityRoles.cancelRole();
-    });
-
-    test('select and delete role UI has no accessibility violations', async ({
-      pageObjects,
-      page,
-      esClient,
-    }) => {
-      await esClient.security.putRole({
-        name: 'a11y-test-role',
-        body: { cluster: [], indices: [] },
+      await pageObjects.securityRoles.deleteRoleButton.click();
+      const { violations: deleteViolations } = await page.checkA11y({
+        include: ['.kbnAppWrapper'],
       });
-
-      try {
-        await pageObjects.securityRoles.goto();
-        await page.testSubj.locator('checkboxSelectRow-a11y-test-role').click();
-        const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
-        expect(violations).toStrictEqual([]);
-
-        await pageObjects.securityRoles.deleteRoleButton.click();
-        const { violations: deleteViolations } = await page.checkA11y({
-          include: ['.kbnAppWrapper'],
-        });
-        expect(deleteViolations).toStrictEqual([]);
-        await page.testSubj.locator('confirmModalCancelButton').click();
-      } finally {
-        await esClient.security.deleteRole({ name: 'a11y-test-role' }).catch(() => {});
-      }
-    });
+      expect(deleteViolations).toStrictEqual([]);
+      await page.testSubj.locator('confirmModalCancelButton').click();
+    } finally {
+      await esClient.security.deleteRole({ name: 'a11y-test-role' }).catch(() => {});
+    }
   });
 });

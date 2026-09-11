@@ -21,7 +21,7 @@ const testUser = {
 test.describe('User email and account settings', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
   });
@@ -51,7 +51,7 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
 
   test('login as new user and verify account settings', async ({ browserAuth, page }) => {
     await browserAuth.loginWithCustomRole({
-      elasticsearch: {},
+      elasticsearch: { cluster: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
 
@@ -61,7 +61,7 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
 
   test('change password and re-login', async ({ pageObjects, browserAuth, esClient }) => {
     await browserAuth.loginWithCustomRole({
-      elasticsearch: {},
+      elasticsearch: { cluster: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
 

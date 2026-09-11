@@ -20,7 +20,7 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
 
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
   });
@@ -65,8 +65,8 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
     await expect(page).toHaveURL(/security\/roles\/edit/);
 
     const { clusters, privileges } = await pageObjects.securityRoles.getRemoteClusterPrivilege(0);
-    expect(clusters).toEqual(expect.arrayContaining(['cluster1', 'cluster2']));
-    expect(privileges).toEqual(expect.arrayContaining(['monitor_enrich']));
+    expect(clusters).toStrictEqual(expect.arrayContaining(['cluster1', 'cluster2']));
+    expect(privileges).toStrictEqual(expect.arrayContaining(['monitor_enrich']));
 
     await pageObjects.securityRoles.deleteRemoteClusterPrivilege(0);
     await pageObjects.securityRoles.addRemoteClusterPrivilege({

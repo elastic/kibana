@@ -26,28 +26,26 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
 
     await esClient.security.putRole({
       name: roleName,
-      body: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-        global: {
-          // @ts-ignore — data_source is a valid global privilege
-          data_source: expectedDataSourcePrivileges,
-        },
-        kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+      cluster: [],
+      indices: [],
+      run_as: [],
+      global: {
+        // @ts-ignore — data_source is a valid global privilege
+        data_source: expectedDataSourcePrivileges,
       },
+      kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+    });
+  });
+
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
+      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
   });
 
   test.afterAll(async ({ esClient }) => {
     await esClient.security.deleteRole({ name: roleName }).catch(() => {});
-  });
-
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-    });
   });
 
   test('can read the role from the roles listing', async ({ pageObjects }) => {
@@ -72,7 +70,7 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
     await expect(columnDescription).toHaveText(updatedRoleDescription);
 
     const updatedRole = await esClient.security.getRole({ name: roleName });
-    expect(updatedRole[roleName]?.global?.data_source).toEqual(expectedDataSourcePrivileges);
+    expect(updatedRole[roleName]?.global?.data_source).toStrictEqual(expectedDataSourcePrivileges);
   });
 
   test('can delete a role with data source privileges', async ({ pageObjects, page }) => {

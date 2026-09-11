@@ -19,64 +19,62 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
     await kbnClient.uiSettings.replace({ defaultIndex: 'logstash-*' });
   });
 
-  test.afterAll(async ({ kbnClient }) => {
+  test.afterAll(async ({ kbnClient, esClient }) => {
     await kbnClient.importExport.unload(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
     );
+    await esClient.security.deleteRole({ name: 'logstash_reader_perm_test' }).catch(() => {});
+    await esClient.security.deleteUser({ username: 'Rashmi' }).catch(() => {});
   });
 
-  test.describe('role creation via UI', () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginWithCustomRole({
-        elasticsearch: { cluster: ['manage_security'], indices: [], run_as: [] },
-        kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-      });
+  test('should add new role logstash_reader', async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
+      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+    });
+    await pageObjects.securityRoles.goto();
+    await pageObjects.securityRoles.createRole('logstash_reader_perm_test', {
+      elasticsearch: {
+        indices: [
+          {
+            names: ['logstash-*'],
+            privileges: ['read', 'view_index_metadata'],
+          },
+        ],
+      },
     });
 
-    test.afterAll(async ({ esClient }) => {
-      await esClient.security.deleteRole({ name: 'logstash_reader_perm_test' }).catch(() => {});
-      await esClient.security.deleteUser({ username: 'Rashmi' }).catch(() => {});
+    const roles = await pageObjects.securityRoles.getAllRoles();
+    expect(roles.some((r) => r.rolename === 'logstash_reader_perm_test')).toBe(true);
+  });
+
+  test('should add new user Rashmi with logstash_reader role', async ({
+    browserAuth,
+    pageObjects,
+  }) => {
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: { cluster: ['manage_security'], indices: [] },
+      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+    });
+    await pageObjects.securityUsers.createUser({
+      username: 'Rashmi',
+      password: 'changeme',
+      confirm_password: 'changeme',
+      full_name: 'RashmiFirst RashmiLast',
+      email: 'rashmi@myEmail.com',
+      roles: ['logstash_reader_perm_test'],
     });
 
-    test('should add new role logstash_reader', async ({ pageObjects }) => {
-      await pageObjects.securityRoles.goto();
-      await pageObjects.securityRoles.createRole('logstash_reader_perm_test', {
-        elasticsearch: {
-          indices: [
-            {
-              names: ['logstash-*'],
-              privileges: ['read', 'view_index_metadata'],
-            },
-          ],
-        },
-      });
-
-      const roles = await pageObjects.securityRoles.getAllRoles();
-      expect(roles.some((r) => r.rolename === 'logstash_reader_perm_test')).toBe(true);
-    });
-
-    test('should add new user Rashmi with logstash_reader role', async ({ pageObjects }) => {
-      await pageObjects.securityUsers.createUser({
-        username: 'Rashmi',
-        password: 'changeme',
-        confirm_password: 'changeme',
-        full_name: 'RashmiFirst RashmiLast',
-        email: 'rashmi@myEmail.com',
-        roles: ['logstash_reader_perm_test'],
-      });
-
-      const users = await pageObjects.securityUsers.getAllUsers();
-      const user = users.find((u) => u.username === 'Rashmi');
-      expect(user).toBeDefined();
-      expect(user!.roles).toContain('logstash_reader_perm_test');
-      expect(user!.fullname).toBe('RashmiFirst RashmiLast');
-      expect(user!.reserved).toBe(false);
-    });
+    const users = await pageObjects.securityUsers.getAllUsers();
+    const user = users.find((u) => u.username === 'Rashmi');
+    expect(user).toBeDefined();
+    expect(user!.roles).toContain('logstash_reader_perm_test');
+    expect(user!.fullname).toBe('RashmiFirst RashmiLast');
+    expect(user!.reserved).toBe(false);
   });
 
   test('Kibana User without manage_security does not have link to user management', async ({
     browserAuth,
-    pageObjects,
     page,
   }) => {
     await browserAuth.loginWithCustomRole({
