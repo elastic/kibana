@@ -188,7 +188,7 @@ export const UserActions = React.memo((props: UserActionsProps) => {
                 type={notFound}
                 alt=""
                 fullWidth={false}
-                style={{ maxInlineSize: 200 }}
+                style={{ maxInlineSize: 160 }}
               />
             }
             title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}
