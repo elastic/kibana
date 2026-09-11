@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('User Profiles page', function () {
-    loadTestFile(require.resolve('./user_profiles'));
-  });
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/security/plugin_types_server'],
 };
