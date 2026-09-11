@@ -2003,10 +2003,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.2.tgz#ea3386f8ff415603f0f49f18bd80acd1fa820df5"
   integrity sha512-gYK9mHdGm/P7wbf6yhYo17qoP61IlUcwVwIDyOSHqx89TymSn9AyVZzbgjwmGdaLFNfgM+RKvg+hfTB7Unm+Gw==
 
-"@elastic/eui-test-helpers@1.5.0-snapshot.1788752437240":
-  version "1.5.0-snapshot.1788752437240"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.5.0-snapshot.1788752437240.tgz#91ccb7419aaeebd7a203bc0bbfe4f94aa8207ef3"
-  integrity sha512-vuSoYimsHXUau35iWM2sY+75XIQinv9KgyWKdDW57ml7Iok3tdDe0ZpWHYcGmIZlKHbXSs6h7SmYY6ydY9uQ/A==
+"@elastic/eui-test-helpers@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.6.0.tgz#98e22cc315dd7caba132687588092d5bb9e19fb5"
+  integrity sha512-H2c4qYXVYaooLpDCLTQq2+VAw6aSBowEW3PTEqZfEzE9CJq/tXYpV/NfApRVJo/OjxLFdGws+fQd26UR2agozg==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
@@ -2025,10 +2025,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@120.0.0":
-  version "120.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-120.0.0.tgz#30ee329210b3cd608fb55e31690edfe01711cd0f"
-  integrity sha512-iUutRU4JIG4eolU3LCE4CWe/H7juRCKYQaT+UeXQyegHRGttYFlunPEisS7+BLV1qrJRWiIq2lwykf0HwT7osw==
+"@elastic/eui@121.0.0":
+  version "121.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-121.0.0.tgz#bafa2c972a6457ac8899401217f7b0a1376891cc"
+  integrity sha512-Ws6scxpbhK7kiUqC8RR1Nua3ppguOOcXis81OATvzb9xSKQZbUWys+6TlZP67lrFheO1eqVc3ih276Pfm6kVBw==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
@@ -4465,6 +4465,14 @@
   uid ""
 
 "@kbn/alerts-ui-shared@link:src/platform/packages/shared/kbn-alerts-ui-shared":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alertzero-common@link:x-pack/solutions/security/packages/kbn-alertzero-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/alertzero-plugin@link:x-pack/solutions/security/plugins/alertzero":
   version "0.0.0"
   uid ""
 
@@ -7732,10 +7740,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-test-plugin@link:src/platform/test/plugin_functional/plugins/management_test_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/manifest@link:packages/kbn-manifest":
   version "0.0.0"
   uid ""
@@ -8028,6 +8032,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alerting-plugin@link:x-pack/solutions/observability/plugins/observability_alerting":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
@@ -8189,14 +8197,6 @@
   uid ""
 
 "@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
-  version "0.0.0"
-  uid ""
-
-"@kbn/pnd-common@link:x-pack/solutions/security/packages/kbn-pnd-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/pnd-plugin@link:x-pack/solutions/security/plugins/pnd":
   version "0.0.0"
   uid ""
 
@@ -21373,9 +21373,9 @@ fast-string-width@^3.0.2:
     fast-string-truncated-width "^3.0.2"
 
 fast-uri@^3.0.1:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.6.tgz#bfdd308ef763f835fed059f3c6c925f708e33e3a"
-  integrity sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.7.tgz#743157d957f3cbb4c65310e033dc2ad4ad7dc60a"
+  integrity sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==
 
 fast-wrap-ansi@^0.2.0:
   version "0.2.0"
