@@ -489,3 +489,114 @@ describe('eventsToRounds — multi-execution HITL fold', () => {
     });
   });
 });
+
+/** Minimal event set for a single completed round. */
+const singleRoundEvents = (roundId: string): TimelineEvent[] => [
+  {
+    id: `${roundId}::user_message`,
+    type: TimelineEventType.userMessage,
+    created_at: '2024-01-01T00:00:00.000Z',
+    actor: userActor,
+    data: { message: 'hello' },
+  },
+  ...executionEvents({
+    roundId,
+    executionId: `${roundId}::execution`,
+    triggerEventId: `${roundId}::user_message`,
+    triggerType: TimelineTriggerType.userMessage,
+    steps: [],
+    outcome: { type: 'responded', response: { message: 'hi' } },
+    createdAt: '2024-01-01T00:00:01.000Z',
+  }),
+];
+
+describe('eventsToRounds — feedback projection', () => {
+  it('attaches feedback to the matching round', () => {
+    const events: TimelineEvent[] = [
+      ...singleRoundEvents('r1'),
+      {
+        id: 'r1::feedback',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2024-01-01T00:01:00.000Z',
+        actor: userActor,
+        data: {
+          round_id: 'r1',
+          vote: 'up',
+          chips: ['accurate'],
+          comment: 'great',
+          submitted_at: '2024-01-01T00:01:00.000Z',
+        },
+      },
+    ];
+
+    const [round] = eventsToRounds(events);
+    expect(round.feedback).toEqual({
+      vote: 'up',
+      chips: ['accurate'],
+      comment: 'great',
+      submitted_at: '2024-01-01T00:01:00.000Z',
+    });
+  });
+
+  it('last feedback event wins when multiple exist for the same round', () => {
+    const events: TimelineEvent[] = [
+      ...singleRoundEvents('r1'),
+      {
+        id: 'r1::feedback::1',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2024-01-01T00:01:00.000Z',
+        actor: userActor,
+        data: {
+          round_id: 'r1',
+          vote: 'up',
+          chips: [],
+          comment: '',
+          submitted_at: '2024-01-01T00:01:00.000Z',
+        },
+      },
+      {
+        id: 'r1::feedback::2',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2024-01-01T00:02:00.000Z',
+        actor: userActor,
+        data: {
+          round_id: 'r1',
+          vote: 'down',
+          chips: ['inaccurate'],
+          comment: '',
+          submitted_at: '2024-01-01T00:02:00.000Z',
+        },
+      },
+    ];
+
+    const [round] = eventsToRounds(events);
+    expect(round.feedback?.vote).toBe('down');
+  });
+
+  it('leaves rounds without a feedback event untouched', () => {
+    const [round] = eventsToRounds(singleRoundEvents('r1'));
+    expect(round.feedback).toBeUndefined();
+  });
+
+  it('ignores feedback events for unknown round ids', () => {
+    const events: TimelineEvent[] = [
+      ...singleRoundEvents('r1'),
+      {
+        id: 'unknown::feedback',
+        type: TimelineEventType.roundFeedback,
+        created_at: '2024-01-01T00:01:00.000Z',
+        actor: userActor,
+        data: {
+          round_id: 'unknown',
+          vote: 'up',
+          chips: [],
+          comment: '',
+          submitted_at: '2024-01-01T00:01:00.000Z',
+        },
+      },
+    ];
+
+    const [round] = eventsToRounds(events);
+    expect(round.feedback).toBeUndefined();
+  });
+});

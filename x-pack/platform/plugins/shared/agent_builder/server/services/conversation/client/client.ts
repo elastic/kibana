@@ -11,8 +11,8 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
-  ConversationRoundFeedback,
   FeedbackChipId,
+  RoundFeedbackEvent,
 } from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
@@ -24,6 +24,8 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
+  TimelineEventType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -88,6 +90,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
@@ -584,8 +587,10 @@ class ConversationClientImpl implements ConversationClient {
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
+        const feedbackEventId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback}`;
+        const feedbackEvent = currentEvents.find((e) => e.id === feedbackEventId);
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
-        const replaced = [...nonRoundEvents, ...events];
+        const replaced = [...nonRoundEvents, ...(feedbackEvent ? [feedbackEvent] : []), ...events];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -646,33 +651,42 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
       fields: (current) => {
-        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
-
-        if (roundIndex === -1) {
+        const round = current.rounds.find((r) => r.id === roundId);
+        if (!round) {
           throw createConversationNotFoundError({ conversationId });
         }
 
-        const round = current.rounds[roundIndex];
-        const { feedback: _removed, ...roundWithoutFeedback } = round;
+        const feedbackEventId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback}`;
+        const otherEvents = (current.events ?? []).filter((e) => e.id !== feedbackEventId);
 
-        const updatedRound =
-          feedback.vote === null
-            ? roundWithoutFeedback
-            : {
-                ...round,
-                feedback: {
-                  vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
-                  submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
-                } satisfies ConversationRoundFeedback,
-              };
+        if (feedback.vote === null) {
+          return { events: otherEvents };
+        }
 
-        return {
-          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        const now = new Date().toISOString();
+        const feedbackEvent: RoundFeedbackEvent = {
+          id: feedbackEventId,
+          type: TimelineEventType.roundFeedback,
+          created_at: now,
+          actor: {
+            type: EventActorType.user,
+            id: this.user.id ?? this.user.username,
+            username: this.user.username,
+          },
+          data: {
+            round_id: roundId,
+            vote: feedback.vote,
+            chips: feedback.chips ?? [],
+            comment: feedback.comment ?? '',
+            submitted_at: now,
+            ...(round.model_usage?.connector_id
+              ? { connector_id: round.model_usage.connector_id }
+              : {}),
+            ...(round.model_usage?.model ? { model: round.model_usage.model } : {}),
+          },
         };
+
+        return { events: [...otherEvents, feedbackEvent] };
       },
     });
   }
