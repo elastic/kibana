@@ -23,6 +23,7 @@ const createRegistry = (definition: {
 
 describe('validateAttachment', () => {
   const resolveContext = createResolveContextMock();
+  const validateContext = { request: resolveContext.request };
 
   describe('Converse attachment input scenarios (structural + resolution)', () => {
     it('only data: validates using inline data', async () => {
@@ -34,6 +35,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text', data: { body: 'only-data' } },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(result).toEqual({
@@ -56,6 +58,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text', origin: 'dashboard-id' },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(result).toEqual({
@@ -79,6 +82,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text', data: { body: 'inline' }, origin: 'so-1' },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(resolve).not.toHaveBeenCalled();
@@ -101,6 +105,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text' },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(result).toEqual({

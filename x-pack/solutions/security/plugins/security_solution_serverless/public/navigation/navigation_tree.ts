@@ -46,14 +46,14 @@ export const createNavigationTree = async (
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // PND body (nodes omitted when xpack.pnd.enabled is false)
-      ...defaultNavigationTree.pnd(),
+      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
+      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.pndSecondary(),
+      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction } from '../../actions/types';
@@ -116,5 +116,33 @@ describe('EpisodeFooterActionMenu', () => {
     expect(screen.getByTestId('alertingV2EpisodeFlyoutTakeAction').className).not.toContain(
       'euiPopover-isOpen'
     );
+  });
+  it('lets an action own its menu entry and hands it a menu closer', async () => {
+    const renderMenuItem = jest.fn(({ closeMenu }) => (
+      <button type="button" data-test-subj="ownEntry" onClick={closeMenu}>
+        {'Own entry'}
+      </button>
+    ));
+    const assigneeAction = makeAction('ALERTING_V2_EDIT_EPISODE_ASSIGNEE', { renderMenuItem });
+
+    renderMenu([assigneeAction]);
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    const ownEntry = await screen.findByTestId('ownEntry');
+    expect(renderMenuItem).toHaveBeenCalledWith(
+      expect.objectContaining({ episodes: mockEpisodes, onSuccess: mockOnSuccess })
+    );
+    // The default descriptor item is bypassed, so `execute` never fires on click.
+    expect(
+      screen.queryByTestId('alertingV2EpisodeTakeAction-ALERTING_V2_EDIT_EPISODE_ASSIGNEE')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(ownEntry);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('ownEntry')).not.toBeInTheDocument();
+    });
+    expect(assigneeAction.execute).not.toHaveBeenCalled();
   });
 });
