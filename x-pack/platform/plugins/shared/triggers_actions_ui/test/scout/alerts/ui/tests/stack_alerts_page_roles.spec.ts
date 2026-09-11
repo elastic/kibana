@@ -63,7 +63,7 @@ const RULES_MANAGEMENT_LINK_SUBJ = 'triggersActions';
 // Restricted to applications so saved objects don't interfere with the Rules-app assertions.
 const GLOBAL_SEARCH_RULES_APP_QUERY = 'type:application rules';
 // Rules is surfaced in global search via the management-section deep link.
-const GLOBAL_SEARCH_RULES_RESULT = 'Alerts and Insights / Rules';
+const GLOBAL_SEARCH_RULES_RESULT = 'Automation / Rules';
 
 // LocalStorage payload that pre-seeds the alerts search bar's filter group.
 // In the FTR equivalent the user navigated to `/app/management` first, then

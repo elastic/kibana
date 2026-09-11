@@ -7,38 +7,24 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 
-type CapturedFlyoutOnClose = EuiFlyoutProps['onClose'];
-
-let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
-
-jest.mock('@elastic/eui', () => {
-  const ReactActual = jest.requireActual('react') as typeof import('react');
-  const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
-  const EuiFlyoutActual = actual.EuiFlyout;
-  return {
-    ...actual,
-    EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
-      (props, ref) => {
-        latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
-        return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
-      }
-    ),
-  };
-});
-
 let mockAreAgentBuilderSkillsAvailable = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
 };
 
 jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
   useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
 }));
 
 const onClose = jest.fn();
@@ -60,11 +46,12 @@ const renderFlyout = () =>
 
 describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
-    latestFlyoutOnClose = undefined;
     jest.clearAllMocks();
     mockAreAgentBuilderSkillsAvailable = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
     };
   });
 
@@ -73,35 +60,10 @@ describe('RuleCreateOptionsFlyout', () => {
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
-    expect(screen.getByTestId('ruleCreateOptionsFlyoutUniversalBadge')).toHaveTextContent(
-      'Universal'
-    );
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('With AI Agent')).toBeInTheDocument();
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
-  });
-
-  it('shows the Create rule title and closes from the header when stacked', () => {
-    render(
-      <I18nProvider>
-        <RuleCreateOptionsFlyout
-          historyKey={Symbol('rulesListCreateRule')}
-          retainOnCascade
-          onClose={onClose}
-          onCreateEsqlRule={onCreateEsqlRule}
-          onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
-
-    expect(onClose).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
   });
 
   it('calls onClose when the close button is clicked', () => {
@@ -112,12 +74,12 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not dismiss when EUI cascade-closes a stacked session the form is still using', () => {
+  it('uses a managed overlay session when historyKey is provided', () => {
+    const historyKey = Symbol('createRuleSession');
     render(
       <I18nProvider>
         <RuleCreateOptionsFlyout
-          historyKey={Symbol('rulesListCreateRule')}
-          retainOnCascade
+          historyKey={historyKey}
           onClose={onClose}
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
@@ -126,32 +88,8 @@ describe('RuleCreateOptionsFlyout', () => {
       </I18nProvider>
     );
 
-    act(() => {
-      latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
-    });
-
-    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
-  });
-
-  it('dismisses a stacked picker when a cascade is not from the open form', () => {
-    render(
-      <I18nProvider>
-        <RuleCreateOptionsFlyout
-          historyKey={Symbol('rulesListCreateRule')}
-          onClose={onClose}
-          onCreateEsqlRule={onCreateEsqlRule}
-          onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
-        />
-      </I18nProvider>
-    );
-
-    act(() => {
-      latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
-    });
-
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('ruleCreateOptionsFlyoutCloseButton')).not.toBeInTheDocument();
   });
 
   it('calls onCreateEsqlRule when the ES|QL option is selected', () => {
@@ -189,6 +127,7 @@ describe('RuleCreateOptionsFlyout', () => {
     mockAreAgentBuilderSkillsAvailable = false;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
     };
     render(
       <I18nProvider>
@@ -208,5 +147,32 @@ describe('RuleCreateOptionsFlyout', () => {
 
     fireEvent.click(screen.getByTestId('createWithAgentCard'));
     expect(onCreateWithAgent).not.toHaveBeenCalled();
+  });
+
+  it('does not render the Manage rules footer when onManageRules is omitted', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyoutManageRules')).not.toBeInTheDocument();
+  });
+
+  it('renders a Manage rules footer action on the right and calls onManageRules', () => {
+    const onManageRules = jest.fn();
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+          onManageRules={onManageRules}
+        />
+      </I18nProvider>
+    );
+
+    const manageRulesButton = screen.getByTestId('ruleCreateOptionsFlyoutManageRules');
+    expect(manageRulesButton).toHaveTextContent('Manage rules');
+    expect(manageRulesButton.querySelector('[data-euiicon-type="gear"]')).toBeInTheDocument();
+    fireEvent.click(manageRulesButton);
+    expect(onManageRules).toHaveBeenCalledTimes(1);
   });
 });

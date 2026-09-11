@@ -34,7 +34,7 @@ export const CASES_CONFIGURE_EDIT_TEMPLATE_PATH =
 export const CASES_CONFIGURE_FIELD_LIBRARY_PATH = `${CASES_CONFIGURE_PATH}/field_library` as const;
 /**
  * The main Cases application is in the stack management under the
- * Alerts and Insights section. To do that, Cases registers to the management
+ * Automation section. To do that, Cases registers to the management
  * application. This constant holds the application ID of the management plugin
  */
 export const STACK_APP_ID = 'management' as const;

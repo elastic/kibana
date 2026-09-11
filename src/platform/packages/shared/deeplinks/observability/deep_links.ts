@@ -115,6 +115,8 @@ export type StreamsLinkId = 'overview';
 
 export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'rules' | 'sources';
 
+export type SloLinkId = 'management' | 'settings';
+
 export type ObservabilityAlertingLinkId =
   | 'alerts'
   | 'rules-v1'
@@ -145,5 +147,6 @@ export type DeepLinkId =
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`
   | `${NightshiftApp}:${NightshiftLinkId}`
+  | `${SloApp}:${SloLinkId}`
   | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`
   | `${EntityInventoryApp}:${EntityInventoryAppLinkId}`;

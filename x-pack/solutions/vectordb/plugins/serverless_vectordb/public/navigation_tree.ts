@@ -36,7 +36,7 @@ const MONITOR_PERFORMANCE_TITLE = i18n.translate(
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessVectordb.nav.mngt.alertsAndInsights',
   {
-    defaultMessage: 'Alerts and insights',
+    defaultMessage: 'Automation',
   }
 );
 const ACCESS_TITLE = i18n.translate('xpack.serverlessVectordb.nav.mngt.access', {

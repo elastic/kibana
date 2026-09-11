@@ -19,9 +19,6 @@ import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimenta
 import RulesPage from './rules_page_container';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
-import { AppStatus } from '@kbn/core/public';
-import type { ApplicationStart } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/get_experimental_features');
@@ -41,17 +38,18 @@ jest.mock('../rule_details/components/global_rule_event_log_list', () => {
   return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
 });
 
-jest.mock('../rules_settings_page/rules_settings_page', () => ({
-  RulesSettingsPageContainer: () => (
-    <div data-test-subj="rulesSettingsPage">{'Render Rules Settings page component'}</div>
-  ),
+jest.mock('../../components/rules_setting/rules_settings_flyout', () => ({
+  RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
+    isVisible ? (
+      <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
+    ) : null,
 }));
 
 jest.mock('@kbn/response-ops-rule-form', () => ({
   RuleTypeModal: () => <div data-test-subj="ruleTypeModal">{'Render Rule Type Modal'}</div>,
 }));
 
-jest.mock('@kbn/ebt-tools/react', () => ({
+jest.mock('@kbn/ebt-tools', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
@@ -84,12 +82,6 @@ const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] }
     </IntlProvider>
   );
 
-const useSetAlertsAppStatus = (status: AppStatus) => {
-  useKibanaMock().services.application.applications$ = new BehaviorSubject(
-    new Map([['observability-overview', { status }]])
-  ) as unknown as ApplicationStart['applications$'];
-};
-
 describe('rulesPage', () => {
   beforeEach(() => {
     (hasShowActionsCapability as jest.Mock).mockClear();
@@ -102,7 +94,6 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
-    useSetAlertsAppStatus(AppStatus.accessible);
     useKibanaMock().services.hideListBackButton = undefined;
     useKibanaMock().services.tabs = undefined;
   });
@@ -141,34 +132,12 @@ describe('rulesPage', () => {
     expect(await screen.findAllByRole('tab')).toHaveLength(1);
   });
 
-  it('omits the list back button when hideListBackButton is set', async () => {
-    useKibanaMock().services.hideListBackButton = true;
+  it('does not show a back button on the rules list', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
-  });
-
-  it('omits the list back button when the observability-overview app is inaccessible', async () => {
-    useSetAlertsAppStatus(AppStatus.inaccessible);
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-    renderRulesPage(history);
-
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
-  });
-
-  it('points the back button at Alerts on the rules list', async () => {
-    useKibanaMock().services.application.getUrlForApp = jest.fn(
-      () => '/app/observability-overview/alerts'
-    );
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-    renderRulesPage(history);
-
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
-      'Back to Alerts'
-    );
   });
 
   it('keeps classic Logs on the Rules heading with a back button to Alerts', async () => {
@@ -243,36 +212,21 @@ describe('rulesPage', () => {
       expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
     });
 
-    it('navigates to the settings sub-page from the header menu', async () => {
+    it('opens the settings flyout from the header menu', async () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
       renderRulesPage(history);
 
-      expect(screen.queryByTestId('rulesSettingsPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBeInTheDocument();
       await openAppMenuOverflow();
       // EUI overflow popovers set pointer-events: none in jsdom; fireEvent still invokes run.
       fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
-      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
-      expect(history.location.pathname).toBe('/settings');
-      expect(history.location.state).toEqual({ returnPath: '/' });
-    });
-
-    it('remembers the Logs page when opening settings from it', async () => {
-      const history = createMemoryHistory({ initialEntries: ['/logs'] });
-      renderRulesPage(history);
-
-      await openAppMenuOverflow();
-      fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
-      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
-      expect(history.location.state).toEqual({ returnPath: '/logs' });
+      expect(await screen.findByTestId('rulesSettingsFlyout')).toBeInTheDocument();
     });
   });
 
   describe('when alerting v2 is enabled', () => {
     beforeEach(() => {
       (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
-      (useKibanaMock().services.settings.globalClient.isDeclared as jest.Mock).mockReturnValue(
-        true
-      );
     });
 
     describe('and the user can read v2 rules', () => {
@@ -334,6 +288,7 @@ describe('rulesPage', () => {
         expect(screen.queryByTestId('v1RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('v2RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('rulesSettingsLink')).not.toBeInTheDocument();
 
         await openAppMenuOverflow();
         expect(screen.queryByTestId('rulesLogsLink')).not.toBeInTheDocument();

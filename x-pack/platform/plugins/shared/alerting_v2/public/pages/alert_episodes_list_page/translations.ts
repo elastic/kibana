@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'Inbox',
 });
 
 export const EPISODES_LIST_MANAGE_RULES = i18n.translate(

@@ -28,10 +28,14 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
-import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import {
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  AGENT_BUILDER_NEW_CONVERSATION_PATH,
+  paths,
+} from './constants';
 import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
 import { getAlertingV2Locators } from './application/bind_locators_to_host';
-import { OBSERVABILITY_ALERTING_HOST } from '../common/locators';
+import { OBSERVABILITY_ALERTING_HOST } from './observability_alerting_host';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -213,20 +217,15 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
-  const handleHistoryBack = useCallback(() => {
-    setStep({ type: 'selector' });
-  }, []);
-  const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
-  const closeRequestRef = useRef<(() => void) | null>(null);
-  const isAuthoringStep = step.type === 'esql' || step.type === 'threshold';
-
-  const handlePickerClose = useCallback(() => {
-    if (isAuthoringStep) {
-      closeRequestRef.current?.();
-      return;
-    }
+  const navigateToManageRules = useCallback(() => {
+    if (!value?.services) return;
+    const href = value.services.http.basePath.prepend(paths.ruleList);
+    value.services.application.navigateToUrl(href);
     onClose();
-  }, [isAuthoringStep, onClose]);
+  }, [value, onClose]);
+
+  const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
+  const returnToSelector = useCallback(() => setStep({ type: 'selector' }), []);
 
   const rulesApi = useMemo(
     () => (value?.services ? new RulesApi(value.services.http) : undefined),
@@ -290,6 +289,8 @@ const CreateRuleOptionsFlyoutInner = ({
 
   const { services, ComposeDiscoverFlyout } = value;
 
+  const showAuthoringFlyout = step.type === 'esql' || step.type === 'threshold';
+
   if (step.type === 'legacy') {
     const legacyItem = legacyRuleTypes?.find((item) => item.id === step.id);
     if (legacyItem) {
@@ -298,34 +299,36 @@ const CreateRuleOptionsFlyoutInner = ({
   }
 
   return (
-    <Context.Provider value={services.container}>
-      <RuleCreateOptionsFlyout
-        historyKey={historyKey}
-        retainOnCascade={isAuthoringStep}
-        onClose={handlePickerClose}
-        onCreateEsqlRule={() => setStep({ type: 'esql' })}
-        onCreateWithAgent={navigateToAgentBuilder}
-        onCreateThresholdRule={() => setStep({ type: 'threshold' })}
-        legacyRuleTypes={legacyPanelItems}
-      />
-      {isAuthoringStep ? (
-        <ActionPolicyAwareComposeDiscoverFlyout
-          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
+    <>
+      <Context.Provider value={services.container}>
+        <RuleCreateOptionsFlyout
           historyKey={historyKey}
-          mode="create"
           onClose={onClose}
-          onHistoryBack={handleHistoryBack}
-          closeRequestRef={closeRequestRef}
-          stackedOnPicker
-          services={services}
-          builderType={step.type === 'threshold' ? 'threshold' : undefined}
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
+          onCreateEsqlRule={() => setStep({ type: 'esql' })}
+          onCreateWithAgent={navigateToAgentBuilder}
+          onCreateThresholdRule={() => setStep({ type: 'threshold' })}
+          legacyRuleTypes={legacyPanelItems}
+          onManageRules={navigateToManageRules}
         />
+      </Context.Provider>
+      {showAuthoringFlyout ? (
+        <Context.Provider value={services.container}>
+          <ActionPolicyAwareComposeDiscoverFlyout
+            ComposeDiscoverFlyout={ComposeDiscoverFlyout}
+            historyKey={historyKey}
+            session="start"
+            mode="create"
+            onClose={returnToSelector}
+            services={services}
+            builderType={step.type === 'threshold' ? 'threshold' : undefined}
+            onCreateRule={handleCreateRule}
+            isSaving={isSaving}
+            initialQuery={query}
+            esqlVariables={esqlVariables}
+          />
+        </Context.Provider>
       ) : null}
-    </Context.Provider>
+    </>
   );
 };
 

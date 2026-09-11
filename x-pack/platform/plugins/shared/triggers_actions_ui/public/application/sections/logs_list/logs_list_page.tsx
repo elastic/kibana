@@ -29,16 +29,12 @@ const LogsList = lazy(() => import('../rule_details/components/global_rule_event
 export const LogsListContainer = () => {
   const history = useHistory();
   const {
-    application: {
-      getUrlForApp,
-      capabilities: { rulesSettings = {} },
-    },
+    application: { getUrlForApp },
     chrome: { docTitle },
     http,
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
-    showClassicBadge,
   } = useKibana().services;
   const { rules } = useLocators();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
@@ -46,10 +42,7 @@ export const LogsListContainer = () => {
     toasts,
     filteredRuleTypes: [],
   });
-  const { openCreateRuleModal, navigateToSettings } = useRulesPageActions();
-
-  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
-  const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
+  const { openCreateRuleModal } = useRulesPageActions();
 
   const docLink = docLinks.links.alerting.guide;
   const rulesListHref = rules.useUrl({});
@@ -65,11 +58,11 @@ export const LogsListContainer = () => {
     () =>
       getRulesPageMenu({
         authorizedToCreateAnyRules,
-        canShowSettings,
+        canShowSettings: false,
         onCreateRule: openCreateRuleModal,
-        onOpenSettings: navigateToSettings,
+        onOpenSettings: () => undefined,
       }),
-    [authorizedToCreateAnyRules, canShowSettings, openCreateRuleModal, navigateToSettings]
+    [authorizedToCreateAnyRules, openCreateRuleModal]
   );
 
   const classicLogsTabs = useMemo(
@@ -79,13 +72,7 @@ export const LogsListContainer = () => {
 
   const heading =
     mode !== RULES_PAGE_MODE.triggersActionsTabs ? (
-      <LogsListHeader
-        backHref={rulesListHref}
-        shouldShowSettings={canShowSettings}
-        showClassicBadge={showClassicBadge}
-        docLink={docLink}
-        onOpenSettings={navigateToSettings}
-      />
+      <LogsListHeader backHref={rulesListHref} docLink={docLink} />
     ) : (
       <RulesPageHeader
         back={{

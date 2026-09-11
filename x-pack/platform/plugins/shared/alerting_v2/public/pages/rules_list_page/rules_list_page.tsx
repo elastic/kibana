@@ -16,7 +16,7 @@ import { UserCapabilities } from '../../services/user_capabilities';
 import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
@@ -30,7 +30,6 @@ import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
-import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -42,42 +41,48 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
-  const createSessionHistoryKey = useMemo(() => Symbol('rulesListCreateRule'), []);
+
+  // One history key for the whole create session so the form can stack on the
+  // options picker and Back returns to it (rna-program#960 prototype).
+  const createSessionHistoryKey = useMemo(() => Symbol('createRuleSession'), []);
+
   const {
     flyout,
     confirmationModal,
+    closeFlyout,
     openCreateFlyout,
     openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
-    isOpen: isAuthoringFlyoutOpen,
-    requestClose: requestAuthoringClose,
   } = useComposeDiscoverFlyout({
-    historyKey: isCreateOptionsFlyoutOpen ? createSessionHistoryKey : undefined,
-    onDismiss: closeCreateOptionsFlyout,
+    historyKey: createSessionHistoryKey,
+    // Same historyKey as the options picker; both use session="start" so EUI
+    // stacks history (form covers picker; Back returns). session="inherit" is
+    // parent/child and lays out side-by-side on wide screens.
+    onCreateSuccess: closeCreateOptionsFlyout,
   });
 
+  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
-  const showBuildSequence = useAlertingV2ExperimentalFeatures();
   const { rulesLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
   }, [rulesLocators]);
-  const handlePickerClose = useCallback(() => {
-    if (isAuthoringFlyoutOpen) {
-      requestAuthoringClose();
-      return;
-    }
-    closeCreateOptionsFlyout();
-  }, [isAuthoringFlyoutOpen, requestAuthoringClose, closeCreateOptionsFlyout]);
 
-  const onCreateWithAgentFromOptionsFlyout = () => {
+  const handleCloseCreateOptionsFlyout = useCallback(() => {
+    // Closing the picker exits the whole create session — also dismiss any form on top.
+    closeFlyout();
     closeCreateOptionsFlyout();
-    navigateToAgentBuilder();
+  }, [closeFlyout, closeCreateOptionsFlyout]);
+
+  // Keep the picker mounted underneath; open the authoring flyout on top.
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
+    openCreateFlyout();
   };
-  const onBuildSequenceFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
-    navigateToSequenceBuilder();
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    handleCloseCreateOptionsFlyout();
+    navigateToAgentBuilder();
   };
   const onCreateThresholdRuleFromOptionsFlyout = () => {
     openCreateBuilderFlyout('threshold');
@@ -97,7 +102,7 @@ export const RulesListPage = () => {
         <h2>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
-            defaultMessage="No Universal rules"
+            defaultMessage="No rules"
           />
         </h2>
       }
@@ -105,7 +110,7 @@ export const RulesListPage = () => {
         <p>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
-            defaultMessage="There are no Universal rules to display."
+            defaultMessage="There are no rules to display."
           />
         </p>
       }
@@ -166,8 +171,8 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
+          onBuildSequence={navigateToSequenceBuilder}
         />
-        <UniversalAlertingIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
@@ -185,12 +190,10 @@ export const RulesListPage = () => {
       {isCreateOptionsFlyoutOpen ? (
         <RuleCreateOptionsFlyout
           historyKey={createSessionHistoryKey}
-          retainOnCascade={isAuthoringFlyoutOpen}
-          onClose={handlePickerClose}
-          onCreateEsqlRule={openCreateFlyout}
+          onClose={handleCloseCreateOptionsFlyout}
+          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
-          onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
         />
       ) : null}
       {flyout}

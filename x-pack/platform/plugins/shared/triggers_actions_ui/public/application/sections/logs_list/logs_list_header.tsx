@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
+import React from 'react';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 
 export interface LogsListHeaderProps {
   backHref: string;
-  shouldShowSettings: boolean;
-  showClassicBadge?: boolean;
   docLink: string;
-  onOpenSettings: () => void;
 }
 
 const LOGS_PAGE_TITLE = i18n.translate('xpack.triggersActionsUI.rulesLogsPage.pageTitle', {
@@ -29,43 +25,17 @@ const BACK_TO_RULES_LABEL = i18n.translate(
   }
 );
 
-const CLASSIC_RULES_ONLY_BADGE: AppHeaderBadge = {
-  label: i18n.translate('xpack.triggersActionsUI.rulesLogsPage.classicRulesOnlyBadgeLabel', {
-    defaultMessage: 'Classic',
-  }),
-  color: 'hollow',
-  'data-test-subj': 'classicRulesOnlyBadge',
-};
-
 /**
  * Header for the v1 Rules Logs page: a child-page heading with its own title and a back
- * button to Rules, and no tabs.
+ * button to Rules, and no tabs or Settings entry.
  */
-export const LogsListHeader = ({
-  backHref,
-  shouldShowSettings,
-  showClassicBadge,
-  docLink,
-  onOpenSettings,
-}: LogsListHeaderProps) => {
-  const menu = useMemo(
-    () =>
-      getRulesPageMenu({
-        authorizedToCreateAnyRules: false,
-        canShowSettings: shouldShowSettings,
-        onOpenSettings,
-      }),
-    [shouldShowSettings, onOpenSettings]
-  );
-
+export const LogsListHeader = ({ backHref, docLink }: LogsListHeaderProps) => {
   return (
     <AppHeader
       title={LOGS_PAGE_TITLE}
-      badges={showClassicBadge ? [CLASSIC_RULES_ONLY_BADGE] : undefined}
       spacing="bleed"
       back={{ href: backHref, label: BACK_TO_RULES_LABEL }}
       docLink={docLink}
-      menu={menu}
     />
   );
 };
