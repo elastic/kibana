@@ -22304,7 +22304,6 @@
     "xpack.fleet.debug.agentPolicyDebugger.selectLabel": "エージェントポリシーを選択",
     "xpack.fleet.debug.agentPolicyDebugger.title": "エージェントポリシーデバッガー",
     "xpack.fleet.debug.agentPolicyDebugger.viewAgentPolicyLink": "Fleet UIでエージェントポリシーを表示",
-    "xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title": "クラウドオンボーディング導入デバッガ",
     "xpack.fleet.debug.dangerZone.description": "このページは、Fleetの基本データと診断の問題を直接管理するためのインターフェースです。これらのデバッグツールは、本質的に{strongDestructive}である可能性があり、{strongLossOfData}のおそれがあります。十分にご注意ください。",
     "xpack.fleet.debug.dangerZone.destructive": "破壊的",
     "xpack.fleet.debug.dangerZone.lossOfData": "データの損失",

@@ -22239,7 +22239,6 @@
     "xpack.fleet.debug.agentPolicyDebugger.selectLabel": "Wählen Sie eine Agent Policy aus",
     "xpack.fleet.debug.agentPolicyDebugger.title": "Agent Policy-Debugger",
     "xpack.fleet.debug.agentPolicyDebugger.viewAgentPolicyLink": "Agent Policy in der Fleet-Benutzeroberfläche anzeigen",
-    "xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title": "Cloud-Onboarding-Deployment-Debugger",
     "xpack.fleet.debug.dangerZone.description": "Diese Seite bietet eine Schnittstelle zur direkten Verwaltung der zugrunde liegenden Daten von Fleet und zur Diagnose von Problemen. Seien Sie sich bewusst, dass diese Debugging-Tools von Natur aus {strongDestructive} sein können und zu {strongLossOfData} führen können. Bitte verfahren Sie mit Vorsicht.",
     "xpack.fleet.debug.dangerZone.destructive": "zerstörerisch",
     "xpack.fleet.debug.dangerZone.lossOfData": "Datenverlust",

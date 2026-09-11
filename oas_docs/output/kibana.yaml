@@ -147,6 +147,7 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
+  - name: Fleet cloud onboarding deployments
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -44682,6 +44683,1252 @@ paths:
       tags:
         - Fleet cloud connectors
       x-state: Experimental; added in 9.2.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/cloud_onboarding_deployments:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new Fleet cloud onboarding deployment.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: post-fleet-cloud-onboarding-deployments
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postCloudOnboardingDeploymentAgentBasedRequestExample:
+                description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
+                value:
+                  connectorId: cloud-connector-id-1
+                  mechanisms:
+                    - agent_based
+                  provider: aws
+                  services:
+                    - cloudwatch_metrics
+                  serviceVars:
+                    cloudwatch_metrics:
+                      namespace: AWS/EC2
+                      regions:
+                        - us-east-1
+              postCloudOnboardingDeploymentEcfRequestExample:
+                description: Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)
+                value:
+                  connectorId: cloud-connector-id-1
+                  mechanisms:
+                    - ecf
+                  provider: aws
+                  services:
+                    - cloudfront_logs
+                  serviceVars:
+                    cloudfront_logs:
+                      regions:
+                        - us-east-1
+                      s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
+              postCloudOnboardingDeploymentRequestExample:
+                description: Create a new AWS cloud onboarding deployment using identity federation (managed integration)
+                value:
+                  connectorId: cloud-connector-id-1
+                  mechanisms:
+                    - managed_integration
+                  provider: aws
+                  services:
+                    - cloudwatch_metrics
+                    - cloudtrail
+                  serviceVars:
+                    cloudtrail:
+                      regions:
+                        - us-east-1
+                      s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                    cloudwatch_metrics:
+                      namespace: AWS/EC2
+                      regions:
+                        - us-east-1
+                        - eu-west-1
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                authMethod:
+                  description: Authentication method for managed integrations.
+                  enum:
+                    - identity_federation
+                    - static_keys
+                  type: string
+                connectorId:
+                  description: ID of the fleet-cloud-connector to associate with this deployment. Omit for static-keys deployments.
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                dataFormat:
+                  description: 'Data format: ecs or otel.'
+                  enum:
+                    - ecs
+                    - otel
+                  type: string
+                globalRegion:
+                  description: Global AWS region from the Service Settings step.
+                  maxLength: 64
+                  type: string
+                mechanisms:
+                  description: Delivery mechanisms active in this deployment.
+                  items:
+                    description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                    enum:
+                      - managed_integration
+                      - ecf
+                      - agent_based
+                    type: string
+                  maxItems: 10
+                  type: array
+                provider:
+                  description: Cloud provider.
+                  enum:
+                    - aws
+                    - azure
+                    - gcp
+                  type: string
+                services:
+                  description: Service IDs to be covered by this deployment.
+                  items:
+                    minLength: 1
+                    type: string
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+                serviceVars:
+                  additionalProperties:
+                    additionalProperties:
+                      nullable: true
+                    type: object
+                  description: Per-service config keyed by instance ID.
+                  type: object
+              required:
+                - provider
+                - mechanisms
+                - services
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postCloudOnboardingDeploymentAgentBasedExample:
+                  description: Agent-based deployment — agentPolicyId set after the agent policy is selected or created
+                  value:
+                    item:
+                      agentPolicyId: agent-policy-id-1
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-2
+                      mechanisms:
+                        - agent_based
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                      serviceVars:
+                        cloudwatch_metrics:
+                          namespace: AWS/EC2
+                          regions:
+                            - us-east-1
+                      status: pending
+                postCloudOnboardingDeploymentEcfExample:
+                  description: ECF deployment — apiKeyId set after the Elasticsearch API key is created for the ECF service
+                  value:
+                    item:
+                      apiKeyId: es-api-key-id-1
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-3
+                      mechanisms:
+                        - ecf
+                      provider: aws
+                      services:
+                        - cloudfront_logs
+                      serviceVars:
+                        cloudfront_logs:
+                          regions:
+                            - us-east-1
+                          s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
+                      status: pending
+                postCloudOnboardingDeploymentExample:
+                  description: Managed integration deployment — packagePolicyIds set after deployment completes
+                  value:
+                    item:
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      id: onboarding-deployment-id-1
+                      mechanisms:
+                        - managed_integration
+                      packagePolicyIds:
+                        - package-policy-id-1
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                        - cloudtrail
+                      serviceVars:
+                        cloudtrail:
+                          regions:
+                            - us-east-1
+                          s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                        cloudwatch_metrics:
+                          namespace: AWS/EC2
+                          regions:
+                            - us-east-1
+                            - eu-west-1
+                      status: pending
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                        type: string
+                      apiKeyId:
+                        description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                        type: string
+                      attemptCount:
+                        description: Number of deployment attempts, including the current one.
+                        minimum: 1
+                        type: number
+                      authMethod:
+                        description: Authentication method for managed integrations.
+                        enum:
+                          - identity_federation
+                          - static_keys
+                        type: string
+                      connectorId:
+                        description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                        type: string
+                      dataFormat:
+                        description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
+                        type: string
+                      deploymentId:
+                        description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                        type: string
+                      deploymentName:
+                        description: Opaque deployment name; for AWS, the CFN stack name.
+                        type: string
+                      ecfStacks:
+                        description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            family:
+                              description: ECF template family.
+                              enum:
+                                - unified
+                                - otel
+                                - crowdstrike
+                              type: string
+                            stackName:
+                              description: CloudFormation stack name (128-char AWS limit).
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            templateVersion:
+                              description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                          required:
+                            - family
+                            - stackName
+                            - templateVersion
+                        maxItems: 10
+                        type: array
+                      globalRegion:
+                        description: Global AWS region from the Service Settings step.
+                        type: string
+                      id:
+                        type: string
+                      mechanisms:
+                        items:
+                          description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                          enum:
+                            - managed_integration
+                            - ecf
+                            - agent_based
+                          type: string
+                        maxItems: 10
+                        type: array
+                      packagePolicyIds:
+                        description: Package policy IDs created for managed_integration services.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      provider:
+                        description: Cloud provider.
+                        enum:
+                          - aws
+                          - azure
+                          - gcp
+                        type: string
+                      services:
+                        description: Service IDs covered by this deployment.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      serviceVars:
+                        additionalProperties:
+                          additionalProperties:
+                            nullable: true
+                          type: object
+                        description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                        type: object
+                      status:
+                        description: Deployment status.
+                        enum:
+                          - pending
+                          - deploying
+                          - succeeded
+                          - failed
+                        type: string
+                      statusMessage:
+                        description: Error context when status is failed.
+                        type: string
+                    required:
+                      - id
+                      - provider
+                      - mechanisms
+                      - services
+                      - status
+                      - attemptCount
+                required:
+                  - item
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Create cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/cloud_onboarding_deployments/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: delete-fleet-cloud-onboarding-deployments-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The saved object ID of the cloud onboarding deployment.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteCloudOnboardingDeploymentExample:
+                  description: The cloud onboarding deployment was successfully deleted
+                  value:
+                    id: onboarding-deployment-id-1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Delete cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-onboarding-deployments-id
+      parameters:
+        - description: The saved object ID of the cloud onboarding deployment.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCloudOnboardingDeploymentExample:
+                  description: A cloud onboarding deployment that has succeeded
+                  value:
+                    item:
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                      deploymentName: elastic-aws-onboarding
+                      id: onboarding-deployment-id-1
+                      mechanisms:
+                        - managed_integration
+                      packagePolicyIds:
+                        - package-policy-id-1
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                        - cloudtrail
+                      serviceVars:
+                        cloudtrail:
+                          - regions:
+                              - us-east-1
+                            s3_bucket_arn: arn:aws:s3:::my-cloudtrail-bucket
+                        cloudwatch_metrics:
+                          - namespace: AWS/EC2
+                            regions:
+                              - us-east-1
+                              - eu-west-1
+                      status: succeeded
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                        type: string
+                      apiKeyId:
+                        description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                        type: string
+                      attemptCount:
+                        description: Number of deployment attempts, including the current one.
+                        minimum: 1
+                        type: number
+                      authMethod:
+                        description: Authentication method for managed integrations.
+                        enum:
+                          - identity_federation
+                          - static_keys
+                        type: string
+                      connectorId:
+                        description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                        type: string
+                      dataFormat:
+                        description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
+                        type: string
+                      deploymentId:
+                        description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                        type: string
+                      deploymentName:
+                        description: Opaque deployment name; for AWS, the CFN stack name.
+                        type: string
+                      ecfStacks:
+                        description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            family:
+                              description: ECF template family.
+                              enum:
+                                - unified
+                                - otel
+                                - crowdstrike
+                              type: string
+                            stackName:
+                              description: CloudFormation stack name (128-char AWS limit).
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            templateVersion:
+                              description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                          required:
+                            - family
+                            - stackName
+                            - templateVersion
+                        maxItems: 10
+                        type: array
+                      globalRegion:
+                        description: Global AWS region from the Service Settings step.
+                        type: string
+                      id:
+                        type: string
+                      mechanisms:
+                        items:
+                          description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                          enum:
+                            - managed_integration
+                            - ecf
+                            - agent_based
+                          type: string
+                        maxItems: 10
+                        type: array
+                      packagePolicyIds:
+                        description: Package policy IDs created for managed_integration services.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      provider:
+                        description: Cloud provider.
+                        enum:
+                          - aws
+                          - azure
+                          - gcp
+                        type: string
+                      services:
+                        description: Service IDs covered by this deployment.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      serviceVars:
+                        additionalProperties:
+                          additionalProperties:
+                            nullable: true
+                          type: object
+                        description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                        type: object
+                      status:
+                        description: Deployment status.
+                        enum:
+                          - pending
+                          - deploying
+                          - succeeded
+                          - failed
+                        type: string
+                      statusMessage:
+                        description: Error context when status is failed.
+                        type: string
+                    required:
+                      - id
+                      - provider
+                      - mechanisms
+                      - services
+                      - status
+                      - attemptCount
+                required:
+                  - item
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Get cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+      operationId: put-fleet-cloud-onboarding-deployments-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The saved object ID of the cloud onboarding deployment.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 255
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putCloudOnboardingDeploymentRequestExample:
+                description: Update a cloud onboarding deployment after the CFN stack has been submitted
+                value:
+                  deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                  deploymentName: elastic-aws-onboarding
+                  status: deploying
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agentPolicyId:
+                  maxLength: 255
+                  type: string
+                apiKeyId:
+                  maxLength: 255
+                  type: string
+                attemptCount:
+                  description: Incremented by callers performing a retry.
+                  minimum: 1
+                  type: number
+                deploymentId:
+                  description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
+                  maxLength: 2048
+                  type: string
+                deploymentName:
+                  maxLength: 255
+                  type: string
+                ecfStacks:
+                  description: ECF CloudFormation stacks to record for this deployment.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      family:
+                        description: ECF template family.
+                        enum:
+                          - unified
+                          - otel
+                          - crowdstrike
+                        type: string
+                      stackName:
+                        description: CloudFormation stack name (128-char AWS limit).
+                        maxLength: 128
+                        minLength: 1
+                        type: string
+                      templateVersion:
+                        description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                        maxLength: 32
+                        minLength: 1
+                        type: string
+                    required:
+                      - family
+                      - stackName
+                      - templateVersion
+                  maxItems: 10
+                  type: array
+                packagePolicyIds:
+                  items:
+                    maxLength: 255
+                    type: string
+                  maxItems: 100
+                  type: array
+                serviceVars:
+                  additionalProperties:
+                    additionalProperties:
+                      nullable: true
+                    type: object
+                  description: Per-service config keyed by instance ID.
+                  type: object
+                status:
+                  description: Deployment status.
+                  enum:
+                    - pending
+                    - deploying
+                    - succeeded
+                    - failed
+                  type: string
+                statusMessage:
+                  description: Error context; set when transitioning to failed.
+                  maxLength: 1000
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putCloudOnboardingDeploymentExample:
+                  description: The updated cloud onboarding deployment
+                  value:
+                    item:
+                      attemptCount: 1
+                      connectorId: cloud-connector-id-1
+                      deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                      deploymentName: elastic-aws-onboarding
+                      id: onboarding-deployment-id-1
+                      mechanisms:
+                        - managed_integration
+                      packagePolicyIds:
+                        - package-policy-id-1
+                      provider: aws
+                      services:
+                        - cloudwatch_metrics
+                        - cloudtrail
+                      status: deploying
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                        type: string
+                      apiKeyId:
+                        description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                        type: string
+                      attemptCount:
+                        description: Number of deployment attempts, including the current one.
+                        minimum: 1
+                        type: number
+                      authMethod:
+                        description: Authentication method for managed integrations.
+                        enum:
+                          - identity_federation
+                          - static_keys
+                        type: string
+                      connectorId:
+                        description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                        type: string
+                      dataFormat:
+                        description: 'Data format: ecs or otel.'
+                        enum:
+                          - ecs
+                          - otel
+                        type: string
+                      deploymentId:
+                        description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                        type: string
+                      deploymentName:
+                        description: Opaque deployment name; for AWS, the CFN stack name.
+                        type: string
+                      ecfStacks:
+                        description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            family:
+                              description: ECF template family.
+                              enum:
+                                - unified
+                                - otel
+                                - crowdstrike
+                              type: string
+                            stackName:
+                              description: CloudFormation stack name (128-char AWS limit).
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                            templateVersion:
+                              description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                              maxLength: 32
+                              minLength: 1
+                              type: string
+                          required:
+                            - family
+                            - stackName
+                            - templateVersion
+                        maxItems: 10
+                        type: array
+                      globalRegion:
+                        description: Global AWS region from the Service Settings step.
+                        type: string
+                      id:
+                        type: string
+                      mechanisms:
+                        items:
+                          description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                          enum:
+                            - managed_integration
+                            - ecf
+                            - agent_based
+                          type: string
+                        maxItems: 10
+                        type: array
+                      packagePolicyIds:
+                        description: Package policy IDs created for managed_integration services.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
+                      provider:
+                        description: Cloud provider.
+                        enum:
+                          - aws
+                          - azure
+                          - gcp
+                        type: string
+                      services:
+                        description: Service IDs covered by this deployment.
+                        items:
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      serviceVars:
+                        additionalProperties:
+                          additionalProperties:
+                            nullable: true
+                          type: object
+                        description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                        type: object
+                      status:
+                        description: Deployment status.
+                        enum:
+                          - pending
+                          - deploying
+                          - succeeded
+                          - failed
+                        type: string
+                      statusMessage:
+                        description: Error context when status is failed.
+                        type: string
+                    required:
+                      - id
+                      - provider
+                      - mechanisms
+                      - services
+                      - status
+                      - attemptCount
+                required:
+                  - item
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundResponseExample:
+                  description: The requested cloud onboarding deployment does not exist
+                  value:
+                    error: Not Found
+                    message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Update cloud onboarding deployment
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/cloud_onboarding_deployments/connector/{connectorId}:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments/connector/{connectorId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all cloud onboarding deployments for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-onboarding-deployments-connector-connectorid
+      parameters:
+        - description: The fleet-cloud-connector ID to list deployments for.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCloudOnboardingDeploymentsByConnectorIdExample:
+                  description: List of cloud onboarding deployments for a connector
+                  value:
+                    items:
+                      - attemptCount: 1
+                        connectorId: cloud-connector-id-1
+                        deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
+                        deploymentName: elastic-aws-onboarding
+                        id: onboarding-deployment-id-1
+                        mechanisms:
+                          - managed_integration
+                        packagePolicyIds:
+                          - package-policy-id-1
+                        provider: aws
+                        services:
+                          - cloudwatch_metrics
+                        status: succeeded
+                      - attemptCount: 1
+                        connectorId: cloud-connector-id-1
+                        id: onboarding-deployment-id-2
+                        mechanisms:
+                          - managed_integration
+                          - ecf
+                        provider: aws
+                        services:
+                          - cloudfront_logs
+                        serviceVars:
+                          cloudfront_logs:
+                            regions:
+                              - us-east-1
+                            s3_bucket_arn: arn:aws:s3:::my-cloudfront-logs-bucket
+                        status: deploying
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agentPolicyId:
+                          description: Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.
+                          type: string
+                        apiKeyId:
+                          description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                          type: string
+                        attemptCount:
+                          description: Number of deployment attempts, including the current one.
+                          minimum: 1
+                          type: number
+                        authMethod:
+                          description: Authentication method for managed integrations.
+                          enum:
+                            - identity_federation
+                            - static_keys
+                          type: string
+                        connectorId:
+                          description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                          type: string
+                        dataFormat:
+                          description: 'Data format: ecs or otel.'
+                          enum:
+                            - ecs
+                            - otel
+                          type: string
+                        deploymentId:
+                          description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                          type: string
+                        deploymentName:
+                          description: Opaque deployment name; for AWS, the CFN stack name.
+                          type: string
+                        ecfStacks:
+                          description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              family:
+                                description: ECF template family.
+                                enum:
+                                  - unified
+                                  - otel
+                                  - crowdstrike
+                                type: string
+                              stackName:
+                                description: CloudFormation stack name (128-char AWS limit).
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              templateVersion:
+                                description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                                maxLength: 32
+                                minLength: 1
+                                type: string
+                            required:
+                              - family
+                              - stackName
+                              - templateVersion
+                          maxItems: 10
+                          type: array
+                        globalRegion:
+                          description: Global AWS region from the Service Settings step.
+                          type: string
+                        id:
+                          type: string
+                        mechanisms:
+                          items:
+                            description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                            enum:
+                              - managed_integration
+                              - ecf
+                              - agent_based
+                            type: string
+                          maxItems: 10
+                          type: array
+                        packagePolicyIds:
+                          description: Package policy IDs created for managed_integration services.
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
+                        provider:
+                          description: Cloud provider.
+                          enum:
+                            - aws
+                            - azure
+                            - gcp
+                          type: string
+                        services:
+                          description: Service IDs covered by this deployment.
+                          items:
+                            type: string
+                          maxItems: 1000
+                          type: array
+                        serviceVars:
+                          additionalProperties:
+                            additionalProperties:
+                              nullable: true
+                            type: object
+                          description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                          type: object
+                        status:
+                          description: Deployment status.
+                          enum:
+                            - pending
+                            - deploying
+                            - succeeded
+                            - failed
+                          type: string
+                        statusMessage:
+                          description: Error context when status is failed.
+                          type: string
+                      required:
+                        - id
+                        - provider
+                        - mechanisms
+                        - services
+                        - status
+                        - attemptCount
+                    maxItems: 100
+                    type: array
+                required:
+                  - items
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get cloud onboarding deployments by connector ID
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
