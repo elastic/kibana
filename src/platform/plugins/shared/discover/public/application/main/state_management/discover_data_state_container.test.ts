@@ -48,6 +48,7 @@ const mockFetchDocuments = jest.mocked(fetchDocuments);
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchDocuments.mockResolvedValue({ records: [] });
   });
 
   test('return is valid', async () => {
@@ -112,6 +113,53 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('does not reset warning callout dismiss on fetch more', async () => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 2),
+    });
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+        isWarningCalloutDismissed: true,
+      })
+    );
+
+    mockFetchDocuments.mockResolvedValue({ records: records.slice(2) });
+    dataStateContainer.refetch$.next('fetch_more');
+
+    await waitFor(() => {
+      expect(dataStateContainer.data$.documents$.value.result).toEqual(records);
+    });
+    expect(toolkit.getCurrentTab().isWarningCalloutDismissed).toBe(true);
+  });
+
+  test('resets warning callout dismiss when a new fetch completes', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+        isWarningCalloutDismissed: true,
+      })
+    );
+    dataStateContainer.refetch$.next(undefined);
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().isWarningCalloutDismissed).toBe(false);
+    });
   });
 
   test('refetch$ clears stale profile URL state when the resolved profile has no URL state', async () => {

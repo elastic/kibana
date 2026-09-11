@@ -39,7 +39,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({}),
@@ -65,7 +65,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -104,7 +104,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -164,7 +164,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -207,7 +207,7 @@ describe('useDashboardMenuItems', () => {
     };
 
     const renderMenuItems = () =>
-      renderHook(() => useDashboardMenuItems({ maybeRedirect: jest.fn() }), {
+      renderHook(() => useDashboardMenuItems({ redirectTo: jest.fn() }), {
         wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
       });
 
@@ -289,7 +289,7 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              maybeRedirect: jest.fn(),
+              redirectTo: jest.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({
@@ -328,7 +328,7 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              maybeRedirect: jest.fn(),
+              redirectTo: jest.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),
@@ -354,7 +354,7 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              maybeRedirect: jest.fn(),
+              redirectTo: jest.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),

@@ -18,6 +18,8 @@ import {
   FilterOutBtn,
 } from './default_cell_actions';
 import { dataTableContextMock } from '../../__mocks__/table_context';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -80,7 +82,7 @@ describe('Default cell actions ', () => {
           colIndex: 1,
           columnId: 'extension',
         })
-      ).props['aria-label']
+      )!.props['aria-label']
     ).toEqual(CopyBtn.props['aria-label']);
   });
 
@@ -110,7 +112,7 @@ describe('Default cell actions ', () => {
           colIndex: 1,
           columnId: 'extension',
         })
-      ).props['aria-label']
+      )!.props['aria-label']
     ).toEqual(CopyBtn.props['aria-label']);
   });
 
@@ -221,6 +223,62 @@ describe('Default cell actions ', () => {
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
+    });
+  });
+
+  describe('when a value was ignored by Elasticsearch', () => {
+    // Row 0 tripped `ignore_above` on `extension`, row 1 did not. Only row 0 should
+    // lose its filter buttons: the mapping is per index, but `_ignored` is per document.
+    const contextWithIgnoredValue = {
+      ...dataTableContextMock,
+      getRowByIndex: (index: number) =>
+        buildDataTableRecord(
+          index === 0
+            ? {
+                _index: 'i',
+                _id: '0',
+                _source: { extension: 'a-very-long-extension' },
+                _ignored: ['extension'],
+              }
+            : { _index: 'i', _id: '1', _source: { extension: 'jpg' } },
+          dataViewMock
+        ),
+    };
+
+    const renderFilterButtons = (rowIndex: number) =>
+      renderWithI18n(
+        <UnifiedDataTableContext.Provider value={contextWithIgnoredValue}>
+          <FilterInBtn
+            cellActionProps={createCellActionProps({
+              colIndex: 1,
+              columnId: 'extension',
+              rowIndex,
+            })}
+            field={extensionField}
+          />
+          <FilterOutBtn
+            cellActionProps={createCellActionProps({
+              colIndex: 1,
+              columnId: 'extension',
+              rowIndex,
+            })}
+            field={extensionField}
+          />
+        </UnifiedDataTableContext.Provider>
+      );
+
+    it('renders no filter buttons for the document whose value was ignored', () => {
+      renderFilterButtons(0);
+
+      expect(screen.queryByRole('button', { name: 'Filter for this extension' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Filter out this extension' })).toBeNull();
+    });
+
+    it('still renders filter buttons for a document whose value was indexed', () => {
+      renderFilterButtons(1);
+
+      expect(screen.getByRole('button', { name: 'Filter for this extension' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Filter out this extension' })).toBeInTheDocument();
     });
   });
 });

@@ -243,6 +243,7 @@ export const GmailConnector: ConnectorSpec = {
 
     searchMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for emails in Gmail. Use a specific query (from:, subject:, is:unread, after:, newer_than:Nd) and limit maxResults (e.g. 10-20) to avoid large responses.',
       input: SearchMessagesInputSchema,
@@ -269,6 +270,7 @@ export const GmailConnector: ConnectorSpec = {
 
     getMessage: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve one Gmail message by ID. You must call searchMessages or listMessages first to get message IDs, then pass one of those IDs here.',
       input: GetMessageInputSchema,
@@ -289,6 +291,7 @@ export const GmailConnector: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve one Gmail attachment by message ID and attachment ID. Call getMessage with format "full" first to get attachment IDs from payload.parts[].body.attachmentId (and parts[].filename for the file name). WARNING: Attachment data is returned as base64url-encoded binary and may be large. Only call this action when you have a concrete plan to process the data (e.g. decode and index via an Elasticsearch attachment processor pipeline). Do not call it speculatively.',
       input: GetAttachmentInputSchema,
@@ -310,6 +313,7 @@ export const GmailConnector: ConnectorSpec = {
 
     listMessages: {
       isTool: true,
+      scope: 'read',
       description:
         'List Gmail message IDs by label (e.g. INBOX, SENT). Prefer searchMessages when the user has a specific query; limit maxResults (e.g. 10-20) to keep context small.',
       input: ListMessagesInputSchema,
@@ -344,6 +348,7 @@ export const GmailConnector: ConnectorSpec = {
 
     listLabels: {
       isTool: true,
+      scope: 'read',
       description:
         'List all Gmail labels (system and user-created) with their IDs and names. Call this before modifyLabels to resolve a label name (e.g. "Quarantine") to its ID.',
       input: ListLabelsInputSchema,

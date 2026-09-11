@@ -22,8 +22,14 @@ import * as nodeDataModel from '../../models/node_data';
 import type { State } from '../../../common/store/types';
 
 export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
+  const originTimestampMs = useSelector((state: State) =>
+    selectors.originTimestamp(state.analyzer[id])
+  );
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+    nodeDataModel.eventAtOrBefore(
+      selectors.nodeDataForID(state.analyzer[id])(nodeID),
+      originTimestampMs
+    )
   );
   const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 

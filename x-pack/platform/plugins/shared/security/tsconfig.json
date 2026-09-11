@@ -19,6 +19,7 @@
     "__mocks__/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/cloud-plugin",
     "@kbn/cps",
     "@kbn/cps-utils",
@@ -120,7 +121,6 @@
     "@kbn/core-chrome-browser-components",
     "@kbn/core-logging-server",
     "@kbn/projects-solutions-groups",
-    "@kbn/app-header",
     "@kbn/unsaved-changes-prompt",
     "@kbn/ui-callout",
   ],
