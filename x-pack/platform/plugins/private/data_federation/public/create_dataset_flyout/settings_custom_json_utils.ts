@@ -8,7 +8,12 @@
 import type { DatasetSettings } from '../../common/dataset_types';
 import { omitDatasetSettingsNotSentToEs } from '../../common';
 import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
-import type { CreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
+import {
+  buildDatasetSettingsFromFormValues,
+  type CreateDatasetSettingsFormValues,
+  type DatasetErrorModeFormValue,
+} from './create_dataset_flyout_form_state';
+import { getVisibleCustomJsonApiKeys } from './settings_custom_json_schema';
 
 export const DATASET_SETTINGS_CUSTOM_JSON_API_KEYS = [
   'partition_detection',
@@ -42,6 +47,52 @@ export type DatasetSettingsCustomJsonApiKey =
 const DATASET_SETTINGS_CUSTOM_JSON_API_KEY_SET = new Set<string>(
   DATASET_SETTINGS_CUSTOM_JSON_API_KEYS
 );
+
+const JSON_ONLY_CUSTOM_JSON_API_KEYS = new Set<string>(['target_split_size']);
+
+const tryParseCustomJsonObject = (value: string): Record<string, unknown> | undefined => {
+  const parsed = parseSettingsCustomJson(value);
+
+  return parsed ? (parsed as Record<string, unknown>) : undefined;
+};
+
+/** Keeps custom JSON aligned with explicit form values (Flow 3 9.6). */
+export const buildSettingsCustomJsonFromForm = (
+  settings: CreateDatasetSettingsFormValues,
+  errorMode: DatasetErrorModeFormValue,
+  existingJsonStr: string
+): string => {
+  const format = settings.format;
+  if (!format) {
+    return existingJsonStr?.trim() ? existingJsonStr : EMPTY_SETTINGS_CUSTOM_JSON;
+  }
+
+  const visibleApiKeys = getVisibleCustomJsonApiKeys(format, errorMode);
+  const apiSettings = buildDatasetSettingsFromFormValues(settings) ?? {};
+  const existingParsed = tryParseCustomJsonObject(existingJsonStr) ?? {};
+  const jsonObject: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(existingParsed)) {
+    if (!DATASET_SETTINGS_CUSTOM_JSON_API_KEY_SET.has(key)) {
+      jsonObject[key] = value;
+    }
+  }
+
+  for (const key of visibleApiKeys) {
+    if (JSON_ONLY_CUSTOM_JSON_API_KEYS.has(key)) {
+      if (key in existingParsed) {
+        jsonObject[key] = existingParsed[key];
+      }
+    } else {
+      const apiValue = (apiSettings as Record<string, unknown>)[key];
+      if (apiValue !== undefined) {
+        jsonObject[key] = apiValue;
+      }
+    }
+  }
+
+  return JSON.stringify(jsonObject, null, 2);
+};
 
 export const EMPTY_SETTINGS_CUSTOM_JSON = '{\n\n}';
 

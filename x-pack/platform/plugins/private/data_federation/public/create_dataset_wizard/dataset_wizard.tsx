@@ -27,7 +27,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource, DataSourceWithSecrets } from '../../common';
 import { validateIndexNameRules } from '../../common';
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
-import { applyCustomJsonToFormSettings } from '../create_dataset_flyout/settings_custom_json_utils';
+import {
+  applyCustomJsonToFormSettings,
+  buildSettingsCustomJsonFromForm,
+} from '../create_dataset_flyout/settings_custom_json_utils';
 import { buildDatasetPayloadFromWizardValues } from './review_step_utils';
 import {
   extractFlyoutSaveErrorMessage,
@@ -77,6 +80,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
   isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -459,6 +463,25 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     }
 
     const values = getValues();
+
+    if (isDatasetWizardFlow396(flowVariant)) {
+      const format = values.settings.format;
+      if (!format) {
+        return;
+      }
+
+      setValue(
+        'settings_custom_json',
+        buildSettingsCustomJsonFromForm(
+          values.settings,
+          values.settings.error_mode,
+          values.settings_custom_json
+        ),
+        { shouldDirty: true, shouldValidate: true }
+      );
+      return;
+    }
+
     const nextSettings = applyCustomJsonToFormSettings(
       values.settings,
       values.settings_custom_json

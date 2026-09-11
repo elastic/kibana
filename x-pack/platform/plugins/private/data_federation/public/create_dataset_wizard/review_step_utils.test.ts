@@ -15,7 +15,10 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
-import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
+import {
+  getResourceOwnedSettingsFieldIds,
+  getReviewAdditionalSettingsExcludeFieldIds,
+} from './resource_settings_fields';
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestBody,
@@ -260,7 +263,8 @@ describe('review_step_utils', () => {
       values.settings,
       values.resource,
       undefined,
-      getResourceOwnedSettingsFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+      getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
     );
 
     expect(logisticsRows).toEqual(
@@ -438,6 +442,53 @@ describe('review_step_utils', () => {
       expect.objectContaining({ label: 'Format', displayValue: 'CSV' }),
       expect.objectContaining({ displayValue: 'Semicolon (;)', badge: 'modified' }),
     ]);
+  });
+
+  it('marks every explicit Flow 3 9.6 choice as modified in the additional settings summary', () => {
+    const settings = {
+      ...emptyCreateDatasetSettingsFormValues(),
+      format: 'csv' as const,
+      delimiter: ',',
+    };
+
+    const rows = getReviewSettingsRows(
+      settings,
+      's3://obs-logs-prod/**/*.csv',
+      undefined,
+      getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+
+    const delimiterRow = rows.find((row) => row.displayValue === 'Comma (,)');
+
+    expect(delimiterRow?.badge).toBe('modified');
+  });
+
+  it('summarizes schema mapping settings on the schema review column in Flow 3 9.6', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: {
+        ...emptyCreateDatasetSettingsFormValues(),
+        format: 'parquet' as const,
+        schema_resolution: 'strict',
+      },
+    };
+
+    const additionalRows = getReviewSettingsRows(
+      values.settings,
+      values.resource,
+      undefined,
+      getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+    const schemaRows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+
+    expect(additionalRows.map(({ label }) => label)).not.toContain('Schema resolution');
+    expect(schemaRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Schema resolution', displayValue: 'Strict' }),
+      ])
+    );
   });
 
   it('returns automatic schema mapping rows when inferred field types were modified', () => {

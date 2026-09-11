@@ -17,19 +17,14 @@ import type {
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
-import { buildDatasetSettingsFromFormValues } from './create_dataset_flyout_form_state';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import { getVisibleCustomJsonApiKeys } from './settings_custom_json_schema';
 import {
-  DATASET_SETTINGS_CUSTOM_JSON_API_KEYS,
   applyCustomJsonToFormSettings,
+  buildSettingsCustomJsonFromForm,
   stripJsonComments,
-  type DatasetSettingsCustomJsonApiKey,
 } from './settings_custom_json_utils';
-
-const CUSTOM_JSON_API_KEY_SET = new Set<string>(DATASET_SETTINGS_CUSTOM_JSON_API_KEYS);
-const JSON_ONLY_API_KEYS = new Set<string>(['target_split_size']);
 
 const tryParseJson = (value: string): Record<string, unknown> | undefined => {
   try {
@@ -43,38 +38,6 @@ const tryParseJson = (value: string): Record<string, unknown> | undefined => {
     // invalid JSON — caller handles the undefined return
   }
   return undefined;
-};
-
-const buildJsonFromFormSettings = (
-  settings: CreateDatasetSettingsFormValues,
-  visibleApiKeys: DatasetSettingsCustomJsonApiKey[],
-  existingJsonStr: string
-): string => {
-  const apiSettings = buildDatasetSettingsFromFormValues(settings) ?? {};
-  const existingParsed = tryParseJson(existingJsonStr) ?? {};
-
-  const jsonObject: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(existingParsed)) {
-    if (!CUSTOM_JSON_API_KEY_SET.has(key)) {
-      jsonObject[key] = value;
-    }
-  }
-
-  for (const key of visibleApiKeys) {
-    if (JSON_ONLY_API_KEYS.has(key)) {
-      if (key in existingParsed) {
-        jsonObject[key] = existingParsed[key];
-      }
-    } else {
-      const apiValue = (apiSettings as Record<string, unknown>)[key];
-      if (apiValue !== undefined) {
-        jsonObject[key] = apiValue;
-      }
-    }
-  }
-
-  return JSON.stringify(jsonObject, null, 2);
 };
 
 export interface DatasetSettingsAdvancedViewToggleProps {
@@ -185,9 +148,9 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
 
     prevSettingsDigestRef.current = settingsDigest;
     skipJsonToFormRef.current = true;
-    const newJson = buildJsonFromFormSettings(
+    const newJson = buildSettingsCustomJsonFromForm(
       settings as CreateDatasetSettingsFormValues,
-      visibleJsonApiKeys,
+      (settings as CreateDatasetSettingsFormValues).error_mode,
       getValues('settings_custom_json')
     );
     setValue('settings_custom_json', newJson, { shouldDirty: true, shouldValidate: true });

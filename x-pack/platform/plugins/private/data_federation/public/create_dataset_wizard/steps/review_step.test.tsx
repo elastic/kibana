@@ -305,5 +305,30 @@ describe('ReviewStep flow 3', () => {
       });
       expect(screen.queryByText('Modified')).not.toBeInTheDocument();
     });
+
+    it('shows additional settings the user chose on step 2', () => {
+      render(
+        <EuiProvider>
+          <ReviewStep
+            values={{
+              ...emptyDatasetWizardFormValues(),
+              name: 'dataset-obs-prod-s3',
+              data_source: 'obs-prod-s3',
+              resource: 's3://obs-logs-prod/**/*.csv',
+              settings: {
+                ...emptyCreateDatasetSettingsFormValues(),
+                format: 'csv',
+                delimiter: ';',
+              },
+            }}
+            dataSources={[s3DataSource]}
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+          />
+        </EuiProvider>
+      );
+
+      expect(screen.getByTestId('datasetWizardReviewSettings')).toHaveTextContent('Semicolon (;)');
+      expect(screen.getByTestId('datasetWizardReviewSettings')).toHaveTextContent('Custom');
+    });
   });
 });

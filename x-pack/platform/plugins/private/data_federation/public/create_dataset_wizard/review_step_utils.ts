@@ -35,11 +35,13 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
 import { inferFormatFromResource } from './infer_format_from_resource';
 import { getVisibleResourceOwnedSettingsFieldIds } from './resource_settings_fields';
+import { getSchemaMappingSettingsFieldIds } from './schema_mapping_settings_fields';
 
 export type ReviewSettingBadge = 'default' | 'modified';
 
@@ -213,7 +215,8 @@ export const getReviewSettingsRows = (
   settings: DatasetWizardFormValues['settings'],
   resource: string,
   customJson?: string,
-  excludeFieldIds: readonly DatasetSettingsFieldId[] = []
+  excludeFieldIds: readonly DatasetSettingsFieldId[] = [],
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_2
 ): ReviewSummaryRow[] => {
   const format = settings.format;
   if (!format) {
@@ -224,6 +227,7 @@ export const getReviewSettingsRows = (
     ? applyCustomJsonToFormSettings(settings, customJson)
     : settings;
   const defaults = getDefaultSettingsForFormat(format);
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
   const inferredFormat = inferFormatFromResource(resource);
   const formatBadge =
     inferredFormat && inferredFormat === format ? undefined : ('modified' as const);
@@ -260,7 +264,7 @@ export const getReviewSettingsRows = (
     rows.push({
       label: getDatasetSettingsFieldLabel(fieldId),
       displayValue: formatSettingsFieldDisplayValue(fieldId, value),
-      badge: isDefault ? 'default' : 'modified',
+      badge: isFlow396 ? 'modified' : isDefault ? 'default' : 'modified',
     });
   }
 
@@ -318,6 +322,34 @@ export const getReviewSchemaMappingRows = (
         displayValue: datasetWizardStrings.reviewAutomaticFieldTypesCount(mappedFieldCount),
         badge: 'modified',
       });
+    }
+  }
+
+  if (isDatasetWizardFlow396(flowVariant)) {
+    const effectiveSettings = values.settings_custom_json
+      ? applyCustomJsonToFormSettings(values.settings, values.settings_custom_json)
+      : values.settings;
+    const format = effectiveSettings.format;
+
+    if (format) {
+      const defaults = getDefaultSettingsForFormat(format);
+
+      for (const fieldId of getSchemaMappingSettingsFieldIds(format, effectiveSettings.error_mode, {
+        showForAllFormats: true,
+      })) {
+        const value = effectiveSettings[fieldId];
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          continue;
+        }
+
+        const isDefault = defaults[fieldId] !== undefined && value === defaults[fieldId];
+
+        rows.push({
+          label: getDatasetSettingsFieldLabel(fieldId),
+          displayValue: formatSettingsFieldDisplayValue(fieldId, value),
+          badge: isDefault ? 'default' : 'modified',
+        });
+      }
     }
   }
 
