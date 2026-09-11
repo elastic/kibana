@@ -22,13 +22,13 @@ import {
   clearRuleDatasetSummaries,
   formatRuleEvalSummary,
 } from './src/rules/evaluate_dataset';
-import type { RuleExample } from './datasets/rules/types';
+import type { RuleExample, RuleVendor } from './datasets/rules/types';
 
 type EvaluateDatasetFn = (args: { dataset: EvaluationDataset<DashboardExample> }) => Promise<void>;
 
 type EvaluateRuleDatasetFn = (args: {
   dataset: EvaluationDataset<RuleExample>;
-  vendor: 'splunk' | 'qradar';
+  vendor: RuleVendor;
 }) => Promise<void>;
 
 interface WorkerFixtures {
