@@ -125,4 +125,14 @@ describe('generateOxlintConfig', () => {
     );
     expect(config.ignorePatterns).not.toContain('plugins/a/server/plugin.ts');
   });
+
+  it('ignores declaration files via a glob, not the uncovered-files list', () => {
+    const config = generateOxlintConfig(
+      [project('plugins/a', ['server/**/*'])],
+      ['plugins/a/server/plugin.ts', 'plugins/a/server/types.d.ts']
+    );
+
+    expect(config.ignorePatterns).toContain('**/*.d.ts');
+    expect(config.ignorePatterns).not.toContain('plugins/a/server/types.d.ts');
+  });
 });
