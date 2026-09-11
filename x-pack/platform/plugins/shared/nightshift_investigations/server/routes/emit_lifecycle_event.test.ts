@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { nightshiftInvestigationsRouteRepository } from '.';
-import { InvestigationNotFoundError } from '../client/investigations_client';
+import { InvestigationNotFoundError } from '../client/errors';
 
 const endpoint = 'POST /internal/nightshift/investigations/{id}/lifecycle_events' as const;
 const { handler } = nightshiftInvestigationsRouteRepository[endpoint];

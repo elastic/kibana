@@ -46,7 +46,7 @@ describe('NumberRow', () => {
     const comp = shallow(<NumberRow {...defaultProps} />);
     comp.find('EuiButtonIcon').simulate('click');
 
-    expect(defaultProps.onDelete).lastCalledWith(defaultProps.model.id);
+    expect(defaultProps.onDelete).toHaveBeenLastCalledWith(defaultProps.model.id);
   });
 
   test('should call onChange', () => {
@@ -55,6 +55,9 @@ describe('NumberRow', () => {
       target: { value: '5' },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    expect(defaultProps.onChange).lastCalledWith({ id: defaultProps.model.id, value: '5' });
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith({
+      id: defaultProps.model.id,
+      value: '5',
+    });
   });
 });

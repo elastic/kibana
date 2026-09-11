@@ -42,4 +42,21 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),
+  /** ECF CloudFormation stacks launched for this deployment, one entry per template family. */
+  ecfStacks: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        family: schema.oneOf([
+          schema.literal('unified'),
+          schema.literal('otel'),
+          schema.literal('crowdstrike'),
+        ]),
+        /** CloudFormation stack name; bounded by the 128-char AWS limit. */
+        stackName: schema.string({ minLength: 1, maxLength: 128 }),
+        /** ECF semantic version resolved at launch time, e.g. "1.10.0". */
+        templateVersion: schema.string({ minLength: 1, maxLength: 32 }),
+      }),
+      { maxSize: 10 }
+    )
+  ),
 });

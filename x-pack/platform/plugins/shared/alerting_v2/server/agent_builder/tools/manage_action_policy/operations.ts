@@ -18,7 +18,7 @@ import {
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
-import { attachmentDataToActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept

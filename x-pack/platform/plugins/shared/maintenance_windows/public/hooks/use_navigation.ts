@@ -33,12 +33,21 @@ export const useNavigation = (appId: string) => {
 };
 
 export const useCreateMaintenanceWindowNavigation = () => {
-  const { navigateTo } = useNavigation(MANAGEMENT_APP_ID);
+  const { navigateTo, getAppUrl } = useNavigation(MANAGEMENT_APP_ID);
+  const path = MAINTENANCE_WINDOW_PATHS.maintenanceWindowsCreate;
+  const deepLinkId = MAINTENANCE_WINDOWS_APP_ID;
+
   return {
     navigateToCreateMaintenanceWindow: () =>
       navigateTo({
-        path: MAINTENANCE_WINDOW_PATHS.maintenanceWindowsCreate,
-        deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
+        path,
+        deepLinkId,
+      }),
+    getCreateMaintenanceWindowUrl: (absolute?: boolean) =>
+      getAppUrl({
+        path,
+        deepLinkId,
+        absolute,
       }),
   };
 };

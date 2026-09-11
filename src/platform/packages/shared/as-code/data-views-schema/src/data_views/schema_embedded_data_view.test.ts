@@ -94,3 +94,44 @@ describe('dataViewSpecSchema name', () => {
     ).toThrow();
   });
 });
+
+describe('dataViewSpecSchema field_filters', () => {
+  it('accepts field_filters as an array of strings', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['field_a', 'field_b'],
+    };
+
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('accepts an empty field_filters array', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: [],
+    };
+
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('accepts spec without field_filters', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+    };
+
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('rejects field_filters with non-string values', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: [123],
+    };
+
+    expect(() => dataViewSpecSchema.parse(input)).toThrow();
+  });
+});

@@ -47,12 +47,33 @@ steps:
   # touches that client — as does any hand-written workflow or manual run. Ensuring it here is the
   # one place that covers every trigger. Idempotent, and it never overwrites admin edits.
   #
-  # Runs before `emit_investigation_started` so that a failure here does not leave a stale
-  # `running` status with no terminal event. Without `on-failure: continue`, a failure also
-  # cannot leave a pending marker on a significant event for an investigation that will never
-  # produce anything: no `investigations` entry is written, so the next discovery cycle retries.
+  # Runs before persist / emit so that a failure here does not leave a stale `running`
+  # investigation record or lifecycle event. Without `on-failure: continue`, a failure also cannot leave a
+  # pending marker on a significant event for an investigation that will never produce anything:
+  # no `investigations` entry is written, so the next discovery cycle retries.
   - name: ensure_investigation_agent
     type: nightshift.ensureInvestigationAgent
+
+  # Creates the investigation record for this run if it does not exist yet.
+  # Runs before emit so any run that proceeds past this step is guaranteed to be visible to the
+  # investigations API regardless of how it was triggered (start endpoint,
+  # nightshift.triggerInvestigation step, or a direct workflow execution). Retries transient
+  # failures (e.g. the execution document not yet readable right at startup), then fails the
+  # run — no `continue`, so a run whose record cannot be persisted never proceeds invisibly.
+  # All attributes derive from the execution document server-side; no body is needed.
+  - name: persist_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
+
   - name: emit_investigation_started
     type: kibana.request
     with:
@@ -694,6 +715,58 @@ steps:
           - hypotheses
     on-failure:
       continue: true
+
+  # Persists the investigation structured output onto the investigation record.
+  # Runs after `investigate` when the agent completed successfully. Writes completed status +
+  # all structured output fields. Retries transient failures, then fails the run: a completed
+  # investigation whose record cannot be written must not be lost silently. The persist route
+  # is idempotent — the progress report tool may have already set status to 'running'.
+  # Trigger write-back lives in the significant-events investigation_completed subscriber,
+  # not here — applying it in both places would double-write.
+  - name: persist_investigation_completed
+    type: kibana.request
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      method: PATCH
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: "completed"
+        summary: "${{ steps.investigate.output.structured_output.summary }}"
+        conclusion: "${{ steps.investigate.output.structured_output.conclusion }}"
+        severity: "${{ steps.investigate.output.structured_output.severity }}"
+        hypotheses: ${{ steps.investigate.output.structured_output.hypotheses }}
+        recommendations: ${{ steps.investigate.output.structured_output.recommendations }}
+        blind_spots: ${{ steps.investigate.output.structured_output.blind_spots }}
+        trigger_feedback: ${{ steps.investigate.output.structured_output.trigger_feedback }}
+        impact: ${{ steps.investigate.output.structured_output.impact }}
+        conversation_id: "${{ steps.investigate.output.conversation_id }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
+
+  # Persists failure status when the investigate step errored. Retries transient failures,
+  # then fails the run: an investigation whose record cannot be written must not be lost silently.
+  - name: persist_investigation_failed
+    type: kibana.request
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      method: PATCH
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: "failed"
+        error: "${{ steps.investigate.error.message | default: 'Investigation failed' }}"
+        conversation_id: "${{ steps.investigate.output.conversation_id }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
 
   # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
   # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.

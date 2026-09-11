@@ -14,7 +14,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
-import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   IndexPattern,
@@ -202,12 +202,10 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
       continue;
     }
 
-    const effectiveProjectRouting =
-      getProjectRoutingFromEsqlQuery(layer.query.esql) ?? projectRouting;
     const timeFieldName = await getESQLTimeField({
       query: layer.query.esql,
       http,
-      projectRouting: effectiveProjectRouting,
+      projectRouting,
     });
 
     if (timeFieldName && layer.index && result[layer.index]) {

@@ -253,7 +253,7 @@ describe('healthRoute', () => {
     await sleep(600);
     stats$.next(nextMockStat);
 
-    expect(logHealthMetrics).toBeCalledTimes(2);
+    expect(logHealthMetrics).toHaveBeenCalledTimes(2);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -337,7 +337,7 @@ describe('healthRoute', () => {
       summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
-    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics).toHaveBeenCalledTimes(3);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -429,7 +429,7 @@ describe('healthRoute', () => {
       summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
-    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics).toHaveBeenCalledTimes(3);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),

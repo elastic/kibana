@@ -100,6 +100,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
     const usesEsql$ = new BehaviorSubject<boolean>(
       initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
     );
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const query$ = new BehaviorSubject<AggregateQuery | undefined>(
       initialVisInstance.type.getEsqlQuery?.(initialVisInstance.params)
     );
@@ -284,6 +285,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       dataViews$,
       projectRoutingOverrides$,
       usesEsql$,
+      approximationApplied$,
       // `undefined` until the vis type reports an ES|QL query; `apiPublishesESQLQuery` is the runtime check.
       query$: query$ as VisualizeApi['query$'],
       rendered$: hasRendered$,
