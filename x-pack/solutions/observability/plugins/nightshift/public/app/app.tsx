@@ -160,6 +160,7 @@ export function NightshiftApp(): React.ReactElement {
       <InvestigationList
         investigations={investigations}
         total={data?.total ?? 0}
+        isInitialLoading={isInitialLoading}
         size={size}
         onSizeChange={setSize}
         selectedInvestigationId={selectedInvestigationId}

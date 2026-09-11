@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -38,6 +39,7 @@ const getNextPageSize = (
 export interface InvestigationListProps {
   investigations: ListInvestigationItem[];
   total: number;
+  isInitialLoading?: boolean;
   size: InvestigationListPageSize;
   onSizeChange: (size: InvestigationListPageSize) => void;
   selectedInvestigationId?: string;
@@ -47,6 +49,7 @@ export interface InvestigationListProps {
 export function InvestigationList({
   investigations,
   total,
+  isInitialLoading = false,
   size,
   onSizeChange,
   selectedInvestigationId,
@@ -77,13 +80,28 @@ export function InvestigationList({
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge>{total}</EuiBadge>
-        </EuiFlexItem>
+        {!isInitialLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge data-test-subj="nightshiftInvestigationsCount">{total}</EuiBadge>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
   );
+
+  if (isInitialLoading) {
+    return (
+      <>
+        {heading}
+        <EuiPanel hasBorder hasShadow={false} paddingSize="l" css={roundedPanelCss}>
+          <div aria-hidden data-test-subj="nightshiftInvestigationListSkeleton">
+            <EuiSkeletonText lines={3} />
+          </div>
+        </EuiPanel>
+      </>
+    );
+  }
 
   if (investigations.length === 0) {
     return (

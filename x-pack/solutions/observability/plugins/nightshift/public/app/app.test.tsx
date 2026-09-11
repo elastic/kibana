@@ -23,14 +23,19 @@ jest.mock('../investigation/investigation_list', () => ({
   INVESTIGATION_LIST_PAGE_SIZES: [20, 50, 100],
   InvestigationList: ({
     investigations,
+    isInitialLoading,
     onInvestigationClick,
   }: {
     investigations: ListInvestigationItem[];
+    isInitialLoading?: boolean;
     onInvestigationClick: (investigation: ListInvestigationItem) => void;
   }) => (
-    <button onClick={() => onInvestigationClick(investigations[0])} type="button">
-      {investigations[0]?.summary ?? 'No investigations'}
-    </button>
+    <>
+      <span data-test-subj="investigationListInitialLoading">{String(isInitialLoading)}</span>
+      <button onClick={() => onInvestigationClick(investigations[0])} type="button">
+        {investigations[0]?.summary ?? 'No investigations'}
+      </button>
+    </>
   ),
 }));
 
@@ -150,6 +155,14 @@ describe('NightshiftApp', () => {
       screen.getByText('Investigations are not available in this deployment')
     ).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(expect.objectContaining({ isReady: true }));
+  });
+
+  it('passes the initial loading state to the investigations list', () => {
+    setInvestigations({ data: undefined, isInitialLoading: true });
+
+    renderApp();
+
+    expect(screen.getByTestId('investigationListInitialLoading')).toHaveTextContent('true');
   });
 
   it('shows a retry action when the initial request fails', () => {
