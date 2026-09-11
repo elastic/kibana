@@ -29,6 +29,8 @@ describe('investigation agent type', () => {
           'observability.investigation',
           'streams-management',
         ],
+        workflow_ids: ['system-nightshift-cortex-hydrate'],
+        post_execution_workflow_ids: ['system-nightshift-cortex-optimize'],
       },
     });
   });

@@ -14,6 +14,8 @@ import { getSeverityCountsRoute } from './get_severity_counts';
 import { updateInvestigationRoute } from './update_investigation';
 import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
+import { listCortexPagesRoute } from './list_cortex_pages';
+import { getCortexPageRoute } from './get_cortex_page';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -25,6 +27,8 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateInvestigationRoute,
   ...followInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
+  ...listCortexPagesRoute,
+  ...getCortexPageRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

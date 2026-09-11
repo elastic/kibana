@@ -8,6 +8,10 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import {
+  NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import instructions from './instructions/investigator.md.text';
 import {
   OBSERVABILITY_GET_LOGS_TOOL_ID,
@@ -66,6 +70,8 @@ export const investigationAgentType = {
     // connectors are persisted on the derived agent and merged into this allow-list.
     enable_elastic_capabilities: true,
     connector_ids: [],
+    workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID],
+    post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID],
   },
 } as const satisfies AgentTypeDefinition;
 

@@ -208,6 +208,21 @@ export interface SeverityCountsResponse {
 }
 
 export {
+  CORTEX_AI_INDEX_ID,
+  CORTEX_AI_INDEX_DEST,
+  CORTEX_ENTITY_TYPES,
+  CORTEX_PAGE_STATUSES,
+  CORTEX_ENTITY_TYPE_BUCKETS,
+  type CortexEntityType,
+  type CortexPageStatus,
+  type CortexPageSummary,
+  type CortexPage,
+  type CortexStats,
+  type ListCortexPagesResponse,
+  type GetCortexPageResponse,
+} from './cortex';
+
+export {
   INVESTIGATION_STARTED_TRIGGER_ID,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,

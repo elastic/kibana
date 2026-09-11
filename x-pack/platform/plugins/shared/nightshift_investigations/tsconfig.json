@@ -31,6 +31,9 @@
     "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/context-engine-plugin",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin"
   ]
 }

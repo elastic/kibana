@@ -32,6 +32,7 @@ import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
+import { CortexTab } from './components/cortex/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -43,6 +44,7 @@ const significantEventsTabs = [
   'detections',
   'significant_events',
   'memory',
+  'cortex',
   'settings',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
@@ -208,6 +210,14 @@ export function SignificantEventsPage() {
         isSelected: tab === 'memory',
       },
       {
+        id: 'cortex',
+        label: i18n.translate('xpack.significantEventsApp.cortexTab', {
+          defaultMessage: 'Cortex',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'cortex' } }),
+        isSelected: tab === 'cortex',
+      },
+      {
         id: 'settings',
         label: i18n.translate('xpack.significantEventsApp.settingsTab', {
           defaultMessage: 'Settings',
@@ -356,6 +366,7 @@ export function SignificantEventsPage() {
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'significant_events' && <SignificantEventsTab />}
             {tab === 'memory' && <MemoryTab />}
+            {tab === 'cortex' && <CortexTab />}
             {tab === 'settings' && <SettingsTab />}
           </SignificantEventsAppPageTemplate.Body>
         </SignificantEventsPageProvider>
