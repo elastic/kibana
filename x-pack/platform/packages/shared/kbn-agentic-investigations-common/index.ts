@@ -29,6 +29,10 @@ export { TimelineEventList } from './src/components/timeline/timeline_event_list
 
 export { useOpenInChat } from './src/hooks/use_open_in_chat';
 export {
+  useOpenConversationDetails,
+  type UseOpenConversationDetailsResult,
+} from './src/hooks/use_open_conversation_details';
+export {
   useConversationInvestigation,
   type ConversationInvestigationState,
 } from './src/hooks/use_conversation_investigation';
