@@ -29,6 +29,67 @@ const forwardCompatibilitySchema = currentRuleSavedObjectAttributesSchema.extend
   { unknowns: 'ignore' }
 );
 
+// ---------------------------------------------------------------------------
+// Open-record assertion
+//
+// Assert at module load that the persisted attributes schema keeps
+// `metadata.builder_fields` as an open record (schema.recordOf). This is the
+// property that allows rolled-back framework code to read rules written by
+// newer manifest versions: new builder fields are not unknown *attributes*
+// but keys inside the open container, preserved intact rather than stripped.
+//
+// If someone tightens `ruleMetadataSchema` (e.g. replaces the recordOf with a
+// fixed-key object schema) and also edits the companion test, the violation
+// will still be caught here at plugin load time.
+//
+// Ref: rule-data-migration.md "Rollback behavior"
+//      rule-type-registration.md "The fold into the saved-object registration"
+// ---------------------------------------------------------------------------
+assertBuilderFieldsIsOpenRecord();
+
+/**
+ * Validates at runtime that the current persisted attributes schema accepts
+ * arbitrary unknown keys in `metadata.builder_fields`.
+ *
+ * Throws if the schema rejects an object with an unrecognised key inside
+ * `builder_fields`, which means the container has been tightened from an open
+ * record to a closed schema — breaking rollback compatibility.
+ *
+ * Called once at module load (see the IIFE above). Exported so that tests can
+ * invoke it directly to verify the assertion function itself is correct.
+ */
+export function assertBuilderFieldsIsOpenRecord(): void {
+  // A minimal valid rule attributes document.  builder_fields carries one
+  // deliberately unknown key to exercise the open-record property.
+  const testDoc = {
+    kind: 'alert' as const,
+    metadata: { name: '__open_record_check__', builder_fields: { __future_field__: true } },
+    time_field: '@timestamp',
+    schedule: { every: '1m' },
+    query: {
+      format: 'standalone' as const,
+      breach: { query: 'FROM logs-* | LIMIT 1' },
+    },
+    enabled: false,
+    createdBy: null,
+    updatedBy: null,
+    createdAt: '1970-01-01T00:00:00.000Z',
+    updatedAt: '1970-01-01T00:00:00.000Z',
+  };
+
+  try {
+    currentRuleSavedObjectAttributesSchema.validate(testDoc);
+  } catch (err) {
+    throw new Error(
+      `alerting_v2: the persisted attributes schema no longer accepts arbitrary unknown ` +
+        `keys in metadata.builder_fields — it must stay an open record ` +
+        `(schema.recordOf(schema.string(), schema.any())) so that rolled-back code can ` +
+        `read rules written by newer manifest versions without stripping builder fields. ` +
+        `See rule-data-migration.md "Rollback behavior". Original error: ${String(err)}`
+    );
+  }
+}
+
 /**
  * Expands version `n` of a builder type's static manifest into an ordinary
  * saved-object model version.

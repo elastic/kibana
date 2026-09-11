@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_BUILDER_FIELDS_ARRAY_ITEMS } from '@kbn/alerting-v2-constants';
 import { MAX_BUILDER_FIELDS_KEYS } from '@kbn/alerting-v2-schemas';
 
 type JsonSchemaNode = Record<string, unknown>;
