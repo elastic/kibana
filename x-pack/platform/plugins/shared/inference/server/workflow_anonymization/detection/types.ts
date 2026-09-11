@@ -55,6 +55,6 @@ export interface PiiRegexWorkerTaskPayload {
  * `block` refuses to produce a partial result, so a broken rule fails the LLM call
  * rather than letting the PII class it was meant to catch through unmasked.
  * `allow_unsafe` logs and skips each invalid rule; valid rules still run and return their matches.
- * Infrastructure failures (timeout, queue saturation) still return no matches for the entire payload.
+ * Infrastructure failures (timeout, queue saturation) return no matches only in `allow_unsafe` mode; in `block` mode they throw.
  */
 export type PiiDetectionFailureMode = 'block' | 'allow_unsafe';

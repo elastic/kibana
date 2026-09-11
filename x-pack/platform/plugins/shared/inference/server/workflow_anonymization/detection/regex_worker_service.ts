@@ -60,7 +60,7 @@ export class PiiRegexWorkerService {
    * Throws when a rule has an invalid pattern and `failureMode` is `'block'` (the default).
    * With `'allow_unsafe'`, invalid rules are logged individually and skipped; the remaining
    * rules still run and return their matches. Infrastructure failures (timeout, queue
-   * saturation) return no matches for the entire payload regardless of `failureMode`.
+   * saturation) return no matches only in `'allow_unsafe'` mode; in `'block'` mode they throw.
    *
    * When the worker pool is disabled, runs synchronously on the main event loop.
    * In that mode only RE2-compilable patterns are accepted; patterns that require
