@@ -9,6 +9,7 @@ import semverGt from 'semver/functions/gt';
 import semverValid from 'semver/functions/valid';
 import type { EpmPackageItem, RequestDeps } from './api';
 import { getAllIntegrations, getInstalledPackages } from './api';
+import { normalizeTitleName } from './helper_functions';
 
 export type UploadPackageEvaluation =
   | { kind: 'ok' }
@@ -28,6 +29,7 @@ export type UploadPackageEvaluation =
 
 interface AutoImportIntegrationName {
   integrationId: string;
+  title: string;
 }
 
 const getInstalledVersion = (catalogItem: EpmPackageItem): string | undefined =>
@@ -77,7 +79,11 @@ const hasAutoImportIntegration = (
   packageName: string,
   autoImportIntegrations: AutoImportIntegrationName[]
 ): boolean =>
-  autoImportIntegrations.some((integration) => integration.integrationId === packageName);
+  autoImportIntegrations.some(
+    (integration) =>
+      integration.integrationId === packageName ||
+      normalizeTitleName(integration.title) === packageName
+  );
 
 export const evaluateUploadPackage = (
   packageName: string,

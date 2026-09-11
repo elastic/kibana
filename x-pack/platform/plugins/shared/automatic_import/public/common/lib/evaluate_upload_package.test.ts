@@ -77,7 +77,7 @@ describe('evaluateUploadPackage', () => {
         'my_custom_integration',
         '1.1.0',
         [],
-        [{ integrationId: 'my_custom_integration' }]
+        [{ integrationId: 'my_custom_integration', title: 'Something Else' }]
       )
     ).toEqual({
       kind: 'error',
@@ -86,10 +86,16 @@ describe('evaluateUploadPackage', () => {
     });
   });
 
-  it('does not match Automatic Import integrations by title', () => {
+  it('blocks a name that matches a normalized Automatic Import title', () => {
     expect(
-      evaluateUploadPackage('nginx_logs', '1.1.0', [], [{ integrationId: 'some_id' }])
-    ).toEqual({ kind: 'ok' });
+      evaluateUploadPackage('nginx_logs', '1.1.0', [], [
+        { integrationId: 'some_id', title: 'Nginx Logs' },
+      ])
+    ).toEqual({
+      kind: 'error',
+      reason: 'automatic_import',
+      packageName: 'nginx_logs',
+    });
   });
 
   it('allows upgrading an uploaded package when the zip version is greater', () => {
@@ -130,7 +136,7 @@ describe('evaluateUploadPackage', () => {
         'mako',
         '1.2.0',
         [uploadedPackage('mako', '1.0.0')],
-        [{ integrationId: 'mako' }]
+        [{ integrationId: 'mako', title: 'Mako' }]
       )
     ).toEqual({
       kind: 'error',
@@ -222,7 +228,7 @@ describe('evaluateUploadedZipPackage', () => {
   });
 
   it('blocks an Automatic Import-only name', async () => {
-    mockGetAllIntegrations.mockResolvedValue([{ integrationId: 'mako' }]);
+    mockGetAllIntegrations.mockResolvedValue([{ integrationId: 'mako', title: 'Mako' }]);
 
     await expect(evaluateUploadedZipPackage('mako', '1.1.0', deps)).resolves.toEqual({
       kind: 'error',
