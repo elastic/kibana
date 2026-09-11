@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -29,14 +29,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocation } from 'react-router-dom';
 import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
   useGetPackageInfoByKeyQuery,
   getAnyCloudConnectorIacTemplateUrl,
 } from '@kbn/fleet-plugin/public';
-import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
+import type {
+  AwsStaticKeyCredentials,
+  CloudSetupForCloudConnector,
+} from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { StaticKeysReplaceView } from './static_keys_replace_view';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
@@ -58,13 +63,20 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId, authenticateAndDeployStep } = useOnboardingFlow();
+  const { setConnectorId, setStaticKeys, authenticateAndDeployStep } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
+  const location = useLocation();
+  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
+  const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
-    showIdentityFederation ? 'identity_federation' : 'access_keys'
+    isStaticKeysEditMode
+      ? 'access_keys'
+      : showIdentityFederation
+      ? 'identity_federation'
+      : 'access_keys'
   );
 
   useEffect(() => {
@@ -78,6 +90,13 @@ export function ManagedIntegrationsSection({
   }, [isDone]);
 
   const [isDeployReady, setIsDeployReady] = useState(false);
+
+  const handleStaticKeysChange = useCallback(
+    (fields: AwsStaticKeyCredentials | undefined) => {
+      setStaticKeys(fields);
+    },
+    [setStaticKeys]
+  );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
     'aws',
@@ -231,8 +250,17 @@ export function ManagedIntegrationsSection({
                   onConnectorIdChange={setConnectorId}
                   initialConnectorId={initialConnectorId}
                 />
+              ) : isStaticKeysEditMode ? (
+                <StaticKeysReplaceView
+                  onReadyChange={setIsDeployReady}
+                  onFieldsChange={handleStaticKeysChange}
+                />
               ) : (
-                <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
+                <LazyAwsStaticKeysForm
+                  initialValues={authenticateAndDeployStep.staticKeys}
+                  onReadyChange={setIsDeployReady}
+                  onFieldsChange={handleStaticKeysChange}
+                />
               )}
             </Suspense>
 
