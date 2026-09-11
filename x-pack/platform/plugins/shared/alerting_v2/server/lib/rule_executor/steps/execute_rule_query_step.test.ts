@@ -7,6 +7,7 @@
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { QueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -263,9 +264,9 @@ describe('ExecuteRuleQueryStep', () => {
     expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
   });
 
-  it('marks content-length-exceeded errors as TaskErrorSource.USER', async () => {
-    // The maxResponseSize guard only fires on the JSON (non-streaming) path, which
-    // checks Content-Length; the arrow path uses chunked transfer encoding.
+  it('replaces content-length-exceeded errors with an actionable user error', async () => {
+    // The maxResponseSize guard fires on the JSON (non-streaming) path; the arrow
+    // path streams record batches and is bounded per batch instead.
     mockEsClient.esql.query.mockRejectedValue(
       new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
     );
@@ -274,8 +275,9 @@ describe('ExecuteRuleQueryStep', () => {
 
     const error = await getStepError(step, state);
 
-    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('breach');
   });
 
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
