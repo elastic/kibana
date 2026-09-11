@@ -13,11 +13,13 @@ import {
 } from './constants';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
-import RULE_TUNING_YAML from './rule_tuning.yaml';
+import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
+import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
-export const ALERTZERO_RULE_TUNING_WORKFLOW_ID = 'system-security-rule-tuning';
+export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID = 'system-security-rule-tuning-worker';
+export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
 export const ALERTZERO_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {
@@ -25,17 +27,26 @@ export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: RULE_PREVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
-export const ALERTZERO_RULE_TUNING_WORKFLOW = {
+export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
   billable: false,
-  id: ALERTZERO_RULE_TUNING_WORKFLOW_ID,
+  id: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
-  yaml: RULE_TUNING_YAML,
+  version: 23,
+  yaml: RULE_TUNING_WORKER_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
+  billable: false,
+  id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
+  management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 14,
+  yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_CREATION_WORKFLOW = {
