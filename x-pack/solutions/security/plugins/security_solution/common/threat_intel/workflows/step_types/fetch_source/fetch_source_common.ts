@@ -36,6 +36,21 @@ export const fetchSourceInputSchema = z.object({
   source: z.union([z.string(), sourceHitSchema]),
 });
 
+/** Must match the `extracted.iocs` nested mapping in setup/index_templates.ts. */
+export const iocEntrySchema = z.object({
+  type: z.string(),
+  value: z.string(),
+  defanged: z.string().optional(),
+  tier: z.string(),
+  tier_heuristic: z.string(),
+  tier_basis: z.string(),
+  port: z.number().optional(),
+  reference: z.string().optional(),
+  block_index: z.number().optional(),
+});
+
+export type IocEntry = z.infer<typeof iocEntrySchema>;
+
 /** Must match `.kibana-threat-reports` strict mapping in setup/index_templates.ts. */
 export const normalizedReportSchema = z.object({
   '@timestamp': z.string(),
@@ -69,21 +84,7 @@ export const normalizedReportSchema = z.object({
   }),
   extracted: z
     .object({
-      iocs: z
-        .array(
-          z.object({
-            type: z.string(),
-            value: z.string(),
-            defanged: z.string().optional(),
-            tier: z.string(),
-            tier_heuristic: z.string(),
-            tier_basis: z.string(),
-            port: z.number().optional(),
-            reference: z.string().optional(),
-            block_index: z.number().optional(),
-          })
-        )
-        .optional(),
+      iocs: z.array(iocEntrySchema).optional(),
       categories: z.array(z.string()).optional(),
       vulnerability: z
         .object({
