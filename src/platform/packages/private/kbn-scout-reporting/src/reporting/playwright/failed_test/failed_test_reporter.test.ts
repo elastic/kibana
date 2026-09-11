@@ -160,7 +160,7 @@ describe('ScoutFailedTestReporter', () => {
     });
   });
 
-  it('records tests cut off by --max-failures as a runner error, not intentional skips', () => {
+  it('records the --max-failures cutoff notice and the tests it cut off as runner errors', () => {
     const saveRunnerErrorsSpy = jest
       .spyOn(ScoutFailureTracker.prototype, 'saveRunnerErrors')
       .mockImplementation(() => {});
@@ -186,13 +186,16 @@ describe('ScoutFailedTestReporter', () => {
       createMockConfig(),
       createMockSuite([failed, neverStarted, skippedAtRuntime, declaredSkip, interruptedTest])
     );
-
     reporter.onTestEnd(failed, createMockResult({ status: 'failed' }));
+    // Playwright emits this (colored) global error when the --max-failures threshold is hit.
+    reporter.onError({
+      message: '\u001b[31mTesting stopped early after 1 maximum allowed failures.\u001b[39m',
+    } as TestError);
     reporter.onEnd(createMockFullResult('failed'));
 
     expect(saveRunnerErrorsSpy).toHaveBeenCalledWith({
       status: 'failed',
-      errors: ['2 test(s) did not run'],
+      errors: ['Testing stopped early after 1 maximum allowed failures.', '2 test(s) did not run'],
     });
   });
 

@@ -23,6 +23,7 @@ import {
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
 import { ToolingLog } from '@kbn/tooling-log';
+import stripANSI from 'strip-ansi';
 import path from 'node:path';
 import {
   BROWSER_CONSOLE_ERRORS_ATTACHMENT,
@@ -177,9 +178,10 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onError(error: TestError) {
+    // Playwright colors some of these (e.g. the --max-failures cutoff notice).
     const message =
       error.message ?? (error.value !== undefined ? String(error.value) : 'unknown error');
-    this.runnerErrors.push(stripFilePath(message));
+    this.runnerErrors.push(stripFilePath(stripANSI(message)));
   }
 
   onEnd(result: FullResult) {
