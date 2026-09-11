@@ -30,6 +30,8 @@ import type {
   AlertZeroStartDependencies,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
+import { registerAlertZeroUiSettings } from './settings/register_ui_settings';
+import { OnboardingService } from './services/onboarding/onboarding_service';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
@@ -98,6 +100,7 @@ export class AlertZeroPlugin
       },
     });
 
+    registerAlertZeroUiSettings(coreSetup);
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -107,6 +110,7 @@ export class AlertZeroPlugin
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
+      getOnboardingService: () => this.requireOnboardingService(),
     });
 
     return {};
@@ -145,6 +149,14 @@ export class AlertZeroPlugin
 
     // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
     this.watchesService = new WatchesService();
+    this.onboardingService = new OnboardingService({
+      logger: this.logger,
+      getManagedWorkflows: async () => managedWorkflows,
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) =>
+            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+        : undefined,
+    });
     this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
       ensureAgentForSpace: plugins.agentBuilder
         ? (spaceId) =>
@@ -162,6 +174,15 @@ export class AlertZeroPlugin
       throw new Error('Watches service is not available until the AlertZero plugin has started');
     }
     return this.watchesService;
+  }
+
+  private onboardingService: OnboardingService | undefined;
+
+  private requireOnboardingService(): OnboardingService {
+    if (!this.onboardingService) {
+      throw new Error('Onboarding service is not available until the AlertZero plugin has started');
+    }
+    return this.onboardingService;
   }
 
   private requireWorkersService(): WorkersService {

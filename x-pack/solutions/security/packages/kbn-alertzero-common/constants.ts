@@ -16,6 +16,20 @@ export const ALERTZERO_APP_PATH = '/app/alertzero' as const;
 
 export const ALERTZERO_INTERNAL_URL = '/internal/alertzero' as const;
 
+/**
+ * Per-space advanced setting that gates AlertZero enablement. This is the source of truth for the
+ * derived onboarding states: while it is `false` the app shows the disabled CTA page. Read it from
+ * the browser via `uiSettings` under this key, never from request bodies.
+ */
+export const ALERTZERO_ENABLED_SETTING = 'alertzero:enabled' as const;
+
+/** In-app route for the onboarding experience (S0/S1/S2 derived states). */
+export const ALERTZERO_ONBOARDING_PATH = '/onboarding' as const;
+
+/** Enable route: flips {@link ALERTZERO_ENABLED_SETTING} to `true` for the current space. */
+export const ALERTZERO_ONBOARDING_ENABLE_URL =
+  `${ALERTZERO_INTERNAL_URL}/onboarding/enable` as const;
+
 export const ALERTZERO_WATCHES_URL = `${ALERTZERO_INTERNAL_URL}/watches` as const;
 export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}` as const;
 
