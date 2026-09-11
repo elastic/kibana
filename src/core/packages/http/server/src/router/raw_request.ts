@@ -40,3 +40,14 @@ export interface FakeRawRequest {
 }
 
 export type RawRequest = Request | FakeRawRequest;
+
+// @hapi/hapi v21.4.10 widened the default `Query`/`Params`/`Headers` request types to
+// `unknown` (https://github.com/hapijs/hapi/pull/4562). Kibana's HTTP stack assumes the
+// previous narrower shapes, so restore them via the supported `ReqRefDefaults` override.
+declare module '@hapi/hapi' {
+  interface ReqRefDefaults {
+    Headers: Record<string, string | string[] | undefined>;
+    Query: { [key: string]: string | string[] | undefined };
+    Params: Record<string, string>;
+  }
+}
