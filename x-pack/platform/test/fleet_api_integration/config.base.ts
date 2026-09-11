@@ -98,7 +98,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableSloTemplates: true,
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
-          enableCloudOnboardingDeployments: true,
           enableAgentPolicyMultipleDownloadSources: true,
           installIntegrationsKnowledge: false,
           // Keep the legacy agentless APIs enabled here so the base suite exercises legacy behavior;

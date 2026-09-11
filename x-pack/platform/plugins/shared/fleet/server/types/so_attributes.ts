@@ -49,7 +49,8 @@ import type {
   VerificationStatus,
 } from '../../common/types/models/cloud_connector';
 import type {
-  CloudOnboardingDeploymentMechanism,
+  CloudOnboardingDeploymentAuthMethod,
+  DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
 
@@ -375,10 +376,10 @@ export interface CloudConnectorSOAttributes {
 export interface CloudOnboardingDeploymentSOAttributes {
   /** Cloud provider — determines how deploymentId/deploymentName are interpreted (e.g. for AWS, deploymentId is the CFN stack ARN). */
   provider: CloudProvider;
-  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
-  connectorId: string;
+  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. */
+  connectorId?: string;
   /** Active delivery mechanisms included in this deployment's IaC stack (agentless, firehose, cloud_forwarder, agent_based). */
-  mechanisms: CloudOnboardingDeploymentMechanism[];
+  mechanisms: DeploymentMethod[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
   /** Human-readable deployment name. For AWS: the CloudFormation stack name. */
@@ -392,7 +393,13 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** Number of deploy attempts — incremented on each retry. */
   attemptCount: number;
   /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
-  serviceVars?: Record<string, Array<Record<string, unknown>>>;
+  serviceVars?: Record<string, Record<string, unknown>>;
+  /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
+  globalRegion?: string;
+  /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
+  dataFormat?: 'ecs' | 'otel';
+  /** Authentication method used for managed integrations. */
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
   /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */

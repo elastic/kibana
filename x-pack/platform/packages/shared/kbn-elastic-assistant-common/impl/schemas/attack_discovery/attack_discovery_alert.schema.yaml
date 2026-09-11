@@ -28,6 +28,9 @@ components:
         alertRuleUuid:
           description: The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
           type: string
+        alertWorkflowReason:
+          description: The optional kibana.alert.workflow_reason of this attack discovery, which records why the workflow status was last changed
+          type: string
         alertWorkflowStatus:
           description: The optional kibana.alert.workflow_status of this attack discovery
           type: string

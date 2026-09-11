@@ -20,7 +20,7 @@ export function registerResolutionRulesList(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'List entity resolution rules',
       description:
-        'List managed entity resolution rules and their effective enabled state for this space.',
+        'List managed entity resolution rules and their effective enabled state for this space. Each rule description states what it bridges, which data sources it needs, and when to disable it.',
       options: {
         tags: ['oas-tag:Security entity store'],
         availability: {
