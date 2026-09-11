@@ -48,5 +48,9 @@
     "react/no-multi-comp": ["error", { "ignoreStateless": true }],
     "react/no-unknown-property": ["error", { "ignore": ["css"] }],
     "react/prefer-es6-class": ["error", "always"]
-  }
+  },
+
+  // Mirror tsc's `skipLibCheck: true`: oxlint's parser reports TypeScript grammar errors (e.g.
+  // TS1016) that ESLint's parser does not, and declaration files are never type-checked either.
+  "ignorePatterns": ["**/*.d.ts"]
 }
