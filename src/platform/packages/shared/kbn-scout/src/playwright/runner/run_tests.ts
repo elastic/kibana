@@ -123,7 +123,11 @@ async function runLocalServersAndTests(
   cmdArgs: string[],
   env: Record<string, string> = {}
 ) {
-  const configRootDir = getConfigRootDir(options.configPath, options.testTarget);
+  // When --serverConfigSet is explicitly set (non-default), it overrides the server config
+  // that would otherwise be auto-detected from the playwright config path.
+  const explicitConfigSet =
+    options.serverConfigSet !== 'default' ? options.serverConfigSet : undefined;
+  const configRootDir = getConfigRootDir(options.configPath, options.testTarget, explicitConfigSet);
   const config = await loadServersConfig(options.testTarget, log, configRootDir);
   const abortCtrl = new AbortController();
 

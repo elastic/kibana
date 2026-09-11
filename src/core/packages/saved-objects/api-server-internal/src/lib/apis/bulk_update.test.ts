@@ -52,8 +52,8 @@ import {
   createBadRequestErrorPayload,
   expectUpdateResult,
   MULTI_NAMESPACE_TYPE,
+  createConflictErrorPayload,
 } from '../../test_helpers/repository.test.common';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 interface ExpectedErrorResult {
@@ -68,7 +68,7 @@ describe('#bulkUpdate', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let securityExtension: ReturnType<typeof savedObjectsExtensionsMock.createSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -785,6 +785,112 @@ describe('#bulkUpdate', () => {
             expect.objectContaining({ originId }),
           ],
         });
+      });
+    });
+
+    describe('saved object diff audit events', () => {
+      it('emits a per-object diff with before/after attributes when savedObjectDiffEnabled is true', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+      });
+
+      it('does not emit a diff event when savedObjectDiffEnabled is false', async () => {
+        securityExtension.savedObjectDiffEnabled = false;
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('emits unknown-outcome events for every object when the bulk request fails', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));
+        client.bulk.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.bulkUpdate([obj1, obj2])).rejects.toThrow();
+
+        // The attempted change is recorded (in stored form, post-encryption) before the
+        // bulk call, so a failed write still audits what was attempted.
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: { type: obj1.type, id: obj1.id, name: 'Test One' },
+            outcome: 'unknown',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: { type: obj2.type, id: obj2.id, name: 'Test Two' },
+            outcome: 'unknown',
+          })
+        );
+      });
+
+      it('audits duplicate {type, id} entries in one request as separate events', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        const stale = { ...obj1, attributes: { title: 'Stale' }, version: 'WzEsMV0=' };
+        const objects = [obj1, stale];
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, objects));
+        // first entry commits, second hits a version conflict
+        mockGetBulkOperationError.mockReturnValueOnce(undefined);
+        mockGetBulkOperationError.mockReturnValueOnce(
+          createConflictErrorPayload(obj1.type, obj1.id) as unknown as Payload
+        );
+        client.bulk.mockResponseOnce(getMockBulkUpdateResponse(registry, objects));
+
+        await repository.bulkUpdate(objects);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Stale' }),
+          })
+        );
+        mockGetBulkOperationError.mockReset();
+      });
+
+      it('does not fail the bulk update when the diff audit emit throws', async () => {
+        securityExtension.savedObjectDiffEnabled = true;
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(
+          bulkUpdateSuccess(client, repository, registry, [obj1, obj2])
+        ).resolves.toBeDefined();
       });
     });
 

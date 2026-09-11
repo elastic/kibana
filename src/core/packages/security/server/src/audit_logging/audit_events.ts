@@ -62,6 +62,20 @@ export interface AuditKibana {
    * Set of types that are not authorized for an action.
    */
   unauthorized_types?: readonly string[];
+  /**
+   * Configuration diff for saved object mutations (create/update/delete).
+   * Uses Extended JSON Patch format (RFC 6902 with oldValue extension).
+   */
+  diff?: {
+    format: 'json_patch_extended';
+    ops: Array<{
+      op: 'add' | 'remove' | 'replace';
+      path: string;
+      value?: unknown;
+      oldValue?: unknown;
+    }>;
+    noOps: Array<{ path: string }>;
+  };
 }
 
 type EcsHttp = Required<LogMeta>['http'];

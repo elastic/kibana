@@ -46,11 +46,16 @@ import {
   getSavedObjectFromSource,
   mergeForUpdate,
 } from './utils';
+import type {
+  WriteAuditRecord,
+  SavedObjectAuditDiffRecorder,
+} from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;
   options: SavedObjectsBulkUpdateOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 type DocumentToSave = Record<string, unknown>;
@@ -81,8 +86,16 @@ type ExpectedBulkUpdateResult = Either<
 >;
 
 export const performBulkUpdate = async <T>(
-  { objects, options }: PerformUpdateParams<T>,
-  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
+  { objects, options, auditDiffRecorder }: PerformUpdateParams<T>,
+  {
+    registry,
+    helpers,
+    allowedTypes,
+    client,
+    serializer,
+    logger,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
   const {
     common: commonHelper,
@@ -239,12 +252,34 @@ export const performBulkUpdate = async <T>(
     'bulk_update'
   );
 
+  // Audit handles, indexed by request position so duplicate `{type, id}` entries each get
+  // their own event. `before`/`after` are recorded in stored (encrypted) form below.
+  const auditRecords: Array<WriteAuditRecord | undefined> = [];
+  if (auditDiffRecorder) {
+    expectedBulkGetResults.forEach((expectedResult, index) => {
+      if (isLeft(expectedResult)) {
+        return;
+      }
+      const { type, id, documentToSave } = expectedResult.value;
+      auditRecords[index] = auditDiffRecorder.track(
+        {
+          type,
+          id,
+          name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+            attributes: documentToSave[type] as SavedObject<T>,
+          }),
+        },
+        { key: String(index) }
+      );
+    });
+  }
+
   let bulkUpdateRequestIndexCounter = 0;
   const bulkUpdateParams: object[] = [];
 
   const expectedBulkUpdateResults = await Promise.all(
     (expectedAuthorizedResults ?? expectedBulkGetResults).map<Promise<ExpectedBulkUpdateResult>>(
-      async (expectedBulkGetResult) => {
+      async (expectedBulkGetResult, index) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
         }
@@ -353,6 +388,11 @@ export const performBulkUpdate = async <T>(
         const namespaces =
           savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
 
+        // Recorded before the bulk call so a failed write still audits the attempt.
+        const auditRecord = auditRecords[index];
+        auditRecord?.setBefore(migrated.attributes as Record<string, unknown>);
+        auditRecord?.setAfter(updatedAttributes as Record<string, unknown>);
+
         const expectedResult = {
           type,
           id,
@@ -392,7 +432,7 @@ export const performBulkUpdate = async <T>(
   const result = {
     saved_objects: expectedBulkUpdateResults.map<
       SavedObjectsUpdateResponse<T> | SavedObjectErrorResult
-    >((expectedResult) => {
+    >((expectedResult, index) => {
       if (isLeft(expectedResult)) {
         return expectedResult.value as SavedObjectErrorResult;
       }
@@ -406,6 +446,9 @@ export const performBulkUpdate = async <T>(
       if (error) {
         return { type, id, error };
       }
+
+      // Success is only recorded once ES confirms this object's write.
+      auditRecords[index]?.succeed();
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 

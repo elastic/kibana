@@ -55,6 +55,7 @@ import type {
   ObjectRequiringPrivilegeCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type { Logger } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,
@@ -67,7 +68,8 @@ import { AccessControlService, MANAGE_ACCESS_CONTROL_ACTION } from './access_con
 import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { SecurityAction } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { savedObjectEvent } from '../audit';
+import { computeJsonPatch, savedObjectEvent } from '../audit';
+import type { ExtendedJsonPatch } from '../audit';
 
 interface Params {
   actions: Actions;
@@ -76,6 +78,10 @@ interface Params {
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
   typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectDiffEnabled?: boolean;
+  savedObjectDiffTypesToInclude?: string[];
+  savedObjectDiffFieldSizeLimit?: number;
+  logger?: Logger;
 }
 
 /**
@@ -152,6 +158,11 @@ export interface AddAuditEventParams {
    * the audit event
    */
   error?: Error;
+  /**
+   * Configuration diff for saved object mutations.
+   * Extended JSON Patch format (RFC 6902 + oldValue).
+   */
+  savedObjectDiff?: ExtendedJsonPatch;
 }
 
 /**
@@ -315,6 +326,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
+  public readonly savedObjectDiffEnabled: boolean;
+  private readonly savedObjectDiffTypesToInclude: Set<string>;
+  private readonly savedObjectDiffFieldSizeLimit?: number;
+  private readonly logger?: Logger;
 
   constructor({
     actions,
@@ -323,12 +338,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     checkPrivileges,
     getCurrentUser,
     typeRegistry,
+    savedObjectDiffEnabled = false,
+    savedObjectDiffTypesToInclude = [],
+    savedObjectDiffFieldSizeLimit,
+    logger,
   }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
+    this.savedObjectDiffEnabled = savedObjectDiffEnabled;
+    this.savedObjectDiffTypesToInclude = new Set(savedObjectDiffTypesToInclude);
+    this.savedObjectDiffFieldSizeLimit = savedObjectDiffFieldSizeLimit;
+    this.logger = logger;
 
     this.typeRegistry = typeRegistry;
     this.accessControlService = new AccessControlService({ typeRegistry });
@@ -595,6 +618,25 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
+  /**
+   * When saved object diff auditing is enabled, write operations (create/update/delete)
+   * are audited after the ES write succeeds (via `emitSavedObjectDiffAuditEvent`), so the
+   * pre-operation 'unknown'-outcome event is suppressed ('on_success' bypasses only the
+   * success path of enforcement — authorization failures are still audited here as usual).
+   */
+  private writeAuditBypass(): 'on_success' | 'never' {
+    return this.savedObjectDiffEnabled ? 'on_success' : 'never';
+  }
+
+  /**
+   * Whether a field-level diff should be computed for this saved object type.
+   * Extra Elasticsearch reads that exist only to capture before-state must consult
+   * this so types not on the allow list do not pay that cost.
+   */
+  public shouldComputeSavedObjectDiff(type: string): boolean {
+    return this.savedObjectDiffEnabled && this.savedObjectDiffTypesToInclude.has(type);
+  }
+
   private allAccessControlObjectsAreInaccessible(
     allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
     inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
@@ -820,15 +862,95 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   private addAuditEvent(params: AddAuditEventParams): void {
     if (this.auditLogger.enabled) {
-      const { savedObject, ...rest } = params;
+      const { savedObject, savedObjectDiff, ...rest } = params;
 
       const auditEvent = savedObjectEvent({
         savedObject: this.maybeRedactSavedObject(savedObject),
+        savedObjectDiff,
         ...rest,
       });
 
       this.auditLogger.log(auditEvent);
     }
+  }
+
+  emitSavedObjectDiffAuditEvent(params: {
+    action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
+    savedObject: { type: string; id: string; name?: string };
+    /** 'success' when the write completed; 'unknown' when it was attempted but did not complete. */
+    outcome: 'success' | 'unknown';
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    attributesToRedact?: string[];
+  }): void {
+    // Only emit when the feature is enabled. The caller also gates on
+    // `savedObjectDiffEnabled`, but checking here keeps the public method
+    // correct on its own.
+    if (!this.savedObjectDiffEnabled) {
+      return;
+    }
+
+    const { type, id } = params.savedObject;
+
+    // The diff is independent of the outcome: it describes the (attempted) change,
+    // including on 'unknown'-outcome events. The pre-operation audit event is
+    // suppressed in this mode, so this event is the operation's only audit record:
+    // types not in `typesToInclude` still emit it, they just don't carry the
+    // attribute diff. For the same reason the event must survive a diff computation
+    // failure — the diff is best-effort enrichment, so an error here degrades to
+    // an event without `kibana.diff` rather than a missing audit record.
+    // `before`/`after` are the object's attributes (not the full SO), so there
+    // are no system-managed root fields to filter out here.
+    let savedObjectDiff: ExtendedJsonPatch | undefined;
+    if (this.shouldComputeSavedObjectDiff(type)) {
+      try {
+        savedObjectDiff = computeJsonPatch({
+          a: params.before,
+          b: params.after,
+          // ESO attributes are compared as ciphertext here; redacting them hides
+          // their values in the emitted diff. Because ESO encryption is
+          // non-deterministic, an encrypted attribute included in a write may
+          // surface as a (redacted) change even when its plaintext is unchanged.
+          // `fieldsToRedact` is the diff helper's generic option name; at the
+          // saved objects layer these are the object's attributes.
+          fieldsToRedact: params.attributesToRedact,
+          fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
+        });
+      } catch (error) {
+        // Use String(error) rather than error.message, which would throw if a
+        // non-Error (e.g. null) was thrown.
+        this.logger?.error(
+          `Failed to compute the saved object diff for the ${
+            params.action
+          } audit event of ${type} [id=${id}]: ${String(error)}`
+        );
+      }
+    }
+
+    // Name from `after`, then `before`, then the caller-resolved name (e.g. a failure
+    // flushed before any state was recorded). `addAuditEvent` handles redaction.
+    let name = params.savedObject.name;
+    try {
+      const nameAttribute = this.typeRegistry.getNameAttribute(type);
+      name =
+        SavedObjectsUtils.getName(nameAttribute, { attributes: params.after }) ??
+        SavedObjectsUtils.getName(nameAttribute, { attributes: params.before }) ??
+        params.savedObject.name;
+    } catch (error) {
+      this.logger?.error(
+        `Failed to resolve the saved object name for the ${
+          params.action
+        } audit event of ${type} [id=${id}]: ${String(error)}`
+      );
+    }
+
+    this.addAuditEvent({
+      // `action` is the narrow SO-diff union; cast to the internal AuditAction enum.
+      action: params.action as AuditAction,
+      savedObject: { type, id, name },
+      outcome: params.outcome,
+      savedObjectDiff,
+    });
   }
 
   private async checkPrivileges(
@@ -918,7 +1040,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       spaces: spacesToAuthorize,
       enforceMap,
       options: { allowGlobalResource: true },
-      auditOptions: { objects },
+      auditOptions: {
+        objects,
+        bypass: this.writeAuditBypass(),
+      },
     });
 
     return authorizationResult;
@@ -979,7 +1104,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(enforceMap.keys()),
       spaces: spacesToAuthorize,
       enforceMap,
-      auditOptions: { objects },
+      auditOptions: {
+        objects,
+        bypass: this.writeAuditBypass(),
+      },
     });
 
     return authorizationResult;
@@ -1035,6 +1163,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap,
       auditOptions: {
         objects,
+        bypass: this.writeAuditBypass(),
       },
     });
   }

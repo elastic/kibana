@@ -1,0 +1,120 @@
+{
+  "sha1": "098fecdcbbcda234942549ffe82eb822eae8dc25",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b56ee1f41d6fee2-86851e2f1f81251",
+      "title": "Audit log — saved object diffs (ECS file appender) create emits add ops with an empty \"before\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-05225c71854f291",
+      "title": "Audit log — saved object diffs (ECS file appender) update emits a replace op with oldValue and noOps for unchanged fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-5bdee862cc24049",
+      "title": "Audit log — saved object diffs (ECS file appender) delete emits remove ops with an empty \"after\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-53ff59088ddfd9f",
+      "title": "Audit log — saved object diffs (ECS file appender) bulk create emits a per-object diff for each object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 119,
+        "column": 58
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-6454a48f4d20aea",
+      "title": "Audit log — saved object diffs (ECS file appender) bulk delete emits a per-object diff for each object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 153,
+        "column": 25
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-79fc051e7cf8568",
+      "title": "Audit log — saved object diffs (ECS file appender) replaces values above the configured fieldSizeLimit with the sentinel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 181,
+        "column": 25
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-c6f9835385da3e7",
+      "title": "Audit log — saved object diffs (ECS file appender) does not emit a diff for saved object types outside typesToInclude",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 214,
+        "column": 17
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-dc303b5ebc0d1eb",
+      "title": "Audit log — saved object diffs (ECS file appender) redacts encrypted (ESO) attributes in the diff",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 240,
+        "column": 9
+      }
+    }
+  ]
+}

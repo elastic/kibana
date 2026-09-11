@@ -26,6 +26,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -84,6 +91,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -142,6 +156,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -199,6 +220,13 @@ describe('config schema', () => {
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
+          "savedObjectDiff": Object {
+            "enabled": false,
+            "fieldSizeLimit": ByteSizeValue {
+              "valueInBytes": 49152,
+            },
+            "typesToInclude": Array [],
+          },
         },
         "authc": Object {
           "http": Object {
@@ -1942,6 +1970,41 @@ describe('config schema', () => {
         )
       ).toThrow('must specify [ssl.certificate] when [ssl.key] is specified');
     });
+  });
+});
+
+describe('audit.savedObjectDiff config', () => {
+  it('applies defaults when the block is configured', () => {
+    const config = ConfigSchema.validate({
+      audit: { enabled: true, savedObjectDiff: { enabled: true } },
+    });
+    expect(config.audit.savedObjectDiff.enabled).toBe(true);
+    expect(config.audit.savedObjectDiff.typesToInclude).toEqual([]);
+    expect(config.audit.savedObjectDiff.fieldSizeLimit.getValueInBytes()).toBe(49152);
+  });
+
+  it('applies defaults when not configured', () => {
+    const { savedObjectDiff } = ConfigSchema.validate({}).audit;
+    expect(savedObjectDiff.enabled).toBe(false);
+    expect(savedObjectDiff.typesToInclude).toEqual([]);
+    expect(savedObjectDiff.fieldSizeLimit.getValueInBytes()).toBe(49152);
+  });
+
+  it('throws when savedObjectDiff.enabled is true but audit.enabled is false', () => {
+    expect(() =>
+      ConfigSchema.validate({ audit: { enabled: false, savedObjectDiff: { enabled: true } } })
+    ).toThrow(/savedObjectDiff\.enabled requires xpack\.security\.audit\.enabled/);
+  });
+
+  it('does not throw when savedObjectDiff is disabled and audit is disabled', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          enabled: false,
+          savedObjectDiff: { enabled: false, typesToInclude: ['dashboard'] },
+        },
+      })
+    ).not.toThrow();
   });
 });
 

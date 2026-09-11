@@ -29,3 +29,5 @@ export const securityAuditOtelServerArgs = [
   '--xpack.security.audit.appender.protocol=http',
   `--xpack.security.audit.appender.url=http://127.0.0.1:${OTEL_RECEIVER_PORT}/v1/logs`,
 ];
+// Both flavors also enable savedObjectDiff so the specs can assert kibana.diff is
+// JSON-stringified for the OTel SDK on Serverless and traditional alike.

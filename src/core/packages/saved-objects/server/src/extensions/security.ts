@@ -409,6 +409,12 @@ export interface SetAccessControlToWriteParams {
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
  * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
  */
+/** Saved object writes that emit a post-operation audit event when diff auditing is enabled. */
+export type SavedObjectDiffAuditAction =
+  | 'saved_object_create'
+  | 'saved_object_update'
+  | 'saved_object_delete';
+
 export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization for the CREATE security action
@@ -605,6 +611,38 @@ export interface ISavedObjectsSecurityExtension {
     spaceId: string,
     objects: Array<SavedObjectsFindResult<T>>
   ) => void;
+
+  /**
+   * Emits a post-operation audit event for a saved object write when saved object diff
+   * auditing is enabled (in that mode the pre-operation audit event is suppressed, so this
+   * is the operation's only audit record). The outcome is 'success' when the write
+   * completed, or 'unknown' when it was attempted but did not complete. Independently of
+   * the outcome, the event carries an attribute diff (`kibana.diff`) of the (attempted)
+   * change when the object's type is in the configured allow list.
+   */
+  emitSavedObjectDiffAuditEvent: (params: {
+    action: SavedObjectDiffAuditAction;
+    savedObject: { type: string; id: string; name?: string };
+    outcome: 'success' | 'unknown';
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    attributesToRedact?: string[];
+  }) => void;
+
+  /**
+   * Whether saved object diff computation is enabled for audit events.
+   * Extra Elasticsearch reads for before-state are also gated on this flag
+   * together with {@link ISavedObjectsSecurityExtension.shouldComputeSavedObjectDiff}.
+   */
+  readonly savedObjectDiffEnabled: boolean;
+
+  /**
+   * Whether a field-level diff should be computed for this saved object type.
+   * False when the feature is off or the type is not in `typesToInclude`.
+   * Callers that fetch before-state solely for the diff must consult this
+   * so non-allow-listed types do not pay an extra Elasticsearch read.
+   */
+  shouldComputeSavedObjectDiff: (type: string) => boolean;
 
   /**
    * Retrieves the current user from the request context if available

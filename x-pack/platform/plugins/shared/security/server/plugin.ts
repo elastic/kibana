@@ -364,6 +364,11 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
+      // The schema rejects savedObjectDiff.enabled without audit.enabled.
+      savedObjectDiffEnabled: config.audit.savedObjectDiff.enabled,
+      savedObjectDiffTypesToInclude: config.audit.savedObjectDiff.typesToInclude,
+      savedObjectDiffFieldSizeLimit: config.audit.savedObjectDiff.fieldSizeLimit.getValueInBytes(),
+      logger: this.logger.get('saved-objects-audit'),
     });
 
     this.registerDeprecations(core, license);

@@ -27,6 +27,7 @@ import type { CreateRequest, IndexRequest } from '@elastic/elasticsearch/lib/api
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -35,6 +36,7 @@ export interface PerformUpdateParams<T = unknown> {
   id: string;
   attributes: T;
   options: SavedObjectsUpdateOptions<T>;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performUpdate = async <T>(
@@ -75,7 +77,7 @@ export const performUpdate = async <T>(
 };
 
 export const executeUpdate = async <T>(
-  { id, type, attributes, options }: PerformUpdateParams<T>,
+  { id, type, attributes, options, auditDiffRecorder }: PerformUpdateParams<T>,
   { registry, helpers, client, serializer, extensions = {}, logger }: ApiExecutionContext,
   { namespace }: { namespace: string | undefined }
 ): Promise<SavedObjectsUpdateResponse<T>> => {
@@ -113,6 +115,9 @@ export const executeUpdate = async <T>(
 
   const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
   const accessControl = preflightDocNSResult.rawDocSource?._source.accessControl;
+  const name = SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+    attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
+  });
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: {
@@ -123,12 +128,17 @@ export const executeUpdate = async <T>(
         accessControl,
       }),
       objectNamespace: namespace && registry.isSingleNamespace(type) ? namespace : undefined,
-      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
-        attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
-      }),
+      name,
     },
   });
 
+  // Track the write for auditing (flushed by the repository once the operation
+  // settles). `after` is only recorded once encryption/migration has produced the
+  // stored form (per path — upsert vs update — below) — never the caller's
+  // plaintext, so failures flushed before that point cannot leak unencrypted ESO
+  // attributes into the audit log. A conflict retry re-tracks the object, so the
+  // final attempt determines what is audited.
+  const auditRecord = auditDiffRecorder?.track({ type, id, name });
   // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
   const docOutsideNamespace = preflightDocNSResult?.checkResult === 'found_outside_namespace';
   const docNotFound =
@@ -213,6 +223,7 @@ export const executeUpdate = async <T>(
       ...(accessControlToWrite && { accessControl: accessControlToWrite }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
+    auditRecord?.setAfter((migratedUpsert.attributes ?? {}) as Record<string, unknown>);
     const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
 
     const createRequestParams: CreateRequest = {
@@ -275,6 +286,8 @@ export const executeUpdate = async <T>(
       attributes: upsert, // these ignore the attribute values provided in the main request body.
     } as SavedObject<T>;
 
+    auditRecord?.succeed();
+
     // UPSERT CASE END
   } else {
     // UPDATE CASE START
@@ -298,6 +311,8 @@ export const executeUpdate = async <T>(
           typeMappings: typeDefinition.mappings,
         })
       : encryptedUpdatedAttributes;
+    auditRecord?.setBefore((migrated!.attributes ?? {}) as Record<string, unknown>);
+    auditRecord?.setAfter(updatedAttributes as Record<string, unknown>);
 
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
@@ -380,6 +395,8 @@ export const executeUpdate = async <T>(
       references,
       attributes,
     } as SavedObject<T>;
+
+    auditRecord?.succeed();
   }
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(

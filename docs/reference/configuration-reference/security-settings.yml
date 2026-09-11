@@ -591,6 +591,39 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: xpack.security.audit.savedObjectDiff.enabled
+        description: |
+          Set to `true` to record saved object create, update, and delete audit events after the operation completes. When enabled, each write emits a single audit event reflecting its result — `event.outcome: success` once the write is confirmed, or `event.outcome: unknown`, carrying the attempted change, when the write did not complete — in place of the pre-operation event. A field-level attribute diff is added in the `kibana.diff` field only for types listed in `typesToInclude`. Failed authorization is still audited with `event.outcome: failure` as usual. Requires `xpack.security.audit.enabled` to be `true`. **Default:** `false`
+
+          Diffs cover attributes only (not references, spaces, or access control). `incrementCounter` mutations do not emit diffs. Saved object types whose plugins manage their own saved objects authorization and auditing are not covered by this setting: their writes never emit diffs and keep their existing audit behavior. This notably includes writes made through the connectors API (`action`), alerting rules (`alert`), and cases (`cases`), as well as writes made by Fleet, Task Manager, Reporting, Osquery, Elastic Defend, custom branding, and maintenance windows. Upsert that creates an object still uses `event.action: saved_object_update` with an empty before-state. A create that overwrites an existing object (for example, saved object import with `overwrite`) still uses `event.action: saved_object_create`, but its diff records the previous state: `replace` and `remove` operations preserve the overwritten values in `oldValue`, while a create of a new object contains only `add` operations. Large objects may list every unchanged leaf path under `kibana.diff.noOps`; `fieldSizeLimit` only caps individual attribute values, not total event size. A `success` event without a diff means the type is not listed in `typesToInclude` or diff computation failed (details are written to the {{kib}} server log).
+
+          Do not use `xpack.security.audit.ignore_filters` to drop `event.outcome: unknown` events solely to reduce volume — for a write that fails after authorization, that event is its only audit trail.
+
+          If you ingest the audit log into {{es}} (for example, with the Filebeat `kibana` module), the index must not dynamically map `kibana.diff.ops.value` or `kibana.diff.ops.oldValue`. These fields hold the raw JSON of whatever attribute changed, so their type varies between events (string, number, boolean, array, or object); mapping them as `object` (even with `enabled: false`) rejects scalar values, and leaving them to dynamic mapping types the field from the first event and silently rejects later events of a different type. The Filebeat `kibana` module maps `kibana.diff.ops` with `dynamic: false` so those fields stay in `_source` without being indexed. Use a Filebeat version that includes that mapping, or set `dynamic: false` on `kibana.diff.ops` in your index template, before enabling this setting.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.6
+          self: preview
+
+      - setting: xpack.security.audit.savedObjectDiff.typesToInclude[]
+        description: |
+          Allow list of saved object types that receive a field-level `kibana.diff` on their result audit event. Diffs are opt-in per type: an empty list (the default) generates no diffs. Types not in this list still emit their result audit event when `savedObjectDiff.enabled` is `true`, but without `kibana.diff`. **Default:** `[]`
+        datatype: string
+        default: "[]"
+        applies_to:
+          stack: preview 9.6
+          self: preview
+
+      - setting: xpack.security.audit.savedObjectDiff.fieldSizeLimit
+        description: |
+          Maximum serialized size of an individual attribute value included in a diff. Values larger than this are replaced with the placeholder `Value above fieldSizeLimit` to keep per-field values bounded. Accepts a byte-size value (for example, `48kb`). Does not limit the number of `noOps` entries. Because audit retention on the rolling file appender is measured in bytes, larger diff events shorten the retention window; this setting clamps individual values (typically a few large JSON strings) but not objects with many small attributes, so review your appender retention after enabling diffs. **Default:** `48kb`
+        datatype: string
+        default: 48kb
+        applies_to:
+          stack: preview 9.6
+          self: preview
+
   - group: File appender
     id: audit-logging-file-appender
     description: |

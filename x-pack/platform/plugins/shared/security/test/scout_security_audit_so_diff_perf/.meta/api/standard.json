@@ -1,0 +1,106 @@
+{
+  "sha1": "b9ae128dbc31fb078163473f5dbe2866b15869b0",
+  "testChannels": [
+    "ci-batch-weekly"
+  ],
+  "tests": [
+    {
+      "id": "fe23a3230de4670-e52b63fe12df675",
+      "title": "Saved object audit diffs — performance measurements sequential bulk create of large nested objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 333,
+        "column": 18
+      }
+    },
+    {
+      "id": "fe23a3230de4670-cc01d4dd8656a1f",
+      "title": "Saved object audit diffs — performance measurements sequential single updates of one large nested object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 353,
+        "column": 16
+      }
+    },
+    {
+      "id": "fe23a3230de4670-bee22410cf69078",
+      "title": "Saved object audit diffs — performance measurements sequential bulk updates of medium nested objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 379,
+        "column": 16
+      }
+    },
+    {
+      "id": "fe23a3230de4670-c2137673cf06af3",
+      "title": "Saved object audit diffs — performance measurements import with overwrite (exercises before-state reads)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 411,
+        "column": 23
+      }
+    },
+    {
+      "id": "fe23a3230de4670-e43d37d5979e110",
+      "title": "Saved object audit diffs — performance measurements concurrent bulk creates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 446,
+        "column": 25
+      }
+    },
+    {
+      "id": "fe23a3230de4670-6dd8e9702244f4c",
+      "title": "Saved object audit diffs — performance measurements sequential single updates of a large real dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 476,
+        "column": 22
+      }
+    },
+    {
+      "id": "fe23a3230de4670-dc8f016b622e382",
+      "title": "Saved object audit diffs — performance measurements summary",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_perf/api/tests/saved_object_diff_perf.spec.ts",
+        "line": 498,
+        "column": 72
+      }
+    }
+  ]
+}

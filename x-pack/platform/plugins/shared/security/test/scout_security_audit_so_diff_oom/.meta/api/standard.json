@@ -1,0 +1,78 @@
+{
+  "sha1": "c21b5ce5eefc952fe4231ef2a1eaa2b13f0b4c24",
+  "testChannels": [
+    "ci-batch-weekly"
+  ],
+  "tests": [
+    {
+      "id": "c167a1910518aea-f750e678da6f02a",
+      "title": "Saved object audit diffs OOM prevention create and update a large nested object succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
+        "line": 202,
+        "column": 53
+      }
+    },
+    {
+      "id": "c167a1910518aea-fda9d2d86738738",
+      "title": "Saved object audit diffs OOM prevention bulk create nested objects succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
+        "line": 235,
+        "column": 16
+      }
+    },
+    {
+      "id": "c167a1910518aea-34dfa9f47d3294e",
+      "title": "Saved object audit diffs OOM prevention bulk update nested objects succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
+        "line": 266,
+        "column": 25
+      }
+    },
+    {
+      "id": "c167a1910518aea-fcc662123766c5d",
+      "title": "Saved object audit diffs OOM prevention create and update a large real dashboard succeeds under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
+        "line": 307,
+        "column": 70
+      }
+    },
+    {
+      "id": "c167a1910518aea-0c40a822164014a",
+      "title": "Saved object audit diffs OOM prevention sequential updates to a large object succeed under constrained heap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
+        "line": 350,
+        "column": 9
+      }
+    }
+  ]
+}

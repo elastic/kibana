@@ -13,6 +13,7 @@ import type {
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
+  OtelAppenderPluginConfig,
   StatusServiceSetup,
 } from '@kbn/core/server';
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
@@ -23,6 +24,7 @@ import {
   applyAuditOtelFieldMap,
   AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
   AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+  serializeAuditDiffAttribute,
 } from './audit_otel_transform';
 import type { AuditLogWriteAccess } from './audit_write_access';
 import { getAuditLogPath, getAuditStatus$, probeAuditLogWriteAccess } from './audit_write_access';
@@ -240,25 +242,9 @@ export const createLoggingConfig =
         highlight: true,
       },
     };
-    // On Serverless, when the configured appender is OTel, inject the audit-specific attribute
-    // transform callback (renames, drops, defaults, additions) to satisfy Serverless audit log
-    // field requirements at the output layer — without touching the upstream AuditEvent type — and
-    // slim the resource to the minimal audit attributes. These transforms are Serverless-only: on
-    // other build flavors the OTel appender is left untouched (full resource, raw ECS field names).
     const appender =
-      isServerless && baseAppender.type === 'otel'
-        ? {
-            ...baseAppender,
-            transformAttributes: applyAuditOtelFieldMap,
-            // Only service identity belongs in the resource. Promotion captures project.id and
-            // other configured keys before filtering, so they remain available on each record.
-            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
-            promoteResourceAttributes: [
-              ...(baseAppender.promoteResourceAttributes ?? []),
-              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            ],
-            attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
-          }
+      baseAppender.type === 'otel'
+        ? withAuditOtelTransforms(baseAppender, isServerless)
         : baseAppender;
 
     return {
@@ -272,6 +258,31 @@ export const createLoggingConfig =
       ],
     };
   };
+
+/**
+ * Adds the audit attribute transforms to an OTel appender: the `kibana.diff` serialization on
+ * every flavor, plus the Serverless field map and slimmed resource on Serverless.
+ */
+const withAuditOtelTransforms = (
+  baseAppender: OtelAppenderPluginConfig,
+  isServerless: boolean
+): OtelAppenderPluginConfig => {
+  if (!isServerless) {
+    return { ...baseAppender, transformAttributes: serializeAuditDiffAttribute };
+  }
+  return {
+    ...baseAppender,
+    transformAttributes: applyAuditOtelFieldMap,
+    // Only service identity belongs in the resource. Promotion captures project.id and
+    // other configured keys before filtering, so they remain available on each record.
+    includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+    promoteResourceAttributes: [
+      ...(baseAppender.promoteResourceAttributes ?? []),
+      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+    ],
+    attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
+  };
+};
 
 /**
  * Evaluates the list of provided ignore rules, and filters out events only
