@@ -305,6 +305,52 @@ describe('Workflows Connector', () => {
       expect(result.subActionParams.inputs?.event?.alerts).toHaveLength(1);
     });
 
+    it('should attach action context to alerts when contextByAlertUuid is provided', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+      const uuid = 'alert-uuid-1';
+      const context = { message: 'cpu high' };
+
+      const mockAlerts = {
+        all: { data: [], count: 0 },
+        new: {
+          data: [{ _id: 'alert-1', _index: 'test-index-1', kibana: { alert: { uuid } } }],
+          count: 1,
+        },
+        ongoing: { data: [], count: 0 },
+        recovered: { data: [], count: 0 },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: ['test-tag'],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params: {
+          subAction: 'run' as const,
+          subActionParams: {
+            workflowId: 'test-workflow-id',
+          },
+        },
+        ruleUrl: 'https://example.com/rule',
+        spaceId: 'default',
+        contextByAlertUuid: { [uuid]: context },
+      });
+
+      expect(result.subActionParams.inputs?.event?.alerts[0]).toEqual(
+        expect.objectContaining({
+          _id: 'alert-1',
+          context,
+        })
+      );
+    });
+
     it('should handle missing workflowId gracefully', () => {
       const adapter = getWorkflowsConnectorAdapter();
 
