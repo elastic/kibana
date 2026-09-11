@@ -17,8 +17,7 @@ import {
   loadDiscoveriesFromSnapshot,
   loadDetectionsFromSnapshot,
 } from '../../src/data_generators/replay';
-import type { GcsConfig } from '../../src/data_generators/replay';
-import { getAllDatasetIds, getDatasetById } from '../../src/datasets';
+import { getAllDatasetIds, getDatasetById, getDefaultDatasetIds } from '../../src/datasets';
 import { readKibanaConfig } from '../lib/kibana';
 
 const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
@@ -120,7 +119,8 @@ const formatDiscovery = (discovery: SignificantEvent): string[] => {
 run(
   async ({ log, flags }) => {
     const datasetIds = getAllDatasetIds();
-    const datasetId = String(flags.dataset || datasetIds[0]);
+    const defaultDatasetId = getDefaultDatasetIds()[0];
+    const datasetId = flags.dataset == null ? defaultDatasetId : String(flags.dataset);
 
     if (datasetId === 'list') {
       log.info(`Registered datasets: ${datasetIds.join(', ')}`);
@@ -132,6 +132,11 @@ run(
       throw new Error(
         `Unknown dataset "${datasetId}". Registered: ${datasetIds.join(', ')}.\n` +
           'Use --dataset list to see available datasets.'
+      );
+    }
+    if (datasetConfig.replayMode === 'managed-stream') {
+      throw new Error(
+        `replay_eval_snapshot does not support dataset "${datasetId}" because it uses replayMode "managed-stream".`
       );
     }
 
@@ -159,7 +164,7 @@ run(
       auth: { username, password },
     });
 
-    const gcs: GcsConfig = datasetConfig.gcs;
+    const gcs = datasetConfig.gcs;
 
     log.info(`Run: ${SIGEVENTS_SNAPSHOT_RUN} | ES: ${esUrl}`);
     log.info(`Dataset: ${datasetConfig.id} — ${datasetConfig.description}`);
@@ -352,7 +357,7 @@ run(
         'service-field',
       ],
       help: `
-        --dataset          Dataset id to replay from, or "list" to list registered datasets (default: first registered)
+        --dataset          Dataset id to replay from, or "list" to list registered datasets (default: first default dataset)
         --scenario         (required) Scenario name to replay, or "list" to list available snapshots
         --run-id           Snapshot run ID (default: SIGEVENTS_SNAPSHOT_RUN env var or 2026-02-25)
         --stream-name      Stream name to filter KI features by (default: logs)

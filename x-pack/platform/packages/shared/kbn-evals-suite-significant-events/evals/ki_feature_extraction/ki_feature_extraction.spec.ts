@@ -17,12 +17,15 @@ import {
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
+  replayIntoManagedStream,
   replaySignificantEventsSnapshot,
+  resolveBasePath,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
 import { createKIFeatureExtractionEvaluators } from '../../src/evaluators/ki_feature_extraction';
 import {
   getActiveDatasets,
+  hasExplicitDatasetSelection,
   MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
@@ -42,6 +45,7 @@ interface CollectedExample {
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
+  const failOnMissingSnapshot = hasExplicitDatasetSelection(process.env.SIGEVENTS_DATASET);
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
@@ -97,6 +101,12 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
             availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
 
           if (!availableSnapshots.has(source.snapshotName)) {
+            if (failOnMissingSnapshot) {
+              throw new Error(
+                `Snapshot "${source.snapshotName}" for dataset "${dataset.id}" was not found at ` +
+                  `"${source.gcs.bucket}/${resolveBasePath(source.gcs)}".`
+              );
+            }
             log.info(
               `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
                 `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
@@ -105,7 +115,13 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           }
 
           await cleanSignificantEventsDataStreams(esClient, log);
-          await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+          if (dataset.replayMode === 'managed-stream') {
+            await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs, {
+              includeOriginalNameIndices: true,
+            });
+          } else {
+            await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
+          }
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
           const sampledHits = await collectSampleDocuments({
