@@ -33,6 +33,10 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
  *   recovery strategies on `kind: 'signal'`. Tests that override `query`
  *   should include `recovery_strategy: 'no_breach'` (or another valid
  *   strategy) if they want the executor to emit recovery events.
+ * - When a caller disables recovery (`recovery_strategy: 'none'` or `undefined`)
+ *   without supplying its own `state_transition`, `buildCreateRuleData` strips
+ *   the default `recovering_count`/`recovering_timeframe`, since the write API
+ *   rejects an inert recovering delay when recovery is off.
  */
 const DEFAULTS: CreateRuleData = {
   kind: 'alert',
@@ -56,10 +60,17 @@ const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
 
 export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 
-export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
-  ...DEFAULTS,
-  ...input,
-});
+export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => {
+  const merged: CreateRuleData = { ...DEFAULTS, ...input };
+
+  const recoveryEnabled = merged.recovery_strategy != null && merged.recovery_strategy !== 'none';
+  if (!recoveryEnabled && input.state_transition === undefined && merged.state_transition != null) {
+    const { recovering_count, recovering_timeframe, ...rest } = merged.state_transition;
+    merged.state_transition = rest;
+  }
+
+  return merged;
+};
 
 export const buildRuleTemplateData = (rule: BuildCreateRuleDataInput = {}): RuleTemplateData => ({
   engine: 'v2',

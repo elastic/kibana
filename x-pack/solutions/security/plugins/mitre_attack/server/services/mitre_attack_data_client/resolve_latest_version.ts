@@ -7,7 +7,7 @@
 
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { MitreEntity, MitreFramework } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../saved_objects';
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 import { buildKqlFilter } from '../utils';
 
 interface ResolveLatestVersionArgs {
