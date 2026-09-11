@@ -13,6 +13,10 @@ import { EuiButtonEmpty, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { ESQLColumn } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 
+const SELECT_COLUMN_LABEL = i18n.translate('esqlUtils.valuesPreview.selectAColumnText', {
+  defaultMessage: 'Select a column',
+});
+
 export function ChooseColumnPopover({
   columns,
   updateQuery,
@@ -24,10 +28,6 @@ export function ChooseColumnPopover({
   const [options, setOptions] = useState<EuiSelectableOption[]>(
     columns.map((column) => ({ label: column.name }))
   );
-
-  const selectAColumnText = i18n.translate('esqlUtils.valuesPreview.selectAColumnText', {
-    defaultMessage: 'Select a column',
-  });
 
   const onColumnChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -46,7 +46,7 @@ export function ChooseColumnPopover({
       onClick={() => setIsPopoverOpen((status) => !status)}
       data-test-subj="chooseColumnBtn"
     >
-      {selectAColumnText}
+      {SELECT_COLUMN_LABEL}
     </EuiButtonEmpty>
   );
 
@@ -60,7 +60,7 @@ export function ChooseColumnPopover({
       closePopover={() => setIsPopoverOpen(false)}
     >
       <EuiSelectable
-        aria-label={selectAColumnText}
+        aria-label={SELECT_COLUMN_LABEL}
         searchable
         searchProps={{ 'data-test-subj': 'selectableColumnSearch' }}
         listProps={{ 'data-test-subj': 'selectableColumnList' }}

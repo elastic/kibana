@@ -8,12 +8,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiCallOut, EuiFlexGrid, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiCallOut, EuiCode, EuiFlexGrid, EuiStat } from '@elastic/eui';
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DataControlType } from '@kbn/controls-constants';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -69,13 +70,14 @@ export const ESQLValuesPreview: React.FC<{
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
       >
-        <p>
-          {i18n.translate('esqlUtils.valuesPreview.multiColumnErrorBody', {
-            defaultMessage:
-              'Your query is currently returning {totalColumns} columns. Choose a column, or use STATS BY to narrow your query down.',
-            values: { totalColumns: previewColumns.length },
-          })}
-        </p>
+        <FormattedMessage
+          id="esqlUtils.valuesPreview.multiColumnErrorBody"
+          defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {statsBy} to narrow your query down."
+          values={{
+            totalColumns: previewColumns.length,
+            statsBy: <EuiCode>STATS BY</EuiCode>,
+          }}
+        />
         <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
       </EuiCallOut>
     );
