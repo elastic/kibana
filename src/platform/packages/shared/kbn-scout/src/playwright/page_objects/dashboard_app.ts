@@ -1349,7 +1349,7 @@ export class DashboardApp {
   async selectDiscoverEmbeddableTab(tabLabel: string) {
     await this.page.testSubj.click('discoverEmbeddableInlineEditSelectTabAction');
     const tabPicker = this.page.testSubj.locator('discoverEmbeddableInlineEditSelectTabPopover');
-    await tabPicker.getByRole('button', { name: tabLabel, exact: true }).click();
+    await tabPicker.getByText(tabLabel, { exact: true }).click();
   }
 
   /** Applies pending inline edits to a Discover embeddable. */

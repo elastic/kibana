@@ -18,7 +18,7 @@ const createSavedSearch = async (
   searchId: string,
   searchTitle: string,
   dataViewId: string,
-  tabs: Array<{
+  tabs?: Array<{
     id: string;
     label: string;
     attributes: {
@@ -26,7 +26,7 @@ const createSavedSearch = async (
       sort: Array<[string, 'asc' | 'desc']>;
       kibanaSavedObjectMeta: { searchSourceJSON: string };
     };
-  }> = []
+  }>
 ) =>
   await kbnClient.savedObjects.create({
     type: 'search',
@@ -41,7 +41,7 @@ const createSavedSearch = async (
         searchSourceJSON:
           '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
       },
-      tabs,
+      ...(tabs?.length ? { tabs } : {}),
     },
     references: [
       {
@@ -139,6 +139,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     });
 
     await pageObjects.dashboard.saveDashboard(dashboardTitle);
+    createdSavedObjects.push({ type: 'dashboard', id: getCurrentDashboardId(page.url()) });
     await kbnClient.savedObjects.delete({
       type: 'search',
       id: savedSearchId,
@@ -158,16 +159,20 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     ).toBeHidden();
   });
 
-  test('should support URL drilldown', async ({ page, pageObjects }) => {
+  test('should support URL drilldown', async ({ kbnClient, page, pageObjects }) => {
     const drilldownName = `URL drilldown ${randomUUID()}`;
     const dashboardTitle = `Dashboard URL drilldown ${randomUUID()}`;
+    const searchId = randomUUID().replace(/-/g, '');
+    const searchTitle = `URL drilldown saved search ${searchId}`;
     const urlTemplate =
       "{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{context.panel.timeRange.from}}',to:'{{context.panel.timeRange.to}}'))" +
       "&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto," +
       "query:(language:{{context.panel.query.language}},query:'clientip:239.190.189.77'),sort:!())";
 
     await pageObjects.dashboard.openNewDashboard();
-    await pageObjects.dashboard.addPanelFromLibrary('Rendering-Test:-saved-search');
+    await createSavedSearch(kbnClient, searchId, searchTitle, testData.DEFAULT_DATA_VIEW);
+    createdSavedObjects.push({ type: 'search', id: searchId });
+    await pageObjects.dashboard.addPanelFromLibrary(searchTitle);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({ state: 'visible' });
     await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-addDrilldown');
     await pageObjects.dashboard.createUrlDrilldown(
@@ -181,7 +186,7 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     createdSavedObjects.push({ type: 'dashboard', id: dashboardId });
     await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
-    await pageObjects.dashboard.openPanelContextMenu('Rendering-Test:-saved-search');
+    await pageObjects.dashboard.openPanelContextMenu(searchTitle);
     const popupPromise = page.waitForEvent('popup');
     await page.getByRole('link', { name: drilldownName, exact: true }).click();
     const discoverPage = await popupPromise;
