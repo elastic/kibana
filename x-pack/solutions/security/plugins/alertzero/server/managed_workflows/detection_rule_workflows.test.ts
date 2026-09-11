@@ -187,11 +187,28 @@ describe('detection rule workflows', () => {
           type === 'workflow.execute' &&
           input?.['workflow-id'] === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.map(({ name }) => name)).toEqual(['propose_action', 'propose_manual']);
+      expect(proposals.map(({ name }) => name)).toEqual([
+        'propose_entry',
+        'propose_action',
+        'propose_manual',
+      ]);
 
-      const [action, manual] = proposals;
+      const [entry, action, manual] = proposals;
+      const entryInputs = entry.with?.inputs as Record<string, unknown>;
       const actionInputs = action.with?.inputs as Record<string, unknown>;
       const manualInputs = manual.with?.inputs as Record<string, unknown>;
+
+      // Manual autonomy stops once for permission to do the work; the entry gate
+      // carries no action and a dismissal terminates the run before diagnosis.
+      expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
+      expect(entryInputs).not.toHaveProperty('actionWorkflowId');
+      expect(entryInputs).not.toHaveProperty('actionInput');
+      const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
+      const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
+      expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
+      expect(stopIndex).toBeLessThan(diagnoseIndex);
+      expect(all[stopIndex].type).toBe('workflow.output');
+      expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(actionInputs.actionInput).toEqual({
@@ -207,6 +224,8 @@ describe('detection rule workflows', () => {
       for (const proposal of proposals) {
         expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
         expect(proposal).not.toHaveProperty('on-failure');
+      }
+      for (const proposal of [action, manual]) {
         expect((proposal.with?.inputs as Record<string, unknown>).comment).toBe(
           '{{ steps.compose_proposal.output.comment }}'
         );
@@ -423,12 +442,19 @@ describe('detection rule workflows', () => {
 
       it('tags the harvested alerts once a decision is recorded', () => {
         expect(tagSteps.map(({ name }) => name)).toEqual([
+          'mark_alerts_declined',
           'mark_alerts_dismissed',
           'mark_alerts_applied',
           'mark_alerts_acknowledged',
         ]);
 
-        const [dismissed, applied, acknowledged] = tagSteps;
+        const [declined, dismissed, applied, acknowledged] = tagSteps;
+        // A declined entry gate retires the alerts too, or the next sweep re-opens it.
+        expect(declined.if).toContain('steps.record_entry.output.declined == true');
+        expect(declined.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ consts.dismissed_tag }}',
+        ]);
         expect(dismissed.if).toContain('steps.record_decision.output.dismissed == true');
         expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -498,20 +524,21 @@ describe('detection rule workflows', () => {
         expect(JSON.stringify(refresh.with)).toContain('steps.refetch_rule.output | json');
       });
 
-      // Both backtests run inside one preview worker execution, and the proposal gate
-      // is the only other child: one synchronous child per wake-up cycle is safe,
-      // while two consecutive child calls share one immediate-resume slot and can
-      // strand the review in waiting_for_child. run_previews resumes the run before
-      // either propose_* step executes, so each cycle holds exactly one child.
+      // Both backtests run inside one preview worker execution, and the proposal
+      // gates are the only other children: one synchronous child per wake-up cycle
+      // is safe, while two consecutive child calls share one immediate-resume slot
+      // and can strand the review in waiting_for_child. Each gate resumes the run
+      // before the next child executes, so each cycle holds exactly one child.
       it('backtests both queries through a single preview worker run', () => {
         const children = reviewSteps.filter(({ type }) => type === 'workflow.execute');
 
         expect(children.map(({ name }) => name)).toEqual([
+          'propose_entry',
           'run_previews',
           'propose_action',
           'propose_manual',
         ]);
-        const [previews] = children;
+        const [, previews] = children;
         expect(previews.with?.['workflow-id']).toBe(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID);
 
         const previewInputs = previews.with?.inputs as Record<

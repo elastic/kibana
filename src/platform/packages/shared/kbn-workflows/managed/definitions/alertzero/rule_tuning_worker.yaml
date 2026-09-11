@@ -24,6 +24,14 @@ triggers:
   - type: manual
     inputs:
       properties:
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          default: assisted
+          description: >-
+            Detection Watch autonomy level of the dispatching worker, forwarded to
+            every review it launches. "manual" makes each review wait for an analyst
+            before diagnosis.
         min_fp_count:
           type: integer
           # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
@@ -254,6 +262,7 @@ steps:
             alert_ids: "${{ foreach.item.3 }}"
             total_alert_count: "${{ foreach.item.4 }}"
             total_fp_count: "${{ foreach.item.5 }}"
+            autonomy_level: "{{ inputs.autonomy_level | default: 'assisted' }}"
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
