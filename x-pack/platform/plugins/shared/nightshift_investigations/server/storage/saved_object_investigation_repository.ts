@@ -25,7 +25,7 @@ import type {
   SeverityCounts,
   SeverityCountsQuery,
 } from './types';
-import type { ImpactedEntity } from '../../common';
+import type { ImpactEntity } from '../../common';
 
 const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
   id,
@@ -188,14 +188,14 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     };
   }
 
-  async findImpactedEntities(query: InvestigationDateFilters): Promise<ImpactedEntity[]> {
+  async findImpactEntities(query: InvestigationDateFilters): Promise<ImpactEntity[]> {
     const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, 'impact'>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       filter: buildBaseInvestigationFilter(query),
       perPage: 1000,
       fields: ['impact'],
     });
-    const entities = new Map<string, ImpactedEntity>();
+    const entities = new Map<string, ImpactEntity>();
 
     for (const { attributes } of result.saved_objects) {
       for (const { name, type } of attributes.impact?.entities ?? []) {

@@ -211,12 +211,12 @@ export interface SeverityCountsResponse {
   severity_counts: SeverityCounts;
 }
 
-export type ImpactedEntity = Pick<InvestigationImpactEntity, 'name' | 'type'>;
+export type ImpactEntity = Pick<InvestigationImpactEntity, 'name' | 'type'>;
 
-export type ImpactedEntitiesRequest = InvestigationDateFilterRequest;
+export type ImpactEntitiesRequest = InvestigationDateFilterRequest;
 
-export interface ImpactedEntitiesResponse {
-  impacted_entities: ImpactedEntity[];
+export interface ImpactEntitiesResponse {
+  impact_entities: ImpactEntity[];
 }
 
 export {

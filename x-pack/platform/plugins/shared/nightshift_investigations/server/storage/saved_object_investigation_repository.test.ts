@@ -393,7 +393,7 @@ describe('SavedObjectInvestigationRepository', () => {
     });
   });
 
-  describe('findImpactedEntities()', () => {
+  describe('findImpactEntities()', () => {
     it('loads the first 1,000 matching investigations and returns distinct entity pairs', async () => {
       const { repository, savedObjectsClient } = createRepository();
       savedObjectsClient.find.mockResolvedValue({
@@ -432,7 +432,7 @@ describe('SavedObjectInvestigationRepository', () => {
       });
 
       await expect(
-        repository.findImpactedEntities({
+        repository.findImpactEntities({
           createdAfter: '2024-01-01T00:00:00Z',
           createdBefore: '2024-01-31T00:00:00Z',
           startedAfter: '2024-01-02T00:00:00Z',
@@ -471,7 +471,7 @@ describe('SavedObjectInvestigationRepository', () => {
         per_page: 1_000,
       });
 
-      await repository.findImpactedEntities({});
+      await repository.findImpactEntities({});
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith({
         type: TYPE,

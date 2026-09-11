@@ -8,20 +8,20 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { nightshiftInvestigationsRouteRepository } from '.';
 
-const endpoint = 'GET /internal/nightshift/investigations/_impacted_entities' as const;
+const endpoint = 'GET /internal/nightshift/investigations/_impact_entities' as const;
 const { handler, params } = nightshiftInvestigationsRouteRepository[endpoint];
 const mockRequest = {} as KibanaRequest;
 
-const makeResources = (query: Record<string, unknown>, getImpactedEntities = jest.fn()) => ({
+const makeResources = (query: Record<string, unknown>, getImpactEntities = jest.fn()) => ({
   request: mockRequest,
   params: { query },
-  getInvestigationsClient: jest.fn().mockReturnValue({ getImpactedEntities }),
+  getInvestigationsClient: jest.fn().mockReturnValue({ getImpactEntities }),
 });
 
-describe('GET /internal/nightshift/investigations/_impacted_entities', () => {
+describe('GET /internal/nightshift/investigations/_impact_entities', () => {
   it('accepts date bounds and forwards them to the client', async () => {
-    const getImpactedEntities = jest.fn().mockResolvedValue({
-      impacted_entities: [{ name: 'checkout', type: 'service' }],
+    const getImpactEntities = jest.fn().mockResolvedValue({
+      impact_entities: [{ name: 'checkout', type: 'service' }],
     });
     const query = {
       created_after: '2024-01-01T00:00:00Z',
@@ -32,10 +32,10 @@ describe('GET /internal/nightshift/investigations/_impacted_entities', () => {
       completed_before: '2024-01-29T00:00:00Z',
     };
 
-    await expect(handler(makeResources(query, getImpactedEntities) as never)).resolves.toEqual({
-      impacted_entities: [{ name: 'checkout', type: 'service' }],
+    await expect(handler(makeResources(query, getImpactEntities) as never)).resolves.toEqual({
+      impact_entities: [{ name: 'checkout', type: 'service' }],
     });
-    expect(getImpactedEntities).toHaveBeenCalledWith(query);
+    expect(getImpactEntities).toHaveBeenCalledWith(query);
   });
 
   it('rejects malformed date bounds', () => {

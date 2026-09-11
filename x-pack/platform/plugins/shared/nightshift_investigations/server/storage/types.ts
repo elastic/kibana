@@ -6,7 +6,7 @@
  */
 
 import type {
-  ImpactedEntity,
+  ImpactEntity,
   InvestigationStatus,
   InvestigationStructuredOutput,
   InvestigationSubjectType,
@@ -105,7 +105,7 @@ export interface InvestigationRepository {
     query: FindInvestigationsQuery<Fields>
   ): Promise<FindInvestigationsResult<Fields>>;
   countBySeverity(query: SeverityCountsQuery): Promise<SeverityCounts>;
-  findImpactedEntities(query: InvestigationDateFilters): Promise<ImpactedEntity[]>;
+  findImpactEntities(query: InvestigationDateFilters): Promise<ImpactEntity[]>;
 }
 
 export type FindInvestigationsAcrossSpacesResult<

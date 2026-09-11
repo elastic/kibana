@@ -119,7 +119,7 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
   countBySeverity: jest
     .fn()
     .mockResolvedValue({ '80-critical': 0, '60-high': 0, '40-medium': 0, '20-low': 0 }),
-  findImpactedEntities: jest.fn().mockResolvedValue([]),
+  findImpactEntities: jest.fn().mockResolvedValue([]),
 });
 
 beforeEach(() => {
@@ -355,15 +355,15 @@ describe('NightshiftInvestigationsClient.list()', () => {
   });
 });
 
-describe('NightshiftInvestigationsClient.getImpactedEntities()', () => {
+describe('NightshiftInvestigationsClient.getImpactEntities()', () => {
   it('maps date bounds and returns the entity pairs', async () => {
-    repository.findImpactedEntities.mockResolvedValue([
+    repository.findImpactEntities.mockResolvedValue([
       { name: 'checkout', type: 'service' },
       { name: 'host-1' },
     ]);
 
     await expect(
-      makeClient().getImpactedEntities({
+      makeClient().getImpactEntities({
         created_after: '2024-01-01T00:00:00Z',
         created_before: '2024-01-31T00:00:00Z',
         started_after: '2024-01-02T00:00:00Z',
@@ -372,10 +372,10 @@ describe('NightshiftInvestigationsClient.getImpactedEntities()', () => {
         completed_before: '2024-01-29T00:00:00Z',
       })
     ).resolves.toEqual({
-      impacted_entities: [{ name: 'checkout', type: 'service' }, { name: 'host-1' }],
+      impact_entities: [{ name: 'checkout', type: 'service' }, { name: 'host-1' }],
     });
 
-    expect(repository.findImpactedEntities).toHaveBeenCalledWith({
+    expect(repository.findImpactEntities).toHaveBeenCalledWith({
       createdAfter: '2024-01-01T00:00:00Z',
       createdBefore: '2024-01-31T00:00:00Z',
       startedAfter: '2024-01-02T00:00:00Z',
@@ -386,9 +386,9 @@ describe('NightshiftInvestigationsClient.getImpactedEntities()', () => {
   });
 
   it('queries without date bounds when none are provided', async () => {
-    await makeClient().getImpactedEntities();
+    await makeClient().getImpactEntities();
 
-    expect(repository.findImpactedEntities).toHaveBeenCalledWith({
+    expect(repository.findImpactEntities).toHaveBeenCalledWith({
       createdAfter: undefined,
       createdBefore: undefined,
       startedAfter: undefined,

@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
-export const getImpactedEntitiesRoute = createNightshiftInvestigationsServerRoute({
-  endpoint: 'GET /internal/nightshift/investigations/_impacted_entities',
+export const getImpactEntitiesRoute = createNightshiftInvestigationsServerRoute({
+  endpoint: 'GET /internal/nightshift/investigations/_impact_entities',
   options: {
     access: 'internal',
-    summary: 'List impacted entities',
-    description: 'Returns distinct impacted entity name and type pairs in the current space.',
+    summary: 'List impact entities',
+    description: 'Returns distinct impact entity name and type pairs in the current space.',
   },
   security: {
     // agentBuilder:read as a proxy for AI feature access. See start_investigation.ts.
@@ -30,5 +30,5 @@ export const getImpactedEntitiesRoute = createNightshiftInvestigationsServerRout
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) =>
-    getInvestigationsClient(request).getImpactedEntities(params.query),
+    getInvestigationsClient(request).getImpactEntities(params.query),
 });

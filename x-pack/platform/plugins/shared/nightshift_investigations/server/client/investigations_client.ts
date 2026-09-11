@@ -20,8 +20,8 @@ import type {
   InvestigationSubject,
   InvestigationSubjectType,
   InvestigationTriggerType,
-  ImpactedEntitiesRequest,
-  ImpactedEntitiesResponse,
+  ImpactEntitiesRequest,
+  ImpactEntitiesResponse,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
@@ -724,15 +724,15 @@ export class NightshiftInvestigationsClient {
     return { severity_counts: severityCounts };
   }
 
-  async getImpactedEntities({
+  async getImpactEntities({
     created_after,
     created_before,
     started_after,
     started_before,
     completed_after,
     completed_before,
-  }: ImpactedEntitiesRequest = {}): Promise<ImpactedEntitiesResponse> {
-    const impactedEntities = await this.investigationRepository.findImpactedEntities({
+  }: ImpactEntitiesRequest = {}): Promise<ImpactEntitiesResponse> {
+    const impactEntities = await this.investigationRepository.findImpactEntities({
       createdAfter: created_after,
       createdBefore: created_before,
       startedAfter: started_after,
@@ -741,6 +741,6 @@ export class NightshiftInvestigationsClient {
       completedBefore: completed_before,
     });
 
-    return { impacted_entities: impactedEntities };
+    return { impact_entities: impactEntities };
   }
 }
