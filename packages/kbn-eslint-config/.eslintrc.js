@@ -376,6 +376,7 @@ module.exports = {
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
     '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
+    '@kbn/eslint/no_eso_registration_dotted_attribute_keys': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
@@ -487,6 +488,18 @@ module.exports = {
          * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
          */
         '@kbn/eslint/no_sync_import_from_plugin': 'error',
+      },
+    },
+    {
+      // Synthetics monitor ESO registrations contain dotted attribute keys for historical reasons.
+      // The values (e.g. 'ssl.key', 'source.inline.script') are top-level saved-object attributes
+      // that happen to use dot notation in their names, matching the heartbeat config key format.
+      files: [
+        'x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/synthetics_monitor_config.ts',
+        'x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts',
+      ],
+      rules: {
+        '@kbn/eslint/no_eso_registration_dotted_attribute_keys': 'off',
       },
     },
   ],

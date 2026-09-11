@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-restricted-syntax */
-
 export const one = 1;
 export const two = 2;
 export const three = 3;

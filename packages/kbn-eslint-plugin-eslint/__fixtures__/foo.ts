@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-restricted-syntax */
-
 export type { Bar as ReexportedClass } from './bar';
 
 export const someConst = 'bar';
