@@ -36,9 +36,31 @@ import {
  */
 export type WorkflowRunInputs = RunWorkflowOptions['inputs'];
 
+export interface RunWorkflowExecutorParams {
+  /** ID of the workflow to execute. */
+  workflowId: string;
+  /** Merged inputs to forward to the execution API. */
+  inputs: WorkflowRunInputs;
+}
+
+/**
+ * Optional executor that replaces the default `useRunWorkflow` mutation.
+ * Useful when the caller needs to route execution through its own API endpoint
+ * (e.g. the Cases-owned execution wrapper) rather than the shared Workflows API.
+ */
+export type RunWorkflowExecutor = (
+  params: RunWorkflowExecutorParams
+) => Promise<RunWorkflowResponseDto>;
+
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
+  /**
+   * Optional executor used instead of the default `useRunWorkflow` hook.
+   * When provided the panel calls `runWorkflow({ workflowId, inputs })` and
+   * handles success/error/settled internally so toast behaviour is unchanged.
+   */
+  runWorkflow?: RunWorkflowExecutor;
   /**
    * Server-side managed workflow visibility filter. Only managed workflows tagged with a
    * matching managedVisibilityContexts value (selector or solution) are returned by the server.
@@ -59,6 +81,11 @@ export interface RunWorkflowPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * When false, the panel skips its built-in success toast so the caller can
+   * report the outcome itself (e.g. a multi-target run). Defaults to true.
+   */
+  showSuccessToast?: boolean;
 }
 
 interface RunWorkflowPanelServices {
@@ -70,18 +97,20 @@ interface RunWorkflowPanelServices {
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
+  runWorkflow: runWorkflowExecutor,
   visibility,
   sortWorkflow,
   filterWorkflow,
   onClose,
   onExecute,
+  showSuccessToast = true,
 }: RunWorkflowPanelProps) => {
   const {
     services: { application, notifications, rendering },
   } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
-  const runWorkflow = useRunWorkflow();
+  const defaultRunWorkflow = useRunWorkflow();
   const [selectedId, setSelectedId] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
@@ -111,48 +140,73 @@ export const RunWorkflowPanel = ({
       setIsLoading(true);
       onExecute?.();
 
-      runWorkflow.mutate(
-        {
-          id: selectedId,
-          inputs: { ...extraInputs, ...inputs },
-        },
-        {
-          onSuccess: (data: RunWorkflowResponseDto) => {
-            notifications.toasts.addSuccess({
-              title: i18n.WORKFLOW_START_SUCCESS_TOAST,
-              ...(rendering && {
-                text: toMountPoint(
-                  <EuiFlexGroup justifyContent={'flexEnd'}>
-                    <EuiButton
-                      size="s"
-                      onClick={() => {
-                        application.navigateToApp(WORKFLOWS_APP_ID, {
-                          openInNewTab: true,
-                          path: `${selectedId}?executionId=${data.workflowExecutionId}`,
-                        });
-                      }}
-                    >
-                      {i18n.WORKFLOW_START_SUCCESS_BUTTON}
-                    </EuiButton>
-                  </EuiFlexGroup>,
-                  rendering
-                ),
-              }),
-            });
-          },
-          onError: (err) => {
-            notifications.toasts.addError(new Error(err.body?.message ?? err.message), {
-              title: i18n.WORKFLOW_START_FAILED_TOAST,
-            });
-          },
-          onSettled: () => {
-            setIsLoading(false);
-            onClose();
-          },
-        }
-      );
+      const mergedInputs = { ...extraInputs, ...inputs };
+
+      const onSuccess = (data: RunWorkflowResponseDto) => {
+        if (!showSuccessToast) return;
+        notifications.toasts.addSuccess({
+          title: i18n.WORKFLOW_START_SUCCESS_TOAST,
+          ...(rendering && {
+            text: toMountPoint(
+              <EuiFlexGroup justifyContent={'flexEnd'}>
+                <EuiButton
+                  size="s"
+                  onClick={() => {
+                    application.navigateToApp(WORKFLOWS_APP_ID, {
+                      openInNewTab: true,
+                      path: `${selectedId}?executionId=${data.workflowExecutionId}`,
+                    });
+                  }}
+                >
+                  {i18n.WORKFLOW_START_SUCCESS_BUTTON}
+                </EuiButton>
+              </EuiFlexGroup>,
+              rendering
+            ),
+          }),
+        });
+      };
+
+      const onSettled = () => {
+        setIsLoading(false);
+        onClose();
+      };
+
+      if (runWorkflowExecutor) {
+        void runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs })
+          .then(onSuccess, (err: unknown) => {
+            const error = err instanceof Error ? err : new Error(String(err));
+            notifications.toasts.addError(error, { title: i18n.WORKFLOW_START_FAILED_TOAST });
+          })
+          .finally(onSettled);
+      } else {
+        defaultRunWorkflow.mutate(
+          { id: selectedId, inputs: mergedInputs },
+          {
+            onSuccess,
+            onError: (err) => {
+              notifications.toasts.addError(
+                new Error((err as { body?: { message?: string } }).body?.message ?? err.message),
+                { title: i18n.WORKFLOW_START_FAILED_TOAST }
+              );
+            },
+            onSettled,
+          }
+        );
+      }
     },
-    [application, selectedId, runWorkflow, inputs, notifications, rendering, onClose, onExecute]
+    [
+      application,
+      selectedId,
+      defaultRunWorkflow,
+      runWorkflowExecutor,
+      inputs,
+      notifications,
+      rendering,
+      onClose,
+      onExecute,
+      showSuccessToast,
+    ]
   );
 
   const handleExecuteClick = useCallback(() => {
