@@ -59,6 +59,20 @@ function syntheticPairIds(
   };
 }
 
+function neighborIds(
+  graph: { getDirectSuccessors(nodeId: string): Array<{ id: string }> },
+  nodeId: string
+): string[] {
+  return graph.getDirectSuccessors(nodeId).map((node) => node.id);
+}
+
+function ancestorIds(
+  graph: { getAllPredecessors(nodeId: string): Array<{ id: string }> },
+  nodeId: string
+): string[] {
+  return graph.getAllPredecessors(nodeId).map((node) => node.id);
+}
+
 describe('WorkflowRuntimeGraph synthetic scopes', () => {
   it('gives nested owners that both mint iteration 0 distinct pair ids', () => {
     const overlay = createOverlay();
@@ -163,6 +177,113 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
       if (innerEnter && 'exitNodeId' in innerEnter) {
         expect(innerEnter.exitNodeId).toBe('exitForeach_innerLoop');
       }
+    });
+  });
+});
+
+describe('WorkflowRuntimeGraph successors and predecessors', () => {
+  const compiled = () =>
+    WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml);
+
+  it('matches compiled neighbors when no synthetic is minted', () => {
+    const compiledGraph = compiled();
+    const overlay = new WorkflowRuntimeGraph(compiledGraph, []);
+
+    for (const nodeId of compiledGraph.topologicalOrder) {
+      expect(neighborIds(overlay, nodeId)).toEqual(neighborIds(compiledGraph, nodeId));
+      expect(ancestorIds(overlay, nodeId).sort()).toEqual(
+        ancestorIds(compiledGraph, nodeId).sort()
+      );
+    }
+  });
+
+  describe('after minting the outer pair', () => {
+    const outer = syntheticPairIds('enterForeach_outerLoop', '0');
+    let overlay: WorkflowRuntimeGraph;
+    let compiledGraph: WorkflowGraph;
+
+    beforeEach(() => {
+      compiledGraph = compiled();
+      overlay = new WorkflowRuntimeGraph(compiledGraph, []);
+      overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
+    });
+
+    it('rewires the owner enter to the synthetic enter', () => {
+      expect(neighborIds(overlay, 'enterForeach_outerLoop')).toEqual([outer.enterId]);
+      expect(neighborIds(overlay, outer.enterId)).toEqual(
+        neighborIds(compiledGraph, 'enterForeach_outerLoop')
+      );
+    });
+
+    it('rewires the last body node to the synthetic exit, then the owner exit', () => {
+      expect(neighborIds(overlay, 'exitForeach_innerLoop')).toEqual([outer.exitId]);
+      expect(neighborIds(overlay, outer.exitId)).toEqual(['exitForeach_outerLoop']);
+    });
+
+    it('leaves compiled edges that do not touch the owner pair unchanged', () => {
+      expect(neighborIds(overlay, 'enterForeach_innerLoop')).toEqual(
+        neighborIds(compiledGraph, 'enterForeach_innerLoop')
+      );
+      expect(neighborIds(overlay, 'deepAction')).toEqual(neighborIds(compiledGraph, 'deepAction'));
+    });
+
+    it('predecessors of the synthetic enter are the owner enter and the owner ancestors', () => {
+      expect(ancestorIds(overlay, outer.enterId).sort()).toEqual(
+        ['enterForeach_outerLoop', ...ancestorIds(compiledGraph, 'enterForeach_outerLoop')].sort()
+      );
+    });
+
+    it('predecessors of the body start include the synthetic enter and the owner enter', () => {
+      expect(ancestorIds(overlay, 'enterForeach_innerLoop')).toEqual(
+        expect.arrayContaining([outer.enterId, 'enterForeach_outerLoop'])
+      );
+      expect(ancestorIds(overlay, 'enterForeach_innerLoop')).not.toContain(outer.exitId);
+    });
+
+    it('predecessors of the owner exit include the synthetic exit and the body', () => {
+      expect(ancestorIds(overlay, 'exitForeach_outerLoop')).toEqual(
+        expect.arrayContaining([
+          outer.exitId,
+          outer.enterId,
+          'exitForeach_innerLoop',
+          'enterForeach_innerLoop',
+          'enterForeach_outerLoop',
+        ])
+      );
+    });
+  });
+
+  describe('after minting nested pairs', () => {
+    const outer = syntheticPairIds('enterForeach_outerLoop', '0');
+    const inner = syntheticPairIds('enterForeach_innerLoop', '0');
+    let overlay: WorkflowRuntimeGraph;
+
+    beforeEach(() => {
+      overlay = createOverlay();
+      overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
+      overlay.insertSyntheticScope('enterForeach_innerLoop', '0', 'iteration');
+    });
+
+    it('rewires each owner independently', () => {
+      expect(neighborIds(overlay, 'enterForeach_outerLoop')).toEqual([outer.enterId]);
+      expect(neighborIds(overlay, outer.enterId)).toEqual(['enterForeach_innerLoop']);
+      expect(neighborIds(overlay, 'enterForeach_innerLoop')).toEqual([inner.enterId]);
+      expect(neighborIds(overlay, inner.enterId)).toEqual(['deepAction']);
+      expect(neighborIds(overlay, 'deepAction')).toEqual([inner.exitId]);
+      expect(neighborIds(overlay, inner.exitId)).toEqual(['exitForeach_innerLoop']);
+      expect(neighborIds(overlay, 'exitForeach_innerLoop')).toEqual([outer.exitId]);
+      expect(neighborIds(overlay, outer.exitId)).toEqual(['exitForeach_outerLoop']);
+    });
+
+    it('predecessors of the inner body include both synthetic enters', () => {
+      expect(ancestorIds(overlay, 'deepAction')).toEqual(
+        expect.arrayContaining([
+          inner.enterId,
+          'enterForeach_innerLoop',
+          outer.enterId,
+          'enterForeach_outerLoop',
+        ])
+      );
     });
   });
 });
