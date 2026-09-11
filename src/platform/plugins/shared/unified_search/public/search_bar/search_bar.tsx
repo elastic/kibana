@@ -158,10 +158,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * greys out the entire query bar.
    */
   disableSubmitAction?: boolean;
-  /**
-   * Tooltip shown on the Search button when `disableSubmitAction` is true.
-   */
-  disableSubmitActionTooltip?: string;
 
   submitOnBlur?: boolean;
 
@@ -809,7 +805,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showAddFilter={this.props.showFilterBar}
           isDisabled={this.props.isDisabled}
           disableSubmitAction={this.props.disableSubmitAction}
-          disableSubmitActionTooltip={this.props.disableSubmitActionTooltip}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}

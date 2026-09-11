@@ -340,7 +340,7 @@ export const DiscoverTopNav = ({
     typeof showDatePicker === 'object'
       ? {
           disabled: showDatePicker.disabled || disableEmptyEsqlControls,
-          disabledTooltip: emptyEsqlQueryDisabledTooltip,
+          disabledReason: emptyEsqlQueryDisabledTooltip,
         }
       : showDatePicker;
   const esqlEditorInitialState = useMemo(
@@ -408,7 +408,6 @@ export const DiscoverTopNav = ({
         onCancel={onCancelClick}
         isLoading={isLoading}
         disableSubmitAction={disableEmptyEsqlControls}
-        disableSubmitActionTooltip={emptyEsqlQueryDisabledTooltip}
         onQueryChange={onQueryChange}
         onSavedQueryIdChange={updateSavedQueryId}
         disableSubscribingToGlobalDataServices={true}
@@ -483,8 +482,7 @@ export const DiscoverTopNav = ({
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
                   defaultMessage: 'Only applies to queries that use one STATS command.',
                 }),
-                disabled: disableEmptyEsqlControls,
-                disabledTooltip: emptyEsqlQueryDisabledTooltip,
+                disabledReason: emptyEsqlQueryDisabledTooltip,
               }
             : undefined
         }
