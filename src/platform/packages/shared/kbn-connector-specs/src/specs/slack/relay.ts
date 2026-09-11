@@ -9,11 +9,10 @@
 
 import { RELAY_AUTH_ID } from '../../auth_types/relay';
 import type { ActionContext, RelayActionClient } from '../../connector_spec';
-import {
-  SlackResolveChannelIdInputSchema,
-  type SlackListChannelsInput,
-  type SlackResolveChannelIdInput,
-  type SlackSendMessageInput,
+import type {
+  SlackListChannelsInput,
+  SlackResolveChannelIdInput,
+  SlackSendMessageInput,
 } from './types';
 
 const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
@@ -21,25 +20,11 @@ const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
 /** The Relay's own max page size; the Slack schemas allow far larger limits. */
 const RELAY_MAX_BINDINGS_PAGE = 200;
 
-/**
- * Conventional Slack conversation ids (channels, private groups, DMs). Case-sensitive so a long
- * channel name such as `generalalerts` is not mistaken for a `G…` id.
- */
-const SLACK_CONVERSATION_ID_PATTERN = /^[CGD][A-Z0-9]{8,}$/;
-
 /** Marks results as coming from the connected bindings rather than a `conversations.list` call. */
 const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 
-const isSlackConversationId = (channel: string): boolean =>
-  SLACK_CONVERSATION_ID_PATTERN.test(channel);
-
 const createChannelNotConnectedError = (channel: string): Error =>
   new Error(`Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`);
-
-const createChannelResolveLimitError = (channel: string): Error =>
-  new Error(
-    `Could not resolve channel ${channel} among the connected channels. Use the channel ID.`
-  );
 
 export interface SlackRelayConnection {
   client: RelayActionClient;
@@ -112,33 +97,12 @@ export async function relaySendMessage(
     );
   }
 
-  const requestedChannel = input.channel.trim();
-  let channel = requestedChannel;
-
-  // Relay bindings are keyed by Slack conversation id. A name (`#general`, `general`) must be
-  // resolved against connected channels first — posting the raw name yields a misleading 403.
-  if (!isSlackConversationId(channel)) {
-    const resolved = await relayResolveChannelId(
-      connection,
-      ctx,
-      SlackResolveChannelIdInputSchema.parse({ name: channel })
-    );
-
-    if (!resolved.found) {
-      throw resolved.nextCursor
-        ? createChannelResolveLimitError(requestedChannel)
-        : createChannelNotConnectedError(requestedChannel);
-    }
-
-    channel = resolved.id;
-  }
-
-  ctx.log.debug(`Slack sendMessage request through relay: channel=${channel}`);
+  ctx.log.debug(`Slack sendMessage request through relay: channel=${input.channel}`);
 
   try {
-    const { ref } = await connection.client.trigger({
+    const { ref, channel } = await connection.client.trigger({
       tenantKey: connection.tenantKey,
-      channel,
+      channel: input.channel,
       message: input.text,
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
@@ -146,7 +110,7 @@ export async function relaySendMessage(
     return { ok: true, channel, ts: ref };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
-    throw toUserFacingError(error, requestedChannel);
+    throw toUserFacingError(error, input.channel);
   }
 }
 
