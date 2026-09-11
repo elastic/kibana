@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
+import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
+
+const mockLocators = createMockLocators();
 
 const mockUseLinkedActionPolicies = jest.fn();
 
@@ -57,11 +61,13 @@ const baseRule: RuleApiResponse = {
 
 const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
-    <I18nProvider>
-      <RuleProvider rule={rule}>
-        <ActionPoliciesArtifactsSubsection />
-      </RuleProvider>
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <RuleProvider rule={rule}>
+          <ActionPoliciesArtifactsSubsection />
+        </RuleProvider>
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 
 describe('ActionPoliciesArtifactsSubsection', () => {
@@ -134,13 +140,15 @@ describe('ActionPoliciesArtifactsSubsection', () => {
 
     renderSubsection();
 
+    const { actionPolicyLocators } = mockLocators;
+    expect(actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
     expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('2');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(
       '1 is matching criteria and 1 is catch-all'
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/action_policies'
+      '/mock-locator-url'
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'target',
@@ -152,6 +160,27 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     );
     expect(screen.getByText('Open notification policies')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
+  });
+
+  it('open link params resolve to management action policies list URL', async () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      totalCount: 2,
+      catchAllCount: 1,
+      matchingCriteriaCount: 1,
+      isLoading: false,
+      isError: false,
+      isCountTruncated: false,
+      error: null,
+    });
+
+    renderSubsection();
+
+    const [params] = jest.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    expect(location).toMatchObject({
+      app: 'management',
+      path: '/alertingV2/action_policies',
+    });
   });
 
   it('shows a truncated count indicator when linked policy counts may be incomplete', () => {
