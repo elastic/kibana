@@ -6,20 +6,32 @@
  */
 
 import { type Attributes, type Counter, metrics, ValueType } from '@opentelemetry/api';
+import { createToken } from '@kbn/core-di';
+import { injectable } from 'inversify';
+import type { GuardedQueryType } from '../../errors/query_response_size_exceeded_error';
 
-/** Which of the rule executor's ES|QL queries tripped the guardrail. */
-export type GuardedQueryType = 'breach' | 'recovery' | 'data_presence';
-
-export type RuleKindAttribute = 'alert' | 'signal';
+export type RuleKindAttribute = 'alert' | 'signal' | 'unknown';
 
 export const QUERY_RESPONSE_SIZE_EXCEEDED_METRIC =
   'kibana.alerting_v2.rule_execution.query_response_size_exceeded.count';
 
+export interface RuleExecutionTelemetryContract {
+  recordQueryResponseSizeExceeded(args: {
+    queryType: GuardedQueryType;
+    ruleKind: RuleKindAttribute;
+  }): void;
+}
+
+export const RuleExecutionTelemetryToken = createToken<RuleExecutionTelemetryContract>(
+  'alerting_v2.RuleExecutionTelemetry'
+);
+
 /**
- * OTel metrics for the rule executor. One meter per plugin, instruments created once at
- * module load and shared for the process lifetime (same shape as Task Manager's telemetry).
+ * OTel metrics for the rule executor. Bound as a singleton so the meter and its
+ * instruments are created once per process and shared by every execution.
  */
-class RuleExecutionTelemetry {
+@injectable()
+export class RuleExecutionTelemetry implements RuleExecutionTelemetryContract {
   private readonly meter = metrics.getMeter('kibana.alerting_v2');
   private readonly queryResponseSizeExceededCounter: Counter<Attributes>;
 
@@ -35,18 +47,16 @@ class RuleExecutionTelemetry {
     );
   }
 
-  recordQueryResponseSizeExceeded = ({
+  public recordQueryResponseSizeExceeded({
     queryType,
     ruleKind,
   }: {
     queryType: GuardedQueryType;
     ruleKind: RuleKindAttribute;
-  }) => {
+  }): void {
     this.queryResponseSizeExceededCounter.add(1, {
       'alerting.query.type': queryType,
       'alerting.rule.kind': ruleKind,
     });
-  };
+  }
 }
-
-export const ruleExecutionTelemetry = new RuleExecutionTelemetry();

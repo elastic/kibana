@@ -6,7 +6,6 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
-import { ruleExecutionTelemetry } from '../otel/rule_execution_telemetry';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { QueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
@@ -58,10 +57,6 @@ const createPluginConfigAccessor = ({
 
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 };
-
-jest.mock('../otel/rule_execution_telemetry', () => ({
-  ruleExecutionTelemetry: { recordQueryResponseSizeExceeded: jest.fn() },
-}));
 
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
@@ -282,10 +277,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-    expect(ruleExecutionTelemetry.recordQueryResponseSizeExceeded).toHaveBeenCalledWith({
-      queryType: 'breach',
-      ruleKind: expect.any(String),
-    });
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('breach');
   });
 
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {

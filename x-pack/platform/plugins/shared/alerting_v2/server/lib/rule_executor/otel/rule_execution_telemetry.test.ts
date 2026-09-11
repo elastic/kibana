@@ -8,7 +8,7 @@
 import { metrics } from '@opentelemetry/api';
 import {
   QUERY_RESPONSE_SIZE_EXCEEDED_METRIC,
-  ruleExecutionTelemetry,
+  RuleExecutionTelemetry,
 } from './rule_execution_telemetry';
 
 jest.mock('@opentelemetry/api', () => {
@@ -20,18 +20,17 @@ jest.mock('@opentelemetry/api', () => {
 });
 
 const getMeter = jest.mocked(metrics.getMeter);
-const createCounter = jest.mocked(getMeter.mock.results[0].value.createCounter);
-const add = jest.mocked(createCounter.mock.results[0].value.add);
 
-describe('ruleExecutionTelemetry', () => {
+describe('RuleExecutionTelemetry', () => {
   beforeEach(() => {
-    add.mockClear();
+    getMeter.mockClear();
   });
 
-  it('creates the counter once on the alerting v2 meter with a fully-qualified name', () => {
-    expect(getMeter).toHaveBeenCalledTimes(1);
+  it('creates the counter on the alerting v2 meter with a fully-qualified name', () => {
+    new RuleExecutionTelemetry();
+
     expect(getMeter).toHaveBeenCalledWith('kibana.alerting_v2');
-    expect(createCounter).toHaveBeenCalledTimes(1);
+    const createCounter = jest.mocked(getMeter.mock.results[0].value.createCounter);
     expect(createCounter).toHaveBeenCalledWith(
       QUERY_RESPONSE_SIZE_EXCEEDED_METRIC,
       expect.objectContaining({ unit: '1', valueType: expect.any(Number) })
@@ -39,10 +38,12 @@ describe('ruleExecutionTelemetry', () => {
   });
 
   it('increments by one with the query type and rule kind as attributes', () => {
-    ruleExecutionTelemetry.recordQueryResponseSizeExceeded({
-      queryType: 'breach',
-      ruleKind: 'signal',
-    });
+    const telemetry = new RuleExecutionTelemetry();
+    const createCounter = jest.mocked(getMeter.mock.results[0].value.createCounter);
+    const add = jest.mocked(createCounter.mock.results[0].value.add);
+    add.mockClear();
+
+    telemetry.recordQueryResponseSizeExceeded({ queryType: 'breach', ruleKind: 'signal' });
 
     expect(add).toHaveBeenCalledTimes(1);
     expect(add).toHaveBeenCalledWith(1, {
