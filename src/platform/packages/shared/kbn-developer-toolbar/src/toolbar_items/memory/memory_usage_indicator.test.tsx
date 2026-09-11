@@ -83,23 +83,23 @@ describe('MemoryUsageIndicator', () => {
 
   it('shows trend only with enough samples and a finite slope, and drops stale details when unavailable', () => {
     render(<MemoryUsageIndicator />);
-    expect(screen.getByRole('tooltip').textContent).toContain('Measuring heap…');
+    expect(screen.getByRole('tooltip').textContent).toContain('Measuring…');
 
     act(() => publish(memoryInfo(512, 0.25, false, { sampleCount: 9, shortTrendPerMin: 25.04 })));
     expect(screen.getByRole('tooltip').textContent).not.toContain('Trend:');
 
-    act(() =>
-      publish(memoryInfo(1024, 0.25, false, { sampleCount: 10, shortTrendPerMin: 25.04 }))
-    );
-    expect(screen.getByRole('tooltip').textContent).toContain('Trend: +25.0 MB/min');
-    expect(screen.getByText('Mem 1.00GiB')).toBeTruthy();
+    act(() => publish(memoryInfo(1024, 0.25, false, { sampleCount: 10, shortTrendPerMin: 25.04 })));
+    expect(screen.getByRole('tooltip').textContent).toContain('Trend: +25.0 MiB/min');
+    expect(screen.getByRole('tooltip').textContent).toContain('Heap: 1.00 GiB (25% of limit)');
+    expect(screen.getByRole('tooltip').textContent).not.toContain('JS heap:');
+    expect(screen.getByText('Mem 1.00 GiB')).toBeTruthy();
 
     act(() => publish(memoryInfo(512, 0.25, false, { sampleCount: 10, shortTrendPerMin: NaN })));
     expect(screen.getByRole('tooltip').textContent).not.toContain('Trend:');
 
     act(() => publish(null));
-    expect(screen.getByText('Mem -GiB')).toBeTruthy();
-    expect(screen.getByRole('tooltip').textContent).toContain('Heap size unavailable.');
-    expect(screen.getByRole('tooltip').textContent).not.toContain('JS heap: 1.00 GiB');
+    expect(screen.getByText('Mem —')).toBeTruthy();
+    expect(screen.getByRole('tooltip').textContent).toContain('Not supported in this browser.');
+    expect(screen.getByRole('tooltip').textContent).not.toContain('Heap: 1.00 GiB');
   });
 });

@@ -14,7 +14,6 @@ export interface PerformanceInfo {
   jankPercentage: number;
   baselineFps: number;
   history: number[];
-  maxFps: number;
   minFps: number;
 }
 
@@ -103,7 +102,6 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
         jankPercentage: 0,
         baselineFps: 60,
         history: [],
-        maxFps: 0,
         minFps: 0,
       });
     }
@@ -173,7 +171,6 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
       jankPercentage: this.calculateJankPercentage(frameHistory, baselineFps),
       baselineFps,
       history: [...frameHistory],
-      maxFps: Math.max(...frameHistory),
       minFps: Math.min(...frameHistory),
     });
   }
@@ -195,7 +192,19 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
     if (this.frameHistory.length < 3) return;
 
     const sorted = [...this.frameHistory].sort((a, b) => a - b);
-    const target = Math.max(60, Math.min(240, sorted[Math.floor(sorted.length * 0.75)]));
+    const p75 = sorted[Math.floor(sorted.length * 0.75)];
+    const min = sorted[0];
+    const max = sorted.at(-1) ?? min;
+    if (
+      this.frameHistory.length >= this.maxHistorySize &&
+      max - min <= 0.1 * max &&
+      max < this.baselineFps * 0.85
+    ) {
+      this.baselineFps = Math.max(60, Math.min(240, Math.round(p75)));
+      return;
+    }
+
+    const target = Math.max(60, Math.min(240, p75));
     if (target <= this.baselineFps) return;
 
     this.baselineFps = Math.round(this.baselineFps + 0.35 * (target - this.baselineFps));

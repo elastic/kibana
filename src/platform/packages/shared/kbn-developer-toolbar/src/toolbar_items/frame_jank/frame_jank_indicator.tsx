@@ -31,11 +31,10 @@ const THRESHOLDS = {
 };
 
 type SeverityLevel = 'normal' | 'warning' | 'danger';
-type PerformanceWarning =
-  | { kind: 'input'; severity: 'warning' | 'danger'; startTime: number }
-  | { kind: 'stall'; severity: 'warning' | 'danger'; startTime: number }
-  | { kind: 'blocking'; severity: 'warning' | 'danger' }
-  | { kind: 'frames'; severity: 'warning' | 'danger' };
+interface PerformanceWarning {
+  kind: 'input' | 'stall' | 'blocking' | 'frames';
+  severity: 'warning' | 'danger';
+}
 
 const getPerformanceWarning = (
   perfInfo: PerformanceInfo | null,
@@ -44,26 +43,16 @@ const getPerformanceWarning = (
 ): PerformanceWarning | null => {
   const candidates: PerformanceWarning[] = [];
 
-  if (
-    inpStats.worstInteractionStartTime !== null &&
-    inpStats.worstInteractionDelay >= THRESHOLDS.inp.warning
-  ) {
+  if (inpStats.worstInteractionDelay >= THRESHOLDS.inp.warning) {
     candidates.push({
       kind: 'input',
-      severity:
-        inpStats.worstInteractionDelay >= THRESHOLDS.inp.danger ? 'danger' : 'warning',
-      startTime: inpStats.worstInteractionStartTime,
+      severity: inpStats.worstInteractionDelay >= THRESHOLDS.inp.danger ? 'danger' : 'warning',
     });
   }
-  if (
-    longTaskStats.worstTaskStartTime !== null &&
-    longTaskStats.worstTaskDuration >= THRESHOLDS.stall.warning
-  ) {
+  if (longTaskStats.worstTaskDuration >= THRESHOLDS.stall.warning) {
     candidates.push({
       kind: 'stall',
-      severity:
-        longTaskStats.worstTaskDuration >= THRESHOLDS.stall.danger ? 'danger' : 'warning',
-      startTime: longTaskStats.worstTaskStartTime,
+      severity: longTaskStats.worstTaskDuration >= THRESHOLDS.stall.danger ? 'danger' : 'warning',
     });
   }
   if (longTaskStats.totalBlockingTime >= THRESHOLDS.blockingTime.warning) {
@@ -127,7 +116,7 @@ const getContainerStyles = (euiTheme: EuiThemeComputed) => css`
   overflow: hidden;
 `;
 
-const getGraphContainerStyles = () => css`
+const graphContainerStyles = css`
   position: absolute;
   left: 0;
   right: 0;
@@ -164,7 +153,7 @@ const getBarStyles = (
   height: ${height}px;
   background-color: ${warning ? euiTheme.colors.severity.danger : euiTheme.colors.severity.neutral};
 `;
-const getTriggerStyles = () => css`
+const triggerStyles = css`
   width: ${WIDTH}px;
   height: ${HEIGHT}px;
 `;
@@ -185,21 +174,15 @@ export const FrameJankIndicator: React.FC = () => {
   const [frameSupported, setFrameSupported] = useState<boolean | null>(null);
   const [longTaskStats, setLongTaskStats] = useState<LongTaskInfo>({
     worstTaskDuration: 0,
-    worstTaskStartTime: null,
     totalBlockingTime: 0,
     tasksInLast30Seconds: 0,
   });
   const [inpStats, setInpStats] = useState<INPInfo>({
-    currentINP: 0,
     slowInteractionsCount: 0,
     worstInteractionDelay: 0,
-    worstInteractionStartTime: null,
   });
   const [longTaskSupported, setLongTaskSupported] = useState<boolean | null>(null);
   const [inpSupported, setInpSupported] = useState<boolean | null>(null);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [ageClock, setAgeClock] = useState(() => performance.now());
 
   useEffect(() => {
     const performanceMonitor = new PerformanceMonitor(GRAPH_SAMPLE_COUNT);
@@ -237,34 +220,6 @@ export const FrameJankIndicator: React.FC = () => {
   }, []);
   const frameInfo = perfInfo?.history.length ? perfInfo : null;
   const warning = getPerformanceWarning(frameInfo, longTaskStats, inpStats);
-  const active = hovered || focused;
-  const timingStartTime =
-    warning?.kind === 'input' || warning?.kind === 'stall' ? warning.startTime : null;
-
-  useEffect(() => {
-    if (!active || timingStartTime === null) return;
-
-    let interval: number | undefined;
-    const refresh = () => setAgeClock(performance.now());
-    const syncInterval = () => {
-      if (interval !== undefined) {
-        window.clearInterval(interval);
-        interval = undefined;
-      }
-      if (!document.hidden) {
-        refresh();
-        interval = window.setInterval(refresh, 1000);
-      }
-    };
-    const handleVisibilityChange = () => syncInterval();
-
-    syncInterval();
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      if (interval !== undefined) window.clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [active, timingStartTime]);
 
   const warningReason =
     warning?.kind === 'input'
@@ -276,49 +231,33 @@ export const FrameJankIndicator: React.FC = () => {
       : warning?.kind === 'frames'
       ? 'Frame jank'
       : null;
-  const selectedIncidentAge =
-    timingStartTime === null ? null : Math.max(0, Math.floor((ageClock - timingStartTime) / 1000));
 
   const tooltipContent = (
     <div css={tooltipContentStyles}>
       <div>
         <div>
-          <strong>Frames</strong>
+          <strong>Frames · {GRAPH_SAMPLE_COUNT}s</strong>
         </div>
         {frameSupported === false ? (
-          <div>Frame timing unavailable in this browser.</div>
+          <div>Not supported in this browser.</div>
+        ) : !frameInfo ? (
+          <div>Measuring…</div>
         ) : (
           <>
             <div>
               FPS:{' '}
-              {frameInfo ? (
-                <SeverityValue metricType="fps" value={frameInfo.fps}>
-                  {frameInfo.fps}
-                </SeverityValue>
-              ) : (
-                '—'
-              )}
+              <SeverityValue metricType="fps" value={frameInfo.fps}>
+                {frameInfo.fps}
+              </SeverityValue>{' '}
+              (min {frameInfo.minFps})
             </div>
-            <div>Range: {frameInfo ? `${frameInfo.minFps}–${frameInfo.maxFps}` : '—'}</div>
             <div css={warning?.kind === 'frames' ? selectedMetricStyles : undefined}>
               Jank:{' '}
-              {frameInfo ? (
-                <>
-                  <SeverityValue metricType="jankPercentage" value={frameInfo.jankPercentage}>
-                    {frameInfo.jankPercentage}%
-                  </SeverityValue>{' '}
-                  (below {Number((frameInfo.baselineFps * 0.85).toFixed(1))} FPS)
-                </>
-              ) : (
-                '—'
-              )}
+              <SeverityValue metricType="jankPercentage" value={frameInfo.jankPercentage}>
+                {frameInfo.jankPercentage}%
+              </SeverityValue>{' '}
+              of seconds below {Math.round(frameInfo.baselineFps * 0.85)} FPS
             </div>
-            <div>Samples: {frameInfo?.history.length ?? 0}</div>
-            <div>
-              Percent of 1-second samples below 85% of a calibrated session target based on recent
-              healthy samples (floor 60). The target only rises while visible. Not dropped frames.
-            </div>
-            {!frameInfo && <div>Measuring frame rate…</div>}
           </>
         )}
       </div>
@@ -327,7 +266,7 @@ export const FrameJankIndicator: React.FC = () => {
           <strong>Main thread · 30s</strong>
         </div>
         {longTaskSupported === false ? (
-          <div>Long tasks unavailable in this browser.</div>
+          <div>Not supported in this browser.</div>
         ) : longTaskSupported ? (
           <>
             <div>
@@ -345,14 +284,10 @@ export const FrameJankIndicator: React.FC = () => {
             {longTaskStats.worstTaskDuration > 0 && (
               <div css={warning?.kind === 'stall' ? selectedMetricStyles : undefined}>
                 <SeverityValue metricType="stall" value={longTaskStats.worstTaskDuration}>
-                  Worst task: {Math.round(longTaskStats.worstTaskDuration)}ms
-                  {warning?.kind === 'stall' && selectedIncidentAge !== null
-                    ? ` · ${selectedIncidentAge}s ago`
-                    : ''}
+                  Longest: {Math.round(longTaskStats.worstTaskDuration)}ms
                 </SeverityValue>
               </div>
             )}
-            <div>Blocking time sums each long task past its first 50ms (TBT-style).</div>
           </>
         ) : null}
       </div>
@@ -361,28 +296,16 @@ export const FrameJankIndicator: React.FC = () => {
           <strong>Interactions · 30s</strong>
         </div>
         {inpSupported === false ? (
-          <div>Interaction timing unavailable in this browser.</div>
+          <div>Not supported in this browser.</div>
         ) : inpSupported ? (
           <>
             <div>Slow interactions (≥100ms): {inpStats.slowInteractionsCount}</div>
-            {inpStats.slowInteractionsCount > 0 && (
-              <>
-                <div>
-                  p75:{' '}
-                  <SeverityValue metricType="inp" value={inpStats.currentINP}>
-                    {Math.round(inpStats.currentINP)}ms
-                  </SeverityValue>
-                </div>
-                <div css={warning?.kind === 'input' ? selectedMetricStyles : undefined}>
-                  <SeverityValue metricType="inp" value={inpStats.worstInteractionDelay}>
-                    Worst: {Math.round(inpStats.worstInteractionDelay)}ms
-                    {warning?.kind === 'input' && selectedIncidentAge !== null
-                      ? ` · ${selectedIncidentAge}s ago`
-                      : ''}
-                  </SeverityValue>
-                </div>
-                <div>p75 of slow click/key interactions in this window. Not Chrome’s INP.</div>
-              </>
+            {inpStats.worstInteractionDelay > 0 && (
+              <div css={warning?.kind === 'input' ? selectedMetricStyles : undefined}>
+                <SeverityValue metricType="inp" value={inpStats.worstInteractionDelay}>
+                  Slowest: {Math.round(inpStats.worstInteractionDelay)}ms
+                </SeverityValue>
+              </div>
             )}
           </>
         ) : null}
@@ -400,22 +323,9 @@ export const FrameJankIndicator: React.FC = () => {
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <div
-        css={getTriggerStyles()}
-        tabIndex={0}
-        aria-label={triggerAriaLabel}
-        onMouseEnter={() => {
-          setHovered(true);
-          setAgeClock(performance.now());
-        }}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => {
-          setFocused(true);
-          setAgeClock(performance.now());
-        }}
-        onBlur={() => setFocused(false)}
-      >
+      <div css={triggerStyles} tabIndex={0} aria-label={triggerAriaLabel}>
         <div css={getContainerStyles(euiTheme)} data-test-subj="performanceIndicator">
+          {/* EuiBadge derives a native title from its text; undefined suppresses the duplicate. */}
           <EuiBadge color="default" css={getBadgeStyles()} title={undefined}>
             {warning ? (
               <EuiTextColor color={warning.severity}>Jank {badgeValue}</EuiTextColor>
@@ -423,7 +333,7 @@ export const FrameJankIndicator: React.FC = () => {
               <>Jank {badgeValue}</>
             )}
           </EuiBadge>
-          <div css={getGraphContainerStyles()}>
+          <div css={graphContainerStyles}>
             {GRAPH_POSITIONS.map((position) => {
               const measuredIndex = position - placeholderCount;
               const sample = measuredIndex >= 0 ? measuredHistory[measuredIndex] : graphBaseline;

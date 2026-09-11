@@ -59,17 +59,23 @@ describe('PerformanceMonitor', () => {
     });
   });
 
-  it('keeps a 120 Hz high-water so a visible 60 FPS downshift stays slow', () => {
+  it('lowers a 120 Hz baseline for a steady 60 FPS plateau but not mixed frame rates', () => {
     monitor.startMonitoring();
     advanceFrames(961, 1000 / 120);
 
     const highWater = snapshots.at(-1)?.baselineFps ?? 0;
     expect(highWater).toBeGreaterThan(60);
 
-    advanceFrames(20 * 60, 1000 / 60);
+    for (let sample = 0; sample < 8; sample++) {
+      advanceFrames(30, 1000 / 30);
+      advanceFrames(60, 1000 / 60);
+    }
     expect(snapshots.at(-1)?.baselineFps).toBeGreaterThanOrEqual(highWater);
+
+    advanceFrames(20 * 60, 1000 / 60);
+    expect(snapshots.at(-1)?.baselineFps).toBe(60);
     expect(snapshots.at(-1)?.fps).toBeCloseTo(60, 0);
-    expect(snapshots.at(-1)?.jankPercentage).toBe(100);
+    expect(snapshots.at(-1)?.jankPercentage).toBe(0);
   });
 
   it('clears 30 FPS jank through history roll-off without lowering the baseline', () => {
@@ -104,7 +110,6 @@ describe('PerformanceMonitor', () => {
       jankPercentage: 0,
       baselineFps: 60,
       history: [],
-      maxFps: 0,
       minFps: 0,
     });
 

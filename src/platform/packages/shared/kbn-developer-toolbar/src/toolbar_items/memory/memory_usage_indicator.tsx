@@ -50,12 +50,13 @@ export const MemoryUsageIndicator: React.FC = () => {
 
   if (memoryInfo === undefined || memoryInfo === null) {
     const tooltipContent =
-      memoryInfo === undefined ? 'Measuring heap…' : 'Heap size unavailable.';
+      memoryInfo === undefined ? 'Measuring…' : 'Not supported in this browser.';
 
     return (
       <EuiToolTip content={<div>{tooltipContent}</div>}>
+        {/* EuiBadge derives a native title from its text; undefined suppresses the duplicate. */}
         <EuiBadge color="#0B1628" css={badgeStyles} tabIndex={0} title={undefined}>
-          Mem -GiB
+          Mem —
         </EuiBadge>
       </EuiToolTip>
     );
@@ -63,49 +64,31 @@ export const MemoryUsageIndicator: React.FC = () => {
 
   const { heapUsageRatio, growthDetected, sampleCount, shortTrendPerMin } = memoryInfo;
   const isUnderHeapPressure = heapUsageRatio > 0.85;
-  const warningSeverity =
-    growthDetected && isUnderHeapPressure
-      ? 'danger'
-      : growthDetected || isUnderHeapPressure
-      ? 'warning'
-      : null;
+  const warningColor = growthDetected && isUnderHeapPressure ? 'danger' : 'warning';
+  const warningSeverity = growthDetected || isUnderHeapPressure ? warningColor : null;
   const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
   const trendText =
     sampleCount >= TREND_MIN_SAMPLES && Number.isFinite(shortTrendPerMin)
-      ? `Trend: ${formatTrend(shortTrendPerMin)} MB/min`
+      ? `Trend: ${formatTrend(shortTrendPerMin)} MiB/min`
       : null;
   const heapUtilizationPercentage = Math.round(heapUsageRatio * 100);
+  const heapText = `Heap: ${memoryGiB} GiB (${heapUtilizationPercentage}% of limit)`;
 
   const tooltipContent = (
     <div css={tooltipContentStyles}>
-      <div>
-        <div>JS heap: {memoryGiB} GiB</div>
-        {isUnderHeapPressure ? (
-          <div css={emphasisStyles}>
-            <EuiTextColor color={warningSeverity ?? 'warning'}>
-              Heap limit used: {heapUtilizationPercentage}%
-            </EuiTextColor>
-          </div>
-        ) : (
-          <div>Heap limit used: {heapUtilizationPercentage}%</div>
-        )}
-      </div>
-      {(trendText || growthDetected) && (
-        <div>
-          {trendText && <div>{trendText}</div>}
-          {growthDetected && (
-            <div css={emphasisStyles}>
-              <EuiTextColor color={warningSeverity ?? 'warning'}>
-                Heap growing steadily.
-              </EuiTextColor>
-            </div>
-          )}
+      {isUnderHeapPressure ? (
+        <div css={emphasisStyles}>
+          <EuiTextColor color={warningColor}>{heapText}</EuiTextColor>
+        </div>
+      ) : (
+        <div>{heapText}</div>
+      )}
+      {trendText && <div>{trendText}</div>}
+      {growthDetected && (
+        <div css={emphasisStyles}>
+          <EuiTextColor color={warningColor}>Heap growing steadily.</EuiTextColor>
         </div>
       )}
-      <div>
-        Chrome’s JS heap estimate, sampled every 20s while visible. Steady growth vs baseline, not
-        a confirmed leak.
-      </div>
     </div>
   );
 
@@ -116,10 +99,10 @@ export const MemoryUsageIndicator: React.FC = () => {
         css={badgeStyles}
         iconType={warningSeverity ? 'warningFill' : undefined}
         iconSide={'right'}
-        title={undefined}
         tabIndex={0}
+        title={undefined}
       >
-        {`Mem ${memoryGiB}GiB`}
+        {`Mem ${memoryGiB} GiB`}
       </EuiBadge>
     </EuiToolTip>
   );

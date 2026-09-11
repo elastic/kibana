@@ -13,9 +13,7 @@ import { LongTaskMonitor, type LongTaskInfo } from './long_task_monitor';
 class TimingObserver implements PerformanceObserver {
   static supportedEntryTypes = ['longtask', 'event'];
   static instances: TimingObserver[] = [];
-  static rejectBufferedObserve = false;
   type?: string;
-  options?: PerformanceObserverInit;
   private connected = false;
 
   constructor(private readonly callback: PerformanceObserverCallback) {
@@ -23,10 +21,6 @@ class TimingObserver implements PerformanceObserver {
   }
 
   observe(options: PerformanceObserverInit = {}): void {
-    if (TimingObserver.rejectBufferedObserve && options.buffered) {
-      throw new Error('buffered observe unsupported');
-    }
-    this.options = options;
     this.type = options.type ?? options.entryTypes?.[0];
     this.connected = true;
   }
@@ -90,7 +84,6 @@ const deliverEvents = (entries: PerformanceEventTiming[]) => {
 
 const installObserver = () => {
   TimingObserver.instances = [];
-  TimingObserver.rejectBufferedObserve = false;
   Object.defineProperty(globalThis, 'PerformanceObserver', {
     configurable: true,
     value: TimingObserver,
@@ -129,7 +122,6 @@ describe('LongTaskMonitor', () => {
       totalBlockingTime: 280,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 300,
-      worstTaskStartTime: 0,
     });
 
     jest.advanceTimersByTime(10_000);
@@ -151,12 +143,11 @@ describe('LongTaskMonitor', () => {
       totalBlockingTime: 0,
       tasksInLast30Seconds: 0,
       worstTaskDuration: 0,
-      worstTaskStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('rejects buffered pre-session tasks and still records tasks when buffered observe is unavailable', () => {
+  it('rejects pre-session tasks and accepts in-session tasks', () => {
     monitor.stopMonitoring();
     jest.advanceTimersByTime(5_000);
     monitor.startMonitoring();
@@ -164,18 +155,6 @@ describe('LongTaskMonitor', () => {
     expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(0);
 
     deliver([timingEntry(250, performance.now())]);
-    expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(1);
-
-    monitor.destroy();
-    TimingObserver.instances = [];
-    TimingObserver.rejectBufferedObserve = true;
-    snapshots = [];
-    monitor = new LongTaskMonitor();
-    monitor.subscribe((info) => snapshots.push(info));
-    monitor.startMonitoring();
-
-    expect(TimingObserver.instances.at(-1)?.options).toEqual({ entryTypes: ['longtask'] });
-    deliver([timingEntry(180, performance.now())]);
     expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(1);
   });
 });
@@ -207,10 +186,8 @@ describe('INPMonitor', () => {
     deliverEvents([eventEntry(100, 2), eventEntry(80, 3)]);
     jest.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toEqual({
-      currentINP: 100,
       slowInteractionsCount: 1,
       worstInteractionDelay: 100,
-      worstInteractionStartTime: 10_000,
     });
 
     const publicationsBeforeStop = snapshots.length;
@@ -220,10 +197,8 @@ describe('INPMonitor', () => {
 
     monitor.startMonitoring();
     expect(snapshots.at(-1)).toEqual({
-      currentINP: 0,
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
-      worstInteractionStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
   });
@@ -239,7 +214,7 @@ describe('INPMonitor', () => {
     expect(snapshots.at(-1)?.slowInteractionsCount).toBe(1);
   });
 
-  it('reports p75 of unique slow interactions and coalesces one interactionId', () => {
+  it('counts unique slow interactions and coalesces one interactionId', () => {
     deliverEvents([
       eventEntry(100, 1),
       eventEntry(200, 2),
@@ -248,10 +223,8 @@ describe('INPMonitor', () => {
       eventEntry(80, 5),
     ]);
     expect(snapshots.at(-1)).toEqual({
-      currentINP: 300,
       slowInteractionsCount: 4,
       worstInteractionDelay: 400,
-      worstInteractionStartTime: 0,
     });
 
     deliverEvents([

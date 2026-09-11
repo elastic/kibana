@@ -62,20 +62,16 @@ const neutralPerf: PerformanceInfo = {
   jankPercentage: 0,
   baselineFps: 60,
   history: [60, 60, 60],
-  maxFps: 60,
   minFps: 60,
 };
 const neutralTask: LongTaskInfo = {
   worstTaskDuration: 0,
-  worstTaskStartTime: null,
   totalBlockingTime: 0,
   tasksInLast30Seconds: 0,
 };
 const neutralInp: INPInfo = {
-  currentINP: 0,
   slowInteractionsCount: 0,
   worstInteractionDelay: 0,
-  worstInteractionStartTime: null,
 };
 
 const warningTrigger = () => screen.getByLabelText(/^Performance warning:/);
@@ -84,12 +80,9 @@ describe('FrameJankIndicator warnings', () => {
   let perfCallback: PerfCallback;
   let taskCallback: TaskCallback;
   let inpCallback: InpCallback;
-  let now = 10_000;
 
   beforeEach(() => {
-    now = 10_000;
     jest.useFakeTimers();
-    jest.spyOn(performance, 'now').mockImplementation(() => now);
     jest.spyOn(PerformanceMonitor.prototype, 'subscribe').mockImplementation((callback) => {
       perfCallback = callback;
       return jest.fn();
@@ -142,19 +135,20 @@ describe('FrameJankIndicator warnings', () => {
     expect(screen.getByText('Jank —')).toBeTruthy();
 
     emit({
-      perf: { ...neutralPerf, fps: 0, history: [], maxFps: 0, minFps: 0 },
+      perf: { ...neutralPerf, fps: 0, history: [], minFps: 0 },
     });
     expect(screen.getByText('Jank —')).toBeTruthy();
 
     fireEvent.focus(screen.getByLabelText('Performance monitor'));
-    expect(screen.getByRole('tooltip').textContent).toContain('Samples: 0');
-    expect(screen.getByRole('tooltip').textContent).toContain('Measuring frame rate…');
+    expect(screen.getByRole('tooltip').textContent).toContain('Frames · 20s');
+    expect(screen.getByRole('tooltip').textContent).toContain('Measuring…');
+    expect(screen.getByRole('tooltip').textContent).not.toContain('FPS:');
 
     emit({ perf: { ...neutralPerf, history: [60] } });
     expect(screen.getAllByTestId('performanceGraphBar')).toHaveLength(20);
 
-    expect(screen.getByRole('tooltip').textContent).toContain('Samples: 1');
-    expect(screen.getByRole('tooltip').textContent).not.toContain('Measuring frame rate…');
+    expect(screen.getByRole('tooltip').textContent).toContain('FPS: 60 (min 60)');
+    expect(screen.getByRole('tooltip').textContent).not.toContain('Measuring…');
   });
 
   it('selects the worst live warning and ignores frame jank before three samples', () => {
@@ -162,10 +156,8 @@ describe('FrameJankIndicator warnings', () => {
     emit({
       inp: {
         ...neutralInp,
-        currentINP: 100,
         slowInteractionsCount: 1,
         worstInteractionDelay: 300,
-        worstInteractionStartTime: 9_000,
       },
     });
     expect(warningTrigger().getAttribute('aria-label')).toBe(
@@ -178,14 +170,12 @@ describe('FrameJankIndicator warnings', () => {
       task: {
         ...neutralTask,
         worstTaskDuration: 100,
-        worstTaskStartTime: 8_000,
         totalBlockingTime: 200,
       },
       inp: {
         ...neutralInp,
         slowInteractionsCount: 1,
         worstInteractionDelay: 100,
-        worstInteractionStartTime: 9_000,
       },
     });
     expect(warningTrigger().getAttribute('aria-label')).toBe(
@@ -193,7 +183,7 @@ describe('FrameJankIndicator warnings', () => {
     );
 
     act(() => {
-      taskCallback({ ...neutralTask, worstTaskDuration: 300, worstTaskStartTime: 8_000 });
+      taskCallback({ ...neutralTask, worstTaskDuration: 300 });
     });
     expect(warningTrigger().getAttribute('aria-label')).toBe('Performance warning: Long task');
     expect(screen.getByText('Jank 15%').getAttribute('data-color')).toBe('danger');
@@ -204,13 +194,10 @@ describe('FrameJankIndicator warnings', () => {
         ...neutralInp,
         slowInteractionsCount: 1,
         worstInteractionDelay: 300,
-        worstInteractionStartTime: 9_000,
       },
     });
     act(() => inpCallback(neutralInp));
-    expect(warningTrigger().getAttribute('aria-label')).toBe(
-      'Performance warning: Blocking time'
-    );
+    expect(warningTrigger().getAttribute('aria-label')).toBe('Performance warning: Blocking time');
     act(() => taskCallback(neutralTask));
     expect(screen.getByLabelText('Performance monitor')).toBeTruthy();
 
@@ -225,7 +212,6 @@ describe('FrameJankIndicator warnings', () => {
       taskCallback({
         ...neutralTask,
         worstTaskDuration: 600,
-        worstTaskStartTime: 9_000,
       })
     );
     expect(warningTrigger().getAttribute('aria-label')).toBe('Performance warning: Long task');
@@ -235,35 +221,7 @@ describe('FrameJankIndicator warnings', () => {
     jest.spyOn(INPMonitor.prototype, 'isSupported').mockReturnValue(false);
     render(<FrameJankIndicator />);
     fireEvent.focus(screen.getByLabelText('Performance monitor'));
-    expect(screen.getByRole('tooltip').textContent).toContain(
-      'Interaction timing unavailable in this browser.'
-    );
-    expect(screen.getByRole('tooltip').textContent).not.toContain('p75:');
-  });
-
-  it('updates incident age only while hovered or focused and clears its timer on unmount', () => {
-    const { unmount } = render(<FrameJankIndicator />);
-    emit({
-      inp: {
-        ...neutralInp,
-        slowInteractionsCount: 1,
-        worstInteractionDelay: 100,
-        worstInteractionStartTime: 9_000,
-      },
-    });
-    const trigger = warningTrigger();
-
-    fireEvent.mouseEnter(trigger);
-    expect(jest.getTimerCount()).toBe(1);
-    now = 12_000;
-    act(() => jest.advanceTimersByTime(1_000));
-    fireEvent.focus(trigger);
-    expect(screen.getByRole('tooltip').textContent).toContain('3s ago');
-
-    fireEvent.blur(trigger);
-    fireEvent.mouseLeave(trigger);
-    expect(jest.getTimerCount()).toBe(0);
-    unmount();
-    expect(jest.getTimerCount()).toBe(0);
+    expect(screen.getByRole('tooltip').textContent).toContain('Not supported in this browser.');
+    expect(screen.getByRole('tooltip').textContent).not.toContain('Slowest:');
   });
 });

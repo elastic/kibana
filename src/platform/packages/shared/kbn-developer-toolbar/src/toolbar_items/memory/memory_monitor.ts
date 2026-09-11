@@ -183,8 +183,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
   private buildInfo(current: number, mem: PerformanceMemory): MemoryInfo {
     const shortTrendPerMin = this.linearSlope(this.history.slice(-10), this.sampleTimes.slice(-10));
     const longTrendPerMin = this.linearSlope(this.history.slice(-20), this.sampleTimes.slice(-20));
-    const absoluteIncrease =
-      this.frozenBaseline === undefined ? 0 : current - this.frozenBaseline;
+    const absoluteIncrease = this.frozenBaseline === undefined ? 0 : current - this.frozenBaseline;
     const growthDetected =
       this.frozenBaseline !== undefined &&
       shortTrendPerMin > MemoryMonitor.SHORT_TREND_MB_PER_MIN &&
