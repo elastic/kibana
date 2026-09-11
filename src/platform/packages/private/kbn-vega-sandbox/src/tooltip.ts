@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escape } from 'he';
+import escape from 'lodash/escape';
 import { formatValue as createTooltipContent } from 'vega-tooltip';
 import type { View } from 'vega';
 import type { VegaSandboxTooltipConfig } from './types';
