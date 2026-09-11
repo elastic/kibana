@@ -15,8 +15,6 @@ import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { DataControlType } from '@kbn/controls-constants';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 export const ESQLValuesPreview: React.FC<{
@@ -27,14 +25,15 @@ export const ESQLValuesPreview: React.FC<{
   // Query execution error; when set, renders an error callout instead of values
   error?: Error;
   updateQuery: (column: string) => void;
-  selectedControlType?: DataControlType;
-}> = ({ values, error, columns, updateQuery, selectedControlType }) => {
+  // When true and the column is numeric, renders a min/max range stat instead of badges
+  isRangeControl?: boolean;
+}> = ({ values, error, columns, updateQuery, isRangeControl }) => {
   const range = useMemo(() => {
-    if (selectedControlType !== RANGE_SLIDER_CONTROL || !isNumericType(columns?.[0]?.type)) return;
+    if (!isRangeControl || !isNumericType(columns?.[0]?.type)) return;
 
     const valuesAsNumbers = values.map((v) => Number(v));
     return { min: min(valuesAsNumbers), max: max(valuesAsNumbers) };
-  }, [values, selectedControlType, columns]);
+  }, [values, isRangeControl, columns]);
 
   if (error) {
     return (

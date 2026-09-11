@@ -11,7 +11,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ESQLColumn } from '@kbn/es-types';
-import { RANGE_SLIDER_CONTROL, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { ESQLValuesPreview } from './esql_values_preview';
 
 const noopProps = {
@@ -29,7 +28,7 @@ describe('ESQLValuesPreview', () => {
           {...noopProps}
           values={[6, 7, 67]}
           columns={[numericColumn]}
-          selectedControlType={RANGE_SLIDER_CONTROL}
+          isRangeControl={true}
         />
       </I18nProvider>
     );
@@ -46,7 +45,7 @@ describe('ESQLValuesPreview', () => {
           {...noopProps}
           values={[6, 7, 67]}
           columns={[numericColumn]}
-          selectedControlType={OPTIONS_LIST_CONTROL}
+          isRangeControl={false}
         />
       </I18nProvider>
     );
