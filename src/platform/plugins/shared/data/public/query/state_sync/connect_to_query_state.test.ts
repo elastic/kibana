@@ -136,7 +136,10 @@ describe('connect_to_global_state', () => {
   test('when state container receives a time range with null boundary (e.g. _g=(time:(from:now-15m,to:null))), it is normalized back to the timefilter default', () => {
     const stop = connectToQueryGlobalState(queryServiceStart, globalState);
 
-    globalState.set({ ...globalState.get(), time: { from: 'now-15m', to: null as unknown as string } });
+    globalState.set({
+      ...globalState.get(),
+      time: { from: 'now-15m', to: null as unknown as string },
+    });
 
     expect(timeFilter.getTime()).toEqual(timeFilter.getTimeDefaults());
     expect(globalState.get().time).toEqual(timeFilter.getTimeDefaults());
