@@ -10,17 +10,20 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { getUiamClientAuthentication } from './get_client_authentication';
 
 describe('getUiamClientAuthentication', () => {
-  it.each(['Bearer', 'bearer'])('forwards supplied client authentication for %s tokens', (scheme) => {
-    for (const sharedSecret of ['upstream-secret', '']) {
-      const request = httpServerMock.createKibanaRequest({
-        headers: {
-          authorization: `${scheme} essu_token`,
-          'x-client-authentication': sharedSecret,
-        },
-      });
-      expect(getUiamClientAuthentication(request)).toEqual({ sharedSecret });
+  it.each(['Bearer', 'bearer'])(
+    'forwards supplied client authentication for %s tokens',
+    (scheme) => {
+      for (const sharedSecret of ['upstream-secret', '']) {
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `${scheme} essu_token`,
+            'x-client-authentication': sharedSecret,
+          },
+        });
+        expect(getUiamClientAuthentication(request)).toEqual({ sharedSecret });
+      }
     }
-  });
+  );
 
   it.each(['Bearer', 'bearer'])(
     'defers to Kibana client authentication when %s tokens carry none',

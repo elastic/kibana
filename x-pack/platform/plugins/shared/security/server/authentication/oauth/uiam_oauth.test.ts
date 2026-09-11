@@ -123,7 +123,11 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.createClient(request, params);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', params, undefined);
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith(
+        'essu_access_token',
+        params,
+        undefined
+      );
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -511,7 +515,11 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.resolveUsers(request, ['user-1']);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.resolveUsers).toHaveBeenCalledWith('essu_access_token', ['user-1'], undefined);
+      expect(mockUiam.resolveUsers).toHaveBeenCalledWith(
+        'essu_access_token',
+        ['user-1'],
+        undefined
+      );
     });
 
     it('propagates the error when UIAM call fails', async () => {
