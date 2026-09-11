@@ -10,7 +10,7 @@
 import Fs from 'fs';
 import Path from 'path';
 import { parse as yamlParse } from 'yaml';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 /**
  * Eval steps spell out their own agent block, so they opt out of the repo-wide agent defaults and

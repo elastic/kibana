@@ -311,7 +311,7 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+if (path.basename(process.argv[1] ?? '') === 'notify_release_readiness.ts') {
   main().catch((error) => {
     console.error(error);
     process.exit(1);
