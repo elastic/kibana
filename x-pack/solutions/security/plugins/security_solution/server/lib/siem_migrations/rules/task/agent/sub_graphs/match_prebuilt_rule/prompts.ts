@@ -16,10 +16,6 @@ export const MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2 = ChatPromptTemplate.fromMessa
   ['system', AGENT_ROLE_GUIDELINES],
 ]);
 
-// Mirrors CREATE_SEMANTIC_QUERY_PROMPT's system message (../../nodes/create_semantic_query/prompts.ts)
-// — same keyword-extraction task and category breakdown, just retargeted at the tool's "query"
-// argument (a pre-built *rule* match) instead of a standalone semantic_query JSON completion (an
-// *integration* match).
 const PREBUILT_RULES_SEMANTIC_QUERY_GUIDELINES = `<query_guidelines>
 You are extracting keywords from the source SIEM detection rule to build the "query" argument for searchPrebuiltRules — a semantic search over Elastic pre-built detection rule names and descriptions.
 
@@ -67,7 +63,7 @@ Search again only if you can name a specific defect in the query you just issued
 - it missed the attack technique the source rule detects;
 - all returned candidates are completely unrelated to the source rule (different technology, different attack domain, different use case) — this signals the query keywords were wrong, not that no rule exists.
 A scope difference alone is not a query defect: if a candidate is merely broader or narrower than the source rule but covers the same use case, answer with an empty "match" instead.
-You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS} times in total. Once that many queries are listed below, you cannot search again — decide from the candidates you already have and reply with the final JSON.{previousQueries}
+You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS} times in total. Once that many queries are listed below, you cannot search again — decide from the candidates you already have and reply with the final JSON.
 </matching_guidelines>`;
 
 const MATCH_GUIDELINES_SPLUNK = buildMatchGuidelines(MATCH_CORE_GUIDELINE_BULLETS_SPLUNK);
@@ -104,10 +100,7 @@ A: Please find the resulting JSON response below:
 </example_response_no_match>`;
 
 /**
- * Injected on the first turn, and again only when a search comes back empty — the two cases where
- * the model has nothing to evaluate and its sole job is to produce a query. On an evaluation turn
- * with candidates the match prompt goes in alone, because this message's source rule and query
- * guidelines are already earlier in the conversation.
+ * Injected on the first turn, and again whenever a search comes back empty.
  */
 export const CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2 = ChatPromptTemplate.fromMessages<{
   ruleContext: string;
@@ -136,7 +129,7 @@ Call the searchPrebuiltRules tool with your best query to find candidate Elastic
  * candidates — the caller injects the match prompt instead whenever there is something to evaluate —
  * so in that branch every listed query genuinely failed and can be described as such.
  */
-export const formatSearchInstructionsPrompt = (
+export const formatSemanticQueryInstructions = (
   previousSearchAttempts: PreviousSearchAttempt[]
 ): string => {
   if (previousSearchAttempts.length === 0) {
@@ -195,30 +188,7 @@ export const formatRetrySearchPrompt = (
   );
 };
 
-/**
- * Compact companion to the above, for the `{previousQueries}` slot on the match prompts. On an
- * evaluation turn the candidates and their queries are already visible in the conversation, so this
- * only needs to name the queries so the model doesn't reuse one if it decides to search again.
- *
- * It doubles as how the model tracks the `MAX_TOOL_CALL_ATTEMPTS` cap stated in the matching
- * guidelines: comparing the length of this list against that number is a far more reliable way to
- * know when searching is exhausted than counting its own conversational turns. Returns `''` before
- * any search has happened.
- */
-export const formatPreviousQueriesPrompt = (
-  previousSearchAttempts: PreviousSearchAttempt[]
-): string => {
-  if (previousSearchAttempts.length === 0) {
-    return '';
-  }
-
-  const queries = previousSearchAttempts.map(({ query }) => `"${query}"`).join(', ');
-  return `\nQueries already tried: ${queries}. If you search again, do not reuse or lightly reword any of them.`;
-};
-
-export const MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2 = ChatPromptTemplate.fromMessages<{
-  previousQueries: string;
-}>([
+export const MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2 = ChatPromptTemplate.fromMessages([
   [
     'human',
     `${MATCH_GUIDELINES_SPLUNK}
@@ -227,9 +197,7 @@ ${OUTPUT_FORMAT_GUIDELINES}`,
   ],
 ]);
 
-export const MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2 = ChatPromptTemplate.fromMessages<{
-  previousQueries: string;
-}>([
+export const MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2 = ChatPromptTemplate.fromMessages([
   [
     'human',
     `${MATCH_GUIDELINES_GENERIC}

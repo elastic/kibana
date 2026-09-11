@@ -15,9 +15,8 @@ import {
   MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2,
   MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2,
   MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2,
-  formatPreviousQueriesPrompt,
   formatRetrySearchPrompt,
-  formatSearchInstructionsPrompt,
+  formatSemanticQueryInstructions,
   RETRY_ON_MALFORMED_JSON_PROMPT,
 } from '../../prompts';
 import type { MatchPrebuiltRuleState, MatchPrebuiltRulesResult } from '../../state';
@@ -63,7 +62,7 @@ const formatCreateSemanticQueryMessages = (state: MatchPrebuiltRuleState) => {
     ruleContext,
     vendor: state.original_rule.vendor,
     mitreAttackIds: state.original_rule.annotations?.mitre_attack?.join(',') ?? '',
-    searchInstructions: formatSearchInstructionsPrompt(
+    searchInstructions: formatSemanticQueryInstructions(
       getPreviousSearchAttempts(state.match_prebuilt_rules_messages)
     ),
   });
@@ -96,9 +95,7 @@ const getPromptMessages = async (state: MatchPrebuiltRuleState): Promise<BaseMes
       state.original_rule.vendor === 'splunk'
         ? MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2
         : MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2;
-    return matchPrompt.formatMessages({
-      previousQueries: formatPreviousQueriesPrompt(previousSearchAttempts),
-    });
+    return matchPrompt.formatMessages({});
   }
 
   return formatCreateSemanticQueryMessages(state);
