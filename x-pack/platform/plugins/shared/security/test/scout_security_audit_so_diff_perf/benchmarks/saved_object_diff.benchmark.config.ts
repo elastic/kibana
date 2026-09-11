@@ -41,6 +41,4 @@ const config = {
   ],
 };
 
-// @kbn/bench only reads the default export of benchmark config files (same as every other benchmark.config.ts).
-// eslint-disable-next-line import/no-default-export
 export default config;
