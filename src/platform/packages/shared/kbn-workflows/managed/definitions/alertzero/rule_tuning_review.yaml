@@ -197,10 +197,19 @@ steps:
                   items:
                     type: string
                   minItems: 1
-              # value is required for: is, is_not, matches, does_not_match
-              # values is required for: is_one_of, is_not_one_of
-              # neither is required for: exists, does_not_exist
               required: [field, operator]
+              oneOf:
+                - properties:
+                    operator:
+                      enum: [is, is_not, matches, does_not_match]
+                  required: [value]
+                - properties:
+                    operator:
+                      enum: [is_one_of, is_not_one_of]
+                  required: [values]
+                - properties:
+                    operator:
+                      enum: [exists, does_not_exist]
           proposed_query:
             type: string
           proposed_risk_score:
@@ -210,7 +219,15 @@ steps:
           proposed_severity:
             type: string
             enum: [low, medium, high, critical]
+        # proposed_risk_score and proposed_severity are always paired: the detection
+        # engine treats them as a unit and the apply step patches both together.
         required: [change_type, summary]
+        if:
+          properties:
+            change_type:
+              const: risk_score
+        then:
+          required: [proposed_risk_score, proposed_severity]
 
   # These optional rule modes need fields that cannot be conditionally omitted from
   # a YAML object, so their query change is not previewed or auto-applied.
