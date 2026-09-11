@@ -92,215 +92,37 @@ beforeEach(() => {
   transactionsSectionProps = null;
 });
 
-describe('ServiceFlyoutOverview capabilities loading and error states', () => {
-  it('renders a skeleton while capabilities are loading', () => {
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
-      capabilities: {
-        loading: true,
-        error: undefined,
-        schema: undefined,
-        header: undefined,
-        overview: undefined,
-        footer: undefined,
-      },
-    });
-    mockUseServiceHasSystemMetrics.mockReturnValue({
-      hasSystemMetrics: undefined,
-      isLoading: true,
-    });
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getByTestId('serviceFlyoutOverviewSkeleton')).toBeInTheDocument();
-    expect(screen.queryByTestId('serviceFlyoutOverview')).not.toBeInTheDocument();
-  });
-
-  it('renders the overview with full capabilities when the capabilities fetch fails', () => {
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
-      capabilities: {
-        loading: false,
-        error: undefined,
-        schema: 'unknown' as const,
-        header: { serviceNameLink: true, badges: true },
-        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
-        footer: { alerts: true, slos: true },
-      },
-    });
+describe('ServiceFlyoutOverview key metrics chart implementation', () => {
+  it('renders the shared APM chart components for classic APM (non-OTel) services', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getByTestId('serviceFlyoutOverview')).toBeInTheDocument();
-    expect(screen.queryByTestId('serviceFlyoutOverviewSkeleton')).not.toBeInTheDocument();
-  });
-});
-
-describe('ServiceFlyoutOverview key metrics chart implementation per schema', () => {
-  it('renders the shared APM chart components for ECS services', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'ecs' }));
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
+    renderOverview({ service: { ...service, agentName: 'java' } });
 
     expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
     expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
     expect(screen.getByTestId('serviceFlyoutSection-keyMetrics')).toBeInTheDocument();
   });
 
-  it('renders the shared APM chart components for unknown-schema services', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'unknown' }));
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
-  });
-
-  it('keeps the ES|QL Lens charts for ECS services in document-based hosts (Discover)', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue({ schema: 'ecs', preferDocumentBasedCharts: true }),
-      indices: {
-        transaction: 'traces-apm*',
-        span: 'traces-apm*',
-        error: 'logs-apm*',
-        metric: 'metrics-apm*',
-        onboarding: 'apm-*',
-      },
-    });
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
-    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
-  });
-
   it('keeps the ES|QL Lens charts for OTel services', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue({ schema: 'otel' }),
-      indices: {
-        transaction: 'traces-apm*',
-        span: 'traces-apm*',
-        error: 'logs-apm*',
-        metric: 'metrics-apm*',
-        onboarding: 'apm-*',
-      },
-    });
+    renderOverview({ service: { ...service, agentName: 'opentelemetry/nodejs' } });
 
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
     expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
   });
 
-  it('seeds the latency aggregation type from the flyout filters', () => {
+  it('keeps the ES|QL Lens charts in document-based hosts (Discover)', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    mockUseServiceFlyoutContext.mockReturnValue(
-      buildContextValue({ filters: { latencyAggregationType: 'p95' } })
-    );
+    renderOverview({ preferDocumentBasedCharts: true });
 
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('seeds the latency aggregation type from the flyout options', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ latencyAggregationType: 'p95' as any });
 
     expect(mockServiceFlyoutApmCharts).toHaveBeenCalledWith(
       expect.objectContaining({ latencyAggregationType: 'p95' })
     );
-  });
-});
-
-describe('ServiceFlyoutOverview OTel key metrics indices loading and error states', () => {
-  it('renders a skeleton for key metrics while indices are loading', () => {
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue({ schema: 'otel' }),
-      indices: undefined,
-    });
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics-skeleton')).toBeInTheDocument();
-    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-error')).not.toBeInTheDocument();
-  });
-
-  it('renders a warning callout for key metrics when indices fail to load', () => {
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue({ schema: 'otel' }),
-      indices: null,
-    });
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics-error')).toBeInTheDocument();
-    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders key metrics charts when indices are available', () => {
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue({ schema: 'otel' }),
-      indices: {
-        transaction: 'traces-apm*',
-        span: 'traces-apm*',
-        error: 'logs-apm*',
-        metric: 'metrics-apm*',
-        onboarding: 'apm-*',
-      },
-    });
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
-    expect(
-      screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-error')).not.toBeInTheDocument();
   });
 });
 

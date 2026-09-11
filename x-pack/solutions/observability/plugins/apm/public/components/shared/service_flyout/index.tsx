@@ -16,13 +16,6 @@ import { ServiceFlyoutFooter } from './footer';
 import { ServiceFlyoutHeader } from './header';
 import { ServiceFlyoutOverview } from './overview';
 
-// The flyout's own chart tooltips must render above the flyout. Elastic Charts
-// derives the portal z-index from the chart's ancestors, which breaks when the
-// flyout is stacked over another flyout (e.g. Discover's doc viewer) — the
-// portal ends up below the flyout and the tooltip is invisible.
-const SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR =
-  "body [id^='echTooltipPortalMainTooltip__serviceFlyout']";
-
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
   alerts: 'alerts',

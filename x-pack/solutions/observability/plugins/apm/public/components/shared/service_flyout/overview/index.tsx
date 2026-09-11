@@ -260,6 +260,12 @@ export function ServiceFlyoutOverview({
                 key={refreshToken}
                 latencyAggregationType={latencyAggregationType}
                 setLatencyAggregationType={setLatencyAggregationType}
+                serviceName={service.id}
+                environment={environment}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                transactionType={transactionType}
+                onRangeChange={onRangeChange}
               />
             </>
           )}

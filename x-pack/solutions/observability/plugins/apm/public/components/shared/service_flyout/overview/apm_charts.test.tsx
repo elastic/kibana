@@ -11,9 +11,12 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { ServiceFlyoutApmCharts } from './apm_charts';
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      uiSettings: { get: jest.fn().mockReturnValue('Browser') },
+    },
+  }),
 }));
 
 const mockLatencyChart = jest.fn();
@@ -55,36 +58,23 @@ jest.mock(
   })
 );
 
-const setRange = jest.fn();
+const onRangeChange = jest.fn();
 
-function buildContextValue(filters: Record<string, unknown> = {}) {
-  return {
-    deps: {
-      core: {
-        uiSettings: { get: jest.fn().mockReturnValue('Browser') },
-      },
-    },
-    service: { name: 'opbeans-java', agentName: 'java' },
-    filters: {
-      environment: 'production',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      transactionType: 'request',
-      setRange,
-      ...filters,
-    },
-  };
-}
+const defaultProps = {
+  latencyAggregationType: LatencyAggregationType.p95,
+  setLatencyAggregationType: jest.fn(),
+  serviceName: 'opbeans-java',
+  environment: 'production',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  transactionType: 'request',
+  onRangeChange,
+};
 
-function renderCharts(filters: Record<string, unknown> = {}) {
-  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue(filters));
-
+function renderCharts(overrides: Partial<typeof defaultProps> = {}) {
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutApmCharts
-        latencyAggregationType={LatencyAggregationType.p95}
-        setLatencyAggregationType={jest.fn()}
-      />
+      <ServiceFlyoutApmCharts {...defaultProps} {...overrides} />
     </IntlProvider>
   );
 }
@@ -162,7 +152,7 @@ describe('ServiceFlyoutApmCharts', () => {
 
     fireEvent.click(screen.getByTestId('latencyChartMock'));
 
-    expect(setRange).toHaveBeenCalledWith({
+    expect(onRangeChange).toHaveBeenCalledWith({
       rangeFrom: '2024-01-01T00:00:00.000Z',
       rangeTo: '2024-01-02T00:00:00.000Z',
     });

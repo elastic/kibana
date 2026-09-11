@@ -12,6 +12,7 @@ import { createMemoryHistory } from 'history';
 import React, { useEffect, useMemo } from 'react';
 import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FailedTransactionChart } from '../../../alerting/ui_components/alert_details_app_section/failed_transaction_chart';
 import { LatencyChart } from '../../../alerting/ui_components/alert_details_app_section/latency_chart';
@@ -19,8 +20,6 @@ import { ThroughputChart } from '../../../alerting/ui_components/alert_details_a
 import { getTimeZone } from '../../charts/helper/timezone';
 import { toQuery } from '../../links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
-import { useServiceFlyoutContext } from '../service_flyout_context';
 
 // Keep the synced crosshair across the three charts, but don't mirror the
 // tooltip onto sibling charts: the flyout columns are too narrow for three
@@ -37,17 +36,24 @@ const FLYOUT_CHART_SETTINGS = {
 export function ServiceFlyoutApmCharts({
   latencyAggregationType,
   setLatencyAggregationType,
+  serviceName,
+  environment,
+  rangeFrom,
+  rangeTo,
+  transactionType,
+  onRangeChange,
 }: {
   latencyAggregationType: LatencyAggregationType;
   setLatencyAggregationType: (value: LatencyAggregationType) => void;
+  serviceName: string;
+  environment: string;
+  rangeFrom: string;
+  rangeTo: string;
+  transactionType: string;
+  onRangeChange: (range: { rangeFrom: string; rangeTo: string }) => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const {
-    deps: { core },
-    service,
-    filters: { environment, rangeFrom, rangeTo, transactionType, setRange },
-  } = useServiceFlyoutContext();
-
+  const { core } = useApmPluginContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   // The flyout has no URL of its own, so brushing (which pushes rangeFrom/rangeTo
@@ -59,17 +65,17 @@ export function ServiceFlyoutApmCharts({
       history.listen((location) => {
         const { rangeFrom: nextRangeFrom, rangeTo: nextRangeTo } = toQuery(location.search);
         if (typeof nextRangeFrom === 'string' && typeof nextRangeTo === 'string') {
-          setRange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
+          onRangeChange({ rangeFrom: nextRangeFrom, rangeTo: nextRangeTo });
         }
       }),
-    [history, setRange]
+    [history, onRangeChange]
   );
 
   const comparisonChartTheme = getComparisonChartTheme();
   const timeZone = getTimeZone(core.uiSettings);
 
   const commonProps = {
-    serviceName: service.name,
+    serviceName,
     environment,
     start,
     end,
@@ -106,7 +112,6 @@ export function ServiceFlyoutApmCharts({
             chartId="serviceFlyoutLatencyChart"
             latencyAggregationType={latencyAggregationType}
             setLatencyAggregationType={setLatencyAggregationType}
-            latencySelectEbt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
           />
           <FailedTransactionChart {...commonProps} chartId="serviceFlyoutErrorRate" />
           <ThroughputChart {...commonProps} chartId="serviceFlyoutThroughput" />

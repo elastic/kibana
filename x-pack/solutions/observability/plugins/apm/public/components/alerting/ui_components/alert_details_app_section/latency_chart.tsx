@@ -12,7 +12,6 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
-import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -65,7 +64,6 @@ export function LatencyChart({
   ruleTypeId,
   compact,
   showAlertAnnotations,
-  latencySelectEbt,
   showChartActions = true,
   chartId = 'latencyChart',
   panelPaddingSize,
@@ -99,8 +97,6 @@ export function LatencyChart({
   compact?: boolean;
   /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
   showAlertAnnotations?: boolean;
-  /** EBT click attributes for the latency aggregation type select. */
-  latencySelectEbt?: EbtClickAttrsWithoutAction;
   /** When false, hide the "Open" chart actions popover. */
   showChartActions?: boolean;
   /**
@@ -226,7 +222,6 @@ export function LatencyChart({
               <LatencyAggregationTypeSelect
                 latencyAggregationType={latencyAggregationType}
                 onChange={setLatencyAggregationType}
-                ebt={latencySelectEbt}
               />
             </EuiFlexItem>
           )}
