@@ -37,7 +37,6 @@ import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
 } from './services/saved_objects/constants';
 import { telemetryEventsSchemas } from './telemetry';
-import { hasIntegration } from './has_integration';
 
 export class AutomaticImportPlugin
   implements
@@ -137,17 +136,15 @@ export class AutomaticImportPlugin
       throw new Error('AutomaticImportService not initialized during setup');
     }
 
-    const savedObjectsClient = new SavedObjectsClient(
-      core.savedObjects.createInternalRepository([
-        INTEGRATION_SAVED_OBJECT_TYPE,
-        DATA_STREAM_SAVED_OBJECT_TYPE,
-      ])
-    );
+    const savedObjectsClient = core.savedObjects.createInternalRepository([
+      INTEGRATION_SAVED_OBJECT_TYPE,
+      DATA_STREAM_SAVED_OBJECT_TYPE,
+    ]);
 
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
     this.automaticImportService
-      .initialize(savedObjectsClient, plugins.taskManager, internalEsClient)
+      .initialize(new SavedObjectsClient(savedObjectsClient), plugins.taskManager, internalEsClient)
       .then(() => {
         this.logger.debug('AutomaticImportService initialized successfully');
       })
@@ -155,10 +152,7 @@ export class AutomaticImportPlugin
         this.logger.error('Failed to initialize AutomaticImportService', error);
       });
 
-    return {
-      hasIntegration: (integrationId, spaceId) =>
-        hasIntegration(savedObjectsClient, integrationId, spaceId),
-    };
+    return {};
   }
 
   /**
