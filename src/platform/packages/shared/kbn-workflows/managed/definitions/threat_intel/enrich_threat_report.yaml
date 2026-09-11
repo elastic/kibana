@@ -304,7 +304,7 @@ steps:
         on-failure:
           continue: true
 
-      # One bump per enrich pass (OQ9). Dedicated script step: ES rejects doc+script
+      # One bump per enrich pass. Dedicated script step: ES rejects doc+script
       # on the same update. Bumps even when severity persist is skipped so IOC/taxonomy
       # writes still advance the hunt-relevant revision. Must also see a successful
       # persist_extractions: that step continues on failure, so gating only on the LLM

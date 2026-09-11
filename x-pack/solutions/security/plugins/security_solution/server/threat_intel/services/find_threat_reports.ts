@@ -53,7 +53,7 @@ const isSearchContextMissing = (err: unknown): boolean => {
 };
 
 /**
- * OQ8b usable bar: title or body text, nested IOCs, severity.level, and revision.
+ * Usable bar: title or body text, nested IOCs, severity.level, and revision.
  * `extracted.iocs` is nested, so exists on the parent path matches nothing.
  */
 export const USABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
