@@ -76,9 +76,7 @@ export const resolveAllowedSubagents = async ({
         try {
           const def = await agentRegistry.get(id);
           if (!def) {
-            logger?.debug(
-              `resolveAllowedSubagents: dropping "${id}" (not found)`
-            );
+            logger?.debug(`resolveAllowedSubagents: dropping "${id}" (not found)`);
             return undefined;
           }
           return { id, description: def.description ?? NO_DESCRIPTION };

@@ -678,9 +678,7 @@ class AgentClientImpl implements AgentClient {
     const seen = new Set<string>();
     for (const id of subagentIds) {
       if (seen.has(id)) {
-        throw createBadRequestError(
-          `subagent_ids must be unique (duplicate: "${id}")`
-        );
+        throw createBadRequestError(`subagent_ids must be unique (duplicate: "${id}")`);
       }
       seen.add(id);
     }

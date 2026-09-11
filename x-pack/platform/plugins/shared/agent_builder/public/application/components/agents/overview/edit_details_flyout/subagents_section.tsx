@@ -29,7 +29,9 @@ import { useExperimentalFeatures } from '../../../../hooks/use_experimental_feat
  */
 export type SubagentIdsValue = string[];
 
-interface SubagentsSectionProps<TFieldValues extends { configuration: { subagent_ids: SubagentIdsValue } }> {
+interface SubagentsSectionProps<
+  TFieldValues extends { configuration: { subagent_ids: SubagentIdsValue } }
+> {
   /**
    * Path of the field on the form's default values, as understood by
    * react-hook-form. Defaults to `configuration.subagent_ids`.
@@ -142,18 +144,16 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
                     label={i18n.translate('xpack.agentBuilder.subagents.pickerLabel', {
                       defaultMessage: 'Delegable sub-agents',
                     })}
-                    helpText={i18n.translate(
-                      'xpack.agentBuilder.subagents.pickerHelpText',
-                      {
-                        defaultMessage:
-                          "Pick the agents this one may spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
-                      }
-                    )}
+                    helpText={i18n.translate('xpack.agentBuilder.subagents.pickerHelpText', {
+                      defaultMessage:
+                        "Pick the agents this one may spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
+                    })}
                     isInvalid={!!subagentIdsError}
                     error={subagentIdsError?.message as string | undefined}
                     fullWidth
                   >
                     <EuiComboBox
+                      isInvalid={!!subagentIdsError}
                       isClearable
                       options={options}
                       selectedOptions={currentValue.map(

@@ -10,9 +10,7 @@ import { filterReachableSubagents } from './filter_reachable_subagents';
 
 describe('filterReachableSubagents', () => {
   it('returns empty on empty entries', () => {
-    expect(
-      filterReachableSubagents({ entries: {}, allowedIds: new Set(['a']) })
-    ).toEqual({});
+    expect(filterReachableSubagents({ entries: {}, allowedIds: new Set(['a']) })).toEqual({});
   });
 
   it('returns all entries when every backing agent_id is allowed', () => {
@@ -20,9 +18,7 @@ describe('filterReachableSubagents', () => {
       r: { conversation_id: 'c1', agent_id: 'a' },
       s: { conversation_id: 'c2', agent_id: 'b' },
     };
-    expect(
-      filterReachableSubagents({ entries, allowedIds: new Set(['a', 'b']) })
-    ).toEqual(entries);
+    expect(filterReachableSubagents({ entries, allowedIds: new Set(['a', 'b']) })).toEqual(entries);
   });
 
   it('drops entries whose backing agent_id is not allowed', () => {
@@ -39,13 +35,11 @@ describe('filterReachableSubagents', () => {
     const entries = {
       self: { conversation_id: 'c-self', agent_id: SELF_AGENT_ID },
     };
-    expect(
-      filterReachableSubagents({ entries, allowedIds: new Set([SELF_AGENT_ID]) })
-    ).toEqual(entries);
+    expect(filterReachableSubagents({ entries, allowedIds: new Set([SELF_AGENT_ID]) })).toEqual(
+      entries
+    );
 
-    expect(
-      filterReachableSubagents({ entries, allowedIds: new Set(['a']) })
-    ).toEqual({});
+    expect(filterReachableSubagents({ entries, allowedIds: new Set(['a']) })).toEqual({});
   });
 
   it('preserves entry ordering', () => {

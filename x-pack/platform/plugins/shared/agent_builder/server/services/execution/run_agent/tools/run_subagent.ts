@@ -172,9 +172,7 @@ export const createSubagentTool = ({
       // `_self` matches `_self` and real ids match real ids.
       if (!allowedIdsSet.has(agent_id)) {
         return {
-          results: [
-            createErrorResult(`Agent id "${agent_id}" is not in this agent's allowlist.`),
-          ],
+          results: [createErrorResult(`Agent id "${agent_id}" is not in this agent's allowlist.`)],
         };
       }
 

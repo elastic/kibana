@@ -44,11 +44,7 @@ const callHandler = async (
     name?: string;
   },
   context: ReturnType<typeof createMockContext>['context']
-) =>
-  tool.handler(
-    { agent_id: 'test-agent', ...params },
-    context
-  ) as Promise<{ results: any[] }>;
+) => tool.handler({ agent_id: 'test-agent', ...params }, context) as Promise<{ results: any[] }>;
 
 describe('createSubagentTool', () => {
   const mockRound = {
@@ -636,11 +632,7 @@ describe('createSubagentTool', () => {
       });
 
       const { context } = createMockContext();
-      await callHandler(
-        tool,
-        { agent_id: SELF_AGENT_ID, description: 't', prompt: 'p' },
-        context
-      );
+      await callHandler(tool, { agent_id: SELF_AGENT_ID, description: 't', prompt: 'p' }, context);
 
       expect(executeSubAgent).toHaveBeenCalledWith(
         expect.objectContaining({ agentId: 'owner-real' })
@@ -673,15 +665,9 @@ describe('createSubagentTool', () => {
       });
 
       const { context } = createMockContext();
-      await callHandler(
-        tool,
-        { agent_id: 'coder', description: 't', prompt: 'p' },
-        context
-      );
+      await callHandler(tool, { agent_id: 'coder', description: 't', prompt: 'p' }, context);
 
-      expect(executeSubAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ agentId: 'coder' })
-      );
+      expect(executeSubAgent).toHaveBeenCalledWith(expect.objectContaining({ agentId: 'coder' }));
     });
 
     it('lists _self first in the description when present', () => {

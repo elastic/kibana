@@ -146,18 +146,16 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
                         label={i18n.translate('xpack.agentBuilder.subagents.pickerLabel', {
                           defaultMessage: 'Delegable sub-agents',
                         })}
-                        helpText={i18n.translate(
-                          'xpack.agentBuilder.subagents.pickerHelpText',
-                          {
-                            defaultMessage:
-                              "Pick the agents this one may spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
-                          }
-                        )}
+                        helpText={i18n.translate('xpack.agentBuilder.subagents.pickerHelpText', {
+                          defaultMessage:
+                            "Pick the agents this one may spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
+                        })}
                         isInvalid={!!subagentIdsErrorNode}
                         error={subagentIdsErrorMessage}
                         fullWidth
                       >
                         <EuiComboBox
+                          isInvalid={!!subagentIdsErrorNode}
                           isClearable
                           options={options}
                           selectedOptions={currentValue.map(
@@ -170,10 +168,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
                           onChange={(next) => {
                             const nextIds = next
                               .map((o) => o.value)
-                              .filter(
-                                (v): v is string =>
-                                  typeof v === 'string' && v.length > 0
-                              );
+                              .filter((v): v is string => typeof v === 'string' && v.length > 0);
                             onChange(nextIds);
                           }}
                           data-test-subj="subagentsPicker"
