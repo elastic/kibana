@@ -16982,7 +16982,6 @@
     "xpack.cases.caseView.userActions.setTemplateFieldLabel": "将 {fieldName} 设置为 {value}",
     "xpack.cases.caseView.userActions.setTemplateFieldLabelPrefix": "将 {fieldName} 设置为",
     "xpack.cases.caseView.userActions.severity": "严重性",
-    "xpack.cases.caseView.userActions.showMore": "显示更多",
     "xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason": "并同步了 {count, plural, =1 {# alert} other {# 个告警}}，带有关闭原因",
     "xpack.cases.caseView.userActions.updatedTemplateFields": "已更新的模板字段",
     "xpack.cases.caseViewFilters.clearFilters": "清除筛选",

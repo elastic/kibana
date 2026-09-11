@@ -16907,7 +16907,6 @@
     "xpack.cases.caseView.userActions.setTemplateFieldLabel": "définir {fieldName} sur {value}",
     "xpack.cases.caseView.userActions.setTemplateFieldLabelPrefix": "définir {fieldName} sur",
     "xpack.cases.caseView.userActions.severity": "Sévérité",
-    "xpack.cases.caseView.userActions.showMore": "Afficher plus",
     "xpack.cases.caseView.userActions.updatedTemplateFields": "champs de modèle mis à jour",
     "xpack.cases.caseViewFilters.clearFilters": "Effacer les filtres",
     "xpack.cases.common.alertAddedToCase": "ajouté au cas",

@@ -16977,7 +16977,6 @@
     "xpack.cases.caseView.userActions.setTemplateFieldLabel": "{fieldName}を{value}に設定",
     "xpack.cases.caseView.userActions.setTemplateFieldLabelPrefix": "{fieldName}を次に設定",
     "xpack.cases.caseView.userActions.severity": "重要度",
-    "xpack.cases.caseView.userActions.showMore": "詳細表示",
     "xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason": "、{count, plural, =1 {# alert} other {#件のアラート}}を閉じる理由と同期しました",
     "xpack.cases.caseView.userActions.updatedTemplateFields": "更新されたテンプレートフィールド",
     "xpack.cases.caseViewFilters.clearFilters": "フィルターを消去",
