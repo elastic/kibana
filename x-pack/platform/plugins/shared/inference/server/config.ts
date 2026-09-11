@@ -31,6 +31,11 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       minThreads: schema.number({ defaultValue: 0, min: 0 }),
       maxThreads: schema.number({ defaultValue: 3, min: 1 }),
+      // Effective minThreads when workflowDriven anonymization is enabled. Defaults to
+      // maxThreads (3) to keep workers pre-warmed and avoid cold-start latency on the
+      // synchronous request path. Set lower to allow thread scaling at the cost of
+      // occasional cold-start latency. Values above maxThreads are clamped to maxThreads.
+      workflowDrivenMinThreads: schema.number({ defaultValue: 3, min: 0 }),
       maxQueue: schema.number({ defaultValue: 20, min: 1 }),
       idleTimeout: schema.duration({ defaultValue: '30s' }),
       taskTimeout: schema.duration({ defaultValue: '15s' }),
