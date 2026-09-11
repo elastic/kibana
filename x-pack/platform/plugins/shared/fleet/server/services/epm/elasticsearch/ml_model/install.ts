@@ -33,42 +33,44 @@ export const installMlModel = async (
 ) => {
   const mlModelPaths = packageInstallContext.paths.filter((path) => isMlModel(path));
 
-  for (const mlModelPath of mlModelPaths) {
-    const mlModelAssetsMap: AssetsMap = new Map();
-    await packageInstallContext.archiveIterator.traverseEntries(
-      async (entry) => {
-        if (!entry.buffer) {
-          return;
-        }
+  if (mlModelPaths.length === 0) {
+    return esReferences;
+  }
 
+  const wantedPaths = new Set(mlModelPaths);
+  const mlModelAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (entry.buffer) {
         mlModelAssetsMap.set(entry.path, entry.buffer);
-      },
-      (path) => path === mlModelPath
-    );
+      }
+    },
+    (path) => wantedPaths.has(path)
+  );
 
-    const content = getAssetFromAssetsMap(mlModelAssetsMap, mlModelPath).toString('utf-8');
+  const mlModelRefs = mlModelPaths.map((mlModelPath) => {
     const pathParts = mlModelPath.split('/');
     const modelId = pathParts[pathParts.length - 1].replace('.json', '');
+    return { id: modelId, type: ElasticsearchAssetType.mlModel };
+  });
 
-    const mlModelRef = {
-      id: modelId,
-      type: ElasticsearchAssetType.mlModel,
-    };
+  // Save all refs before any installs
+  esReferences = await updateEsAssetReferences(
+    savedObjectsClient,
+    packageInstallContext.packageInfo.name,
+    esReferences,
+    { assetsToAdd: mlModelRefs }
+  );
 
-    // get and save ml model refs before installing ml model
-    esReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      packageInstallContext.packageInfo.name,
-      esReferences,
-      { assetsToAdd: [mlModelRef] }
-    );
-
-    const mlModel: MlModelInstallation = {
-      installationName: modelId,
-      content,
-    };
-
-    await handleMlModelInstall({ esClient, logger, mlModel });
+  for (const mlModelPath of mlModelPaths) {
+    const pathParts = mlModelPath.split('/');
+    const modelId = pathParts[pathParts.length - 1].replace('.json', '');
+    const content = getAssetFromAssetsMap(mlModelAssetsMap, mlModelPath).toString('utf-8');
+    await handleMlModelInstall({
+      esClient,
+      logger,
+      mlModel: { installationName: modelId, content },
+    });
   }
 
   return esReferences;
