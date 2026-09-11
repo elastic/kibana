@@ -143,11 +143,11 @@ steps:
         exception  — The rule logic is correct but fires on a known-good entity.
           Use the entity breakdown to identify the tightest conditions.
           Populate exception_entries; each entry is one field condition the step
-          will AND together. Supported operators:
-            is / is_not              → single value string
-            is_one_of / is_not_one_of → values array
-            matches / does_not_match  → glob pattern string (* and ?)
-            exists / does_not_exist   → no value needed
+          will AND together. Supported operators and required fields:
+            is / is_not / matches / does_not_match → populate `value` (string, required)
+            is_one_of / is_not_one_of              → populate `values` (array, required)
+            exists / does_not_exist                → no value needed
+          Glob patterns for matches/does_not_match: * matches any sequence, ? matches one char.
 
         query  — The query is too broad and FPs share a pattern not worth
           excepting individually. Only valid for rule type "{{ steps.fetch_rule.output.type }}".
@@ -191,10 +191,15 @@ steps:
                   enum: [is, is_not, is_one_of, is_not_one_of, matches, does_not_match, exists, does_not_exist]
                 value:
                   type: string
+                  minLength: 1
                 values:
                   type: array
                   items:
                     type: string
+                  minItems: 1
+              # value is required for: is, is_not, matches, does_not_match
+              # values is required for: is_one_of, is_not_one_of
+              # neither is required for: exists, does_not_exist
               required: [field, operator]
           proposed_query:
             type: string
@@ -222,9 +227,13 @@ steps:
   # Gated on fetch_rule so a skipped diagnose_rule cannot carry a stale proposal.
   - name: classify_proposal
     type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true }}
     with:
       can_apply_query: >-
         ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+          and steps.diagnose_rule.output.structured_output.proposed_query != null
           and steps.diagnose_rule.output.structured_output.proposed_query != ''
           and steps.fetch_rule.output.type == 'query'
           and steps.record_auto_apply_support.output.supported == true }}
@@ -322,7 +331,10 @@ steps:
   # and the next sweep proposes the rule again with a fresh diagnosis.
   - name: review_tuning
     type: waitForApproval
-    if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.summary != null }}
     timeout: "72h"
     with:
       approveLabel: Approve change
@@ -344,7 +356,12 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
+        {% if steps.classify_proposal.output.can_apply_exception %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+        {% else %}
+        The exception proposal is incomplete — apply it manually in the Detection Rules UI.
+        Approving marks these alerts acknowledged.
+        {% endif %}
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         Current query:
@@ -377,7 +394,12 @@ steps:
         {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
         Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+        {% if steps.classify_proposal.output.can_apply_risk_score %}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+        {% else %}
+        The proposal is incomplete (both risk_score and severity are required) — apply it manually in the Detection Rules UI.
+        Approving marks these alerts acknowledged.
+        {% endif %}
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
         No automated change can be applied safely for this rule.
@@ -458,7 +480,7 @@ steps:
   # Each error check is paired with the gate that ran its apply step; a skipped
   # step leaves no execution record. An approved change whose apply failed stays
   # untagged so a later sweep can retry.
-  - name: record_outcome
+  - name: record_apply_results
     type: data.set
     with:
       query_applied: >-
@@ -472,10 +494,16 @@ steps:
         ${{ steps.review_tuning.output.response.approved == true
           and steps.classify_proposal.output.can_apply_risk_score == true
           and steps.apply_risk_score_tuning.error == null }}
+
+  # Liquid cannot parenthesise conditions, so the OR-of-ANDs for rule_patched is
+  # split into a second step that reads the already-resolved individual flags.
+  - name: record_outcome
+    type: data.set
+    with:
       rule_patched: >-
-        ${{ (steps.decide_apply.output.eligible == true and steps.apply_query_tuning.error == null)
-          or (steps.review_tuning.output.response.approved == true and steps.classify_proposal.output.can_apply_exception == true and steps.apply_exception_tuning.error == null)
-          or (steps.review_tuning.output.response.approved == true and steps.classify_proposal.output.can_apply_risk_score == true and steps.apply_risk_score_tuning.error == null) }}
+        ${{ steps.record_apply_results.output.query_applied == true
+          or steps.record_apply_results.output.exception_applied == true
+          or steps.record_apply_results.output.risk_score_applied == true }}
 
   - name: mark_alerts_dismissed
     type: security.setAlertTags
