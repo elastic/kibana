@@ -36,9 +36,13 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
-import { PendingProposalsPanel } from '../../components/pending_proposals';
-import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { ProposalChartsSummaryRow } from '../../components/proposal_charts_summary';
+import {
+  ProposalsQueue,
+  buildProposalQueueSections,
+  countOpenProposals,
+} from '../../components/proposals_queue';
+import { useProposalsList } from '../../hooks/use_proposals_list';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -66,16 +70,18 @@ export const ConversationsPage: React.FC = () => {
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
   const {
-    data: statsData,
-    isLoading: isStatsLoading,
-    error: statsError,
-  } = useProposalChartsSummary();
-  const proposalCount = useMemo(() => {
-    const lastBucket = statsData?.buckets.at(-1);
-    if (!lastBucket) return 0;
-    // Every category, not just the three with cards, so `escalate` is counted too.
-    return Object.values(lastBucket.counts).reduce((a, b) => a + b, 0);
-  }, [statsData]);
+    data: proposalsData,
+    isLoading: isProposalsLoading,
+    error: proposalsError,
+  } = useProposalsList();
+
+  // One derivation for the header and the sections so the count above the queue
+  // and the cards inside it cannot disagree. Excludes `closed`: a decided
+  // proposal needs nobody, and the header says "N actions need you".
+  const openProposalCount = useMemo(
+    () => countOpenProposals(buildProposalQueueSections(proposalsData?.groups)),
+    [proposalsData?.groups]
+  );
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
@@ -214,15 +220,15 @@ export const ConversationsPage: React.FC = () => {
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
-            // Both queries: the header states something about each, so settling
-            // one while the other is in flight would flash a title the next
-            // render contradicts.
-            isLoading={isLoading || (isStatsLoading && !statsData)}
-            hasError={Boolean(statsError)}
+            isLoading={isLoading || (isProposalsLoading && !proposalsData)}
+            // Gated on `!proposalsData` so keepPreviousData is not thrown away
+            // by one transient refetch failure flipping the title over a queue
+            // that is rendering fine.
+            hasError={Boolean(proposalsError && !proposalsData)}
             isQueueEmpty={
-              !isStatsLoading && sortedConversations.length === 0 && proposalCount === 0
+              !isProposalsLoading && sortedConversations.length === 0 && openProposalCount === 0
             }
-            eventCount={proposalCount}
+            eventCount={openProposalCount}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -236,10 +242,11 @@ export const ConversationsPage: React.FC = () => {
           />
         </EuiFlexItem>
 
-        {/* Durable proposals from the investigation proposals API. Hidden when
-            empty so the queue below is unaffected when nothing is pending. */}
+        {/* Proposals grouped by action category, with conversation titles, from
+            the AlertZero route. Renders nothing when there is nothing pending or
+            recently decided, so the conversation queue below is unaffected. */}
         <EuiFlexItem grow={false}>
-          <PendingProposalsPanel hideWhenEmpty />
+          <ProposalsQueue />
         </EuiFlexItem>
 
         {isLoading ? (
