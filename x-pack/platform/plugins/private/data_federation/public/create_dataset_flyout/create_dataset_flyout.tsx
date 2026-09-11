@@ -38,7 +38,6 @@ import {
   MappingEditor,
   buildDatasetMappings,
   emptyMappingEditorValue,
-  DataType,
   type MappingEditorValue,
   validateMappingEditorValue,
 } from '../components/mapping_editor';
@@ -116,13 +115,12 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
       id: String(idx),
       name,
       path: prop.path ?? '',
-      type: prop.type === 'date' ? DataType.DATETIME : (prop.type as DataType),
+      type: prop.type,
       format: prop.format ?? '',
     }));
 
     return {
       dynamic: mappings.dynamic !== 'false',
-      idPath: mappings._id?.path ?? '',
       fields,
     };
   });
@@ -147,12 +145,11 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         id: String(idx),
         name,
         path: prop.path ?? '',
-        type: prop.type === 'date' ? DataType.DATETIME : (prop.type as DataType),
+        type: prop.type,
         format: prop.format ?? '',
       }));
       setMappingsValue({
         dynamic: mappings.dynamic !== 'false',
-        idPath: mappings._id?.path ?? '',
         fields,
       });
       setIsMappingsOpen(true);

@@ -31,14 +31,14 @@ export interface FieldMappingFormErrors {
   format?: string;
 }
 
-export interface FieldMappingFormProps<TType extends string = string> {
-  value: FieldMappingFormValue<TType>;
-  onChange: (patch: Partial<FieldMappingFormValue<TType>>) => void;
-  typeOptions: Array<{ value: '' | TType; text: string }>;
+export interface FieldMappingFormProps {
+  value: FieldMappingFormValue;
+  onChange: (patch: Partial<FieldMappingFormValue>) => void;
+  typeOptions: Array<{ value: '' | DatasetMappingFieldType; text: string }>;
   typeHelpText?: ReactNode;
   pathHelpText?: ReactNode;
   errors?: FieldMappingFormErrors;
-  dateTypeValue: TType;
+  dateTypeValue: DatasetMappingFieldType;
   actions: ReactNode;
   fieldTypeTestSubj: string;
   fieldNameTestSubj: string;
@@ -63,7 +63,7 @@ export const getFieldTypeDocsHelpText = (
   );
 };
 
-export function FieldMappingForm<TType extends string>({
+export function FieldMappingForm({
   value,
   onChange,
   typeOptions,
@@ -76,7 +76,7 @@ export function FieldMappingForm<TType extends string>({
   fieldNameTestSubj,
   fieldPathTestSubj,
   fieldFormatTestSubj,
-}: FieldMappingFormProps<TType>) {
+}: FieldMappingFormProps) {
   const isDateType = value.type === dateTypeValue;
 
   return (
@@ -97,7 +97,7 @@ export function FieldMappingForm<TType extends string>({
             options={typeOptions as unknown as Array<{ value: string; text: string }>}
             value={value.type}
             onChange={(e) => {
-              const nextType = e.target.value as '' | TType;
+              const nextType = e.target.value as '' | DatasetMappingFieldType;
               onChange({
                 type: nextType,
                 ...(nextType === dateTypeValue ? {} : { format: '' }),

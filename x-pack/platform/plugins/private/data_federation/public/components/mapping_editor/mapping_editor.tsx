@@ -15,7 +15,6 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiFieldSearch,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -30,31 +29,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import type { DatasetMappings } from '../../../common';
+import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
-
-export enum DataType {
-  KEYWORD = 'keyword',
-  LONG = 'long',
-  INTEGER = 'integer',
-  DOUBLE = 'double',
-  BOOLEAN = 'boolean',
-  DATETIME = 'datetime',
-  UNSIGNED_LONG = 'unsigned_long',
-  IP = 'ip',
-}
 
 export interface MappingEditorField {
   id: string;
   name: string;
   path: string;
-  type: '' | DataType;
+  type: '' | DatasetMappingFieldType;
   format: string;
 }
 
 export interface MappingEditorValue {
   dynamic: boolean;
-  idPath: string;
   fields: MappingEditorField[];
 }
 
@@ -68,7 +55,6 @@ export interface MappingEditorValidationResult {
   isValid: boolean;
   hasAnyDeclaredMappings: boolean;
   globalErrors: string[];
-  idPathError?: string;
   fieldErrorsById: Record<string, FieldValidationErrors>;
 }
 
@@ -82,46 +68,39 @@ export interface MappingEditorProps {
   showJsonPreview?: boolean;
 }
 
-const typeToDatasetMappingType = (
-  type: DataType
-): DatasetMappings['properties'][string]['type'] => {
-  if (type === DataType.DATETIME) return 'date';
-  return type;
-};
-
 const ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL =
   'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference';
 
-const TYPE_INFO_BY_VALUE: Record<DataType, { label: string; docs: string }> = {
-  [DataType.BOOLEAN]: {
+const TYPE_INFO_BY_VALUE: Record<DatasetMappingFieldType, { label: string; docs: string }> = {
+  boolean: {
     label: 'Boolean',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/boolean`,
   },
-  [DataType.DATETIME]: {
+  date: {
     label: 'Date',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/date`,
   },
-  [DataType.DOUBLE]: {
+  double: {
     label: 'Double',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
   },
-  [DataType.INTEGER]: {
+  integer: {
     label: 'Integer',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
   },
-  [DataType.IP]: {
+  ip: {
     label: 'IP',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/ip`,
   },
-  [DataType.KEYWORD]: {
+  keyword: {
     label: 'Keyword',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/keyword`,
   },
-  [DataType.LONG]: {
+  long: {
     label: 'Long',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
   },
-  [DataType.UNSIGNED_LONG]: {
+  unsigned_long: {
     label: 'Unsigned long',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`,
   },
@@ -157,26 +136,25 @@ const renderBoldMatches = (text: string, query: string): React.ReactNode => {
   return <>{parts}</>;
 };
 
-const TYPE_OPTIONS: Array<{ value: '' | DataType; text: string }> = [
+const TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
   {
     value: '',
     text: i18n.translate('xpack.dataFederation.mappingEditor.typePlaceholder', {
       defaultMessage: 'Select type',
     }),
   },
-  { value: DataType.BOOLEAN, text: TYPE_INFO_BY_VALUE[DataType.BOOLEAN].label },
-  { value: DataType.DATETIME, text: TYPE_INFO_BY_VALUE[DataType.DATETIME].label },
-  { value: DataType.DOUBLE, text: TYPE_INFO_BY_VALUE[DataType.DOUBLE].label },
-  { value: DataType.INTEGER, text: TYPE_INFO_BY_VALUE[DataType.INTEGER].label },
-  { value: DataType.IP, text: TYPE_INFO_BY_VALUE[DataType.IP].label },
-  { value: DataType.KEYWORD, text: TYPE_INFO_BY_VALUE[DataType.KEYWORD].label },
-  { value: DataType.LONG, text: TYPE_INFO_BY_VALUE[DataType.LONG].label },
-  { value: DataType.UNSIGNED_LONG, text: TYPE_INFO_BY_VALUE[DataType.UNSIGNED_LONG].label },
+  { value: 'boolean', text: TYPE_INFO_BY_VALUE.boolean.label },
+  { value: 'date', text: TYPE_INFO_BY_VALUE.date.label },
+  { value: 'double', text: TYPE_INFO_BY_VALUE.double.label },
+  { value: 'integer', text: TYPE_INFO_BY_VALUE.integer.label },
+  { value: 'ip', text: TYPE_INFO_BY_VALUE.ip.label },
+  { value: 'keyword', text: TYPE_INFO_BY_VALUE.keyword.label },
+  { value: 'long', text: TYPE_INFO_BY_VALUE.long.label },
+  { value: 'unsigned_long', text: TYPE_INFO_BY_VALUE.unsigned_long.label },
 ];
 
 export const emptyMappingEditorValue = (): MappingEditorValue => ({
   dynamic: true,
-  idPath: '',
   fields: [],
 });
 
@@ -225,7 +203,7 @@ export const validateMappingEditorValue = (
     }
 
     const format = f.format.trim();
-    if (format && f.type !== DataType.DATETIME) {
+    if (format && f.type !== 'date') {
       errors.format = i18n.translate(
         'xpack.dataFederation.mappingEditor.validation.formatDateOnly',
         {
@@ -243,33 +221,12 @@ export const validateMappingEditorValue = (
   const declaredFieldCount = nonBlankFields.filter((f) => f.name.trim() && f.type).length;
   const hasAnyDeclaredMappings = declaredFieldCount > 0;
 
-  const idPath = value.idPath.trim();
-  let idPathError: string | undefined;
-  // Only enforce _id.path matching a declared mapped field when dynamic fields are disabled.
-  if (idPath && value.dynamic === false) {
-    const candidatePaths = nonBlankFields
-      .flatMap((f) => {
-        const logical = f.name.trim();
-        const physical = f.path.trim();
-        return [logical, physical].filter((v): v is string => Boolean(v));
-      })
-      .filter((v, idx, arr) => arr.indexOf(v) === idx);
-
-    if (!candidatePaths.includes(idPath)) {
-      idPathError = i18n.translate('xpack.dataFederation.mappingEditor.validation.idPathUnknown', {
-        defaultMessage: '_id.path must match an existing mapped field name or rename-to value.',
-      });
-    }
-  }
-
-  const isValid =
-    globalErrors.length === 0 && !idPathError && Object.keys(fieldErrorsById).length === 0;
+  const isValid = globalErrors.length === 0 && Object.keys(fieldErrorsById).length === 0;
 
   return {
     isValid,
     hasAnyDeclaredMappings,
     globalErrors,
-    idPathError,
     fieldErrorsById,
   };
 };
@@ -279,7 +236,7 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
     const name = f.name.trim();
     if (!name || !f.type) return acc;
 
-    const type = typeToDatasetMappingType(f.type);
+    const type = f.type;
     const prop: DatasetMappings['properties'][string] = { type };
 
     const path = f.path.trim();
@@ -293,7 +250,6 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
   }, {});
 
   const dynamic = value.dynamic;
-  const idPath = value.idPath.trim();
 
   const hasAny = Object.keys(properties).length > 0;
 
@@ -302,7 +258,6 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
   return {
     ...(!dynamic ? { dynamic: 'false' as const } : {}),
     properties,
-    ...(idPath ? { _id: { path: idPath } } : {}),
   };
 };
 
@@ -333,7 +288,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     return validatedFieldIds.some((id) => validation.fieldErrorsById[id] !== undefined);
   }, [validatedFieldIds, validation.fieldErrorsById]);
 
-  const shouldShowValidationCallout = Boolean(validation.idPathError) || hasValidatedFieldErrors;
+  const shouldShowValidationCallout = hasValidatedFieldErrors;
 
   const addField = useCallback(() => {
     const id = `mapping-field-${nextId.current++}`;
@@ -422,7 +377,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     }
 
     const format = draftField.format.trim();
-    if (format && type !== DataType.DATETIME) {
+    if (format && type !== 'date') {
       errors.format = i18n.translate(
         'xpack.dataFederation.mappingEditor.validation.formatDateOnly',
         {
@@ -441,8 +396,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     const type = draftField.type;
     const format = draftField.format.trim();
     const isDuplicate = Boolean(name) && value.fields.some((f) => f.name.trim() === name);
-    const hasErrors =
-      !name || !type || isDuplicate || (Boolean(format) && type !== DataType.DATETIME);
+    const hasErrors = !name || !type || isDuplicate || (Boolean(format) && type !== 'date');
     if (hasErrors) return;
 
     const id = `mapping-field-${nextId.current++}`;
@@ -487,7 +441,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         <p>
           {i18n.translate('xpack.dataFederation.mappingEditor.description', {
             defaultMessage:
-              'Declare a schema, rename physical columns using “path”, optionally add a date “format”, and select a source column to use as “_id”.',
+              'Declare a schema, rename physical columns using “path”, and optionally add a date “format”.',
           })}
         </p>
       </EuiText>
@@ -505,7 +459,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                 {validation.globalErrors.map((e, idx) => (
                   <li key={idx}>{e}</li>
                 ))}
-                {validation.idPathError ? <li>{validation.idPathError}</li> : null}
                 {hasValidatedFieldErrors ? (
                   <li>
                     {i18n.translate('xpack.dataFederation.mappingEditor.validation.fieldErrors', {
@@ -548,30 +501,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               checked={value.dynamic}
               onChange={(e) => onChange((prev) => ({ ...prev, dynamic: e.target.checked }))}
               data-test-subj="dataFederationMappingEditorDynamic"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate('xpack.dataFederation.mappingEditor.idPathLabel', {
-              defaultMessage: '_id.path',
-            })}
-            helpText={i18n.translate('xpack.dataFederation.mappingEditor.idPathHelp', {
-              defaultMessage: 'Optional source column whose value becomes the row’s _id.',
-            })}
-            isInvalid={Boolean(validation.idPathError)}
-            error={validation.idPathError}
-            fullWidth
-          >
-            <EuiFieldText
-              isInvalid={Boolean(validation.idPathError)}
-              fullWidth
-              value={value.idPath}
-              onChange={(e) => onChange((prev) => ({ ...prev, idPath: e.target.value }))}
-              data-test-subj="dataFederationMappingEditorIdPath"
-              placeholder={i18n.translate('xpack.dataFederation.mappingEditor.idPathPlaceholder', {
-                defaultMessage: 'e.g. request_id or user.id',
-              })}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -650,13 +579,20 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
           <FieldMappingForm
             value={draftField}
-            onChange={(patch: Partial<MappingEditorField>) =>
-              setDraftField((prev) => ({ ...prev, ...patch }))
+            onChange={(patch) =>
+              setDraftField((prev) => ({ ...prev, ...(patch as Partial<MappingEditorField>) }))
             }
             typeOptions={TYPE_OPTIONS}
-            typeHelpText={getFieldTypeDocsHelpText(draftField.type, TYPE_INFO_BY_VALUE)}
+            typeHelpText={
+              draftField.type
+                ? getFieldTypeDocsHelpText(
+                    draftField.type as DatasetMappingFieldType,
+                    TYPE_INFO_BY_VALUE
+                  )
+                : undefined
+            }
             errors={draftFieldErrors}
-            dateTypeValue={DataType.DATETIME}
+            dateTypeValue={'date'}
             actions={
               <EuiButton
                 iconType="plusCircle"
@@ -686,7 +622,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {filteredFields.map((f) => {
-            const isDate = f.type === DataType.DATETIME;
+            const isDate = f.type === 'date';
             const typeInfo = (
               TYPE_INFO_BY_VALUE as Record<string, { label: string; docs: string } | undefined>
             )[f.type];
@@ -703,11 +639,15 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                       <>
                         <FieldMappingForm
                           value={f}
-                          onChange={(patch: Partial<MappingEditorField>) => {
-                            updateField(f.id, patch);
+                          onChange={(patch) => {
+                            updateField(f.id, patch as Partial<MappingEditorField>);
                           }}
                           typeOptions={TYPE_OPTIONS}
-                          typeHelpText={getFieldTypeDocsHelpText(f.type, TYPE_INFO_BY_VALUE)}
+                          typeHelpText={
+                            f.type
+                              ? getFieldTypeDocsHelpText(f.type, TYPE_INFO_BY_VALUE)
+                              : undefined
+                          }
                           pathHelpText={i18n.translate(
                             'xpack.dataFederation.mappingEditor.physicalPathHelp',
                             {
@@ -715,7 +655,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             }
                           )}
                           errors={rowErrors}
-                          dateTypeValue={DataType.DATETIME}
+                          dateTypeValue={'date'}
                           actions={
                             <EuiFlexGroup
                               gutterSize="s"
@@ -779,9 +719,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                                 textToCopy={JSON.stringify(
                                   {
                                     [f.name || 'field']: {
-                                      type: f.type
-                                        ? typeToDatasetMappingType(f.type as DataType)
-                                        : '',
+                                      type: f.type,
                                       ...(f.path ? { path: f.path } : {}),
                                       ...(isDate && f.format ? { format: f.format } : {}),
                                     },
@@ -887,10 +825,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {/* TODO remove */}
           <EuiCodeBlock language="json" isCopyable paddingSize="s">
             {previewJson ||
-              '{\n  "mappings": {\n    "dynamic": "false",\n    "properties": {\n      "@timestamp": {\n        "type": "date",\n        "path": "event_time",\n        "format": "yyyy-MM-dd HH:mm:ss"\n      }\n    },\n    "_id": {\n      "path": "request_id"\n    }\n  }\n}'}
+              '{\n  "mappings": {\n    "dynamic": "false",\n    "properties": {\n      "@timestamp": {\n        "type": "date",\n        "path": "event_time",\n        "format": "yyyy-MM-dd HH:mm:ss"\n      }\n    }\n  }\n}'}
           </EuiCodeBlock>
         </>
       ) : null}

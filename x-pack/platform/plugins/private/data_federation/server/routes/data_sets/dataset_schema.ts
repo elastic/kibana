@@ -38,11 +38,6 @@ export const datasetSchema = schema.object({
           format: optionalString,
         })
       ),
-      _id: schema.maybe(
-        schema.object({
-          path: schema.string({ maxLength: 256 }),
-        })
-      ),
     })
   ),
   settings: schema.maybe(

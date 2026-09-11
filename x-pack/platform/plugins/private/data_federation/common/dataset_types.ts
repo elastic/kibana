@@ -56,10 +56,6 @@ export interface DatasetMappings {
    */
   dynamic?: DatasetMappingsDynamic;
   properties: Record<string, DatasetMappingProperty>;
-  _id?: {
-    /** Optional source column whose value becomes the row's `_id`. */
-    path: string;
-  };
 }
 
 export interface DatasetSettingsFile {

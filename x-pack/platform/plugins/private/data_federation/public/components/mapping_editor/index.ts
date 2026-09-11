@@ -11,6 +11,5 @@ export {
   emptyMappingEditorValue,
   buildDatasetMappings,
   validateMappingEditorValue,
-  DataType,
 } from './mapping_editor';
 export type { MappingEditorValue, MappingEditorField } from './mapping_editor';
