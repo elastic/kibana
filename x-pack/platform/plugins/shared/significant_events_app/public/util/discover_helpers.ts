@@ -7,18 +7,18 @@
 
 import { esql } from '@elastic/esql';
 import type { TimeState } from '@kbn/es-query';
-import type { StreamQuery } from '@kbn/significant-events-schema';
 import { getSourcesForStream, type Streams } from '@kbn/streams-schema';
 import { conditionToESQLAst, type Condition } from '@kbn/streamlang';
+import type { TimeRange } from '@kbn/es-query';
 
-export function buildDiscoverParams(query: StreamQuery, timeState: TimeState) {
+export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
   return {
     timeRange: {
-      from: timeState.timeRange.from,
-      to: timeState.timeRange.to,
+      from: timeRange.from,
+      to: timeRange.to,
     },
     query: {
-      esql: query.esql.query,
+      esql: esqlQuery,
     },
     interval: 'auto',
   };
