@@ -7,6 +7,8 @@
 
 import type { Datatable, DatatableRow, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { lastValueFrom, map } from 'rxjs';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { aggregateQueryToAst } from '@kbn/data-plugin/common';
 
 export interface ExecuteEsqlQueryOptions<Input> {
   expressions: ExpressionsStart;
@@ -38,10 +40,13 @@ export const executeEsqlQuery = <TRow extends object = DatatableRow, Input = unk
   noCache,
   timeField,
 }: ExecuteEsqlQueryOptions<Input>): Promise<TRow[]> => {
-  const escapedQuery = query.replace(/'/g, "\\'");
-  const expression = timeField
-    ? `esql '${escapedQuery}' timeField='${timeField}'`
-    : `esql '${escapedQuery}'`;
+  // Built as an AST rather than as an expression string, so the query text
+  // needs no escaping for the expression parser.
+  const esqlFunction = aggregateQueryToAst({ query: { esql: query }, timeField });
+  if (!esqlFunction) {
+    throw new Error('Could not build the esql expression');
+  }
+  const expression: ExpressionAstExpression = { type: 'expression', chain: [esqlFunction] };
   const options = noCache ? { allowCache: false } : undefined;
   const executionContract = expressions.execute<Input, Datatable>(expression, input, options);
   abortSignal?.addEventListener('abort', (e) => {

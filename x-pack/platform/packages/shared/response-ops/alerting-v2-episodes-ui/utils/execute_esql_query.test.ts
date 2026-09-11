@@ -12,6 +12,14 @@ import { executeEsqlQuery } from './execute_esql_query';
 
 const mockExpressionsService = expressionsPluginMock.createStartContract();
 
+const getEsqlArguments = () => {
+  const ast = mockExpressionsService.execute.mock.calls[0][0] as {
+    chain: Array<{ function: string; arguments: Record<string, unknown[]> }>;
+  };
+  const esqlFunction = ast.chain.find(({ function: name }) => name === 'esql');
+  return esqlFunction?.arguments ?? {};
+};
+
 describe('executeEsqlQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,10 +52,14 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | STATS count() BY status'",
+      expect.objectContaining({ type: 'expression' }),
       null,
       undefined
     );
+    expect(getEsqlArguments()).toEqual(
+      expect.objectContaining({ query: ['FROM index | STATS count() BY status'] })
+    );
+    expect(getEsqlArguments().timeField).toBeUndefined();
     expect(result).toEqual(mockDatatable.rows);
   });
 
@@ -74,10 +86,11 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM logs'",
+      expect.objectContaining({ type: 'expression' }),
       input,
       undefined
     );
+    expect(getEsqlArguments().timeField).toBeUndefined();
   });
 
   it('should pass timeField to the esql function when provided', async () => {
@@ -100,14 +113,12 @@ describe('executeEsqlQuery', () => {
       timeField: '@timestamp',
     });
 
-    expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM logs' timeField='@timestamp'",
-      input,
-      undefined
+    expect(getEsqlArguments()).toEqual(
+      expect.objectContaining({ query: ['FROM logs'], timeField: ['@timestamp'] })
     );
   });
 
-  it('should handle query with single quotes correctly', async () => {
+  it('should pass quotes and backslashes through untouched', async () => {
     const mockDatatable: Datatable = {
       type: 'datatable',
       columns: [],
@@ -127,11 +138,8 @@ describe('executeEsqlQuery', () => {
       input: null,
     });
 
-    expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | WHERE status == \\'active\\''",
-      null,
-      undefined
-    );
+    // The AST carries the query verbatim: no escaping for quotes or backslashes.
+    expect(getEsqlArguments().query).toEqual(["FROM index | WHERE status == 'active'"]);
   });
 
   it('should throw when result type is error', async () => {
