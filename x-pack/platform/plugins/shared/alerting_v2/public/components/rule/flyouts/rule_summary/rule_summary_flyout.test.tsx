@@ -11,9 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleSummaryFlyoutProps } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../../services/rules_api';
-import { useRuleAutoAttach } from '../../../../agent_builder/use_rule_auto_attach';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 
-jest.mock('../../../../agent_builder/use_rule_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   useRuleAutoAttach: jest.fn(),
 }));
 
@@ -237,9 +237,9 @@ describe('RuleSummaryFlyout', () => {
 
       const expectedOrder = [
         'viewRuleDetails-rule-1',
+        'runRule-rule-1',
         'editRule-rule-1',
         'cloneRule-rule-1',
-        'runRule-rule-1',
         'toggleEnabledRule-rule-1',
         'updateRuleApiKey-rule-1',
         'deleteRule-rule-1',
@@ -251,7 +251,8 @@ describe('RuleSummaryFlyout', () => {
         .filter((testId) => expectedOrder.includes(testId ?? ''));
       expect(renderedOrder).toEqual(expectedOrder);
 
-      expect(panel?.querySelectorAll('hr')).toHaveLength(3);
+      // Two dividers: after Clone, and after Update API key.
+      expect(panel?.querySelectorAll('hr')).toHaveLength(2);
     });
 
     it('omits the update API key action when onUpdateApiKey is not provided', () => {
@@ -279,11 +280,14 @@ describe('RuleSummaryFlyout', () => {
       const changeHistory = screen.getByTestId('viewChangeHistoryRule-rule-1');
       expect(changeHistory).toBeInTheDocument();
 
+      // View change history sits in the second group, after Clone and before Delete.
       const panel = changeHistory.closest('.euiContextMenuPanel');
       const readGroup = [
         'viewRuleDetails-rule-1',
-        'viewChangeHistoryRule-rule-1',
         'editRule-rule-1',
+        'cloneRule-rule-1',
+        'viewChangeHistoryRule-rule-1',
+        'deleteRule-rule-1',
       ];
       const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
         .map((element) => element.getAttribute('data-test-subj'))
@@ -306,7 +310,7 @@ describe('RuleSummaryFlyout', () => {
     it('passes the loaded rule to useRuleAutoAttach', () => {
       renderFlyout();
 
-      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
     });
   });
 });

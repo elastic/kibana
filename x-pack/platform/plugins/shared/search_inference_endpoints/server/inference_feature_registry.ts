@@ -71,4 +71,28 @@ export class InferenceFeatureRegistry {
   get(featureId: string): InferenceFeatureConfig | undefined {
     return this.features.get(featureId);
   }
+
+  /**
+   * Replaces the recommended endpoints for an already-registered feature.
+   *
+   * @param featureId - The ID of the feature to update.
+   * @param endpoints - Non-empty list of endpoint IDs to set as recommended.
+   * @throws if the feature is not found or the endpoint list is invalid.
+   */
+  updateRecommendedEndpoints(featureId: string, endpoints: string[]): void {
+    const feature = this.features.get(featureId);
+    if (!feature) {
+      throw new Error(`feature "${featureId}" not found.`);
+    }
+    if (endpoints.length === 0) {
+      throw new Error('endpoints must not be empty.');
+    }
+    if (endpoints.some((endpoint) => !endpoint.trim())) {
+      throw new Error('endpoints must not contain empty strings.');
+    }
+    this.features.set(featureId, { ...feature, recommendedEndpoints: endpoints });
+    this.logger.debug(
+      `Updated recommended endpoints for "${featureId}": [${endpoints.join(', ')}]`
+    );
+  }
 }

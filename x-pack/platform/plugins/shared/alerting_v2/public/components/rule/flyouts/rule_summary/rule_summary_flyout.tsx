@@ -7,13 +7,15 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FlyoutAccordion, FlyoutSubsection } from '@kbn/flyout-sections';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useRuleAutoAttach } from '../../../../agent_builder/use_rule_auto_attach';
 import { paths } from '../../../../constants';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
@@ -63,8 +65,12 @@ export const RuleSummaryFlyout = ({
   ownFocus = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
   const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
-  useRuleAutoAttach(rule);
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));

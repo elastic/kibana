@@ -237,6 +237,7 @@ export {
   childrenUnsavedChanges$,
   DEBOUNCE_TIME as CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
 } from './interfaces/containers/container_state/children_unsaved_changes';
+export { childrenLatestState$ } from './interfaces/containers/container_state/children_latest_state';
 
 export {
   initializeStateApi,
