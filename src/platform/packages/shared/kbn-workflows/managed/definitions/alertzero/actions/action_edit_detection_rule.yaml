@@ -17,7 +17,7 @@ consts:
   actionMetadata:
     name: Edit detection rule query
     description: Replaces the query of an existing detection rule, leaving every other field as is.
-    category: tune
+    category: configure
     impact: medium
     reversible: true
     approvalPolicy: always-gate
@@ -54,6 +54,8 @@ outputs:
     type: string
   - name: ruleName
     type: string
+  - name: query
+    type: string
 steps:
   - name: patch_rule
     type: security.patchRule
@@ -70,3 +72,4 @@ steps:
     with:
       ruleId: "{{ steps.patch_rule.output.id }}"
       ruleName: "{{ steps.patch_rule.output.name }}"
+      query: "{{ steps.patch_rule.output.query }}"
