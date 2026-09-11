@@ -54,6 +54,7 @@ import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/moc
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import { EsqlResultCacheService } from '../esql_result_cache/service';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -204,6 +205,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     history,
     getScopedHistory: () => scopedHistoryMock.create(),
     initialTabStateService: new InitialTabStateService(),
+    esqlResultCache: new EsqlResultCacheService(corePluginMock),
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),

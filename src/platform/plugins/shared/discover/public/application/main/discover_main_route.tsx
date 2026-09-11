@@ -10,7 +10,6 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -21,22 +20,20 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
 import {
-  type DiscoverInternalState,
   internalStateActions,
   InternalStateProvider,
   RuntimeStateManagerProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from './state_management/redux';
-import type { RootProfileState } from '../../context_awareness';
-import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
-import type { SingleTabViewProps } from './components/single_tab_view';
+import { useRootProfile } from '../../context_awareness';
 import {
   BrandedLoadingIndicator,
   InitializationError,
   NoDataPage,
   SingleTabView,
   SingleTabViewWithAppMenu,
+  type SingleTabViewProps,
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
@@ -47,6 +44,8 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import { useDiscoverStartupGate } from './startup/use_discover_startup_gate';
+import { isEsqlTab, shouldUseEsqlTabState } from './startup/policy';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -54,10 +53,6 @@ export interface MainRouteProps {
   stateStorageContainer?: IKbnUrlStateStorage;
   onAppLeave?: AppMountParameters['onAppLeave'];
 }
-
-type InitializeMainRoute = (
-  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<DiscoverInternalState['initializationState']>;
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -104,43 +99,19 @@ export const DiscoverMainRoute = ({
   );
 };
 
-const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
-  const { customizationContext, runtimeStateManager } = props;
+const DiscoverMainRouteContent = (props: Omit<SingleTabViewProps, 'useEsqlTabState'>) => {
+  const { customizationContext, internalState, runtimeStateManager, urlStateStorage } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, data } = services;
+  const { core, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
   const tabsEnabled =
     !services.embeddableEditor.isByValueEditor() &&
     customizationContext.displayMode === 'standalone';
-
-  const { initializeProfileDataViews } = useDefaultAdHocDataViews();
-  const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
-    async (loadedRootProfileState) => {
-      const [hasESData, hasUserDataView, defaultDataViewExists, hasESQLDatasets] =
-        await Promise.all([
-          dataViews.hasData.hasESData().catch(() => false),
-          dataViews.hasData.hasUserDataView().catch(() => false),
-          dataViews.defaultDataViewExists().catch(() => false),
-          core.http
-            .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-            .then((res) => res.datasets.length > 0)
-            .catch(() => false),
-          dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-        ]);
-      const initializationState: DiscoverInternalState['initializationState'] = {
-        hasESData: hasESData || hasESQLDatasets,
-        hasUserDataView: (hasUserDataView && defaultDataViewExists) || hasESQLDatasets,
-      };
-      const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
-
-      dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
-      dispatch(internalStateActions.setInitializationState(initializationState));
-
-      return initializationState;
-    }
+  const { id: currentDiscoverSessionId } = useParams<{ id?: string }>();
+  const [hasInitialLocationState] = useState(
+    () => services.getScopedHistory()?.location.state !== undefined
   );
 
   const [tabsInitializationState, initializeTabs] = useAsyncFunction(
@@ -154,14 +125,27 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       await dispatch(
         internalStateActions.initializeTabs({ discoverSessionId, shouldClearAllTabs })
       ).unwrap();
+
+      return isEsqlTab({ internalState, urlStateStorage, services });
     }
   );
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  // Select the Gate 1 policy after the active tab has been restored.
+  const useEsqlTabState = shouldUseEsqlTabState({
+    displayMode: customizationContext.displayMode,
+    isByValueEditor: services.embeddableEditor.isByValueEditor(),
+    discoverSessionId: currentDiscoverSessionId,
+    hasInitialLocationState,
+    isEsql: tabsInitializationState.value === true,
+  });
+  const startupGate = useDiscoverStartupGate({
+    rootProfileState,
+    useEsqlTabState,
+  });
 
-  const { id: currentDiscoverSessionId } = useParams<{ id?: string }>();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const initializeDiscoverSession = useLatest(
     ({ nextDiscoverSessionId }: { nextDiscoverSessionId: string | undefined }) => {
       const persistedDiscoverSessionId = persistedDiscoverSession?.id;
@@ -179,12 +163,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       }
     }
   );
-
-  useEffect(() => {
-    if (!rootProfileState.rootProfileLoading) {
-      initializeMainRoute(rootProfileState);
-    }
-  }, [initializeMainRoute, rootProfileState]);
 
   useEffect(() => {
     initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
@@ -236,35 +214,34 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   ]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
-  const isLoading =
-    rootProfileState.rootProfileLoading ||
-    mainRouteInitializationState.loading ||
-    tabsInitializationState.loading ||
-    areTabsInitializing;
+  const isLoading = startupGate.loading || tabsInitializationState.loading || areTabsInitializing;
 
   if (isLoading) {
     return <BrandedLoadingIndicator />;
   }
 
-  const error = mainRouteInitializationState.error || tabsInitializationState.error;
+  const error = startupGate.error || tabsInitializationState.error;
 
   if (error) {
     return <InitializationError error={error} />;
   }
 
-  if (
-    !mainRouteInitializationState.value.hasESData &&
-    !mainRouteInitializationState.value.hasUserDataView
-  ) {
+  const { noDataPageState } = startupGate;
+  if (noDataPageState) {
     return (
       <NoDataPage
-        {...mainRouteInitializationState.value}
+        {...noDataPageState}
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
       />
     );
   }
+
+  const viewProps: SingleTabViewProps = {
+    ...props,
+    useEsqlTabState,
+  };
 
   return (
     <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
@@ -290,11 +267,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
              * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
              */
             tabsEnabled ? (
-              <TabsView {...props} />
+              <TabsView {...viewProps} />
             ) : customizationContext.displayMode === 'embedded' ? (
-              <SingleTabView {...props} />
+              <SingleTabView {...viewProps} />
             ) : (
-              <SingleTabViewWithAppMenu {...props} />
+              <SingleTabViewWithAppMenu {...viewProps} />
             )
           }
         </>

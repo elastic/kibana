@@ -66,6 +66,7 @@ import type { ProfileProviderSharedServices, ProfilesManager } from './context_a
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { EsqlResultCacheService } from './esql_result_cache/service';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -87,6 +88,7 @@ export class DiscoverPlugin
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
   private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
+  private esqlResultCache?: EsqlResultCacheService;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -255,6 +257,8 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    this.esqlResultCache = new EsqlResultCacheService(core);
+
     if (plugins.agentBuilder) {
       registerEsqlResultsAttachmentUi(plugins.agentBuilder);
     }
@@ -317,6 +321,9 @@ export class DiscoverPlugin
   }
 
   stop() {
+    this.esqlResultCache?.dispose();
+    this.esqlResultCache = undefined;
+
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
@@ -425,6 +432,7 @@ export class DiscoverPlugin
       profilesManager,
       profileStateRegistry,
       ebtManager,
+      esqlResultCache: this.esqlResultCache!,
       setHeaderActionMenu,
     });
   };
