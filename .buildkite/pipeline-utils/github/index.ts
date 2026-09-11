@@ -8,3 +8,4 @@
  */
 
 export * from './github';
+export * from './stacked_pr';

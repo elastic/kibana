@@ -34,6 +34,8 @@ import {
   prHasFIPSLabel,
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
+  getEffectiveTargetBranch,
+  setEffectiveTargetBranch,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -131,6 +133,10 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     const doAnySuiteRelevantChangesMatch = (paths: RegExp[]): Promise<boolean> =>
       doAnyChangesMatch(paths, suiteRelevantChanges);
+
+    // Resolve before any getPipeline() call: step conditionals are baked into the YAML
+    // as it is read, so a later resolution would silently miss earlier steps.
+    setEffectiveTargetBranch(await getEffectiveTargetBranch());
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 

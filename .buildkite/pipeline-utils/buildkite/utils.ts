@@ -127,6 +127,49 @@ export function _resetPendingCancelKeys() {
   pendingCancelKeys.length = 0;
 }
 
+/**
+ * Step conditionals such as `build.env('GITHUB_PR_TARGET_BRANCH') == 'main'` are evaluated
+ * by Buildkite at pipeline *upload* time against the build's environment, which a job-level
+ * export cannot change. For a stacked PR that env var holds the PR's direct base — a sibling
+ * feature branch — so those steps drop out even though the change is headed for main.
+ *
+ * Rewriting the expression into the branch we resolved is therefore the only point where the
+ * gate's intent can still be honoured. Left unset (every non-stacked PR), the emitted YAML is
+ * byte-identical to what ships today.
+ */
+const TARGET_BRANCH_EXPRESSION = /build\.env\(['"]GITHUB_PR_TARGET_BRANCH['"]\)/g;
+
+// A branch name that survives round-tripping into a single-quoted Buildkite string literal.
+const QUOTABLE_BRANCH = /^[\w.\-/]+$/;
+
+let effectiveTargetBranch: string | undefined;
+
+/**
+ * Records the branch a stacked PR is ultimately headed for, so step conditionals are
+ * evaluated against it instead of the intermediate branch the PR directly targets.
+ * Anything unquotable is ignored rather than escaped — a branch name needing escapes is
+ * far more likely to be a bug than a real branch, and ignoring it restores today's behaviour.
+ */
+export function setEffectiveTargetBranch(branch: string | undefined) {
+  effectiveTargetBranch =
+    branch && QUOTABLE_BRANCH.test(branch) && branch !== process.env.GITHUB_PR_TARGET_BRANCH
+      ? branch
+      : undefined;
+}
+
+/** @internal Exposed only for tests */
+export function _resetEffectiveTargetBranch() {
+  effectiveTargetBranch = undefined;
+}
+
+export function applyEffectiveTargetBranch(yaml: string): string {
+  if (!effectiveTargetBranch) {
+    return yaml;
+  }
+
+  return yaml.replace(TARGET_BRANCH_EXPRESSION, `'${effectiveTargetBranch}'`);
+}
+
 export const getPipeline = (filename: string, options?: boolean | GetPipelineOptions) => {
   const opts: GetPipelineOptions =
     typeof options === 'boolean' ? { removeSteps: options } : { removeSteps: true, ...options };
@@ -139,5 +182,7 @@ export const getPipeline = (filename: string, options?: boolean | GetPipelineOpt
     registerCancelOnGateFailureMetadata(keys);
   }
 
-  return opts.removeSteps ? str.replace(/^steps:/, '') : str;
+  const yaml = applyEffectiveTargetBranch(str);
+
+  return opts.removeSteps ? yaml.replace(/^steps:/, '') : yaml;
 };
