@@ -11,6 +11,7 @@ import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
+  agentIdMaxLength,
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -18,11 +19,17 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SearchConversationsResponse,
 } from '../../../common/http_api/conversations';
 import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
-import { internalApiPath } from '../../../common/constants';
+import {
+  internalApiPath,
+  MAX_CONVERSATION_SEARCH_PER_PAGE,
+  MAX_RESULT_WINDOW,
+  CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+} from '../../../common/constants';
 
 export function registerInternalConversationRoutes({
   router,
@@ -264,6 +271,58 @@ export function registerInternalConversationRoutes({
         body: {
           id: updatedConversation.id,
           pinned: updatedConversation.pinned ?? false,
+        },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: `${internalApiPath}/conversations/_search`,
+      validate: {
+        query: schema.object(
+          {
+            query: schema.string({
+              minLength: 1,
+              maxLength: CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+            }),
+            agent_id: schema.maybe(
+              schema.string({
+                maxLength: agentIdMaxLength,
+              })
+            ),
+            page: schema.number({ defaultValue: 1, min: 1 }),
+            per_page: schema.number({
+              defaultValue: MAX_CONVERSATION_SEARCH_PER_PAGE,
+              min: 1,
+              max: MAX_CONVERSATION_SEARCH_PER_PAGE,
+            }),
+          },
+          {
+            validate: ({ page, per_page: perPage }) => {
+              if (page * perPage > MAX_RESULT_WINDOW) {
+                return `page * per_page must not exceed ${MAX_RESULT_WINDOW}; conversations beyond that are not reachable through this API`;
+              }
+            },
+          }
+        ),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { query, agent_id: agentId, page, per_page: perPage } = request.query;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const { results, total } = await client.search({ query, agentId, page, perPage });
+
+      return response.ok<SearchConversationsResponse>({
+        body: {
+          pagination: { total, page, per_page: perPage },
+          results,
         },
       });
     })
