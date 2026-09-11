@@ -133,14 +133,14 @@ describe('Policy Response Services', () => {
         });
       };
 
-      beforeEach(() => {
+      beforeEach(async () => {
         readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
         mockPolicyResponseFrom('.ds-metrics-endpoint.policy-default-000001');
 
-        endpointServiceMock.isCpsEnabled.mockReturnValue(true);
-        endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
+        endpointServiceMock.isCpsActive.mockResolvedValue(true);
+        endpointServiceMock.getReadEsClient.mockResolvedValue(readEsClientMock);
         request = httpServerMock.createKibanaRequest();
-        fetchOptions.scoped = endpointServiceMock.asScoped(request);
+        fetchOptions.scoped = await endpointServiceMock.asScoped(request);
       });
 
       it('should read as the request user so the search can fan out to linked projects', async () => {
@@ -332,7 +332,7 @@ describe('Policy Response Services', () => {
         ).mockResolvedValue([]);
 
         // Build a scoped object where getSpace rejects — the space does not exist on this project
-        const scoped = endpointServiceMock.asScoped(request);
+        const scoped = await endpointServiceMock.asScoped(request);
         const scopedWithInvalidSpace = {
           ...scoped,
           getSpace: () => Promise.reject(new Error('Saved object [space/only-there] not found')),

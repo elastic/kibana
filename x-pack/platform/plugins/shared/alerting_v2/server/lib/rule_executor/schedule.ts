@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { IntervalSchedule, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '.';
-import type { RuleExecutorTaskParams } from './types';
 
 export function getRuleExecutorTaskId({ ruleId, spaceId }: { ruleId: string; spaceId: string }) {
   return `${ALERTING_RULE_EXECUTOR_TASK_TYPE}:${spaceId}:${ruleId}`;
@@ -36,10 +35,11 @@ export async function ensureRuleExecutorTaskScheduled({
       id,
       taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
       schedule,
+      // Wire params stay as string; branded at task-run entry.
       params: {
         ruleId,
         spaceId,
-      } satisfies RuleExecutorTaskParams,
+      },
       state: {},
       scope: ['alerting'],
       enabled: true,

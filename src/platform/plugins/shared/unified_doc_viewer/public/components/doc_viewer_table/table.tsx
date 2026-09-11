@@ -59,10 +59,6 @@ export interface DocViewerTableRestorableState {
   showOnlySelectedFields: boolean;
   // Array of pinned field names
   pinnedFields: string[];
-  // Current rows per page selection
-  rowsPerPage: number;
-  // Current page number
-  pageNumber: number;
   // Current vertical scroll position
   scrollTop: number;
 }
@@ -80,10 +76,7 @@ interface ItemsEntry {
   allFields: TableFiltersProps['allFields'];
 }
 
-const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
-const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
-const PAGE_SIZE = 'discover:pageSize';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
@@ -309,34 +302,6 @@ const InternalDocViewerTable = ({
 
   const rows = useMemo(() => [...pinnedRows, ...restRows], [pinnedRows, restRows]);
 
-  const [initialPageSizeRaw, setInitialPageSizeRaw] = useRestorableLocalStorage(
-    'rowsPerPage',
-    PAGE_SIZE,
-    DEFAULT_PAGE_SIZE
-  );
-
-  // Ensure initialPageSize is always a valid option
-  const initialPageSize = useMemo(
-    () => (PAGE_SIZE_OPTIONS.includes(initialPageSizeRaw) ? initialPageSizeRaw : DEFAULT_PAGE_SIZE),
-    [initialPageSizeRaw]
-  );
-
-  const onChangePageSize = useCallback(
-    (newPageSize: number) => {
-      setInitialPageSizeRaw(newPageSize);
-    },
-    [setInitialPageSizeRaw]
-  );
-
-  const [pageNumber, setPageNumber] = useRestorableState('pageNumber', 0);
-
-  const onChangePageNumber = useCallback(
-    (newPageNumber: number) => {
-      setPageNumber(newPageNumber);
-    },
-    [setPageNumber]
-  );
-
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
   const { width: containerWidth } = useResizeObserver(containerRef);
 
@@ -457,10 +422,6 @@ const InternalDocViewerTable = ({
             columns={columns}
             onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
             searchTerm={searchTerm}
-            initialPageSize={initialPageSize}
-            onChangePageSize={onChangePageSize}
-            initialPageIndex={pageNumber}
-            onChangePageIndex={onChangePageNumber}
             pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
             hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}

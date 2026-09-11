@@ -33,19 +33,36 @@ export const UnifiedExecutionResult = lazySchema(() =>
     /**
      * Unique identifier of this execution.
      */
-    execution_uuid: z.string().nullable(),
+    execution_uuid: z.string().nullable().describe('Unique identifier of this execution.'),
     /**
      * Start time of the execution (event.start from the Alerting Framework execute event).
      */
-    execution_start: z.string().datetime(),
+    execution_start: z
+      .string()
+      .datetime()
+      .describe(
+        'Start time of the execution (event.start from the Alerting Framework execute event).'
+      ),
     /**
      * Total execution duration in milliseconds (converted from event.duration nanoseconds).
      */
-    execution_duration_ms: z.number().int().nullable(),
+    execution_duration_ms: z
+      .number()
+      .int()
+      .nullable()
+      .describe(
+        'Total execution duration in milliseconds (converted from event.duration nanoseconds).'
+      ),
     /**
      * Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).
      */
-    schedule_delay_ms: z.number().int().nullable(),
+    schedule_delay_ms: z
+      .number()
+      .int()
+      .nullable()
+      .describe(
+        'Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).'
+      ),
     /**
      * Source event time range for backfill (manual) executions, computed from start and interval.
      */
@@ -54,54 +71,93 @@ export const UnifiedExecutionResult = lazySchema(() =>
         from: z.string().datetime(),
         to: z.string().datetime(),
       })
-      .nullable(),
+      .nullable()
+      .describe(
+        'Source event time range for backfill (manual) executions, computed from start and interval.'
+      ),
     /**
      * Execution outcome information.
      */
-    outcome: z.object({
-      status: UnifiedExecutionStatus,
-      /**
-       * Outcome message from the source event (event.message).
-       */
-      message: z.string().nullable(),
-    }),
+    outcome: z
+      .object({
+        status: UnifiedExecutionStatus,
+        /**
+         * Outcome message from the source event (event.message).
+         */
+        message: z
+          .string()
+          .nullable()
+          .describe('Outcome message from the source event (event.message).'),
+      })
+      .describe('Execution outcome information.'),
     /**
      * Execution metrics from kibana.alert.rule.execution.metrics in the Alerting Framework execute event.
      */
-    metrics: z.object({
-      /**
-       * Total search duration in milliseconds.
-       */
-      total_search_duration_ms: z.number().int().nullable(),
-      /**
-       * Total indexing duration in milliseconds.
-       */
-      total_indexing_duration_ms: z.number().int().nullable(),
-      /**
-       * Gap duration in seconds.
-       */
-      execution_gap_duration_s: z.number().int().nullable(),
-      /**
-       * Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).
-       */
-      alerts_candidate_count: z.number().int().nullable(),
-      /**
-       * Alert counts for this execution.
-       */
-      alert_counts: z
-        .object({
-          new: z.number().int().nullable(),
-        })
-        .nullable(),
-      /**
-       * Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).
-       */
-      matched_indices_count: z.number().int().nullable(),
-      /**
-       * Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
-       */
-      frozen_indices_queried_count: z.number().int().nullable(),
-    }),
+    metrics: z
+      .object({
+        /**
+         * Total search duration in milliseconds.
+         */
+        total_search_duration_ms: z
+          .number()
+          .int()
+          .nullable()
+          .describe('Total search duration in milliseconds.'),
+        /**
+         * Total indexing duration in milliseconds.
+         */
+        total_indexing_duration_ms: z
+          .number()
+          .int()
+          .nullable()
+          .describe('Total indexing duration in milliseconds.'),
+        /**
+         * Gap duration in seconds.
+         */
+        execution_gap_duration_s: z.number().int().nullable().describe('Gap duration in seconds.'),
+        /**
+         * Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).
+         */
+        alerts_candidate_count: z
+          .number()
+          .int()
+          .nullable()
+          .describe(
+            'Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).'
+          ),
+        /**
+         * Alert counts for this execution.
+         */
+        alert_counts: z
+          .object({
+            new: z.number().int().nullable(),
+          })
+          .nullable()
+          .describe('Alert counts for this execution.'),
+        /**
+         * Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).
+         */
+        matched_indices_count: z
+          .number()
+          .int()
+          .nullable()
+          .describe(
+            'Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).'
+          ),
+        /**
+         * Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
+         */
+        frozen_indices_queried_count: z
+          .number()
+          .int()
+          .nullable()
+          .describe(
+            'Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).'
+          ),
+      })
+      .describe(
+        'Execution metrics from kibana.alert.rule.execution.metrics in the Alerting Framework execute event.'
+      ),
   })
 );
 export type UnifiedExecutionResult = z.infer<typeof UnifiedExecutionResult>;

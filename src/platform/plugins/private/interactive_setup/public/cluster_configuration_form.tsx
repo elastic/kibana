@@ -189,6 +189,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="interactiveSetupUsernameInput"
               icon="user"
               name="username"
               value={form.values.username}
@@ -210,6 +211,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiFieldPassword
+              data-test-subj="interactiveSetupPasswordInput"
               type="dual"
               name="password"
               value={form.values.password}
@@ -264,6 +266,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiCheckableCard
+              data-test-subj="interactiveSetupTrustCaCertCheckbox"
               id={trustCaCertId}
               label={i18n.translate('interactiveSetup.clusterConfigurationForm.trustCaCertLabel', {
                 defaultMessage: 'I recognize and trust this certificate:',
@@ -294,6 +297,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="interactiveSetupSubmitConfigurationButton"
             buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
