@@ -18,7 +18,9 @@ export const matchActionPoliciesForRuleBodySchema = z
           .array(tagItemSchema)
           .max(100)
           .optional()
-          .describe('The tags of the rule, used to match against action policy tag clauses.'),
+          .describe(
+            'Tags of the rule you want to check. Used to find policies whose `matcher.tags` include at least one of these values.'
+          ),
       })
       .strict()
       .optional(),
@@ -31,7 +33,7 @@ export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesF
 export const matchedActionPolicyCategorySchema = z
   .enum(['catch-all', 'tags'])
   .describe(
-    'Why this action policy matches the rule: "catch-all" (no matcher, or a matcher with neither tags nor an expression), or "tags" (the rule\'s tags intersect the matcher\'s tag clause).'
+    "The reason this policy applies to the rule. `catch-all` means the policy sets neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule carries at least one tag listed in the policy's `matcher.tags`."
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;

@@ -17,7 +17,11 @@ import {
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
 } from './constants';
-import { policyMatcherSchema } from './policy_matcher_schema';
+import {
+  POLICY_MATCHER_DESCRIPTION,
+  POLICY_MATCHER_UPDATE_DESCRIPTION,
+  policyMatcherSchema,
+} from './policy_matcher_schema';
 
 /**
  * The set of supported action policy destination types. Single source of truth
@@ -183,7 +187,7 @@ const createActionPolicyDataBaseSchema = z
       .min(1, 'At least one destination must be provided')
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .describe('The list of destinations. At least one is required.'),
-    matcher: policyMatcherSchema.optional().describe('Structured matcher for the action policy.'),
+    matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
@@ -223,12 +227,7 @@ export const updateActionPolicyDataSchema = z
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
-    matcher: policyMatcherSchema
-      .nullable()
-      .optional()
-      .describe(
-        'Structured matcher, replaced as a whole on update. To preserve an existing `expression` while changing `tags`, send both fields. `null` clears the matcher (catch-all).'
-      ),
+    matcher: policyMatcherSchema.nullable().optional().describe(POLICY_MATCHER_UPDATE_DESCRIPTION),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)

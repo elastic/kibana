@@ -34,7 +34,7 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Match action policies for a rule',
     description:
-      "Returns action policies that match a given rule, categorised as catch-all (no matcher, or a matcher with neither tags nor an expression) or tags (the rule's tags intersect the matcher's tag clause).",
+      "Returns action policies that currently appear to apply to the given rule. Each result includes a `category`: `catch-all` when the policy has no `matcher.tags` and no `matcher.expression`, or `tags` when the rule has at least one tag listed in the policy's `matcher.tags`. Policies that match only by `matcher.expression` are omitted, because expressions can depend on alert data that is not available here. A `tags` result does not evaluate `matcher.expression`, so a returned policy might still not fire when an alert is dispatched.",
     oasOperationObject: matchActionPoliciesForRuleOasExamples,
   } as const;
   static schemas = {
