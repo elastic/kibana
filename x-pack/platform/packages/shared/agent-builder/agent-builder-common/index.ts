@@ -288,6 +288,8 @@ export {
   isRoundCompleteEvent,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
   isToolProgressEvent,
   isPromptRequestEvent,
   type CompactionStartedEvent,

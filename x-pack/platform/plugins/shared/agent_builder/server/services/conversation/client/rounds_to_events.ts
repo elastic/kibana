@@ -223,6 +223,31 @@ export const parseExecutionId = (id: string): { roundId: string; index: number }
   return { roundId: match[1], index: Number(match[2] ?? 0) };
 };
 
+/** The `execution_started` event id for an execution index (0 = the initial run). */
+export const executionStartedEventId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted
+      }`;
+
+/**
+ * The index of the next execution to append to a round. Counts distinct executions already stored
+ * for the round on `conversation.events`. Returns 0 when the round has no prior executions.
+ */
+export const nextResumeIndex = (
+  conversation: Pick<Conversation, 'events'>,
+  roundId: string
+): number => {
+  const storedEvents = conversation.events ?? [];
+  const roundExecutionIds = new Set(
+    storedEvents
+      .map((event) => event.execution_id)
+      .filter((id): id is string => id !== undefined && parseExecutionId(id)?.roundId === roundId)
+  );
+  return roundExecutionIds.size;
+};
+
 /** The `execution_terminated` event id for an execution index (0 = the initial run). */
 export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>
   executionIndex === 0
@@ -268,6 +293,37 @@ export const promptResponseEvent = ({
 });
 
 /**
+ * Builds the `execution_started` event for a resume execution (`exec_k`). Shared between the
+ * persisted timeline projection ({@link resumeExecutionToEvents}) and the start-time SSE emission
+ * so both paths produce byte-identical events for the same `started_at` / trigger.
+ */
+export const resumeExecutionStartedEvent = ({
+  roundId,
+  executionIndex,
+  startedAt,
+  triggerEventId,
+  conversation,
+}: {
+  roundId: string;
+  executionIndex: number;
+  startedAt: string;
+  /** The `prompt_response` event id that triggered this execution. */
+  triggerEventId: string;
+  conversation: Conversation;
+}): TimelineEvent => {
+  const executionId = resumeExecutionId(roundId, executionIndex);
+  return {
+    id: executionStartedEventId(roundId, executionIndex),
+    type: TimelineEventType.executionStarted,
+    created_at: startedAt,
+    actor: agentActor(conversation),
+    execution_id: executionId,
+    trigger_event_id: triggerEventId,
+    data: { trigger_type: TimelineTriggerType.promptResponse },
+  };
+};
+
+/**
  * Builds the events for a resume execution (`exec_k`). Mirrors {@link roundToEvents} but with
  * execution-scoped ids and a `prompt_response` trigger, and without a `user_message` (a resume
  * continues an existing round, it does not start one).
@@ -287,15 +343,13 @@ export const resumeExecutionToEvents = ({
   conversation: Conversation;
 }): TimelineEvent[] => {
   const executionId = resumeExecutionId(roundId, executionIndex);
-  const startedEvent: TimelineEvent = {
-    id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
-    type: TimelineEventType.executionStarted,
-    created_at: followUpRound.started_at,
-    actor: agentActor(conversation),
-    execution_id: executionId,
-    trigger_event_id: triggerEventId,
-    data: { trigger_type: TimelineTriggerType.promptResponse },
-  };
+  const startedEvent = resumeExecutionStartedEvent({
+    roundId,
+    executionIndex,
+    startedAt: followUpRound.started_at,
+    triggerEventId,
+    conversation,
+  });
   const stepEvents: TimelineEvent[] = (followUpRound.steps ?? []).map((step, index) => ({
     id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${index}`,
     type: TimelineEventType.executionStep,

@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
+  CONVERSATION_SCHEMA_VERSION,
   ConversationAccessControlMode,
   ConversationRoundStatus,
   ConversationRoundStepType,
@@ -33,6 +34,7 @@ import type { ConversationWithOperation } from './conversations';
 import {
   appendResumeExecution$,
   appendRoundTerminated$,
+  createConversation$,
   getConversation,
   persistRoundInput,
   updateConversation$,
@@ -381,6 +383,101 @@ describe('conversations utils', () => {
       expect(request).not.toHaveProperty('rounds');
       expect(request).not.toHaveProperty('title');
     });
+
+    it('emits execution_terminated before conversation_updated on regenerate', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({
+        rounds: [createRound({ id: 'round-1' })],
+      });
+      const round = createRound({
+        id: 'round-new',
+        status: ConversationRoundStatus.completed,
+      });
+      conversationClient.upsertRound.mockResolvedValue(conversation);
+
+      const emitted = await lastValueFrom(
+        updateConversation$({
+          conversationClient,
+          conversation,
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: { round, resumed: false },
+          }),
+          action: 'regenerate',
+        }).pipe(toArray())
+      );
+
+      // `execution_started` is projected earlier from `round_started` in the runner, not from the
+      // persistence phase — the persistence emit is `terminated + lifecycle`.
+      expect(emitted.map((event) => event.type)).toEqual([
+        TimelineEventType.executionTerminated,
+        ChatEventType.conversationUpdated,
+      ]);
+      // Legacy fallback (no schema_version on the persisted result): the id must match the new
+      // round, not the superseded one.
+      expect((emitted[0] as { id: string }).id).toBe('round-new::execution_terminated');
+    });
+
+    it('emits nothing when upsertRound rejects', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ rounds: [] });
+      conversationClient.upsertRound.mockRejectedValue(new Error('write failed'));
+
+      const emitted: ChatEvent[] = [];
+      let terminalError: Error | undefined;
+      await new Promise<void>((resolve) => {
+        updateConversation$({
+          conversationClient,
+          conversation,
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: {
+              round: createRound({ id: 'r', status: ConversationRoundStatus.completed }),
+              resumed: false,
+            },
+          }),
+        }).subscribe({
+          next: (event) => emitted.push(event),
+          error: (error) => {
+            terminalError = error as Error;
+            resolve();
+          },
+        });
+      });
+
+      expect(emitted).toEqual([]);
+      expect(terminalError?.message).toBe('write failed');
+    });
+  });
+
+  describe('createConversation$', () => {
+    it('emits execution_terminated before conversation_created (legacy fallback for a doc without schema_version)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ id: 'conv-1' });
+      const round = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+      });
+      conversationClient.create.mockResolvedValue(conversation);
+
+      const emitted = await lastValueFrom(
+        createConversation$({
+          conversation,
+          conversationClient,
+          title$: of('Generated title'),
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: { round, resumed: false },
+          }),
+        }).pipe(toArray())
+      );
+
+      expect(emitted.map((event) => event.type)).toEqual([
+        TimelineEventType.executionTerminated,
+        ChatEventType.conversationCreated,
+      ]);
+      expect((emitted[0] as { id: string }).id).toBe('round-1::execution_terminated');
+    });
   });
 
   describe('persistRoundInput (receipt-time input write)', () => {
@@ -567,11 +664,14 @@ describe('conversations utils', () => {
         'round-1::execution_terminated',
       ]);
 
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0].type).toBe(ChatEventType.conversationCreated);
+      expect(emitted.map((event) => event.type)).toEqual([
+        TimelineEventType.executionTerminated,
+        ChatEventType.conversationCreated,
+      ]);
+      expect((emitted[0] as { id: string }).id).toBe('round-1::execution_terminated');
     });
 
-    it('emits conversationUpdated for UPDATE', async () => {
+    it('emits execution_terminated then conversationUpdated for UPDATE', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
       const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
@@ -585,8 +685,117 @@ describe('conversations utils', () => {
         },
       });
 
-      expect(emitted).toHaveLength(1);
-      expect(emitted[0].type).toBe(ChatEventType.conversationUpdated);
+      expect(emitted.map((event) => event.type)).toEqual([
+        TimelineEventType.executionTerminated,
+        ChatEventType.conversationUpdated,
+      ]);
+    });
+
+    it('forwards the exact persisted execution_terminated event for events-native docs', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        started_at: '2024-01-01T00:00:00.000Z',
+        time_to_last_token: 1000,
+      });
+
+      // Simulate the events-native write response: the stored event carries a distinct
+      // `created_at` / `actor.id` we can assert to prove we are forwarding the persisted
+      // copy, not our local projection.
+      const persistedTerminated = {
+        id: 'round-1::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2099-12-31T23:59:59.000Z',
+        actor: { type: 'agent', id: 'from-store' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          outcome: { type: 'responded', response: { message: 'stored' } },
+          time_to_first_token: 42,
+          time_to_last_token: 4242,
+          model_usage: { connector_id: 'x', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        },
+      };
+      conversationClient.replaceRoundEvents.mockResolvedValue({
+        ...conversation,
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        events: [persistedTerminated] as never,
+      });
+
+      const emitted = await lastValueFrom(
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: { round, resumed: false },
+          }),
+        }).pipe(toArray())
+      );
+
+      expect(emitted[0]).toEqual(persistedTerminated);
+      expect(emitted[1].type).toBe(ChatEventType.conversationUpdated);
+    });
+
+    it('emits an execution_terminated with prompt_requested outcome when the round pauses on HITL', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({
+        id: 'round-p',
+        status: ConversationRoundStatus.awaitingPrompt,
+        pending_prompts: [
+          {
+            id: 'tools.my_tool.confirmation',
+            type: 'confirmation',
+          } as never,
+        ],
+      });
+
+      const emitted = await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      const terminated = emitted[0] as { data: { outcome: { type: string; prompts: unknown[] } } };
+      expect(terminated.data.outcome.type).toBe('prompt_requested');
+      expect(terminated.data.outcome.prompts).toEqual([
+        { id: 'tools.my_tool.confirmation', type: 'confirmation' },
+      ]);
+    });
+
+    it('emits nothing when the persist write rejects', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+      conversationClient.replaceRoundEvents.mockRejectedValue(new Error('write failed'));
+
+      const emitted: ChatEvent[] = [];
+      let terminalError: Error | undefined;
+      await new Promise<void>((resolve) => {
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: { round, resumed: false },
+          }),
+        }).subscribe({
+          next: (event) => emitted.push(event),
+          error: (error) => {
+            terminalError = error as Error;
+            resolve();
+          },
+        });
+      });
+
+      expect(emitted).toEqual([]);
+      expect(terminalError?.message).toBe('write failed');
     });
 
     it('omits title when no title$ is provided', async () => {
@@ -769,7 +978,18 @@ describe('conversations utils', () => {
         responses: { 'tools.my_tool.confirmation': { allow: true } },
         input: { message: 'resume msg', attachment_refs: [{ attachment_id: 'att-2', version: 1 }] },
       });
-      expect(emitted[0].type).toBe(ChatEventType.conversationUpdated);
+      expect(emitted.map((event) => event.type)).toEqual([
+        TimelineEventType.executionTerminated,
+        ChatEventType.conversationUpdated,
+      ]);
+      const terminated = emitted[0] as {
+        id: string;
+        execution_id: string;
+        trigger_event_id: string;
+      };
+      expect(terminated.id).toBe('round-1::execution::1::execution_terminated');
+      expect(terminated.execution_id).toBe('round-1::execution::1');
+      expect(terminated.trigger_event_id).toBe('round-1::prompt_response::1');
     });
 
     it('derives exec_2 (index 2) for a re-pause chain', async () => {
@@ -797,7 +1017,7 @@ describe('conversations utils', () => {
       };
       conversationClient.appendEvents.mockResolvedValue(conversation);
 
-      await run(conversation, conversationClient, {
+      const emitted = await run(conversation, conversationClient, {
         type: ChatEventType.roundComplete,
         data: {
           round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
@@ -812,6 +1032,15 @@ describe('conversations utils', () => {
         prompt_requested_event_id: 'round-1::execution::1::execution_terminated',
       });
       expect(args.events[1].id).toBe('round-1::execution::2::execution_started');
+
+      const terminated = emitted[0] as {
+        id: string;
+        execution_id: string;
+        trigger_event_id: string;
+      };
+      expect(terminated.id).toBe('round-1::execution::2::execution_terminated');
+      expect(terminated.execution_id).toBe('round-1::execution::2');
+      expect(terminated.trigger_event_id).toBe('round-1::prompt_response::2');
     });
 
     it('throws when the round_complete carries no resume_execution payload', async () => {

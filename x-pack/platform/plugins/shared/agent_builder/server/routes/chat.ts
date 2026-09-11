@@ -31,7 +31,11 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
-import { getConverseHelpers, type ResolvedExecutionOptions } from './converse_helpers';
+import {
+  filterLegacyApiEvents,
+  getConverseHelpers,
+  type ResolvedExecutionOptions,
+} from './converse_helpers';
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -501,10 +505,12 @@ export function registerChatRoutes({
           executionService,
         });
 
+        const legacyEvents$ = chatEvents$.pipe(filterLegacyApiEvents());
+
         return response.ok({
           headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(
-            chatEvents$ as unknown as Observable<ServerSentEvent>,
+            legacyEvents$ as unknown as Observable<ServerSentEvent>,
             {
               signal: abortController.signal,
               flushThrottleMs: 100,
