@@ -135,10 +135,12 @@ apiTest.describe(
 
       // The pad-ml module registers asynchronously after the PAD integration install, so retry
       // until it is recognized instead of firing a setup that fails silently before it exists.
+      // NOTE: job/datafeed *creation* succeeding here is not sufficient — see
+      // `waitForDatafeedReady` below for why we still have to wait after this returns.
       const setupMlModuleWithRetry = async (
         module: string,
         body: Record<string, unknown>
-      ): Promise<void> => {
+      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
         const maxAttempts = 10;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
@@ -146,14 +148,22 @@ apiTest.describe(
             responseType: 'json',
             body,
           });
-          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
+          const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
             response.body?.jobs ?? [];
-          const succeeded =
-            response.statusCode === 200 &&
-            jobs.length > 0 &&
-            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
-          if (succeeded) {
-            return;
+          const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+            response.body?.datafeeds ?? [];
+
+          const jobsCreated =
+            jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+          const datafeedsCreated =
+            datafeeds.length > 0 &&
+            datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
+
+          if (response.statusCode === 200 && jobsCreated && datafeedsCreated) {
+            return {
+              jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
+              datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
+            };
           }
           if (attempt < maxAttempts) {
             await setTimeoutAsync(3000);
@@ -162,9 +172,70 @@ apiTest.describe(
         throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
       };
 
+      // Job/datafeed *creation* succeeding (checked above) does not mean the datafeed is
+      // actually running. Elasticsearch can accept the start request while ML compute is
+      // still scaling up from zero — normal on a project without a currently-running ML
+      // node, which is exactly the state a serverless project's ML tier starts in (ML node
+      // autoscaling is always-on there; see
+      // https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection/anomaly-detection-scale).
+      // Until the datafeed is actually assigned, the job's live `datafeed_config` (what
+      // get_job_config.ts reads to build `sourceIndex` for baseline enrichment) stays empty,
+      // and enrichment silently returns the anomaly unenriched — no error, just
+      // `baselineValues: []`. Re-posting module setup doesn't help at that point (starting an
+      // already-started datafeed 409s), so poll the live job/datafeed state directly instead
+      // of trusting the setup response alone.
+      const waitForDatafeedReady = async (
+        jobIds: string[],
+        datafeedIds: string[]
+      ): Promise<void> => {
+        const maxAttempts = 30;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          const jobsRes = await esClient.ml.getJobs({ job_id: jobIds.join(',') });
+          const jobsById = new Map((jobsRes.jobs ?? []).map((job) => [job.job_id, job]));
+          const notReady = jobIds.filter(
+            (id) => (jobsById.get(id)?.datafeed_config?.indices ?? []).length === 0
+          );
+
+          if (notReady.length === 0) {
+            return;
+          }
+
+          // DIAGNOSTIC: log the live datafeed state/assignment on every attempt, so a future
+          // MKI failure shows exactly what ML is doing instead of a bare
+          // `datafeed_config: undefined`.
+          try {
+            const statsRes = await esClient.ml.getDatafeedStats({
+              datafeed_id: datafeedIds.join(','),
+            });
+            log.info(
+              `Waiting for ML datafeed allocation (attempt ${attempt}/${maxAttempts}, ` +
+                `not ready: ${notReady.join(', ')}): ` +
+                `${JSON.stringify(
+                  (statsRes.datafeeds ?? []).map((df) => ({
+                    datafeed_id: df.datafeed_id,
+                    state: df.state,
+                    // Not populated on Elastic Cloud Serverless, but useful on stateful.
+                    node: df.node?.name,
+                    assignment_explanation: df.assignment_explanation,
+                  }))
+                )}`
+            );
+          } catch (err) {
+            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
+          }
+
+          if (attempt < maxAttempts) {
+            await setTimeoutAsync(5000);
+          }
+        }
+        throw new Error(
+          `ML job(s) ${jobIds.join(', ')} did not receive an assigned datafeed_config in time`
+        );
+      };
+
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      await setupMlModuleWithRetry('pad-ml', {
+      const padSetup = await setupMlModuleWithRetry('pad-ml', {
         prefix: '',
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
@@ -172,10 +243,12 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
+      await waitForDatafeedReady(padSetup.jobIds, padSetup.datafeedIds);
 
       // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
-      // In MKI the job config has been theorised to be empty, which would cause baseline
-      // enrichment to silently fail.
+      // `waitForDatafeedReady` above already guarantees `datafeed_config` is populated by
+      // this point — if this ever logs "missing entirely" or an empty `indices` again, the
+      // wait itself (not just this one-off check) has a gap worth investigating.
       try {
         const padJobRes = await esClient.ml.getJobs({
           job_id: 'pad_windows_rare_region_name_by_user_ea',
@@ -209,7 +282,7 @@ apiTest.describe(
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      await setupMlModuleWithRetry('security_auth', {
+      const authSetup = await setupMlModuleWithRetry('security_auth', {
         prefix: '',
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
@@ -217,6 +290,7 @@ apiTest.describe(
         startDatafeed: true,
         start: startMs,
       });
+      await waitForDatafeedReady(authSetup.jobIds, authSetup.datafeedIds);
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);

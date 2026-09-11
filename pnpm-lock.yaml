@@ -195,8 +195,8 @@ importers:
         specifier: 4.24.0
         version: 4.24.0
       '@elastic/eui':
-        specifier: 120.0.0
-        version: 120.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
+        specifier: 121.0.0
+        version: 121.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
       '@elastic/eui-illustrations':
         specifier: 1.0.2
         version: 1.0.2
@@ -392,6 +392,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/agentic_investigations
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -503,6 +506,12 @@ importers:
       '@kbn/alerts-ui-shared':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-alerts-ui-shared
+      '@kbn/alertzero-common':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-alertzero-common
+      '@kbn/alertzero-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/plugins/alertzero
       '@kbn/analytics':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-analytics
@@ -2417,9 +2426,6 @@ importers:
       '@kbn/management-settings-utilities':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/utilities
-      '@kbn/management-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/management_test_plugin
       '@kbn/mapbox-gl':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-mapbox-gl
@@ -2624,6 +2630,9 @@ importers:
       '@kbn/observability-alert-details':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/alert-details
+      '@kbn/observability-alerting-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/observability_alerting
       '@kbn/observability-alerting-test-data':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/alerting-test-data
@@ -2702,12 +2711,6 @@ importers:
       '@kbn/panel-loader':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-panel-loader
-      '@kbn/pnd-common':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-pnd-common
-      '@kbn/pnd-plugin':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/plugins/pnd
       '@kbn/portable-dashboards-example':
         specifier: workspace:*
         version: link:examples/portable_dashboards_example
@@ -3608,6 +3611,9 @@ importers:
       '@kbn/ui-actions-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ui_actions
+      '@kbn/ui-ai-components':
+        specifier: workspace:*
+        version: link:src/platform/kbn-ui/ai-components
       '@kbn/ui-app-header':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/app-header
@@ -4798,8 +4804,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@elastic/eui-test-helpers':
-        specifier: 1.5.0-snapshot.1788752437240
-        version: 1.5.0-snapshot.1788752437240(@playwright/test@1.62.1)
+        specifier: 1.6.0
+        version: 1.6.0(@playwright/test@1.62.1)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -7313,6 +7319,8 @@ importers:
 
   src/dev: {}
 
+  src/platform/kbn-ui/ai-components: {}
+
   src/platform/kbn-ui/app-header: {}
 
   src/platform/kbn-ui/app-menu: {}
@@ -8487,8 +8495,6 @@ importers:
 
   src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
 
-  src/platform/test/plugin_functional/plugins/management_test_plugin: {}
-
   src/platform/test/plugin_functional/plugins/rendering_plugin: {}
 
   src/platform/test/plugin_functional/plugins/saved_object_export_transforms: {}
@@ -9017,6 +9023,8 @@ importers:
 
   x-pack/platform/plugins/shared/agent_builder_workflows: {}
 
+  x-pack/platform/plugins/shared/agentic_investigations: {}
+
   x-pack/platform/plugins/shared/ai_infra/llm_tasks: {}
 
   x-pack/platform/plugins/shared/ai_infra/product_doc_base: {}
@@ -9293,6 +9301,8 @@ importers:
 
   x-pack/solutions/observability/plugins/observability_ai_assistant_app: {}
 
+  x-pack/solutions/observability/plugins/observability_alerting: {}
+
   x-pack/solutions/observability/plugins/observability_logs_explorer: {}
 
   x-pack/solutions/observability/plugins/observability_onboarding: {}
@@ -9369,6 +9379,8 @@ importers:
 
   x-pack/solutions/security/packages/index-adapter: {}
 
+  x-pack/solutions/security/packages/kbn-alertzero-common: {}
+
   x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common: {}
 
   x-pack/solutions/security/packages/kbn-cloud-security-posture/common: {}
@@ -9410,8 +9422,6 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness: {}
-
-  x-pack/solutions/security/packages/kbn-pnd-common: {}
 
   x-pack/solutions/security/packages/kbn-scout-security: {}
 
@@ -9465,6 +9475,8 @@ importers:
 
   x-pack/solutions/security/packages/upselling: {}
 
+  x-pack/solutions/security/plugins/alertzero: {}
+
   x-pack/solutions/security/plugins/cloud_defend: {}
 
   x-pack/solutions/security/plugins/cloud_security_posture: {}
@@ -9482,8 +9494,6 @@ importers:
   x-pack/solutions/security/plugins/lists: {}
 
   x-pack/solutions/security/plugins/mitre_attack: {}
-
-  x-pack/solutions/security/plugins/pnd: {}
 
   x-pack/solutions/security/plugins/security_solution: {}
 
@@ -10683,8 +10693,8 @@ packages:
   '@elastic/eui-illustrations@1.0.2':
     resolution: {integrity: sha512-gYK9mHdGm/P7wbf6yhYo17qoP61IlUcwVwIDyOSHqx89TymSn9AyVZzbgjwmGdaLFNfgM+RKvg+hfTB7Unm+Gw==}
 
-  '@elastic/eui-test-helpers@1.5.0-snapshot.1788752437240':
-    resolution: {integrity: sha512-vuSoYimsHXUau35iWM2sY+75XIQinv9KgyWKdDW57ml7Iok3tdDe0ZpWHYcGmIZlKHbXSs6h7SmYY6ydY9uQ/A==}
+  '@elastic/eui-test-helpers@1.6.0':
+    resolution: {integrity: sha512-H2c4qYXVYaooLpDCLTQq2+VAw6aSBowEW3PTEqZfEzE9CJq/tXYpV/NfApRVJo/OjxLFdGws+fQd26UR2agozg==}
     peerDependencies:
       '@playwright/test': ^1.50.0
     peerDependenciesMeta:
@@ -10701,8 +10711,8 @@ packages:
       react: ^17.0 || ^18.0
       react-dom: ^17.0 || ^18.0
 
-  '@elastic/eui@120.0.0':
-    resolution: {integrity: sha512-iUutRU4JIG4eolU3LCE4CWe/H7juRCKYQaT+UeXQyegHRGttYFlunPEisS7+BLV1qrJRWiIq2lwykf0HwT7osw==}
+  '@elastic/eui@121.0.0':
+    resolution: {integrity: sha512-Ws6scxpbhK7kiUqC8RR1Nua3ppguOOcXis81OATvzb9xSKQZbUWys+6TlZP67lrFheO1eqVc3ih276Pfm6kVBw==}
     engines: {node: 16.x || 18.x || >=20.x}
     peerDependencies:
       '@elastic/datemath': ^5.0.2
@@ -27533,7 +27543,7 @@ snapshots:
 
   '@elastic/eui-illustrations@1.0.2': {}
 
-  '@elastic/eui-test-helpers@1.5.0-snapshot.1788752437240(@playwright/test@1.62.1)':
+  '@elastic/eui-test-helpers@1.6.0(@playwright/test@1.62.1)':
     optionalDependencies:
       '@playwright/test': 1.62.1
 
@@ -27555,7 +27565,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@elastic/eui@120.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
+  '@elastic/eui@121.0.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)':
     dependencies:
       '@elastic/datemath': 5.0.3(moment@2.30.1)
       '@elastic/eui-theme-borealis': 8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)

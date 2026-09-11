@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alertzero-plugin",
+  "owner": ["@elastic/security-solution"],
+  "group": "security",
+  "visibility": "private",
+  "description": "AlertZero Security Watch investigation queue and catalog",
+  "plugin": {
+    "id": "alertzero",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "alertzero"],
+    "requiredPlugins": ["agentBuilder", "features", "workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": ["spaces"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}
