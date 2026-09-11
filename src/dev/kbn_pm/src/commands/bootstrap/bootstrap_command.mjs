@@ -131,7 +131,7 @@ export const command = {
       // The patch-package command is used to apply patches to the node_modules directory.
       // Add patch files under ./patches using patch-package's package+version naming convention.
       // Example: patches/example-package+1.2.3.patch
-      await run('node', ['node_modules/.bin/patch-package', '--error-on-fail'], {
+      await run('pnpm', ['patch-package', '--error-on-fail'], {
         pipe: !quiet,
         description: 'patch-package',
       });
