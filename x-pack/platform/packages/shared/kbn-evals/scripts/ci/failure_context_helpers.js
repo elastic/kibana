@@ -382,14 +382,10 @@ function resolveTriageConnector() {
  */
 function parseTriageGroups(rawText) {
   const text = String(rawText ?? '').trim();
-  const unfenced = text
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```$/i, '')
-    .trim();
 
   let parsed;
   try {
-    parsed = JSON.parse(unfenced);
+    parsed = JSON.parse(text);
   } catch {
     throw new Error('Triage model did not return valid JSON');
   }

@@ -172,12 +172,6 @@ describe('parseTriageGroups', () => {
     expect(parseTriageGroups(JSON.stringify({ groups: [GROUP] }))).toEqual([GROUP]);
   });
 
-  it('strips a markdown code fence', () => {
-    expect(parseTriageGroups(`\`\`\`json\n${JSON.stringify({ groups: [GROUP] })}\n\`\`\``)).toEqual(
-      [GROUP]
-    );
-  });
-
   it('coerces loose field types and drops empty groups', () => {
     const raw = JSON.stringify({
       groups: [

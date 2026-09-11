@@ -53,7 +53,6 @@ function parseVaultConfig() {
 
 // CI notify triage uses this OpenRouter model.
 // Model must support OpenAI-style tool calling with `tool_choice` on OpenRouter.
-// Models without it fail every triage with "did not call the report_triage tool".
 const TRIAGE_OPENROUTER_MODEL = 'google/gemini-3.7-flash';
 
 /**
