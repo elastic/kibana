@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages';
+import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages/index.ts';
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical

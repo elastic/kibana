@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './client.ts';
-export * from './on_complete.ts';
-export * from './on_metrics_viable.ts';
-export * from './on_start.ts';
-export * from './pick_test_group_run_order/index.ts';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { getKibanaDir } from './get_kibana_dir.ts';
+
+export const loadBuildkiteJson = <T>(relativePath: string): T =>
+  JSON.parse(readFileSync(resolve(getKibanaDir(), '.buildkite', relativePath), 'utf8')) as T;
