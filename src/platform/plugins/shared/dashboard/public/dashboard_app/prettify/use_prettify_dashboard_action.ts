@@ -24,7 +24,6 @@ const getPrettifyAction = async (): Promise<Action<PrettifyDashboardActionContex
 
 export interface UsePrettifyDashboardAction {
   execute: () => Promise<void>;
-  displayName: string;
 }
 
 export const usePrettifyDashboardAction = (
@@ -73,7 +72,6 @@ export const usePrettifyDashboardAction = (
       action
         ? {
             execute: () => action.execute(context),
-            displayName: action.getDisplayName(context),
           }
         : null,
     [action, context]

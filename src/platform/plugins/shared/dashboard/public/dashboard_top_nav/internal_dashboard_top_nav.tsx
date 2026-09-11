@@ -74,7 +74,6 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
-import { PrettifyDashboardButton } from '../dashboard_app/prettify/prettify_dashboard_button';
 import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
@@ -399,17 +398,16 @@ export function InternalDashboardTopNav({
 
   const shareAction = useDashboardShareAction({ redirectTo });
   const prettifyAction = usePrettifyDashboardAction(dashboardApi);
-  const showHeaderEnhance = viewMode === 'edit' && Boolean(prettifyAction) && !fullScreenMode;
   const experimentalDashboardAiAction = useMemo(
     () =>
-      showHeaderEnhance && prettifyAction
+      viewMode === 'edit' && prettifyAction
         ? {
             onClick: () => {
               void prettifyAction.execute();
             },
           }
         : undefined,
-    [showHeaderEnhance, prettifyAction]
+    [viewMode, prettifyAction]
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
@@ -582,7 +580,6 @@ export function InternalDashboardTopNav({
       </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
-      {!showHeaderEnhance && <PrettifyDashboardButton dashboardApi={dashboardApi} />}
     </div>
   );
 }
