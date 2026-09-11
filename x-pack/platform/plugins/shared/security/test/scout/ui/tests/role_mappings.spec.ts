@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
@@ -82,9 +84,7 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await page.goto('/app/management/security/role_mappings/edit/i-do-not-exist');
-    await expect(
-      page.testSubj.locator('errorLoadingRoleMappingEditorToast')
-    ).toBeVisible();
+    await expect(page.testSubj.locator('errorLoadingRoleMappingEditorToast')).toBeVisible();
     await expect(page).toHaveURL(/management\/security\/role_mappings\//);
   });
 
@@ -160,7 +160,7 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
     });
 
     test('allows a role mapping to be edited', async ({ pageObjects }) => {
-      await pageObjects.securityRoleMappings['page'].testSubj.locator('roleMappingName').click();
+      await pageObjects.securityRoleMappings.page.testSubj.locator('roleMappingName').click();
       await pageObjects.securityRoleMappings.saveRoleMapping();
     });
   });

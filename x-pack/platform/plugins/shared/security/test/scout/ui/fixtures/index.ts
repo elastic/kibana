@@ -10,10 +10,10 @@ import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 
 import {
   ApiKeysApp,
-  SecurityUsersPage,
-  SecurityRolesPage,
-  SecurityRoleMappingsPage,
   SecurityAccountSettingsPage,
+  SecurityRoleMappingsPage,
+  SecurityRolesPage,
+  SecurityUsersPage,
 } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {

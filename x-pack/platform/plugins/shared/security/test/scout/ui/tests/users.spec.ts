@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 test.describe('Security - Users management', { tag: tags.stateful.classic }, () => {
@@ -28,13 +30,13 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
     const users = await pageObjects.securityUsers.getAllUsers();
     const byUsername = Object.fromEntries(users.map((u) => [u.username, u]));
 
-    expect(byUsername['elastic'].roles).toContain('superuser');
-    expect(byUsername['elastic'].reserved).toBe(true);
-    expect(byUsername['elastic'].deprecated).toBe(false);
+    expect(byUsername.elastic.roles).toContain('superuser');
+    expect(byUsername.elastic.reserved).toBe(true);
+    expect(byUsername.elastic.deprecated).toBe(false);
 
-    expect(byUsername['kibana_system'].roles).toContain('kibana_system');
-    expect(byUsername['kibana_system'].reserved).toBe(true);
-    expect(byUsername['kibana_system'].deprecated).toBe(false);
+    expect(byUsername.kibana_system.roles).toContain('kibana_system');
+    expect(byUsername.kibana_system.reserved).toBe(true);
+    expect(byUsername.kibana_system.deprecated).toBe(false);
   });
 
   test('should add new user', async ({ pageObjects, esClient }) => {
@@ -60,10 +62,7 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
     }
   });
 
-  test('should add new user with optional fields left empty', async ({
-    pageObjects,
-    esClient,
-  }) => {
+  test('should add new user with optional fields left empty', async ({ pageObjects, esClient }) => {
     await pageObjects.securityUsers.createUser(optionalUser);
 
     try {
@@ -97,14 +96,14 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
     const roles = await pageObjects.securityRoles.getAllRoles();
     const byName = Object.fromEntries(roles.map((r) => [r.rolename, r]));
 
-    expect(byName['apm_system']?.reserved).toBe(true);
-    expect(byName['beats_admin']?.reserved).toBe(true);
-    expect(byName['beats_system']?.reserved).toBe(true);
-    expect(byName['kibana_admin']?.reserved).toBe(true);
-    expect(byName['kibana_system']?.reserved).toBe(true);
-    expect(byName['logstash_system']?.reserved).toBe(true);
-    expect(byName['monitoring_user']?.reserved).toBe(true);
-    expect(byName['kibana_user']?.deprecated).toBe(true);
+    expect(byName.apm_system?.reserved).toBe(true);
+    expect(byName.beats_admin?.reserved).toBe(true);
+    expect(byName.beats_system?.reserved).toBe(true);
+    expect(byName.kibana_admin?.reserved).toBe(true);
+    expect(byName.kibana_system?.reserved).toBe(true);
+    expect(byName.logstash_system?.reserved).toBe(true);
+    expect(byName.monitoring_user?.reserved).toBe(true);
+    expect(byName.kibana_user?.deprecated).toBe(true);
   });
 
   test.describe('edit user', () => {

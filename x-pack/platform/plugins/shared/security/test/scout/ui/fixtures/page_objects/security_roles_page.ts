@@ -85,9 +85,7 @@ export class SecurityRolesPage {
   }
 
   async addIndexPrivilege(indexName: string, privilege: string, indexNum = 0) {
-    await this.page.components
-      .comboBox(`indicesInput${indexNum}`)
-      .setSelectedOptions([indexName]);
+    await this.page.components.comboBox(`indicesInput${indexNum}`).setSelectedOptions([indexName]);
     await this.page.components
       .comboBox(`privilegesInput${indexNum}`)
       .setSelectedOptions([privilege]);
@@ -108,9 +106,7 @@ export class SecurityRolesPage {
 
   async addGrantedFields(fields: string[], indexNum = 0) {
     for (const field of fields) {
-      await this.page.components
-        .comboBox(`fieldInput${indexNum}`)
-        .setSelectedOptions([field]);
+      await this.page.components.comboBox(`fieldInput${indexNum}`).setSelectedOptions([field]);
     }
   }
 
@@ -179,9 +175,7 @@ export class SecurityRolesPage {
         }
       }
       for (const privilege of idx.privileges) {
-        await this.page.components
-          .comboBox(`privilegesInput${i}`)
-          .setSelectedOptions([privilege]);
+        await this.page.components.comboBox(`privilegesInput${i}`).setSelectedOptions([privilege]);
       }
     }
 

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/security/flstest/data');
+    await esArchiver.loadIfNeeded(
+      'x-pack/platform/test/fixtures/es_archives/security/flstest/data'
+    );
     await kbnClient.importExport.load(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
     );
@@ -47,12 +51,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
               names: ['flstest'],
               privileges: ['read', 'view_index_metadata'],
               field_security: {
-                grant: [
-                  'customer_ssn',
-                  'customer_name',
-                  'customer_region',
-                  'customer_type',
-                ],
+                grant: ['customer_ssn', 'customer_name', 'customer_region', 'customer_type'],
               },
             },
           ],
@@ -134,7 +133,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
       });
 
       const roleDef = await esClient.security.getRole({ name: 'a_casesenstive_fields_role' });
-      const indexEntry = roleDef['a_casesenstive_fields_role']?.indices?.[0];
+      const indexEntry = roleDef.a_casesenstive_fields_role?.indices?.[0];
       expect(indexEntry?.field_security?.grant).toEqual(
         expect.arrayContaining(['customer_*', 'Customer_*'])
       );

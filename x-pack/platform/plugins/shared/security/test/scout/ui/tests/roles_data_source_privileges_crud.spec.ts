@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 const roleName = 'data-source-privs-crud-role';
@@ -66,10 +68,8 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
     await page.testSubj.locator('roleFormDescriptionInput').fill(updatedRoleDescription);
     await pageObjects.securityRoles.saveRole();
 
-    const columnDescription = await page.testSubj
-      .locator(`roleRowDescription-${roleName}`)
-      .innerText();
-    expect(columnDescription).toBe(updatedRoleDescription);
+    const columnDescription = page.testSubj.locator(`roleRowDescription-${roleName}`);
+    await expect(columnDescription).toHaveText(updatedRoleDescription);
 
     const updatedRole = await esClient.security.getRole({ name: roleName });
     expect(updatedRole[roleName]?.global?.data_source).toEqual(expectedDataSourcePrivileges);

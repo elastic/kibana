@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 const testUser = {
@@ -25,9 +27,7 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
   });
 
   test.afterAll(async ({ esClient }) => {
-    await esClient.security
-      .deleteUser({ username: testUser.username })
-      .catch(() => {});
+    await esClient.security.deleteUser({ username: testUser.username }).catch(() => {});
   });
 
   test('should add new user with email', async ({ pageObjects }) => {

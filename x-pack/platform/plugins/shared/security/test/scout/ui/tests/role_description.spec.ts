@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 test.describe('Role Description', { tag: tags.stateful.classic }, () => {
@@ -28,13 +30,13 @@ test.describe('Role Description', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('roleFormDescriptionInput').fill('role description');
     await pageObjects.securityRoles.saveRole();
 
-    const columnDescription = await page.testSubj
-      .locator('roleRowDescription-a-role-with-description')
-      .innerText();
-    expect(columnDescription).toBe('role description');
+    const columnDescription = page.testSubj.locator('roleRowDescription-a-role-with-description');
+    await expect(columnDescription).toHaveText('role description');
 
     await pageObjects.securityRoles.clickEditRole('a-role-with-description');
-    await expect(pageObjects.securityRoles.roleFormNameInput).toHaveValue('a-role-with-description');
+    await expect(pageObjects.securityRoles.roleFormNameInput).toHaveValue(
+      'a-role-with-description'
+    );
     await expect(page.testSubj.locator('roleFormDescriptionInput')).toHaveValue('role description');
     await pageObjects.securityRoles.cancelRole();
   });
@@ -103,7 +105,9 @@ test.describe('Role Description', { tag: tags.stateful.classic }, () => {
         expect(violations).toStrictEqual([]);
 
         await pageObjects.securityRoles.deleteRoleButton.click();
-        const { violations: deleteViolations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+        const { violations: deleteViolations } = await page.checkA11y({
+          include: ['.kbnAppWrapper'],
+        });
         expect(deleteViolations).toStrictEqual([]);
         await page.testSubj.locator('confirmModalCancelButton').click();
       } finally {

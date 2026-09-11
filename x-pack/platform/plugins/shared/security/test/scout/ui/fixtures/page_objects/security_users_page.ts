@@ -167,7 +167,10 @@ export class SecurityUsersPage {
     const fullname = await row.locator('[data-test-subj="userRowFullName"]').innerText();
     const email = await row.locator('[data-test-subj="userRowEmail"]').innerText();
     const rolesText = await row.locator('[data-test-subj="userRowRoles"]').innerText();
-    const roles = rolesText.split('\n').map((r) => r.trim()).filter(Boolean);
+    const roles = rolesText
+      .split('\n')
+      .map((r) => r.trim())
+      .filter(Boolean);
     const reserved = (await row.locator('[data-test-subj="userReserved"]').count()) > 0;
     const deprecated = (await row.locator('[data-test-subj="userDeprecated"]').count()) > 0;
     const enabled = (await row.locator('[data-test-subj="userDisabled"]').count()) === 0;

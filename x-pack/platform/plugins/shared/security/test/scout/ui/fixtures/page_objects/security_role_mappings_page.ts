@@ -58,9 +58,7 @@ export class SecurityRoleMappingsPage {
 
   async saveRoleMapping() {
     await this.saveRoleMappingButton.click();
-    await this.page.testSubj
-      .locator('savedRoleMappingSuccessToast')
-      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('savedRoleMappingSuccessToast').waitFor({ state: 'visible' });
   }
 
   async deleteRoleMapping(name: string) {

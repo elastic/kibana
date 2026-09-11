@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 const customRole = 'rc-custom-role';
@@ -62,8 +64,7 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
 
     await expect(page).toHaveURL(/security\/roles\/edit/);
 
-    const { clusters, privileges } =
-      await pageObjects.securityRoles.getRemoteClusterPrivilege(0);
+    const { clusters, privileges } = await pageObjects.securityRoles.getRemoteClusterPrivilege(0);
     expect(clusters).toEqual(expect.arrayContaining(['cluster1', 'cluster2']));
     expect(privileges).toEqual(expect.arrayContaining(['monitor_enrich']));
 

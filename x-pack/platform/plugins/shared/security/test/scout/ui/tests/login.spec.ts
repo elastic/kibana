@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+
 import { test } from '../fixtures';
 
 test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
@@ -24,7 +26,9 @@ test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('loginPassword').fill('wrong-password');
     await page.testSubj.locator('loginSubmit').click();
     const errorMessage = page.testSubj.locator('loginErrorMessage');
-    await expect(errorMessage).toContainText('Username or password is incorrect. Please try again.');
+    await expect(errorMessage).toContainText(
+      'Username or password is incorrect. Please try again.'
+    );
   });
 
   test('displays message acknowledging logout', async ({ page, browserAuth }) => {
