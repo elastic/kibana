@@ -111,6 +111,8 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
   const exportButton = page.testSubj.locator('lnsApp_exportButton');
 
+  // Toasts sit over the AppMenu; closing them after overflow is open dismisses the menu.
+  await page.components.toast().closeAll();
   // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
   await openLensAppMenuOverflow(page);
   await expect(exportButton).toBeEnabled();

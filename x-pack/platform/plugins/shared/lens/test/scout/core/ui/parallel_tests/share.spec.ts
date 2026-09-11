@@ -71,6 +71,18 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         await lens.workspace.closeShareModal();
       });
 
+      // Export while the chart still has data. The next step applies a filter that
+      // yields "No results found", which disables CSV (`csvEnabled` requires hasData).
+      await spaceTest.step('download CSV for single-layer visualization', async () => {
+        await page.evaluate(() => {
+          window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
+          window.ELASTIC_LENS_CSV_CONTENT = undefined;
+        });
+        await completeLensCsvExport(page);
+        const csvContent = await waitForLensCsvContent(page, 1);
+        expect(Object.keys(csvContent)).toHaveLength(1);
+      });
+
       await spaceTest.step('preserve filter and query when sharing URL', async () => {
         // Dismiss save/share toasts first — they sit over the filter bar and intercept clicks.
         await toasts.dismissAll();
@@ -96,16 +108,6 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         } finally {
           await sharedPage.close();
         }
-      });
-
-      await spaceTest.step('download CSV for single-layer visualization', async () => {
-        await page.evaluate(() => {
-          window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
-          window.ELASTIC_LENS_CSV_CONTENT = undefined;
-        });
-        await completeLensCsvExport(page);
-        const csvContent = await waitForLensCsvContent(page, 1);
-        expect(Object.keys(csvContent)).toHaveLength(1);
       });
 
       await spaceTest.step('download CSV for multi-layer visualization', async () => {

@@ -422,12 +422,12 @@ export class LensWorkspace {
   /**
    * Opens the Share modal. Waits until the share button is enabled (can lag after save).
    * Dismisses save toasts first — they sit over the top nav and intercept the click.
+   * Toasts must be closed before opening overflow; closing them afterward dismisses the menu.
    */
   async openShareModal() {
+    await this.page.components.toast().closeAll();
     await this.openAppMenuOverflow();
     await expect(this.shareButton).toBeEnabled({ timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
-
-    await this.page.components.toast().closeAll();
     await this.shareButton.click();
     await this.shareModal.waitFor({ state: 'visible' });
     await this.copyShareUrlButton.waitFor({ state: 'visible' });
