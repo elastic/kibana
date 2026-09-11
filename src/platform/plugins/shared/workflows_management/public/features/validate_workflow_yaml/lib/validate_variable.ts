@@ -21,31 +21,11 @@ import type { VariableItem, YamlValidationResult } from '../model/types';
 
 export function validateVariable(
   variableItem: VariableItem,
-  context: typeof DynamicStepContextSchema | null
+  context: typeof DynamicStepContextSchema
 ): YamlValidationResult {
   const { key, type } = variableItem;
 
-  if (!key) {
-    return {
-      ...variableItem,
-      message: 'Variable is not defined',
-      severity: 'error',
-      owner: 'variable-validation',
-      hoverMessage: null,
-    };
-  }
-
   const parsedPath = parseVariablePath(key);
-
-  if (!context) {
-    return {
-      ...variableItem,
-      message: `Variable ${key} cannot be validated, because the workflow schema is invalid`,
-      severity: 'warning',
-      owner: 'variable-validation',
-      hoverMessage: null,
-    };
-  }
 
   if (type === 'foreach') {
     try {
@@ -56,6 +36,7 @@ export function validateVariable(
           message: itemSchema.description ?? FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
           severity: 'warning',
           owner: 'variable-validation',
+          ruleId: 'foreachItemRuntimeType',
           hoverMessage: getVariableHoverMessage(key, itemSchema),
         };
       }
@@ -73,6 +54,7 @@ export function validateVariable(
           message: error.message,
           severity: 'warning',
           owner: 'variable-validation',
+          ruleId: 'invalidForeachParameter',
           hoverMessage: null,
         };
       }
@@ -86,6 +68,7 @@ export function validateVariable(
       message: `Invalid variable path: ${key}`,
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'invalidVariablePath',
       hoverMessage: null,
     };
   }
@@ -96,6 +79,7 @@ export function validateVariable(
       message: parsedPath.errors.join(', '),
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'variablePathParseError',
       hoverMessage: null,
     };
   }
@@ -106,6 +90,7 @@ export function validateVariable(
       message: 'Failed to parse variable path',
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'variablePathParseError',
       hoverMessage: null,
     };
   }
@@ -118,6 +103,7 @@ export function validateVariable(
       message: `Variable ${parsedPath.propertyPath} is invalid`,
       severity: 'error',
       owner: 'variable-validation',
+      ruleId: 'invalidVariableReference',
       hoverMessage: null,
     };
   }
@@ -128,6 +114,7 @@ export function validateVariable(
       message: refSchema.description,
       severity: 'warning',
       owner: 'variable-validation',
+      ruleId: 'unknownVariableType',
       hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }
@@ -138,6 +125,7 @@ export function validateVariable(
       message: `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`,
       severity: 'warning',
       owner: 'variable-validation',
+      ruleId: 'unknownVariableType',
       hoverMessage: getVariableHoverMessage(parsedPath.propertyPath, refSchema),
     };
   }

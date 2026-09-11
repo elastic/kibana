@@ -46,6 +46,23 @@ export interface AssetsAccordionProps<TAsset extends AccordionAsset = AccordionA
   getTitleHref?: (asset: TAsset) => string | undefined;
 }
 
+const resolveAssetTitleHref = (
+  titleHref: string,
+  basePath: { get?: () => string; prepend: (path: string) => string }
+): string => {
+  const currentBasePath = basePath.get?.() ?? '';
+  if (
+    currentBasePath &&
+    (titleHref === currentBasePath || titleHref.startsWith(`${currentBasePath}/`))
+  ) {
+    return titleHref;
+  }
+  if (titleHref.startsWith('/app/')) {
+    return basePath.prepend(titleHref);
+  }
+  return titleHref;
+};
+
 export const AssetsAccordion = <TAsset extends AccordionAsset = AccordionAsset>({
   savedObjects,
   type,
@@ -114,7 +131,9 @@ export const AssetsAccordion = <TAsset extends AccordionAsset = AccordionAsset>(
                       <EuiText size="m">
                         <p>
                           {titleHref ? (
-                            <EuiLink href={http.basePath.prepend(titleHref)}>{title}</EuiLink>
+                            <EuiLink href={resolveAssetTitleHref(titleHref, http.basePath)}>
+                              {title}
+                            </EuiLink>
                           ) : (
                             title
                           )}

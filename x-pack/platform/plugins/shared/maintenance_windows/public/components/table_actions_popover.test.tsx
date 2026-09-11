@@ -157,7 +157,7 @@ describe('TableActionsPopover', () => {
 
     await userEvent.click(await result.findByTestId('table-actions-copy-id'));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
-    expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
+    expect(mockAddSuccess).toHaveBeenCalledWith('Copied maintenance window ID to clipboard');
 
     Object.assign(navigator, global.window.navigator.clipboard);
   });

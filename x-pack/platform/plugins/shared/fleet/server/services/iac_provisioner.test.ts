@@ -58,11 +58,16 @@ const jsonResponse = (status: number, body: unknown) =>
     json: async () => body,
   } as any);
 
+function mockFeatureFlag(enabled = true) {
+  jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({
+    getBooleanValue: jest.fn().mockResolvedValue(enabled),
+  } as any);
+}
+
 function mockConfig(overrides: Record<string, unknown> = {}) {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: true },
     iacProvisioner: {
-      enabled: true,
       api: {
         url: 'https://iac-provisioner.example',
         tls: { certificate: '/path/tls.crt', key: '/path/tls.key', ca: '/path/ca.crt' },
@@ -71,6 +76,7 @@ function mockConfig(overrides: Record<string, unknown> = {}) {
     },
   } as any);
   jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+  mockFeatureFlag(true);
 }
 
 function mockLogger() {
@@ -91,17 +97,15 @@ describe('IacProvisionerService', () => {
     jest.clearAllMocks();
   });
 
-  it('throws IacProvisionerConfigError when the feature is not enabled', async () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
-      agentless: { enabled: true },
-      iacProvisioner: { enabled: false },
-    } as any);
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+  it('throws IacProvisionerConfigError when the feature flag is off', async () => {
+    mockConfig();
+    mockFeatureFlag(false);
     mockLogger();
 
     await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerConfigError
     );
+    expect(mockedFetch).not.toHaveBeenCalled();
   });
 
   it('throws IacProvisionerConfigError when the API url is missing', async () => {
@@ -138,6 +142,7 @@ describe('IacProvisionerService', () => {
         // Server certs must always be verified, regardless of what SslConfig
         // says — its rejectUnauthorized is a server-side client-auth setting.
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });
@@ -162,6 +167,7 @@ describe('IacProvisionerService', () => {
         key: undefined,
         ca: '/path/ca.crt',
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });
@@ -266,40 +272,6 @@ describe('IacProvisionerService', () => {
     expect(errorLogged).toContain('unable to get issuer certificate');
   });
 
-  it('passes an array of CA paths through to the outbound Agent', async () => {
-    // kibana-controller injects both cluster-internal-cas and the MKI
-    // intermediate so rejectUnauthorized: true can complete the chain.
-    mockConfig({
-      api: {
-        url: 'https://cloud-iac-provisioner.cloud-iac-provisioner.svc.cluster.local',
-        tls: {
-          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
-          key: '/mnt/elastic-internal/http-certs/tls.key',
-          ca: [
-            '/mnt/elastic-internal/trust-bundle/ca.crt',
-            '/mnt/elastic-internal/http-certs/ca.crt',
-          ],
-        },
-      },
-    });
-    mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
-
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
-
-    expect(mockedAgent).toHaveBeenCalledWith({
-      connect: expect.objectContaining({
-        ca: [
-          '/mnt/elastic-internal/trust-bundle/ca.crt',
-          '/mnt/elastic-internal/http-certs/ca.crt',
-        ],
-        rejectUnauthorized: true,
-      }),
-    });
-  });
-
   it('does not replace Mozilla roots when tls.ca is unset', async () => {
     // ECH presents a client cert to the public proxy but must keep the default
     // CA store so Let's Encrypt on the hosted URL still verifies.
@@ -323,6 +295,7 @@ describe('IacProvisionerService', () => {
       connect: expect.objectContaining({
         ca: undefined,
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });
@@ -419,6 +392,7 @@ describe('IacProvisionerService', () => {
         cert: undefined,
         key: undefined,
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });

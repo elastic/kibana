@@ -269,6 +269,100 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('includes user.full_name when the current user has one', async () => {
+    const getCurrentUserWithFullName = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      full_name: 'Jane Doe',
+    });
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser: getCurrentUserWithFullName,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: { id: 'uid', name: 'jdoe', full_name: 'Jane Doe', roles: ['admin'] },
+      })
+    );
+    audit.stop();
+  });
+
+  describe('user.domain (Serverless OTel only)', () => {
+    const getCurrentUserWithRealm = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      authentication_realm: { name: 'cloud-saml-kibana', type: 'saml' },
+    });
+
+    const logWithConfig = async (
+      auditConfig: Partial<ConfigType['audit']>,
+      isServerless: boolean
+    ) => {
+      const audit = new AuditService(logger);
+      const auditSetup = audit.setup({
+        license,
+        config: createAuditConfig(auditConfig),
+        logging,
+        status,
+        http,
+        isServerless,
+        getCurrentUser: getCurrentUserWithRealm,
+        getSpaceId,
+        getSID,
+        recordAuditLoggingUsage,
+      });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+      audit.stop();
+
+      return (logger.info.mock.calls[logger.info.mock.calls.length - 1][1] as { user: object })
+        .user;
+    };
+
+    const otelAppender = {
+      enabled: true,
+      appender: { type: 'otel' as const, protocol: 'http' as const, url: 'http://collector:4318' },
+    };
+
+    it('includes the authentication realm when serverless and shipping to OTel', async () => {
+      expect(await logWithConfig(otelAppender, true)).toEqual({
+        id: 'uid',
+        name: 'jdoe',
+        domain: 'cloud-saml-kibana',
+        roles: ['admin'],
+      });
+    });
+
+    it('omits it when serverless but not shipping to OTel', async () => {
+      const user = await logWithConfig({ enabled: true }, true);
+      expect(user).not.toHaveProperty('domain');
+    });
+
+    it('omits it when shipping to OTel but not serverless', async () => {
+      const user = await logWithConfig(otelAppender, false);
+      expect(user).not.toHaveProperty('domain');
+    });
+  });
+
   it('logs event enriched with meta data from fake request', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
@@ -716,18 +810,13 @@ describe('#createLoggingConfig', () => {
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
-    // includeResources keeps the audit resource attribute keys plus the promoted keys (so project.id
-    // stays in the resource for log delivery); attributes supply the service.name/service.type values.
-    expect(otelAppender.includeResources).toEqual([
-      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
-      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-    ]);
+    expect(otelAppender.includeResources).toEqual(['service.name', 'service.type']);
     expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
-    // project.id is also copied into per-record attributes (kept in both places).
+    // project.id is captured before filtering and emitted only in per-record attributes.
     expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
   });
 
-  test('merges user-provided attributes with audit resource attributes', () => {
+  test('preserves configured attributes for promotion while restricting the resource to service identity', () => {
     const features = { allowAuditLogging: true };
 
     const loggingConfig = createLoggingConfig(
@@ -738,7 +827,13 @@ describe('#createLoggingConfig', () => {
           type: 'otel',
           protocol: 'http',
           url: 'http://collector:4318/v1/logs',
-          attributes: { 'custom.attr': 'value' },
+          attributes: {
+            'custom.attr': 'value',
+            'project.id': 'configured-project',
+            'service.name': 'custom-service',
+            'service.type': 'custom-type',
+          },
+          promoteResourceAttributes: ['custom.attr'],
         },
       },
       true
@@ -748,13 +843,12 @@ describe('#createLoggingConfig', () => {
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     expect(otelAppender.attributes).toEqual({
       'custom.attr': 'value',
+      'project.id': 'configured-project',
       ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
     });
-    // includeResources must cover ALL configured attribute keys — not just the audit two — plus the
-    // promoted keys, so a deployment-provided resource attribute (e.g. project.id) is not stripped.
-    expect(otelAppender.includeResources).toEqual([
+    expect(otelAppender.includeResources).toEqual(['service.name', 'service.type']);
+    expect(otelAppender.promoteResourceAttributes).toEqual([
       'custom.attr',
-      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
       ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
     ]);
   });

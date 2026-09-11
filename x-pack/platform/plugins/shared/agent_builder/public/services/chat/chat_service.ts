@@ -38,8 +38,6 @@ export type ResumeRoundParams = BaseConverseParams & {
   prompts: Record<string, PromptResponse>;
 };
 
-export type RegenerateParams = BaseConverseParams;
-
 /**
  * Wire payload for `converse()` with `conversation_id` narrowed to required. Every
  * Agent Builder UI caller passes a client-generated UUID before chat fires.
@@ -82,18 +80,6 @@ export class ChatService {
       connector_id: params.connectorId,
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
-      project_routing: params.projectRouting,
-    });
-  }
-
-  regenerate(params: RegenerateParams): Observable<ChatEvent> {
-    return this.converse(params.signal, {
-      agent_id: params.agentId,
-      conversation_id: params.conversationId,
-      execution_id: params.executionId,
-      connector_id: params.connectorId,
-      browser_api_tools: params.browserApiTools ?? [],
-      action: 'regenerate',
       project_routing: params.projectRouting,
     });
   }

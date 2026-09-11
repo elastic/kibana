@@ -161,6 +161,7 @@ export const BROWSER_ADVANCED = (readOnly: boolean) => [
     components: [
       FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
       FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
+      FIELD(readOnly)[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST],
       FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
       FIELD(readOnly)[ConfigKey.PLAYWRIGHT_OPTIONS],
       FIELD(readOnly)[ConfigKey.PARAMS],

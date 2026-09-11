@@ -150,19 +150,6 @@
       ]
     },
     {
-      "id": "obs-ai-assistant",
-      "name": "Observability AI Assistant",
-      "slackChannel": "#obs-ai-assistant-alerts",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts",
-      "tags": [
-        "observability",
-        "ai-assistant"
-      ],
-      "ciLabels": [
-        "evals:obs-ai-assistant"
-      ]
-    },
-    {
       "id": "observability-ai",
       "name": "Observability AI",
       "slackChannel": "#obs-ai-assistant-alerts",
@@ -429,6 +416,20 @@
       "ciLabels": [
         "evals:security-alert-analysis-workflow"
       ]
+    },
+    {
+      "id": "detection-watch-rule-creation",
+      "name": "Detection Watch Rule Creation",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/playwright.config.ts",
+      "tags": [
+        "security",
+        "detection-engineering"
+      ],
+      "ciLabels": [
+        "evals:detection-watch-rule-creation"
+      ],
+      "serverConfigSet": "evals_detection_watch_rule_creation"
     },
     {
       "id": "skill-selection-benchmark",

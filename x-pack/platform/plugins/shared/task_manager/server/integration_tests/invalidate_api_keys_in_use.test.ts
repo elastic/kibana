@@ -15,6 +15,7 @@ import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
 import type { ApiKeyToInvalidate } from '../saved_objects/schemas/api_key_to_invalidate';
 import { TaskStatus } from '../task';
 import { injectTask, setupTestServers } from './lib';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
 
@@ -67,7 +68,11 @@ describe('invalidate api keys task - in-use guard', () => {
       startedAt: null,
       retryAt: null,
       ownerId: null,
-      userScope: { apiKeyId: sharedKeyId, apiKeyCreatedByUser: false, spaceId: 'default' },
+      userScope: {
+        apiKeyId: sharedKeyId,
+        apiKeyCreatedByUser: false,
+        spaceId: asSpaceId('default'),
+      },
     });
 
     // Both keys are queued for invalidation, created far enough in the past to clear removalDelay.

@@ -169,6 +169,7 @@ describe('EditableMarkdown', () => {
       jest.clearAllMocks();
     });
 
+    // Failing: https://github.com/elastic/kibana/issues/288576
     it.skip('Save button click clears session storage', async () => {
       renderWithTestingProviders(<EditableMarkdown {...defaultProps} />);
 
@@ -196,7 +197,7 @@ describe('EditableMarkdown', () => {
       expect(window.sessionStorage.getItem(draftStorageKey)).toBe(null);
     });
 
-    it.skip('Cancel button click clears session storage', async () => {
+    it('Cancel button click clears session storage', async () => {
       renderWithTestingProviders(<EditableMarkdown {...defaultProps} />);
 
       expect(window.sessionStorage.getItem(draftStorageKey)).toBe('');

@@ -49,6 +49,38 @@ Now, based on that information, request documentation from the ES|QL handbook to
   ];
 };
 
+// Variant used when the resource (field stats) is not yet available — e.g. when pre-fetching
+// docs in parallel with index discovery. Keyword selection is based on NL query alone.
+export const createRequestDocumentationPromptNoResource = ({
+  nlQuery,
+  documentation,
+}: {
+  nlQuery: string;
+  documentation: EsqlLoadedDocumentation;
+}): BaseMessageLike[] => {
+  return [
+    [
+      'system',
+      `You are an Elasticsearch assistant that helps with writing ES|QL queries.
+
+Your current task is to examine the user's query and request documentation
+from the ES|QL handbook that will be needed to generate a valid ES|QL query.
+
+${getDocumentationSection({ documentation })}`,
+    ],
+    [
+      'user',
+      `Your task is to write a single, valid ES|QL query based on the following information:
+
+<user-query>
+${nlQuery}
+</user-query>
+
+Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
+    ],
+  ];
+};
+
 export const createGenerateEsqlPrompt = ({
   nlQuery,
   resource,
@@ -136,11 +168,11 @@ const getDocumentationSection = ({
   documentation,
   tsDocRequested = false,
 }: {
-  resource: ResolvedResourceWithSampling;
+  resource?: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
   tsDocRequested?: boolean;
 }): string => {
-  const isTsdb = resource.isTsdb || tsDocRequested;
+  const isTsdb = resource?.isTsdb || tsDocRequested;
 
   return `# ES|QL Documentation
 

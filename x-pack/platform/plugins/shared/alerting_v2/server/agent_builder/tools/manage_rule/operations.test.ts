@@ -10,9 +10,11 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   executeRuleOperations as executeRuleOperationsImpl,
   RuleOperationValidationError,
+  ruleOperationSchema,
   type RuleOperation,
 } from './operations';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
@@ -875,7 +877,24 @@ describe('executeRuleOperations', () => {
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-1' },
+          data: { dashboard_id: 'dash-1' },
+        },
+      ]);
+    });
+
+    it('passes validation for a complete rule with a runbook artifact', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_runbook', content: '# Restart the service\n\n1. Check logs' },
+        { operation: 'validate' },
+      ];
+
+      const result = await executeRuleOperations(validRule, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^runbook-/),
+          type: 'runbook',
+          data: { content: '# Restart the service\n\n1. Check logs' },
         },
       ]);
     });
@@ -1006,12 +1025,12 @@ describe('executeRuleOperations', () => {
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-1' },
+          data: { dashboard_id: 'dash-1' },
         },
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-2' },
+          data: { dashboard_id: 'dash-2' },
         },
       ]);
       expect(result.data.artifacts?.[0].id).not.toBe(result.data.artifacts?.[1].id);
@@ -1021,7 +1040,7 @@ describe('executeRuleOperations', () => {
       const existing: Partial<RuleAttachmentData> = {
         artifacts: [
           { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
-          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboard_id: 'old-dash' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: ['new-dash'] }];
@@ -1033,14 +1052,14 @@ describe('executeRuleOperations', () => {
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'new-dash' },
+          data: { dashboard_id: 'new-dash' },
         },
       ]);
     });
 
     it('reuses the existing artifact id when the same dashboard is already attached', async () => {
       const existing: Partial<RuleAttachmentData> = {
-        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } }],
+        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
       };
       const ops: RuleOperation[] = [
         { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
@@ -1049,11 +1068,11 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations(existing, ops);
 
       expect(result.data.artifacts).toEqual([
-        { id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-keep', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
         {
           id: expect.stringMatching(/^dashboard-/),
           type: 'dashboard',
-          data: { dashboardId: 'dash-2' },
+          data: { dashboard_id: 'dash-2' },
         },
       ]);
     });
@@ -1066,14 +1085,14 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.artifacts).toHaveLength(1);
-      expect(result.data.artifacts?.[0].data).toEqual({ dashboardId: 'dash-1' });
+      expect(result.data.artifacts?.[0].data).toEqual({ dashboard_id: 'dash-1' });
     });
 
     it('unlinks all dashboards when passed an empty array', async () => {
       const existing: Partial<RuleAttachmentData> = {
         artifacts: [
           { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
-          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboard_id: 'old-dash' } },
         ],
       };
       const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
@@ -1144,6 +1163,122 @@ describe('executeRuleOperations', () => {
 
       expect(soClient.bulkGet).not.toHaveBeenCalled();
       expect(result.data.artifacts).toEqual([]);
+    });
+  });
+
+  describe('set_runbook', () => {
+    it('stores markdown as a runbook artifact matching the create/update API', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_runbook', content: '# Restart the service\n\n1. Check logs' },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^runbook-/),
+          type: 'runbook',
+          data: { content: '# Restart the service\n\n1. Check logs' },
+        },
+      ]);
+    });
+
+    it('replaces an existing runbook and reuses its artifact id', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [{ id: 'runbook-keep', type: 'runbook', data: { content: 'Old steps' } }],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'New steps' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-keep', type: 'runbook', data: { content: 'New steps' } },
+      ]);
+    });
+
+    it('replaces previously attached runbooks and preserves dashboard artifacts', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-old', type: 'runbook', data: { content: 'Old steps' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'New steps' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        { id: 'runbook-old', type: 'runbook', data: { content: 'New steps' } },
+      ]);
+    });
+
+    it('replaces multiple existing runbooks with a single artifact', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'First' } },
+          { id: 'runbook-2', type: 'runbook', data: { content: 'Second' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'Only runbook' }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Only runbook' } },
+      ]);
+    });
+
+    it.each([null, '', '   '])('unlinks the runbook when content is %j', async (content) => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+      ]);
+    });
+
+    it('throws when merged artifacts would exceed the API cap', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: Array.from({ length: 100 }, (_, index) => ({
+          id: `dashboard-${index}`,
+          type: 'dashboard',
+          data: { dashboard_id: `dash-${index}` },
+        })),
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_runbook', content: 'Steps' }];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(/at most 100 artifacts/);
+    });
+
+    it('rejects content over the runbook limit at the operation schema', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_runbook',
+        content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT + 1),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts content at the runbook limit', () => {
+      const result = ruleOperationSchema.safeParse({
+        operation: 'set_runbook',
+        content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT),
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 });

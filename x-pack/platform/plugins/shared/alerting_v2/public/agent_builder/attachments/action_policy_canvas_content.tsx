@@ -15,11 +15,11 @@ import {
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
-import { attachmentDataToActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';

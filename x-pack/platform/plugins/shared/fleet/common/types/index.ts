@@ -55,13 +55,12 @@ export interface FleetConfigType {
     };
   };
   iacProvisioner?: {
-    enabled: boolean;
     api?: {
       url?: string;
       tls?: {
         certificate?: string;
         key?: string;
-        ca?: string | string[];
+        ca?: string;
       };
     };
   };
@@ -107,6 +106,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
+    skipUploadPackageValidation?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];

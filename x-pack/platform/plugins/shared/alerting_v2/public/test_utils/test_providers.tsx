@@ -61,11 +61,12 @@ export function TestProviders({
 export function ListPageTestProviders({
   children,
   queryClient = createTestQueryClient(),
-}: PropsWithChildren<{ queryClient?: QueryClient }>) {
+  initialEntries,
+}: PropsWithChildren<{ queryClient?: QueryClient; initialEntries?: string[] }>) {
   return (
     <MockChromeContextProvider>
       <I18nProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={initialEntries}>
           <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         </MemoryRouter>
       </I18nProvider>

@@ -6,41 +6,70 @@
  */
 
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { defaultAiIndices } from '../../../../agents/default_ai_indices';
+import type { AiIndexCatalogEntry } from '../../types';
+
+const PRIVILEGES_PATH = 'permissions.kibana.privileges';
+const SPACE_FIELD = `${PRIVILEGES_PATH}.space`;
 
 /**
- * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
- * limit results to the current space. Returns an empty string when disabled or the agent has none.
+ * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled or when
+ * the catalog has no entries.
  */
 export const getAiIndicesInstructions = ({
   enabled,
-  aiIndices,
+  catalog,
   spaceId,
 }: {
   enabled: boolean;
-  aiIndices: string[];
+  catalog: AiIndexCatalogEntry[];
   spaceId: string;
 }): string => {
-  if (!enabled || aiIndices.length === 0) {
+  if (!enabled || catalog.length === 0) {
     return '';
   }
 
-  const described = aiIndices.flatMap((id) => defaultAiIndices[id] ?? []);
-  const catalog: string[] = [];
-
-  if (described.length > 0) {
-    const entries = described.map(({ name, description, guidance }) =>
-      [`- \`${name}\` — ${description}`, guidance].filter(Boolean).join(' ')
+  // Unresolved entries are omitted: the id is not a valid `FROM` target.
+  const entries = catalog
+    .filter(({ esqlTarget }) => esqlTarget !== undefined)
+    .map(
+      ({ esqlTarget, description }) =>
+        `- \`${esqlTarget}\`${description ? ` — ${description}` : ''}`
     );
-    catalog.push('Available to this agent:', entries.join('\n'));
-  }
+  const catalogSection =
+    entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
 
+  // Mirrors `buildVisibilityFilter` in the SML service, minus its `terms_set` privilege check —
+  // the agent only scopes by space.
+  //
+  // `ignore_unmapped` is the one addition: this filter runs across every `ai-index-*` the agent can
+  // reach and most do not map `permissions.kibana.privileges` at all, where a `nested` clause errors
+  // out by default instead of leaving those documents alone.
   const spaceFilter = {
     bool: {
       should: [
-        { term: { spaces: spaceId } },
-        { term: { spaces: '*' } },
-        { bool: { must_not: { exists: { field: 'spaces' } } } },
+        {
+          bool: {
+            must_not: {
+              nested: {
+                path: PRIVILEGES_PATH,
+                query: { match_all: {} },
+                ignore_unmapped: true,
+              },
+            },
+          },
+        },
+        {
+          nested: {
+            path: PRIVILEGES_PATH,
+            ignore_unmapped: true,
+            query: {
+              bool: {
+                should: [{ term: { [SPACE_FIELD]: spaceId } }, { term: { [SPACE_FIELD]: '*' } }],
+                minimum_should_match: 1,
+              },
+            },
+          },
+        },
       ],
       minimum_should_match: 1,
     },
@@ -53,13 +82,13 @@ An AI index stores Knowledge Indicators (KIs): context prepared for agents, such
 
 Search relevant AI indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools. Fields differ between AI indices, so check what an index holds before filtering on one.
 
-${catalog.join('\n\n')}
+${catalogSection}
 
 ### Space scoping
 
 Documents in an AI index may be restricted to a single Kibana space. This conversation runs in the space \`${spaceId}\`.
 
-The \`spaces\` field is optional: some AI indices define it, others do not, and an index without it holds documents visible from every space. A document whose \`spaces\` contains \`*\` is likewise visible everywhere.
+An index is space-aware when its documents carry \`${PRIVILEGES_PATH}\`: one entry per space the document belongs to, each naming that space in its \`space\` field. An entry whose \`space\` is \`*\` means the document belongs to every space. Documents are visible from every space when their index is not space-aware — most AI indices do not define that field at all — and so is a document that carries the field but no entries.
 
 When you query AI indices with \`execute_esql\`, pass the query and space \`filter\` together. Adapt the query to the task, but copy the filter verbatim:
 
@@ -69,8 +98,8 @@ ${JSON.stringify({ query: 'FROM ai-index-* | LIMIT 100', filter: spaceFilter })}
 
 Two caveats:
 
-- Use that filter as written. The final clause keeps indices with no \`spaces\` field in the query — without it Elasticsearch drops those indices entirely and returns fewer results with no error.
-- Do not express the space condition as a \`WHERE\` clause. \`WHERE\` discards every document from indices that do not define \`spaces\`, the opposite of what you want.
+- Use that filter as written. \`ignore_unmapped\` is what keeps indices that are not space-aware in the query — without it Elasticsearch fails the whole query on those indices instead of returning their documents.
+- Do not express the space condition as a \`WHERE\` clause. \`${PRIVILEGES_PATH}\` is a \`nested\` field, and ES|QL cannot reference nested fields as columns at all, so the condition only works in the \`filter\`.
 
 `);
 };

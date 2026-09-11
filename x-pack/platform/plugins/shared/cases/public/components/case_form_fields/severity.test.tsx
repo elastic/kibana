@@ -56,7 +56,7 @@ describe('Severity form field', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ severity: 'high' }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ severity: 'high' }, true);
     });
   });
 

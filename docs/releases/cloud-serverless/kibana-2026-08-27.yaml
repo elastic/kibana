@@ -1,0 +1,431 @@
+products:
+- product: cloud-serverless
+  target: 2026-08-27
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-08-27
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 282175.yaml
+    checksum: faf8c2451924146db38dad4a25ce85d5fe4f609e
+  type: enhancement
+  title: Add document flyout deep links in Discover
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/282175
+  issues:
+  - https://github.com/elastic/kibana/issues/273654
+- file:
+    name: 282347.yaml
+    checksum: d19cb321a97cc118f2f48d8df66f943f3d359eb9
+  type: bug-fix
+  title: Fix Kibana crash when audit logs cannot be written
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Reports a degraded status instead of crashing when the file-based audit log appender cannot write.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/282347
+- file:
+    name: 283697.yaml
+    checksum: 99e6776d1465be250f56ed9a98463f252c6d1920
+  type: bug-fix
+  title: Fix legacy hash dashboard links in Security markdown panels
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/283697
+  issues:
+  - https://github.com/elastic/kibana/issues/283672
+- file:
+    name: 283925.yaml
+    checksum: 948e08defa171600814d2bdbb9875f1be507b980
+  type: feature
+  title: Enable the UniFi connector in Workflows
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/283925
+- file:
+    name: 284512.yaml
+    checksum: ffd61b77cf68ab66c6fcbea646f8b4c8aa15c704
+  type: feature
+  title: Assign a default Agent Builder agent per Kibana space
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Lets administrators set a default Agent Builder agent for a space so non-administrator users only see and use that agent.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/284512
+  issues:
+  - https://github.com/elastic/kibana/issues/283015
+- file:
+    name: 284900.yaml
+    checksum: 505eb553d2e3fb7323a35b4b400b0eb2de4f03b0
+  type: bug-fix
+  title: Fix Osquery agent picker failures with many policies
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes HTTP 414 and 431 errors in the Osquery agent picker when many Osquery-enabled policies made the request URL too long.
+  prs:
+  - https://github.com/elastic/kibana/pull/284900
+  issues:
+  - https://github.com/elastic/kibana/issues/266739
+- file:
+    name: 284910.yaml
+    checksum: cdb89f41394747e59a5c3630737b170d22fc6625
+  type: feature
+  title: Add write actions to the Jira Cloud connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds 14 write actions to the Jira Cloud connector, enabling workflows and agents to create and update issues, post comments, transition statuses, assign users, manage attachments, and more.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/284910
+- file:
+    name: 284912.yaml
+    checksum: 898574668e627dbcc1f36922f12367dae40f1009
+  type: feature
+  title: Add write actions to the Gmail connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds eight write actions to the Gmail connector — `listLabels`, `modifyLabels`, `markAsRead`, `markAsUnread`, `trashMessage`, `untrashMessage`, `sendMessage`, and `replyMessage`. They enable phishing-remediation workflows that can label, quarantine, and reply to emails directly from Kibana. Write actions require OAuth 2.0 authorization code authentication with the `gmail.modify` scope.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/284912
+- file:
+    name: 284972.yaml
+    checksum: 1bfc5195d08a8da9fe0f20681f2cbc8b3a78885c
+  type: bug-fix
+  title: Fix stale Kibana advanced settings after concurrent updates
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a race where Kibana could keep serving previous advanced settings after a concurrent update.
+  prs:
+  - https://github.com/elastic/kibana/pull/284972
+  issues:
+  - https://github.com/elastic/kibana/issues/284957
+- file:
+    name: 285153.yaml
+    checksum: 5b58de10d75ee0ca6b594f0a571d6d1a1e899ee0
+  type: bug-fix
+  title: Fix unexpected PKI logouts when HTTP/2 streams are cancelled
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: 'Fixes an issue where PKI authentication sessions were unexpectedly invalidated when in-flight requests were cancelled over HTTP/2, logging users out. This issue affected deployments on `server.protocol: http2`, which became the default in 9.0.0 when TLS is enabled.'
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/285153
+  issues:
+  - https://github.com/elastic/kibana/issues/258232
+- file:
+    name: 285178.yaml
+    checksum: 7d0cc27d19e7ae6f105420fc2d60c4d8549adc3f
+  type: bug-fix
+  title: Fix detection rules silently dropping exceptions for large IP range lists
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes detection rule exception items that use `ip_range` value lists with more than 200 dash-notation entries so those exceptions are evaluated and can suppress matching alerts.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/285178
+  issues:
+  - https://github.com/elastic/kibana/issues/283864
+- file:
+    name: 285794.yaml
+    checksum: f71ce143920ea5ef372e77ee4b508cf4fcf26f75
+  type: enhancement
+  title: Add auto-suggest to the Endpoint response console
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285794
+- file:
+    name: 286119.yaml
+    checksum: f2f8c421acb505f7939801f5c86deda06cbaabce
+  type: bug-fix
+  title: Fix Fleet agent CSV export when scroll strategy is configured
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet agent CSV exports that failed with a parsing error when `xpack.reporting.csv.scroll.strategy` was set to `scroll`.
+  prs:
+  - https://github.com/elastic/kibana/pull/286119
+- file:
+    name: 286324.yaml
+    checksum: b7293721e97eab59ce70e04d88eafa4042a0f00b
+  type: bug-fix
+  title: Fix Fleet agent status updates failing on large agent sets
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a loop where the Fleet agent-status task failed on large Elasticsearch responses, so agent status stopped updating.
+  prs:
+  - https://github.com/elastic/kibana/pull/286324
+  issues:
+  - https://github.com/elastic/kibana/issues/281488
+- file:
+    name: 286360.yaml
+    checksum: 295cc2aa49ed0413d0b2a96c456d1afca1a24a57
+  type: bug-fix
+  title: Fix missing border on YAML fields in Fleet integration settings
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286360
+  issues:
+  - https://github.com/elastic/kibana/issues/209914
+- file:
+    name: 286381.yaml
+    checksum: 8010f061ce63d8de171ebc2f8e5f0bd1bc7ce6da
+  type: bug-fix
+  title: Fix overflowing agent policy names in "Assign to new policy"
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286381
+  issues:
+  - https://github.com/elastic/kibana/issues/285362
+- file:
+    name: 286383.yaml
+    checksum: 558dfb61b419de96d2d138d72f01057eb96f3a15
+  type: bug-fix
+  title: Fix host column sorting on the Fleet Agents page
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286383
+  issues:
+  - https://github.com/elastic/kibana/issues/243607
+- file:
+    name: 286501.yaml
+    checksum: dcd6efcf9891991daf223dd272c3ebdc21d90c96
+  type: bug-fix
+  title: Fix unreadable project names in the Security Alerts table
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the linked projects column in the Security Alerts table so it shows project aliases instead of unreadable values.
+  prs:
+  - https://github.com/elastic/kibana/pull/286501
+  issues:
+  - https://github.com/elastic/kibana/issues/285276
+- file:
+    name: 286616.yaml
+    checksum: 903c1e10215419cdab61eb34364a2940b55a1a19
+  type: enhancement
+  title: Add `user.email` to Kibana audit logs
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/286616
+- file:
+    name: 286626.yaml
+    checksum: fdfe1d7b6f2ff32114667fd481ab517cbb273af3
+  type: bug-fix
+  title: Fix SLO dashboard panels when Elasticsearch query inspection is enabled
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286626
+  issues:
+  - https://github.com/elastic/kibana/issues/286589
+- file:
+    name: 286639.yaml
+    checksum: 587ff7e51c1ef8156d0afc5ff1d467ca2cc2b3f2
+  type: bug-fix
+  title: Fix empty anomaly detection chart for data views from other projects
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the anomaly detection wizard time-range chart staying empty after "Use full data" when the data view points at data in another project.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/286639
+- file:
+    name: 286647.yaml
+    checksum: 6c950e438af2cc3a24c9cf5de6850ee1b771c76c
+  type: bug-fix
+  title: Fix empty Data Visualizer chart for data views from other projects
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Data Visualizer document-count chart staying empty after "Use full data" when the data view points at data in another project.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/286647
+- file:
+    name: 286695.yaml
+    checksum: ccb0adc3ca7bdb6963efa640f6ca430acd7c4ead
+  type: bug-fix
+  title: Fix Console autocomplete after triple-quoted values
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/286695
+  issues:
+  - https://github.com/elastic/kibana/issues/284395
+- file:
+    name: 286699.yaml
+    checksum: 514a309623dbbf644286d7534487da360237d872
+  type: bug-fix
+  title: Fix Console autocomplete quoting boolean and numeric values
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Console autocomplete now inserts boolean and numeric suggestions as JSON primitives instead of quoted strings.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/286699
+  issues:
+  - https://github.com/elastic/kibana/issues/279853
+- file:
+    name: 286704.yaml
+    checksum: 5a260df4cde274cbff7e336b4db06ee59a82b9e2
+  type: bug-fix
+  title: Fix duplicate Cut, Copy, and Paste actions in Dev Tools Console
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/286704
+  issues:
+  - https://github.com/elastic/kibana/issues/284086
+- file:
+    name: 286758.yaml
+    checksum: e322ae089802c571717122894d1fffceb4f57f0f
+  type: bug-fix
+  title: Fix zero throughput for Entity Analytics managed integrations in Fleet
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes Fleet integration throughput and Discover links for Entity Analytics managed integrations that use dynamic datasets (Okta, Active Directory, Microsoft Entra ID).
+  prs:
+  - https://github.com/elastic/kibana/pull/286758
+- file:
+    name: 286826.yaml
+    checksum: 6b663e6a50880d827c9f5bcdcb8495dc2965f3a3
+  type: bug-fix
+  title: Fix pre-execution workflows that were disappearing in Agent Builder settings
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Keeps pre-execution workflows that have been turned off visible in Agent Builder settings so you can remove them.
+  prs:
+  - https://github.com/elastic/kibana/pull/286826
+- file:
+    name: 286842.yaml
+    checksum: 81d661588a52311bc62d03eb5009e1e6f5fcc733
+  type: bug-fix
+  title: Fix service overview chart tooltips overlapping the service flyout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286920
+  - https://github.com/elastic/kibana/pull/286842
+  issues:
+  - https://github.com/elastic/kibana/issues/286822
+- file:
+    name: 286890.yaml
+    checksum: 1333f67eee170aa97be90cf9c59fb76924a9b0eb
+  type: bug-fix
+  title: Fix alert rule names showing as "Unknown rule" in case activity feed
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where alert rule names in the Cases activity feed would display as "Unknown rule" when expanding a collapsed entry containing many alert attachments.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286890
+  issues:
+  - https://github.com/elastic/kibana/issues/284799
+- file:
+    name: 286909.yaml
+    checksum: 1bb246a39d1b476426e284852fc5263357b386c4
+  type: bug-fix
+  title: Fix Cloud Security benchmarks "Evaluated" counts above 500 assets
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Cloud Security benchmarks "Evaluated" counter so deployments with more than 500 evaluated assets show an exact count instead of an undercount.
+  prs:
+  - https://github.com/elastic/kibana/pull/286909
+- file:
+    name: 286952.yaml
+    checksum: db8f7605c0148a0bd66e21fb31bcaf9e375212fa
+  type: bug-fix
+  title: Fix vertical alignment in the document flyout Entities section
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286952
+- file:
+    name: 286972.yaml
+    checksum: 6e1c60edb5a304d4606be7728001251e191cbe17
+  type: bug-fix
+  title: Fix Cases allowing alert and event attachments from other projects or clusters
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Rejects alert and event attachments that reference other projects or clusters so they cannot be added to a case.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286972
+- file:
+    name: 286982.yaml
+    checksum: 763f1b51b36317cd4f45e38dfdad2f10307676c5
+  type: bug-fix
+  title: Fix alert rules stuck after UIAM API key failures
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes alert rules that could not recover after an unusable UIAM API key. Rule settings and SLO lookup failures are now visible to repair logic. UIAM keys leaked onto rules with user-created API keys are removed so the rule falls back to the user key.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286982

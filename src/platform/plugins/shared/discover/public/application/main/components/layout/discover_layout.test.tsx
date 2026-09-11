@@ -23,6 +23,7 @@ import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { render, screen, waitFor } from '@testing-library/react';
+import * as savedSearchUrlConflictCallout from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
 const setup = async ({
   dataView,
@@ -104,6 +105,22 @@ const setup = async ({
 };
 
 describe('Discover component', () => {
+  test('renders the conflict callout before the sidebar and results container', async () => {
+    const calloutSpy = jest
+      .spyOn(savedSearchUrlConflictCallout, 'SavedSearchURLConflictCallout')
+      .mockReturnValue(<div data-test-subj="testConflictCallout" />);
+
+    try {
+      await setup({ dataView: dataViewWithTimefieldMock });
+
+      const callout = screen.getByTestId('testConflictCallout');
+      const layout = screen.getByTestId('discoverLayoutResizableContainer');
+      expect(callout.nextElementSibling).toContainElement(layout);
+    } finally {
+      calloutSpy.mockRestore();
+    }
+  }, 10000);
+
   test('selected data view without time field displays no chart and table toggle', async () => {
     await setup({ dataView: dataViewMock });
     expect(screen.queryByTestId('dscHideHistogramButton')).not.toBeInTheDocument();

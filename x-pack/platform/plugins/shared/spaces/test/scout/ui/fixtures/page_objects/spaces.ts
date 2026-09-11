@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ScoutPage } from '@kbn/scout';
 
 export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
@@ -21,10 +22,7 @@ export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj
-      .locator('chromeNextGlobalHeader')
-      .or(this.page.testSubj.locator('kibanaProjectHeader'))
-      .isVisible();
+    return await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible();
   }
 
   async navigateToHome() {
@@ -78,7 +76,16 @@ export class SpacesPage {
   }
 
   async getCurrentSpaceTitle() {
-    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
+    const contextTrigger = this.page.testSubj.locator('contextSwitcherTriggerButton');
+    const classicTrigger = this.page.testSubj.locator('spacesNavSelector');
+    await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
+
+    if (await contextTrigger.isVisible()) {
+      return (await contextTrigger.getAttribute('data-space-name'))?.trim() ?? null;
+    }
+
+    // Classic nav exposes the space name only via `title`.
+    return (await classicTrigger.getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
@@ -309,6 +316,15 @@ export class SpacesPage {
     return this.page.testSubj.locator('cps-project-picker-button');
   }
 
+  /**
+   * "Hide all" shortcut in the feature-visibility section of the create/edit
+   * space form. Absent when `xpack.spaces.allowFeatureVisibility` is off, which
+   * is the case for every serverless project type.
+   */
+  hideAllFeaturesLinkLocator() {
+    return this.page.testSubj.locator('hideAllFeaturesLink');
+  }
+
   async setSpaceName(name: string) {
     await this.page.testSubj.fill('addSpaceName', name);
   }
@@ -427,11 +443,29 @@ export class SpacesPage {
     await this.spacesMenuPanelLocator().waitFor({ state: 'visible' });
   }
 
+  /**
+   * Selects a space in the nav menu and waits for the resulting navigation to commit.
+   *
+   * Selecting a space `await`s an analytics flush before it calls `navigateToUrl`
+   * (`nav_control/components/spaces_menu.tsx`), so the click resolves long before the
+   * browser starts navigating — regularly longer than the default 10s expect timeout on a
+   * stack where the telemetry endpoint is unreachable. Settling here rather than in each
+   * spec also means callers are never left with an in-flight navigation for a subsequent
+   * `page.goto` to collide with.
+   */
   async switchToSpaceFromNav(spaceId: string) {
-    await this.page.testSubj
-      .locator(`space-${spaceId}`)
-      .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
-      .click();
+    const landedInSpace = (url: URL) =>
+      spaceId === DEFAULT_SPACE_ID
+        ? !url.pathname.startsWith('/s/')
+        : url.pathname.startsWith(`/s/${spaceId}/`);
+
+    await Promise.all([
+      this.page.waitForURL(landedInSpace, { waitUntil: 'commit', timeout: 30_000 }),
+      this.page.testSubj
+        .locator(`space-${spaceId}`)
+        .or(this.page.testSubj.locator(`${spaceId}-selectableSpaceItem`))
+        .click(),
+    ]);
   }
 
   navSearchInputLocator() {

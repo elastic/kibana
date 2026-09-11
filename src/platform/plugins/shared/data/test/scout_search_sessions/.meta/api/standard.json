@@ -1,5 +1,5 @@
 {
-  "sha1": "7fb379f736a0c45f3ff7120b9cb520d2262459ea",
+  "sha1": "498a21e193974237e8b240f03be8b69205afd30e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 184,
-        "column": 13
+        "line": 154,
+        "column": 7
       }
     },
     {
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
-        "line": 208,
+        "line": 176,
         "column": 28
       }
     },
@@ -156,6 +156,48 @@
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_permissions.spec.ts",
         "line": 30,
         "column": 16
+      }
+    },
+    {
+      "id": "60f7b08f83daab5-5ef681c6f88830b",
+      "title": "search session - searches integration (stateful only) keeps an unsaved session short-lived and extends it once the session is saved and extended",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_searches_integration.spec.ts",
+        "line": 43,
+        "column": 13
+      }
+    },
+    {
+      "id": "60f7b08f83daab5-0951fe094ebe1af",
+      "title": "search session - searches integration (stateful only) deletes the async searches it grouped when the session is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_searches_integration.spec.ts",
+        "line": 80,
+        "column": 15
+      }
+    },
+    {
+      "id": "60f7b08f83daab5-88b0f46e64b286c",
+      "title": "search session - searches integration (stateful only) records a search submitted after the session's existing searches have already completed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_searches_integration.spec.ts",
+        "line": 118,
+        "column": 20
       }
     },
     {

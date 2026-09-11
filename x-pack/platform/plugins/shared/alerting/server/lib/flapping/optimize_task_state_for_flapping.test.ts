@@ -75,7 +75,7 @@ describe('optimizeTaskStateForFlapping', () => {
       );
       expect(alertIds).toEqual(['2']);
 
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Recovered alerts have exceeded the max alert limit of 2 : dropping 1 alert.'
       );
     });

@@ -16,12 +16,24 @@ const mockSetupMutate = jest.fn();
 
 let capturedFlyoutProps: Record<string, unknown> = {};
 
+const mockParseState = jest.fn();
+
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
     capturedFlyoutProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
-  RULE_BUILDER_REGISTRY: {},
+  RULE_BUILDER_REGISTRY: {
+    threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
+  },
+}));
+
+jest.mock('@kbn/alerting-v2-schemas', () => ({
+  getBreachEsqlQuery: (query: unknown) =>
+    typeof query === 'object' && query !== null && 'breach' in (query as Record<string, unknown>)
+      ? (query as Record<string, unknown>).breach
+      : '',
+  getRecoverEsqlQuery: () => undefined,
 }));
 
 jest.mock('./use_create_rule', () => ({
@@ -81,7 +93,12 @@ let hookApi: ReturnType<typeof useComposeDiscoverFlyout> | undefined;
 const Harness = ({ redirectPath }: { redirectPath?: string }) => {
   const api = useComposeDiscoverFlyout({ createSuccessRedirectPath: redirectPath });
   hookApi = api;
-  return <>{api.flyout}</>;
+  return (
+    <>
+      {api.flyout}
+      {api.confirmationModal}
+    </>
+  );
 };
 
 const renderAndOpenCreate = async (redirectPath?: string) => {
@@ -258,5 +275,98 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
+  const builderRule = {
+    id: 'rule-builder',
+    metadata: { name: 'Builder rule', builder_type: 'threshold' },
+    query: { format: 'standalone', breach: 'FROM logs-* | STATS count() | WHERE count > 5' },
+    recovery_strategy: null,
+    time_field: '@timestamp',
+  } as unknown as RuleApiResponse;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('shows confirmation modal when builder rule query cannot be parsed', async () => {
+    mockParseState.mockReturnValue(null);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingV2ConfirmBuilderToEsqlModal')).toBeInTheDocument();
+    });
+  });
+
+  it('opens flyout in ES|QL mode after confirmation', async () => {
+    mockParseState.mockReturnValue(null);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertingV2ConfirmBuilderToEsqlModal')).toBeInTheDocument();
+    });
+
+    act(() => {
+      screen.getByText('Open in ES|QL mode').click();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBeUndefined();
+    expect(capturedFlyoutProps.mode).toBe('edit');
+  });
+
+  it('does not open flyout when user cancels confirmation', async () => {
+    mockParseState.mockReturnValue(null);
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertingV2ConfirmBuilderToEsqlModal')).toBeInTheDocument();
+    });
+
+    act(() => {
+      screen.getByText('Cancel').click();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('opens directly in builder mode when parse succeeds', async () => {
+    mockParseState.mockReturnValue({ stats: [{ fn: 'count', alias: 'count' }] });
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(builderRule);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBe('threshold');
+    expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
   });
 });
