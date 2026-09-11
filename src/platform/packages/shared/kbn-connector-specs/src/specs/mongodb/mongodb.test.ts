@@ -171,7 +171,7 @@ describe('database resolution', () => {
     ).rejects.toThrow('database name is required');
   });
 
-  it('surfaces the real parse error for a malformed URI instead of "database name is required"', async () => {
+  it('returns a sanitized error for a malformed URI instead of echoing the raw parse error', async () => {
     const ctxWithMalformedUri = {
       ...mockContext,
       config: { uri: 'not-a-valid-uri' },
@@ -179,7 +179,7 @@ describe('database resolution', () => {
 
     await expect(
       MongoDBConnector.actions.count.handler(ctxWithMalformedUri, { collection: 'orders' })
-    ).rejects.toThrow(/invalid scheme|invalid connection string/i);
+    ).rejects.toThrow('config.uri is not a valid MongoDB connection string');
   });
 });
 

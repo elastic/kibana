@@ -61,10 +61,15 @@ const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulat
 const resolveDb = async (inputDatabase: string | undefined, uri: string): Promise<string> => {
   if (inputDatabase) return inputDatabase;
 
-  // Let a malformed uri throw its own MongoParseError here rather than masking it —
-  // ctx.getClient('mongodb') would hit the same parse failure, but only after this call.
   const ConnectionString = await loadConnectionString();
-  const { pathname } = new ConnectionString(uri);
+  let pathname: string;
+  try {
+    ({ pathname } = new ConnectionString(uri));
+  } catch {
+    // The raw parse error can echo the URI (including any embedded password), so throw a
+    // generic message — matching the guard in build().
+    throw new Error('config.uri is not a valid MongoDB connection string');
+  }
   const dbFromUri = pathname.slice(1);
   if (dbFromUri) return dbFromUri;
 
