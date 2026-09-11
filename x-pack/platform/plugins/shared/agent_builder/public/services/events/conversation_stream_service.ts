@@ -13,9 +13,12 @@ import { activeStreamReducer, initialActiveStreamState } from './active_stream_s
 
 export interface ChatEventSource {
   getChatEvents$: (conversationId: string) => Observable<BrowserChatEvent>;
+  /** Fires when the run terminates, however it terminates - completed, errored or aborted. */
+  getRunEnded$: (conversationId: string) => Observable<void>;
 }
 
 interface ConversationStream {
+  conversationId: string;
   /** The fold's accumulator, and what consumers subscribe to. */
   state$: BehaviorSubject<ActiveStreamState>;
   sub: Subscription;
@@ -33,13 +36,29 @@ export class ConversationStreamService {
       existing.ended = false;
       return existing;
     }
+    return this.createStream(conversationId);
+  }
+
+  private createStream(conversationId: string): ConversationStream {
     const state$ = new BehaviorSubject<ActiveStreamState>(initialActiveStreamState);
     const sub = this.source
       .getChatEvents$(conversationId)
       .subscribe((event) => state$.next(activeStreamReducer(state$.getValue(), event)));
-    const stream: ConversationStream = { state$, sub, ended: false };
+    const stream: ConversationStream = { conversationId, state$, sub, ended: false };
     this.streams.set(conversationId, stream);
+
+    sub.add(this.source.getRunEnded$(conversationId).subscribe(() => this.onRunEnded(stream)));
     return stream;
+  }
+
+  private onRunEnded(stream: ConversationStream) {
+    const { conversationId, state$ } = stream;
+    stream.ended = true;
+    const state = state$.getValue();
+    if (state.activeExecution) {
+      state$.next({ ...state, activeExecution: null });
+    }
+    this.maybeTeardown(conversationId);
   }
 
   private maybeTeardown(conversationId: string) {
@@ -65,23 +84,5 @@ export class ConversationStreamService {
   /** Non-reactive snapshot: is this conversation mid-run right now. */
   isStreamActive(conversationId: string): boolean {
     return !!this.streams.get(conversationId)?.state$.getValue().activeExecution;
-  }
-
-  /**
-   * Marks the run for this conversation as over. Must be called for every run, including the ones
-   * that never reach `round_complete` (stop, error, dropped connection) - otherwise the abandoned
-   * draft stays in the fold and the next run appends to it.
-   */
-  notifyStreamEnded(conversationId: string) {
-    const stream = this.streams.get(conversationId);
-    if (!stream) {
-      return;
-    }
-    stream.ended = true;
-    const state = stream.state$.getValue();
-    if (state.activeExecution) {
-      stream.state$.next({ ...state, activeExecution: null });
-    }
-    this.maybeTeardown(conversationId);
   }
 }

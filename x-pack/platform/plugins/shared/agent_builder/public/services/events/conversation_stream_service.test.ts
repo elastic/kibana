@@ -28,15 +28,23 @@ const roundCompleteEvent = (roundId: string): ChatEvent =>
 // The whole point of ChatEventSource is to avoid needing the real EventsService here.
 const makeFakeSource = () => {
   const subjects = new Map<string, Subject<ChatEvent>>();
+  const runEndings = new Map<string, Subject<void>>();
   const getSubject = (id: string): Subject<ChatEvent> => {
     if (!subjects.has(id)) subjects.set(id, new Subject());
     return subjects.get(id)!;
   };
+  const getRunEndings = (id: string): Subject<void> => {
+    if (!runEndings.has(id)) runEndings.set(id, new Subject());
+    return runEndings.get(id)!;
+  };
   const source: ChatEventSource = {
     // BrowserChatEvent = ChatEvent, structurally identical, no cast needed
     getChatEvents$: (conversationId) => getSubject(conversationId).asObservable() as any,
+    getRunEnded$: (conversationId) => getRunEndings(conversationId).asObservable(),
   };
-  return { source, getSubject };
+  // What `propagateEvents`' `finalize` does in production: the run terminated, however it ended.
+  const endRun = (id: string) => getRunEndings(id).next();
+  return { source, getSubject, endRun };
 };
 
 describe('ConversationStreamService', () => {
@@ -137,10 +145,10 @@ describe('ConversationStreamService', () => {
     expect(service.isStreamActive('A')).toBe(false);
   });
 
-  it('tears down source subscription after notifyStreamEnded when no subscribers and execution is in-flight', () => {
+  it('tears down source subscription once the run ends with no subscribers left', () => {
     // maybeTeardown keeps the stream alive while (!ended && !isIdle).
-    // Once ended=true, it tears down regardless of idle state.
-    const { source, getSubject } = makeFakeSource();
+    // Once the run has ended, it tears down regardless of idle state.
+    const { source, getSubject, endRun } = makeFakeSource();
     const service = new ConversationStreamService(source);
 
     // Subscribe, then push an event to make activeExecution non-null (not idle)
@@ -153,14 +161,14 @@ describe('ConversationStreamService', () => {
     sub.unsubscribe();
     expect(getSubject('Z').observed).toBe(true); // source still subscribed
 
-    // notifyStreamEnded sets ended=true then calls maybeTeardown:
+    // The run ends: onRunEnded sets ended=true then calls maybeTeardown:
     //   state$.observed=false, ended=true -> teardown condition met
-    service.notifyStreamEnded('Z');
+    endRun('Z');
     expect(getSubject('Z').observed).toBe(false); // source subscription torn down
   });
 
   it('starts a fresh draft when a run ends without round_complete (stop, error, disconnect)', () => {
-    const { source, getSubject } = makeFakeSource();
+    const { source, getSubject, endRun } = makeFakeSource();
     const service = new ConversationStreamService(source);
 
     let state: ActiveStreamState | undefined;
@@ -173,7 +181,7 @@ describe('ConversationStreamService', () => {
 
     // Run 2 streams, then the user hits stop - no round_complete ever arrives
     getSubject('A').next(messageChunkEvent('abandoned answer'));
-    service.notifyStreamEnded('A');
+    endRun('A');
 
     // Run 3 must not inherit run 2's draft, and run 1 must still be sealed
     getSubject('A').next(messageChunkEvent('third answer'));
@@ -183,14 +191,14 @@ describe('ConversationStreamService', () => {
   });
 
   it('re-subscribe after ended stream creates a fresh stream emitting initialActiveStreamState', () => {
-    const { source, getSubject } = makeFakeSource();
+    const { source, getSubject, endRun } = makeFakeSource();
     const service = new ConversationStreamService(source);
 
     // Create, run, then tear down
     const sub = service.getActiveStream$('X').subscribe(() => {});
     getSubject('X').next(messageChunkEvent('data')); // activeExecution non-null
     sub.unsubscribe(); // kept alive (not idle, not ended)
-    service.notifyStreamEnded('X'); // tears down, deletes from streams map
+    endRun('X'); // tears down, deletes from streams map
 
     // Re-subscribe: ensure() finds nothing, creates a fresh stream
     const newEmissions: ActiveStreamState[] = [];
