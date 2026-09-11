@@ -7,4 +7,4 @@
 
 export { apiTest, tags } from '@kbn/scout-security';
 export * as testData from './constants';
-export { cleanupThreatIntelDocs, SECURITY_READ_ONLY_ROLE } from './helpers';
+export { cleanupThreatReportsByIds, SECURITY_READ_ONLY_ROLE } from './helpers';

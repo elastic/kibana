@@ -11,7 +11,7 @@ import {
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
 } from '../../../../common/threat_intel';
-import { apiTest, tags, testData, cleanupThreatIntelDocs } from '../fixtures';
+import { apiTest, tags, testData, cleanupThreatReportsByIds } from '../fixtures';
 
 interface CreateReportResponse {
   status: 'ingested' | 'duplicate';
@@ -20,8 +20,6 @@ interface CreateReportResponse {
 
 /** Shaped from the service's own result type so a field rename fails the type check. */
 type ExtractIocsResponse = ExtractIocsResult;
-
-const MANUAL_ADAPTER_ID = 'manual:analyst-paste';
 
 /**
  * `create_threat_report` writes to `.kibana-threat-reports`, which is created
@@ -33,6 +31,7 @@ const MANUAL_ADAPTER_ID = 'manual:analyst-paste';
  */
 apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.classic] }, () => {
   let writeHeaders: Record<string, string>;
+  const createdReportIds: string[] = [];
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -43,7 +42,7 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
   });
 
   apiTest.afterAll(async ({ esClient }) => {
-    await cleanupThreatIntelDocs(esClient, MANUAL_ADAPTER_ID);
+    await cleanupThreatReportsByIds(esClient, createdReportIds);
   });
 
   apiTest('ingests a pasted report, then dedups an identical repeat', async ({ apiClient }) => {
@@ -68,6 +67,7 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
     const firstBody = first.body as CreateReportResponse;
     expect(firstBody.status).toBe('ingested');
     expect(firstBody.report_id).toBeDefined();
+    createdReportIds.push(firstBody.report_id);
 
     // Byte-identical content fingerprints the same, so the second call must be
     // recognized as a duplicate and must not create a second report.

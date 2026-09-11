@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { THREAT_INTEL_SOURCES_INDEX, THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
+import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
 
 /** Minimal ES client surface these tests rely on. */
 interface EsLike {
@@ -42,17 +42,17 @@ export const SECURITY_READ_ONLY_ROLE = {
 };
 
 /**
- * Remove documents this suite created without dropping the indices themselves,
- * so a later assertion about lazily created indices is not affected by cleanup.
+ * Remove only the specific threat reports created by this suite run.
+ * Scoped to IDs (not adapter_id) so parallel runs or real users on a shared
+ * cluster are not affected.
  */
-export const cleanupThreatIntelDocs = async (esClient: EsLike, adapterId: string) => {
-  for (const index of [THREAT_INTEL_SOURCES_INDEX, THREAT_REPORTS_INDEX]) {
-    await esClient.deleteByQuery({
-      index,
-      query: { term: { 'source.adapter_id': adapterId } },
-      refresh: true,
-      ignore_unavailable: true,
-      conflicts: 'proceed',
-    });
-  }
+export const cleanupThreatReportsByIds = async (esClient: EsLike, ids: string[]) => {
+  if (ids.length === 0) return;
+  await esClient.deleteByQuery({
+    index: THREAT_REPORTS_INDEX,
+    query: { ids: { values: ids } },
+    refresh: true,
+    ignore_unavailable: true,
+    conflicts: 'proceed',
+  });
 };
