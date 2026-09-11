@@ -21,13 +21,7 @@ import type {
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
-import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import {
-  getMaxSignalsWarning,
-  getSuppressionMaxSignalsWarning,
-  stringifyAfterKey,
-} from '../utils/utils';
-import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import { stringifyAfterKey } from '../utils/utils';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 
 import type {
@@ -59,7 +53,6 @@ interface MultiTermsCompositeArgsBase {
   logger: Logger;
   afterKey: Record<string, string | number | null> | undefined;
   createAlertsHook: CreateAlertsHook;
-  isAlertSuppressionActive: boolean;
   isLoggedRequestsEnabled: boolean;
 }
 
@@ -72,8 +65,7 @@ interface LoggedRequestsProps {
 }
 
 type MultiTermsCompositeResult =
-  | (Omit<GenericBulkCreateResponse<NewTermsAlertLatest>, 'suppressedItemsCount'> &
-      LoggedRequestsProps)
+  | ({ alertsWereTruncated: boolean } & LoggedRequestsProps)
   | LoggedRequestsProps
   | undefined;
 
@@ -96,7 +88,6 @@ const multiTermsCompositeNonRetryable = async ({
   afterKey,
   createAlertsHook,
   batchSize,
-  isAlertSuppressionActive,
   isLoggedRequestsEnabled,
 }: MultiTermsCompositeArgs): Promise<MultiTermsCompositeResult> => {
   const {
@@ -238,13 +229,12 @@ const multiTermsCompositeNonRetryable = async ({
         throw new Error('Aggregations were missing on document fetch search result');
       }
 
-      const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
+      const { alertsWereTruncated } = await createAlertsHook(docFetchResultWithAggs);
 
-      if (bulkCreateResult.alertsWereTruncated) {
-        result.warningMessages.push(
-          isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
-        );
-        return isLoggedRequestsEnabled ? { ...bulkCreateResult, loggedRequests } : bulkCreateResult;
+      if (alertsWereTruncated) {
+        return isLoggedRequestsEnabled
+          ? { alertsWereTruncated, loggedRequests }
+          : { alertsWereTruncated };
       }
     }
 
