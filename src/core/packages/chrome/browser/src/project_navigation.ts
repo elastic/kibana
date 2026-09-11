@@ -113,7 +113,7 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'home' | 'panelOpener';
+export type RenderAs = 'panelOpener';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -180,8 +180,7 @@ interface ChromeNavigationNodeCommon
  */
 export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon {
   /**
-   * Indicate if this is a special node
-   * - home - node should be rendered as the home link
+   * When `panelOpener`, this node opens a secondary panel instead of navigating.
    */
   renderAs?: RenderAs;
   /** App id or deeplink id */
@@ -245,10 +244,6 @@ export type RootNodeDefinition<
   ChildrenId extends string = Id
 > =
   | StandardNodeDefinition<LinkId, Id, ChildrenId>
-  | (NodeDefinitionCommon<LinkId, Id> & {
-      renderAs: 'home';
-      children?: never;
-    })
   | RootNodePanelOpenerDefinition<LinkId, Id, ChildrenId>;
 
 /**

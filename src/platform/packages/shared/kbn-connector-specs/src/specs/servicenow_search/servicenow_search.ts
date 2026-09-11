@@ -105,6 +105,7 @@ export const ServicenowSearch: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search ServiceNow records using full-text search across a given table',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
@@ -133,6 +134,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getRecord: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a specific ServiceNow record by its sys_id. Works for any table. ' +
         'For knowledge articles (kb_knowledge table), request fields: sys_id,number,short_description,text,topic,category,author,sys_created_on,sys_updated_on,workflow_state,kb_knowledge_base,kb_category',
@@ -154,6 +156,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listRecords: {
       isTool: true,
+      scope: 'read',
       description: 'List records from a ServiceNow table with optional encoded query filter',
       input: ListRecordsInputSchema,
       handler: async (ctx, input: ListRecordsInput) => {
@@ -178,6 +181,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List available ServiceNow tables with their labels and descriptions. Use this to discover what tables exist in the instance before querying them.',
       input: ListTablesInputSchema,
@@ -204,6 +208,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listKnowledgeBases: {
       isTool: true,
+      scope: 'read',
       description:
         'List available ServiceNow knowledge bases with their titles and descriptions. Use this to discover what knowledge bases exist before searching for articles.',
       input: ListKnowledgeBasesInputSchema,
@@ -228,6 +233,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getComments: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve comments and work notes for a ServiceNow record (e.g., an incident or change request). ' +
         'Returns journal entries in chronological order. Call this after retrieving a record to understand its history.',
@@ -253,6 +259,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a ServiceNow attachment as base64-encoded content by its attachment sys_id. ' +
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
@@ -292,6 +299,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Describe the schema of a ServiceNow table by listing all its fields (including inherited fields), ' +
         'their types, labels, and constraints. Use this to understand the structure of a table before ' +

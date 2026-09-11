@@ -184,6 +184,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
             id: pendingTemplateData.templateId,
             version: pendingTemplateData.templateVersion,
             fields: pendingTemplateData.definition.fields,
+            settings: pendingTemplateData.definition.settings,
           }
         : null;
 
@@ -200,7 +201,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
     }
 
     changeTemplate(
-      { caseData, newTemplate, extendedFields },
+      { caseData, newTemplate, extendedFields, entryPoint: 'case_view_sidebar' },
       {
         onSuccess: () => {
           closeConfirmModal();

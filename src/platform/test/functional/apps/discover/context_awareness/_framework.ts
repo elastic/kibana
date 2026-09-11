@@ -9,6 +9,12 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/_framework.ts
 
+/**
+ * Scout audit: MOVE TO JEST UI (RTL). Both tests only assert that a custom-context formatter
+ * stringified a static record into `exampleDataSourceProfileDocViewRecord`.
+ * Target: context_awareness/profile_providers/example/example_data_source_profile/components/custom_doc_view.tsx
+ * Precedent: profile_providers/observability/log_document_profile/accessors/get_doc_viewer.test.tsx
+ */
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';

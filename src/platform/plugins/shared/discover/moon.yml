@@ -123,6 +123,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
   - '@kbn/cps'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'

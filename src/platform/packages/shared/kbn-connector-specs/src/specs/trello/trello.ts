@@ -91,6 +91,7 @@ export const Trello: ConnectorSpec = {
   actions: {
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the currently authenticated Trello member. Returns the member record for the API key/token in use. Useful for verifying which account is connected or resolving your own member ID.',
       input: EmptyInputSchema,
@@ -99,6 +100,7 @@ export const Trello: ConnectorSpec = {
 
     listBoards: {
       isTool: true,
+      scope: 'read',
       description:
         'List all boards the authenticated member belongs to. Use to discover boards and their IDs before drilling into lists or cards.',
       input: EmptyInputSchema,
@@ -110,6 +112,7 @@ export const Trello: ConnectorSpec = {
 
     getBoard: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full details of a single Trello board by ID. Use when you already have a board ID and need its metadata.',
       input: BoardIdInputSchema,
@@ -123,6 +126,7 @@ export const Trello: ConnectorSpec = {
 
     listBoardLists: {
       isTool: true,
+      scope: 'read',
       description:
         'List the (open) lists on a board, e.g. "To Do", "Doing", "Done". Use the returned list IDs with listListCards or createCard.',
       input: BoardIdInputSchema,
@@ -136,6 +140,7 @@ export const Trello: ConnectorSpec = {
 
     listBoardCards: {
       isTool: true,
+      scope: 'read',
       description:
         'List all open cards on a board, across all of its lists. Returns every card with no limit — for large boards this can be hundreds of records. For large boards, prefer search() with idBoards to cap results. Use when you need every card on a board rather than one list at a time.',
       input: BoardIdInputSchema,
@@ -149,6 +154,7 @@ export const Trello: ConnectorSpec = {
 
     listBoardLabels: {
       isTool: true,
+      scope: 'read',
       description:
         'List the labels defined on a board. Returns label IDs, names, and colors. Call this before createCard or updateCard to resolve label names to IDs for the idLabels parameter.',
       input: BoardIdInputSchema,
@@ -162,6 +168,7 @@ export const Trello: ConnectorSpec = {
 
     listBoardMembers: {
       isTool: true,
+      scope: 'read',
       description:
         'List the members (collaborators) of a board. Returns member IDs, usernames, and full names. Call this before createCard or updateCard to resolve member names to IDs for the idMembers parameter.',
       input: BoardIdInputSchema,
@@ -175,6 +182,7 @@ export const Trello: ConnectorSpec = {
 
     listListCards: {
       isTool: true,
+      scope: 'read',
       description:
         "List the open cards within a single list. Use once you have a list ID (from listBoardLists) and want just that list's cards.",
       input: ListListCardsInputSchema,
@@ -188,6 +196,7 @@ export const Trello: ConnectorSpec = {
 
     getCard: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full details of a single card by ID, including its description, due date, members, and labels. Use when you already have a card ID and need the complete record.',
       input: CardIdInputSchema,
@@ -201,6 +210,7 @@ export const Trello: ConnectorSpec = {
 
     getCardComments: {
       isTool: true,
+      scope: 'read',
       description:
         'List comments posted on a card (the conversation thread). Use when you have a card ID and need to read its discussion history.',
       input: CardIdInputSchema,
@@ -217,6 +227,7 @@ export const Trello: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search across Trello boards and cards by keyword or query operators. Use when you need to find items by keyword rather than browsing a known board/list.',
       input: SearchInputSchema,
@@ -235,6 +246,7 @@ export const Trello: ConnectorSpec = {
 
     createCard: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new card in a list. Returns the created card, including its ID. Use listBoardLists first to find the target list ID.',
       input: CreateCardInputSchema,
@@ -254,6 +266,7 @@ export const Trello: ConnectorSpec = {
 
     updateCard: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Edit a card's fields, move it to another list, or archive/unarchive it. Set idList to move the card, or closed: true to archive it (there is no hard-delete action). Returns the updated card.",
       input: UpdateCardInputSchema,
@@ -277,6 +290,7 @@ export const Trello: ConnectorSpec = {
 
     addComment: {
       isTool: true,
+      scope: 'write',
       description:
         "Post a comment on a card. Use to leave notes or updates on a card's activity feed. Returns the created comment action.",
       input: AddCommentInputSchema,

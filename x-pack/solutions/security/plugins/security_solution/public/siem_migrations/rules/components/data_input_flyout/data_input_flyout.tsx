@@ -174,7 +174,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={modalTitleId} aria-label={RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
+              <h2 id={modalTitleId}>
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title"
                   defaultMessage="Upload SIEM rules"
