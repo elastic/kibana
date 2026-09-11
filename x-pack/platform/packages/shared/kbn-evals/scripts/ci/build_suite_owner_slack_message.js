@@ -146,9 +146,6 @@ async function main() {
   } catch (error) {
     const message = formatTriageError(error);
     console.error(`--- Triage summary failed: ${message}`);
-    if (error && typeof error === 'object' && typeof error.details === 'string') {
-      console.error(error.details);
-    }
     triage = { modelId: TRIAGE_OPENROUTER_CONNECTOR_ID, error: message };
   }
 
