@@ -172,7 +172,7 @@ export const connectToQueryState = <S extends QueryState>(
         // into the state container, otherwise consumers like the DateRangePicker would
         // render the raw, unvalidated value instead of the normalized default
         if (!isTimeValid) {
-          stateContainer.set({ ...stateContainer.get(), time });
+          stateContainer.set({ ...state, time: _.cloneDeep(time) });
         }
       }
 
