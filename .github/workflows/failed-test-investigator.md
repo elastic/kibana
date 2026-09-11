@@ -284,7 +284,13 @@ Request an automatic fix immediately for a fixable **`application`** failure. Fo
 
 **Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
 
-An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate.
+An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate or the team opt-out below.
+
+#### Teams opted out of automatic fix requests
+
+Some teams prefer to request fixes themselves. When the issue carries one of these `Team:` labels, never add `ai:fix-flaky` — regardless of classification or `failCount`. Still add `failure:ai-fixable` when a fix is available, and use the "Fix available, team opted out" tip in "Comment format" so the team sees how to request one.
+
+- `Team:Kibana Management`
 
 ### "Previous fix didn't hold" label
 
@@ -370,6 +376,15 @@ If a fix PR is already up (in draft or in review) in the Kibana repository — t
 > [!TIP]
 > Marked "AI-fixable". Add `ai:fix-flaky` to request a fix now; otherwise it will be requested automatically if the test fails again.
 ```
+
+**Fix available, team opted out** — you added `failure:ai-fixable` without `ai:fix-flaky` because the issue's team has opted out of automatic fix requests (see "Teams opted out of automatic fix requests"). Fixes are never requested automatically for it, so don't promise one:
+
+```markdown
+> [!TIP]
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix PR — `<Team: label>` has opted out of automatic fix requests.
+```
+
+Fill `<Team: label>` with the issue's opted-out team label, e.g. `Team:Kibana Management`.
 
 ### 1. Visible header (required)
 
