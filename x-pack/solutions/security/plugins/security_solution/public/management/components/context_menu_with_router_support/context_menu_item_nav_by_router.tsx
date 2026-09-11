@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import type { MouseEventHandler } from 'react';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiContextMenuItem } from '@elastic/eui';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -25,29 +24,10 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
    * is set on the menu component, this prop will be overridden
    */
   textTruncate?: boolean;
-  /** Displays an additional info when hover an item */
-  hoverInfo?: React.ReactNode;
   /** Disables navigation */
   isNavigationDisabled?: boolean;
   children: React.ReactNode;
 }
-
-const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
-  .additional-info {
-    display: none;
-    max-width: 50%;
-  }
-  &:hover {
-    .additional-info {
-      display: block !important;
-    }
-  }
-`;
-
-const StyledEuiFlexItem = styled('div')`
-  max-width: 50%;
-  padding-right: ${(props) => props.theme.eui.euiSizeS};
-`;
 
 /**
  * Just like `EuiContextMenuItem`, but allows for additional props to be defined which will
@@ -59,7 +39,6 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     navigateOptions,
     onClick,
     textTruncate,
-    hoverInfo,
     children,
     href,
     isNavigationDisabled = false,
@@ -70,19 +49,6 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       onClick,
     });
     const getTestId = useTestIdGenerator(otherMenuItemProps['data-test-subj']);
-
-    const hoverComponentInstance = useMemo(() => {
-      // If the `hoverInfo` is not an object (ex. text, number), then auto-add the text truncation className.
-      // Adding this when the `hoverInfo` is a react component could cause issue, thus in those cases, we
-      // assume the component will handle how the data is truncated (if applicable)
-      const cssClassNames = `additional-info ${
-        'object' !== typeof hoverInfo ? 'eui-textTruncate' : ''
-      }`;
-
-      return hoverInfo ? (
-        <StyledEuiFlexItem className={cssClassNames}>{hoverInfo}</StyledEuiFlexItem>
-      ) : null;
-    }, [hoverInfo]);
 
     const handleItemClick = useCallback<MouseEventHandler>(
       (ev) => {
@@ -99,37 +65,27 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       [handleOnClickViaNavigateToApp, isNavigationDisabled, navigateAppId, onClick]
     );
 
-    const content = textTruncate ? (
-      <>
-        <div
-          className="eui-textTruncate"
-          data-test-subj={getTestId('truncateWrapper')}
-          {
-            /* Add the html `title` prop if children is a string */
-            ...('string' === typeof children ? { title: children } : {})
-          }
-        >
-          {children}
-        </div>
-        {hoverComponentInstance}
-      </>
-    ) : (
-      <>
-        <EuiFlexItem>{children}</EuiFlexItem>
-        {hoverComponentInstance}
-      </>
-    );
-
     return (
-      <StyledEuiContextMenuItem
+      <EuiContextMenuItem
         {...otherMenuItemProps}
         onClick={handleItemClick}
         href={isNavigationDisabled ? undefined : href}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          {content}
-        </EuiFlexGroup>
-      </StyledEuiContextMenuItem>
+        {textTruncate ? (
+          <div
+            className="eui-textTruncate"
+            data-test-subj={getTestId('truncateWrapper')}
+            {
+              /* Add the html `title` prop if children is a string */
+              ...('string' === typeof children ? { title: children } : {})
+            }
+          >
+            {children}
+          </div>
+        ) : (
+          children
+        )}
+      </EuiContextMenuItem>
     );
   }
 );

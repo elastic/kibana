@@ -10,7 +10,6 @@ import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
@@ -38,9 +37,6 @@ const StyledWithContextMenuShiftedWrapper = styled('div')`
   margin-left: -10px;
 `;
 
-const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
-  height: 10px !important;
-`;
 export interface EffectScopeProps extends Pick<CommonProps, 'data-test-subj'> {
   /** If set (even if empty), then effect scope will be policy specific. Else, it shows as global */
   policies?: ContextMenuItemNavByRouterProps[];
@@ -116,20 +112,11 @@ export const WithContextMenu = memo<WithContextMenuProps>(
 
         return {
           ...policyMenuItem,
-          hoverInfo:
-            hasHref && canReadPolicies ? (
-              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="external">
-                <FormattedMessage
-                  id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
-                  defaultMessage="View details"
-                />
-              </StyledEuiButtonEmpty>
-            ) : undefined,
           disabled: !hasHref,
           toolTipContent: !hasHref ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE : undefined,
         };
       });
-    }, [canReadPolicies, policies]);
+    }, [policies]);
 
     return (
       <ContextMenuWithRouterSupport

@@ -435,12 +435,8 @@ describe('ArtifactSimpleTable', () => {
       expect(
         renderResult.getByTestId('testTable-columnPolicyAssignment-popupMenu-popoverPanel')
       ).toBeInTheDocument();
-      expect(renderResult.getByTestId('policyMenuItem-1')).toHaveTextContent(
-        'Policy oneView details'
-      );
-      expect(renderResult.getByTestId('policyMenuItem-2')).toHaveTextContent(
-        'Policy twoView details'
-      );
+      expect(renderResult.getByTestId('policyMenuItem-1')).toHaveTextContent('Policy one');
+      expect(renderResult.getByTestId('policyMenuItem-2')).toHaveTextContent('Policy two');
     });
 
     it('shows the policy id when the policy is not in the policies map', () => {
