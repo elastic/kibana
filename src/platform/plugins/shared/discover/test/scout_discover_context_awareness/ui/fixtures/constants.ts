@@ -71,6 +71,9 @@ export const LOGSTASH_TIME_RANGE = {
   to: '2015-09-24T16:30:00.000Z',
 };
 
+/** Ad hoc data view `example-root-profile` contributes through `getDefaultAdHocDataViews`. */
+export const PROFILE_DATA_VIEW = 'Example profile data view';
+
 /** Column ids `example-data-source-profile` defaults to for a logs data source. */
 export const LOGS_PROFILE_COLUMNS = ['@timestamp', 'log.level', 'message'];
 
