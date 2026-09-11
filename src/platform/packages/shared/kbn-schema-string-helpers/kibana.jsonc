@@ -2,6 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/schema-string-helpers",
   "owner": [
+    "@elastic/kibana-security",
     "@elastic/kibana-core"
   ],
   "group": "platform",

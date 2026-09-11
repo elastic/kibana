@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/schema-string-helpers'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/kibana-security'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,9 @@ project:
   title: '@kbn/schema-string-helpers'
   description: Moon project for @kbn/schema-string-helpers
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner:
+    - '@elastic/kibana-security'
+    - '@elastic/kibana-core'
   sourceRoot: src/platform/packages/shared/kbn-schema-string-helpers
 dependsOn: []
 tags:

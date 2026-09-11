@@ -157,7 +157,8 @@ function buildBaseProjectConfig(
   kibanaJsonc: PackageManifestBaseFields
 ): MoonProjectConfig {
   const projectConfig: MoonProjectConfig = parse(projectConfigTemplate) as any;
-  const mainOwner = Array.isArray(kibanaJsonc.owner) ? kibanaJsonc.owner[0] : kibanaJsonc.owner;
+  const allOwners = Array.isArray(kibanaJsonc.owner) ? kibanaJsonc.owner : [kibanaJsonc.owner];
+  const mainOwner = allOwners[0];
   projectConfig.id = pkg.name;
   projectConfig.layer = MOON_CONST.PROJECT_LAYER_UNKNOWN; // we currently don't make use of this
   projectConfig.owners = { defaultOwner: mainOwner };
@@ -167,7 +168,7 @@ function buildBaseProjectConfig(
     title: pkg.name,
     description: `Moon project for ${pkg.name}`,
     channel: '',
-    owner: mainOwner,
+    owner: allOwners.length === 1 ? allOwners[0] : allOwners,
     // Custom project metadata is now defined directly on `project` in moon v2.
     sourceRoot: pkg.normalizedRepoRelativeDir,
   };
