@@ -10,19 +10,14 @@
 import { inject, injectable } from 'inversify';
 import { chain } from 'lodash';
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
+import type { ServiceTypeOf } from '@kbn/core-di';
 import {
-  type ISavedObjectsClientFactory,
   Request,
   Response,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
-import type {
-  ISavedObjectTypeRegistry,
-  KibanaRequest,
-  KibanaResponseFactory,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_SEARCH_LENGTH,
@@ -84,12 +79,14 @@ export class FindRoute {
   private readonly client: SavedObjectsClientContract;
 
   constructor(
-    @inject(SavedObjectsClientFactory) clientFactory: ISavedObjectsClientFactory,
-    @inject(SavedObjectsTypeRegistry) private readonly typeRegistry: ISavedObjectTypeRegistry,
+    @inject(SavedObjectsClientFactory)
+    clientFactory: ServiceTypeOf<typeof SavedObjectsClientFactory>,
+    @inject(SavedObjectsTypeRegistry)
+    private readonly typeRegistry: ServiceTypeOf<typeof SavedObjectsTypeRegistry>,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
     @inject(Request)
     private readonly request: KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>,
-    @inject(Response) private readonly response: KibanaResponseFactory
+    @inject(Response) private readonly response: ServiceTypeOf<typeof Response>
   ) {
     this.client = clientFactory({
       includedHiddenTypes: chain(request.query.type)

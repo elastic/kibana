@@ -8,12 +8,9 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { ServiceTypeOf } from '@kbn/core-di';
 import { Response, SavedObjectsTypeRegistry } from '@kbn/core-di-server';
-import type {
-  ISavedObjectTypeRegistry,
-  KibanaResponseFactory,
-  SavedObjectsType,
-} from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectManagementTypeInfo } from '../../common';
 
 function convertType(sot: SavedObjectsType): SavedObjectManagementTypeInfo {
@@ -38,8 +35,9 @@ export class GetAllowedTypesRoute {
   static validate = false as const;
 
   constructor(
-    @inject(SavedObjectsTypeRegistry) private readonly typeRegistry: ISavedObjectTypeRegistry,
-    @inject(Response) private readonly response: KibanaResponseFactory
+    @inject(SavedObjectsTypeRegistry)
+    private readonly typeRegistry: ServiceTypeOf<typeof SavedObjectsTypeRegistry>,
+    @inject(Response) private readonly response: ServiceTypeOf<typeof Response>
   ) {}
 
   async handle() {

@@ -9,15 +9,17 @@
 
 import { inject, injectable } from 'inversify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ServiceTypeOf } from '@kbn/core-di';
 import { SavedObjectsTypeRegistry } from '@kbn/core-di-server';
-import type { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export type ISavedObjectsManagement = PublicMethodsOf<SavedObjectsManagement>;
 
 @injectable()
 export class SavedObjectsManagement {
   constructor(
-    @inject(SavedObjectsTypeRegistry) private readonly registry: ISavedObjectTypeRegistry
+    @inject(SavedObjectsTypeRegistry)
+    private readonly registry: ServiceTypeOf<typeof SavedObjectsTypeRegistry>
   ) {}
 
   public isImportAndExportable(type: string) {

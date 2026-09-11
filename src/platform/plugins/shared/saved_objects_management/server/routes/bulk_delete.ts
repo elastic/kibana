@@ -9,12 +9,9 @@
 
 import { inject, injectable } from 'inversify';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import type { ServiceTypeOf } from '@kbn/core-di';
 import { Request, Response, SavedObjectsClient } from '@kbn/core-di-server';
-import type {
-  KibanaRequest,
-  KibanaResponseFactory,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
@@ -43,14 +40,14 @@ export class BulkDeleteRoute {
   };
 
   constructor(
-    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(SavedObjectsClient) private readonly client: ServiceTypeOf<typeof SavedObjectsClient>,
     @inject(Request)
     private readonly request: KibanaRequest<
       never,
       never,
       TypeOf<typeof BulkDeleteRoute.validate.body>
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory
+    @inject(Response) private readonly response: ServiceTypeOf<typeof Response>
   ) {}
 
   async handle() {
