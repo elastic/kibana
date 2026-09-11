@@ -6,14 +6,15 @@
  */
 
 import type { OperatorFunction } from 'rxjs';
-import { tap } from 'rxjs';
+import { finalize, pipe, tap } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { EventsService } from '../events';
 
 /**
  * Forwards each event in the converse() stream to the public events service, tagged with
  * the conversation id so per-conversation subscribers (`getChatEvents$`) can filter to
- * just their conversation.
+ * just their conversation. Also reports the end of the run - `finalize` covers all three
+ * ways it can end: completed, errored, or aborted (unsubscribed).
  */
 export function propagateEvents({
   eventsService,
@@ -22,7 +23,12 @@ export function propagateEvents({
   eventsService: EventsService;
   conversationId: string;
 }): OperatorFunction<ChatEvent, ChatEvent> {
-  return tap((event) => {
-    eventsService.propagateChatEvent(conversationId, event);
-  });
+  return pipe(
+    tap((event) => {
+      eventsService.propagateChatEvent(conversationId, event);
+    }),
+    finalize(() => {
+      eventsService.notifyRunEnded(conversationId);
+    })
+  );
 }
