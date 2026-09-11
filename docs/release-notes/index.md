@@ -46,7 +46,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Dashboards and Visualizations**:
 * Fix the **Update filter** button being unreachable when the filter editor is taller than the screen [#289163]({{kib-pull}}289163).
 * Fix sibling dashboard panels not dimming during inline editing on dashboards that have no controls [#288939]({{kib-pull}}288939).
-* Fix Lens as-code {{esql}} visualizations dropping Identifier Control (`??field`) variables after an API round-trip [#288785]({{kib-pull}}288785).
+* Fix {{esql}} visualizations dropping field variable controls (`??field`) after you save them through the Visualizations API [#288785]({{kib-pull}}288785).
 * Fix Options list filters stopping after you delete a collapsible dashboard section [#287923]({{kib-pull}}287923).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.4-a5c2bed4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
 % * Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
