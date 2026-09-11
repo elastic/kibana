@@ -22,7 +22,17 @@ const AWS_DESCRIPTION = i18n.translate('xpack.fleet.onboardingOverride.awsDescri
   defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
 });
 
-const HIDDEN_TILE_NAMES = new Set(['aws']);
+const HIDDEN_TILE_NAMES = new Set([
+  'aws',
+  'aws_bedrock',
+  'aws_bedrock_agentcore',
+  'aws_cloudwatch_input_otel',
+  'aws_logs',
+  'aws_mq',
+  'awsfargate',
+  'awsfirehose',
+  'aws_securityhub'
+]);
 const HIDDEN_TILE_IDS = new Set(['epr:aws']);
 
 export function useOnboardingOverride() {
