@@ -22,6 +22,7 @@ const mockRunPreBuild = jest.fn();
 const mockGetEvalTriggerStep = jest.fn();
 const mockIsAutomatedVersionBumpPR = jest.fn();
 const mockGetPrChangesCached = jest.fn();
+const mockGetAffectedPackages = jest.fn();
 
 jest.mock('#pipeline-utils', () => {
   const actual = jest.requireActual('#pipeline-utils');
@@ -35,6 +36,7 @@ jest.mock('#pipeline-utils', () => {
     flushCancelOnGateFailureMetadata: mockFlushCancelOnGateFailureMetadata,
     isAutomatedVersionBumpPR: mockIsAutomatedVersionBumpPR,
     getPrChangesCached: mockGetPrChangesCached,
+    getAffectedPackages: mockGetAffectedPackages,
   };
 });
 
@@ -87,6 +89,7 @@ describe('pull_request pipeline generation', () => {
     mockGetEvalTriggerStep.mockReturnValue(null);
     mockIsAutomatedVersionBumpPR.mockResolvedValue(false);
     mockGetPrChangesCached.mockResolvedValue([]);
+    mockGetAffectedPackages.mockResolvedValue(new Set());
   });
 
   afterEach(() => {
@@ -290,5 +293,55 @@ describe('pull_request pipeline generation', () => {
     expect(parsed).toEqual({ steps: [] });
     expect(mockRunPreBuild).not.toHaveBeenCalled();
     expect(mockAreChangesSkippable).not.toHaveBeenCalled();
+  });
+
+  it('emits storybooks when yarn.lock changes', async () => {
+    const changes = [{ filename: 'yarn.lock' }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
+    expect(mockGetAffectedPackages).not.toHaveBeenCalled();
+  });
+
+  it('emits storybooks when @kbn/storybook is in the affected set', async () => {
+    mockGetAffectedPackages.mockResolvedValue(new Set(['@kbn/storybook']));
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
+    expect(mockGetAffectedPackages).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ changedFiles: expect.any(Array) })
+    );
+  });
+
+  it('does not emit storybooks for an unrelated affected set', async () => {
+    mockGetAffectedPackages.mockResolvedValue(new Set(['@kbn/unified-search-plugin']));
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('Build Storybooks');
+  });
+
+  it('emits storybooks when affected-package detection fails', async () => {
+    mockGetAffectedPackages.mockRejectedValue(new Error('git merge-base failed'));
+    jest.spyOn(console, 'error').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build Storybooks');
   });
 });

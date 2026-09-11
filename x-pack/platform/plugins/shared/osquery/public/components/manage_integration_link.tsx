@@ -5,58 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { useCallback, useMemo } from 'react';
 
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
-const ManageIntegrationLinkComponent = () => {
+export const useManageIntegration = () => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
 
-  const integrationHref = useMemo(
+  const integrationPath = pagePathGetters.integration_details_policies({
+    pkgkey: OSQUERY_INTEGRATION_NAME,
+  })[1];
+
+  const href = useMemo(
     () =>
       getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-        path: pagePathGetters.integration_details_policies({
-          pkgkey: OSQUERY_INTEGRATION_NAME,
-        })[1],
+        path: integrationPath,
       }),
-    [getUrlForApp]
+    [getUrlForApp, integrationPath]
   );
 
-  const integrationClick = useCallback(
-    (event: any) => {
-      if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
-        event.preventDefault();
+  const navigate = useCallback(() => {
+    navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+      path: integrationPath,
+    });
+  }, [integrationPath, navigateToApp]);
 
-        return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-          path: pagePathGetters.integration_details_policies({
-            pkgkey: OSQUERY_INTEGRATION_NAME,
-          })[1],
-        });
-      }
-    },
-    [navigateToApp]
-  );
-
-  return integrationHref ? (
-    <EuiFlexItem>
-      {
-        // eslint-disable-next-line @elastic/eui/href-or-on-click
-        <EuiButtonEmpty iconType="gear" href={integrationHref} onClick={integrationClick}>
-          <FormattedMessage
-            id="xpack.osquery.appNavigation.manageIntegrationButton"
-            defaultMessage="Manage integration"
-          />
-        </EuiButtonEmpty>
-      }
-    </EuiFlexItem>
-  ) : null;
+  return { href, navigate };
 };
-
-export const ManageIntegrationLink = React.memo(ManageIntegrationLinkComponent);

@@ -18,8 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
         // Pin the templates flag ON explicitly so this suite is deterministic
-        // regardless of the plugin default. The flag-OFF legacy counterpart runs
-        // under `config_legacy.ts`.
+        // regardless of the plugin default.
         '--xpack.cases.templates.enabled=true',
       ],
     },

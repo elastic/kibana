@@ -235,12 +235,12 @@ export async function createRule<Params extends RuleParams = never>(
   const { systemActions, actions: actionToNotUse, ...restData } = data;
 
   const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     data.tags,
     apiKeyProps.uiamApiKey,
-    apiKeyProps.apiKeyCreatedByUser,
     context.isServerless,
-    context.featureFlags
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   // Convert domain rule object to ES rule attributes

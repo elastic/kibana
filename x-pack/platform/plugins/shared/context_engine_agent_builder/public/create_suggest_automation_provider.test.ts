@@ -11,7 +11,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 
@@ -89,6 +88,16 @@ describe('createSuggestAutomationProvider', () => {
     expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
   });
 
+  it('keeps skill ids out of the message the user reads, since the attachment carries them', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+
+    const { initialMessage } = openChat.mock.calls[0][0];
+    expect(initialMessage).not.toMatch(/skill:\/\//);
+    expect(initialMessage).not.toMatch(/attachment/i);
+  });
+
   it('opens agent builder chat with the AI index attachment', () => {
     const { provider, openChat } = createProvider();
 
@@ -97,13 +106,8 @@ describe('createSuggestAutomationProvider', () => {
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
-        autoSendInitialMessage: false,
-        initialMessage: expect.stringMatching(
-          new RegExp(
-            `\\[\\/${KI_AUTOMATION_GENERATION_SKILL_ID}\\]\\(skill://${KI_AUTOMATION_GENERATION_SKILL_ID}\\).*When an ai_index attachment is present`,
-            's'
-          )
-        ),
+        autoSendInitialMessage: true,
+        initialMessage: 'Suggest an automation for this AI index.',
         sessionTag: 'context-engine-ai-index-my-ai-index',
         attachments: [
           expect.objectContaining({

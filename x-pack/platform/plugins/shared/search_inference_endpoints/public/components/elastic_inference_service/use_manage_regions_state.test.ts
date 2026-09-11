@@ -477,6 +477,52 @@ describe('useManageRegionsState', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // handleLocationTypeChange
+  // ---------------------------------------------------------------------------
+  describe('handleLocationTypeChange', () => {
+    it('switches activeTab', () => {
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+
+      act(() => result.current.common.handleLocationTypeChange('regions'));
+
+      expect(result.current.common.activeTab).toBe('regions');
+    });
+
+    it('is a no-op when called with the already-active tab', () => {
+      mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.geoTab.onToggleGeo('us'));
+      expect(result.current.geoTab.checkedGeos.size).toBe(2);
+
+      act(() => result.current.common.handleLocationTypeChange('geo'));
+
+      expect(result.current.geoTab.checkedGeos.size).toBe(2);
+    });
+
+    it('resets both tab selections to their seeded values on switch', () => {
+      mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      const { result } = renderHook(() => useManageRegionsState(onClose));
+      act(() => result.current.geoTab.onToggleGeo('us'));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu', 'us']));
+
+      act(() => result.current.common.handleLocationTypeChange('regions'));
+      act(() => result.current.common.handleLocationTypeChange('geo'));
+
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // handleConfirmSave (regions mode)
   // ---------------------------------------------------------------------------
   describe('handleConfirmSave (regions mode)', () => {
