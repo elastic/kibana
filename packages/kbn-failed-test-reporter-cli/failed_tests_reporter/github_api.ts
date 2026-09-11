@@ -208,8 +208,7 @@ export class GithubApi {
   /**
    * Every issue of the repository matching the filters, following `Link: rel="next"` pagination.
    * Read-only, so it also runs in dry-run mode. Pull requests share the issue shape and are
-   * dropped. Unlike the search API, the listing has no result cap and counts against the core
-   * rate limit only, so it is the way to read thousands of issues.
+   * dropped.
    */
   async listIssues({
     state,
