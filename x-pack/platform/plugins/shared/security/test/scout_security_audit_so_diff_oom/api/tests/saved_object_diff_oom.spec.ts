@@ -58,7 +58,13 @@ const buildNestedAttributes = (title: string, panelCount: number) => {
 const buildDashboardPanel = (index: number) => ({
   version: '8.8.0',
   type: 'lens',
-  gridData: { x: (index % 2) * 24, y: Math.floor(index / 2) * 15, w: 24, h: 15, i: `panel-${index}` },
+  gridData: {
+    x: (index % 2) * 24,
+    y: Math.floor(index / 2) * 15,
+    w: 24,
+    h: 15,
+    i: `panel-${index}`,
+  },
   panelIndex: `panel-${index}`,
   embeddableConfig: {
     attributes: {
@@ -176,7 +182,12 @@ apiTest.describe(
   'Saved object audit diffs OOM prevention',
   // Local-only: tests read from the ECS file appender at AUDIT_LOG_PATH, which is only
   // accessible when the test runner is co-located with Kibana (not on Cloud deployments).
-  { tag: [...tags.stateful.classic.filter((t) => t.startsWith('@local')), ...tags.serverless.security.complete.filter((t) => t.startsWith('@local'))] },
+  {
+    tag: [
+      ...tags.stateful.classic.filter((t) => t.startsWith('@local')),
+      ...tags.serverless.security.complete.filter((t) => t.startsWith('@local')),
+    ],
+  },
   () => {
     const savedObjectsToCleanUp: Array<{ type: string; id: string }> = [];
 
