@@ -8,11 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
 import { AlertEpisodesListPage } from '../pages/alert_episodes_list_page/alert_episodes_list_page';
 import { EpisodeDetailsPage } from '../pages/episode_details_page/episode_details_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 export const EpisodesApp = () => {
+  const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
     <RequireAlertingPrivilege
       features={['alerts']}
@@ -21,10 +24,10 @@ export const EpisodesApp = () => {
       })}
     >
       <Routes>
-        <Route exact path="/">
+        <Route exact path={path}>
           <AlertEpisodesListPage />
         </Route>
-        <Route path="/:episodeId">
+        <Route path={`${base}/:episodeId`}>
           <EpisodeDetailsPage />
         </Route>
       </Routes>
