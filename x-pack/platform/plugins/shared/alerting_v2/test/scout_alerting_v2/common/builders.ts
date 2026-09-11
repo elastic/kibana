@@ -63,8 +63,6 @@ export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => {
   const merged: CreateRuleData = { ...DEFAULTS, ...input };
 
-  // The write API rejects a recovering delay when recovery is off,
-  // so drop the default one unless the caller set its own `state_transition`.
   const recoveryEnabled = merged.recovery_strategy != null && merged.recovery_strategy !== 'none';
   if (!recoveryEnabled && input.state_transition === undefined && merged.state_transition != null) {
     const { recovering_count, recovering_timeframe, ...rest } = merged.state_transition;
