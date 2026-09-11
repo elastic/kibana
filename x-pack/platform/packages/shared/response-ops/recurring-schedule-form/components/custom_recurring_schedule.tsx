@@ -45,6 +45,8 @@ export interface CustomRecurringScheduleProps {
   readOnly?: boolean;
   compressed?: boolean;
   minFrequency?: Frequency;
+  // Reporting still validates bymonthday as 1-31 via Task Manager.
+  allowLastDayOfMonth?: boolean;
 }
 
 export const CustomRecurringSchedule = memo(
@@ -53,6 +55,7 @@ export const CustomRecurringSchedule = memo(
     readOnly = false,
     compressed = false,
     minFrequency = Frequency.YEARLY,
+    allowLastDayOfMonth = false,
   }: CustomRecurringScheduleProps) => {
     const [{ recurringSchedule }] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
@@ -78,7 +81,7 @@ export const CustomRecurringSchedule = memo(
       if (!startDate) return [];
       const date = moment(startDate);
       const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date, 'ddd');
-      return [
+      const options = [
         {
           id: 'day',
           label: RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY(date),
@@ -88,12 +91,15 @@ export const CustomRecurringSchedule = memo(
           label:
             RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT(dayOfWeek)[isLastOfMonth ? 0 : nthWeekdayOfMonth],
         },
-        {
+      ];
+      if (allowLastDayOfMonth) {
+        options.push({
           id: 'lastday',
           label: RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_LAST_DAY,
-        },
-      ];
-    }, [startDate]);
+        });
+      }
+      return options;
+    }, [allowLastDayOfMonth, startDate]);
 
     const defaultByWeekday = useMemo(() => getInitialByWeekday([], moment(startDate)), [startDate]);
 

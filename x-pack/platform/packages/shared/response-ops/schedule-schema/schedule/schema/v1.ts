@@ -29,7 +29,7 @@ const MONTH_DAY_DESCRIPTION =
   'The specific days of the month for a recurring schedule. Valid values are 1-31.';
 
 const LAST_DAY_OF_MONTH_DESCRIPTION =
-  'The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or `-1` for the last day of the month.';
+  'The specific days of the month for a recurring schedule. Valid values are `1` to `31`, or `-1` for the last day of the month.';
 
 const getRecurringRequestSchema = (
   recurringMetaId?: string,

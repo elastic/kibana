@@ -102550,7 +102550,7 @@ components:
           minItems: 1
           type: array
         onMonthDay:
-          description: The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or `-1` for the last day of the month.
+          description: The specific days of the month for a recurring schedule. Valid values are `1` to `31`, or `-1` for the last day of the month.
           items:
             maximum: 31
             minimum: -1
@@ -102587,7 +102587,7 @@ components:
           maxItems: 12
           type: array
         onMonthDay:
-          description: The specific days of the month for a recurring schedule. Valid values are 1-31, counting forward from the start of the month, or `-1` for the last day of the month.
+          description: The specific days of the month for a recurring schedule. Valid values are `1` to `31`, or `-1` for the last day of the month.
           items:
             type: number
           maxItems: 31
