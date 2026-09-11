@@ -216,3 +216,11 @@ src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_sco
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md
 
 .ralph/
+
+# Bazel
+bazel-*
+.bazelrc.cache
+
+# Yarn
+.yarn/
+yarn.lock
