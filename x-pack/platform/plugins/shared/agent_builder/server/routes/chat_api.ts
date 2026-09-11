@@ -13,7 +13,11 @@ import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
+import type {
+  ChatRequestBodyPayload,
+  ChatConverseResponse,
+  ContextMessagePayload,
+} from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -23,23 +27,26 @@ import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { chatPayloadSchema, contextMessagePayloadSchema, conversePayloadSchema } from './chat';
 
-type ContextMessagePayload = ChatRequestBodyPayload & {
-  trigger_mode: 'never';
-  conversation_id: string;
-};
-
+/**
+ * Validates a `trigger_mode: 'never'` chat request, rejecting execution-only options and
+ * requests with neither input nor attachments.
+ */
 const validateContextMessagePayload = (payload: ChatRequestBodyPayload): ContextMessagePayload => {
+  let contextMessagePayload: ContextMessagePayload;
+
   try {
-    contextMessagePayloadSchema.validate(payload);
+    contextMessagePayload = contextMessagePayloadSchema.validate(payload);
   } catch (error) {
     throw createBadRequestError(error instanceof Error ? error.message : String(error));
   }
 
-  if (!payload.input?.trim() && !payload.attachments?.length) {
+  const { input, attachments } = contextMessagePayload;
+
+  if (!input?.trim() && !attachments?.length) {
     throw createBadRequestError('Context message requests require input or attachments');
   }
 
-  return payload as ContextMessagePayload;
+  return contextMessagePayload;
 };
 
 /** Events-native chat API */
@@ -87,7 +94,11 @@ export function registerChatApiRoutes({
           const payload = request.body as ChatRequestBodyPayload;
 
           if (payload.trigger_mode === 'never') {
-            const contextMessagePayload = validateContextMessagePayload(payload);
+            const {
+              conversation_id: conversationId,
+              input,
+              attachments: attachmentInputs,
+            } = validateContextMessagePayload(payload);
 
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
@@ -95,20 +106,17 @@ export function registerChatApiRoutes({
 
             let attachments: AttachmentInput[] | undefined;
             try {
-              attachments = await attachmentsService.validate(
-                contextMessagePayload.attachments ?? [],
-                request
-              );
+              attachments = await attachmentsService.validate(attachmentInputs ?? [], request);
             } catch (error) {
               throw createBadRequestError(error instanceof Error ? error.message : String(error));
             }
 
             const author = await conversationsService.getConversationRoundAuthor({ request });
             const body = await client.appendContextMessage({
-              id: contextMessagePayload.conversation_id,
+              id: conversationId,
               messageId: uuidv4(),
               createdAt: new Date(),
-              message: contextMessagePayload.input ?? '',
+              message: input ?? '',
               attachments: attachments ?? [],
               getTypeDefinition: attachmentsService.getTypeDefinition,
               author,
