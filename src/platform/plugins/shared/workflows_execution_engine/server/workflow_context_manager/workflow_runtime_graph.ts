@@ -13,8 +13,6 @@ import { WorkflowScopeStack } from './workflow_scope_stack';
 
 /** Prefix on ids of runtime-created enter nodes (e.g. a loop iteration). */
 export const ENTER_SYNTHETIC_PREFIX = 'enterSynthetic_';
-/** Prefix on ids of runtime-created exit nodes (e.g. a loop iteration). */
-export const EXIT_SYNTHETIC_PREFIX = 'exitSynthetic_';
 const ENTER_NODE_ID_PREFIX = 'enter';
 const EXIT_NODE_ID_PREFIX = 'exit';
 
@@ -32,20 +30,6 @@ export type RuntimeGraphView = Pick<
   | 'topologicalOrder'
   | 'nodeAfter'
 >;
-
-function syntheticPairTypes(stepType: string): { enterType: string; exitType: string } {
-  if (stepType.startsWith('enter-')) {
-    const base = stepType.slice('enter-'.length);
-    return { enterType: `enter-${base}`, exitType: `exit-${base}` };
-  }
-
-  if (stepType.startsWith('exit-')) {
-    const base = stepType.slice('exit-'.length);
-    return { enterType: `enter-${base}`, exitType: `exit-${base}` };
-  }
-
-  return { enterType: `enter-${stepType}`, exitType: `exit-${stepType}` };
-}
 
 function getPairByNodeId(nodeId: string): { enterNodeId: string; exitNodeId: string } {
   const enterNodeId = nodeId.startsWith(EXIT_NODE_ID_PREFIX)
@@ -107,8 +91,8 @@ export class WorkflowRuntimeGraph {
    * Adds a runtime scope under `ownerNodeId` (one loop iteration) and returns the
    * enter node the cursor should move to.
    *
-   * Wraps the compiled body the first time. Later mints rewire that same pair to
-   * the new hashed ids — the body is not cloned.
+   * Wraps the compiled body the first time. Later mints replace that pair —
+   * the body is not cloned.
    */
   public insertSyntheticScope(ownerNodeId: string, stepId: string, stepType: string): string {
     const { enter: enterSynthetic, exit: exitSynthetic } = this.createSyntheticScope(
@@ -242,10 +226,6 @@ export class WorkflowRuntimeGraph {
   }
 
   private init(compiledGraph: WorkflowGraph, stackFrames: StackFrame[]): void {
-    this.nodesInTopologicalOrder = compiledGraph.topologicalOrder
-      .map((id) => this.compiledGraph.getNode(id))
-      .filter((node): node is GraphNodeUnion => node !== undefined);
-
     let scopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
 
     while (!scopeStack.isEmpty()) {
@@ -321,37 +301,27 @@ export class WorkflowRuntimeGraph {
     );
   }
 
-  /**
-   * Puts `enter` immediately after the owner enter and `exit` immediately before
-   * the owner exit. If that pair is already there (same stepType), replace in place.
-   */
+  /** Splices the current pair after the owner enter and before the owner exit. */
   private upsertSyntheticNodes(orderedNodes: GraphNodeUnion[]): GraphNodeUnion[] {
     const result = [];
 
     for (const node of orderedNodes) {
-      if (this.syntheticNodeIdByOwnerId.has(node.id)) {
-        const syntheticNodeId = this.syntheticNodeIdByOwnerId.get(node.id);
+      const syntheticNodeId = this.syntheticNodeIdByOwnerId.get(node.id);
+      const syntheticNode = syntheticNodeId
+        ? this.syntheticNodesById.get(syntheticNodeId)
+        : undefined;
 
-        if (syntheticNodeId) {
-          const syntheticNode = this.syntheticNodesById.get(syntheticNodeId);
-
-          const nodePair = getPairByNodeId(node.id);
-          if (
-            nodePair.enterNodeId === node.id &&
-            nodePair.exitNodeId !== node.id &&
-            syntheticNode
-          ) {
-            result.push(node, syntheticNode.node);
-          } else if (
-            nodePair.exitNodeId === node.id &&
-            nodePair.enterNodeId !== node.id &&
-            syntheticNode
-          ) {
-            result.push(syntheticNode.node, node);
-          }
-        }
-      } else {
+      if (!syntheticNode) {
         result.push(node);
+      } else {
+        const nodePair = getPairByNodeId(node.id);
+        if (nodePair.enterNodeId === node.id && nodePair.exitNodeId !== node.id) {
+          result.push(node, syntheticNode.node);
+        } else if (nodePair.exitNodeId === node.id && nodePair.enterNodeId !== node.id) {
+          result.push(syntheticNode.node, node);
+        } else {
+          result.push(node);
+        }
       }
     }
 
@@ -366,21 +336,22 @@ export class WorkflowRuntimeGraph {
     enter: SyntheticGraphNode;
     exit: SyntheticGraphNode;
   } {
-    const { enterType, exitType } = syntheticPairTypes(stepType);
+    const enterNodeType = `enter-${stepType}`;
+    const exitNodeType = `exit-${stepType}`;
     const enterId = `${ENTER_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`;
     const { exitNodeId } = getPairByNodeId(enterId);
 
     return {
       enter: {
         id: enterId,
-        type: enterType,
+        type: enterNodeType,
         stepId,
         stepType,
         isSynthetic: true,
       },
       exit: {
         id: exitNodeId,
-        type: exitType,
+        type: exitNodeType,
         stepId,
         stepType,
         isSynthetic: true,

@@ -11,11 +11,7 @@ import type { ConnectorStep, ForEachStep, WorkflowYaml } from '@kbn/workflows';
 import type { ExitForeachNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
-import {
-  ENTER_SYNTHETIC_PREFIX,
-  EXIT_SYNTHETIC_PREFIX,
-  WorkflowRuntimeGraph,
-} from '../workflow_runtime_graph';
+import { ENTER_SYNTHETIC_PREFIX, WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
 const nestedForeachDefinition = {
   steps: [
@@ -53,9 +49,10 @@ function syntheticPairIds(
   ownerNodeId: string,
   stepId: string
 ): { enterId: string; exitId: string } {
+  const enterId = `${ENTER_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`;
   return {
-    enterId: `${ENTER_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`,
-    exitId: `${EXIT_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`,
+    enterId,
+    exitId: enterId.replace('enter', 'exit'),
   };
 }
 
