@@ -523,6 +523,7 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
+  /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
