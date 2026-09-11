@@ -479,7 +479,7 @@ async function executor(
     configurationUtilities
   );
 
-  if (configurationUtilities.enableFooterInEmail()) {
+  if (configurationUtilities.enableFooterInEmail() && !useTestMessage) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
       kibanaFooterLink: params.kibanaFooterLink,

@@ -1199,7 +1199,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('ensure fixed subject and message using HTTP_REQUEST', async () => {
+  test('ensure fixed subject and message and no footer using HTTP_REQUEST', async () => {
     sendEmailMock.mockReset();
 
     const executorOptionsWithHTTP = {
@@ -1211,10 +1211,32 @@ describe('execute()', () => {
     await connectorType.executor(executorOptionsWithHTTP);
     const emailSent = sendEmailMock.mock.calls[0][1];
     expect(emailSent.content.subject).toBe('This is a test email from Kibana');
-    expect(emailSent.content.message).toBe(
-      'This is a test email from Kibana\n\n---\n\nThis message was sent by Elastic.'
-    );
+    expect(emailSent.content.message).toBe('This is a test email from Kibana');
     expect(emailSent.content.messageHTML).toBe(null);
+  });
+
+  test('ensure fixed messageHTML using HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      params: { ...executorOptions.params, messageHTML: 'this should not be displayed' },
+      config: { ...executorOptions.config, service: 'gmail', allowHTML: true },
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    // Currently messageHTML can only be used for notifications; this test
+    // is future-proofing that; if ever allowed for HTTP, it should be the
+    // fixed message.
+    const result = await connectorType.executor(executorOptionsWithHTTP);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "HTML email can only be sent when the connector is configured to allow HTML",
+        "status": "error",
+      }
+    `);
   });
 
   test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
