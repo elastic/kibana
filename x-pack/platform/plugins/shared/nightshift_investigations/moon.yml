@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/investigation-output'
 tags:
   - plugin
   - prod

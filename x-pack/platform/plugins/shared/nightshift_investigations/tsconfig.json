@@ -31,6 +31,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/investigation-output"
   ]
 }

@@ -23,5 +23,6 @@
       "workflowsManagement",
     ],
     "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   },
 }
