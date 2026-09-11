@@ -28,7 +28,6 @@ export type RuntimeGraphView = Pick<
   | 'getAllPredecessors'
   | 'getWorkflowLevelTimeout'
   | 'topologicalOrder'
-  | 'nodeAfter'
 >;
 
 function getPairByNodeId(nodeId: string): { enterNodeId: string; exitNodeId: string } {
