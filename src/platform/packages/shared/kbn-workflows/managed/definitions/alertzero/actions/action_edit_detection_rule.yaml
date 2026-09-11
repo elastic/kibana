@@ -50,9 +50,9 @@ triggers:
         - actionInput
       additionalProperties: false
 outputs:
-  - name: ruleId
+  - name: id
     type: string
-  - name: ruleName
+  - name: name
     type: string
   - name: query
     type: string
@@ -70,6 +70,6 @@ steps:
     type: workflow.output
     status: completed
     with:
-      ruleId: "{{ steps.patch_rule.output.id }}"
-      ruleName: "{{ steps.patch_rule.output.name }}"
+      id: "{{ steps.patch_rule.output.id }}"
+      name: "{{ steps.patch_rule.output.name }}"
       query: "{{ steps.patch_rule.output.query }}"
