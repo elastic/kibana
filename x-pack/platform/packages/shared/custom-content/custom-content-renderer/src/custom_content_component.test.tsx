@@ -64,4 +64,26 @@ describe('CustomContentComponent', () => {
 
     expect(onLoadingChange).toHaveBeenCalledWith(true);
   });
+
+  it('renders the template in a fully sandboxed iframe', () => {
+    const { container } = render(<CustomContentComponent {...defaultProps} />);
+
+    const iframe = container.querySelector('iframe');
+    expect(iframe).not.toBeNull();
+    expect(iframe!.getAttribute('sandbox')).toBe('');
+  });
+
+  it('sandboxes the preview iframe too', () => {
+    mockUseCustomContentHtml.mockReturnValue({
+      html: '',
+      isLoading: false,
+      error: undefined,
+      noContent: false,
+    });
+    const { container } = render(
+      <CustomContentComponent {...defaultProps} previewHtml="<p>preview</p>" />
+    );
+
+    expect(container.querySelector('iframe')!.getAttribute('sandbox')).toBe('');
+  });
 });

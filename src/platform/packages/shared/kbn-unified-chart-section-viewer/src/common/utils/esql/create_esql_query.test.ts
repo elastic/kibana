@@ -63,13 +63,12 @@ const mockLegacyHistogramMetric: ParsedMetricItem = {
   metricTypes: ['histogram'],
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/289979
-describe.skip('createESQLQuery', () => {
+describe('createESQLQuery', () => {
   it('should nullify unmapped fields in generated metric queries', () => {
     expect(createESQLQueryWithSettings({ metricItem: mockMetric })).toBe(
       `
 SET unmapped_fields = "NULLIFY"; TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );
   });

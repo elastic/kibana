@@ -9,6 +9,7 @@ import {
   METRICS_DETAIL_PATH,
   METRICS_HOSTS_PATH,
   METRICS_INVENTORY_PATH,
+  METRICS_SETTINGS_PATH,
 } from './metrics_header_paths';
 
 /**
@@ -20,6 +21,7 @@ import {
 export const METRICS_HEADER_PORTAL_EXCLUDED_PATHS: readonly string[] = [
   METRICS_INVENTORY_PATH,
   METRICS_HOSTS_PATH,
+  METRICS_SETTINGS_PATH,
   METRICS_DETAIL_PATH,
   '/snapshot',
   '/',
