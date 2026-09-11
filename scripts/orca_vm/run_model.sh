@@ -115,7 +115,11 @@ source /tmp/golden-cluster-env.sh 2>/dev/null
 # to "never ran" — 4.6-sonnet lost 294 valid docs this way on 2026-08-29.
 # Pick a default judge that differs from the model under test, and let the
 # caller override. DEFAULT_JUDGE is only used when it is not the candidate.
-DEFAULT_JUDGE=eis-anthropic-claude-4-6-sonnet
+# Default is the omniroute Opus 5 combo (canary-verified 2026-09-11: endpoint
+# 200, judge calls 200, PASS docs=8/8) — cross-family vs every eis-* candidate
+# and immune to EIS connector outages. The selfhost-* synthesis branch below
+# provisions its proxy/endpoint; requires .selfhost-judge.env on the VM.
+DEFAULT_JUDGE=selfhost-omni-opus-5
 ALT_JUDGE=eis-anthropic-claude-4-5-haiku
 if [ -z "${EVAL_CONNECTOR_ID:-}" ]; then
   if [ "$MODEL" = "$DEFAULT_JUDGE" ]; then
