@@ -37,6 +37,13 @@ export const BULK_CLOSE_LABEL = i18n.translate(
   }
 );
 
+export const CLOSE_ALERTS_REASON_LABEL = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.alertsActions.closeAlertsReasonLabel',
+  {
+    defaultMessage: 'Reason for closing',
+  }
+);
+
 export const BULK_CLOSE_RUNTIME_FIELD_WARNING_TITLE = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.alertsActions.bulkCloseRuntimeFieldWarning.title',
   {
