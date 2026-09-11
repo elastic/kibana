@@ -82,3 +82,4 @@ export * from './specs/unifi/unifi';
 export * from './specs/urlscan_io/urlscan_io';
 export * from './specs/misp/misp';
 export * from './specs/google_threat_intelligence/google_threat_intelligence';
+export * from './specs/elasticsearch/elasticsearch';
