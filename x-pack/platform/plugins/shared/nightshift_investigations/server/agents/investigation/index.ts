@@ -8,10 +8,6 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-import {
-  NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
 import instructions from './instructions/investigator.md.text';
 import {
   OBSERVABILITY_GET_LOGS_TOOL_ID,
@@ -23,10 +19,6 @@ import {
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_TRACES_TOOL_ID,
 } from './discovery_tool_ids';
-import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
-import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
-import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
-import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'significant-events.investigation';
 export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID =
@@ -59,10 +51,6 @@ export const investigationAgentType = {
           OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
           OBSERVABILITY_GET_SERVICES_TOOL_ID,
           OBSERVABILITY_GET_TRACES_TOOL_ID,
-          SANDBOX_BASH_TOOL_ID,
-          SANDBOX_VIEW_FILE_TOOL_ID,
-          SANDBOX_STR_REPLACE_TOOL_ID,
-          SANDBOX_WRITE_FILE_TOOL_ID,
         ],
       },
     ],
@@ -70,8 +58,6 @@ export const investigationAgentType = {
     // connectors are persisted on the derived agent and merged into this allow-list.
     enable_elastic_capabilities: true,
     connector_ids: [],
-    workflow_ids: [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID],
-    post_execution_workflow_ids: [NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID],
   },
 } as const satisfies AgentTypeDefinition;
 

@@ -27,4 +27,5 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;
   getCortexPageStore: GetCortexPageStore;
+  isCortexEnabled: () => boolean;
 }

@@ -12,7 +12,7 @@ import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server
 import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -80,10 +80,12 @@ export const runCortexOptimize = async ({
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
 }): Promise<void> => {
+  // Only the deductive investigator writes to Cortex: it is the one agent whose post-execution
+  // hook runs this workflow, and other agents' rounds must not edit the wiki.
   const resolvedAgentId = agentId !== undefined && agentId.length > 0 ? agentId : undefined;
   if (
     resolvedAgentId !== undefined &&
-    resolvedAgentId !== SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID
+    resolvedAgentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID
   ) {
     return;
   }

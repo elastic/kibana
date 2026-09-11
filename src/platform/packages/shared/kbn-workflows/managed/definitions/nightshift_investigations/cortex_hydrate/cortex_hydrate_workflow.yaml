@@ -21,9 +21,6 @@ triggers:
         conversation_id:
           type: string
           description: Conversation id that namespaces the sandbox. Absent for standalone runs.
-        is_first_round:
-          type: boolean
-          description: True only on the first agent round of the conversation.
       additionalProperties: false
 
 steps:

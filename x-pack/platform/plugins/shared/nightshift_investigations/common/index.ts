@@ -89,6 +89,9 @@ export interface StartInvestigationResponse {
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
 
+/** Subject id a manual investigation persists under when the caller supplies none. */
+export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
+
 export const INVESTIGATION_STATUSES = [
   'pending',
   'running',

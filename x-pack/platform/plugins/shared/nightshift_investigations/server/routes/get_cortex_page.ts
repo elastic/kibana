@@ -25,7 +25,9 @@ export const getCortexPageRoute = createNightshiftInvestigationsServerRoute({
       id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
   }),
-  handler: async ({ request, params, getCortexPageStore }) => {
+  handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
+    if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
+
     const page = await getCortexPageStore(request).get(params.path.id);
     if (!page) {
       throw notFound(`Cortex page ${params.path.id} was not found`);

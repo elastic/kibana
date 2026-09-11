@@ -33,6 +33,7 @@ import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { CortexTab } from './components/cortex/tab';
+import { useCortexEnabled } from './components/cortex/use_cortex';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -76,6 +77,7 @@ export function SignificantEventsPage() {
   const canManageStreams = streams?.manage === true;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const isCortexEnabled = useCortexEnabled();
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -209,14 +211,18 @@ export function SignificantEventsPage() {
         href: router.link('/{tab}', { path: { tab: 'memory' } }),
         isSelected: tab === 'memory',
       },
-      {
-        id: 'cortex',
-        label: i18n.translate('xpack.significantEventsApp.cortexTab', {
-          defaultMessage: 'Cortex',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'cortex' } }),
-        isSelected: tab === 'cortex',
-      },
+      ...(isCortexEnabled
+        ? [
+            {
+              id: 'cortex',
+              label: i18n.translate('xpack.significantEventsApp.cortexTab', {
+                defaultMessage: 'Cortex',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'cortex' } }),
+              isSelected: tab === 'cortex',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         label: i18n.translate('xpack.significantEventsApp.settingsTab', {
@@ -226,7 +232,7 @@ export function SignificantEventsPage() {
         isSelected: tab === 'settings',
       },
     ],
-    [tab, router]
+    [tab, router, isCortexEnabled]
   );
 
   if (isAvailabilityLoading) {
@@ -366,7 +372,7 @@ export function SignificantEventsPage() {
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'significant_events' && <SignificantEventsTab />}
             {tab === 'memory' && <MemoryTab />}
-            {tab === 'cortex' && <CortexTab />}
+            {tab === 'cortex' && isCortexEnabled && <CortexTab />}
             {tab === 'settings' && <SettingsTab />}
           </SignificantEventsAppPageTemplate.Body>
         </SignificantEventsPageProvider>

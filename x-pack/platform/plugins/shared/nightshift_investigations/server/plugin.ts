@@ -36,6 +36,7 @@ import { createCortexStore, registerCortexAiIndex } from './cortex/register_cort
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
+import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
 import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
@@ -44,6 +45,7 @@ import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_to
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
+import { writeElasticManifest } from './tools/sandbox_bash/elastic_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import {
   nightshiftInvestigationSavedObjectType,
@@ -82,6 +84,7 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
+  private cortexEnabled = false;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -94,7 +97,11 @@ export class NightshiftInvestigationsPlugin
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
-    registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+
+    this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    if (this.cortexEnabled) {
+      registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+    }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
 
@@ -117,21 +124,31 @@ export class NightshiftInvestigationsPlugin
     );
 
     if (plugins.agentBuilder) {
+      const config = this.ctx.config.get();
+      const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
+      // The significant-events investigator keeps its own prompt and Elastic tools; only the
+      // deductive agent runs from the sandbox and talks to Cortex.
       registerInvestigationAgentType(plugins.agentBuilder);
+      registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
+        sandboxEnabled: !!config.sandbox,
+        cortexEnabled: this.cortexEnabled,
+        telemetryConnectorId,
+      });
       plugins.agentBuilder.tools.register(
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
         })
       );
 
-      const config = this.ctx.config.get();
       if (config.sandbox) {
         const sandboxLogger = this.logger.get('sandbox_bash_tool');
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: sandboxLogger,
-          writeManifest: (conversationId, callContext) =>
-            writeConnectorManifest({
+          // Both manifests are documentation only: they name the env vars the sandbox can
+          // reference, never the values behind them.
+          writeManifest: async (conversationId, callContext) => {
+            await writeConnectorManifest({
               conversationId,
               apiClient: connectionManager.apiClient,
               callContext,
@@ -139,7 +156,16 @@ export class NightshiftInvestigationsPlugin
                 ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
                 : undefined,
               logger: sandboxLogger,
-            }),
+            });
+            if (telemetryConnectorId) {
+              await writeElasticManifest({
+                conversationId,
+                apiClient: connectionManager.apiClient,
+                connectorId: telemetryConnectorId,
+                logger: sandboxLogger,
+              });
+            }
+          },
         });
         this.sandboxConnectionManager = connectionManager;
 
@@ -205,19 +231,21 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
         );
-        plugins.workflowsExtensions.registerStepDefinition(
-          cortexHydrateStepDefinition({
-            getConnectionManager: () => this.sandboxConnectionManager,
-            logger: this.logger.get('cortex'),
-          })
-        );
-        plugins.workflowsExtensions.registerStepDefinition(
-          cortexOptimizeStepDefinition({
-            getInference: () => this.inference,
-            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
-            logger: this.logger.get('cortex'),
-          })
-        );
+        if (this.cortexEnabled) {
+          plugins.workflowsExtensions.registerStepDefinition(
+            cortexHydrateStepDefinition({
+              getConnectionManager: () => this.sandboxConnectionManager,
+              logger: this.logger.get('cortex'),
+            })
+          );
+          plugins.workflowsExtensions.registerStepDefinition(
+            cortexOptimizeStepDefinition({
+              getInference: () => this.inference,
+              getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              logger: this.logger.get('cortex'),
+            })
+          );
+        }
       }
 
       registerRoutes({
@@ -227,6 +255,7 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          isCortexEnabled: () => this.cortexEnabled,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -358,7 +387,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
-    await installCortexWorkflows({ client });
+    if (this.cortexEnabled) {
+      await installCortexWorkflows({ client });
+    }
     await client.ready();
   }
 
