@@ -25,7 +25,6 @@ import {
   DEFAULT_RESULT_SIZE,
   DEFAULT_FIELD_AGGREGATION_SIZE,
 } from './constants';
-import { DATA_STREAM_NAME, SEPARATOR_CHAR, ECS_VERSION, DEFAULT_RESULT_SIZE } from './constants';
 import type {
   ChangeHistoryAggregateField,
   ChangeHistoryDocument,
