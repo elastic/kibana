@@ -27,7 +27,7 @@ test.describe('Vega sandbox example', { tag: ['@local-stateful-classic'] }, () =
     await expect(iframe).not.toHaveAttribute('srcdoc');
 
     await expect(page.testSubj.locator('vegaSandboxExampleIsolationProbe')).toContainText(
-      'parent document blocked'
+      'opaque origin (isolated)'
     );
 
     await expect(page.testSubj.locator('vegaSandboxExampleRenderBtn')).toBeEnabled();
@@ -46,6 +46,6 @@ test.describe('Vega sandbox example', { tag: ['@local-stateful-classic'] }, () =
     );
     await expect(protocolLog).toContainText('"type": "applyFilter"');
     await expect(protocolLog).toContainText('kibanaAddFilter');
-    await expect(protocolLog).toContainText('"renderId": "r3"');
+    await expect(protocolLog).toContainText(/"renderId": ".+-3"/);
   });
 });
