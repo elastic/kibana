@@ -8,21 +8,15 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiCallOut,
-  EuiFlexGrid,
-  EuiStat,
-} from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiCallOut, EuiFlexGrid, EuiStat } from '@elastic/eui';
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import { i18n } from '@kbn/i18n';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DataControlType } from '@kbn/controls-constants';
 import { ChooseColumnPopover } from './choose_column_popover';
-import { DataControlEditorStrings } from '../data_control_constants';
 
 export const ESQLValuesPreview: React.FC<{
   previewOptions: string[] | number[];
@@ -51,7 +45,9 @@ export const ESQLValuesPreview: React.FC<{
     return (
       <EuiCallOut
         announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
+        title={i18n.translate('esqlUtils.valuesPreview.errorTitle', {
+          defaultMessage: 'Error getting values preview',
+        })}
         color="danger"
         iconType="error"
         size="s"
@@ -65,16 +61,20 @@ export const ESQLValuesPreview: React.FC<{
     return (
       <EuiCallOut
         announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
+        title={i18n.translate('esqlUtils.valuesPreview.multiColumnErrorTitle', {
+          defaultMessage: 'Query must return a single column',
+        })}
         color="warning"
         iconType="warning"
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
       >
         <p>
-          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
-            previewColumns.length
-          )}
+          {i18n.translate('esqlUtils.valuesPreview.multiColumnErrorBody', {
+            defaultMessage:
+              'Your query is currently returning {totalColumns} columns. Choose a column, or use STATS BY to narrow your query down.',
+            values: { totalColumns: previewColumns.length },
+          })}
         </p>
         <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
       </EuiCallOut>
@@ -85,13 +85,19 @@ export const ESQLValuesPreview: React.FC<{
     return (
       <EuiCallOut
         announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
+        title={i18n.translate('esqlUtils.valuesPreview.emptyTitle', {
+          defaultMessage: 'No values returned',
+        })}
         color="warning"
         iconType="warning"
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
       >
-        <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
+        <p>
+          {i18n.translate('esqlUtils.valuesPreview.emptyText', {
+            defaultMessage: "This query isn't returning any values. Edit it and run it again.",
+          })}
+        </p>
       </EuiCallOut>
     );
   }
@@ -102,12 +108,16 @@ export const ESQLValuesPreview: React.FC<{
         <EuiStat
           titleSize="s"
           title={range.min}
-          description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMinText()}
+          description={i18n.translate('esqlUtils.valuesPreview.minText', {
+            defaultMessage: 'Minimum value',
+          })}
         />
         <EuiStat
           titleSize="s"
           title={range.max}
-          description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMaxText()}
+          description={i18n.translate('esqlUtils.valuesPreview.maxText', {
+            defaultMessage: 'Maximum value',
+          })}
         />
       </EuiFlexGrid>
     );

@@ -54,6 +54,7 @@ describe('ESQLValuesPreview', () => {
     expect(queryByTestId('esqlValuesPreviewRange')).not.toBeInTheDocument();
     expect(getByTestId('esqlValuesPreviewStrings')).toBeInTheDocument();
   });
+
   it('renders a list of values for string columns', () => {
     const { getByTestId } = render(
       <I18nProvider>

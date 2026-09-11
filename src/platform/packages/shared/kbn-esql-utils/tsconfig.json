@@ -16,6 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@elastic/eui",
     "@kbn/data-views-plugin",
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
@@ -23,9 +24,11 @@
     "@kbn/esql-types",
     "@kbn/search-types",
     "@kbn/expressions-plugin",
+    "@kbn/field-formats-common",
     "@kbn/field-types",
     "@kbn/es-types",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/datemath",
     "@kbn/es-query",
     "@kbn/code-editor",
