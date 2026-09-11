@@ -313,24 +313,22 @@ function toKibanaContainerModuleLoadOptions(
     hook: ServiceIdentifier<(container: Container) => void>
   ): KibanaContainerModuleLoadOptions['onSetup'] | KibanaContainerModuleLoadOptions['onStart'] {
     return (serviceIdentifier, ...definition) => {
-      options.onActivation(serviceIdentifier, (context, injectable) => {
-        const [dependencies, handler] = pop(definition);
+      const [dependencies, handler] = pop(definition);
 
-        handler(
-          ...([
-            toKibanaResolutionContext(context),
-            injectable,
-            ...resolveSync(context, dependencies),
-          ] as const)
-        );
+      options
+        .bind(hook)
+        .toDynamicValue((context) => (container) => {
+          if (!container.isCurrentBound(serviceIdentifier)) {
+            return;
+          }
+          const kibanaResolutionContext = toKibanaResolutionContext(context);
+          const resolvedDependencies = resolveSync(context, dependencies);
 
-        return injectable;
-      });
-      options.bind(hook).toConstantValue((container) => {
-        if (container.isCurrentBound(serviceIdentifier)) {
-          container.getAll(serviceIdentifier);
-        }
-      });
+          container.getAll(serviceIdentifier).forEach((injectable) => {
+            handler(...([kibanaResolutionContext, injectable, ...resolvedDependencies] as const));
+          });
+        })
+        .inRequestScope();
     };
   }
 

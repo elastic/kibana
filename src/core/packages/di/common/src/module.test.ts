@@ -75,6 +75,15 @@ describe('KibanaContainerModule', () => {
       expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2');
     });
 
+    it('should not invoke the registered handler when the service was resolved before', () => {
+      container.bind(token).toConstantValue('value');
+      container.get(token);
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(() => trigger(hook, container)).not.toThrow();
+      expect(handler).toHaveBeenCalled();
+    });
+
     it('should activate only in the current context', () => {
       container.bind(token).toConstantValue('value1');
 
@@ -157,6 +166,40 @@ describe('KibanaContainerModule', () => {
         'value',
         expected
       );
+    });
+  });
+
+  describe('onStart', () => {
+    it('should invoke the registered handler on start only', () => {
+      const onSetupHandler = jest.fn();
+      const onStartHandler = jest.fn();
+
+      options.onSetup(token, onSetupHandler);
+      options.onStart(token, onStartHandler);
+      container.bind(token).toConstantValue('value');
+
+      trigger(OnSetup, container);
+      expect(onSetupHandler).toHaveBeenCalledTimes(1);
+      expect(onStartHandler).not.toHaveBeenCalled();
+
+      trigger(OnStart, container);
+      expect(onStartHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not throw when there are dependencies available after start', () => {
+      const onStartHandler = jest.fn();
+      const startDependency = Symbol.for('core.start.service');
+      options.onSetup(token, jest.fn());
+      options.onStart(token, startDependency, onStartHandler);
+      container.bind(token).toConstantValue('value');
+
+      expect(() => trigger(OnSetup, container)).not.toThrow();
+      expect(onStartHandler).not.toHaveBeenCalled();
+
+      container.bind(startDependency).toConstantValue('something');
+
+      expect(() => trigger(OnStart, container)).not.toThrow();
+      expect(onStartHandler).toHaveBeenCalledWith(expect.anything(), 'value', 'something');
     });
   });
 
