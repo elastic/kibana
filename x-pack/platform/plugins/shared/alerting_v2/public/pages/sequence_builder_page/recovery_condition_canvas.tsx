@@ -53,24 +53,18 @@ export const DEFAULT_RECOVERY_CONFIG: RecoveryConfig = {
 export const resolveRecoveryIndices = (
   mode: RecoveryMode,
   stepsLength: number,
-  currentIndices?: number[]
-): { recoveryStepIndex: number; recoveryStepIndices: number[] | undefined } => {
+  currentIndices: number[]
+): { recoveryStepIndices: number[] } => {
   if (mode === 'all') {
-    return {
-      recoveryStepIndex: 0,
-      recoveryStepIndices: Array.from({ length: stepsLength }, (_, i) => i),
-    };
+    return { recoveryStepIndices: Array.from({ length: stepsLength }, (_, i) => i) };
   }
-  if (mode === 'custom' && currentIndices && currentIndices.length > 0) {
+  if (mode === 'custom' && currentIndices.length > 0) {
     const valid = currentIndices.filter((i) => i < stepsLength).sort((a, b) => a - b);
     if (valid.length > 0) {
-      return { recoveryStepIndex: valid[0], recoveryStepIndices: valid };
+      return { recoveryStepIndices: valid };
     }
   }
-  return {
-    recoveryStepIndex: Math.max(0, stepsLength - 1),
-    recoveryStepIndices: undefined,
-  };
+  return { recoveryStepIndices: [Math.max(0, stepsLength - 1)] };
 };
 
 const RECOVERY_MODE_OPTIONS = [
@@ -196,14 +190,8 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
     if (recoveryConfig.mode === 'all') {
       return new Set(seqValues.steps.map((_, i) => i));
     }
-    const indices = seqValues.recoveryStepIndices ?? [seqValues.recoveryStepIndex];
-    return new Set(indices.filter((i) => i < seqValues.steps.length));
-  }, [
-    recoveryConfig.mode,
-    seqValues.steps,
-    seqValues.recoveryStepIndices,
-    seqValues.recoveryStepIndex,
-  ]);
+    return new Set(seqValues.recoveryStepIndices.filter((i) => i < seqValues.steps.length));
+  }, [recoveryConfig.mode, seqValues.steps, seqValues.recoveryStepIndices]);
 
   const handleModeChange = useCallback(
     (id: string) => {
@@ -226,12 +214,11 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
       const idx = node.data.stageIndex;
 
       setSeqValues((prev) => {
-        const current = prev.recoveryStepIndices ?? [prev.recoveryStepIndex];
+        const current = prev.recoveryStepIndices;
         const already = current.includes(idx);
         if (already && current.length <= 1) return prev;
         const next = already ? current.filter((i) => i !== idx) : [...current, idx];
-        const sorted = [...next].sort((a, b) => a - b);
-        return { ...prev, recoveryStepIndex: sorted[0], recoveryStepIndices: sorted };
+        return { ...prev, recoveryStepIndices: next.sort((a, b) => a - b) };
       });
     },
     [setSeqValues]

@@ -227,8 +227,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           ...prev,
           steps: nextSteps,
           hopWindows: hopWindows.slice(0, Math.max(0, nextSteps.length - 1)),
-          recoveryStepIndex: Math.max(0, Math.min(prev.recoveryStepIndex, nextSteps.length - 1)),
-          recoveryStepIndices: undefined,
+          recoveryStepIndices: [Math.max(0, nextSteps.length - 1)],
         };
       });
     },
@@ -315,8 +314,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
               0,
               nextSteps.length - 1
             ),
-            recoveryStepIndex: nextSteps.length - 1,
-            recoveryStepIndices: undefined,
+            recoveryStepIndices: [nextSteps.length - 1],
           };
         });
       } catch {
