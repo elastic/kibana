@@ -485,6 +485,65 @@ describe('ComposeDiscoverFlyout', () => {
     });
   });
 
+  describe('builder Preview button', () => {
+    const thresholdEditRule: ComposeDiscoverFlyoutProps['rule'] = {
+      id: 'rule-1',
+      kind: 'alert',
+      enabled: true,
+      metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '5m' },
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      },
+      created_by: 'test',
+      created_at: '2026-01-01T00:00:00Z',
+      updated_by: 'test',
+      updated_at: '2026-01-01T00:00:00Z',
+    };
+
+    it.each([
+      ['create', { mode: 'create' as const, builderType: 'threshold' }],
+      [
+        'edit',
+        {
+          mode: 'edit' as const,
+          builderType: 'threshold',
+          ruleId: 'rule-1',
+          rule: thresholdEditRule,
+        },
+      ],
+    ])('renders a labeled Preview button in the header in %s mode', (_mode, props) => {
+      renderFlyout(props);
+
+      expect(screen.getByTestId('ruleBuilderOpenPreview')).toHaveTextContent('Preview');
+    });
+
+    it('does not render Preview outside builder mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(screen.queryByTestId('ruleBuilderOpenPreview')).not.toBeInTheDocument();
+    });
+
+    it('opens the query sandbox', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('ruleBuilderOpenPreview'));
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+    });
+
+    it('disables Preview while the sandbox is open', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('ruleBuilderOpenPreview'));
+
+      expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
+    });
+  });
+
   describe('isEditing prop', () => {
     beforeEach(() => {
       mockComposeDiscoverForm.mockClear();

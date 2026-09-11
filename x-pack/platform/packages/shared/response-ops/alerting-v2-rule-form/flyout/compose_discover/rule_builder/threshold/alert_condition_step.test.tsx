@@ -518,6 +518,26 @@ describe('RuleBuilderAlertConditionStep', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('renders optional as a label append instead of in the field title', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getAllByText('Filter')).toHaveLength(2);
+    expect(screen.getAllByText('optional')).toHaveLength(2);
+    expect(screen.queryByText('Filter (optional)')).not.toBeInTheDocument();
+    expect(screen.getByText('Evaluations')).toBeInTheDocument();
+    expect(screen.queryByText('Evaluations (optional)')).not.toBeInTheDocument();
+  });
+
   it('sets and displays filter input value', () => {
     const onBuilderStateChange = jest.fn();
     const builderState = makeBuilderState();
@@ -793,38 +813,6 @@ describe('RuleBuilderAlertConditionStep', () => {
       const options = Array.from(select.options).map((o) => o.value);
       expect(options).toEqual(['event_time', '@timestamp']);
     });
-  });
-
-  it('disables preview button when childOpen is true', () => {
-    const builderState = makeBuilderState();
-
-    render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <RuleBuilderAlertConditionStep
-          state={createState({ childOpen: true })}
-          dispatch={dispatch}
-          services={createMockServices()}
-        />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
-  });
-
-  it('enables preview button when childOpen is false', () => {
-    const builderState = makeBuilderState();
-
-    render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <RuleBuilderAlertConditionStep
-          state={createState({ childOpen: false })}
-          dispatch={dispatch}
-          services={createMockServices()}
-        />
-      </Wrapper>
-    );
-
-    expect(screen.getByTestId('ruleBuilderOpenPreview')).not.toBeDisabled();
   });
 
   describe('recovery condition sync', () => {
