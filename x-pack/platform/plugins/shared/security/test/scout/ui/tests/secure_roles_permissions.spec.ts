@@ -81,6 +81,7 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
   }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
+        cluster: [],
         indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
       },
       kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
@@ -97,6 +98,7 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
   }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
+        cluster: [],
         indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
       },
       kibana: [

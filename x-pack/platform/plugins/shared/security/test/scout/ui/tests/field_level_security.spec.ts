@@ -150,10 +150,12 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     }) => {
       await browserAuth.loginWithCustomRole({
         elasticsearch: {
+          cluster: [],
           indices: [
             {
               names: ['flstest'],
               privileges: ['read', 'view_index_metadata'],
+              // @ts-ignore — field_security is a valid FLS field
               field_security: {
                 grant: ['customer_ssn', 'customer_name', 'customer_region', 'customer_type'],
               },
@@ -175,10 +177,12 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
     }) => {
       await browserAuth.loginWithCustomRole({
         elasticsearch: {
+          cluster: [],
           indices: [
             {
               names: ['flstest'],
               privileges: ['read', 'view_index_metadata'],
+              // @ts-ignore — field_security is a valid FLS field
               field_security: {
                 grant: ['customer_name', 'customer_region', 'customer_type'],
               },

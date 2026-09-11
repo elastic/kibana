@@ -159,8 +159,8 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
       }
     });
 
-    test('allows a role mapping to be edited', async ({ pageObjects }) => {
-      await pageObjects.securityRoleMappings.page.testSubj.locator('roleMappingName').click();
+    test('allows a role mapping to be edited', async ({ pageObjects, page }) => {
+      await page.testSubj.locator('roleMappingName').click();
       await pageObjects.securityRoleMappings.saveRoleMapping();
     });
   });

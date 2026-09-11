@@ -73,6 +73,7 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
   test('user East should only see EAST doc in Discover', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: {
+        cluster: [],
         indices: [
           {
             names: ['dlstest'],
