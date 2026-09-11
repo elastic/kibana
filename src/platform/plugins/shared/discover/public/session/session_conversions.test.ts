@@ -486,7 +486,9 @@ describe('Discover session conversion and UI preparation', () => {
     mockedUuidv4.mockReturnValueOnce('runtime-inline-a').mockReturnValueOnce('runtime-inline-b');
 
     const session = assignSessionDataViewIds(
-      fromDiscoverSessionApiResponse(createInlineTabsResponse([inlineApiDataView, changedInlineDataView])),
+      fromDiscoverSessionApiResponse(
+        createInlineTabsResponse([inlineApiDataView, changedInlineDataView])
+      ),
       []
     );
 
@@ -512,7 +514,9 @@ describe('Discover session conversion and UI preparation', () => {
     });
 
     const originalTab = cloneDeep(restoredTab);
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), [restoredTab]);
+    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), [
+      restoredTab,
+    ]);
 
     expect(session.tabs[1].serializedSearchSource.index).toEqual(
       expect.objectContaining({ id: 'runtime-inline-id', title: 'logs-*' })
