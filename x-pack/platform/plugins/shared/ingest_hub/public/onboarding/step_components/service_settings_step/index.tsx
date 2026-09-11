@@ -73,7 +73,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
-  const { awsServicesMap } = useOnboardingFlow();
+  const { awsServicesMap, detectAndReviewStep } = useOnboardingFlow();
+
+  const isRegionDisabled =
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
+    Object.values(detectAndReviewStep.serviceStatuses).some(
+      (s) => s !== 'error' && s !== 'timeout'
+    );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [duplicateSourceInstanceId, setDuplicateSourceInstanceId] = useState<string | null>(null);
@@ -404,27 +410,50 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               ) : undefined
             }
           >
-            <EuiComboBox
-              compressed
-              singleSelection={{ asPlainText: true }}
-              options={globalRegionOptions}
-              selectedOptions={selectedGlobalRegionOption}
-              onChange={(selected) => {
-                setGlobalRegionTouched(true);
-                setGlobalRegion(selected[0]?.label ?? '');
-              }}
-              onCreateOption={(searchValue) => {
-                setGlobalRegionTouched(true);
-                setGlobalRegion(searchValue);
-              }}
-              isInvalid={globalRegionTouched && !globalRegion.trim()}
-              customOptionText='Use "{searchValue}" as region'
-              placeholder={i18n.translate(
-                'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
-                { defaultMessage: 'Select or enter a region' }
-              )}
-              data-test-subj="serviceSettingsStep-globalRegion"
-            />
+            {(() => {
+              const comboBox = (
+                <EuiComboBox
+                  compressed
+                  singleSelection={{ asPlainText: true }}
+                  options={globalRegionOptions}
+                  selectedOptions={selectedGlobalRegionOption}
+                  onChange={(selected) => {
+                    setGlobalRegionTouched(true);
+                    setGlobalRegion(selected[0]?.label ?? '');
+                  }}
+                  onCreateOption={(searchValue) => {
+                    setGlobalRegionTouched(true);
+                    setGlobalRegion(searchValue);
+                  }}
+                  isInvalid={globalRegionTouched && !globalRegion.trim()}
+                  isDisabled={isRegionDisabled}
+                  customOptionText='Use "{searchValue}" as region'
+                  placeholder={i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
+                    { defaultMessage: 'Select or enter a region' }
+                  )}
+                  data-test-subj="serviceSettingsStep-globalRegion"
+                />
+              );
+              if (!isRegionDisabled) return comboBox;
+              // span needed: disabled EuiComboBox has pointer-events:none; the span intercepts
+              // hover events so the tooltip fires even when the field is non-interactive.
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.globalRegion.disabledTooltip',
+                    {
+                      defaultMessage:
+                        'Region cannot be changed after services have been deployed. To use a different region, start a new session.',
+                    }
+                  )}
+                >
+                  <span tabIndex={0} style={{ display: 'block' }}>
+                    {comboBox}
+                  </span>
+                </EuiToolTip>
+              );
+            })()}
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -811,7 +811,7 @@ describe('useDeploy', () => {
 
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
-        cloud_connector: { enabled: true, cloud_connector_id: 'connector-123' },
+        cloud_connector: { enabled: true, cloud_connector_id: 'connector-123', target_csp: 'aws' },
       })
     );
   });

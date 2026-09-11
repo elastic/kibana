@@ -7,10 +7,12 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
+  agenticInvestigations: 9299
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 21472
+  alertzero: 4489
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 1174
@@ -37,7 +39,7 @@ pageLoadAssetSize:
   core: 320
   cps: 6032
   crossClusterReplication: 7691
-  customContent: 2714
+  customContent: 3300
   customIntegrations: 636
   dashboard: 536
   dashboardMarkdown: 4012
@@ -142,12 +144,12 @@ pageLoadAssetSize:
   observabilityAIAssistant: 2236
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2280
+  observabilityAlerting: 3500
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2550
-  pnd: 4489
   presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
@@ -193,7 +195,7 @@ pageLoadAssetSize:
   shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
-  significantEvents: 3022
+  significantEvents: 3679
   significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
@@ -235,5 +237,5 @@ pageLoadAssetSize:
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
-  workflowsManagement: 32428
+  workflowsManagement: 36613
   workplaceAIApp: 1800
