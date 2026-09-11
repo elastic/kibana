@@ -97,6 +97,21 @@ export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): P
 };
 
 /**
+ * Strips `ai_indices` from an incoming write body when the Context Engine is disabled,
+ * leaving stored values intact so they reactivate when the flag is toggled back on.
+ */
+const withoutAiIndices = <T extends { configuration?: { ai_indices?: string[] } }>(
+  body: T,
+  contextEngineEnabled: boolean
+): T => {
+  if (contextEngineEnabled || !body.configuration) {
+    return body;
+  }
+  const { ai_indices: _stripped, ...restConfig } = body.configuration;
+  return { ...body, configuration: restConfig } as T;
+};
+
+/**
  * Shapes `ai_indices` for a response: absent while the Context Engine is disabled, and present
  * with an empty-list default while it is enabled.
  */
@@ -365,16 +380,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
-
-        // When disabled, strip ai_indices from the write but leave stored values
-        // intact so they reactivate when the flag is toggled back on.
-        const createBody = (() => {
-          if (!contextEngineEnabled) {
-            const { ai_indices: _stripped, ...restConfig } = request.body.configuration;
-            return { ...request.body, configuration: restConfig };
-          }
-          return request.body;
-        })();
+        const createBody = withoutAiIndices(request.body, contextEngineEnabled);
 
         try {
           const createdProfile = await service.create(createBody);
@@ -523,16 +529,7 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
-
-        // When disabled, strip ai_indices from the write but leave stored values
-        // intact so they reactivate when the flag is toggled back on.
-        const updateBody = (() => {
-          if (!contextEngineEnabled && request.body.configuration) {
-            const { ai_indices: _stripped, ...restConfig } = request.body.configuration;
-            return { ...request.body, configuration: restConfig };
-          }
-          return request.body;
-        })();
+        const updateBody = withoutAiIndices(request.body, contextEngineEnabled);
 
         try {
           const profile = await service.update(request.params.id, updateBody);
