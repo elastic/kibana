@@ -48,6 +48,7 @@ export * from './src/playwright/ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
+  AppMenu,
   ContentListWrapper,
   DataGrid,
   DiscoverApp,
