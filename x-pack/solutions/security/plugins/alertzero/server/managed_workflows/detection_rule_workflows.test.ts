@@ -425,6 +425,50 @@ describe('detection rule workflows', () => {
         );
       });
 
+      it('applies exceptions via security.createRuleException gated on can_apply_exception', () => {
+        const apply = reviewSteps.find(({ name }) => name === 'apply_exception_tuning')!;
+        expect(apply.type).toBe('security.createRuleException');
+        expect(apply.if).toContain('steps.classify_proposal.output.can_apply_exception == true');
+        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(apply['on-failure']).toEqual({ continue: true });
+        expect(apply.with?.rule_id).toBe('{{ inputs.rule_uuid }}');
+        expect(apply.with?.entries).toBe(
+          '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.exception_applied)).toContain(
+          'steps.classify_proposal.output.can_apply_exception == true'
+        );
+        expect(String(applyResults.with?.exception_applied)).toContain(
+          'steps.apply_exception_tuning.error == null'
+        );
+      });
+
+      it('applies risk score changes via security.patchRule gated on can_apply_risk_score', () => {
+        const apply = reviewSteps.find(({ name }) => name === 'apply_risk_score_tuning')!;
+        expect(apply.type).toBe('security.patchRule');
+        expect(apply.if).toContain('steps.classify_proposal.output.can_apply_risk_score == true');
+        expect(apply.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(apply['on-failure']).toEqual({ continue: true });
+        const patch = apply.with?.patch as Record<string, string>;
+        expect(patch.id).toBe('{{ inputs.rule_uuid }}');
+        expect(patch.risk_score).toBe(
+          '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}'
+        );
+        expect(patch.severity).toBe(
+          '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}'
+        );
+
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results')!;
+        expect(String(applyResults.with?.risk_score_applied)).toContain(
+          'steps.classify_proposal.output.can_apply_risk_score == true'
+        );
+        expect(String(applyResults.with?.risk_score_applied)).toContain(
+          'steps.apply_risk_score_tuning.error == null'
+        );
+      });
+
       // The gate can stay open for 72h; a stale approval must not clobber an analyst
       // edit made in the meantime. Both reads go by saved-object id, so a rule
       // deleted and recreated under the same signature 404s instead of matching.
