@@ -58,6 +58,7 @@ import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } fr
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
+import { runConversationAttachmentsBackfill } from './backfills/conversation_attachments_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 
@@ -468,12 +469,48 @@ export class AgentBuilderPlugin
   }
 
   /**
-   * Applies all registered tool ID backfills.
+   * Applies all registered backfills:
+   * - Tool ID backfill.
+   * - Conversation attachments backfill.
    */
   private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
     const logger = this.logger.get('backfill');
     const esClient = elasticsearch.client.asInternalUser;
-    await runToolIdBackfill(logger, esClient);
+
+    const backfills = [
+      { name: 'tool ID', run: () => runToolIdBackfill(logger.get('tool-id'), esClient) },
+      {
+        name: 'conversation attachments',
+        run: () =>
+          runConversationAttachmentsBackfill(logger.get('conversation-attachments'), esClient),
+      },
+    ];
+
+    const results = await Promise.allSettled(
+      backfills.map(({ name, run }) =>
+        run().catch((error) => {
+          logger.error(
+            `${name} backfill failed: ${error instanceof Error ? error.message : error}`
+          );
+          throw error;
+        })
+      )
+    );
+
+    const failures = results.flatMap<{ name: string; error: unknown }>((result, index) =>
+      result.status === 'rejected' ? [{ name: backfills[index].name, error: result.reason }] : []
+    );
+
+    if (failures.length > 0) {
+      const failureDetails = failures
+        .map(({ name, error }) => `${name}: ${error instanceof Error ? error.message : error}`)
+        .join('; ');
+
+      throw new AggregateError(
+        failures.map(({ error }) => error),
+        `${failures.length} backfill(s) failed. ${failureDetails}`
+      );
+    }
   }
 
   /**
