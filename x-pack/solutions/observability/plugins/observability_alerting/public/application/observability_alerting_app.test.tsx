@@ -7,6 +7,7 @@
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
@@ -47,7 +48,7 @@ const createTestHistory = (pathname: string): ScopedHistory => {
 };
 
 const mockTriggersActionsUi = {
-  getClassicRulesPage: () => <Placeholder name="classicRulesPage" />,
+  getClassicRulesPage: jest.fn(() => <Placeholder name="classicRulesPage" />),
 };
 
 const renderAt = (pathname: string) => {
@@ -70,6 +71,10 @@ const renderAt = (pathname: string) => {
 };
 
 describe('ObservabilityAlertingApp', () => {
+  beforeEach(() => {
+    mockTriggersActionsUi.getClassicRulesPage.mockClear();
+  });
+
   it('redirects / to inbox', () => {
     const { history } = renderAt('/');
 
@@ -91,6 +96,16 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
     expect(history.createSubHistory).toHaveBeenCalledWith(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hideListBackButton: true,
+        history,
+        host: {
+          app: OBSERVABILITY_ALERTING_APP_ID,
+          basePath: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+        },
+      })
+    );
   });
 
   it('renders RulesPage at /rules/v2', async () => {

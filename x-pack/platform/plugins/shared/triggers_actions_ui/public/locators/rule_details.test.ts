@@ -10,8 +10,11 @@ import {
   ALERT_STATUS,
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_HISTORY_TAB,
+  RULES_MANAGEMENT_HOST,
 } from '@kbn/rule-data-utils';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
+
+const MGMT_BASE = RULES_MANAGEMENT_HOST.basePath;
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();
@@ -19,8 +22,8 @@ describe('RuleDetailsLocator', () => {
 
   it('should return correct url when only ruleId is provided', async () => {
     const location = await locator.getLocation({ ruleId: mockedRuleId });
-    expect(location.app).toEqual('rules');
-    expect(location.path).toEqual(getRuleDetailsPath(mockedRuleId));
+    expect(location.app).toEqual('management');
+    expect(location.path).toEqual(`${MGMT_BASE}${getRuleDetailsPath(mockedRuleId)}`);
   });
 
   it('should return correct url when tabId is history', async () => {
@@ -28,9 +31,9 @@ describe('RuleDetailsLocator', () => {
       ruleId: mockedRuleId,
       tabId: RULE_DETAILS_HISTORY_TAB,
     });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_HISTORY_TAB}`
+      `${MGMT_BASE}${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_HISTORY_TAB}`
     );
   });
 
@@ -39,9 +42,11 @@ describe('RuleDetailsLocator', () => {
       ruleId: mockedRuleId,
       tabId: RULE_DETAILS_ALERTS_TAB,
     });
-    expect(location.app).toEqual('rules');
+    expect(location.app).toEqual('management');
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
+      `${MGMT_BASE}${getRuleDetailsPath(
+        mockedRuleId
+      )}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
     );
   });
@@ -55,7 +60,9 @@ describe('RuleDetailsLocator', () => {
       kuery: 'mockedKuery',
     });
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
+      `${MGMT_BASE}${getRuleDetailsPath(
+        mockedRuleId
+      )}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
@@ -97,10 +104,19 @@ describe('RuleDetailsLocator', () => {
       controlConfigs: mockedControlConfigs,
     });
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
+      `${MGMT_BASE}${getRuleDetailsPath(
+        mockedRuleId
+      )}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(untracked)` +
         `,title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group)` +
         `,(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
+  });
+
+  it('should resolve to a custom host when host is provided', async () => {
+    const host = { app: 'observability', basePath: '/alerting/rules/v1' };
+    const location = await locator.getLocation({ ruleId: mockedRuleId, host });
+    expect(location.app).toEqual('observability');
+    expect(location.path).toEqual(`/alerting/rules/v1${getRuleDetailsPath(mockedRuleId)}`);
   });
 });

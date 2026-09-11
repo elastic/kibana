@@ -37,6 +37,7 @@ export const LogsListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
+    host,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -49,7 +50,9 @@ export const LogsListContainer = () => {
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
 
   const docLink = docLinks.links.alerting.guide;
-  const rulesListHref = http.basePath.prepend(triggersActionsRoute);
+  const rulesListHref = host
+    ? getUrlForApp(host.app, { path: host.basePath })
+    : http.basePath.prepend(triggersActionsRoute);
   const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
   const mode = useRulesPageMode();
 

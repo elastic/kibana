@@ -36,6 +36,8 @@ export const RulesListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
+    hideListBackButton,
+    host,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -61,10 +63,14 @@ export const RulesListContainer = () => {
     docTitle.change(getCurrentDocTitle('rules'));
   }, [docTitle, setBreadcrumbs]);
 
+  const v1ListHref = host
+    ? getUrlForApp(host.app, { path: host.basePath })
+    : http.basePath.prepend(triggersActionsRoute);
+
   const rulesListTabs = useMemo(() => {
     if (mode === RULES_PAGE_MODE.v1AndV2Tabs) {
       return getV1RulesPageTabs({
-        v1Href: http.basePath.prepend(triggersActionsRoute),
+        v1Href: v1ListHref,
         v2Href: http.basePath.prepend(ALERTING_V2_RULES_BASE_PATH),
       });
     }
@@ -74,7 +80,7 @@ export const RulesListContainer = () => {
     }
 
     return getClassicTabs('rules', authorizedToReadAnyRules, history);
-  }, [mode, authorizedToReadAnyRules, history, http.basePath]);
+  }, [mode, authorizedToReadAnyRules, history, http.basePath, v1ListHref]);
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
     const extraItems: NonNullable<AppMenuConfig['items']> =
@@ -113,12 +119,16 @@ export const RulesListContainer = () => {
   return (
     <>
       <RulesPageHeader
-        back={{
-          href: alertsBackHref,
-          label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
-            defaultMessage: 'Alerts',
-          }),
-        }}
+        back={
+          hideListBackButton
+            ? undefined
+            : {
+                href: alertsBackHref,
+                label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
+                  defaultMessage: 'Alerts',
+                }),
+              }
+        }
         tabs={rulesListTabs}
         menu={rulesListMenu}
         docLink={docLink}

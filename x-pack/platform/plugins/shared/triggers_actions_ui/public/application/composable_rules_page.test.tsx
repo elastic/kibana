@@ -9,6 +9,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
+import { RULES_MANAGEMENT_HOST } from '@kbn/rule-data-utils';
 import { createStartServicesMock } from '../common/lib/kibana/kibana_react.mock';
 import { triggersActionsUiMock } from '../mocks';
 import { ComposableClassicRulesPage } from './composable_rules_page';
@@ -92,7 +93,44 @@ describe('ComposableClassicRulesPage', () => {
     const deps = getLatestDeps();
     expect(deps.setBreadcrumbs).toBe(setBreadcrumbs);
     expect(deps.history).toBe(history);
+    expect(deps.hideListBackButton).toBeUndefined();
+    expect(deps.host).toEqual(RULES_MANAGEMENT_HOST);
     expect(getFeatures).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards hideListBackButton onto RulesPageApp deps', async () => {
+    const getFeatures = jest.fn().mockResolvedValue([]);
+
+    render(
+      <ComposableClassicRulesPage
+        coreStart={coreStart}
+        setBreadcrumbs={setBreadcrumbs}
+        hideListBackButton
+        internalDeps={createInternalDeps(getFeatures)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getLatestDeps().hideListBackButton).toBe(true);
+    });
+  });
+
+  it('forwards a solution host onto RulesPageApp deps', async () => {
+    const getFeatures = jest.fn().mockResolvedValue([]);
+    const host = { app: 'observabilityAlerting', basePath: '/rules/v1' };
+
+    render(
+      <ComposableClassicRulesPage
+        coreStart={coreStart}
+        setBreadcrumbs={setBreadcrumbs}
+        host={host}
+        internalDeps={createInternalDeps(getFeatures)}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getLatestDeps().host).toEqual(host);
+    });
   });
 
   it('falls back to empty kibanaFeatures when getFeatures rejects', async () => {
