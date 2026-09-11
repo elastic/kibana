@@ -265,29 +265,22 @@ export const ConversationsPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        {!isLoading && !error && filteredQueueItems.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiEmptyPrompt
-              iconType="chartTagCloud"
-              title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>}
-            />
-          </EuiFlexItem>
-        ) : null}
-
         {!isLoading && !error
-          ? groupedBriefingItems.map((group) => (
-              <EuiFlexItem key={group.id} grow={false}>
-                <ConversationQueue
-                  briefingId={group.id}
-                  briefingType={group.id as RecommendedAction}
-                  briefingList={group.items}
-                  isFiltered={filteredQueueItems.length !== sortedConversations.length}
-                  onClickRecommendedAction={onClickRecommendedAction}
-                  onClickAction={onClickAction}
-                  onClickCard={onClickCard}
-                />
-              </EuiFlexItem>
-            ))
+          ? groupedBriefingItems
+              .filter((group) => group.items.length > 0)
+              .map((group) => (
+                <EuiFlexItem key={group.id} grow={false}>
+                  <ConversationQueue
+                    briefingId={group.id}
+                    briefingType={group.id as RecommendedAction}
+                    briefingList={group.items}
+                    isFiltered={filteredQueueItems.length !== sortedConversations.length}
+                    onClickRecommendedAction={onClickRecommendedAction}
+                    onClickAction={onClickAction}
+                    onClickCard={onClickCard}
+                  />
+                </EuiFlexItem>
+              ))
           : null}
       </EuiFlexGroup>
     </AlertZeroPageSection>
