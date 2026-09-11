@@ -11,6 +11,7 @@ import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer } from '@xyflow/react';
 import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EdgeBranchType } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
 
@@ -21,9 +22,9 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   /** Switch bus routing marker — present on all case/default edges of a switch node. */
   readonly branchType?: EdgeBranchType;
   /**
-   * True when this edge participates in a fan-in that includes a synthetic
-   * placeholder (empty `if` branch lane). Routes the edge on the merge bus
-   * (symmetric inverted-bus fan-in matching the fork-bus fan-out).
+   * True when the target has more than one incoming edge (fan-in). Routes the
+   * edge on the merge bus (symmetric inverted-bus fan-in matching the
+   * fork-bus fan-out) so 16px corners apply instead of xyflow smooth-step.
    */
   readonly isMerge?: boolean;
   /**
@@ -34,6 +35,16 @@ interface WorkflowEdgeData extends Record<string, unknown> {
 }
 
 const LABEL_TRUNCATE = 24;
+
+function displayEdgeLabel(label: string): string {
+  if (label === 'true') {
+    return i18n.translate('workflowsUi.graph.trueBranchLabel', { defaultMessage: 'true' });
+  }
+  if (label === 'false') {
+    return i18n.translate('workflowsUi.graph.falseBranchLabel', { defaultMessage: 'false' });
+  }
+  return label;
+}
 
 function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
@@ -68,12 +79,12 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
 
   const traversed = edgeData?.traversed ?? false;
   // Traversed edges use the `success` token to match the node's success state.
-  // Non-traversed edges use the neutral `borderBasePlain` tone. Both adapt to
-  // dark mode (borderBasePlain: light `#cad3e2` → dark `#485975`).
-  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain;
+  // Non-traversed edges and branch labels use `borderBaseProminent` so they
+  // stay readable on the dotted canvas. Node panels keep `borderBasePlain`.
+  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBaseProminent;
   const strokeWidth = 1;
 
-  const fullLabel = edgeData?.label ?? '';
+  const fullLabel = displayEdgeLabel(edgeData?.label ?? '');
   const truncated =
     fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
 
@@ -110,13 +121,13 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
               padding: '0 12px',
-              borderRadius: 8,
-              fontFamily: '"Roboto Mono", monospace',
+              borderRadius: euiTheme.size.l,
+              fontFamily: euiTheme.font.familyCode,
               fontSize: 11,
               fontWeight: 400,
               lineHeight: '20px',
-              background: euiTheme.colors.backgroundBaseSubdued,
-              border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
+              background: euiTheme.colors.backgroundBasePlain,
+              border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
               color: euiTheme.colors.textParagraph,
               whiteSpace: 'nowrap',
             }}

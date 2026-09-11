@@ -181,7 +181,7 @@ export function useWorkflowLayout({
     }
     const mergeNodeIds = new Set<string>();
     for (const [target, sources] of incomingByTarget) {
-      if (sources.length > 1 && sources.some((s) => allBypassLaneIds.has(s))) {
+      if (sources.length > 1) {
         mergeNodeIds.add(target);
       }
     }

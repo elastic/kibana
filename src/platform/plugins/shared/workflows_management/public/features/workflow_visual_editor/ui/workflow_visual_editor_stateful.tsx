@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFocusTrap, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFocusTrap,
+  EuiLoadingSpinner,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -79,6 +85,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   onViewportChange,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
+  const floatingShadow = useEuiShadow('m');
 
   const definition = useSelector(selectEditorWorkflowDefinition);
   const stepExecutions = useSelector(selectStepExecutions);
@@ -238,9 +245,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               bottom: 8,
               width: 420,
               zIndex: euiTheme.levels.flyout,
-              boxShadow:
-                '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 13px 0 rgba(43, 57, 79, 0.12), 0 8px 17px 0 rgba(43, 57, 79, 0.07)',
-              borderRadius: 8,
+              boxShadow: floatingShadow,
+              borderRadius: euiTheme.border.radius.small,
               overflow: 'hidden',
               outline: 'none',
             }}

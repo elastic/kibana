@@ -16,7 +16,7 @@ import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 // Exported so tests can import the real values instead of re-declaring them.
 export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 32, left: 32 } as const;
 export const WORKFLOW_NODE_SEP = 50;
-export const WORKFLOW_RANK_SEP = 70;
+export const WORKFLOW_RANK_SEP = 90;
 
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];

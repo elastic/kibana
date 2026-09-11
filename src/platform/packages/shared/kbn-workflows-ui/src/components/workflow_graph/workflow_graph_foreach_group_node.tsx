@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
+import { resolveNodeChipStyle } from './resolve_node_chip_style';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -24,11 +25,11 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
 }
 
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
-  const { label, stepExecution } = node.data;
+  const { label, stepType, stepExecution } = node.data;
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;
-  // Display-only, mirrors workflow_graph_node.tsx: `label` itself must stay
-  // untouched since it's used to key execution status.
+  // TODO: switch to xxs when available
+  const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const displayLabel = deslugifyStepName(label);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
@@ -40,58 +41,60 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
 
-  // Match the regular step card (workflow_graph_node.tsx): the same Borealis
-  // tokens for the tinted border + header pane, `primary` icon, and flat look.
-  const borderColor = isSuccess
+  const chip = resolveNodeChipStyle(euiTheme, stepType, false, { isSuccess, isFailed });
+  const panelBorder = isSuccess
     ? colors.success
     : isFailed
     ? colors.danger
-    : colors.backgroundLightPrimary;
-  const headerBg = isSuccess
-    ? colors.backgroundBaseSuccess
-    : isFailed
-    ? colors.backgroundBaseDanger
-    : colors.backgroundLightPrimary;
-  const iconColor = isSuccess ? colors.success : isFailed ? colors.danger : colors.primary;
+    : colors.borderBasePlain;
+  const borderRadius = euiTheme.border.radius.small;
 
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
-        css={{
-          width: '100%',
-          height: '100%',
-          // Semi-transparent white body (50%) so the canvas dot pattern shows
-          // through softly; token-based so it adapts to dark mode.
-          background: transparentize(colors.backgroundBasePlain, 0.5),
-          border: `1px solid ${borderColor}`,
-          borderRadius: 10,
-          position: 'relative',
-          transition: 'border-color 120ms ease',
-        }}
+        css={[
+          {
+            width: '100%',
+            height: '100%',
+            background: transparentize(colors.backgroundBasePlain, 0.5),
+            border: `${euiTheme.border.width.thin} solid ${panelBorder}`,
+            borderRadius,
+            position: 'relative',
+            transition: 'border-color 120ms ease',
+          },
+          nodeShadow,
+        ]}
       >
-        {/* Full-width header with refresh icon + label. Sized to match
-            GROUP_PADDING_TOP in apply_graph_layout.ts so inner nodes sit
-            just below the header. */}
         <div
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: 16,
-            padding: '8px 16px',
-            background: headerBg,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
-            borderBottom: `1px solid ${borderColor}`,
+            gap: euiTheme.size.s,
+            padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
             fontFamily: euiTheme.font.family,
             fontSize: 12,
             fontWeight: 500,
             color: colors.textHeading,
             lineHeight: '24px',
-            transition: 'background 120ms ease',
           }}
         >
-          <EuiIcon type="refresh" size="m" color={iconColor} aria-hidden />
+          <div
+            css={{
+              flex: '0 0 auto',
+              width: 28,
+              height: 28,
+              background: chip.background,
+              border: `1px solid ${chip.border}`,
+              borderRadius,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 120ms ease, border-color 120ms ease',
+            }}
+          >
+            <EuiIcon type="refresh" size="m" color={chip.iconColor} aria-hidden />
+          </div>
           <span
             css={{
               whiteSpace: 'nowrap',
