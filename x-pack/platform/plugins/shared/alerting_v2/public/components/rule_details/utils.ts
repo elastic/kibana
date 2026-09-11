@@ -155,6 +155,25 @@ export function getRecoverEsqlSegment(
   return query.recovery.query;
 }
 
+/**
+ * Display parts for the conditions panel. Composed rules use the stored base /
+ * breach segment; standalone rules have a single query and no alert condition.
+ */
+export function getDisplayQueryParts(query: Query): {
+  baseQuery: string;
+  alertCondition?: string;
+} {
+  if (query.format === 'composed') {
+    const segment = query.breach?.segment?.trim();
+    return {
+      baseQuery: query.base,
+      ...(segment ? { alertCondition: segment } : {}),
+    };
+  }
+
+  return { baseQuery: query.breach.query };
+}
+
 const RECOVERY_STRATEGY_LABELS: Record<RecoveryStrategy, string> = {
   query: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
     defaultMessage: 'Custom',

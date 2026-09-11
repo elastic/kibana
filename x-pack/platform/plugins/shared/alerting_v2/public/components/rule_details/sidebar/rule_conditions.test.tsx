@@ -71,6 +71,42 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
       'FROM logs-* | STATS count() BY host.name'
     );
+    expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
+  });
+
+  it('splits a composed query into base query and alert condition', () => {
+    renderConditions({
+      ...alertRule,
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        breach: { segment: 'WHERE avg(cpu) > 0.9' },
+        recovery: { segment: 'WHERE avg(cpu) < 0.5' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
+      'FROM metrics-* | STATS avg(cpu) BY host.name'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertCondition')).toHaveTextContent(
+      'WHERE avg(cpu) > 0.9'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).not.toHaveTextContent(
+      'WHERE avg(cpu) > 0.9'
+    );
+  });
+
+  it('omits the alert condition block when a composed query has no breach segment', () => {
+    renderConditions({
+      ...alertRule,
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
+      'FROM metrics-* | STATS avg(cpu) BY host.name'
+    );
+    expect(screen.queryByTestId('alertingV2RuleDetailsAlertCondition')).not.toBeInTheDocument();
   });
 
   it('renders summary fields for alert rule', () => {
@@ -272,36 +308,50 @@ describe('RuleConditions', () => {
   });
 
   describe('variant="summary"', () => {
-    it('hides recovery, alert delay, recovery delay, and no-data-config fields', () => {
-      renderConditions(alertRule, 'summary');
-      expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryDelay')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('alertingV2RuleDetailsNoDataStrategy')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('alertingV2RuleDetailsRecovery')).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('alertingV2RuleDetailsRecoveryCondition')
-      ).not.toBeInTheDocument();
-      expect(screen.queryByText('Recovery')).not.toBeInTheDocument();
+    it('omits the description and still shows recovery and other alert fields', () => {
+      renderConditions(
+        {
+          ...alertRule,
+          metadata: { ...alertRule.metadata, description: 'Should not appear in summary' },
+        },
+        'summary'
+      );
+      expect(screen.queryByTestId('ruleConditionsDescription')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Custom');
+      expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+        'FROM metrics-* | WHERE avg(cpu) < 0.5'
+      );
+      expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toBeInTheDocument();
+      expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toBeInTheDocument();
     });
 
-    it('still renders the base query and retained summary fields', () => {
-      renderConditions(alertRule, 'summary');
+    it('splits a composed query the same way as the full variant', () => {
+      renderConditions(
+        {
+          ...alertRule,
+          query: {
+            format: 'composed',
+            base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+            breach: { segment: 'WHERE avg(cpu) > 0.9' },
+            recovery: { segment: 'WHERE avg(cpu) < 0.5' },
+          },
+        },
+        'summary'
+      );
       expect(screen.getByTestId('alertingV2RuleDetailsBaseQuery')).toHaveTextContent(
         'FROM metrics-* | STATS avg(cpu) BY host.name'
       );
-      expect(screen.getByTestId('alertingV2RuleDetailsDataSource')).toHaveTextContent('metrics-*');
-      expect(screen.getByTestId('alertingV2RuleDetailsGroupBy')).toHaveTextContent(
-        'host.name, service.name'
+      expect(screen.getByTestId('alertingV2RuleDetailsAlertCondition')).toHaveTextContent(
+        'WHERE avg(cpu) > 0.9'
       );
-      expect(screen.getByTestId('alertingV2RuleDetailsTimeField')).toHaveTextContent('@timestamp');
-      expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
-      expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
-      expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Alerts');
+      expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+        'WHERE avg(cpu) < 0.5'
+      );
     });
   });
 
   describe('description', () => {
-    it('renders description text before the ES|QL heading when it exists', () => {
+    it('renders description text before the base query when it exists', () => {
       const ruleWithDesc = {
         ...baseRule,
         metadata: { ...baseRule.metadata, name: 'Test Events Rule', description: 'My rule desc' },
