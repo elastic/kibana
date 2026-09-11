@@ -43,12 +43,8 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import {
-  ControlValuesSource,
-  DEFAULT_CONTROL_VALUES_SOURCE,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-} from '@kbn/controls-constants';
+import type { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { ControlValuesSource, DEFAULT_CONTROL_VALUES_SOURCE } from '@kbn/controls-constants';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { type CreateControlTypeAction } from '../../../actions/control_panel_actions';
@@ -167,7 +163,11 @@ const CompatibleControlTypesComponent = ({
               data-test-subj={`create__${action.type}`}
               isSelected={action.type === selectedAction}
               disabled={disabled}
-              onClick={() => setSelectedAction(action.type as typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL)}
+              onClick={() =>
+                setSelectedAction(
+                  action.type as typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL
+                )
+              }
               label={action.getDisplayName(controlTypeContext)}
             >
               <EuiIcon
@@ -223,9 +223,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     initialDefaultPanelTitle ?? initialState.field_name ?? ''
   );
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
-  const [selectedControlType, setSelectedControlType] = useState<typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL | undefined>(
-    controlType
-  );
+  const [selectedControlType, setSelectedControlType] = useState<
+    typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL | undefined
+  >(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   const editorConfig = useMemo<ControlGroupEditorConfig | undefined>(() => {
@@ -342,7 +342,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           }
           return undefined;
         })();
-        if (firstCompatible) setSelectedControlType(firstCompatible.type as typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL);
+        if (firstCompatible)
+          setSelectedControlType(
+            firstCompatible.type as typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL
+          );
       }
 
       /**

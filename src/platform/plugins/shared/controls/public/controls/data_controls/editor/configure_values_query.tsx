@@ -27,10 +27,10 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLColumn } from '@kbn/es-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-publishing';
+import type { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   ESQL_CONTROL,
-  OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import { ESQLValuesPreview } from '@kbn/esql-utils';

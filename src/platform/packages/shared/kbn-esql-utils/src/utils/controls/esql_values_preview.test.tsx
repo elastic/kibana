@@ -92,11 +92,7 @@ describe('ESQLValuesPreview', () => {
   it('shows the column picker when the query returns multiple columns', () => {
     const { getByText, getByTestId } = render(
       <I18nProvider>
-        <ESQLValuesPreview
-          {...noopProps}
-          values={[]}
-          columns={[numericColumn, stringColumn]}
-        />
+        <ESQLValuesPreview {...noopProps} values={[]} columns={[numericColumn, stringColumn]} />
       </I18nProvider>
     );
 
