@@ -31,7 +31,9 @@ const noOpPaths = (diff: SavedObjectDiff) => diff.noOps.map((noOp) => noOp.path)
 
 apiTest.describe(
   'Audit log — saved object diffs (ECS file appender)',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  // Local-only: tests read from the ECS file appender at AUDIT_LOG_PATH, which is only
+  // accessible when the test runner is co-located with Kibana (not on Cloud deployments).
+  { tag: [...tags.stateful.classic.filter((t) => t.startsWith('@local')), ...tags.serverless.security.complete.filter((t) => t.startsWith('@local'))] },
   () => {
     // Objects registered here are torn down after each test so re-runs don't
     // accumulate state on shared or long-lived stacks. Tests that delete their

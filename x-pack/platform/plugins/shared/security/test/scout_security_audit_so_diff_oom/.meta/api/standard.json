@@ -1,5 +1,5 @@
 {
-  "sha1": "abc5e500426ee082307c5ea61a010836a45a16a9",
+  "sha1": "c21b5ce5eefc952fe4231ef2a1eaa2b13f0b4c24",
   "testChannels": [
     "ci-batch-weekly"
   ],
@@ -10,14 +10,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 201,
-        "column": 15
+        "line": 202,
+        "column": 53
       }
     },
     {
@@ -26,14 +24,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
         "line": 235,
-        "column": 28
+        "column": 16
       }
     },
     {
@@ -42,14 +38,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 265,
-        "column": 11
+        "line": 266,
+        "column": 25
       }
     },
     {
@@ -58,14 +52,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 305,
-        "column": 77
+        "line": 307,
+        "column": 70
       }
     },
     {
@@ -74,14 +66,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff_oom/api/tests/saved_object_diff_oom.spec.ts",
-        "line": 348,
-        "column": 44
+        "line": 350,
+        "column": 9
       }
     }
   ]
