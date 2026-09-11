@@ -132,7 +132,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
 
   apiTest(
     'authorization: should return 403 for a user with read-only alerting_v2 privileges',
-    async ({ apiClient, requestAuth }) => {
+    async ({ apiClient, apiServices, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_RULES_READ_ROLE
       );
@@ -143,12 +143,14 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
         },
       });
       expect(response).toHaveStatusCode(403);
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
+      expect(remaining.items).toHaveLength(0);
     }
   );
 
   apiTest(
     'authorization: should return 403 for a user without alerting_v2 privileges',
-    async ({ apiClient, requestAuth }) => {
+    async ({ apiClient, apiServices, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
       const response = await apiClient.post(BULK_CREATE_URL, {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
@@ -157,6 +159,8 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
         },
       });
       expect(response).toHaveStatusCode(403);
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
+      expect(remaining.items).toHaveLength(0);
     }
   );
 });
