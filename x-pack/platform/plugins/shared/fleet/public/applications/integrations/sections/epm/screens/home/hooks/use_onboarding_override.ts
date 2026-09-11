@@ -32,7 +32,17 @@ const HIDDEN_TILE_NAMES = new Set([
   'aws_mq',
   'awsfargate',
   'awsfirehose',
-  'aws_securityhub'
+  'aws_securityhub',
+  'aws_cloudtrail_otel',
+  'aws_ec2_otel',
+  'aws_ecs_otel',
+  'aws_elb_metrics_otel',
+  'aws_elb_otel',
+  'aws_lambda_otel',
+  'aws_rds_otel',
+  'aws_sqs_otel',
+  'aws_vpcflow_otel',
+  'aws_waf_otel',
 ]);
 const HIDDEN_TILE_IDS = new Set(['epr:aws']);
 
