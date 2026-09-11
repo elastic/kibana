@@ -83,7 +83,7 @@ describe('shared-schema id collision detection', () => {
     ctx.addSharedSchema('id_collision', storedShape);
     delete (storedShape as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_DISCRIMINATOR];
 
-    expect(() => ctx.addSharedSchema('id_collision', { ...extendedShape })).toThrowError(
+    expect(() => ctx.addSharedSchema('id_collision', { ...extendedShape })).toThrow(
       OasSchemaCollisionError
     );
   });
@@ -122,7 +122,7 @@ describe('shared-schema id collision detection', () => {
   it('throws OasSchemaCollisionError when the same id is registered with a different shape', () => {
     const ctx = createCtx();
     ctx.addSharedSchema('id_collision', { ...baseShape });
-    expect(() => ctx.addSharedSchema('id_collision', { ...extendedShape })).toThrowError(
+    expect(() => ctx.addSharedSchema('id_collision', { ...extendedShape })).toThrow(
       OasSchemaCollisionError
     );
   });
@@ -206,6 +206,6 @@ describe('shared-schema id collision detection', () => {
         'package_policy_status_response_demo',
         baseJson.schemas.package_policy_status_response_demo as never
       )
-    ).toThrowError(/OAS shared schema collision for id "package_policy_status_response_demo"/);
+    ).toThrow(/OAS shared schema collision for id "package_policy_status_response_demo"/);
   });
 });

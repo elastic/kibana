@@ -180,6 +180,34 @@ describe('cancel-on-gate-failure', () => {
       const finalCall = mockSetAnnotation.mock.calls[mockSetAnnotation.mock.calls.length - 1];
       expect(finalCall[1]).toBe('info');
     });
+
+    it('collapses canceled step keys in the final annotation', () => {
+      mockGetMetadataKeys.mockReturnValue(['cancel_on_gate_failure_batch:pipeline']);
+      mockGetMetadata.mockReturnValue(JSON.stringify(['jest', 'ftr_configs_1']));
+
+      runCancelModule();
+
+      const finalCall = mockSetAnnotation.mock.calls[mockSetAnnotation.mock.calls.length - 1];
+      expect(finalCall[2]).toContain('Canceled 2 step(s).');
+      expect(finalCall[2]).toContain('<details><summary>Canceled step keys</summary>');
+      expect(finalCall[2]).toContain('- jest\n- ftr_configs_1');
+    });
+
+    it('separates collapsed step lists from visible cancellation failures', () => {
+      mockGetMetadataKeys.mockReturnValue(['cancel_on_gate_failure_batch:pipeline']);
+      mockGetMetadata.mockReturnValue(JSON.stringify(['jest', 'ftr_configs_1', 'scout']));
+      mockCancelStep.mockImplementation((key) => {
+        if (key === 'ftr_configs_1') throw new Error('already finished');
+        if (key === 'scout') throw new Error('network error');
+      });
+
+      runCancelModule();
+
+      const finalCall = mockSetAnnotation.mock.calls[mockSetAnnotation.mock.calls.length - 1];
+      expect(finalCall[2]).toContain('</details>\n\nAlready finished: 1 step(s).');
+      expect(finalCall[2]).toContain('</details>\n\nFailed to cancel:');
+      expect(finalCall[2]).toContain('- scout: network error');
+    });
   });
 
   describe('already-finished step handling', () => {
@@ -194,7 +222,9 @@ describe('cancel-on-gate-failure', () => {
 
       expect(process.exit).not.toHaveBeenCalled();
       const finalCall = mockSetAnnotation.mock.calls[mockSetAnnotation.mock.calls.length - 1];
-      expect(finalCall[2]).toContain('Already finished: jest');
+      expect(finalCall[2]).toContain('Already finished: 1 step(s).');
+      expect(finalCall[2]).toContain('<details><summary>Already-finished step keys</summary>');
+      expect(finalCall[2]).toContain('- jest');
     });
 
     it('exits with 1 when a non-already-finished cancel fails', () => {

@@ -13,10 +13,9 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AppDetails, FeedbackRegistryEntry } from '@kbn/ui-feedback';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
-import { firstValueFrom, type Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { FeedbackContext, FeedbackFormData, SetFeedbackContext } from '../common';
 import { getAppDetails } from './src/utils';
 
@@ -38,12 +37,6 @@ interface FeedbackDeps {
   showToast: (title: string, color: 'success' | 'error') => void;
 }
 
-const LazyFeedbackTriggerButton = lazy(() =>
-  import('@kbn/ui-feedback').then(({ FeedbackTriggerButton }) => ({
-    default: FeedbackTriggerButton,
-  }))
-);
-
 const LazyFeedbackContainer = lazy(() =>
   import('@kbn/ui-feedback').then(({ FeedbackContainer }) => ({
     default: FeedbackContainer,
@@ -53,6 +46,8 @@ const LazyFeedbackContainer = lazy(() =>
 const feedbackModalCss = css`
   overflow-y: auto;
 `;
+
+const RESEARCH_PANEL_SURVEY_URL = 'https://ela.st/user-interviews-opt-in';
 
 const createFeedbackDeps = (
   core: CoreStart,
@@ -94,7 +89,36 @@ const createFeedbackDeps = (
     },
     showToast: (title: string, color: 'success' | 'error') => {
       if (color === 'success') {
-        core.notifications.toasts.addSuccess({ title });
+        void import('@kbn/ui-feedback').then(
+          ({
+            FeedbackSuccessToastTitle,
+            FeedbackSuccessToastBody,
+            FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS: toastLifeTimeMs,
+          }) => {
+            const toastRef: {
+              current: ReturnType<typeof core.notifications.toasts.add> | undefined;
+            } = { current: undefined };
+
+            toastRef.current = core.notifications.toasts.add({
+              color: 'success',
+              title: toMountPoint(core.rendering.addContext(<FeedbackSuccessToastTitle />), core),
+              text: toMountPoint(
+                core.rendering.addContext(
+                  <FeedbackSuccessToastBody
+                    surveyUrl={RESEARCH_PANEL_SURVEY_URL}
+                    onDismiss={() => {
+                      if (toastRef.current) {
+                        core.notifications.toasts.remove(toastRef.current);
+                      }
+                    }}
+                  />
+                ),
+                core
+              ),
+              toastLifeTimeMs,
+            });
+          }
+        );
       }
       if (color === 'error') {
         core.notifications.toasts.addDanger({ title });
@@ -194,30 +218,18 @@ export class FeedbackPlugin implements Plugin {
       spaces
     );
     const { isOptedIn$ } = telemetry.telemetryService;
-    const checkTelemetryOptIn = () => firstValueFrom(isOptedIn$);
 
-    if (isNextChrome(core.featureFlags)) {
-      let unregisterFeedbackHandler: (() => void) | undefined;
+    let unregisterFeedbackHandler: (() => void) | undefined;
 
-      this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
-        unregisterFeedbackHandler?.();
-        unregisterFeedbackHandler = undefined;
+    this.telemetryOptInSubscription = isOptedIn$.subscribe((optIn) => {
+      unregisterFeedbackHandler?.();
+      unregisterFeedbackHandler = undefined;
 
-        if (optIn) {
-          unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
-            openFeedbackModal(core, deps);
-          });
-        }
-      });
-    }
-
-    core.chrome.navControls.registerRight({
-      order: 1001,
-      content: (
-        <Suspense fallback={null}>
-          <LazyFeedbackTriggerButton {...deps} checkTelemetryOptIn={checkTelemetryOptIn} />
-        </Suspense>
-      ),
+      if (optIn) {
+        unregisterFeedbackHandler = core.chrome.next.registerFeedbackHandler(() => {
+          openFeedbackModal(core, deps);
+        });
+      }
     });
 
     return { setContext };

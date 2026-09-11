@@ -51,7 +51,6 @@ interface StartDeps {
   getUiSettingsHomeRoute: () => string | undefined;
   logger: Logger;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  isNextChrome: boolean;
 }
 
 export class ProjectNavigationService {
@@ -71,7 +70,6 @@ export class ProjectNavigationService {
       logger,
       prependBasePath,
       getUiSettingsHomeRoute,
-      isNextChrome,
     } = startDeps;
 
     const currentNavSource$ = new BehaviorSubject<{
@@ -110,8 +108,7 @@ export class ProjectNavigationService {
           this.customization$,
         ]).pipe(
           map(([def, deepLinks, links, customization]) =>
-            // In Chrome Next the home node is a regular, customizable sidebar item.
-            applyCustomization(source.id, def, deepLinks, links, customization, isNextChrome)
+            applyCustomization(source.id, def, deepLinks, links, customization)
           ),
           catchError((err) => {
             logger.error(err);
@@ -167,11 +164,7 @@ export class ProjectNavigationService {
     return {
       getProjectHome$: () => {
         return parsedNavigation$.pipe(
-          map((parsed) => {
-            const defaultRoute = getUiSettingsHomeRoute();
-            const navRoute = parsed?.tree.find((n) => n.renderAs === 'home')?.href;
-            return defaultRoute ?? navRoute;
-          }),
+          map(() => getUiSettingsHomeRoute()),
           filter((home): home is string => home !== undefined),
           distinctUntilChanged()
         );

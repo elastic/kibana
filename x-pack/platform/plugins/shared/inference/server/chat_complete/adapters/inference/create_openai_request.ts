@@ -12,6 +12,7 @@ import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
+import { getModelId } from './utils';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
   const {
@@ -25,6 +26,9 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     reasoning,
   } = applyProviderTransforms(options);
 
+  // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
+  const model = modelName ?? getModelId(options.connector) ?? options.connector.config?.inferenceId;
+
   let request: OpenAIRequest;
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
@@ -36,6 +40,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     const resolvedReasoning = resolveChatCompletionReasoning({
       reasoning,
       hasNativeTools: false,
+      model,
     });
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
@@ -49,6 +54,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     const resolvedReasoning = resolveChatCompletionReasoning({
       reasoning,
       hasNativeTools: hasTools,
+      model,
     });
 
     request = {

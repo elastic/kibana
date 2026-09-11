@@ -171,9 +171,30 @@ describe('EVAL Autocomplete', () => {
     ]);
   });
 
-  test('does not suggest subqueries after IN', async () => {
-    await evalExpectSuggestions('from a | eval col = doubleField in ', ['($0)']);
-    await evalExpectSuggestions('from a | eval col = doubleField not in ', ['($0)']);
+  test('suggests subqueries after IN', async () => {
+    await evalExpectSuggestions('from a | eval col = doubleField in ', [
+      '($0)',
+      '(FROM $0)',
+      '(ROW $0)',
+      '(TS $0)',
+    ]);
+    await evalExpectSuggestions('from a | eval col = doubleField not in ', [
+      '($0)',
+      '(FROM $0)',
+      '(ROW $0)',
+      '(TS $0)',
+    ]);
+  });
+
+  test('suggestions after an IN subquery', async () => {
+    await evalExpectSuggestions(
+      'from index | EVAL col = doubleField in (FROM index | KEEP doubleField) ',
+      ['\n', ', ', '| ', ...getOperatorSuggestions(logicalOperators)]
+    );
+    await evalExpectSuggestions(
+      'from index | EVAL col = doubleField not in (FROM index | KEEP doubleField) ',
+      ['\n', ', ', '| ', ...getOperatorSuggestions(logicalOperators)]
+    );
   });
 
   test('after column after assignment', async () => {
@@ -214,8 +235,18 @@ describe('EVAL Autocomplete', () => {
   });
 
   test('with lists', async () => {
-    await evalExpectSuggestions('from index | EVAL doubleField in ', ['($0)']);
-    await evalExpectSuggestions('from index | EVAL doubleField not in /', ['($0)']);
+    await evalExpectSuggestions('from index | EVAL doubleField in ', [
+      '($0)',
+      '(FROM $0)',
+      '(ROW $0)',
+      '(TS $0)',
+    ]);
+    await evalExpectSuggestions('from index | EVAL doubleField not in /', [
+      '($0)',
+      '(FROM $0)',
+      '(ROW $0)',
+      '(TS $0)',
+    ]);
   });
 
   test('after assignment', async () => {

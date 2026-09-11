@@ -185,7 +185,7 @@ function SlackCardFooter({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType={showChannels ? 'arrowDown' : 'arrowRight'}
+                iconType={showChannels ? 'chevronSingleDown' : 'chevronSingleRight'}
                 onClick={() => setShowChannels((value) => !value)}
                 aria-expanded={showChannels}
                 data-test-subj="streamsSlackAppToggleChannelsButton"

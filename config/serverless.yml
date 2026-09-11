@@ -257,6 +257,8 @@ xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
+# Alerting v2 mirrors the v1 serverless budget; the plugin default is the hosted budget (32000)
+xpack.alerting_v2.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 

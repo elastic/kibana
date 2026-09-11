@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { seriesStatisticsEsqlGuidance } from './series_statistics_prompt';
+
 /**
  * Bind the source command to the index the caller grounded the request against.
  *
@@ -70,6 +72,8 @@ TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
 \`\`\`
 
 Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
+
+${seriesStatisticsEsqlGuidance}
 
 ## Grouping dimensions (BY)
 

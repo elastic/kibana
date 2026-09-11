@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
 import type { RuleTypeRegistry } from './types';
 
@@ -61,7 +62,7 @@ export class AlertingAuthorizationClientFactory {
    */
   public async createForSpace(
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<AlertingAuthorization> {
     // If we cannot resolve a space by id (e.g. spaces disabled), fall back to request-derived behavior.
     if (!this.options?.getSpaceById) {

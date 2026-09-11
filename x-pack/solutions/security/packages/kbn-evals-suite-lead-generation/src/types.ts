@@ -15,6 +15,7 @@ import type { Example } from '@kbn/evals';
 export interface LeadEntity {
   type: string;
   name: string;
+  id: string;
 }
 
 export interface Observation {
@@ -33,7 +34,7 @@ export interface Lead {
   title: string;
   byline: string;
   description: string;
-  entities: LeadEntity[];
+  entity: LeadEntity;
   tags: string[];
   priority: number;
   chatRecommendations: string[];

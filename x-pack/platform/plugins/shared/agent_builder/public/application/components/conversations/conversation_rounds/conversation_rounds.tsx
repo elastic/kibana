@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useConversation, useConversationRounds } from '../../../hooks/use_conversation';
@@ -15,13 +16,21 @@ const CONVERSATION_ROUNDS_ID = 'agentBuilderConversationRoundsContainer';
 
 interface ConversationRoundsProps {
   scrollContainerHeight: number;
+  anchoredRoundIndex: number | null;
 }
 
 export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   scrollContainerHeight,
+  anchoredRoundIndex,
 }) => {
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
+
+  // The anchored round is wrapped in a viewport-sized min-height so the user's input
+  // sits at the top of the container while the response streams in below it.
+  const anchorStyles = css`
+    min-height: ${scrollContainerHeight}px;
+  `;
 
   return (
     <EuiFlexGroup
@@ -36,16 +45,21 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
         const isCurrentRound = index === conversationRounds.length - 1;
 
         return (
-          <RoundLayout
+          <EuiFlexItem
             key={index}
-            scrollContainerHeight={scrollContainerHeight}
-            isCurrentRound={isCurrentRound}
-            rawRound={round}
-            conversationId={conversation?.id}
-            conversationAttachments={conversation?.attachments}
-            allRounds={conversationRounds}
-            roundIndex={index}
-          />
+            grow={false}
+            css={index === anchoredRoundIndex ? anchorStyles : undefined}
+            data-test-subj="agentBuilderRoundWrapper"
+          >
+            <RoundLayout
+              isCurrentRound={isCurrentRound}
+              rawRound={round}
+              conversationId={conversation?.id}
+              conversationAttachments={conversation?.attachments}
+              allRounds={conversationRounds}
+              roundIndex={index}
+            />
+          </EuiFlexItem>
         );
       })}
     </EuiFlexGroup>

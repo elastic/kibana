@@ -816,7 +816,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
 
               {this.renderBanners(extensionsService)}
 
-              <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
                     <Route
@@ -866,7 +866,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         isLoading={indicesLoading}
-                        color="success"
                         onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"

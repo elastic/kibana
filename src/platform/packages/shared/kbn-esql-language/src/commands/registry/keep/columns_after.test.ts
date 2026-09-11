@@ -21,4 +21,26 @@ describe('KEEP', () => {
 
     expect(result).toEqual([{ name: 'field1', type: 'keyword', userDefined: false }]);
   });
+
+  it('returns fields in the order specified by the command', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
+
+    const result = columnsAfter(synth.cmd`KEEP field2, field1`, previousCommandFields, '');
+
+    expect(result.map(({ name }) => name)).toEqual(['field2', 'field1']);
+  });
+
+  it('keeps the last occurrence of repeated fields', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
+
+    const result = columnsAfter(synth.cmd`KEEP field1, field2, field1`, previousCommandFields, '');
+
+    expect(result.map(({ name }) => name)).toEqual(['field2', 'field1']);
+  });
 });

@@ -18,7 +18,7 @@ import type { ChromeAppHeaderConfig } from '@kbn/core-chrome-browser';
 export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) => {
   const chrome = useChromeService();
   const unregisterRef = useRef<(() => void) | undefined>(undefined);
-  const isActive = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+  const isActive = chrome.getChromeStyle() === 'project';
 
   useLayoutEffect(() => {
     unregisterRef.current?.();
@@ -28,7 +28,7 @@ export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) =>
       return;
     }
 
-    const unregister = chrome.next.appHeader.set(config);
+    const unregister = chrome.appHeader.set(config);
     unregisterRef.current = unregister;
 
     return () => {

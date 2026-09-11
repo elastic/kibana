@@ -24,11 +24,11 @@ export const RuleHistoryItem = lazySchema(() =>
     /**
      * ISO-8601 timestamp at which the change was recorded.
      */
-    timestamp: z.string(),
+    timestamp: z.string().describe('ISO-8601 timestamp at which the change was recorded.'),
     /**
      * Unique identifier of the change-history event.
      */
-    id: z.string(),
+    id: z.string().describe('Unique identifier of the change-history event.'),
     /**
       * User that produced the change, with both their `name` (login)
 and (when available) `id` (profile id). May be null for
@@ -40,22 +40,29 @@ system-driven changes.
         /**
          * User profile id (when available from the auth realm).
          */
-        id: z.string().optional(),
+        id: z.string().optional().describe('User profile id (when available from the auth realm).'),
         /**
          * Login name of the user that produced the change.
          */
-        name: z.string(),
+        name: z.string().describe('Login name of the user that produced the change.'),
       })
       .nullable()
-      .optional(),
+      .optional()
+      .describe(
+        'User that produced the change, with both their `name` (login)\nand (when available) `id` (profile id). May be null for\nsystem-driven changes.\n'
+      ),
     /**
      * Human-readable action that produced the change (e.g. `rule_create`, `rule_update`).
      */
-    action: z.string(),
+    action: z
+      .string()
+      .describe(
+        'Human-readable action that produced the change (e.g. `rule_create`, `rule_update`).'
+      ),
     /**
      * Full rule snapshot after the change.
      */
-    rule: RuleResponse,
+    rule: RuleResponse.describe('Full rule snapshot after the change.'),
     /**
       * Sparse object containing only the rule fields whose values differ
 between this revision and the immediately preceding one (computed
@@ -64,11 +71,21 @@ snapshot). `null` for creation events, where no previous revision
 exists.
 
       */
-    old_values: z.object({}).catchall(z.unknown()).nullable(),
+    old_values: z
+      .object({})
+      .catchall(z.unknown())
+      .nullable()
+      .describe(
+        'Sparse object containing only the rule fields whose values differ\nbetween this revision and the immediately preceding one (computed\nas an RFC 7396 JSON Merge Patch from `rule` back to the previous\nsnapshot). `null` for creation events, where no previous revision\nexists.\n'
+      ),
     /**
      * Optional event metadata that is not part of the ECS schema.
      */
-    metadata: z.object({}).catchall(z.unknown()).optional(),
+    metadata: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('Optional event metadata that is not part of the ECS schema.'),
   })
 );
 export type RuleHistoryItem = z.infer<typeof RuleHistoryItem>;
@@ -78,11 +95,18 @@ export const RuleChangesHistoryRequestQuery = lazySchema(() =>
     /**
      * Page number (1-based).
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce.number().int().min(1).optional().default(1).describe('Page number (1-based).'),
     /**
      * Items per page.
      */
-    per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(20)
+      .describe('Items per page.'),
   })
 );
 export type RuleChangesHistoryRequestQuery = z.infer<typeof RuleChangesHistoryRequestQuery>;
@@ -93,7 +117,7 @@ export const RuleChangesHistoryRequestParams = lazySchema(() =>
     /**
      * The rule's object `id` value (Saved Object id).
      */
-    ruleId: RuleObjectId,
+    ruleId: RuleObjectId.describe("The rule's object `id` value (Saved Object id)."),
   })
 );
 export type RuleChangesHistoryRequestParams = z.infer<typeof RuleChangesHistoryRequestParams>;
@@ -107,7 +131,13 @@ export const RuleChangesHistoryResponse = lazySchema(() =>
     /**
      * ISO-8601 timestamp of the earliest recorded change event for this rule. Absent when no history items exist.
      */
-    tracking_started_at: z.string().datetime().optional(),
+    tracking_started_at: z
+      .string()
+      .datetime()
+      .optional()
+      .describe(
+        'ISO-8601 timestamp of the earliest recorded change event for this rule. Absent when no history items exist.'
+      ),
     items: z.array(RuleHistoryItem),
   })
 );

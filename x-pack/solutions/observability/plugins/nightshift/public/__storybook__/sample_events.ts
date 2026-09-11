@@ -31,6 +31,8 @@ export const checkoutEvent: SignificantEventResponse = {
   causal_features: [
     {
       feature_id: 'checkout-api',
+      type: 'entity',
+      subtype: 'service',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
@@ -38,6 +40,7 @@ export const checkoutEvent: SignificantEventResponse = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'checkout-api',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
@@ -45,6 +48,7 @@ export const checkoutEvent: SignificantEventResponse = {
     // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
@@ -66,6 +70,8 @@ export const inventoryEvent: SignificantEvent = {
   causal_features: [
     {
       feature_id: 'inventory-service',
+      type: 'entity',
+      subtype: 'service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
     },
@@ -73,6 +79,7 @@ export const inventoryEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
@@ -238,15 +245,27 @@ export const completedInvestigationState: InvestigationState = {
       reason: 'Payment gateway response times remained within their normal range.',
     },
   ],
-  conclusion: `# Conclusion
-The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.
-
-## Next Steps
-- Roll back the checkout deployment · Revert version 2026.07.24-1 and monitor P95 latency.
-- Add a deployment guardrail · Block releases when checkout latency exceeds the service baseline.`,
-  gaps_found: [
-    'Missing database spans · The slow inventory query is not represented in distributed traces.',
-    'Limited deployment metadata · Commit identifiers are not included in checkout logs.',
+  conclusion:
+    'The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.',
+  recommendations: [
+    {
+      title: 'Roll back the checkout deployment',
+      description: 'Revert version 2026.07.24-1 and monitor P95 latency.',
+    },
+    {
+      title: 'Add a deployment guardrail',
+      description: 'Block releases when checkout latency exceeds the service baseline.',
+    },
+  ],
+  blind_spots: [
+    {
+      title: 'Missing database spans',
+      description: 'The slow inventory query is not represented in distributed traces.',
+    },
+    {
+      title: 'Limited deployment metadata',
+      description: 'Commit identifiers are not included in checkout logs.',
+    },
   ],
 };
 

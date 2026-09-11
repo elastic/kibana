@@ -63,12 +63,13 @@ export interface GrantUiamApiKeyRequestBody {
  */
 export interface GrantUiamApiKeyOptions {
   /**
-   * Whether to present Kibana's own client authentication (the shared secret header and, when
-   * configured, the mTLS client certificate) alongside the granting credential. UIAM authenticates
-   * the credential and Kibana independently, and requires the two to agree: an internal API key or
-   * a session token must arrive with client authentication, while an external (organization) API
-   * key must arrive without it, so that internal credentials that leak cannot be replayed through
-   * customer-facing code paths. Presenting the wrong combination fails the grant.
+   * Whether to present Kibana's shared secret header alongside the granting credential. UIAM
+   * authenticates the credential and Kibana independently, and requires the two to agree: an
+   * internal API key or a session token must arrive with the shared secret, while an external
+   * (organization) API key must arrive without it, so that internal credentials that leak cannot
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails the
+   * grant. The mTLS client certificate is always presented when configured, regardless of this
+   * option.
    *
    * Defaults to `true`, which is correct for everything except an external API key.
    */
@@ -150,13 +151,13 @@ interface UiamErrorDetails {
 }
 
 /**
- * Telemetry `errorType` for an OAuth token exchange that Kibana itself rejected
+ * Telemetry `oauthErrorType` for an OAuth token exchange that Kibana itself rejected
  * as opposed to a failure reported by UIAM.
  */
 const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
 
 /**
- * Telemetry `errorType` for an OAuth token exchange failure that carries no
+ * Telemetry `oauthErrorType` for an OAuth token exchange failure that carries no
  * recognizable classification.
  */
 const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
@@ -377,7 +378,6 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
-  #dispatcherWithoutClientCertificate: Agent | undefined;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -514,7 +514,6 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -526,7 +525,7 @@ export class UiamService implements UiamServicePublic {
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
           `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
-          { errorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
+          { oauthErrorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
@@ -538,7 +537,7 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
         outcome: 'failure',
-        errorType: UiamService.#getOAuthTokenExchangeErrorType(err),
+        ...UiamService.#getOAuthTokenExchangeErrorAttributes(err),
       });
 
       this.#logger.error(
@@ -587,9 +586,7 @@ export class UiamService implements UiamServicePublic {
           Authorization: authorization.toString(),
         },
         body: JSON.stringify(body),
-        dispatcher: includeClientAuthentication
-          ? this.#dispatcher
-          : this.#getDispatcherWithoutClientCertificate(),
+        dispatcher: this.#dispatcher,
       };
 
       const response = await UiamService.#parseUiamResponse(
@@ -1090,22 +1087,15 @@ export class UiamService implements UiamServicePublic {
 
   /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
-   *
-   * @param includeClientCertificate Whether to present Kibana's own mTLS client certificate. Server
-   * verification is unaffected either way.
    */
-  #createFetchDispatcher(includeClientCertificate = true) {
+  #createFetchDispatcher() {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
 
     const readFile = (file: string) => readFileSync(file, 'utf8');
 
     // Read client certificate and key for mTLS from PEM files.
-    const cert =
-      includeClientCertificate && this.#config.ssl.certificate
-        ? readFile(this.#config.ssl.certificate)
-        : undefined;
-    const key =
-      includeClientCertificate && this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
+    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
+    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
@@ -1136,20 +1126,6 @@ export class UiamService implements UiamServicePublic {
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
       },
     });
-  }
-
-  /**
-   * Returns the dispatcher for the rare request that must not present Kibana's own mTLS client
-   * certificate, created on first use since virtually every request presents it. Without a
-   * certificate configured there is nothing to withhold, so the main dispatcher (and its connection
-   * pool) is reused.
-   */
-  #getDispatcherWithoutClientCertificate() {
-    if (!this.#config.ssl.certificate) {
-      return this.#dispatcher;
-    }
-
-    return (this.#dispatcherWithoutClientCertificate ??= this.#createFetchDispatcher(false));
   }
 
   /**
@@ -1190,13 +1166,19 @@ export class UiamService implements UiamServicePublic {
     throw err;
   }
 
-  static #getOAuthTokenExchangeErrorType(err: unknown): string {
+  static #getOAuthTokenExchangeErrorAttributes(err: unknown): {
+    oauthErrorType: string;
+    oauthErrorCode: string | undefined;
+  } {
     if (!Boom.isBoom(err)) {
-      return OAUTH_UNKNOWN_ERROR_TYPE;
+      return { oauthErrorType: OAUTH_UNKNOWN_ERROR_TYPE, oauthErrorCode: undefined };
     }
 
     const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
 
-    return err.data?.errorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE;
+    return {
+      oauthErrorType: err.data?.oauthErrorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE,
+      oauthErrorCode: payload?.error?.code,
+    };
   }
 }

@@ -22,6 +22,8 @@ export default createTestConfig({
     ])}`,
     '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'Entity Analytics - Watchlists Integration Tests - Serverless Env - Complete Tier',

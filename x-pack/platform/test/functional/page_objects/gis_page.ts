@@ -25,6 +25,7 @@ export class GisPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visualize = this.ctx.getPageObject('visualize');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -33,7 +34,6 @@ export class GisPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly comboBox = this.ctx.getService('comboBox');
-  private readonly renderable = this.ctx.getService('renderable');
   private readonly browser = this.ctx.getService('browser');
   private readonly contentList = this.ctx.getService('contentList');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
@@ -89,7 +89,7 @@ export class GisPageObject extends FtrService {
 
   async enterFullScreen() {
     this.log.debug(`enterFullScreen`);
-    await this.testSubjects.click('mapsFullScreenMode');
+    await this.appMenu.clickMenuItem('mapsFullScreenMode');
     await this.retry.try(async () => {
       await this.testSubjects.exists('exitFullScreenModeButton');
     });
@@ -178,11 +178,19 @@ export class GisPageObject extends FtrService {
     // Navigate directly because we don't need to go through the map listing
     // page. The listing page is skipped if there are no saved objects
     await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
-    await this.renderable.waitForRender();
+    await this.waitForLayersToLoad();
+  }
+
+  async clickSaveButton() {
+    await this.appMenu.clickMenuItem('mapSaveButton');
+  }
+
+  async expectSaveButtonExists() {
+    await this.appMenu.existOrFail('mapSaveButton');
   }
 
   async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
-    await this.testSubjects.click('mapSaveButton');
+    await this.clickSaveButton();
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
@@ -523,10 +531,8 @@ export class GisPageObject extends FtrService {
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
-    const filterEditorContainer = await this.testSubjects.find('mapFilterEditor');
-    const queryBarInFilterEditor = await this.testSubjects.findDescendant(
-      'queryInput',
-      filterEditorContainer
+    const queryBarInFilterEditor = await this.find.displayedByCssSelector(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
     );
     await queryBarInFilterEditor.click();
     const input = await this.find.activeElement();
@@ -586,12 +592,12 @@ export class GisPageObject extends FtrService {
   }
 
   async fullScreenModeMenuItemExists() {
-    return await this.testSubjects.exists('mapsFullScreenMode');
+    return await this.appMenu.menuItemExists('mapsFullScreenMode');
   }
 
   async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
-    await this.testSubjects.click('mapsFullScreenMode');
+    await this.appMenu.clickMenuItem('mapsFullScreenMode');
   }
 
   async exitFullScreenLogoButtonExists() {
@@ -717,7 +723,7 @@ export class GisPageObject extends FtrService {
   }
 
   async enableAutoFitToBounds() {
-    await this.testSubjects.click('openSettingsButton');
+    await this.appMenu.clickMenuItem('openSettingsButton');
     const isEnabled = await this.testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
     if (!isEnabled) {
       await this.retry.try(async () => {

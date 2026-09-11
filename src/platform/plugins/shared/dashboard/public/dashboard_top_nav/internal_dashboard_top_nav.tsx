@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
@@ -41,9 +41,8 @@ import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
-import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
@@ -154,9 +153,9 @@ export function InternalDashboardTopNav({
   //  - `inline`: next chrome, standalone -> we render `AppHeader`.
   //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
   //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome or next chrome disabled -> push through the imperative chrome APIs.
+  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
+  const isAppHeaderActive = chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
   const { onAppLeave } = useDashboardMountContext();
@@ -377,26 +376,20 @@ export function InternalDashboardTopNav({
     };
   }, [embedSettings, forceHideUnifiedSearch, fullScreenMode, isChromeVisible, viewMode]);
 
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
-  );
+  // Disable the date picker when the dashboard has data views but none are time-based.
+  const showDatePicker = useMemo(() => {
+    if (!visibilityProps.showDatePicker) {
+      return false;
+    }
+    const disabled =
+      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
+    return { disabled };
+  }, [visibilityProps.showDatePicker, allDataViews]);
 
-  const shareAction = useDashboardShareAction({ maybeRedirect });
+  const shareAction = useDashboardShareAction({ redirectTo });
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    maybeRedirect,
+    redirectTo,
     showResetChange,
     shareAction,
   });
@@ -435,7 +428,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
+                        dashboardApi.runInteractiveSave(redirectTo);
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
                     >
@@ -454,7 +447,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [isPopoverOpen, dashboardApi, redirectTo]);
 
   const appHeaderBadges = useMemo<AppHeaderBadge[]>(
     () =>
@@ -511,6 +504,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
+          showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
           useDefaultBehaviors={true}

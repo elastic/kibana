@@ -17,6 +17,7 @@ import {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { type Headers, type FakeRawRequest } from '@kbn/core-http-server';
+import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -95,6 +96,7 @@ export class TaskRunnerFactory {
             actionId,
             params,
             apiKey,
+            uiamApiKeyExternal,
             executionId,
             consumer,
             source,
@@ -109,7 +111,7 @@ export class TaskRunnerFactory {
         );
 
         const { spaceId } = actionTaskExecutorParams;
-        const request = getFakeRequest(apiKey, spaceId);
+        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
@@ -177,7 +179,15 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, apiKey, executionId, consumer, source, relatedSavedObjects },
+          attributes: {
+            actionId,
+            apiKey,
+            uiamApiKeyExternal,
+            executionId,
+            consumer,
+            source,
+            relatedSavedObjects,
+          },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -186,7 +196,7 @@ export class TaskRunnerFactory {
           logger
         );
 
-        const request = getFakeRequest(apiKey, spaceId);
+        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
 
         await actionExecutor.logCancellation({
           actionId,
@@ -237,7 +247,7 @@ export class TaskRunnerFactory {
   }
 }
 
-function getFakeRequest(apiKey: string | undefined, spaceId: string) {
+function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyExternal?: boolean) {
   const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -248,7 +258,17 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string) {
     spaceId: brandSpaceId(spaceId),
   };
 
-  return kibanaRequestFactory(fakeRawRequest);
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+  // An external (user-created Cloud) UIAM API key must not be presented to Elasticsearch with the
+  // UIAM shared secret - UIAM rejects external keys carrying client authentication. The verdict is
+  // UIAM's own, captured when the rule was created and persisted on the action task params.
+  // Framework-minted UIAM keys (flag absent) keep receiving the shared secret.
+  if (apiKey && uiamApiKeyExternal === true) {
+    markExternalUiamCredential(fakeRequest);
+  }
+
+  return fakeRequest;
 }
 
 async function getActionTaskParams(

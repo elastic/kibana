@@ -14,10 +14,9 @@ import { MonitorServiceLocationCodec } from './monitor_management/locations';
 import type { SelectedSyntheticsMonitor } from './external_monitor';
 
 /**
- * Read-only projection of a Synthetics monitor that lives on a remote cluster
- * (CCS). Because the source-cluster's saved object is NOT accessible from
- * Kibana, this type is derived from remote-cluster heartbeat data via
- * Cross-Cluster Search of `${remoteName}:synthetics-*`.
+ * Read-only projection of a Synthetics monitor that has no local saved object.
+ * Used for CCS remotes (`${remoteName}:synthetics-*`) and CPS linked-project
+ * hits (same `_index` alias prefix, project alias instead of cluster name).
  *
  * This is intentionally a strict, narrow subset of
  * `EncryptedSyntheticsSavedMonitor`. Anything not listed here — enabled flag,

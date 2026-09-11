@@ -39,6 +39,13 @@ export const STUCK_TICK_LIMIT = 10;
  */
 export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
 
+/**
+ * Grouping mode applied when an action policy does not specify one. Applied
+ * once at policy hydration (FetchPoliciesStep); `PolicyCatalog.groupingModeOf`
+ * falls back to it only for policies missing from the catalog.
+ */
+export const DEFAULT_GROUPING_MODE = 'per_episode' as const;
+
 /** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;
 
@@ -58,6 +65,12 @@ export const DISPATCHER_TASK_TIMEOUT_MS = 60_000;
  * step takes to yield after the signal fires.
  */
 export const TICK_DEADLINE_MS = Math.round(DISPATCHER_TASK_TIMEOUT_MS * 0.7);
+
+/**
+ * Max workflow schedule items per `bulkScheduleWorkflow` call. Sized so a tick
+ * can abort between chunks before `TICK_DEADLINE_MS`.
+ */
+export const DISPATCH_CHUNK_SIZE = 250;
 
 /**
  * Task manager task type and singleton task id used to schedule dispatcher

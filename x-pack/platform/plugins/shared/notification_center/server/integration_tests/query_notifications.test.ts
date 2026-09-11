@@ -17,6 +17,8 @@ import {
   notificationDataStreamDefinition,
 } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
+import type { NotificationReadState } from '../lib/read_state';
+import { cleanupExpiredNotifications } from '../cleanup_task/cleanup_expired_notifications';
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -37,11 +39,15 @@ const doc = (
 
 describe('queryNotifications [integration]', () => {
   let esServer: EsTestCluster;
+  let esClient: ReturnType<EsTestCluster['getClient']>;
   let dataStreams: DataStreamsStart;
+  let seedNotifications: (documents: NotificationDocument[]) => Promise<void>;
   const logger = loggingSystemMock.createLogger();
 
-  const query = (params: Parameters<typeof queryNotifications>[1] = {}) =>
-    queryNotifications({ dataStreams, logger }, params);
+  const query = (
+    params: Parameters<typeof queryNotifications>[1] = {},
+    readState?: NotificationReadState
+  ) => queryNotifications({ dataStreams, logger }, params, readState);
 
   beforeAll(async () => {
     jest.setTimeout(120_000);
@@ -49,7 +55,7 @@ describe('queryNotifications [integration]', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
     });
     await esServer.start();
-    const esClient = esServer.getClient();
+    esClient = esServer.getClient();
 
     const client = await DataStreamClient.initialize({
       logger: loggingSystemMock.createLogger(),
@@ -59,6 +65,9 @@ describe('queryNotifications [integration]', () => {
     if (!client) {
       throw new Error('Failed to initialize the notification data stream client');
     }
+    seedNotifications = async (documents) => {
+      await client.create({ documents });
+    };
     dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
 
     await client.create({
@@ -72,6 +81,9 @@ describe('queryNotifications [integration]', () => {
         doc('old-error', daysAgo(40), { severity: 'error' }),
         doc('recent-warning', daysAgo(1), { severity: 'warning' }),
         doc('other-type', daysAgo(3), { type: 'other' }),
+        // one copy past the info TTL, one inside: the in-horizon copy represents the group
+        doc('revived', daysAgo(40), { title: 'revived v1' }),
+        doc('revived', daysAgo(1.5), { title: 'revived v2' }),
       ],
     });
     await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
@@ -86,30 +98,104 @@ describe('queryNotifications [integration]', () => {
 
     expect(items.map(({ notification_id: id }) => id)).toEqual([
       'recent-warning',
+      'revived',
       'dup',
       'other-type',
       'old-error',
+      'old-info',
     ]);
     expect(items.find(({ notification_id: id }) => id === 'dup')?.title).toBe('dup v2');
     expect(truncated).toBe(false);
   });
 
-  it('excludes docs past their severity TTL while keeping longer-lived tiers of the same age', async () => {
+  it('returns documents past their severity TTL until cleanup runs', async () => {
     const { items } = await query();
 
     const ids = items.map(({ notification_id: id }) => id);
-    expect(ids).not.toContain('old-info');
+    expect(ids).toContain('old-info');
     expect(ids).toContain('old-error');
   });
 
   it('composes attribute filters', async () => {
-    const bySeverity = await query({ severity: ['error'] });
-    expect(bySeverity.items.map(({ notification_id: id }) => id)).toEqual(['old-error']);
-
     const byType = await query({ type: 'other' });
     expect(byType.items.map(({ notification_id: id }) => id)).toEqual(['other-type']);
 
     const byNamespace = await query({ namespace: 'nonexistent' });
     expect(byNamespace.items).toEqual([]);
+  });
+
+  it('includes any notification with in-window activity, represented by its newest in-window copy', async () => {
+    const { items } = await query({ from: daysAgo(6), to: daysAgo(3) });
+
+    // `dup` was re-pushed after the window closed, but its 5d copy is in-window, so it
+    // appears here represented by that copy — not dropped, and not shown as `dup v2`.
+    expect(items.map(({ notification_id: id }) => id)).toEqual(['other-type', 'dup']);
+    expect(items.find(({ notification_id: id }) => id === 'dup')?.title).toBe('dup v1');
+  });
+
+  it('annotates isRead from the representative without reordering', async () => {
+    const { items } = await query(
+      {},
+      {
+        overrides: { 'recent-warning': { read: true, markedAt: new Date().toISOString() } },
+        readAllBefore: daysAgo(3),
+      }
+    );
+
+    // Strictly newest-first, read and unread interleaved.
+    expect(items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+      // Postdates the marker, but its own override was recorded later still.
+      ['recent-warning', true],
+      // Re-pushed after the marker, so the bulk catch-up is escaped.
+      ['revived', false],
+      ['dup', false],
+      // Predate the marker.
+      ['other-type', true],
+      ['old-error', true],
+      ['old-info', true],
+    ]);
+  });
+
+  it('leaves items unannotated when there is no read state', async () => {
+    const { items } = await query();
+
+    expect(items.every((item) => !('isRead' in item))).toBe(true);
+    // An all-unread annotation is still an annotation: `isRead: false` everywhere, not absent
+    const annotated = await query({}, { overrides: {}, readAllBefore: daysAgo(365) });
+    expect(annotated.items.every(({ isRead }) => isRead === false)).toBe(true);
+  });
+
+  it('cleans an expired group through its newest expired copy while preserving newer copies', async () => {
+    await seedNotifications([
+      doc('cleanup-downgrade', daysAgo(45), { severity: 'error', title: 'older error' }),
+      doc('cleanup-downgrade', daysAgo(35), { title: 'expired info' }),
+      doc('cleanup-live', daysAgo(45), { severity: 'error', title: 'older error' }),
+      doc('cleanup-live', daysAgo(35), { title: 'expired info' }),
+      doc('cleanup-live', daysAgo(1), { severity: 'warning', title: 'fresh warning' }),
+      doc('cleanup-long-lived', daysAgo(45), { severity: 'error' }),
+    ]);
+    await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
+
+    await cleanupExpiredNotifications(esClient, new AbortController().signal);
+    await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
+
+    const response = await esClient.search<NotificationDocument>({
+      index: NOTIFICATION_DATA_STREAM_NAME,
+      size: 10,
+      query: {
+        terms: {
+          notification_id: ['cleanup-downgrade', 'cleanup-live', 'cleanup-long-lived'],
+        },
+      },
+    });
+    const remaining = response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : []));
+
+    expect(remaining.filter(({ notification_id: id }) => id === 'cleanup-downgrade')).toEqual([]);
+    expect(remaining.filter(({ notification_id: id }) => id === 'cleanup-live')).toEqual([
+      expect.objectContaining({ title: 'fresh warning' }),
+    ]);
+    expect(remaining.filter(({ notification_id: id }) => id === 'cleanup-long-lived')).toHaveLength(
+      1
+    );
   });
 });

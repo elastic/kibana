@@ -9,10 +9,171 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import type { GetPreviewDataParams } from '@kbn/slo-schema';
+import { ALL_PROJECT_ROUTING } from '../../common/project_routings';
 import { GetPreviewData } from './get_preview_data';
 import { oneMinute } from './fixtures/duration';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+
+const SUBSET_ROUTING = '_id:p1 AND _id:p2';
+const PREVIEW_RANGE = {
+  from: new Date('2025-02-23T14:26:49.056Z'),
+  to: new Date('2025-02-24T14:26:49.056Z'),
+};
+
+const kqlPreviewParams: GetPreviewDataParams = {
+  indicator: {
+    type: 'sli.kql.custom',
+    params: {
+      index: 'kbn-data-forge-fake_stack.admin-console-*',
+      filter: 'http.response.status_code :*',
+      good: 'http.response.status_code <500',
+      total: 'http.response.status_code :*',
+      timestampField: '@timestamp',
+      dataViewId: 'e7744dbe-a7a4-457b-83aa-539e9c88764c',
+    },
+  },
+  range: PREVIEW_RANGE,
+};
+
+const INDICATOR_PREVIEW_CASES: Array<{ name: string; params: GetPreviewDataParams }> = [
+  { name: 'Custom KQL', params: kqlPreviewParams },
+  {
+    name: 'Custom Metric',
+    params: {
+      indicator: {
+        type: 'sli.metric.custom',
+        params: {
+          index: 'kbn-data-forge-fake_stack.message_processor-*',
+          filter: '',
+          good: {
+            metrics: [{ name: 'A', aggregation: 'sum', field: 'processor.processed', filter: '' }],
+            equation: 'A',
+          },
+          total: {
+            metrics: [{ name: 'A', aggregation: 'sum', field: 'processor.accepted', filter: '' }],
+            equation: 'A',
+          },
+          timestampField: '@timestamp',
+          dataViewId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+        },
+      },
+      range: PREVIEW_RANGE,
+    },
+  },
+  {
+    name: 'Custom Histogram',
+    params: {
+      indicator: {
+        type: 'sli.histogram.custom',
+        params: {
+          index: 'kbn-data-forge-fake_stack.message_processor-*',
+          timestampField: '@timestamp',
+          filter: '',
+          good: {
+            field: 'processor.latency',
+            aggregation: 'range',
+            filter: '',
+            from: 0,
+            to: 100,
+          },
+          total: {
+            field: 'processor.latency',
+            aggregation: 'value_count',
+            filter: '',
+          },
+          dataViewId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+        },
+      },
+      range: PREVIEW_RANGE,
+    },
+  },
+  {
+    name: 'Timeslice Metric',
+    params: {
+      indicator: {
+        type: 'sli.metric.timeslice',
+        params: {
+          index: 'kbn-data-forge-fake_stack.message_processor-*',
+          filter: '',
+          metric: {
+            metrics: [
+              { name: 'A', aggregation: 'sum', field: 'processor.timeSpent', filter: '' },
+              { name: 'B', aggregation: 'sum', field: 'processor.processed', filter: '' },
+            ],
+            equation: 'A / B / 1000',
+            comparator: 'LTE',
+            threshold: 180,
+          },
+          timestampField: '@timestamp',
+          dataViewId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+        },
+      },
+      objective: {
+        target: 0.99,
+        timesliceTarget: 0.95,
+        timesliceWindow: oneMinute(),
+      },
+      range: PREVIEW_RANGE,
+    },
+  },
+  {
+    name: 'APM Latency',
+    params: {
+      indicator: {
+        type: 'sli.apm.transactionDuration',
+        params: {
+          service: 'frontend',
+          environment: 'prod',
+          transactionType: 'request',
+          transactionName: 'GET /api',
+          threshold: 250,
+          filter: 'some.lable:foo',
+          index:
+            'remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*',
+        },
+      },
+      range: PREVIEW_RANGE,
+    },
+  },
+  {
+    name: 'APM Availability',
+    params: {
+      indicator: {
+        type: 'sli.apm.transactionErrorRate',
+        params: {
+          service: 'frontend',
+          environment: 'prod',
+          transactionType: 'request',
+          transactionName: 'GET /api',
+          filter: 'some.lable:bar',
+          index:
+            'remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*',
+        },
+      },
+      range: PREVIEW_RANGE,
+    },
+  },
+  {
+    name: 'Synthetics',
+    params: {
+      indicator: {
+        type: 'sli.synthetics.availability',
+        params: {
+          monitorIds: [
+            { value: 'monitor-1', label: 'My monitor 1' },
+            { value: 'monitor-2', label: 'My monitor 2' },
+          ],
+          index: 'synthetics-*',
+          projects: [{ value: 'project-1', label: 'Project 1' }],
+          tags: [{ value: 'tag-1', label: 'Tag 1' }],
+          dataViewId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+        },
+      },
+      range: PREVIEW_RANGE,
+    },
+  },
+];
 
 describe('GetPreviewData', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -373,6 +534,52 @@ describe('GetPreviewData', () => {
     it('builds the query for a set of groupings', async () => {
       await service.execute({ ...params, groupings: { 'host.name': 'host.001', env: 'prod' } });
       expect(esClientMock.search).toMatchSnapshot();
+    });
+  });
+
+  describe('project_routing', () => {
+    const createService = ({
+      isServerless = false,
+      isCpsAvailable = false,
+    }: {
+      isServerless?: boolean;
+      isCpsAvailable?: boolean;
+    } = {}) =>
+      new GetPreviewData(esClientMock, 'default', mockDataViewsService, {
+        isServerless,
+        isCpsAvailable,
+      });
+
+    const searchRequest = () => esClientMock.search.mock.calls[0][0];
+
+    it.each(INDICATOR_PREVIEW_CASES)(
+      'includes project_routing on $name search when serverless+CPS and projectRoutings is set',
+      async ({ params }) => {
+        await createService({ isServerless: true, isCpsAvailable: true }).execute({
+          ...params,
+          projectRoutings: SUBSET_ROUTING,
+        });
+
+        expect(searchRequest()).toHaveProperty('project_routing', SUBSET_ROUTING);
+      }
+    );
+
+    it.each([
+      { name: 'stateful', isServerless: false, isCpsAvailable: false },
+      { name: 'serverless without CPS', isServerless: true, isCpsAvailable: false },
+    ])('omits project_routing when $name even if projectRoutings is set', async (flags) => {
+      await createService(flags).execute({
+        ...kqlPreviewParams,
+        projectRoutings: SUBSET_ROUTING,
+      });
+
+      expect(searchRequest()).not.toHaveProperty('project_routing');
+    });
+
+    it('defaults project_routing to _alias:* when serverless+CPS and projectRoutings is omitted', async () => {
+      await createService({ isServerless: true, isCpsAvailable: true }).execute(kqlPreviewParams);
+
+      expect(searchRequest()).toHaveProperty('project_routing', ALL_PROJECT_ROUTING);
     });
   });
 });

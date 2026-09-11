@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/test';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import { onboardVmHostWithCrowdStrike } from './install_crowdstrike_agent';
 import type { HostVm } from '../../common/types';
@@ -40,7 +41,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
       info: jest.fn().mockReturnValue('VM info'),
     } as unknown as HostVm;
     mockedSpaces.fetchActiveSpace.mockResolvedValue({
-      id: 'default',
+      id: asSpaceId('default'),
       name: 'Default',
       disabledFeatures: [],
     });

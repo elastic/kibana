@@ -25,14 +25,11 @@ const Registration = ({ config }: { config: ChromeAppHeaderConfig }) => {
 describe('useChromeAppHeaderRegistration', () => {
   it('unregisters the previous config before registering an update', () => {
     const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.getChromeStyle.mockReturnValue('project');
 
     const firstUnregister = jest.fn();
     const secondUnregister = jest.fn();
-    chrome.next.appHeader.set
-      .mockReturnValueOnce(firstUnregister)
-      .mockReturnValueOnce(secondUnregister);
+    chrome.appHeader.set.mockReturnValueOnce(firstUnregister).mockReturnValueOnce(secondUnregister);
 
     const { rerender, unmount } = render(
       <ChromeServiceProvider value={{ chrome }}>
@@ -58,9 +55,8 @@ describe('useChromeAppHeaderRegistration', () => {
 
   it('registers metadata updates from component props', () => {
     const chrome = chromeServiceMock.createStartContract();
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.getChromeStyle.mockReturnValue('project');
-    chrome.next.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(jest.fn());
 
     const { rerender } = render(
       <ChromeServiceProvider value={{ chrome }}>
@@ -74,7 +70,7 @@ describe('useChromeAppHeaderRegistration', () => {
       </ChromeServiceProvider>
     );
 
-    expect(chrome.next.appHeader.set).toHaveBeenLastCalledWith({
+    expect(chrome.appHeader.set).toHaveBeenLastCalledWith({
       title: undefined,
       back: undefined,
       tabs: undefined,

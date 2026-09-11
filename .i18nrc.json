@@ -194,6 +194,7 @@
     ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
+    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
     "unifiedDocViewer": [
       "src/platform/plugins/shared/unified_doc_viewer",
       "src/platform/packages/shared/kbn-unified-doc-viewer"
