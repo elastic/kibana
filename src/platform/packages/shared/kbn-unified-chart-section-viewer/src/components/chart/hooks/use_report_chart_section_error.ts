@@ -13,7 +13,10 @@ import { useCallback } from 'react';
 import { useExternalServices } from '../../../context/external_services';
 import { ERROR_TYPE } from '../../../utils/error_labels';
 import { toLoggable } from '../../../utils/logger_utils';
-import { EsqlResponseError } from '../../../common/errors/esql_response_error';
+import {
+  classifyChartSectionError,
+  getChartSectionErrorMeta,
+} from '../../../common/errors/classify_chart_section_error';
 import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
 
 /** APM label identifying which chart-section call site produced an error. */
@@ -76,8 +79,9 @@ const reportChartSectionError = (
     // Drop undefined / empty values so APM is not polluted with placeholder
     // labels (e.g., an unset `chart_id`). Caller labels are written first so
     // that the reserved keys assigned below (`error_type`,
-    // `chart_section_source`, `esql_*`) always win on collision and cannot be
-    // overridden by a caller bypassing the `ChartSectionErrorLabels` type.
+    // `chart_section_source`, `esql_*`, `error_category`) always win on
+    // collision and cannot be overridden by a caller bypassing the
+    // `ChartSectionErrorLabels` type.
     for (const [key, value] of Object.entries(callerLabels)) {
       if (value !== undefined && value !== '') {
         labels[key] = value;
@@ -85,14 +89,14 @@ const reportChartSectionError = (
     }
     labels.error_type = ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR;
     labels.chart_section_source = source;
-    if (error instanceof EsqlResponseError) {
-      if (error.type) {
-        labels.esql_error_type = error.type;
-      }
-      if (error.status != null) {
-        labels.esql_status = String(error.status);
-      }
+    const { type: esqlErrorType, status: esqlStatus } = getChartSectionErrorMeta(error);
+    if (esqlErrorType) {
+      labels.esql_error_type = esqlErrorType;
     }
+    if (esqlStatus != null) {
+      labels.esql_status = String(esqlStatus);
+    }
+    labels.error_category = classifyChartSectionError(error);
 
     // `apm.captureError` alone doesn't mark the surrounding transaction failed.
     // Mirror lens/data_loader.ts: attach a failed child span around the capture.

@@ -112,7 +112,9 @@ export async function handleConcurrencyBlockedExecution({
     await resumeSyncParentIfNeeded({
       childExecution: execution,
       spaceId,
+      fakeRequest: request,
       internalResumeWorkflowExecution,
+      workflowTaskManager,
       logger,
     });
   }
