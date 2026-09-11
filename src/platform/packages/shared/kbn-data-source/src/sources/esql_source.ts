@@ -11,7 +11,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { Column, DataSource, SerializedDataSource } from '../types';
+import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
 
@@ -44,7 +44,7 @@ interface EsqlSourceConstructorArgs {
  * Construct via the async {@link EsqlSource.create} factory; the constructor
  * is private because id derivation uses `crypto.subtle.digest` (async).
  */
-export class EsqlSource implements DataSource {
+export class EsqlSource implements DataSourceBase {
   public readonly kind = 'esql' as const;
   public readonly id: string;
   public readonly title: string;
@@ -107,6 +107,10 @@ export class EsqlSource implements DataSource {
 
   public isTimeBased(): boolean {
     return !!this.timeFieldName;
+  }
+
+  public isRollup(): boolean {
+    return false;
   }
 
   public isPersisted(): boolean {

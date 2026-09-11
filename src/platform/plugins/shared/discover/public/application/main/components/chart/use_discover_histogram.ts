@@ -27,6 +27,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import type { DataSource, EsqlSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -52,7 +53,6 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import type { DataSource, EsqlSource } from '@kbn/data-source';
 import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 

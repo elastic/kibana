@@ -24,7 +24,6 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import type { EsqlSource } from '@kbn/data-source';
 import { useDataState } from '../../hooks/use_data_state';
 import { FetchStatus } from '../../../types';
 import { useFetchMoreRecords } from '../layout/use_fetch_more_records';
@@ -223,7 +222,7 @@ export const DiscoverAgentBuilderConfig = () => {
 
     if (hasEsqlResults && currentDataSource.kind === 'esql' && documentState.result) {
       const esqlQuery = isOfAggregateQueryType(query) ? query.esql : '';
-      const esqlColumns = (currentDataSource as EsqlSource).getColumns();
+      const esqlColumns = currentDataSource.getColumns();
       const playbookContribution = getDeepAnalysisPlaybookAccessor(() => undefined)({
         dataView,
         query,

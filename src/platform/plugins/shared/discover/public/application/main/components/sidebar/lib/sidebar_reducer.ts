@@ -8,7 +8,7 @@
  */
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataSource, DataViewSource, EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldList, getEsqlQueryFieldList } from './get_field_list';
 
 export enum DiscoverSidebarReducerActionType {
@@ -96,15 +96,15 @@ export function discoverSidebarReducer(
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED: {
       const { dataSource, fieldCounts } = action.payload;
-      const mappedAndUnmappedFields = !dataSource
-        ? null
-        : dataSource.kind === 'esql'
-        ? getEsqlQueryFieldList((dataSource as EsqlSource).resultColumns)
-        : getDataViewFieldList((dataSource as DataViewSource).getDataView(), fieldCounts);
+      const mappedAndUnmappedFields =
+        dataSource?.kind === 'esql'
+          ? getEsqlQueryFieldList(dataSource.resultColumns)
+          : getDataViewFieldList(
+              dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : undefined,
+              fieldCounts
+            );
       const nextDataView =
-        dataSource?.kind === 'index-pattern'
-          ? (dataSource as DataViewSource).getDataView()
-          : state.dataView;
+        dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : state.dataView;
       return {
         ...state,
         dataView: nextDataView,

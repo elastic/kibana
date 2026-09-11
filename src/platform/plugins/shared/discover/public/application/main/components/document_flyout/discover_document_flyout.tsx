@@ -36,7 +36,6 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import type { EsqlSource } from '@kbn/data-source';
 import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
@@ -204,7 +203,9 @@ export const DiscoverDocumentFlyout = memo(
       () =>
         currentDataSource.kind === 'esql'
           ? (Object.fromEntries(
-              (currentDataSource as EsqlSource).getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
+              currentDataSource
+                .getColumns()
+                .map((c) => [c.name, { type: c.type, esType: c.esType }])
             ) as DataTableColumnsMeta)
           : undefined,
       [currentDataSource]

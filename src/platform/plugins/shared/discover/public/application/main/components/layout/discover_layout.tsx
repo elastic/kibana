@@ -24,8 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { type DataViewSource } from '@kbn/data-source';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
 import {
   ErrorCallout,
   SHOW_FIELD_STATISTICS,
@@ -149,15 +148,10 @@ export function DiscoverLayout() {
   // in a non time based way using the regular _search API, since the internal
   // representation of those documents does not have the time field that _field_caps
   // reports us.
-  const isTimeBased = useMemo(() => {
-    if (
-      currentDataSource.kind === 'index-pattern' &&
-      (currentDataSource as DataViewSource).getDataView().type === DataViewType.ROLLUP
-    ) {
-      return false;
-    }
-    return currentDataSource.isTimeBased();
-  }, [currentDataSource]);
+  const isTimeBased = useMemo(
+    () => !currentDataSource.isRollup() && currentDataSource.isTimeBased(),
+    [currentDataSource]
+  );
 
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),

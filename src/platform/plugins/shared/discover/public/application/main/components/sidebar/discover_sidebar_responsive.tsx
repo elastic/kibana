@@ -236,7 +236,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataSource: undefined,
+              dataSource:
+                documentState.esqlSource ??
+                (selectedDataViewRef.current
+                  ? new DataViewSource(selectedDataViewRef.current)
+                  : undefined),
               fieldCounts: EMPTY_FIELD_COUNTS,
             },
           });

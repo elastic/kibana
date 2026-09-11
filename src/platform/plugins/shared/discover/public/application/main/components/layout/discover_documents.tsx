@@ -85,7 +85,6 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import type { EsqlSource } from '@kbn/data-source';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
@@ -326,7 +325,9 @@ function DiscoverDocumentsComponent({
     () =>
       currentDataSource.kind === 'esql'
         ? (Object.fromEntries(
-            (currentDataSource as EsqlSource).getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
+            currentDataSource
+              .getColumns()
+              .map((c) => [c.name, { type: c.type, esType: c.esType }])
           ) as DataTableColumnsMeta)
         : undefined,
     [currentDataSource]
