@@ -8261,7 +8261,7 @@ paths:
                           owner: elastic
                         created_at: '2026-01-15T12:00:00.000Z'
                         created_by: elastic
-                        description: Sends a workflow notification when matching host alerts fire.
+                        description: Sends a workflow notification when alerts from production-tagged rules fire.
                         destinations:
                           - id: workflow-1
                             type: workflow
@@ -8270,8 +8270,8 @@ paths:
                         grouping_mode: per_episode
                         id: action-policy-1
                         matcher:
-                          expression: 'host.name: "web-*"'
-                        name: Notify on host alerts
+                          expression: 'rule.tags: "production"'
+                        name: Notify on production alerts
                         snoozed_until: null
                         tags:
                           - production
@@ -8389,16 +8389,16 @@ paths:
           application/json:
             examples:
               createActionPolicyRequest:
-                summary: Workflow notification for matching host alerts
+                summary: Workflow notification for production-tagged alerts
                 value:
-                  description: Sends a workflow notification when matching host alerts fire.
+                  description: Sends a workflow notification when alerts from production-tagged rules fire.
                   destinations:
                     - id: workflow-1
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'host.name: "web-*"'
-                  name: Notify on host alerts
+                    expression: 'rule.tags: "production"'
+                  name: Notify on production alerts
                   tags:
                     - production
                   throttle:
@@ -8418,7 +8418,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -8427,8 +8427,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -9269,7 +9269,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns action policies that match a given rule, categorised as catch-all (no matcher, or a matcher with neither tags nor an expression) or tags (the rule's tags intersect the matcher's tag clause).<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Returns action policies that currently appear to apply to the given rule. Each result includes a `category`: `catch-all` when the policy has no `matcher.tags` and no `matcher.expression`, or `tags` when the rule has at least one tag listed in the policy's `matcher.tags`. Policies that match only by `matcher.expression` are omitted, because expressions can depend on alert data that is not available here. A `tags` result does not evaluate `matcher.expression`, so a returned policy might still not fire when an alert is dispatched.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: post-alerting-v2-action-policies-match-for-rule
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9306,7 +9306,7 @@ paths:
                             owner: elastic
                           created_at: '2026-01-15T12:00:00.000Z'
                           created_by: elastic
-                          description: Sends a workflow notification when matching host alerts fire.
+                          description: Sends a workflow notification when alerts from production-tagged rules fire.
                           destinations:
                             - id: workflow-1
                               type: workflow
@@ -9317,7 +9317,7 @@ paths:
                           matcher:
                             tags:
                               - production
-                          name: Notify on host alerts
+                          name: Notify on production alerts
                           snoozed_until: null
                           tags:
                             - production
@@ -9567,7 +9567,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -9576,8 +9576,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -9718,7 +9718,7 @@ paths:
                 summary: Rename and update the description
                 value:
                   description: Updated description.
-                  name: Notify on host alerts (updated)
+                  name: Notify on production alerts (updated)
                   version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy'
@@ -9744,8 +9744,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts (updated)
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts (updated)
                     snoozed_until: null
                     tags:
                       - production
@@ -9901,14 +9901,14 @@ paths:
               upsertActionPolicyRequest:
                 summary: Action policy to create or replace at the given id
                 value:
-                  description: Sends a workflow notification when matching host alerts fire.
+                  description: Sends a workflow notification when alerts from production-tagged rules fire.
                   destinations:
                     - id: workflow-1
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'host.name: "web-*"'
-                  name: Notify on host alerts
+                    expression: 'rule.tags: "production"'
+                  name: Notify on production alerts
                   tags:
                     - production
                   throttle:
@@ -9928,7 +9928,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -9937,8 +9937,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -9963,7 +9963,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -9972,8 +9972,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10136,7 +10136,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10145,8 +10145,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10308,7 +10308,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10317,8 +10317,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10490,7 +10490,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10499,8 +10499,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
                     tags:
                       - production
@@ -10662,7 +10662,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10671,8 +10671,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -12339,7 +12339,7 @@ paths:
                         outcome: dispatched
                         policy:
                           id: action-policy-1
-                          name: Notify on host alerts
+                          name: Notify on production alerts
                         rules:
                           - id: rule-1
                             name: Host CPU high
@@ -90699,15 +90699,17 @@ components:
           type: string
         matcher:
           additionalProperties: false
-          description: 'Structured matcher: `tags` values are OR-ed into a rule-tag clause, `expression` is a KQL string evaluated against alert data, and both clauses are AND-ed together. `null` means the policy matches all alerts (catch-all).'
+          description: Criteria that determine which alerts this policy notifies on. Set `tags` to match rules that have any of those tags, and/or `expression` to a KQL query against alert data. When both are omitted or empty, the policy matches all alerts.
           nullable: true
           type: object
           properties:
             expression:
+              description: KQL query evaluated against alert data. Common fields include `rule.id`, `rule.name`, `rule.tags`, `episode_status`, and `severity`. Rule query columns live under `data.*` (for example `data.host.name`). Omit or set to `null` if you do not want an additional query.
               maxLength: 4096
               nullable: true
               type: string
             tags:
+              description: Rule tags this policy should match. The policy applies to alerts from rules that have at least one of these tags. Omit or set to `null` if you do not want to filter by tags.
               items:
                 maxLength: 256
                 minLength: 1
@@ -91130,7 +91132,7 @@ components:
           type: object
           properties:
             tags:
-              description: The tags of the rule, used to match against action policy tag clauses.
+              description: Tags of the rule you want to check. Used to find policies whose `matcher.tags` include at least one of these values.
               items:
                 maxLength: 256
                 minLength: 1
@@ -91164,7 +91166,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: The matched action policy.
         category:
-          description: 'Why this action policy matches the rule: "catch-all" (no matcher, or a matcher with neither tags nor an expression), or "tags" (the rule''s tags intersect the matcher''s tag clause).'
+          description: The reason this policy applies to the rule. `catch-all` means the policy sets neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule carries at least one tag listed in the policy's `matcher.tags`.
           enum:
             - catch-all
             - tags
@@ -91211,14 +91213,16 @@ components:
           description: The grouping mode for alert notifications.
         matcher:
           additionalProperties: false
-          description: Structured matcher for the action policy.
+          description: Criteria that determine which alerts this policy notifies on. Set `tags` to match rules that have any of those tags, and/or `expression` to a KQL query against alert data. When both are omitted or empty, the policy matches all alerts.
           type: object
           properties:
             expression:
+              description: KQL query evaluated against alert data. Common fields include `rule.id`, `rule.name`, `rule.tags`, `episode_status`, and `severity`. Rule query columns live under `data.*` (for example `data.host.name`). Omit or set to `null` if you do not want an additional query.
               maxLength: 4096
               nullable: true
               type: string
             tags:
+              description: Rule tags this policy should match. The policy applies to alerts from rules that have at least one of these tags. Omit or set to `null` if you do not want to filter by tags.
               items:
                 maxLength: 256
                 minLength: 1
@@ -92123,15 +92127,17 @@ components:
           nullable: true
         matcher:
           additionalProperties: false
-          description: Structured matcher, replaced as a whole on update. To preserve an existing `expression` while changing `tags`, send both fields. `null` clears the matcher (catch-all).
+          description: 'Criteria that determine which alerts this policy notifies on. Set `tags` to match rules that have any of those tags, and/or `expression` to a KQL query against alert data. The matcher is replaced as a whole: omitted fields are not kept from the existing matcher. To change `tags` without dropping an existing `expression`, include that same `expression` value in the request. Set `matcher` to `null` to match all alerts.'
           nullable: true
           type: object
           properties:
             expression:
+              description: KQL query evaluated against alert data. Common fields include `rule.id`, `rule.name`, `rule.tags`, `episode_status`, and `severity`. Rule query columns live under `data.*` (for example `data.host.name`). Omit or set to `null` if you do not want an additional query.
               maxLength: 4096
               nullable: true
               type: string
             tags:
+              description: Rule tags this policy should match. The policy applies to alerts from rules that have at least one of these tags. Omit or set to `null` if you do not want to filter by tags.
               items:
                 maxLength: 256
                 minLength: 1
