@@ -95,7 +95,7 @@ describe('ContextPills', () => {
     await userEvent.click(screen.getByTestId(`pillButton-${context.id}`));
 
     await waitFor(() => {
-      expect(setSelectedPromptContexts).toBeCalled();
+      expect(setSelectedPromptContexts).toHaveBeenCalled();
     });
   });
 
@@ -124,7 +124,7 @@ describe('ContextPills', () => {
     fireEvent.click(screen.getByTestId(`pillButton-${context.id}`));
 
     await waitFor(() => {
-      expect(setSelectedPromptContexts).not.toBeCalled();
+      expect(setSelectedPromptContexts).not.toHaveBeenCalled();
     });
   });
 

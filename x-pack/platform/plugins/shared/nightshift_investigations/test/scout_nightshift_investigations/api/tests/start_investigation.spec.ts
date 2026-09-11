@@ -54,6 +54,22 @@ apiTest.describe(
       }
     );
 
+    // Without this, every negative test above would still pass if the alert branch rejected
+    // every body it was given. A well-formed alert body passes validation and reaches the
+    // server-side alert lookup, which returns 404 because the alert does not exist.
+    apiTest(
+      'returns 404 for a well-formed alert body whose alert does not exist',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const response = await apiClient.post(START_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { subject: { type: 'alert', id: 'alert-uuid-1' } },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(404);
+      }
+    );
+
     apiTest(
       'returns 403 for a user without agentBuilder:write',
       async ({ apiClient, samlAuth }) => {

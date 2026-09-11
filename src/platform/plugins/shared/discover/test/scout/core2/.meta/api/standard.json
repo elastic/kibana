@@ -1,5 +1,5 @@
 {
-  "sha1": "4ab04fefb09157a8aea8683c891fda062174f774",
+  "sha1": "13cc4d08edc4b54f5847044ba08533e09dd04270",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -292,8 +292,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
-        "line": 33,
-        "column": 29
+        "line": 38,
+        "column": 9
       }
     },
     {
@@ -312,8 +312,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
-        "line": 87,
+        "line": 92,
         "column": 12
+      }
+    },
+    {
+      "id": "2835ad9f381c708-d820fab95105e6b",
+      "title": "GET /api/discover_sessions/{id} returns the session and resolution headers when an ID is in conflict",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
+        "line": 102,
+        "column": 7
       }
     },
     {
@@ -332,8 +352,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
-        "line": 97,
-        "column": 7
+        "line": 164,
+        "column": 9
       }
     },
     {
@@ -352,8 +372,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
-        "line": 111,
-        "column": 14
+        "line": 174,
+        "column": 11
       }
     },
     {
@@ -532,7 +552,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 45,
+        "line": 49,
         "column": 11
       }
     },
@@ -552,8 +572,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 94,
+        "line": 97,
         "column": 18
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-d022f198a2effd4",
+      "title": "PUT /api/discover_sessions/{id} preserves metrics tab state through a GET and PUT round trip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 219,
+        "column": 22
       }
     },
     {
@@ -572,8 +612,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 215,
-        "column": 11
+        "line": 329,
+        "column": 13
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-4ba1eaf63dcd572",
+      "title": "PUT /api/discover_sessions/{id} preserves stored pinned filter conditions through GET, PUT, and GET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 381,
+        "column": 18
       }
     },
     {
@@ -592,8 +652,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 271,
-        "column": 13
+        "line": 508,
+        "column": 14
       }
     },
     {
@@ -612,8 +672,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 289,
-        "column": 15
+        "line": 506,
+        "column": 24
       }
     }
   ]

@@ -379,7 +379,7 @@ describe('useInvestigationState', () => {
       });
     });
 
-    it('ignores malformed progress payloads instead of rendering them', async () => {
+    it('ignores progress payloads with unscored recommendations instead of rendering them', async () => {
       const http = createHttp();
       const { result } = renderHook(() =>
         useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
@@ -389,7 +389,13 @@ describe('useInvestigationState', () => {
       const snapshot = { summary: 'valid', hypotheses: [] };
       act(() => {
         mockSubject.next(progressEvent(snapshot));
-        mockSubject.next(progressEvent({ nonsense: true }));
+        mockSubject.next(
+          progressEvent({
+            summary: 'Historical output.',
+            hypotheses: [],
+            recommendations: [{ title: 'Restart the service' }],
+          })
+        );
       });
 
       await waitFor(() => {

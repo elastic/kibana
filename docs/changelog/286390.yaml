@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286390
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: 'Remove the "Add to Timeline" cell action from Security dashboards'

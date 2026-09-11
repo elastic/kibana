@@ -36,6 +36,7 @@ import {
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
+import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -49,6 +50,7 @@ export const RulesListPage = () => {
   ] = useBoolean(false);
   const {
     flyout,
+    confirmationModal,
     openCreateFlyout,
     openCreateBuilderFlyout,
     openCreateFromTemplateFlyout,
@@ -171,6 +173,7 @@ export const RulesListPage = () => {
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
+        <CentralizedActionPoliciesBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
@@ -196,6 +199,7 @@ export const RulesListPage = () => {
         />
       ) : null}
       {flyout}
+      {confirmationModal}
     </div>
   );
 };

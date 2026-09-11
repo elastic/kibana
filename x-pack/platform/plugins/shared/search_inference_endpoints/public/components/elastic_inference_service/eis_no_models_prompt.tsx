@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 export const EisNoModelsPrompt = () => (
   <EuiEmptyPrompt
     data-test-subj="eisNoModelsFound"
+    color="subdued"
     title={
       <h3>
         {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
@@ -20,5 +21,6 @@ export const EisNoModelsPrompt = () => (
         })}
       </h3>
     }
+    titleSize="xs"
   />
 );

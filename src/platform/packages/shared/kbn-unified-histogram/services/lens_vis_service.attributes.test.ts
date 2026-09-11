@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -682,10 +683,6 @@ describe('LensVisService attributes', () => {
                 },
               },
             ],
-            "query": Object {
-              "esql": "from logstash-* | limit 10
-      | STATS results = COUNT(*) BY timestamp = BUCKET(timestamp, 10 minute)",
-            },
             "visualization": Object {
               "gridConfig": Object {
                 "isCellLabelVisible": false,
@@ -834,6 +831,6 @@ describe('LensVisService attributes', () => {
       allSuggestions: [], // none available
       isTransformationalESQL: false,
     });
-    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 });

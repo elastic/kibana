@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 
 import type { MiddlewareAPI } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
@@ -308,7 +308,10 @@ async function loadFromSavedObject(
       isSaveable: true,
       sharingSavedObjectProps,
       filters: data.query.filterManager.getFilters(),
-      query: doc.state.query,
+      // For text-based documents the editor's in-flight query is seeded from
+      // the authoritative layer query (with a fallback to a legacy aggregate
+      // slot value); for form-based documents from the chart-scoped filter.
+      query: getRepresentativeQuery(doc) ?? EMPTY_KQL_QUERY,
       searchSessionId:
         !savedObjectId && currentSessionId
           ? currentSessionId

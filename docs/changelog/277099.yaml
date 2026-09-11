@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/277099
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Add tool to redirect users when an agent cannot perform an action
