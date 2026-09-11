@@ -13,8 +13,14 @@ import { getExternals, isKeaReactReduxImport } from './externals';
 /**
  * Rspack-specific externals that are NOT in UiSharedDepsSrc.externals.
  * Any addition here must be intentional and documented.
+ *
+ * `mongodb` and `mongodb-connection-string-url` are excluded from the browser bundle
+ * because the mongodb driver uses Node.js TCP/TLS and must never run in the browser;
+ * kbn-optimizer's webpack config declares the same two packages locally for the same
+ * reason (see packages/kbn-optimizer/src/worker/webpack.config.ts), independently of
+ * UiSharedDepsSrc.externals, which only carries browser-safe shared singleton libs.
  */
-const RSPACK_ONLY_EXTERNALS = ['node:crypto'];
+const RSPACK_ONLY_EXTERNALS = ['node:crypto', 'mongodb', 'mongodb-connection-string-url'];
 
 describe('externals configuration', () => {
   const rspackExternals = getExternals();
