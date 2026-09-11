@@ -144,9 +144,14 @@ export interface CreateScopedRunnerDeps {
   agentConfiguration?: AgentConfiguration;
   /**
    * Resolved runtime configuration for the external Deductive execution path.
-   * Present only when the per-deployment feature flag is enabled.
+   * Populated only for the `deductive.ai` agent when the deployment opted in.
    */
   deductive?: DeductiveRuntimeConfig;
+  /**
+   * `xpack.agentBuilder.deductive.register` for this deployment. One half of the
+   * Deductive double switch; the other is the `agentBuilder:deductiveEnabled` setting.
+   */
+  deductiveRegister: boolean;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -343,6 +348,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
             request,
             uiSettings: runnerDeps.uiSettings,
             savedObjects: runnerDeps.savedObjects,
+            registerEnabled: runnerDeps.deductiveRegister,
           })
         : undefined;
 

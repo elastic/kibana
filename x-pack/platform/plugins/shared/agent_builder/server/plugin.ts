@@ -369,6 +369,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      deductiveRegister: this.config.deductive?.register ?? false,
       conversationEventBus: this.conversationEventBus,
     });
 

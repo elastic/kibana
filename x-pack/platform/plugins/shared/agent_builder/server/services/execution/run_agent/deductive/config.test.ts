@@ -8,14 +8,35 @@
 import { getDeductiveConfig, resolveDeductiveConfig, shouldUseDeductive } from './config';
 
 describe('getDeductiveConfig', () => {
-  const deps = ({ settings = {} }: { settings?: Record<string, unknown> } = {}) => {
+  const deps = ({
+    registerEnabled = true,
+    settings = {},
+  }: {
+    registerEnabled?: boolean;
+    settings?: Record<string, unknown>;
+  } = {}) => {
     const get = jest.fn((key: string) => Promise.resolve(settings[key]));
     return {
       request: {} as any,
       uiSettings: { globalAsScopedToClient: jest.fn(() => ({ get })) } as any,
       savedObjects: { getScopedClient: jest.fn(() => ({})) } as any,
+      registerEnabled,
     };
   };
+
+  it('is disabled when the kibana.yml register switch is off, even if the setting is on', async () => {
+    const cfg = await getDeductiveConfig(
+      deps({
+        registerEnabled: false,
+        settings: {
+          'agentBuilder:deductiveEnabled': true,
+          'agentBuilder:deductiveEndpoint': 'https://app.deductive.ai',
+          'agentBuilder:deductiveApiKey': 'dak_key',
+        },
+      })
+    );
+    expect(cfg.enabled).toBe(false);
+  });
 
   it('is disabled when the Advanced Setting is off even if endpoint/key are configured', async () => {
     const cfg = await getDeductiveConfig(
@@ -31,13 +52,14 @@ describe('getDeductiveConfig', () => {
   });
 
   it('is disabled when the settings are not registered (customer deployment)', async () => {
-    const cfg = await getDeductiveConfig(deps());
+    const cfg = await getDeductiveConfig(deps({ registerEnabled: false }));
     expect(cfg.enabled).toBe(false);
   });
 
-  it('reads endpoint and key from the global scope when enabled', async () => {
+  it('reads endpoint and key from the global scope when BOTH switches are on', async () => {
     const cfg = await getDeductiveConfig(
       deps({
+        registerEnabled: true,
         settings: {
           'agentBuilder:deductiveEnabled': true,
           'agentBuilder:deductiveEndpoint': 'https://app.deductive.ai/',

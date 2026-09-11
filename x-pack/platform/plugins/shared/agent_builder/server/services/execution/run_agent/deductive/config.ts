@@ -129,19 +129,23 @@ export const shouldUseDeductive = (agentId: string | undefined): boolean => {
  * deployment-wide source — a user cannot point the endpoint at a host of their choosing to
  * leak the shared key (SSRF/credential-exfiltration mitigation).
  *
- * `enabled` reflects the `agentBuilder:deductiveEnabled` Advanced Setting. The settings are
- * only registered when the deployment opts in via `xpack.agentBuilder.deductive.register`,
- * so on customer deployments the read fails and the path stays disabled. The runner only
- * calls this for the `deductive.ai` agent, so ordinary agents never read the credentials.
+ * Double switch: `enabled` is true only when the deployment opted in via
+ * `xpack.agentBuilder.deductive.register` (`registerEnabled`) AND the
+ * `agentBuilder:deductiveEnabled` Global Advanced Setting is on. The settings are only
+ * registered when the deployment opts in, so on customer deployments the setting read fails
+ * and `enabled` is false regardless. The runner only calls this for the `deductive.ai`
+ * agent, so ordinary agents never read the credentials.
  */
 export const getDeductiveConfig = async ({
   request,
   uiSettings,
   savedObjects,
+  registerEnabled,
 }: {
   request: KibanaRequest;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  registerEnabled: boolean;
 }): Promise<DeductiveRuntimeConfig> => {
   const global = uiSettings.globalAsScopedToClient(savedObjects.getScopedClient(request));
   const readGlobal = async (key: string) => global.get<string>(key).catch(() => undefined);
@@ -151,7 +155,7 @@ export const getDeductiveConfig = async ({
     global.get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID).catch(() => undefined),
   ]);
   return {
-    enabled: globalEnabled === true,
+    enabled: registerEnabled && globalEnabled === true,
     endpoint: globalEndpoint?.trim().replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
     apiKey: globalKey,
   };
