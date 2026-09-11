@@ -11,6 +11,7 @@ import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
@@ -39,7 +40,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
-    security: { authz: { requiredPrivileges: string[] } };
+    security: { authz: { requiredPrivileges: string[]; extendedPrivileges?: string[] } };
   };
   handler: RequestHandler;
   validate:
@@ -81,7 +82,7 @@ const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
   description: 'Customer support context',
   managed: false,
-  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
+  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
   date_created: '2026-07-08T12:10:30.000Z',
@@ -201,9 +202,30 @@ describe('ai indices routes', () => {
     });
   });
 
-  const callRoute = async (method: string, path: string, request: Record<string, unknown>) => {
+  const callRoute = async (
+    method: string,
+    path: string,
+    request: Record<string, unknown>,
+    authzResult?: Record<string, boolean>
+  ) => {
     const { handler } = getRoute(method, path);
-    return handler(createContext(), httpServerMock.createKibanaRequest(request), response);
+    return handler(
+      createContext(),
+      httpServerMock.createKibanaRequest({
+        ...request,
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult,
+        },
+      }),
+      response
+    );
+  };
+
+  const withWorkflowDeletePrivilege = {
+    [WorkflowsManagementApiActions.delete]: true,
   };
 
   it('returns 404 on every route when the context engine is disabled', async () => {
@@ -260,7 +282,12 @@ describe('ai indices routes', () => {
     });
     expect(getRoute('DELETE', aiIndexByIdPath).config).toMatchObject({
       access: 'public',
-      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.writeContextEngine],
+          extendedPrivileges: [WorkflowsManagementApiActions.delete],
+        },
+      },
     });
     expect(getRoute('PUT', aiIndexFeedbackAnalysisPath).config).toMatchObject({
       access: 'internal',
@@ -867,16 +894,43 @@ describe('ai indices routes', () => {
 
         expect(esDeleteDataStream).not.toHaveBeenCalled();
       });
+
+      it('does not delete a dest that is an index pattern', async () => {
+        aiIndexService.get.mockResolvedValue({
+          ...aiIndexItem,
+          dest: { type: 'data_stream', value: 'ai-index-ds-*' },
+        });
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(esDeleteDataStream).not.toHaveBeenCalled();
+        expect(esDeleteIndex).not.toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining('index pattern')],
+          },
+        });
+      });
     });
 
     describe('delete_automations=true', () => {
       it('deletes workflow automations and returns no errors on success', async () => {
         aiIndexService.delete.mockResolvedValue(undefined);
 
-        await callRoute('DELETE', aiIndexByIdPath, {
-          params: { aiIndexId: 'customer_support' },
-          query: { delete_automations: true },
-        });
+        await callRoute(
+          'DELETE',
+          aiIndexByIdPath,
+          {
+            params: { aiIndexId: 'customer_support' },
+            query: { delete_automations: true },
+          },
+          withWorkflowDeletePrivilege
+        );
 
         expect(workflowsManagementApi.deleteWorkflows).toHaveBeenCalledWith(
           ['nightly-refresh'],
@@ -893,10 +947,15 @@ describe('ai indices routes', () => {
           failures: [{ id: 'nightly-refresh', error: 'not_found' }],
         });
 
-        await callRoute('DELETE', aiIndexByIdPath, {
-          params: { aiIndexId: 'customer_support' },
-          query: { delete_automations: true },
-        });
+        await callRoute(
+          'DELETE',
+          aiIndexByIdPath,
+          {
+            params: { aiIndexId: 'customer_support' },
+            query: { delete_automations: true },
+          },
+          withWorkflowDeletePrivilege
+        );
 
         expect(response.ok).toHaveBeenCalledWith({
           body: {
@@ -932,10 +991,15 @@ describe('ai indices routes', () => {
         });
         aiIndexService.delete.mockResolvedValue(undefined);
 
-        await callRoute('DELETE', aiIndexByIdPath, {
-          params: { aiIndexId: 'customer_support' },
-          query: { delete_automations: true },
-        });
+        await callRoute(
+          'DELETE',
+          aiIndexByIdPath,
+          {
+            params: { aiIndexId: 'customer_support' },
+            query: { delete_automations: true },
+          },
+          withWorkflowDeletePrivilege
+        );
 
         expect(response.ok).toHaveBeenCalledWith({
           body: {
@@ -968,6 +1032,38 @@ describe('ai indices routes', () => {
 
         expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
       });
+
+      it('does not delete workflows when the caller lacks workflow delete privilege', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute(
+          'DELETE',
+          aiIndexByIdPath,
+          {
+            params: { aiIndexId: 'customer_support' },
+            query: { delete_automations: true },
+          },
+          { [WorkflowsManagementApiActions.delete]: false }
+        );
+
+        expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
+        expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining('Missing privilege to delete workflow automations')],
+          },
+        });
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: expect.stringContaining('related resources'),
+            event: expect.objectContaining({
+              action: 'ai_index_delete_resources',
+              outcome: 'failure',
+            }),
+          })
+        );
+      });
     });
 
     it('collects errors from both backing store and automations when both flags are true', async () => {
@@ -977,10 +1073,15 @@ describe('ai indices routes', () => {
         failures: [{ id: 'nightly-refresh', error: 'wf_error' }],
       });
 
-      await callRoute('DELETE', aiIndexByIdPath, {
-        params: { aiIndexId: 'customer_support' },
-        query: { delete_knowledge_indicators: true, delete_automations: true },
-      });
+      await callRoute(
+        'DELETE',
+        aiIndexByIdPath,
+        {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true, delete_automations: true },
+        },
+        withWorkflowDeletePrivilege
+      );
 
       expect(response.ok).toHaveBeenCalledWith({
         body: {

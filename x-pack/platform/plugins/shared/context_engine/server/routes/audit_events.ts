@@ -27,7 +27,11 @@ const eventVerbs: Record<AiIndexAuditAction, VerbsTuple> = {
   ai_index_get: ['access', 'accessing', 'accessed'],
   ai_index_list: ['access', 'accessing', 'accessed'],
   ai_index_delete: ['delete', 'deleting', 'deleted'],
-  ai_index_delete_resources: ['delete', 'deleting', 'deleted'],
+  ai_index_delete_resources: [
+    'delete related resources of',
+    'deleting related resources of',
+    'deleted related resources of',
+  ],
 };
 
 const eventTypes: Record<AiIndexAuditAction, string> = {

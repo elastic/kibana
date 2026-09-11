@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
@@ -95,6 +96,18 @@ const READ_SECURITY: RouteSecurity = {
 const WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
 };
+
+const DELETE_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.writeContextEngine],
+    extendedPrivileges: [...WorkflowsManagementOperationPrivileges.delete],
+  },
+};
+
+const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
+  WorkflowsManagementOperationPrivileges.delete.every(
+    (privilege) => request.authzResult?.[privilege] === true
+  );
 
 const aiIndexIdSchema = schema.string({
   minLength: 1,
@@ -633,7 +646,7 @@ export const registerAiIndexRoutes = ({
   router.versioned
     .delete({
       path: aiIndexByIdPath,
-      security: WRITE_SECURITY,
+      security: DELETE_SECURITY,
       access: 'public',
       summary: 'Delete an AI index',
       description:
@@ -688,15 +701,26 @@ export const registerAiIndexRoutes = ({
           }
 
           if (deleteAutomations) {
-            const automationErrors = await deleteAutomationResources({
-              automations: aiIndex.automations,
-              workflowsManagementApi: await getWorkflowsManagementApi(),
-              spaceId: resolveSpaceId(await getSpaces(), request),
-              request,
-              logger,
-              aiIndexId,
-            });
-            errors.push(...automationErrors);
+            if (
+              aiIndex.automations.some((automation) => automation.type === 'workflow') &&
+              !hasWorkflowDeletePrivilege(request)
+            ) {
+              const message = 'Missing privilege to delete workflow automations.';
+              logger.warn(
+                `Deleted AI index '${aiIndexId}', but could not delete its automations: ${message}`
+              );
+              errors.push(`Failed to delete automations: ${message}`);
+            } else {
+              const automationErrors = await deleteAutomationResources({
+                automations: aiIndex.automations,
+                workflowsManagementApi: await getWorkflowsManagementApi(),
+                spaceId: resolveSpaceId(await getSpaces(), request),
+                request,
+                logger,
+                aiIndexId,
+              });
+              errors.push(...automationErrors);
+            }
           }
 
           // Log any partial failures to audit trail

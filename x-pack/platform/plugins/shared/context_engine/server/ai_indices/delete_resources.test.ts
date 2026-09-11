@@ -49,7 +49,7 @@ describe('deleteBackingStoreResource', () => {
   });
 
   describe('data_stream dest', () => {
-    const dest: AiIndexDest = { type: 'data_stream', value: 'ai-ds-customer_support*' };
+    const dest: AiIndexDest = { type: 'data_stream', value: 'ai-index-ds-customer_support' };
 
     it('deletes the data stream and returns null', async () => {
       deleteDataStream.mockResolvedValue({ acknowledged: true });
@@ -71,7 +71,7 @@ describe('deleteBackingStoreResource', () => {
       deleteDataStream.mockRejectedValue(makeResponseError(403));
 
       await expect(deleteBackingStore(dest)).resolves.toMatch(
-        /Failed to delete the backing store 'ai-ds-customer_support\*'/
+        /Failed to delete the backing store 'ai-index-ds-customer_support'/
       );
       expect(warn).toHaveBeenCalled();
     });
@@ -105,4 +105,16 @@ describe('deleteBackingStoreResource', () => {
       expect(warn).toHaveBeenCalled();
     });
   });
+
+  it.each(['ai-index-ds-*', 'ai-index-ds-a,ai-index-ds-b'])(
+    'refuses to delete index-pattern dest %s',
+    async (value) => {
+      await expect(deleteBackingStore({ type: 'data_stream', value })).resolves.toMatch(
+        /index pattern/
+      );
+      expect(deleteDataStream).not.toHaveBeenCalled();
+      expect(deleteIndex).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalled();
+    }
+  );
 });

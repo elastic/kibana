@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
+import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexAutomation, AiIndexDest } from '../../common/http_api/ai_indices';
 import type { DeleteWorkflowsApi } from '../types';
 
@@ -22,6 +23,13 @@ export const deleteBackingStoreResource = async ({
   logger: Logger;
   aiIndexId: string;
 }): Promise<string | null> => {
+  if (isIndexPattern(dest.value)) {
+    logger.warn(
+      `Deleted AI index '${aiIndexId}', but did not delete its backing store: dest '${dest.value}' is an index pattern, not a single backing store`
+    );
+    return `Cannot delete the backing store '${dest.value}': it is an index pattern`;
+  }
+
   try {
     if (dest.type === 'data_stream') {
       await esClient.indices.deleteDataStream({ name: dest.value });
