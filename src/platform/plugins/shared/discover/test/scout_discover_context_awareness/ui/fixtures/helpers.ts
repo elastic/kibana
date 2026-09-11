@@ -7,9 +7,104 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import kbnRison from '@kbn/rison';
 import type { DataGrid, ScoutPage } from '@kbn/scout';
+import type { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 
 const CONTEXT_LOAD_TIMEOUT = 30_000;
+
+const GRID_DISPLAY_SELECTOR_BUTTON = 'dataGridDisplaySelectorButton';
+const ROW_HEIGHT_LINE_COUNT = 'unifiedDataTableRowHeightSettings_lineCountNumber';
+const PROFILE_STATE_DOC_VIEW_TAB = 'doc_view_profile_state_example';
+
+export interface RowHeightSetting {
+  value: 'Auto' | 'Custom';
+  /** Lines configured for a `Custom` height; `null` while the height is `Auto`. */
+  lineCount: string | null;
+}
+
+/** The grid display popover is a toggle, so closing it means clicking the same toolbar button. */
+async function closeGridDisplaySettings(page: ScoutPage) {
+  await page.testSubj.click(GRID_DISPLAY_SELECTOR_BUTTON);
+  await page.testSubj.locator('densityButtonGroup').waitFor({ state: 'hidden' });
+}
+
+/**
+ * Reads the row height out of the grid display popover, leaving the popover closed again so it
+ * cannot swallow later clicks.
+ */
+export async function readRowHeight(
+  page: ScoutPage,
+  dataGrid: DataGrid
+): Promise<RowHeightSetting> {
+  await dataGrid.openGridDisplaySettings();
+
+  try {
+    const value = await dataGrid.getCurrentRowHeight();
+    const lineCount =
+      value === 'Custom' ? await page.testSubj.locator(ROW_HEIGHT_LINE_COUNT).inputValue() : null;
+
+    return { value, lineCount };
+  } finally {
+    await closeGridDisplaySettings(page);
+  }
+}
+
+/** Sets the row height through the grid display popover, then closes it. */
+export async function setRowHeight(
+  page: ScoutPage,
+  dataGrid: DataGrid,
+  value: RowHeightSetting['value'],
+  lineCount?: number
+) {
+  await dataGrid.openGridDisplaySettings();
+
+  try {
+    await dataGrid.setRowHeight(value);
+
+    if (lineCount !== undefined) {
+      const input = page.testSubj.locator(ROW_HEIGHT_LINE_COUNT);
+      await input.fill(String(lineCount));
+      await input.blur();
+    }
+  } finally {
+    await closeGridDisplaySettings(page);
+  }
+}
+
+/**
+ * Profile state that rides along in the URL, under the `_p` hash parameter. Returns `undefined`
+ * when the URL carries none, which is itself meaningful: it is how "this state was never written"
+ * is told apart from "it was written and then reverted".
+ */
+export async function getProfileUrlState(page: ScoutPage): Promise<unknown> {
+  const { hash } = new URL(page.url());
+  const queryIndex = hash.indexOf('?');
+
+  if (queryIndex === -1) {
+    return undefined;
+  }
+
+  const profileUrlState = new URLSearchParams(hash.slice(queryIndex + 1)).get('_p');
+
+  return profileUrlState ? kbnRison.decode(profileUrlState) : undefined;
+}
+
+/** Raw `discover.tabs` localStorage entry, where persisted per-tab profile state ends up. */
+export function getStoredTabs(page: ScoutPage): Promise<string> {
+  return page.evaluate(() => window.localStorage.getItem('discover.tabs') ?? '');
+}
+
+/** Opens the profile state doc viewer tab, reusing the flyout when it is already open. */
+export async function openProfileStateDocView(page: ScoutPage, docViewer: DocViewer) {
+  const isFlyoutOpen = await page.testSubj.locator('docViewerFlyout').isVisible();
+
+  if (!isFlyoutOpen) {
+    await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+  }
+
+  await docViewer.openTab(PROFILE_STATE_DOC_VIEW_TAB);
+}
 
 /** Resolves once the Surrounding documents page has both of its "Load more" controls rendered. */
 async function waitForSurroundingDocs(page: ScoutPage) {

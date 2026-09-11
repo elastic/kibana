@@ -9,5 +9,15 @@
 
 export { spaceTest } from '../../../scout/common/ui/fixtures';
 export * from './constants';
-export { captureNextDialogMessage, getGridColumnIds, openSurroundingDocs } from './helpers';
+export {
+  captureNextDialogMessage,
+  getGridColumnIds,
+  getProfileUrlState,
+  getStoredTabs,
+  openProfileStateDocView,
+  openSurroundingDocs,
+  readRowHeight,
+  setRowHeight,
+} from './helpers';
+export type { RowHeightSetting } from './helpers';
 export { setupContextAwareness, teardownContextAwareness } from './setup';
