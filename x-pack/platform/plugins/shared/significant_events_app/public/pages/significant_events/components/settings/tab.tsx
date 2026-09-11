@@ -64,6 +64,8 @@ import {
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
+import { RunLimitsSection } from './run_limits_section';
+import { CostEstimate } from './cost_estimate';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -300,6 +302,12 @@ export function SettingsTab() {
       <EuiSpacer />
 
       <StaleEventCleanupSection canManage={canManageStreams} />
+
+      <CostEstimate />
+
+      <EuiSpacer />
+
+      <RunLimitsSection />
 
       <EuiSpacer />
 

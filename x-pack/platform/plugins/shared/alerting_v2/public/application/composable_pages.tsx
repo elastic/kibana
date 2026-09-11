@@ -30,11 +30,15 @@ import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
+import { LocatorProvider } from './locator_context';
+import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
+import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  hostApp?: AlertingV2HostApp;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -45,38 +49,54 @@ export interface InternalPageProps extends AlertingV2PageProps {
 const StandardProviders = ({
   container,
   setBreadcrumbs,
+  hostApp = MANAGEMENT_HOST,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  hostApp?: AlertingV2HostApp;
   children: React.ReactNode;
 }) => {
   const [queryClient] = useState(() => new QueryClient());
+  const locators = useMemo(() => {
+    const share = container.get(PluginStart('share')) as SharePluginStart;
+    return bindLocatorsToHost(getAlertingV2Locators(share), hostApp);
+  }, [container, hostApp]);
   return (
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
-        <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>{children}</I18nProvider>
-        </BreadcrumbProvider>
+        <LocatorProvider locators={locators}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+            <I18nProvider>{children}</I18nProvider>
+          </BreadcrumbProvider>
+        </LocatorProvider>
       </QueryClientProvider>
     </Context.Provider>
   );
 };
 
-export const AlertingV2RulesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
+export const AlertingV2RulesPage = ({ container, setBreadcrumbs, hostApp }: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
     <RulesApp />
   </StandardProviders>
 );
 
-export const AlertingV2RuleLibraryPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
+export const AlertingV2RuleLibraryPage = ({
+  container,
+  setBreadcrumbs,
+  hostApp,
+}: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
     <RuleLibraryApp />
   </StandardProviders>
 );
 
-export const AlertingV2ActionPoliciesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
+export const AlertingV2ActionPoliciesPage = ({
+  container,
+  setBreadcrumbs,
+  hostApp,
+}: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
     <ActionPoliciesApp />
   </StandardProviders>
 );
@@ -84,8 +104,9 @@ export const AlertingV2ActionPoliciesPage = ({ container, setBreadcrumbs }: Inte
 export const AlertingV2ExecutionHistoryPage = ({
   container,
   setBreadcrumbs,
+  hostApp,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
     <ExecutionHistoryApp />
   </StandardProviders>
 );
@@ -96,8 +117,13 @@ export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
+  hostApp = MANAGEMENT_HOST,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
+  const locators = useMemo(() => {
+    const share = container.get(PluginStart('share')) as SharePluginStart;
+    return bindLocatorsToHost(getAlertingV2Locators(share), hostApp);
+  }, [container, hostApp]);
 
   const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
     () => ({
@@ -122,11 +148,13 @@ export const AlertingV2EpisodesPage = ({
     <KibanaContextProvider services={kibanaReactServices}>
       <Context.Provider value={container}>
         <QueryClientProvider client={queryClient}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>
-              <EpisodesApp />
-            </I18nProvider>
-          </BreadcrumbProvider>
+          <LocatorProvider locators={locators}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>
+                <EpisodesApp />
+              </I18nProvider>
+            </BreadcrumbProvider>
+          </LocatorProvider>
         </QueryClientProvider>
       </Context.Provider>
     </KibanaContextProvider>

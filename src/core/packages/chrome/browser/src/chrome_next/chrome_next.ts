@@ -7,52 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DistributiveOmit } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import type { AppHeaderBack, AppHeaderConfig } from '@kbn/ui-app-header';
+import type { ChromeAppHeaderConfig } from '../app_header';
 import type { ChromeControls } from '../controls';
 import type { ChromeHelp, ChromeNewsfeedHandler } from '../help';
-
-/**
- * Presentation types owned by `@kbn/ui-app-header`. Re-exported so
- * `chrome.next.appHeader.set` and existing `@kbn/core-chrome-browser` imports stay valid.
- *
- * @public
- */
-export type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderBadgeItem,
-  AppHeaderConfig,
-  AppHeaderDescription,
-  AppHeaderEditableTitle,
-  AppHeaderFavoriteAction,
-  AppHeaderFavoriteStatus,
-  AppHeaderShareAction,
-  AppHeaderMetadataButtonItem,
-  AppHeaderMetadataHealthItem,
-  AppHeaderMetadataItem,
-  AppHeaderMetadataItems,
-  AppHeaderMetadataTextItem,
-  AppHeaderSpacing,
-  AppHeaderTab,
-  AppHeaderTabAction,
-  AppHeaderTabActions,
-  AppHeaderTabBadge,
-  AppHeaderTabIconBadge,
-  AppHeaderTitle,
-  AppHeaderTitleSaveResult,
-} from '@kbn/ui-app-header';
-
-/**
- * Chrome-owned registration config. Unlike {@link AppHeaderConfig}, `back` may be `false` to
- * suppress the breadcrumb-derived fallback.
- *
- * @public
- */
-export type ChromeAppHeaderConfig = DistributiveOmit<AppHeaderConfig, 'back'> & {
-  back?: AppHeaderBack | false;
-};
 
 /**
  * Deprecated compatibility facade for the former Chrome Next rollout namespace.

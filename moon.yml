@@ -15,7 +15,7 @@ tasks:
     options:
       cache: false
   bootstrap:
-    script: yarn kbn bootstrap
+    script: pnpm kbn bootstrap
 
 workspace:
   inheritedTasks:

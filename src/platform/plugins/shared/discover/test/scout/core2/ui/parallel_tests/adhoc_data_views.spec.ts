@@ -202,7 +202,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
   spaceTest(
     'search results differ between original and updated runtime field definitions on dashboard',
     async ({ apiServices, discoverScoutSpace, pageObjects }) => {
-      const { discover, unifiedFieldList, dataGrid, dashboard } = pageObjects;
+      const { dataGrid, dashboard } = pageObjects;
 
       await spaceTest.step(
         'creates ad hoc data view with runtime field and saves search',
@@ -231,28 +231,36 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
             } satisfies DiscoverSessionApiDataInput,
             discoverScoutSpace.id
           );
-          await discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
-          await discover.waitUntilTabIsLoaded();
         }
       );
 
       await spaceTest.step(
-        'recreates runtime field with 2× multiplier and saves as new search',
+        'creates updated saved search with 2× runtime field via API',
         async () => {
-          await unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
-          await discover.deleteRuntimeField('_bytes-runtimefield');
-          await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-          await discover.createRuntimeField({
-            fieldName: '_bytes-runtimefield',
-            script: `emit((doc["bytes"].value * 2).toString())`,
-          });
-          await discover.waitUntilTabIsLoaded();
-          await unifiedFieldList.waitUntilSidebarHasLoaded();
-          await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
-
-          await discover.saveSearchAsNew('logst*-ss-_bytes-runtimefield-updated');
-          await discover.waitUntilTabIsLoaded();
+          await apiServices.discover.create(
+            {
+              title: 'logst*-ss-_bytes-runtimefield-updated',
+              tabs: [
+                {
+                  id: 'main',
+                  label: 'Untitled',
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logst*',
+                    time_field: '@timestamp',
+                    field_settings: {
+                      '_bytes-runtimefield': {
+                        type: 'keyword',
+                        script: 'emit((doc["bytes"].value * 2).toString())',
+                      },
+                    },
+                  },
+                  column_order: ['_bytes-runtimefield'],
+                },
+              ],
+            } satisfies DiscoverSessionApiDataInput,
+            discoverScoutSpace.id
+          );
         }
       );
 

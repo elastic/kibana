@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SyncNowLink } from './sync_now_link';
@@ -21,12 +22,10 @@ export const MwsPendingSyncCallout = ({
 }) => {
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.synthetics.maintenanceWindowCallout.pendingSync.title', {
           defaultMessage: 'Maintenance window changes pending',
         })}
-        color="warning"
-        iconType="info"
         data-test-subj="maintenanceWindowPendingSyncCallout"
       >
         <FormattedMessage
@@ -42,7 +41,7 @@ export const MwsPendingSyncCallout = ({
           />
         </EuiText>
         {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="s" />
     </>
   );

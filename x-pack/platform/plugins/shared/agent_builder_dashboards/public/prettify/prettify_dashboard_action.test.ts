@@ -49,6 +49,7 @@ const esqlLens = {
 
 const child = (usesEsql: boolean) => ({
   usesEsql$: new BehaviorSubject(usesEsql),
+  approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
 });
 
 const layoutPanel = {
