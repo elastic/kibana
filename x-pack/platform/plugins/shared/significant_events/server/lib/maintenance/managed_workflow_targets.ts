@@ -7,11 +7,9 @@
 
 import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-
-/** Global workflow sentinel (`*`) branded for SpaceId-typed maintenance targets. */
-const BRANDED_GLOBAL_WORKFLOW_SPACE_ID = brandSpaceId(GLOBAL_WORKFLOW_SPACE_ID);
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
@@ -29,6 +27,9 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+
+/** Global workflow sentinel (`*`) branded for SpaceId-typed maintenance targets. */
+const BRANDED_GLOBAL_WORKFLOW_SPACE_ID = brandSpaceId(GLOBAL_WORKFLOW_SPACE_ID);
 
 /**
  * Single source of truth for managed workflow IDs used by installers and by
@@ -55,10 +56,16 @@ export const MEMORY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 ] as const;
 
-/** Scheduled discovery workflows installed per space (`-${spaceId}` document suffix). */
-export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
+/** Scheduled discovery workflows controlled by the per-space Settings toggle. */
+export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+] as const;
+
+/** Scheduled workflows included in per-space maintenance sweeps. */
+export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
+  ...SCHEDULED_DISCOVERY_WORKFLOW_IDS,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
 ] as const;
 
 /** Workflows installed once at the global scope (`spaceId: '*'`). */

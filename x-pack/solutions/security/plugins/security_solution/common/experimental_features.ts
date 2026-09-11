@@ -89,8 +89,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
-   * it covers from the internal user to a project-routed current-user client. Off until the request
-   * user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
   defendCrossProjectSearch: false,
 
@@ -290,6 +292,12 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillRecommendPrebuiltRules: true,
 
   /**
+   * Enables the detection-coverage Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillDetectionCoverage: false,
+
+  /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
    * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
    * Turning this flag on unregisters that advanced setting, forcing the
@@ -356,7 +364,9 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Threat-intel supply pipeline (indices, ingest adapters, create
    * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
-   * off. Enable with:
+   * off. Direct index access is not yet cross-space hardened, so this must remain
+   * disabled until that isolation is implemented or the administrator trust model
+   * is explicitly accepted. Enable with:
    *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
    */
   threatIntelSupplyEnabled: false,

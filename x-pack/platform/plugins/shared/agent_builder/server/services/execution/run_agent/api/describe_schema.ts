@@ -8,7 +8,7 @@
 import { mapValues, omit } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { loadSchemaClosure } from './schema_closure';
-import { isRecord } from './types';
+import { BODY_ROOT_KEY, isRecord } from './types';
 
 // Character limit for inline definitions
 const MAX_INLINED_DEFINITION_CHARS = 1_200;
@@ -193,7 +193,7 @@ const describeAgainstClosure = ({
       return node;
     }
 
-    const siblings = mapValues(omit(node, ['$ref', ROUTING_LOCATION_KEY]), rewrite);
+    const siblings = mapValues(omit(node, ['$ref', ROUTING_LOCATION_KEY, BODY_ROOT_KEY]), rewrite);
 
     const { $ref: ref } = node;
     if (typeof ref !== 'string') {

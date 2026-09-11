@@ -84,6 +84,7 @@ export const createConnectorTypeFromSpec = (
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
         getCredential: actions.getCredential,
         getClientLeasePool: actions.getClientLeasePool,
+        getRelayClient: actions.getRelayClient,
         networkSettings,
       })
     : undefined;

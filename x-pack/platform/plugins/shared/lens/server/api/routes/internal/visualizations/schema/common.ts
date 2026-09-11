@@ -6,12 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import {
   lensCommonSavedObjectSchemaV2,
   lensItemDataSchemaV2,
   lensSavedObjectSchemaV2,
 } from '../../../../../content_management/zod';
+import { lensApiConfigLibItemSchemaNoESQL } from '../../../visualizations/schema/common';
 
 /**
  * The Lens item meta returned from the server
@@ -34,7 +34,7 @@ export const lensItemMetaSchema = lensCommonSavedObjectSchemaV2
 export const lensResponseItemSchema = z
   .object({
     id: lensSavedObjectSchemaV2.shape.id,
-    data: z.union([lensApiConfigSchema, lensItemDataSchemaV2]),
+    data: z.union([lensApiConfigLibItemSchemaNoESQL, lensItemDataSchemaV2]),
     meta: lensItemMetaSchema,
   })
   .strict()

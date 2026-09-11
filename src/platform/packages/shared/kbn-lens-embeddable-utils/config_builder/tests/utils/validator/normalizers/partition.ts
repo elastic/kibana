@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only partition (`lnsPie` / treemap / mosaic / waffle) attribute normalizer for
+ * strict SO ↔ API round-trip checks.
+ */
+
 import {
   PARTITION_EMPTY_SIZE_RADIUS,
   type LensPartitionVisualizationState,

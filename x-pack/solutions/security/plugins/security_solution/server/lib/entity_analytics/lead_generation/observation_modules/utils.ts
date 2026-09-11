@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EntityField } from '@kbn/entity-store/common/domain/definitions/entity.gen';
+import type { z } from '@kbn/zod/v4';
+import { Asset, EntityField } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 import type { LeadEntity, Observation } from '../types';
 
 /**
@@ -43,12 +44,8 @@ export const matchesPrivilegedWatchlist = (watchlists: unknown): boolean => {
 };
 
 /** Returns true if the entity is on a privileged-user monitoring watchlist. */
-export const extractIsPrivileged = (entity: LeadEntity): boolean => {
-  const attrs = getEntityField(entity)?.attributes as
-    | { watchlists?: unknown; privileged?: unknown }
-    | undefined;
-  return matchesPrivilegedWatchlist(attrs?.watchlists) || attrs?.privileged === true;
-};
+export const extractIsPrivileged = (entity: LeadEntity): boolean =>
+  matchesPrivilegedWatchlist(getEntityAttributes(entity)?.watchlists);
 
 /** High-impact asset criticality tiers (see `AssetCriticalityLevel`). */
 const HIGH_CRITICALITY_LEVELS: ReadonlySet<string> = new Set(['high_impact', 'extreme_impact']);
@@ -57,11 +54,11 @@ const HIGH_CRITICALITY_LEVELS: ReadonlySet<string> = new Set(['high_impact', 'ex
  * Reads `asset.criticality` from the entity record root (it lives at the record
  * top level, not under the `entity` namespace). Returns `undefined` when absent.
  */
+const AssetCriticalitySchema = Asset.pick({ criticality: true }).strip();
 export const getAssetCriticality = (entity: LeadEntity): string | undefined => {
-  const asset = (entity.record as Record<string, unknown>).asset as
-    | { criticality?: unknown }
-    | undefined;
-  const criticality = asset?.criticality;
+  const parsed = AssetCriticalitySchema.safeParse((entity.record as Record<string, unknown>).asset);
+  if (!parsed.success) return;
+  const { criticality } = parsed.data;
   return typeof criticality === 'string' ? criticality : undefined;
 };
 
@@ -85,6 +82,31 @@ export const getEntityRisk = (entity: LeadEntity) => {
     calculatedLevel: parsed.data.calculated_level,
     calculatedScoreNorm: parsed.data.calculated_score_norm,
   };
+};
+
+const EntityAttributesSchema = EntityField.shape.attributes
+  .unwrap()
+  .pick({
+    managed: true,
+    mfa_enabled: true,
+    watchlists: true,
+  })
+  .strip();
+export type EntityAttributes = z.infer<typeof EntityAttributesSchema>;
+export const getEntityAttributes = (entity: LeadEntity): EntityAttributes | undefined => {
+  const parsed = EntityAttributesSchema.safeParse(getEntityField(entity)?.attributes);
+  if (!parsed.success) return;
+  return parsed.data;
+};
+
+const EntityLifecycleSchema = EntityField.shape.lifecycle
+  .unwrap()
+  .pick({ first_seen: true, last_seen: true })
+  .strip();
+export const getEntityLifecycle = (entity: LeadEntity) => {
+  const parsed = EntityLifecycleSchema.safeParse(getEntityField(entity)?.lifecycle);
+  if (!parsed.success) return;
+  return parsed.data;
 };
 
 /** Capitalises the entity type for use in human-readable descriptions (e.g. "host" → "Host"). */

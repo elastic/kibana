@@ -34,7 +34,6 @@ describe('bulkGet', () => {
           {
             savedObjectIds: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'),
             caseID: '123',
-            mode: 'legacy',
           },
           clientArgs,
           casesClient
@@ -46,7 +45,7 @@ describe('bulkGet', () => {
 
     it('throws when trying to fetch zero attachments', async () => {
       await expect(
-        bulkGet({ savedObjectIds: [], caseID: '123', mode: 'legacy' }, clientArgs, casesClient)
+        bulkGet({ savedObjectIds: [], caseID: '123' }, clientArgs, casesClient)
       ).rejects.toThrow(
         'Error: The length of the field ids is too short. Array must be of length >= 1.'
       );
@@ -70,7 +69,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1' },
         clientArgs,
         casesClient
       );
@@ -105,7 +104,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1' },
         clientArgs,
         casesClient
       );
@@ -122,7 +121,7 @@ describe('bulkGet', () => {
     });
   });
 
-  describe('unified mode', () => {
+  describe('returns unified attachments', () => {
     const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
 
@@ -137,17 +136,16 @@ describe('bulkGet', () => {
       });
     });
 
-    it('uses unified mode and returns attachments', async () => {
+    it('returns unified attachments', async () => {
       const res = await bulkGet(
-        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'unified' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1' },
         clientArgs,
         casesClient
       );
 
-      expect(clientArgs.services.attachmentService.getter.bulkGet).toHaveBeenCalledWith(
-        ['my-case-1'],
-        'unified'
-      );
+      expect(clientArgs.services.attachmentService.getter.bulkGet).toHaveBeenCalledWith([
+        'my-case-1',
+      ]);
       expect(res.attachments[0]).toEqual(
         expect.objectContaining({
           id: unifiedAttachmentSO.id,
