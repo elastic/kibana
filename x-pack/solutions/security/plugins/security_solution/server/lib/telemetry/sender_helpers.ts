@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios from 'axios';
-
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import type { RawAxiosRequestHeaders } from 'axios';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
 import type {
@@ -23,7 +20,7 @@ export interface SenderMetadata {
   telemetryUrl: string;
   licenseInfo: Nullable<ESLicense>;
   clusterInfo: Nullable<ESClusterInfo>;
-  telemetryRequestHeaders: () => RawAxiosRequestHeaders;
+  telemetryRequestHeaders: () => Record<string, string>;
   isTelemetryOptedIn(): Promise<boolean>;
   isTelemetryServicesReachable(): Promise<boolean>;
 }
@@ -74,8 +71,28 @@ export class SenderUtils {
 
         try {
           const telemetryPingUrl = await this.fetchTelemetryPingUrl();
-          const resp = await axios.get(telemetryPingUrl, { timeout: 3000 });
-          if (resp.status === 200) {
+          const requestUrl = new URL(telemetryPingUrl);
+          const { username, password } = requestUrl;
+          requestUrl.username = '';
+          requestUrl.password = '';
+          const headers = new Headers();
+          if ((username || password) && !headers.has('authorization')) {
+            const credentials = `${decodeURIComponent(username)}:${decodeURIComponent(password)}`;
+            headers.set('authorization', `Basic ${Buffer.from(credentials).toString('base64')}`);
+          }
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 3000);
+          let response: Response;
+          try {
+            response = await fetch(requestUrl, { headers, signal: controller.signal });
+            await response.arrayBuffer();
+          } finally {
+            clearTimeout(timeout);
+          }
+          if (!response.ok) {
+            throw new Error(`Request failed with status code ${response.status}`);
+          }
+          if (response.status === 200) {
             return true;
           }
 
