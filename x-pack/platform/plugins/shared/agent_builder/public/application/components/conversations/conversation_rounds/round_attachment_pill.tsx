@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { ATTACHMENT_PILL_WIDTH } from '../conversation_input/image_upload_styles';
 
 const MAX_PILL_WIDTH = 320;
 const DEFAULT_ICON = 'document';
@@ -44,24 +45,55 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   const versionData = getVersion(attachment, version);
-  const versionTitle = versionData
-    ? uiDefinition?.getLabel({
+  const attachmentForUi = versionData
+    ? {
         id: attachment.id,
         type: attachment.type,
         data: versionData.data,
-
         ...(attachment.description !== undefined ? { description: attachment.description } : {}),
-      })
+      }
     : undefined;
 
+  const versionTitle = attachmentForUi ? uiDefinition?.getLabel(attachmentForUi) : undefined;
   const fallbackTitle = attachment.description || attachment.type;
   const title = versionTitle || fallbackTitle;
+
+  const thumbnailUrl = attachmentForUi ? uiDefinition?.getThumbnail?.(attachmentForUi) : undefined;
 
   const pillStyles = css`
     padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
     border-radius: ${euiTheme.border.radius.small};
     max-inline-size: ${MAX_PILL_WIDTH}px;
   `;
+
+  const thumbnailContainerStyles = css`
+    width: ${ATTACHMENT_PILL_WIDTH}px;
+    height: ${euiTheme.size.xl};
+    border-radius: ${euiTheme.border.radius.small};
+    overflow: hidden;
+    flex-shrink: 0;
+  `;
+
+  const thumbnailImageStyles = css`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  `;
+
+  if (thumbnailUrl) {
+    return (
+      <EuiToolTip content={title} position="top">
+        <div
+          css={thumbnailContainerStyles}
+          tabIndex={0}
+          data-test-subj="agentBuilderRoundAttachmentReferencePill"
+        >
+          <img src={thumbnailUrl} alt={title} css={thumbnailImageStyles} />
+        </div>
+      </EuiToolTip>
+    );
+  }
 
   return (
     <EuiToolTip content={title} position="top">

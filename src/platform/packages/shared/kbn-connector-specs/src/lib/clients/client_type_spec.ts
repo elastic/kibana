@@ -16,13 +16,16 @@ export interface ConnectorResponseSettings {
 }
 
 /**
- * The Kibana `xpack.actions.*` outbound-network settings, handed to a client type unchanged.
+ * Global / shared Kibana `xpack.actions.*` outbound-network settings, handed to a client type
+ * unchanged.
  *
- * These are the same settings the axios path applies via `get_axios_instance`. The framework only
- * makes them reachable; each client type is responsible for applying them through its own
- * library's native options. The two `ensure*` methods are
- * the exception: they are checks rather than values, because the `allowedHosts` matching logic
- * lives in the Actions plugin and cannot be re-implemented in this package.
+ * These are the same settings the axios path applies via `get_axios_instance`. They are for
+ * cluster-wide Actions policy only (allowlist, proxy, TLS, response limits). Do not extend this
+ * surface with client-specific knobs — those belong on connector `config` / secrets, or closed
+ * over in the client type. The framework only makes these settings reachable; each client type
+ * is responsible for applying them through its own library's native options. The two `ensure*`
+ * methods are the exception: they are checks rather than values, because the `allowedHosts`
+ * matching logic lives in the Actions plugin and cannot be re-implemented in this package.
  */
 export interface ConnectorNetworkSettings {
   /** Throws AllowlistDeniedError if the URL is not on xpack.actions.allowedHosts. */

@@ -32,6 +32,7 @@ export interface CustomContentComponentProps {
   /** Whether the host can hand an empty panel over to the agent. Drives the empty prompt's copy. */
   isAiAvailable?: boolean;
   onLoadingChange: (isLoading: boolean) => void;
+  setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
   onGenerateWithChat?: () => void;
 }
 
@@ -69,6 +70,7 @@ export const CustomContentComponent = ({
   previewHtml,
   isAiAvailable = false,
   onLoadingChange,
+  setApproximationApplied,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -86,6 +88,7 @@ export const CustomContentComponent = ({
     query,
     filters,
     esqlVariables,
+    setApproximationApplied,
   });
 
   useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
@@ -104,7 +107,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss} data-shared-item>
+    <div css={wrapperCss} data-shared-item data-test-subj="customContentPanel">
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {
