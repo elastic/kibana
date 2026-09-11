@@ -656,7 +656,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(query).not.toContain('rule_id IN (');
   });
 
-  it('combines internal and external branches with OR, distributing group_hash into each', () => {
+  it('combines internal and external branches with OR, keeping each kind group_hash scoped to its branch', () => {
     const episodes = [
       createAlertEpisode({ source: 'internal', rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlertEpisode({
@@ -670,13 +670,13 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
 
     const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
 
-    expect(query).toContain('rule_id IN ("rule-1")');
+    expect(query).toContain('(group_hash IN ("hash-1")) AND (rule_id IN ("rule-1"))');
     expect(query).toContain('space_id IN ("space-a")');
     expect(query).toContain('source IN ("pagerduty")');
-    // group_hash is repeated in the external branch (after OR) so precedence keeps it applied to
-    // external docs even though the builder strips grouping parentheses.
-    expect(query).toContain('OR (group_hash IN ("hash-1", "hash-pd"))');
-    // Two group_hash IN clauses: one per branch.
+    // The external branch carries only its own kind hashes, so an internal hash can't admit
+    // external docs (and vice versa) even though the builder strips grouping parentheses.
+    expect(query).toContain('OR (group_hash IN ("hash-pd"))');
+    // Two group_hash IN clauses: one per branch, each scoped to that kind.
     expect(query.match(/group_hash IN \(/g)).toHaveLength(2);
   });
 

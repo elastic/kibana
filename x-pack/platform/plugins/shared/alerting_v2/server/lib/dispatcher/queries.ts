@@ -141,8 +141,14 @@ const buildSuppressionsPreFilter = (
     return entry ? [entry] : [];
   });
 
+  const internalGroupHashes = toUniqueString(
+    components.flatMap((c) => (c.kind === 'internal' ? [c.groupHash] : []))
+  );
   const ruleIds = toUniqueString(
     components.flatMap((c) => (c.kind === 'internal' ? [c.ruleId] : []))
+  );
+  const externalGroupHashes = toUniqueString(
+    components.flatMap((c) => (c.kind === 'external' ? [c.groupHash] : []))
   );
   const spaceIds = toUniqueString(
     components.flatMap((c) => (c.kind === 'external' ? [c.spaceId] : []))
@@ -151,15 +157,20 @@ const buildSuppressionsPreFilter = (
     components.flatMap((c) => (c.kind === 'external' ? [c.source] : []))
   );
 
-  const groupHash = esql.exp`group_hash IN (${toUniqueString(components.map((c) => c.groupHash))})`;
-  const internal = ruleIds.length ? esql.exp`${groupHash} AND rule_id IN (${ruleIds})` : undefined;
+  const internal = ruleIds.length
+    ? esql.exp`group_hash IN (${internalGroupHashes}) AND rule_id IN (${ruleIds})`
+    : undefined;
   const external = sources.length
-    ? esql.exp`${groupHash} AND space_id IN (${spaceIds}) AND source IN (${sources})`
+    ? esql.exp`group_hash IN (${externalGroupHashes}) AND space_id IN (${spaceIds}) AND source IN (${sources})`
     : undefined;
 
   if (internal && external) return esql.exp`${internal} OR ${external}`;
   // groupHash is only reached for an empty chunk; single-kind chunks return internal/external.
-  return internal ?? external ?? groupHash;
+  return (
+    internal ??
+    external ??
+    esql.exp`group_hash IN (${toUniqueString(components.map((c) => c.groupHash))})`
+  );
 };
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
@@ -215,11 +226,11 @@ export const getAlertEpisodeSuppressionsQueries = (
 
       return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
         | WHERE ${preFilter}
+        | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
         | EVAL ${SUBJECT_EVAL}
         | WHERE subject IS NOT NULL
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
-        | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
         | EVAL _snooze_action = CASE(
             action_type == "unsnooze", "unsnooze",
             action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
