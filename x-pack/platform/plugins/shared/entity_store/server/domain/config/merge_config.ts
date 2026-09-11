@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import type { LogExtractionConfig, LogExtractionTypeOverride } from '../saved_objects';
 import {
   LATEST_LOG_EXTRACTION_DEFAULTS,

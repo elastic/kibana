@@ -62,7 +62,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           assetManager,
           req,
           res,
-          logExtraction?.additionalIndexPatterns
+          logExtraction?.additionalIndexPatterns ?? undefined
         );
         if (forbidden) return forbidden;
         const { engines } = await assetManager.getStatus();
