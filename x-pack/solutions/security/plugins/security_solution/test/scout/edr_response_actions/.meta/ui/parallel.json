@@ -1,0 +1,51 @@
+{
+  "sha1": "0d240782fe64da0a20bcb8a3821a1a31ab11fbdc",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "09db0f9b251af6a-62e78b299821a45",
+      "title": "Global setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "cd5149de2565f1d-304c5df0555dbdc",
+      "title": "Automated response actions form RBAC rule_author cannot add an Elastic Defend response action while creating a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
+        "line": 20,
+        "column": 34
+      }
+    },
+    {
+      "id": "cd5149de2565f1d-8339d1821f3d70f",
+      "title": "Automated response actions form RBAC rule_author cannot edit or remove existing Elastic Defend response actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
+        "line": 30,
+        "column": 15
+      }
+    }
+  ]
+}
