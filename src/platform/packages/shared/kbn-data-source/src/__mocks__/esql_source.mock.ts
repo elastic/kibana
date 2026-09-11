@@ -15,26 +15,27 @@ type LooseColumn = Omit<Column, 'type'> & { type: string };
 
 export const createMockEsqlSource = (
   columns: LooseColumn[] = [],
-  resultColumns: DatatableColumn[] = []
+  resultColumns: DatatableColumn[] = [],
+  timeFieldName?: string
 ): EsqlSource => {
   const mock: EsqlSource = {
     kind: 'esql',
     id: 'mock-esql-source',
     title: 'mock',
     name: 'mock',
-    timeFieldName: undefined,
+    timeFieldName,
     references: [],
     fields: [],
     resultColumns,
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
-    isTimeBased: () => false,
+    isTimeBased: () => !!timeFieldName,
     isPersisted: () => false,
     serialize: () => ({
       kind: 'esql',
       id: 'mock-esql-source',
       title: 'mock',
-      timeFieldName: undefined,
+      timeFieldName,
       references: [],
     }),
   } as unknown as EsqlSource;

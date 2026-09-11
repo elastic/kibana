@@ -12,6 +12,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { EsqlSource } from './sources/esql_source';
+import { columnToFieldBase } from './to_column';
 import type { Column } from './types';
 
 /**
@@ -27,7 +28,7 @@ export async function registerEsqlSourceInDataViewsCache(
   source: EsqlSource
 ): Promise<DataView> {
   dataViews.clearInstanceCache(source.id);
-  return dataViews.create(
+  const dataView = await dataViews.create(
     {
       id: source.id,
       title: source.title,
@@ -37,6 +38,7 @@ export async function registerEsqlSourceInDataViewsCache(
     },
     true // skipFetchFields — never call _field_caps for ES|QL adapter DVs
   );
+  return dataView;
 }
 
 export function unregisterFromDataViewsCache(
@@ -50,15 +52,13 @@ function makeFieldsSpec(columns: readonly Column[], timeFieldName?: string) {
   const spec = Object.fromEntries(
     columns.map((col) => [
       col.name,
-      {
-        name: col.name,
-        type: col.type,
-        esTypes: col.esType ? [col.esType] : undefined,
-        searchable: true,
-        aggregatable: true,
-      },
+      { ...columnToFieldBase(col), searchable: true, aggregatable: true },
     ])
   );
+  // TODO: Remove once Discover's Redux state holds EsqlSource directly instead of a DataView shim.
+  // DataView.isTimeBased() requires the time field to exist in the fields list
+  // (not just timeFieldName being set on the spec). On first load resultColumns is empty,
+  // so we inject a minimal entry to satisfy that check and enable the timepicker.
   if (timeFieldName && !spec[timeFieldName]) {
     spec[timeFieldName] = {
       name: timeFieldName,

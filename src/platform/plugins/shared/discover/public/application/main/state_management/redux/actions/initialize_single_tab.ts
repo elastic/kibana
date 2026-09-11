@@ -14,7 +14,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
-import { resolveEsqlTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -191,7 +191,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       const esqlSource = await EsqlSource.create({
         query: initialQuery.esql,
         resultColumns: [],
-        timeFieldName: await resolveEsqlTimeField({
+        timeFieldName: await getESQLTimeField({
           query: initialQuery.esql,
           http: services.http,
           projectRouting,

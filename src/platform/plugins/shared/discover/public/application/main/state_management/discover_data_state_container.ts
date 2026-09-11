@@ -38,7 +38,7 @@ import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
   getESQLStatsQueryMeta,
   getProjectRoutingFromEsqlQuery,
-  resolveEsqlTimeField,
+  getESQLTimeField,
 } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
@@ -625,7 +625,7 @@ export function getDataStateContainer({
       const nextSource = await EsqlSource.create({
         query: query.esql,
         resultColumns: currentSource?.resultColumns ?? [],
-        timeFieldName: await resolveEsqlTimeField({
+        timeFieldName: await getESQLTimeField({
           query: query.esql,
           http: services.http,
           projectRouting,
