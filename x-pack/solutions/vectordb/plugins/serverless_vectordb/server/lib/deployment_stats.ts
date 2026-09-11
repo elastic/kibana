@@ -240,7 +240,8 @@ export const fetchNewIndex = async (
 export const fetchIndexStats = async (
   client: IScopedClusterClient,
   logger: Logger,
-  { canMonitorAllIndices, canMonitorCluster }: MonitorPrivileges
+  { canMonitorAllIndices, canMonitorCluster }: MonitorPrivileges,
+  vectorCountEnabled = VECTOR_COUNT_ENABLED
 ): Promise<IndexStats> => {
   try {
     const meteredIndices = await fetchMeteredIndices(client).catch((error) => {
@@ -257,7 +258,7 @@ export const fetchIndexStats = async (
         0
       ) ?? null;
 
-    const shouldFetchVectorCount = VECTOR_COUNT_ENABLED && canMonitorAllIndices;
+    const shouldFetchVectorCount = vectorCountEnabled && canMonitorAllIndices;
 
     if (indicesCount === 0) {
       return {

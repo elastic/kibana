@@ -223,13 +223,20 @@ describe('fetchIndexStats', () => {
     } as any);
   };
 
-  // both privileges default to granted; individual tests drop the one they are exercising
-  const getIndexStats = (privileges: Partial<MonitorPrivileges> = {}) =>
-    fetchIndexStats(client, logger, {
-      canMonitorAllIndices: true,
-      canMonitorCluster: true,
-      ...privileges,
-    });
+  // both privileges default to granted; individual tests drop the one they are exercising.
+  // vectorCountEnabled defaults to false (matches the current constant) — pass true to exercise
+  // the canMonitorAllIndices guard independently of the flag.
+  const getIndexStats = (privileges: Partial<MonitorPrivileges> = {}, vectorCountEnabled = false) =>
+    fetchIndexStats(
+      client,
+      logger,
+      {
+        canMonitorAllIndices: true,
+        canMonitorCluster: true,
+        ...privileges,
+      },
+      vectorCountEnabled
+    );
 
   // metering takes no index pattern, so it is the one source that reports on system indices
   it('excludes dot-prefixed indices and aggregates count/size', async () => {
@@ -278,7 +285,8 @@ describe('fetchIndexStats', () => {
     mockMetering([{ name: 'vectordb', num_docs: 20, size_in_bytes: 500 }]);
     mockDocumentCount(20);
 
-    const result = await getIndexStats({ canMonitorAllIndices: false });
+    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
 
     // the scoped counts still resolve; only the cluster-wide vector total is withheld
     expect(result).toEqual({
@@ -309,7 +317,8 @@ describe('fetchIndexStats', () => {
     mockCatIndices([{ index: 'vectordb', 'creation.date': String(Date.now() - 60_000) }]);
     mockDocumentCount(20);
 
-    const result = await getIndexStats({ canMonitorAllIndices: false });
+    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
 
     expect(result.newIndex).toEqual(expect.objectContaining({ indexName: 'vectordb' }));
     // the cluster-wide vector total is still withheld from a caller without index monitor on *
@@ -318,7 +327,8 @@ describe('fetchIndexStats', () => {
   });
 
   it('reports a null vectorCount for an unprivileged caller with an empty deployment', async () => {
-    const result = await getIndexStats({ canMonitorAllIndices: false });
+    // pass true so the canMonitorAllIndices guard is exercised independently of the feature flag
+    const result = await getIndexStats({ canMonitorAllIndices: false }, true);
 
     // 0 would imply "no vectors"; the caller simply isn't allowed to know
     expect(result.vectorCount).toBeNull();
