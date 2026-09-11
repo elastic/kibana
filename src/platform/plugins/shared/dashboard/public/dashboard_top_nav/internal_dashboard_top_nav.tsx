@@ -38,7 +38,12 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
+import type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderExperimentalDashboardAiAction,
+  AppHeaderShareAction,
+} from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
@@ -69,6 +74,7 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -89,6 +95,7 @@ interface DashboardChromeNextHeaderProps {
   dashboardId?: string;
   viewMode: string;
   share?: AppHeaderShareAction;
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
 }
 
 /**
@@ -103,6 +110,7 @@ const DashboardChromeNextHeader = ({
   dashboardId,
   viewMode,
   share,
+  experimentalDashboardAiAction,
 }: DashboardChromeNextHeaderProps) => {
   const favorite = useFavorite({ id: dashboardId });
 
@@ -119,6 +127,7 @@ const DashboardChromeNextHeader = ({
         badges={badges}
         favorite={favorite}
         share={share}
+        experimentalDashboardAiAction={experimentalDashboardAiAction}
         spacing="compact"
       />
     );
@@ -131,6 +140,7 @@ const DashboardChromeNextHeader = ({
       badges={badges}
       favorite={favorite}
       share={share}
+      experimentalDashboardAiAction={experimentalDashboardAiAction}
       spacing="compact"
     />
   );
@@ -387,6 +397,18 @@ export function InternalDashboardTopNav({
   }, [visibilityProps.showDatePicker, allDataViews]);
 
   const shareAction = useDashboardShareAction({ redirectTo });
+  const prettifyAction = usePrettifyDashboardAction(dashboardApi);
+  const experimentalDashboardAiAction = useMemo(
+    () =>
+      viewMode === 'edit' && prettifyAction
+        ? {
+            onClick: () => {
+              void prettifyAction.execute();
+            },
+          }
+        : undefined,
+    [viewMode, prettifyAction]
+  );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
@@ -495,11 +517,17 @@ export function InternalDashboardTopNav({
             dashboardId={lastSavedId}
             viewMode={viewMode}
             share={shareAction}
+            experimentalDashboardAiAction={experimentalDashboardAiAction}
           />
         </DashboardFavoritesProvider>
       )}
       {headerMode === 'legacy' && (
-        <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />
+        <LegacyDashboardHeader
+          badges={badges}
+          config={appMenuConfig}
+          lastSavedId={lastSavedId}
+          enhanceAction={experimentalDashboardAiAction}
+        />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar

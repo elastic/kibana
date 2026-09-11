@@ -6,7 +6,6 @@
  */
 
 import {
-  IMPACTED_SERVICES_QUERY_PARAM,
   buildNightshiftEventFlyoutShareUrl,
   clearNightshiftEventIdParam,
   getNightshiftEventIdFromSearch,
@@ -16,14 +15,10 @@ import {
 
 describe('url_params', () => {
   it('builds a share URL with the eventId query param', () => {
-    window.history.pushState(
-      {},
-      '',
-      `/app/observability/nightshift?${IMPACTED_SERVICES_QUERY_PARAM}=logs.web`
-    );
+    window.history.pushState({}, '', '/app/observability/nightshift?filter=logs.web');
 
     expect(buildNightshiftEventFlyoutShareUrl('evt-001')).toBe(
-      `${window.location.origin}/app/observability/nightshift?${IMPACTED_SERVICES_QUERY_PARAM}=logs.web&${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001`
+      `${window.location.origin}/app/observability/nightshift?filter=logs.web&${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001`
     );
   });
 
@@ -31,11 +26,11 @@ describe('url_params', () => {
     window.history.pushState(
       {},
       '',
-      `/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=old-id&${IMPACTED_SERVICES_QUERY_PARAM}=logs.web`
+      `/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=old-id&filter=logs.web`
     );
 
     expect(buildNightshiftEventFlyoutShareUrl('evt-001')).toBe(
-      `${window.location.origin}/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001&${IMPACTED_SERVICES_QUERY_PARAM}=logs.web`
+      `${window.location.origin}/app/observability/nightshift?${NIGHTSHIFT_EVENT_ID_QUERY_PARAM}=evt-001&filter=logs.web`
     );
   });
 

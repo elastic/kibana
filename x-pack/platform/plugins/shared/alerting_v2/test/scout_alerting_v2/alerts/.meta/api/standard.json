@@ -1,5 +1,5 @@
 {
-  "sha1": "64375c17ce81b40ab2b88b4d99d552d4b9240c23",
+  "sha1": "7d01c1a812eab777008d2bf3bb3eadc0b5ec228a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1838,8 +1838,8 @@
       }
     },
     {
-      "id": "74db6b831103216-9cb88b5e27c3281",
-      "title": "Suggest user profiles API validation: rejects a body without a name",
+      "id": "74db6b831103216-963e5c02016237e",
+      "title": "Suggest user profiles API returns an unfiltered list when the body has no name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1851,16 +1851,16 @@
       }
     },
     {
-      "id": "74db6b831103216-34fd4c73c6c4fca",
-      "title": "Suggest user profiles API validation: rejects an empty name",
+      "id": "74db6b831103216-c52e7158aaff388",
+      "title": "Suggest user profiles API returns an unfiltered list when the name is empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 88,
-        "column": 11
+        "line": 99,
+        "column": 76
       }
     },
     {
@@ -1872,8 +1872,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 96,
-        "column": 12
+        "line": 106,
+        "column": 69
       }
     },
     {
@@ -1885,8 +1885,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 100,
-        "column": 83
+        "line": 112,
+        "column": 18
       }
     },
     {
@@ -1898,8 +1898,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 107,
-        "column": 63
+        "line": 118,
+        "column": 12
       }
     },
     {
@@ -1911,8 +1911,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 114,
-        "column": 22
+        "line": 127,
+        "column": 6
       }
     },
     {
@@ -1924,8 +1924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 124,
-        "column": 89
+        "line": 136,
+        "column": 29
       }
     },
     {
@@ -1937,8 +1937,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 144,
+        "column": 11
       }
     },
     {
@@ -1950,8 +1950,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 144,
-        "column": 5
+        "line": 155,
+        "column": 61
       }
     },
     {
@@ -1963,8 +1963,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 158,
-        "column": 5
+        "line": 168,
+        "column": 30
       }
     }
   ]
