@@ -65,3 +65,5 @@ reselect-v4
 @swc/plugin-emotion
 graphql
 @cfworker/json-schema
+@jridgewell/remapping
+magic-string
