@@ -16,7 +16,6 @@ import {
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
-import type { ChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
@@ -107,7 +106,7 @@ export const getConverseHelpers = ({
     executionService,
     executionOptions,
   }: {
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
+    payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
     executionOptions?: ResolvedExecutionOptions;
