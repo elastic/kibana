@@ -8,10 +8,10 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
- * Details for a single AI index, sourced from the Context Engine registry.
+ * Details for a single AI Index, sourced from the Context Engine registry.
  */
 export interface AiIndexDetail {
-  /** Registry id of the AI index (the value stored in agent `ai_indices` config). */
+  /** Registry id of the AI Index (the value stored in agent `ai_indices` config). */
   id: string;
   /** May be a concrete index name, a pattern, or a comma-separated list. */
   esqlTarget: string;
@@ -19,7 +19,7 @@ export interface AiIndexDetail {
 }
 
 /**
- * Resolves AI index ids to details for the requesting user. Must omit ids the caller may not see
+ * Resolves AI Index ids to details for the requesting user. Must omit ids the caller may not see
  * or cannot read in the request space. Callers gate on whether Context Engine is enabled.
  */
 export type AiIndexResolver = (params: {

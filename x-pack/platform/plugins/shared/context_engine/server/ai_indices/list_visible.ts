@@ -65,7 +65,7 @@ const failureReason = (item: MsearchResponseItem): string | undefined => {
   return undefined;
 };
 
-/** One `msearch` as the caller, two probes per AI index: any docs, and any visible in `spaceId`. */
+/** One `msearch` as the caller, two probes per AI Index: any docs, and any visible in `spaceId`. */
 export const resolveAiIndexVisibility = async ({
   esClient,
   aiIndices,

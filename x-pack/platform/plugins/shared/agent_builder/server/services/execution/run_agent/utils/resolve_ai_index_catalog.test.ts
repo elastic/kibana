@@ -14,11 +14,11 @@ import { resolveAiIndexCatalog } from './resolve_ai_index_catalog';
 const request = {} as KibanaRequest;
 
 describe('resolveAiIndexCatalog', () => {
-  it('returns an empty catalog for an agent with no AI indices', async () => {
+  it('returns an empty catalog for an agent with no AI Indices', async () => {
     expect(await resolveAiIndexCatalog({ aiIndices: [], request })).toEqual([]);
   });
 
-  it('describes default AI indices from the static map when no resolver is registered', async () => {
+  it('describes default AI Indices from the static map when no resolver is registered', async () => {
     const catalog = await resolveAiIndexCatalog({
       aiIndices: [agentBuilderDefaultAiIndexId],
       request,
@@ -32,7 +32,7 @@ describe('resolveAiIndexCatalog', () => {
     });
   });
 
-  it('describes custom AI indices through the resolver', async () => {
+  it('describes custom AI Indices through the resolver', async () => {
     const resolver = jest
       .fn()
       .mockResolvedValue([
@@ -94,7 +94,7 @@ describe('resolveAiIndexCatalog', () => {
     });
   });
 
-  it('does not call the resolver for an agent with no AI indices', async () => {
+  it('does not call the resolver for an agent with no AI Indices', async () => {
     const resolver = jest.fn();
 
     expect(await resolveAiIndexCatalog({ aiIndices: [], request, resolver })).toEqual([]);
@@ -125,7 +125,7 @@ describe('resolveAiIndexCatalog', () => {
     ]);
   });
 
-  it('does not treat inherited object members as default AI indices', async () => {
+  it('does not treat inherited object members as default AI Indices', async () => {
     const resolver = jest.fn().mockResolvedValue([]);
 
     const catalog = await resolveAiIndexCatalog({

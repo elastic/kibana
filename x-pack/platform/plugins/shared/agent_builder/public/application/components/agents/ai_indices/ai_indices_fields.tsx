@@ -53,9 +53,9 @@ export const useAiIndices = (agentId?: string) => {
 
 export interface AiIndicesFieldsProps {
   aiIndices: Array<Pick<AiIndexHttpItem, 'id' | 'description'>>;
-  /** AI indices assigned to the agent itself: editable, and the only ones a change writes back. */
+  /** AI Indices assigned to the agent itself: editable, and the only ones a change writes back. */
   assignedIds: string[];
-  /** AI indices contributed by the agent's type. They always apply and cannot be removed here. */
+  /** AI Indices contributed by the agent's type. They always apply and cannot be removed here. */
   inheritedIds: string[];
   warnings?: AgentAiIndicesWarning[];
   isLoading: boolean;

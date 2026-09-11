@@ -14,7 +14,7 @@ export interface DefaultAiIndex {
 }
 
 /**
- * The AI indices every chat agent gets by default, keyed by Context Engine id.
+ * The AI Indices every chat agent gets by default, keyed by Context Engine id.
  *
  * Chat agent base configuration derives from these keys. Prompt catalog resolves defaults through
  * Context Engine like any other id; these values are only a fallback when no resolver is available.

@@ -28,7 +28,7 @@ export interface AiIndexDataReadServiceApi {
   /** Throws `AiIndexNotFoundError` for an unknown id. */
   describe(id: string): Promise<DescribeAiIndexResponse>;
   /**
-   * The AI indices the caller can use in this space: those that are empty, or hold at least one
+   * The AI Indices the caller can use in this space: those that are empty, or hold at least one
    * document the caller can see here. Left out when the caller cannot read the backing index,
    * when every document belongs to another space, or when the check itself failed. `ids` limits
    * which registry entries are checked.
