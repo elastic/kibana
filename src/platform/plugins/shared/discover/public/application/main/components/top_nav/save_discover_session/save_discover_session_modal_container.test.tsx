@@ -31,6 +31,7 @@ import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 jest.mock('./discover_session_save_dashboard_modal', () => ({
   DiscoverSessionSaveDashboardModal: jest.fn(() => null),
@@ -367,6 +368,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: dataViewMock.id },
           },
         }),
+        tabType: undefined,
       });
 
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -378,6 +380,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: dataViewMockWithTimeField.id },
           },
         }),
+        tabType: undefined,
       });
 
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -389,6 +392,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: { title: 'adhoc' } },
           },
         }),
+        tabType: undefined,
       });
 
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -403,6 +407,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
             timeRestore: true,
           },
         }),
+        tabType: undefined,
       });
 
       it("should set isTimeBased to false if no tab's data view is time based", async () => {
@@ -454,12 +459,14 @@ describe('DiscoverSessionSaveModalContainer', () => {
         currentDataView: dataViewMock,
         services,
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
+        tabType: undefined,
       });
 
       const timeRestoreTab = fromTabStateToSavedObjectTab({
         currentDataView: dataViewMock,
         services,
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
+        tabType: undefined,
       });
 
       let { modalProps } = await setup({
@@ -648,6 +655,40 @@ describe('DiscoverSessionSaveModalContainer', () => {
         savedSearchId: 'new-session',
         tab: {
           id: toolkit.getCurrentTab().id,
+        },
+      });
+    });
+
+    it('should include the resolved profile state when navigating to a newly saved session', async () => {
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { modalProps, toolkit } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+      const tabId = toolkit.getCurrentTab().id;
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: { ...TEST_PROFILE_STATE_DEF.defaultState, urlValue: 'picked-value' },
+        })
+      );
+
+      await act(async () => {
+        await modalProps?.onSave(getOnSaveProps());
+      });
+
+      expect(navigateSpy).toHaveBeenCalledWith({
+        savedSearchId: 'new-session',
+        tab: { id: tabId },
+        profileState: {
+          testProfileState: {
+            persistentValue: TEST_PROFILE_STATE_DEF.defaultState.persistentValue,
+            urlValue: 'picked-value',
+          },
         },
       });
     });

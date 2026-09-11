@@ -117,8 +117,11 @@ export interface EndpointAppContextServiceStartContract {
   clusterClient: IClusterClient;
   /** Used to build the project-routed search client that CPS search strategies fan out on */
   dataStart: DataPluginStart;
-  /** CPS enabled on the deployment AND the `defendCrossProjectSearch` flag on */
-  cpsEnabled: boolean;
+  /**
+   * Resolves whether THIS request can fan out: deployment capability AND the
+   * `defendCrossProjectSearch` flag AND at least one visible linked project.
+   */
+  isCpsActive: (request: KibanaRequest) => Promise<boolean>;
   productFeaturesService: ProductFeaturesService;
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
@@ -352,13 +355,13 @@ export class EndpointAppContextService {
     return this.startDependencies.esClient;
   }
 
-  /** `true` when Defend reads should fan out across linked projects via Cross-Project Search */
-  public isCpsEnabled(): boolean {
+  /** `true` when this request can fan out across linked projects via Cross-Project Search */
+  public async isCpsActive(request: KibanaRequest): Promise<boolean> {
     if (this.startDependencies == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.cpsEnabled;
+    return this.startDependencies.isCpsActive(request);
   }
 
   /**
@@ -367,30 +370,32 @@ export class EndpointAppContextService {
    * client choice and space filtering have to agree on one answer or a local document can be
    * filtered out of an origin-only read.
    */
-  public isCpsRead(request?: KibanaRequest): boolean {
-    if (!this.isCpsEnabled()) {
-      return false;
+  public async isCpsRead(request?: KibanaRequest): Promise<boolean> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
     }
 
+    // Resolved before `isCpsActive`, because whether this deployment could fan out at all is only
+    // knowable per request now, and a caller with no request identity can never fan out regardless.
     if (!request) {
       this.createLogger('isCpsRead').debug(
-        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
+        'This read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
       );
 
       return false;
     }
 
-    return true;
+    return this.startDependencies.isCpsActive(request);
   }
 
   /** The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()` */
-  public getReadEsClient(request?: KibanaRequest): ElasticsearchClient {
+  public async getReadEsClient(request?: KibanaRequest): Promise<ElasticsearchClient> {
     if (!this.startDependencies?.clusterClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     // `isCpsRead` first, so a caller with no request gets its breadcrumb; the second half narrows
-    if (!this.isCpsRead(request) || !request) {
+    if (!(await this.isCpsRead(request)) || !request) {
       return this.getInternalEsClient();
     }
 
@@ -402,14 +407,14 @@ export class EndpointAppContextService {
    * The search client the Defend search strategies dispatch through. Carries the same routing as
    * `getReadEsClient()` when CPS is on, so callers do not branch on the flag themselves.
    */
-  public getScopedSearchClient(request: KibanaRequest): IScopedSearchClient {
+  public async getScopedSearchClient(request: KibanaRequest): Promise<IScopedSearchClient> {
     if (!this.startDependencies?.dataStart) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     const { dataStart } = this.startDependencies;
 
-    return this.isCpsEnabled()
+    return (await this.isCpsActive(request))
       ? dataStart.search.asScoped(request, { projectRouting: 'space' })
       : dataStart.search.asScoped(request);
   }
@@ -421,14 +426,22 @@ export class EndpointAppContextService {
    * "this read can fan out" visible in their signatures. A service that receives no scoped instance
    * cannot fan out, which is the same rule `isCpsRead` applies to a missing request.
    *
+   * This is the async boundary: whether the request can fan out is now per-request and requires an
+   * ES round trip, so it is resolved once here and handed to services as a plain boolean. Keeping
+   * `ScopedEndpointServices` members synchronous leaves the downstream service signatures untouched.
+   *
    * Modelled on `getScopedEndpointArtifactClient()`, which hands out a request-scoped service object
    * in the same way.
    */
-  public asScoped(request: KibanaRequest): ScopedEndpointServices {
+  public async asScoped(request: KibanaRequest): Promise<ScopedEndpointServices> {
+    const cpsRead = await this.isCpsRead(request);
+    const esClient = await this.getReadEsClient(request);
+    const searchClient = await this.getScopedSearchClient(request);
+
     return {
-      isCpsRead: () => this.isCpsRead(request),
-      getEsClient: () => this.getReadEsClient(request),
-      getSearchClient: () => this.getScopedSearchClient(request),
+      isCpsRead: () => cpsRead,
+      getEsClient: () => esClient,
+      getSearchClient: () => searchClient,
       getSpaceId: () => this.getActiveSpaceId(request),
       getSpace: () => this.getActiveSpace(request),
     };

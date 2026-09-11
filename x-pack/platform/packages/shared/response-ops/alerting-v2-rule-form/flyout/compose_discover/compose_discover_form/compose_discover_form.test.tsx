@@ -215,7 +215,7 @@ describe('step validation', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: DASHBOARD_ID },
+            data: { dashboard_id: DASHBOARD_ID },
           },
         ],
       });

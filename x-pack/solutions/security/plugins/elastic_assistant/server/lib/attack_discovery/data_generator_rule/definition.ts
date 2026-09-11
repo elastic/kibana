@@ -48,7 +48,7 @@ export const getAttackDiscoveryDataGeneratorRuleType = ({
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: 'siem',
     solution: 'security',
-    priority: TaskPriority.Normal,
+    priority: TaskPriority.Standard,
     validate: {
       params: {
         validate: (object: unknown) => CreateAttackDiscoveryAlertsParamsSchema.parse(object),

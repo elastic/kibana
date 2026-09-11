@@ -145,6 +145,8 @@ export interface SearchWorkflowExecutionsParams {
   startedAfter?: string;
   /** Datemath upper bound for filtering by startedAt. */
   startedBefore?: string;
+  /** Opaque `search_after` sort values from a prior page. */
+  searchAfter?: estypes.FieldValue[];
 }
 
 export class WorkflowsService {
@@ -574,7 +576,7 @@ export class WorkflowsService {
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,
-    channel: string,
+    channel: string | undefined,
     spaceId: string
   ): Promise<boolean> {
     await this.ensureInitialized();

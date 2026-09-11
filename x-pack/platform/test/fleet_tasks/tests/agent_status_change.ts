@@ -168,13 +168,16 @@ export default function (providerContext: FtrProviderContextWithServices) {
         statusAfterFirstRun = source.last_known_status;
       });
 
-      // Count docs after first run
-      const countAfterFirst = await retry.tryForTime(10000, async () => {
+      // Count docs after first run. The task writes the status-change doc via a no-refresh bulk, so poll until it is searchable rather than trusting the first (possibly still-0) read.
+      const countAfterFirst = await retry.tryForTime(30000, async () => {
         const res = await es.count({
           index: DEFAULT_DS_INDEX,
           ignore_unavailable: true,
           query: { term: { 'agent.id': 'agent-status-2' } },
         });
+        if (res.count < 1) {
+          throw new Error(`status-change doc not searchable yet (count=${res.count})`);
+        }
         return res.count;
       });
 

@@ -9,6 +9,16 @@
 
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_doc_viewer.ts
 
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, except the 4 custom header/footer tests — those only assert
+ * that `renderHeader` / `renderFooter` emit static text, so they belong in Jest UI (RTL).
+ * Targets: example_data_source_profile/components/custom_doc_viewer_{header,footer}.tsx
+ * Precedent: profile_providers/observability/log_document_profile/accessors/get_doc_viewer.test.tsx
+ * Keep in Scout: tab presence per profile, restorable state surviving a tab switch, and the
+ * actions that rewrite the ES|QL query or open a new tab. The restorable-state primitive itself is
+ * covered by kbn-restorable-state/src/restorable_state_provider.test.tsx — assert the Discover
+ * integration, not the primitive.
+ */
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';

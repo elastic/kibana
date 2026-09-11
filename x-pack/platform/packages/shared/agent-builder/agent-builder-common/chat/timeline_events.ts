@@ -86,6 +86,7 @@ export enum TimelineEventType {
   promptResponse = 'prompt_response',
   // Execution lifecycle
   executionStarted = 'execution_started',
+  executionStep = 'execution_step',
   executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
@@ -137,6 +138,8 @@ export interface PromptResponseEventData {
   prompt_requested_event_id: string;
   /** The responses, keyed by prompt id. */
   responses: Record<string, PromptResponse>;
+  /** Resume input lives here because a resume has no user_message event. */
+  input?: RoundInput;
 }
 export type PromptResponseEvent = BaseTimelineEvent<
   TimelineEventType.promptResponse,
@@ -153,12 +156,22 @@ export type ExecutionStartedEvent = BaseTimelineEvent<
   ExecutionStartedEventData
 >;
 
+/** A single completed step of an agent run. */
+export interface ExecutionStepEventData {
+  step: ConversationRoundStep;
+  sequence: number;
+}
+export type ExecutionStepEvent = BaseTimelineEvent<
+  TimelineEventType.executionStep,
+  ExecutionStepEventData
+>;
+
 /**
  * The run summary: everything describing the execution itself, independent of how it ended.
  */
 export interface ExecutionRunSummary {
   /** The intermediate steps (tool calls, reasoning, etc.). */
-  steps: ConversationRoundStep[];
+  steps?: ConversationRoundStep[];
   /** Model usage statistics for the run. */
   model_usage: RoundModelUsageStats;
   /** Time to first token, in ms. */
@@ -217,6 +230,7 @@ export type TimelineEvent =
   | UserMessageEvent
   | PromptResponseEvent
   | ExecutionStartedEvent
+  | ExecutionStepEvent
   | ExecutionTerminatedEvent
   | ExecutionFailedEvent
   | ExecutionAbortedEvent;
@@ -226,6 +240,7 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
   | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
   | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
   | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;

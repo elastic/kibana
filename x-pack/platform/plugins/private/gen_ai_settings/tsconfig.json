@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
@@ -25,7 +26,7 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/management-settings-field-definition",
-    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-render",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-components-field-row",
     "@kbn/react-query",

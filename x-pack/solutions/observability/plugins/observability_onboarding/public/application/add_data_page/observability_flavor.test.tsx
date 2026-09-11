@@ -109,7 +109,7 @@ const createProviderWrapper = () => {
     <I18nProvider>
       <KibanaContextProvider services={buildServices()}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>{children}</FleetCardsProvider>
+          <FleetCardsProvider>{children}</FleetCardsProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
