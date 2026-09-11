@@ -918,7 +918,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     tagPopoverOpenIndex,
     ruleOutcomeColumnField,
     euiTheme,
-    getUrlForApp,
+    history,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);

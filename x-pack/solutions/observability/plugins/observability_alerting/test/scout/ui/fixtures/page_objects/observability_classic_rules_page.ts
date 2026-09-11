@@ -21,6 +21,8 @@ export const OBS_V1_LOGS_URL_RE = new RegExp(`${V1_BASE_RE}\\/logs(\\/|$|\\?|#)`
 export const OBS_V1_CREATE_URL_RE = new RegExp(`${V1_BASE_RE}\\/create\\/`);
 export const OBS_V1_EDIT_URL_RE = new RegExp(`${V1_BASE_RE}\\/edit\\/`);
 export const OBS_V1_DETAILS_URL_RE = new RegExp(`${V1_BASE_RE}\\/rule\\/[^/?#]+`);
+export const OBS_V1_RULE_NAME_HREF_RE = /\/observability\/alerting\/rules\/v1\/rule\//;
+export const OBS_V1_LIST_HREF_RE = /\/observability\/alerting\/rules\/v1\/?(?:\?|#|$)/;
 
 /** Stack Management classic (v1) Rules tree — observability host-aware nav must not land here. */
 export const MANAGEMENT_CLASSIC_RULES_URL_RE =
@@ -46,6 +48,10 @@ export class ObservabilityClassicRulesPage {
   public readonly settingsLink: Locator;
   public readonly settingsFlyout: Locator;
   public readonly overflowButton: Locator;
+  public readonly editFromDetailsButton: Locator;
+  public readonly alertsTab: Locator;
+  public readonly historyTab: Locator;
+  public readonly ruleDetailsTabs: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
@@ -61,6 +67,10 @@ export class ObservabilityClassicRulesPage {
     this.settingsLink = this.page.testSubj.locator('rulesSettingsLink');
     this.settingsFlyout = this.page.testSubj.locator('rulesSettingsFlyout');
     this.overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    this.editFromDetailsButton = this.page.testSubj.locator('openEditRuleFlyoutButton');
+    this.alertsTab = this.page.testSubj.locator('ruleAlertListTab');
+    this.historyTab = this.page.testSubj.locator('eventLogListTab');
+    this.ruleDetailsTabs = this.page.testSubj.locator('ruleDetailsTabbedContent');
   }
 
   urlFor(subPath = ''): string {
@@ -86,7 +96,7 @@ export class ObservabilityClassicRulesPage {
 
   async openListAndSearch(ruleName: string): Promise<void> {
     await this.goto();
-    await this.rulesList.waitFor({ state: 'visible' });
+    await this.rulesList.waitFor({ state: 'visible', timeout: 30_000 });
     const clearFilters = this.page.testSubj.locator('rules-list-clear-filter');
     if (await clearFilters.isVisible()) {
       await clearFilters.click();
@@ -150,5 +160,22 @@ export class ObservabilityClassicRulesPage {
     await this.page.testSubj.click('editActionHoverButton');
     await this.page.waitForURL(OBS_V1_EDIT_URL_RE);
     await this.ruleForm.waitFor({ state: 'visible' });
+  }
+
+  async openEditFromDetails(): Promise<void> {
+    await this.editFromDetailsButton.waitFor({ state: 'visible' });
+    await this.editFromDetailsButton.click();
+    await this.page.waitForURL(OBS_V1_EDIT_URL_RE);
+    await this.ruleForm.waitFor({ state: 'visible' });
+  }
+
+  async clickAlertsTab(): Promise<void> {
+    await this.ruleDetailsTabs.waitFor({ state: 'visible' });
+    await this.alertsTab.click();
+  }
+
+  async clickHistoryTab(): Promise<void> {
+    await this.ruleDetailsTabs.waitFor({ state: 'visible' });
+    await this.historyTab.click();
   }
 }

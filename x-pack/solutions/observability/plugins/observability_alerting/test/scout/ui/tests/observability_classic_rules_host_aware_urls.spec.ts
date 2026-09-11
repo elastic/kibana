@@ -20,8 +20,10 @@ import {
   OBS_V1_CREATE_URL_RE,
   OBS_V1_DETAILS_URL_RE,
   OBS_V1_EDIT_URL_RE,
+  OBS_V1_LIST_HREF_RE,
   OBS_V1_LIST_URL_RE,
   OBS_V1_LOGS_URL_RE,
+  OBS_V1_RULE_NAME_HREF_RE,
   STANDALONE_RULES_APP_URL_RE,
 } from '../fixtures/page_objects';
 
@@ -113,7 +115,7 @@ test.describe(
 
         await expect(rules.ruleNameLink(ruleName)).toHaveAttribute(
           'href',
-          /\/observability\/alerting\/rules\/v1\/rule\//
+          OBS_V1_RULE_NAME_HREF_RE
         );
         await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
           'href',
@@ -146,10 +148,7 @@ test.describe(
       await expect(rules.backLink).toBeVisible({ timeout: 30_000 });
 
       await test.step('back href stays on the observability mount', async () => {
-        await expect(rules.backLink).toHaveAttribute(
-          'href',
-          /\/observability\/alerting\/rules\/v1\/?(?:\?|#|$)/
-        );
+        await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
         await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
         await expect(rules.backLink).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
       });
@@ -218,10 +217,7 @@ test.describe(
       });
 
       await test.step('back from logs returns to the observability rules list', async () => {
-        await expect(rules.backLink).toHaveAttribute(
-          'href',
-          /\/observability\/alerting\/rules\/v1\/?(?:\?|#|$)/
-        );
+        await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
         await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
         await rules.clickBack();
         await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
@@ -256,6 +252,98 @@ test.describe(
         await rules.closeSettingsFlyout();
         await expect(rules.settingsFlyout).toBeHidden();
         await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
+      });
+    });
+
+    test('list page omits the Alerts back link on the Observability mount', async ({
+      page,
+      pageObjects,
+    }) => {
+      const rules = pageObjects.observabilityClassicRules;
+      await rules.goto();
+      await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
+      await expect(rules.backLink).toHaveCount(0);
+      await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
+    });
+
+    test('click-through list, details, tabs, edit, and back stays on Observability Alerting', async ({
+      page,
+      pageObjects,
+    }) => {
+      const rules = pageObjects.observabilityClassicRules;
+
+      await test.step('list rule-name href is createHref on the observability mount', async () => {
+        await rules.openListAndSearch(ruleName);
+        await expect(rules.ruleNameLink(ruleName)).toBeVisible({ timeout: 30_000 });
+        await expect(rules.ruleNameLink(ruleName)).toHaveAttribute('href', OBS_V1_RULE_NAME_HREF_RE);
+        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
+          'href',
+          MANAGEMENT_CLASSIC_RULES_URL_RE
+        );
+        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
+          'href',
+          STANDALONE_RULES_APP_URL_RE
+        );
+      });
+
+      await test.step('click the rule name onto details', async () => {
+        await rules.clickRuleName(ruleName);
+        await expect(rules.pageTitle).toBeVisible({ timeout: 30_000 });
+        await expectObservabilityHost(page, OBS_V1_DETAILS_URL_RE);
+      });
+
+      await test.step('details back href is createHref to the observability list', async () => {
+        await expect(rules.backLink).toBeVisible();
+        await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
+        await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
+        await expect(rules.backLink).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
+      });
+
+      await test.step('alerts and history tabs stay on the observability details URL', async () => {
+        await expect(rules.ruleDetailsTabs).toBeVisible({ timeout: 30_000 });
+        await rules.clickHistoryTab();
+        await expectObservabilityHost(page, OBS_V1_DETAILS_URL_RE);
+        await rules.clickAlertsTab();
+        await expectObservabilityHost(page, OBS_V1_DETAILS_URL_RE);
+      });
+
+      await test.step('edit from details stays on the observability mount', async () => {
+        await rules.openEditFromDetails();
+        await expectObservabilityHost(page, OBS_V1_EDIT_URL_RE);
+        await expect(page).toHaveURL(new RegExp(`/edit/${ruleId}(/|$|\\?|#)`));
+      });
+
+      await test.step('cancel returns to observability details, back returns to the list', async () => {
+        await rules.clickCancel();
+        await expect(rules.pageTitle).toBeVisible({ timeout: 30_000 });
+        await expectObservabilityHost(page, OBS_V1_DETAILS_URL_RE);
+        await expect(page).toHaveURL(new RegExp(`/rule/${ruleId}(/|$|\\?|#)`));
+
+        await rules.clickBack();
+        await expect(rules.rulesList).toBeVisible();
+        await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
+      });
+    });
+
+    test('settings from logs does not leave Observability Alerting', async ({
+      page,
+      pageObjects,
+    }) => {
+      const rules = pageObjects.observabilityClassicRules;
+      await rules.goto('/logs');
+      await expect(rules.pageTitle).toHaveText('Logs', { timeout: 30_000 });
+      await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
+
+      await test.step('open settings without changing the logs URL', async () => {
+        await rules.openSettingsFlyout();
+        await expect(rules.settingsFlyout).toBeVisible();
+        await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
+      });
+
+      await test.step('close settings and stay on observability logs', async () => {
+        await rules.closeSettingsFlyout();
+        await expect(rules.settingsFlyout).toBeHidden();
+        await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
       });
     });
   }
