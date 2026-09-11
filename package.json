@@ -1297,6 +1297,7 @@
     "@kbn/typed-react-router-config": "workspace:*",
     "@kbn/ui-actions-browser": "workspace:*",
     "@kbn/ui-actions-plugin": "workspace:*",
+    "@kbn/ui-ai-components": "workspace:*",
     "@kbn/ui-app-header": "workspace:*",
     "@kbn/ui-app-menu": "workspace:*",
     "@kbn/ui-callout": "workspace:*",
