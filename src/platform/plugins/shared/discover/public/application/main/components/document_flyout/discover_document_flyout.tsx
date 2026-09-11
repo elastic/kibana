@@ -22,7 +22,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import { getDisplayedColumns, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import { getDisplayedColumns } from '@kbn/unified-data-table';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import {
@@ -199,10 +199,12 @@ export const DiscoverDocumentFlyout = memo(
 
     const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
       () =>
-        documentState.esqlQueryColumns
-          ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
+        documentState.esqlSource
+          ? (Object.fromEntries(
+              documentState.esqlSource.getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
+            ) as DataTableColumnsMeta)
           : undefined,
-      [documentState.esqlQueryColumns]
+      [documentState.esqlSource]
     );
 
     const flyoutColumnsMeta = useMemo(() => {

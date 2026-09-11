@@ -21,7 +21,6 @@ import {
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -33,10 +32,14 @@ import {
   getChartHidden,
   getTableHidden,
   getSidebarHidden,
-  getEsqlDataView,
 } from '@kbn/discover-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import {
+  getESQLStatsQueryMeta,
+  getProjectRoutingFromEsqlQuery,
+  resolveEsqlTimeField,
+} from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -79,7 +82,7 @@ export interface DataMainMsg extends DataMsg {
 
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
-  esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
+  esqlSource?: EsqlSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
@@ -555,11 +558,11 @@ export function getDataStateContainer({
                 return;
               }
 
-              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const { esqlSource } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,
-                esqlQueryColumns,
+                esqlQueryColumns: esqlSource?.getColumns(),
               });
 
               if (postFetchStateUpdate) {
@@ -614,15 +617,33 @@ export function getDataStateContainer({
 
   const fetchQuery = async () => {
     const query = getCurrentTab().appState.query;
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
-    const currentDataView = currentDataView$.getValue();
-
     if (isOfAggregateQueryType(query)) {
-      const nextDataView = await getEsqlDataView(query, currentDataView, services);
-      if (nextDataView !== currentDataView) {
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
+      const currentSource = dataSubjects.documents$.getValue().esqlSource;
+      const projectRouting =
+        getProjectRoutingFromEsqlQuery(query.esql) ?? services.cps?.cpsManager?.getProjectRouting();
+
+      const nextSource = await EsqlSource.create({
+        query: query.esql,
+        resultColumns: currentSource?.resultColumns ?? [],
+        timeFieldName: await resolveEsqlTimeField({
+          query: query.esql,
+          http: services.http,
+          projectRouting,
+        }),
+        projectRouting,
+      });
+
+      if (nextSource.id !== currentSource?.id) {
+        const nextDataView = await registerEsqlSourceInDataViewsCache(
+          services.dataViews,
+          nextSource
         );
+        services.dataSourceService.registerEsqlSource(nextSource);
+        if (nextDataView) {
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
+          );
+        }
       }
     }
 

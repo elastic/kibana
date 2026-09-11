@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { EsqlSource } from './sources/esql_source';
 import type { Column } from './types';
 
@@ -23,15 +25,15 @@ import type { Column } from './types';
 export async function registerEsqlSourceInDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
   source: EsqlSource
-): Promise<void> {
+): Promise<DataView> {
   dataViews.clearInstanceCache(source.id);
-  await dataViews.create(
+  return dataViews.create(
     {
       id: source.id,
       title: source.title,
       type: ESQL_TYPE,
       timeFieldName: source.timeFieldName,
-      fields: makeFieldsSpec(source.getColumns()),
+      fields: makeFieldsSpec(source.getColumns(), source.timeFieldName),
     },
     true // skipFetchFields — never call _field_caps for ES|QL adapter DVs
   );
@@ -44,8 +46,8 @@ export function unregisterFromDataViewsCache(
   dataViews.clearInstanceCache(id);
 }
 
-function makeFieldsSpec(columns: readonly Column[]) {
-  return Object.fromEntries(
+function makeFieldsSpec(columns: readonly Column[], timeFieldName?: string) {
+  const spec = Object.fromEntries(
     columns.map((col) => [
       col.name,
       {
@@ -57,4 +59,14 @@ function makeFieldsSpec(columns: readonly Column[]) {
       },
     ])
   );
+  if (timeFieldName && !spec[timeFieldName]) {
+    spec[timeFieldName] = {
+      name: timeFieldName,
+      type: KBN_FIELD_TYPES.DATE,
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+    };
+  }
+  return spec;
 }

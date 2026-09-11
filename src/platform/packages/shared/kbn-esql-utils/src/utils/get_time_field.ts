@@ -9,6 +9,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
+import { parseTimeFieldFromESQLQuery } from './query_parsing_helpers';
 
 // Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query + routing.
 // Storing the Promise (not the resolved value) deduplicates concurrent calls:
@@ -31,6 +32,23 @@ const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 
  * @param projectRouting - The effective project routing to forward to the server. Callers
  * should resolve precedence (SET instruction vs picker) before passing this value.
  */
+/**
+ * Resolves the time field for an ES|QL query, combining synchronous parse and HTTP detection.
+ * Returns the parse result immediately if the query contains an explicit time filter syntax;
+ * otherwise falls back to `getESQLTimeField` which calls the server-side timefield API.
+ */
+export async function resolveEsqlTimeField({
+  query,
+  http,
+  projectRouting,
+}: {
+  query: string;
+  http: HttpStart;
+  projectRouting?: string;
+}): Promise<string | undefined> {
+  return parseTimeFieldFromESQLQuery(query) ?? getESQLTimeField({ query, http, projectRouting });
+}
+
 export async function getESQLTimeField({
   query,
   http,

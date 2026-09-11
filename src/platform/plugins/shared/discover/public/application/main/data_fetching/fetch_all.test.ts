@@ -8,6 +8,7 @@
  */
 
 import { FetchStatus } from '../../types';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { Subject } from 'rxjs';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
@@ -254,7 +255,7 @@ describe('test fetchAll', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockfetchEsql.mockResolvedValue({
       records: documents,
-      esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+      esqlSource: createMockEsqlSource(),
     });
     const query = { esql: 'from foo' };
     deps.internalState.dispatch(
@@ -273,7 +274,8 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.PARTIAL,
         interceptedWarnings: [],
         result: documents,
-        esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        esqlSource: expect.objectContaining({ id: 'mock-esql-source' }),
+        esqlHeaderWarning: undefined,
         query,
       },
     ]);

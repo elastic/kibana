@@ -8,7 +8,7 @@
  */
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { getDataViewFieldList, getEsqlQueryFieldList } from './get_field_list';
 
 export enum DiscoverSidebarReducerActionType {
@@ -41,7 +41,7 @@ type DiscoverSidebarReducerAction =
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED;
       payload: {
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
-        esqlQueryColumns?: DatatableColumn[]; // from ES|QL searches
+        esqlSource?: EsqlSource; // from ES|QL searches
         isEsqlMode: boolean;
         dataView: DataView | null | undefined;
       };
@@ -98,7 +98,7 @@ export function discoverSidebarReducer(
       };
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
       const mappedAndUnmappedFields = action.payload.isEsqlMode
-        ? getEsqlQueryFieldList(action.payload.esqlQueryColumns)
+        ? getEsqlQueryFieldList(action.payload.esqlSource?.resultColumns)
         : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
       return {
         ...state,

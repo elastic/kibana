@@ -26,6 +26,7 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
+import { registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type {
   DataMain$,
   DataMsg,
@@ -132,7 +133,11 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(async ({ records, esqlSource, interceptedWarnings = [], esqlHeaderWarning }) => {
+        if (isEsqlQuery && esqlSource) {
+          services.dataSourceService.registerEsqlSource(esqlSource);
+          await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+        }
         fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
@@ -174,7 +179,7 @@ export function fetchAll(
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
-          esqlQueryColumns,
+          esqlSource,
           esqlHeaderWarning,
           interceptedWarnings,
           query,

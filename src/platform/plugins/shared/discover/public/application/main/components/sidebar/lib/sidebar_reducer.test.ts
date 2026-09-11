@@ -19,7 +19,7 @@ import {
   getInitialState,
 } from './sidebar_reducer';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {
@@ -103,24 +103,19 @@ describe('sidebar reducer', function () {
         isEsqlMode: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: {},
-        esqlQueryColumns: [
+        esqlSource: createMockEsqlSource([], [
           {
             id: '1',
             name: 'text1',
-            meta: {
-              type: 'number',
-            },
+            meta: { type: 'number' },
             isNull: true,
           },
           {
             id: '2',
             name: 'text2',
-            meta: {
-              type: 'string',
-              esType: 'keyword',
-            },
+            meta: { type: 'string', esType: 'keyword' },
           },
-        ] as DatatableColumn[],
+        ]),
       },
     });
     expect(resultForEsqlQuery).toStrictEqual({

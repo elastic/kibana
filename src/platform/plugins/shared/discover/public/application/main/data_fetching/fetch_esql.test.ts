@@ -17,10 +17,13 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
 import type { TimeRange } from '@kbn/es-query';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
+import { EsqlSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(EsqlSource, 'create').mockResolvedValue(createMockEsqlSource());
   });
 
   const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
@@ -62,9 +65,10 @@ describe('fetchEsql', () => {
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
-      esqlQueryColumns: ['_id', 'foo'],
+      esqlSource: expect.any(Object),
       esqlHeaderWarning: undefined,
       interceptedWarnings: [],
+      approximationApplied: undefined,
     });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });
@@ -107,9 +111,10 @@ describe('fetchEsql', () => {
             flattened: hits[1],
           },
         ],
-        esqlQueryColumns: ['_id', 'foo'],
+        esqlSource: expect.any(Object),
         esqlHeaderWarning: undefined,
         interceptedWarnings: [],
+        approximationApplied: undefined,
       });
     } finally {
       jest.useRealTimers();

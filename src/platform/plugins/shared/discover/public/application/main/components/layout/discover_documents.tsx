@@ -36,7 +36,6 @@ import {
   DataLoadingState,
   useColumns,
   type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -322,10 +321,12 @@ function DiscoverDocumentsComponent({
 
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
+      documentState.esqlSource
+        ? (Object.fromEntries(
+            documentState.esqlSource.getColumns().map((c) => [c.name, { type: c.type, esType: c.esType }])
+          ) as DataTableColumnsMeta)
         : undefined,
-    [documentState.esqlQueryColumns]
+    [documentState.esqlSource]
   );
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 

@@ -35,7 +35,7 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
@@ -230,8 +230,12 @@ export function initializeFetch({
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
+              columnsMeta: result.esqlSource
+                ? (Object.fromEntries(
+                    result.esqlSource
+                      .getColumns()
+                      .map((c) => [c.name, { type: c.type, esType: c.esType }])
+                  ) as DataTableColumnsMeta)
                 : undefined,
               rows: result.records,
               hitCount: result.records.length,

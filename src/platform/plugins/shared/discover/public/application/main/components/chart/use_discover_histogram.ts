@@ -487,7 +487,9 @@ function getUnifiedHistogramTableForEsql({
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const esqlQueryColumns = documentsValue?.esqlSource
+    ? [...documentsValue.esqlSource.resultColumns]
+    : EMPTY_ESQL_COLUMNS;
   return {
     table: {
       type: 'datatable' as const,

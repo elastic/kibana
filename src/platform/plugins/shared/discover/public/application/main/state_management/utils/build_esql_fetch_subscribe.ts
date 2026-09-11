@@ -119,7 +119,7 @@ export const buildEsqlFetchSubscribe = ({
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
     const responseColumns =
-      next.esqlQueryColumns?.map((c) => c.name) ??
+      next.esqlSource?.getColumns().map((c) => c.name) ??
       (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
 
     if (responseColumns !== undefined) {

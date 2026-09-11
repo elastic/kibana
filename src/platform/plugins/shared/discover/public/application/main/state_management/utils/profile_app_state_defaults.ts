@@ -20,7 +20,7 @@ import {
 } from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
-import type { DataDocumentsMsg } from '../discover_data_state_container';
+import type { Column } from '@kbn/data-source';
 
 export const getProfileAppStateDefaults = ({
   scopedProfilesManager,
@@ -84,7 +84,7 @@ export const getProfileAppStateDefaults = ({
       esqlQueryColumns,
     }: {
       defaultColumns: string[];
-      esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
+      esqlQueryColumns: readonly Column[] | undefined;
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
@@ -161,7 +161,7 @@ export const shouldResetProfileAppStateDefaultField = (
     profileAppStateDefaults.fieldsToReset.includes(field));
 
 const getIsValidColumn =
-  (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>
+  (dataView: DataView, esqlQueryColumns: readonly Column[] | undefined) =>
   (column: DefaultAppStateColumn) => {
     // Summary is a synthetic column; allow it even when absent from the data view / ES|QL result
     if (column.name === SOURCE_COLUMN) {
