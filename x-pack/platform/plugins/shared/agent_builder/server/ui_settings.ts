@@ -71,6 +71,7 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     }),
     schema: schema.string(),
     value: '',
+    sensitive: true,
     experimental: true,
     requiresPageReload: false,
     readonly: true,
