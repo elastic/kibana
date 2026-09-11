@@ -145,9 +145,9 @@ describe('RuleSummaryFlyout', () => {
       openMenu();
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest.mocked(rulesLocators.useUrl).mock.calls.find(
-        ([p]) => p.ruleId === 'rule-1'
-      );
+      const useUrlCall = jest
+        .mocked(rulesLocators.useUrl)
+        .mock.calls.find(([p]) => p.ruleId === 'rule-1');
       const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
       expect(location).toMatchObject({
         app: 'management',
@@ -178,9 +178,9 @@ describe('RuleSummaryFlyout', () => {
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest.mocked(rulesLocators.useUrl).mock.calls.find(
-        ([p]) => p.ruleId === 'rule with spaces/and slash'
-      );
+      const useUrlCall = jest
+        .mocked(rulesLocators.useUrl)
+        .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
       const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
       expect(location).toMatchObject({
         app: 'management',
