@@ -32,7 +32,13 @@ spaceTest.describe(
     });
 
     spaceTest('renders ES|QL-specific chrome', async ({ page, pageObjects }) => {
-      const { unifiedFieldList } = pageObjects;
+      const { discover, unifiedFieldList } = pageObjects;
+
+      // Submit explicitly rather than relying on the query Discover opens with: the
+      // observability root profile overrides the default to `FROM <allLogsIndexPattern>`
+      // (see context_awareness/profile_providers/observability), which ignores the
+      // `defaultIndex` this suite sets and resolves to an index with no data here.
+      await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
       await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
@@ -70,6 +76,11 @@ spaceTest.describe(
       'hides histogram for index without a timestamp field; shows it when ?_tstart/?_tend params are used',
       async ({ page, pageObjects }) => {
         const { discover, datePicker } = pageObjects;
+
+        // Make logstash-* the active query before touching the picker. The default query
+        // is deployment-specific — the observability root profile points it at the logs
+        // index pattern, which has no time field, leaving the picker disabled and empty.
+        await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
 
         // Set the time range while the picker is still enabled (logstash-* is the active query).
         await datePicker.setAbsoluteRange({

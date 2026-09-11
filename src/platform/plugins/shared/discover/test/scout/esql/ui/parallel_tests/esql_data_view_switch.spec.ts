@@ -59,6 +59,11 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { discover } = pageObjects;
 
+        // Pin the query to logstash-* rather than inheriting Discover's default: the
+        // observability root profile overrides that default to the logs index pattern,
+        // so the hit count below would not be logstash's.
+        await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
+
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         // ES|QL mode survives the reload, so the switch below is a real transition.
