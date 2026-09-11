@@ -175,7 +175,7 @@ export default function (providerContext: FtrProviderContext) {
         ]);
       });
 
-      it('should bump policies accross all spaces on update', async () => {
+      it('should bump policies across all spaces on update', async () => {
         const policiesResBefore = await fetchAllPolicies();
 
         await apiClient.putDownloadSource(
@@ -191,7 +191,7 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
-      it('should remove the deleted host from download_source_ids accross spaces', async () => {
+      it('should remove the deleted host from download_source_ids across spaces', async () => {
         const policiesResBefore = await fetchAllPolicies();
 
         for (const policyRes of policiesResBefore) {

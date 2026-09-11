@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { uniq } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -42,8 +43,12 @@ interface Props {
 
 const getRows = (agentPolicy: Partial<NewAgentPolicy | AgentPolicy>): string[] => {
   if (agentPolicy.download_source_ids?.length) {
-    return agentPolicy.download_source_ids.map((id) =>
-      id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE ? DEFAULT_SELECT_VALUE : id
+    // Duplicates are not reachable through the form, but a policy saved directly
+    // through the API can hold them and rows are keyed by value.
+    return uniq(
+      agentPolicy.download_source_ids.map((id) =>
+        id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE ? DEFAULT_SELECT_VALUE : id
+      )
     );
   }
   if (agentPolicy.download_source_id) {
@@ -83,7 +88,17 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
     commitRows(rows.filter((_, i) => i !== index));
   };
 
-  const addRow = () => commitRows([...rows, DEFAULT_SELECT_VALUE]);
+  // A row is only ever added with a value no other row holds, since rows are
+  // deduplicated and keyed by value.
+  const nextAvailableValue = downloadSourceOptions.find(
+    (option) => !option.disabled && !rows.includes(option.value)
+  )?.value;
+
+  const addRow = () => {
+    if (nextAvailableValue) {
+      commitRows([...rows, nextAvailableValue]);
+    }
+  };
 
   const atLimit = rows.length >= MAX_DOWNLOAD_SOURCES;
 
@@ -108,7 +123,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
           <EuiIconTip
             content={i18n.translate('xpack.fleet.agentPolicyForm.downloadSource.priorityTooltip', {
               defaultMessage:
-                'Optionally choose the order in which servers are contacted in case of timeouts. Agents running versions older than 9.6.0 will only use the first server.',
+                'Optionally choose the order in which servers are contacted in case of timeouts. Proxy, SSL and authentication settings are taken from the first server and apply to all of them. Agents running versions older than 9.6.0 will only use the first server.',
             })}
             position="right"
           />
@@ -119,7 +134,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
 
       <EuiFlexGroup direction="column" gutterSize="s">
         {rows.map((row, index) => (
-          <EuiFlexItem key={index} grow={false}>
+          <EuiFlexItem key={row} grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
@@ -140,7 +155,11 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
                   isLoading={isLoading}
                   valueOfSelected={row}
                   onChange={(value) => updateRow(index, value)}
-                  options={downloadSourceOptions}
+                  options={downloadSourceOptions.map((option) => ({
+                    ...option,
+                    disabled:
+                      option.disabled || (option.value !== row && rows.includes(option.value)),
+                  }))}
                   data-test-subj={`agentPolicyForm.downloadSource.select.${index}`}
                 />
               </EuiFlexItem>
@@ -171,7 +190,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
             iconType="plusCircle"
             size="s"
             flush="left"
-            disabled={disabled || atLimit}
+            disabled={disabled || atLimit || !nextAvailableValue}
             onClick={addRow}
             data-test-subj="agentPolicyForm.downloadSource.addServer"
           >
