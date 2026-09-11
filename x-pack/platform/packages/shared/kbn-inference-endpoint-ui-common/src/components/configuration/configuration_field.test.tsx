@@ -7,11 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  ConfigInputField,
-  ConfigInputListField,
-  ConfigNumberField,
-} from './configuration_field';
+import { ConfigInputField, ConfigInputListField, ConfigNumberField } from './configuration_field';
 import { FieldType } from '../../types/types';
 import type { ConfigEntryView } from '../../types/types';
 
