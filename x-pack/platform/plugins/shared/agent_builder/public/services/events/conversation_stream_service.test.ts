@@ -159,6 +159,29 @@ describe('ConversationStreamService', () => {
     expect(getSubject('Z').observed).toBe(false); // source subscription torn down
   });
 
+  it('starts a fresh draft when a run ends without round_complete (stop, error, disconnect)', () => {
+    const { source, getSubject } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: ActiveStreamState | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    // Run 1 completes normally, so it is sealed and awaiting a refetch
+    getSubject('A').next(messageChunkEvent('sealed answer'));
+    getSubject('A').next(roundCompleteEvent('round-1'));
+    const sealed = state!.sealed;
+
+    // Run 2 streams, then the user hits stop - no round_complete ever arrives
+    getSubject('A').next(messageChunkEvent('abandoned answer'));
+    service.notifyStreamEnded('A');
+
+    // Run 3 must not inherit run 2's draft, and run 1 must still be sealed
+    getSubject('A').next(messageChunkEvent('third answer'));
+
+    expect(state!.activeExecution?.message).toBe('third answer');
+    expect(state!.sealed).toEqual(sealed);
+  });
+
   it('re-subscribe after ended stream creates a fresh stream emitting initialActiveStreamState', () => {
     const { source, getSubject } = makeFakeSource();
     const service = new ConversationStreamService(source);

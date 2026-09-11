@@ -6,7 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, defer, finalize, scan } from 'rxjs';
+import { BehaviorSubject, defer, finalize } from 'rxjs';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import type { ActiveStreamState } from './active_stream_state';
 import { activeStreamReducer, initialActiveStreamState } from './active_stream_state';
@@ -16,6 +16,7 @@ export interface ChatEventSource {
 }
 
 interface ConversationStream {
+  /** The fold's accumulator, and what consumers subscribe to. */
   state$: BehaviorSubject<ActiveStreamState>;
   sub: Subscription;
   ended: boolean;
@@ -35,8 +36,7 @@ export class ConversationStreamService {
     const state$ = new BehaviorSubject<ActiveStreamState>(initialActiveStreamState);
     const sub = this.source
       .getChatEvents$(conversationId)
-      .pipe(scan(activeStreamReducer, initialActiveStreamState))
-      .subscribe(state$);
+      .subscribe((event) => state$.next(activeStreamReducer(state$.getValue(), event)));
     const stream: ConversationStream = { state$, sub, ended: false };
     this.streams.set(conversationId, stream);
     return stream;
@@ -67,12 +67,21 @@ export class ConversationStreamService {
     return !!this.streams.get(conversationId)?.state$.getValue().activeExecution;
   }
 
+  /**
+   * Marks the run for this conversation as over. Must be called for every run, including the ones
+   * that never reach `round_complete` (stop, error, dropped connection) - otherwise the abandoned
+   * draft stays in the fold and the next run appends to it.
+   */
   notifyStreamEnded(conversationId: string) {
     const stream = this.streams.get(conversationId);
     if (!stream) {
       return;
     }
     stream.ended = true;
+    const state = stream.state$.getValue();
+    if (state.activeExecution) {
+      stream.state$.next({ ...state, activeExecution: null });
+    }
     this.maybeTeardown(conversationId);
   }
 }
