@@ -43,7 +43,8 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     value: false,
     experimental: true,
     requiresPageReload: false,
-    readonly: false,
+    readonly: true,
+    readonlyMode: 'ui',
   },
   [AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID]: {
     description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEndpoint.description', {
@@ -57,7 +58,8 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     value: 'https://turing.deductive.ai',
     experimental: true,
     requiresPageReload: false,
-    readonly: false,
+    readonly: true,
+    readonlyMode: 'ui',
   },
   [AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID]: {
     description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveApiKey.description', {
@@ -71,7 +73,8 @@ const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
     value: '',
     experimental: true,
     requiresPageReload: false,
-    readonly: false,
+    readonly: true,
+    readonlyMode: 'ui',
   },
 };
 

@@ -46,6 +46,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID,
   AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID,
   AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
@@ -353,36 +354,31 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
             // a user overrides it. `uiSettings.get` falls back to the registered default
             // (turing) for unset keys, so the user scope must be read via getUserProvided
             // to avoid an unset value shadowing the global.
-            const globalDeductiveSettings = () =>
-              runnerDeps.uiSettings.globalAsScopedToClient(
-                runnerDeps.savedObjects.getScopedClient(request)
-              );
-            const [flagEnabled, global, userProvided] = await Promise.all([
+            // Config is global-scope only (readonly for users) so endpoint+key always come from
+            // the same deployment-wide source — a user cannot point the endpoint at a host of
+            // their choosing to leak the shared key (SSRF/credential-exfiltration mitigation).
+            const global = runnerDeps.uiSettings.globalAsScopedToClient(
+              runnerDeps.savedObjects.getScopedClient(request)
+            );
+            const readGlobal = async (key: string) =>
+              global.get<string>(key).catch(() => undefined);
+            const [flagEnabled, globalEndpoint, globalKey] = await Promise.all([
               runnerDeps.featureFlags
                 .getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
                 .catch(() => false),
-              globalDeductiveSettings(),
-              uiSettingsClient
-                .getUserProvided()
-                .catch(() => ({} as Record<string, { userValue?: unknown }>)),
-            ]);
-            const readGlobal = async (key: string) =>
-              global.get<string>(key).catch(() => undefined);
-            const [globalEndpoint, globalKey] = await Promise.all([
               readGlobal(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID),
               readGlobal(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID),
             ]);
-            const pick = (key: string): string | undefined => {
-              const v = userProvided[key]?.userValue;
-              return v != null && v !== '' ? String(v) : undefined;
-            };
+            const globalEnabled = await global
+              .get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID)
+              .catch(() => undefined);
+            // `enabled` = deployment flag AND Advanced Setting(on/off), matching the
+            // availability gate so visibility and execution share one kill-switch.
+            const settingEnabled = globalEnabled === true;
             return {
-              enabled: flagEnabled,
-              endpoint:
-                (pick(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID) ?? globalEndpoint)
-                  ?.trim()
-                  .replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
-              apiKey: pick(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID) ?? globalKey,
+              enabled: flagEnabled && settingEnabled,
+              endpoint: globalEndpoint?.trim().replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
+              apiKey: globalKey,
             };
           })()
         : undefined;
