@@ -329,10 +329,6 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
-  # Rendered as markdown by the proposal card. Composed once here because the two
-  # gate calls below cannot share a step: the gate types actionInput as an object,
-  # so a manual proposal has to omit the key rather than pass an empty value, and a
-  # YAML object cannot omit a key conditionally.
   - name: compose_proposal
     type: data.set
     with:
