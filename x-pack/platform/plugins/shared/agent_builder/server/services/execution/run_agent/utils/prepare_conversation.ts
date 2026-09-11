@@ -12,6 +12,7 @@ import type {
   ConverseInput,
   RoundInput,
   MetadataFieldValue,
+  SubagentEntry,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError, TimelineEventType } from '@kbn/agent-builder-common';
@@ -51,8 +52,8 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
-  /** Persistent sub-agent roster */
-  subagentRosterFallback?: Record<string, string>;
+  /** Persistent sub-agent roster (name → entry with conversation id and backing agent id). */
+  subagentRosterFallback?: Record<string, SubagentEntry>;
   /**
    * Deserialized metadata from the active conversation template.
    * Populated from `conversation.metadata` at prepare time so prompt factories

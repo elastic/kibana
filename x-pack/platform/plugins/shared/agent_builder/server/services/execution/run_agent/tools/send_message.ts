@@ -15,6 +15,7 @@ import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
+import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
 
 const schema = z.object({
   to: z.string().describe('Name of the persistent sub-agent to talk to.'),
@@ -39,6 +40,9 @@ The sub-agent sees the full history of your prior exchanges with it.
 - The recipient must resolve to a persistent sub-agent in the current conversation's
   active roster (see "Active persistent sub-agents" system notices in the message
   history). Sending to an unknown name fails with a clear error.
+- Sub-agents whose backing agent has been removed from this agent's allowlist
+  are no longer reachable via \`send_message\` — the child conversation still
+  exists but the parent can no longer message it.
 - To create a fresh sub-agent, use \`run_subagent\`. \`send_message\` never creates.
 `;
 
@@ -48,6 +52,7 @@ export const createSendMessageTool = ({
   abortSignal,
   backgroundExecutionService,
   subagentTracker,
+  allowedIds,
 }: {
   agentId: string;
   executionId: string;
@@ -55,6 +60,12 @@ export const createSendMessageTool = ({
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
+  /**
+   * Resolved allowlist of agent ids the parent may currently spawn/message.
+   * Used to filter the tracker snapshot at call time — entries whose backing
+   * `agent_id` is not in this set are rejected with a clear error.
+   */
+  allowedIds: Set<string>;
 }): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.sendMessageToAgent,
@@ -76,15 +87,30 @@ export const createSendMessageTool = ({
         };
       }
 
-      const childId = subagentTracker.get(to);
-      if (!childId) {
-        const roster = Object.keys(subagentTracker.snapshot());
+      const snapshot = subagentTracker.snapshot();
+      const reachable = filterReachableSubagents({ entries: snapshot, allowedIds });
+      const entry = reachable[to];
+
+      if (!entry) {
+        const rawEntry = snapshot[to];
+        if (rawEntry) {
+          // The entry exists but its backing agent left the parent's allowlist.
+          return {
+            results: [
+              createErrorResult(
+                `Sub-agent "${to}" is backed by agent "${rawEntry.agent_id}", ` +
+                  `which is not in this agent's subagent_ids allowlist.`
+              ),
+            ],
+          };
+        }
+        const reachableNames = Object.keys(reachable);
         return {
           results: [
             createErrorResult(
               `No sub-agent named "${to}" exists in this conversation. ` +
-                (roster.length > 0
-                  ? `Available: ${roster.join(', ')}. `
+                (reachableNames.length > 0
+                  ? `Available: ${reachableNames.join(', ')}. `
                   : `No persistent sub-agents have been created yet. `) +
                 `Use run_subagent to create one first.`
             ),
@@ -98,7 +124,7 @@ export const createSendMessageTool = ({
         });
         const { executionId, events$ } = await subAgentExecutor.sendToSubAgent({
           parentExecutionId,
-          conversationId: childId,
+          conversationId: entry.conversation_id,
           prompt,
           connectorId: subAgentModel.connector.connectorId,
           ...(run_in_background ? {} : { abortSignal }),

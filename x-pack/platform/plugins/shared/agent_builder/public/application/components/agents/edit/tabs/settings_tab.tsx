@@ -51,6 +51,7 @@ import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mod
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
 import { AiIndicesSection } from './ai_indices_section';
+import { SubagentsSection } from '../../overview/edit_details_flyout/subagents_section';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -345,6 +346,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       </EuiFlexGroup>
 
       <AiIndicesSection control={control} agentId={agentId} isFormDisabled={isFormDisabled} />
+
+      <EuiHorizontalRule />
+
+      <SubagentsSection agentId={agentId} />
 
       <EuiHorizontalRule />
 

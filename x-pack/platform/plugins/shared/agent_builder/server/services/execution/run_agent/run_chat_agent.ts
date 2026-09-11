@@ -279,6 +279,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     parentConversationId: conversation?.id,
     subagentTracker,
     conversationExists: (id: string) => conversationClient.exists(id),
+    configuredSubagentIds: agentConfiguration.subagent_ids,
   });
 
   // Then add dynamic tools

@@ -6,7 +6,7 @@
  */
 
 import { Subject, ReplaySubject } from 'rxjs';
-import { ChatEventType, SubagentMode } from '@kbn/agent-builder-common';
+import { ChatEventType, SELF_AGENT_ID, SubagentMode } from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -35,6 +35,7 @@ const createMockContext = (selectedConnectorId = 'selected-connector') => {
 const callHandler = async (
   tool: ReturnType<typeof createSubagentTool>,
   params: {
+    agent_id?: string;
     description: string;
     prompt: string;
     run_in_background?: boolean;
@@ -43,7 +44,11 @@ const callHandler = async (
     name?: string;
   },
   context: ReturnType<typeof createMockContext>['context']
-) => tool.handler(params, context) as Promise<{ results: any[] }>;
+) =>
+  tool.handler(
+    { agent_id: 'test-agent', ...params },
+    context
+  ) as Promise<{ results: any[] }>;
 
 describe('createSubagentTool', () => {
   const mockRound = {
@@ -68,7 +73,8 @@ describe('createSubagentTool', () => {
     events$.complete();
 
     const tool = createSubagentTool({
-      agentId: 'test-agent',
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockResolvedValue({
@@ -100,7 +106,8 @@ describe('createSubagentTool', () => {
 
   it('returns error result when sub-agent execution fails', async () => {
     const tool = createSubagentTool({
-      agentId: 'test-agent',
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
@@ -128,7 +135,8 @@ describe('createSubagentTool', () => {
     const events$ = new Subject<ChatEvent>();
 
     const tool = createSubagentTool({
-      agentId: 'test-agent',
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockResolvedValue({
@@ -176,7 +184,8 @@ describe('createSubagentTool', () => {
 
     const abortSignal = new AbortController().signal;
     const tool = createSubagentTool({
-      agentId: 'test-agent',
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent,
@@ -217,7 +226,8 @@ describe('createSubagentTool', () => {
     events$.complete();
 
     const tool = createSubagentTool({
-      agentId: 'test-agent',
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockResolvedValue({
@@ -242,7 +252,8 @@ describe('createSubagentTool', () => {
     const registerExecution = jest.fn();
 
     const tool = createSubagentTool({
-      agentId: 'test-agent',
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockResolvedValue({
@@ -365,11 +376,16 @@ describe('createSubagentTool', () => {
       expect(conversationExists).not.toHaveBeenCalled();
       // Roster updated with the freshly created child.
       const child = createSubAgent.mock.calls[0][0].conversationId as string;
-      expect(subagentTracker.get('researcher')).toBe(child);
+      expect(subagentTracker.get('researcher')).toEqual({
+        conversation_id: child,
+        agent_id: 'test-agent',
+      });
     });
 
     it('rejects when the name is already taken by a live child', async () => {
-      const subagentTracker = new SubagentTracker({ researcher: 'existing-child' });
+      const subagentTracker = new SubagentTracker({
+        researcher: { conversation_id: 'existing-child', agent_id: 'test-agent' },
+      });
       const createSubAgent = jest.fn();
       const conversationExists = jest.fn().mockResolvedValue(true);
 
@@ -408,12 +424,17 @@ describe('createSubagentTool', () => {
         })
       );
       // Tracker entry preserved.
-      expect(subagentTracker.get('researcher')).toBe('existing-child');
+      expect(subagentTracker.get('researcher')).toEqual({
+        conversation_id: 'existing-child',
+        agent_id: 'test-agent',
+      });
     });
 
     it('recovers from a stale tracker entry when the child conversation no longer exists', async () => {
       const events$ = roundCompleteEvents$();
-      const subagentTracker = new SubagentTracker({ researcher: 'stale-child' });
+      const subagentTracker = new SubagentTracker({
+        researcher: { conversation_id: 'stale-child', agent_id: 'test-agent' },
+      });
       const createSubAgent = jest.fn().mockResolvedValue({
         executionId: 'new-exec',
         events$: events$.asObservable(),
@@ -450,7 +471,10 @@ describe('createSubagentTool', () => {
       expect(createSubAgent).toHaveBeenCalled();
       // Tracker now points at the freshly created child, not the stale id.
       const newChildId = createSubAgent.mock.calls[0][0].conversationId as string;
-      expect(subagentTracker.get('researcher')).toBe(newChildId);
+      expect(subagentTracker.get('researcher')).toEqual({
+        conversation_id: newChildId,
+        agent_id: 'test-agent',
+      });
       expect(newChildId).not.toBe('stale-child');
       expect(result.results[0].type).toBe(ToolResultType.other);
     });
@@ -537,6 +561,179 @@ describe('createSubagentTool', () => {
           message: expect.stringContaining('not available'),
         })
       );
+    });
+
+    it('stores the raw _self sentinel on the tracker entry, not the resolved owner id', async () => {
+      const events$ = roundCompleteEvents$();
+      const createSubAgent = jest.fn().mockResolvedValue({
+        executionId: 'child-exec',
+        events$: events$.asObservable(),
+      });
+      const subagentTracker = new SubagentTracker();
+
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-real',
+        allowedSubagents: [{ id: SELF_AGENT_ID, description: 'Self.' }],
+        executionId: 'parent-exec',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          createSubAgent,
+          sendToSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+        },
+        parentConversationId: 'parent-convo',
+        subagentTracker,
+        conversationExists: jest.fn().mockResolvedValue(false),
+      });
+
+      const { context } = createMockContext();
+      await callHandler(
+        tool,
+        {
+          agent_id: SELF_AGENT_ID,
+          description: 'x',
+          prompt: 'y',
+          mode: SubagentMode.persistent,
+          name: 'self-copy',
+        },
+        context
+      );
+
+      // Executor receives the resolved real id...
+      expect(createSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'owner-real' })
+      );
+      // ...but the tracker keeps the sentinel so the reachability check in
+      // send_message matches against the allowlist's own representation.
+      expect(subagentTracker.get('self-copy')?.agent_id).toBe(SELF_AGENT_ID);
+    });
+  });
+
+  describe('agent_id resolution and allowlist enforcement', () => {
+    it('substitutes _self to ownerAgentId on the executor call', async () => {
+      const events$ = new ReplaySubject<ChatEvent>();
+      events$.next({
+        type: ChatEventType.roundComplete,
+        data: { round: mockRound },
+      } as ChatEvent);
+      events$.complete();
+
+      const executeSubAgent = jest.fn().mockResolvedValue({
+        executionId: 'sub-exec-id',
+        events$: events$.asObservable(),
+      });
+
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-real',
+        allowedSubagents: [{ id: SELF_AGENT_ID, description: 'Self.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context } = createMockContext();
+      await callHandler(
+        tool,
+        { agent_id: SELF_AGENT_ID, description: 't', prompt: 'p' },
+        context
+      );
+
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'owner-real' })
+      );
+    });
+
+    it('passes a real agent_id through unchanged to the executor', async () => {
+      const events$ = new ReplaySubject<ChatEvent>();
+      events$.next({
+        type: ChatEventType.roundComplete,
+        data: { round: mockRound },
+      } as ChatEvent);
+      events$.complete();
+
+      const executeSubAgent = jest.fn().mockResolvedValue({
+        executionId: 'sub-exec-id',
+        events$: events$.asObservable(),
+      });
+
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-real',
+        allowedSubagents: [{ id: 'coder', description: 'Coder.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context } = createMockContext();
+      await callHandler(
+        tool,
+        { agent_id: 'coder', description: 't', prompt: 'p' },
+        context
+      );
+
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'coder' })
+      );
+    });
+
+    it('lists _self first in the description when present', () => {
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner',
+        allowedSubagents: [
+          { id: 'coder', description: 'Writes code.' },
+          { id: SELF_AGENT_ID, description: 'Self.' },
+        ],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+      const selfIdx = tool.description.indexOf(`- ${SELF_AGENT_ID}:`);
+      const coderIdx = tool.description.indexOf('- coder:');
+      expect(selfIdx).toBeGreaterThan(-1);
+      expect(coderIdx).toBeGreaterThan(selfIdx);
+    });
+
+    it('rejects an agent_id outside the allowlist (defense-in-depth)', async () => {
+      const executeSubAgent = jest.fn();
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner',
+        allowedSubagents: [{ id: 'coder', description: 'Coder.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context } = createMockContext();
+      const result = await callHandler(
+        tool,
+        // Bypass the Zod enum by casting; the handler must reject on its own.
+        { agent_id: 'evil' as unknown as string, description: 't', prompt: 'p' } as never,
+        context
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(result.results[0].data).toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/not in this agent's allowlist/i),
+        })
+      );
+      expect(executeSubAgent).not.toHaveBeenCalled();
     });
   });
 });

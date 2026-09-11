@@ -228,6 +228,7 @@ export {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
+  type SubagentEntry,
   type SubagentRosterEntry,
   type SubagentRosterUpdatedStep,
   type SubagentRosterUpdatedStepData,
