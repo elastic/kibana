@@ -50,7 +50,6 @@ const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
 const validPackage = {
   name: 'my_integration',
-  version: '1.0.0',
   data_streams: [{ dataset: 'my_integration.logs', type: 'logs' }],
 };
 
@@ -174,76 +173,12 @@ describe('validatePackageUpload', () => {
       });
     });
 
-    it('allows a top-level ingest pipeline', async () => {
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: ['my_integration-1.0.0/elasticsearch/ingest_pipeline/shared.yml'],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('rejects a top-level ingest pipeline already owned by another installed package', async () => {
-      mockedGetPackageSavedObjects.mockResolvedValue({
-        saved_objects: [
-          {
-            attributes: {
-              name: 'other_integration',
-              installed_es: [{ id: '1.0.0-shared', type: ElasticsearchAssetType.ingestPipeline }],
-            },
-          },
-        ],
-      });
-
+    it('rejects a top-level ingest pipeline', async () => {
       await expectUploadRejected({
         packageInfo: validPackage,
         paths: ['my_integration-1.0.0/elasticsearch/ingest_pipeline/shared.yml'],
         savedObjectsClient: soClient,
       });
-    });
-
-    it('allows a top-level ingest pipeline owned by the same package', async () => {
-      mockedGetPackageSavedObjects.mockResolvedValue({
-        saved_objects: [
-          {
-            attributes: {
-              name: 'my_integration',
-              installed_es: [{ id: '1.0.0-shared', type: ElasticsearchAssetType.ingestPipeline }],
-            },
-          },
-        ],
-      });
-
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: ['my_integration-1.0.0/elasticsearch/ingest_pipeline/shared.yml'],
-          installedPkg: uploadedInstallation(),
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('allows a top-level ingest pipeline when another package owns a different version', async () => {
-      mockedGetPackageSavedObjects.mockResolvedValue({
-        saved_objects: [
-          {
-            attributes: {
-              name: 'other_integration',
-              installed_es: [{ id: '2.0.0-shared', type: ElasticsearchAssetType.ingestPipeline }],
-            },
-          },
-        ],
-      });
-
-      await expect(
-        validateUpload({
-          packageInfo: validPackage,
-          paths: ['my_integration-1.0.0/elasticsearch/ingest_pipeline/shared.yml'],
-          savedObjectsClient: soClient,
-        })
-      ).resolves.toBeUndefined();
     });
 
     it('allows a dataset-scoped ingest pipeline', async () => {
@@ -514,7 +449,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
         },
@@ -537,7 +471,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
         },
@@ -562,7 +495,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'Nginx.Access', type: 'logs' }],
         },
@@ -586,7 +518,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'hostile',
             data_streams: [{ dataset: 'foo', type: 'metrics' }],
           },
@@ -636,7 +567,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'nginx.access@namespace.prod', type: 'logs' }],
         },
@@ -661,7 +591,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'access', type: 'logs-nginx' }],
         },
@@ -689,7 +618,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
         },
@@ -710,7 +638,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'evilclaim',
           data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
         },
@@ -739,7 +666,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'hostile',
           data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
         },
@@ -762,7 +688,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'evilclaim',
             data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
           },
@@ -790,7 +715,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'evilclaim',
             data_streams: [
               {
@@ -883,7 +807,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'evilclaim',
             data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
           },
@@ -901,7 +824,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'evilclaim',
           data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
         },
@@ -922,7 +844,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'evilclaim',
           data_streams: [
             {
@@ -954,7 +875,6 @@ describe('validatePackageUpload', () => {
 
       await expectUploadRejected({
         packageInfo: {
-          version: '1.0.0',
           name: 'evilclaim',
           policy_templates: [
             {
@@ -985,7 +905,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'evilclaim',
             data_streams: [
               {
@@ -1039,7 +958,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'My-Integration',
             data_streams: [{ dataset: 'nginx.access', type: 'logs' }],
           },
@@ -1075,7 +993,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'my_integration',
             data_streams: [
               {
@@ -1095,7 +1012,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'my_integration',
             data_streams: [
               {
@@ -1115,7 +1031,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'my_integration',
             data_streams: [
               {
@@ -1135,7 +1050,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'my_integration',
             type: 'input',
           },
@@ -1175,7 +1089,6 @@ describe('validatePackageUpload', () => {
       await expect(
         validateUpload({
           packageInfo: {
-            version: '1.0.0',
             name: 'my_integration',
             data_streams: [{ dataset: 'my_integration.profile', type: 'profiles' }],
           },

@@ -31,7 +31,6 @@ import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import {
-  getNameAndExtension,
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
   isTopLevelPipeline,
@@ -366,4 +365,19 @@ const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
 const isPipeline = (path: string) => {
   const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.ingestPipeline;
+};
+
+// XXX: assumes path/to/file.ext -- 0..n '/' and exactly one '.'
+const getNameAndExtension = (
+  path: string
+): {
+  name: string;
+  extension: string;
+} => {
+  const splitPath = path.split('/');
+  const filename = splitPath[splitPath.length - 1];
+  return {
+    name: filename.split('.')[0],
+    extension: filename.split('.')[1],
+  };
 };

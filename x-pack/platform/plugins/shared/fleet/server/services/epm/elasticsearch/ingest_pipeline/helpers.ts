@@ -42,21 +42,6 @@ export const getPipelineNameForInstallation = ({
   return `${packageVersion}-${pipelineName}`;
 };
 
-// XXX: assumes path/to/file.ext -- 0..n '/' and exactly one '.'
-export const getNameAndExtension = (
-  path: string
-): {
-  name: string;
-  extension: string;
-} => {
-  const splitPath = path.split('/');
-  const filename = splitPath[splitPath.length - 1];
-  return {
-    name: filename.split('.')[0],
-    extension: filename.split('.')[1],
-  };
-};
-
 export function rewriteIngestPipeline(
   pipeline: string,
   substitutions: RewriteSubstitution[]
