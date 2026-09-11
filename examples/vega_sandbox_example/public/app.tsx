@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
 import type { Spec } from 'vega';
 import { compile } from 'vega-lite';
+import { v4 as uuidv4 } from 'uuid';
 import {
   isVegaSandboxOutboundMessage,
   VEGA_SANDBOX_PROTOCOL_VERSION,
@@ -146,7 +147,7 @@ const toComment = ({ direction, message }: ProtocolLogEntry): EuiCommentProps =>
     username,
     event: message.type,
     eventColor: isInbound ? 'primary' : 'success',
-    timelineAvatar: isInbound ? 'arrowRight' : 'arrowLeft',
+    timelineAvatar: isInbound ? 'chevronSingleRight' : 'chevronSingleLeft',
     timelineAvatarAriaLabel: username,
     children: (
       <EuiCodeBlock language="json" paddingSize="s" overflowHeight={200} isCopyable>
@@ -164,7 +165,7 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const renderCountRef = useRef(0);
   // Per-instance prefix prevents renderId collisions across multiple panels on a dashboard.
-  const renderPrefixRef = useRef(`${crypto.randomUUID()}-`);
+  const renderPrefixRef = useRef(`${uuidv4()}-`);
   const didInitRef = useRef(false);
   const renderSpecRef = useRef<(spec: Spec, extraEntries?: ProtocolLogEntry[]) => void>(() => {});
   const [frameSrc, setFrameSrc] = useState<string | undefined>();
@@ -319,7 +320,7 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
 
   const onReset = () => {
     renderCountRef.current = 0;
-    renderPrefixRef.current = `${crypto.randomUUID()}-`;
+    renderPrefixRef.current = `${uuidv4()}-`;
     didInitRef.current = false;
     setProtocolLog([]);
     setAppliedCategory(undefined);
