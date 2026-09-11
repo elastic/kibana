@@ -49,6 +49,7 @@ import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 import type { AiIndexResolver } from './ai_index_resolver';
+import type { AgentRegistry } from './registry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -311,6 +312,12 @@ export interface AgentHandlerContext {
    * Sub-agent executor for spawning child agent executions.
    */
   subAgentExecutor: SubAgentExecutor;
+  /**
+   * Agent registry scoped to the current user. Used to resolve peer agents by
+   * id — e.g. to look up descriptions for entries in `configuration.subagent_ids`
+   * when composing the `run_subagent` tool schema.
+   */
+  agentRegistry: AgentRegistry;
   /**
    * Conversation store client scoped to the current user. Prefer this over
    * issuing raw ES queries against the conversation index.

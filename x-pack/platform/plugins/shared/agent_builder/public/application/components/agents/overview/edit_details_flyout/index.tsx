@@ -42,6 +42,7 @@ import { AccessSection } from './access_section';
 import { CustomInstructionsSection } from './custom_instructions_section';
 import { CustomizationSection } from './customization_section';
 import { IdentificationSection } from './identification_section';
+import { SubagentsSection } from './subagents_section';
 import { TagsSection } from './tags_section';
 import type { EditDetailsFormData } from './types';
 
@@ -83,6 +84,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         post_execution_workflow_ids: agent.configuration?.post_execution_workflow_ids ?? [],
         instructions: agent.configuration?.instructions ?? '',
         ai_indices: agent.configuration?.ai_indices ?? [],
+        subagent_ids: agent.configuration?.subagent_ids ?? [],
       },
     },
     mode: 'onBlur',
@@ -107,6 +109,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
           post_execution_workflow_ids: data.configuration.post_execution_workflow_ids,
           instructions: data.configuration.instructions,
           ai_indices: data.configuration.ai_indices,
+          subagent_ids: data.configuration.subagent_ids,
         },
       }),
     onSuccess: () => {
@@ -172,6 +175,9 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
 
             <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} agentId={agent.id} />
+
+            <EuiHorizontalRule margin="xl" />
+            <SubagentsSection agentId={agent.id} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />

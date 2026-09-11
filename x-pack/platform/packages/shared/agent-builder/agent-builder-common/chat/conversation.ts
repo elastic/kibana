@@ -672,9 +672,30 @@ export interface ConversationInternalState {
   /** Active todo list for the current conversation. Replaced wholesale on each write. */
   todos?: TodoItem[];
   /**
-   * Map of persistent sub-agent name → child conversation id.
+   * Map of persistent sub-agent name → entry describing the child conversation
+   * and the agent id that backs it. The `agent_id` is what the parent's
+   * `subagent_ids` allowlist filters on when deciding whether `send_message`
+   * can still reach the child (§3.5 of the configurable-subagents design).
+   *
+   * `agent_id` is either a real agent id or the sentinel `SELF_AGENT_ID`
+   * (`'_self'`), stored as-is at creation time and matched by exact string.
    */
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
+}
+
+/**
+ * Value stored per persistent sub-agent name on the parent conversation's
+ * {@link ConversationInternalState.subagents} map.
+ */
+export interface SubagentEntry {
+  /** ID of the child conversation. */
+  conversation_id: string;
+  /**
+   * Agent id backing this persistent sub-agent — either a real agent id or
+   * the `SELF_AGENT_ID` sentinel. Written by `run_subagent` at persistent
+   * creation time using the LLM's `agent_id` choice.
+   */
+  agent_id: string;
 }
 
 export interface BackgroundExecutionCompletedAt {

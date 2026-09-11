@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { agentBuilderDefaultAgentId, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AgentAccessControlMode,
+  SELF_AGENT_ID,
+} from '@kbn/agent-builder-common';
 import type { AgentCreateRequest } from '../../../common/agents';
 
 export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
@@ -24,5 +28,7 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
     enable_elastic_capabilities: true,
     tools: [],
     skill_ids: [],
+    // Preserve today's self-fork behavior via the canonical sentinel.
+    subagent_ids: [SELF_AGENT_ID],
   },
 });

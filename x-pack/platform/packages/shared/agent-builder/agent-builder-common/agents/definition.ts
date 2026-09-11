@@ -152,6 +152,17 @@ export interface AgentConfiguration {
    * the accuracy and token efficiency.
    * */
   ai_indices?: string[];
+
+  /**
+   * Allowlist of agent ids this agent may spawn as sub-agents via the
+   * `run_subagent` tool. Entries are either real agent ids or the sentinel
+   * `SELF_AGENT_ID` (`'_self'`) which resolves to the executing agent itself.
+   *
+   * Missing / empty → the sub-agent tools (`run_subagent`, `send_message`,
+   * `sleep`) are not registered for this agent. Non-empty → the resolved,
+   * access-filtered list becomes the `agent_id` enum on `run_subagent`.
+   */
+  subagent_ids?: string[];
 }
 
 /**

@@ -17,6 +17,7 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/to
 import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { createSubagentTool } from './run_subagent';
 import { createSendMessageTool } from './send_message';
 import { createSleepTool } from './sleep';
@@ -62,6 +63,12 @@ export interface RegisterInternalToolsParams {
   subagentTracker: SubagentTracker;
   /** Existence probe for stale-entry recovery in persistent `run_subagent`. */
   conversationExists: (conversationId: string) => Promise<boolean>;
+  /**
+   * The persisted `configuration.subagent_ids` for the currently-executing agent.
+   * Passed through by the caller (`run_chat_agent.ts`) — the resolved,
+   * access-filtered allowlist is what drives sub-agent tool registration.
+   */
+  configuredSubagentIds?: string[];
 }
 
 /**
@@ -82,6 +89,7 @@ export const registerInternalTools = async ({
   parentConversationId,
   subagentTracker,
   conversationExists,
+  configuredSubagentIds,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -93,6 +101,7 @@ export const registerInternalTools = async ({
     interactivity,
     defaultConnectorId,
     subAgentExecutor,
+    agentRegistry,
     analyticsService,
     trackingService,
     filesystemService,
@@ -130,31 +139,47 @@ export const registerInternalTools = async ({
 
   // run_subagent + send_message + sleep — experimental; reserved for top-level
   // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
+  // All three share the same registration gate: the parent agent's resolved
+  // `subagent_ids` allowlist must be non-empty. Per-call reachability for
+  // `send_message` is enforced in the handler (§3.5 of the design).
   if (experimentalFeatures.subagents && canSpawnSubagents) {
-    tools.push(
-      createSubagentTool({
-        agentId: agentId ?? agentBuilderDefaultAgentId,
-        executionId: executionId ?? '',
-        connectorId: defaultConnectorId,
-        subAgentExecutor,
-        abortSignal,
-        backgroundExecutionService,
-        parentConversationId,
-        subagentTracker,
-        conversationExists,
-      })
-    );
-    tools.push(
-      createSendMessageTool({
-        agentId: agentId ?? agentBuilderDefaultAgentId,
-        executionId: executionId ?? '',
-        subAgentExecutor,
-        abortSignal,
-        backgroundExecutionService,
-        subagentTracker,
-      })
-    );
-    tools.push(createSleepTool());
+    const allowedSubagents = await resolveAllowedSubagents({
+      configuredIds: configuredSubagentIds ?? [],
+      agentRegistry,
+      logger,
+    });
+
+    if (allowedSubagents.length > 0) {
+      const allowedIds = new Set(allowedSubagents.map((a) => a.id));
+      const ownerAgentId = agentId ?? agentBuilderDefaultAgentId;
+
+      tools.push(
+        createSubagentTool({
+          ownerAgentId,
+          allowedSubagents,
+          executionId: executionId ?? '',
+          connectorId: defaultConnectorId,
+          subAgentExecutor,
+          abortSignal,
+          backgroundExecutionService,
+          parentConversationId,
+          subagentTracker,
+          conversationExists,
+        })
+      );
+      tools.push(
+        createSendMessageTool({
+          agentId: ownerAgentId,
+          executionId: executionId ?? '',
+          subAgentExecutor,
+          abortSignal,
+          backgroundExecutionService,
+          subagentTracker,
+          allowedIds,
+        })
+      );
+      tools.push(createSleepTool());
+    }
   }
 
   // ask_user_question — not available in standalone mode.

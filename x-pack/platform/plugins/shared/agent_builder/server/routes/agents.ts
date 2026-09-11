@@ -87,6 +87,22 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
   }
 );
 
+const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: {
+      description:
+        "Agent id this agent may spawn as a sub-agent via `run_subagent`. Use '_self' to enable self-fork.",
+    },
+  }),
+  {
+    maxSize: 50,
+    meta: {
+      description:
+        "Allowlist of sub-agent ids this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+    },
+  }
+);
+
 const AI_INDICES_NOT_ENABLED_MESSAGE =
   '[request body.configuration.ai_indices]: the Context Engine is not enabled. Set contextEngine:enabled to true to enable it.';
 
@@ -351,6 +367,7 @@ export function registerAgentRoutes({
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
+                  subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -501,6 +518,7 @@ export function registerAgentRoutes({
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                     ai_indices: schema.maybe(AI_INDICES_SCHEMA),
+                    subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

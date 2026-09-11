@@ -13,6 +13,7 @@ import {
   ToolType,
   isRoundCompleteEvent,
   internalTools,
+  SELF_AGENT_ID,
   SubagentExecutionMode,
   SubagentMode,
 } from '@kbn/agent-builder-common';
@@ -20,41 +21,15 @@ import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_
 import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
+import type { ResolvedSubagent } from '../../../agents/utils/resolve_allowed_subagents';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
-const schema = z.object({
-  description: z.string().describe('A short (3-5 word) description of the task'),
-  prompt: z.string().describe('The task for the agent to perform'),
-  mode: z
-    .enum([SubagentMode.transient, SubagentMode.persistent])
-    .optional()
-    .describe(
-      '"transient" (default) to create a one-off sub-agent or "persistent" to create a named session you can address later via send_message.'
-    ),
-  name: z
-    .string()
-    .optional()
-    .describe(
-      'For persistent agents - unique Identifier for the sub-agent. Defaults to "subagent".'
-    ),
-  run_in_background: z
-    .boolean()
-    .optional()
-    .describe(
-      'Set to true to run this agent in the background. You will be notified when it completes.'
-    ),
-  effort: z
-    .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
-    .optional()
-    .describe('The effort level of the task.'),
-});
+const BASE_TOOL_DESCRIPTION = `Start a sub-agent to perform a specific task.
 
-const toolDescription = `Start a sub-agent to perform a specific task.
-
-The sub-agent runs with the same configuration as the current agent. Use this to delegate complex sub-tasks.
+Delegate a complex sub-task to another agent execution. Pick the target from \`agent_id\`; each option corresponds to a peer agent you're allowed to invoke.
 
 The effort level will be used to select the model - "low" means a faster and smaller model, "high" means a slower and more powerful model. Choose accordingly.
 
@@ -95,8 +70,25 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
   - Users will **not** be automatically notified when the execution complete. You have to inform them about it.
 `;
 
+/**
+ * Orders the allowlist so that `_self` (when present) sits first — makes the
+ * self-fork option easy to spot in the tool schema description.
+ */
+const orderAllowedWithSelfFirst = (list: ResolvedSubagent[]): ResolvedSubagent[] => {
+  const self = list.find((r) => r.id === SELF_AGENT_ID);
+  const rest = list.filter((r) => r.id !== SELF_AGENT_ID);
+  return self ? [self, ...rest] : rest;
+};
+
+/** Builds the tool description with the per-id allowlist enumeration on top. */
+const buildToolDescription = (allowed: ResolvedSubagent[]): string => {
+  const lines = allowed.map((a) => `- ${a.id}: ${a.description}`).join('\n');
+  return `${BASE_TOOL_DESCRIPTION}\nAvailable sub-agents:\n${lines}\n`;
+};
+
 export const createSubagentTool = ({
-  agentId,
+  ownerAgentId,
+  allowedSubagents,
   executionId: parentExecutionId,
   connectorId,
   subAgentExecutor,
@@ -106,7 +98,17 @@ export const createSubagentTool = ({
   subagentTracker,
   conversationExists,
 }: {
-  agentId: string;
+  /**
+   * Id of the agent currently executing (the "owner") — used to resolve the
+   * `_self` sentinel to a real id at the executor call seam.
+   */
+  ownerAgentId: string;
+  /**
+   * Resolved, access-filtered allowlist. Non-empty (empty case is filtered by
+   * the registrar before this factory is invoked). Each entry's `id` is either
+   * a real agent id or the `SELF_AGENT_ID` sentinel.
+   */
+  allowedSubagents: ResolvedSubagent[];
   executionId: string;
   connectorId?: string;
   subAgentExecutor: SubAgentExecutor;
@@ -118,17 +120,67 @@ export const createSubagentTool = ({
   subagentTracker?: SubagentTracker;
   /** Existence probe for stale-entry recovery. */
   conversationExists?: (id: string) => Promise<boolean>;
-}): InternalBuiltinToolDefinition<typeof schema> => {
-  return {
+}) => {
+  const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
+  const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
+  const allowedIdsSet = new Set(allowedIds);
+
+  const schema = z.object({
+    agent_id: z
+      .enum(allowedIds)
+      .describe(
+        'Id of the sub-agent to delegate to. Must be one of the ids listed in the tool description.'
+      ),
+    description: z.string().describe('A short (3-5 word) description of the task'),
+    prompt: z.string().describe('The task for the agent to perform'),
+    mode: z
+      .enum([SubagentMode.transient, SubagentMode.persistent])
+      .optional()
+      .describe(
+        '"transient" (default) to create a one-off sub-agent or "persistent" to create a named session you can address later via send_message.'
+      ),
+    name: z
+      .string()
+      .optional()
+      .describe(
+        'For persistent agents - unique Identifier for the sub-agent. Defaults to "subagent".'
+      ),
+    run_in_background: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true to run this agent in the background. You will be notified when it completes.'
+      ),
+    effort: z
+      .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
+      .optional()
+      .describe('The effort level of the task.'),
+  });
+
+  const tool: InternalBuiltinToolDefinition<typeof schema> = {
     id: SubAgentToolName,
-    description: toolDescription,
+    description: buildToolDescription(orderedAllowed),
     type: ToolType.builtin,
     schema,
     tags: ['subagent'],
     handler: async (
-      { description, prompt, run_in_background = false, effort = 'medium', mode, name },
+      { agent_id, description, prompt, run_in_background = false, effort = 'medium', mode, name },
       { events, modelProvider }
     ) => {
+      // Defense-in-depth: reject an off-enum agent_id even though Zod should
+      // already have filtered it. Compare by sentinel-shaped string so
+      // `_self` matches `_self` and real ids match real ids.
+      if (!allowedIdsSet.has(agent_id)) {
+        return {
+          results: [createErrorResult(`Agent id "${agent_id}" is not in this agent's allowlist.`)],
+        };
+      }
+
+      // Sentinel substitution happens at exactly this seam: the tracker,
+      // events, and prompt all continue to speak in sentinel terms; only the
+      // executor sees the real id.
+      const resolvedAgentId = agent_id === SELF_AGENT_ID ? ownerAgentId : agent_id;
+
       const fullPrompt = `${description}\n\n${prompt}`;
       const isPersistent = mode === SubagentMode.persistent;
 
@@ -153,7 +205,9 @@ export const createSubagentTool = ({
           // Uniqueness check: name must not point to a live child.
           const existing = subagentTracker.get(finalName);
           if (existing) {
-            const stillExists = conversationExists ? await conversationExists(existing) : true;
+            const stillExists = conversationExists
+              ? await conversationExists(existing.conversation_id)
+              : true;
             if (stillExists) {
               return {
                 results: [
@@ -173,7 +227,7 @@ export const createSubagentTool = ({
           const newChildId = uuidv4();
 
           const { executionId, events$ } = await subAgentExecutor.createSubAgent({
-            agentId,
+            agentId: resolvedAgentId,
             parentConversationId,
             parentExecutionId,
             subagentName: finalName,
@@ -184,10 +238,14 @@ export const createSubagentTool = ({
             ...(run_in_background ? {} : { abortSignal }),
           });
 
+          // Store the entry with the sentinel-shaped agent_id (not the
+          // resolved real id) so the reachability check in send_message
+          // matches whichever form the parent's allowlist holds.
           subagentTracker.register({
             name: finalName,
             purpose: description,
             conversation_id: newChildId,
+            agent_id,
           });
 
           events.reportProgress(`Sub-agent execution ${executionId} started`, {
@@ -220,9 +278,9 @@ export const createSubagentTool = ({
           };
         }
 
-        // Transient path — unchanged behavior.
+        // Transient path.
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
-          agentId,
+          agentId: resolvedAgentId,
           connectorId: selectedConnectorId,
           parentExecutionId,
           prompt: fullPrompt,
@@ -271,6 +329,8 @@ export const createSubagentTool = ({
       }
     },
   };
+
+  return tool;
 };
 
 /**
