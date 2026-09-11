@@ -78,6 +78,9 @@ export class ConversationServiceImpl implements ConversationService {
       onMetadataPatched: eventBus
         ? (payload) => eventBus.emitMetadataPatched(request, payload)
         : undefined,
+      onAttachmentsChanged: eventBus
+        ? (payload) => eventBus.emitAttachmentsChanged(request, payload)
+        : undefined,
     });
   }
 
