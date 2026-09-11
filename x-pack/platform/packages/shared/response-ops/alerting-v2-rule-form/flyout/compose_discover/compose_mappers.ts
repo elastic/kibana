@@ -16,7 +16,7 @@ import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from '../../form/utils/state_transition_helpers';
-import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
+import { isRecoveryEnabled, resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
 
 const DELAY_IMMEDIATE = 'immediate';
@@ -42,15 +42,17 @@ const mapStateTransition = (formValues: FormValues) => {
     if (stateTransition?.pendingCount != null) out.pending_count = stateTransition.pendingCount;
   }
 
-  if (recoveryMode === DELAY_IMMEDIATE) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_DURATION) {
-    if (stateTransition?.recoveringTimeframe != null)
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    if (stateTransition?.recoveringCount != null)
+  if (isRecoveryEnabled(formValues)) {
+    if (recoveryMode === DELAY_IMMEDIATE) {
+      out.recovering_count = 0;
+    } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
+    } else if (recoveryMode === DELAY_DURATION) {
+      if (stateTransition?.recoveringTimeframe != null)
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      if (stateTransition?.recoveringCount != null)
+        out.recovering_count = stateTransition.recoveringCount;
+    }
   }
 
   return Object.keys(out).length ? out : undefined;

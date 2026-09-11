@@ -6,10 +6,10 @@
  */
 
 export type {
-  ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
   ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './contract';
