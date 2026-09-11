@@ -35,6 +35,7 @@ export interface UseCustomContentHtmlParams {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
+  setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
 }
 
 export interface UseCustomContentHtmlResult {
@@ -58,6 +59,7 @@ export function useCustomContentHtml({
   query,
   filters,
   esqlVariables,
+  setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [processedHtml, setProcessedHtml] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -89,7 +91,10 @@ export function useCustomContentHtml({
       setIsLoading(true);
       setError(undefined);
       fetchEsqlData(search, http, esqlQuery, timeRange, controller.signal, fetchOptions)
-        .then((response) => fillTemplate(template, response.columns, response.values ?? []))
+        .then((response) => {
+          if (!controller.signal.aborted) setApproximationApplied?.(response.approximation_applied);
+          return fillTemplate(template, response.columns, response.values ?? []);
+        })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
           setProcessedHtml(sanitizeHtml(rawHtml));
@@ -97,6 +102,7 @@ export function useCustomContentHtml({
         })
         .catch((err: Error) => {
           if (controller.signal.aborted || err.name === 'AbortError') return;
+          setApproximationApplied?.(undefined);
           setError(err.message || RENDER_ERROR_MESSAGE);
           setIsLoading(false);
         });
@@ -104,6 +110,7 @@ export function useCustomContentHtml({
       return () => controller.abort();
     }
 
+    setApproximationApplied?.(undefined);
     setProcessedHtml('');
     setError(undefined);
     setIsLoading(false);
@@ -121,6 +128,7 @@ export function useCustomContentHtml({
     http,
     uiSettings,
     search,
+    setApproximationApplied,
   ]);
 
   const html = useMemo(

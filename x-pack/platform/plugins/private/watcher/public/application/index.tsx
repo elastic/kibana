@@ -7,24 +7,25 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaRenderContextProvider } from './shared_imports';
 import type { AppDeps } from './app';
 import { App } from './app';
 import { setHttpClient } from './lib/api';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
+  rendering: CoreStart['rendering'];
 }
 
 export const renderApp = (bootDeps: BootDeps) => {
-  const { element, ...appDeps } = bootDeps;
+  const { element, rendering, ...appDeps } = bootDeps;
 
   setHttpClient(appDeps.http);
 
   render(
-    <KibanaRenderContextProvider {...appDeps}>
+    rendering.addContext(
       <KibanaContextProvider
         services={{
           uiSettings: bootDeps.uiSettings,
@@ -34,7 +35,7 @@ export const renderApp = (bootDeps: BootDeps) => {
       >
         <App {...appDeps} />
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

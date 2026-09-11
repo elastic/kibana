@@ -1,5 +1,5 @@
 {
-  "sha1": "7691aefe097afcc0e80d15868a2fb2c4eb8b3afc",
+  "sha1": "06f359c9d6a82e57506ad29d15938993b1b5a123",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -866,13 +866,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_placement.spec.ts",
-        "line": 83,
+        "line": 81,
         "column": 51
       }
     },
     {
       "id": "6faf871c5041796-a511d209d7cca3e",
-      "title": "ScalablePrivateLocationRebalance moves a stale agent\u2019s monitors to the survivor with no drops and a revision bump",
+      "title": "ScalablePrivateLocationRebalance moves a stale agent’s monitors to the survivor with no drops and a revision bump",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

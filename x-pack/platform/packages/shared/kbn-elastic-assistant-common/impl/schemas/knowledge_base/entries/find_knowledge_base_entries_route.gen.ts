@@ -35,27 +35,48 @@ export const FindKnowledgeBaseEntriesRequestQuery = lazySchema(() =>
     /**
      * A list of fields to include in the response. If not provided, all fields will be included.
      */
-    fields: ArrayFromString(z.string()).optional(),
+    fields: ArrayFromString(z.string())
+      .optional()
+      .describe(
+        'A list of fields to include in the response. If not provided, all fields will be included.'
+      ),
     /**
      * Search query to filter Knowledge Base Entries by specific criteria.
      */
-    filter: z.string().optional(),
+    filter: z
+      .string()
+      .optional()
+      .describe('Search query to filter Knowledge Base Entries by specific criteria.'),
     /**
      * Field to sort the Knowledge Base Entries by.
      */
-    sort_field: FindKnowledgeBaseEntriesSortField.optional(),
+    sort_field: FindKnowledgeBaseEntriesSortField.optional().describe(
+      'Field to sort the Knowledge Base Entries by.'
+    ),
     /**
      * Sort order for the results, either asc or desc.
      */
-    sort_order: SortOrder.optional(),
+    sort_order: SortOrder.optional().describe('Sort order for the results, either asc or desc.'),
     /**
      * Page number for paginated results. Defaults to 1.
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Page number for paginated results. Defaults to 1.'),
     /**
      * Number of Knowledge Base Entries to return per page. Defaults to 20.
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(20)
+      .describe('Number of Knowledge Base Entries to return per page. Defaults to 20.'),
   })
 );
 export type FindKnowledgeBaseEntriesRequestQuery = z.infer<
@@ -70,19 +91,21 @@ export const FindKnowledgeBaseEntriesResponse = lazySchema(() =>
     /**
      * The current page number.
      */
-    page: z.number().int(),
+    page: z.number().int().describe('The current page number.'),
     /**
      * The number of Knowledge Base Entries returned per page.
      */
-    perPage: z.number().int(),
+    perPage: z.number().int().describe('The number of Knowledge Base Entries returned per page.'),
     /**
      * The total number of Knowledge Base Entries available.
      */
-    total: z.number().int(),
+    total: z.number().int().describe('The total number of Knowledge Base Entries available.'),
     /**
      * The list of Knowledge Base Entries for the current page.
      */
-    data: z.array(KnowledgeBaseEntryResponse),
+    data: z
+      .array(KnowledgeBaseEntryResponse)
+      .describe('The list of Knowledge Base Entries for the current page.'),
   })
 );
 export type FindKnowledgeBaseEntriesResponse = z.infer<typeof FindKnowledgeBaseEntriesResponse>;
