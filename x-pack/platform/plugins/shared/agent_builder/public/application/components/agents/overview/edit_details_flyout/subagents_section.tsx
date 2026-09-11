@@ -64,10 +64,11 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
   agentId,
 }) => {
   const experimentalOn = useExperimentalFeatures();
-  const { data: agents } = useAgentBuilderAgents();
+  const { agents } = useAgentBuilderAgents();
 
-  const { control, setValue, getValues } = useFormContext();
+  const { control, getValues, formState } = useFormContext();
   const checkboxId = useGeneratedHtmlId({ prefix: 'subagentsEnable' });
+  const subagentIdsError = (formState.errors as Record<string, any>)?.configuration?.subagent_ids;
 
   // The initial checkbox state is derived from persisted data; during
   // editing it is a proper UI state so emptying the picker does NOT
@@ -103,7 +104,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.agentBuilder.subagents.description', {
           defaultMessage:
-            'Allow this agent to delegate tasks to other agents via the run_subagent tool. When disabled, the tool is not exposed.',
+            'Allow this agent to delegate tasks to other agents. When disabled, this agent cannot spawn sub-agents.',
         })}
       </EuiText>
       <EuiSpacer size="s" />
@@ -131,10 +132,6 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
                   } else {
                     onChange([]);
                   }
-                  // Ensure the form state's dirty flag flips.
-                  setValue(fieldName, nowEnabled ? [SELF_AGENT_ID] : [], {
-                    shouldDirty: true,
-                  });
                 }}
                 data-test-subj="subagentsEnableCheckbox"
               />
@@ -152,6 +149,8 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
                           "Pick the agents this one may spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
                       }
                     )}
+                    isInvalid={!!subagentIdsError}
+                    error={subagentIdsError?.message as string | undefined}
                     fullWidth
                   >
                     <EuiComboBox

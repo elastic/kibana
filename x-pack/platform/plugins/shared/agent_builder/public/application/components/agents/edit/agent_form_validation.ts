@@ -144,6 +144,6 @@ export const agentFormSchema = z.object({
     plugin_ids: z.array(z.string()).optional(),
     connector_ids: z.array(z.string()).optional(),
     ai_indices: z.array(z.string()).optional(),
-    subagent_ids: z.array(z.string()).optional(),
+    subagent_ids: z.array(z.string()).default([]),
   }),
 });
