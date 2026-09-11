@@ -75,6 +75,18 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
+  const { data: securityHubData, refetch: securityHubRefetch } = useGetPackageInfoByKeyQuery(
+    'aws_securityhub',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+    const { data: firehoseData, refetch: firehoseRefetch } = useGetPackageInfoByKeyQuery(
+    'awsfirehose',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
 
   const matrix = useMemo(() => {
     if (!awsData?.item) {
@@ -90,6 +102,8 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       ...(cloudwatchOtelData?.item && {
         aws_cloudwatch_input_otel: cloudwatchOtelData.item,
       }),
+      ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
+      ...(firehoseData?.item && { awsfirehose: firehoseData.item }),
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
   }, [
@@ -100,6 +114,8 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     mqData,
     logsData,
     cloudwatchOtelData,
+    securityHubData,
+    firehoseData,
   ]);
 
   const refetch = useCallback(() => {
@@ -110,6 +126,8 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     mqRefetch();
     logsRefetch();
     cloudwatchOtelRefetch();
+    securityHubRefetch();
+    firehoseRefetch();
   }, [
     awsRefetch,
     bedrockRefetch,
@@ -118,6 +136,8 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     mqRefetch,
     logsRefetch,
     cloudwatchOtelRefetch,
+    securityHubRefetch,
+    firehoseRefetch,
   ]);
 
   return { matrix, isError: awsIsError, refetch };

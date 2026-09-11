@@ -298,10 +298,11 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     ecfDedicatedTemplate: 'otel',
     inputs: ['aws-s3'],
   },
-  {
-    id: 'securityhub',
+  // aws_securityhub replaces securityhub policy template in aws (legacy)
+    {
+    id: 'aws_securityhub',
     category: 'security_identity_compliance',
-    packageName: 'aws',
+    packageName: 'aws_securityhub',
   },
   {
     id: 'waf',
@@ -332,8 +333,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'cloudfront',
     category: 'networking_content_delivery',
     // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
-    showInUI: false,
+    // TODO enable ecf deployment method when supported
     packageName: 'aws',
   },
   {
@@ -469,18 +469,24 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
 
+  // ── awsfirehose package — Analytics ─────────────────────────────────────
+  {
+    id: 'awsfirehose',
+    name: 'AWS Firehose',
+    category: 'analytics',
+    packageName: 'awsfirehose',
+  },
+
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'aws_bedrock',
     category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
-  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'aws_bedrock_agentcore',
     category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
-    showInUI: false,
   },
 
   // ── awsfargate package — Containers ─────────────────────────────────────
@@ -491,12 +497,10 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
 
   // ── aws_mq package — application_integration ────────────────────────────
-  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'amazon_mq',
     category: 'application_integration',
     packageName: 'aws_mq',
-    showInUI: false,
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
@@ -720,7 +724,8 @@ function deriveUnionConfig(varDefsByInput: Record<string, Record<string, Registr
  */
 function buildDeploymentMethods(
   staticMethods: DeploymentMethodEntry[] | undefined,
-  managedIntegrations: boolean
+  managedIntegrations: boolean,
+  agentBasedFallback: boolean = false
 ): DeploymentMethodEntry[] {
   const methods: DeploymentMethodEntry[] = [];
   if (managedIntegrations) {
@@ -732,6 +737,10 @@ function buildDeploymentMethods(
         ? staticMethods.map((m) => ({ ...m, preferred: false }))
         : staticMethods)
     );
+  }
+  // When nothing else applies and the entry is not ECF-only, agent_based is the fallback.
+  if (methods.length === 0 && agentBasedFallback) {
+    methods.push({ method: 'agent_based', preferred: true });
   }
   if (!managedIntegrations && methods.length > 0 && !methods.some((dm) => dm.preferred)) {
     methods[0] = { ...methods[0], preferred: true };
@@ -835,7 +844,13 @@ export function buildAwsServiceMatrix(
           signalTypesSet.add(ptType as SignalType);
         }
 
-        const ptDataStreamIds: string[] = (pt as any).data_streams ?? [];
+        // When the PT doesn't list data_streams explicitly (e.g. single-PT packages like
+        // aws_securityhub, aws_bedrock), fall back to all package-level data streams.
+        // Packages like `aws` always list data_streams per PT, so the fallback never fires there.
+        const ptDataStreamIds: string[] =
+          (pt as any).data_streams?.length > 0
+            ? (pt as any).data_streams
+            : (packageInfo.data_streams ?? []).map((ds: any) => ds.path as string);
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
@@ -937,7 +952,7 @@ export function buildAwsServiceMatrix(
     }
 
     const signalTypes: SignalType[] = [...signalTypesSet];
-    const deploymentMethods = buildDeploymentMethods(staticMethods, managedIntegrations);
+    const deploymentMethods = buildDeploymentMethods(staticMethods, managedIntegrations, !entry.ecfOnly);
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
     const ecfConfig = applyEcfOnlyConfig(
