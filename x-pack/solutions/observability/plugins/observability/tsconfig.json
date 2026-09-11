@@ -159,6 +159,7 @@
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
     "@kbn/cps",
+    "@kbn/cps-utils",
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
     "@kbn/core-spaces-common",
@@ -166,7 +167,6 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/global-search-plugin",
     "@kbn/nightshift-investigations-plugin",
-    "@kbn/zod",
     "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]

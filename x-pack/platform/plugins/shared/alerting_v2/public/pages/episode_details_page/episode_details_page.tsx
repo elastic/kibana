@@ -24,7 +24,9 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -47,12 +49,12 @@ import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
+import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -136,10 +138,19 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
-  useEpisodeAutoAttach(episode, {
-    ruleName: episodeRuleName,
-    groupingFields,
-  });
+  useEpisodeAutoAttach(
+    episode,
+    {
+      ruleName: episodeRuleName,
+      groupingFields,
+    },
+    {
+      chrome: useService(CoreStart('chrome')),
+      agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+        | AgentBuilderPluginStart
+        | undefined,
+    }
+  );
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

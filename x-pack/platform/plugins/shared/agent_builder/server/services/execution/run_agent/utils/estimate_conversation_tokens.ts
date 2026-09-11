@@ -8,7 +8,8 @@
 import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { ProcessedConversationRound } from './prepare_conversation';
+import type { ProcessedTimelineEvent } from './context_timeline';
+import { groupTimelineRounds } from './context_timeline';
 import type { ToolSummarizationDeps } from './tool_summarization';
 import { createSummarizationTransformer } from './tool_summarization';
 import { roundToLangchain } from './to_langchain_messages';
@@ -47,13 +48,14 @@ export const estimateMessagesTokens = (messages: BaseMessage[]): number => {
   return total;
 };
 
+/** Token estimates for the timeline's rounds, in round order (the order compaction indexes). */
 export const estimatePerRoundTokens = async (
-  rounds: ProcessedConversationRound[],
+  timeline: ProcessedTimelineEvent[],
   deps: ToolSummarizationDeps
 ): Promise<number[]> => {
   const resultTransformer = createSummarizationTransformer(deps);
   return Promise.all(
-    rounds.map(async (round) =>
+    groupTimelineRounds(timeline).map(async (round) =>
       estimateMessagesTokens(await roundToLangchain(round, { resultTransformer }))
     )
   );
