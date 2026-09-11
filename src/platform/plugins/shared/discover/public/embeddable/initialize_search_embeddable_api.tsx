@@ -171,7 +171,7 @@ export const initializeSearchEmbeddableApi = async ({
     getProjectRoutingOverrides(initialQuery)
   );
   const esql$ = new BehaviorSubject<AggregateQuery[]>(
-    isOfAggregateQueryType(initialQuery) ? [initialQuery as AggregateQuery] : []
+    isOfAggregateQueryType(initialQuery) ? [initialQuery] : []
   );
   const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
@@ -294,7 +294,7 @@ export const initializeSearchEmbeddableApi = async ({
       projectRoutingOverrides$.next(nextOverrides);
     }
 
-    const nextEsql = isOfAggregateQueryType(query) ? [query as AggregateQuery] : [];
+    const nextEsql = isOfAggregateQueryType(query) ? [query] : [];
     if (!deepEqual(esql$.getValue(), nextEsql)) {
       esql$.next(nextEsql);
       if (nextEsql.length === 0) approximationApplied$.next(undefined);

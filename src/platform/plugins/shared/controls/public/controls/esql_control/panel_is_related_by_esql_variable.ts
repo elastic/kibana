@@ -32,5 +32,5 @@ export const panelIsRelatedByEsqlVariable = ({
         getESQLQueryVariables(q.esql).includes(selfESQLVariable.key)
       );
     },
-  } satisfies RelatedPanelsConfig<typeof dependentObservables, [AggregateQuery[]]>;
+  } satisfies RelatedPanelsConfig<typeof dependentObservables, [AggregateQuery[] | undefined]>;
 };
