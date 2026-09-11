@@ -56,6 +56,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.ml}.query_anomalies`,
 
   // Security Solution
+  `${internalNamespaces.security}.alertzero.actions.list_by_category`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
