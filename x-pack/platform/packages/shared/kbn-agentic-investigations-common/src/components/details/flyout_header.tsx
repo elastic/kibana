@@ -6,64 +6,65 @@
  */
 
 import React, { memo } from 'react';
+import moment from 'moment';
+import { FormattedRelative } from '@kbn/i18n-react';
 import {
-  EuiFlyoutHeader,
-  EuiButtonIcon,
-  EuiToolTip,
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextTruncate,
+  EuiTitle,
 } from '@elastic/eui';
+import type { Investigation } from '../../types';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { InvestigationHeaderBlocks } from './header_blocks';
 
-export const ConversationDetailsFlyoutHeader: React.FC<{ onClose: () => void }> = memo(
-  ({ onClose }) => {
-    const { euiTheme } = useEuiTheme();
+export interface ConversationDetailsFlyoutHeaderProps {
+  investigation: Investigation;
+  statusOptions: readonly string[];
+  onChangeStatus?: (status: string) => void;
+  onChangeAssignee?: (assignee: string) => void;
+}
+
+const formatSince = (isoTimestamp: string): string =>
+  DETAILS_FLYOUT_LABELS.header.since(moment(isoTimestamp).format('HH:mm'));
+
+/**
+ * Header slot content. Agent Builder renders this inside its own `EuiFlyoutHeader` and points the
+ * flyout's `aria-labelledby` at it, so the title text has to live here.
+ */
+export const ConversationDetailsFlyoutHeader = memo<ConversationDetailsFlyoutHeaderProps>(
+  ({ investigation, statusOptions, onChangeStatus, onChangeAssignee }) => {
+    const { title, createdAt } = investigation;
+
     return (
-      <EuiFlyoutHeader hasBorder css={{ paddingBlock: `${euiTheme.size.m} !important` }}>
-        <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={DETAILS_FLYOUT_LABELS.header.flyoutMenu.share}
-              disableScreenReaderOutput
-              display="inlineBlock"
-            >
-              <EuiButtonIcon
-                aria-label={DETAILS_FLYOUT_LABELS.header.flyoutMenu.share}
-                iconType="share"
-                color="text"
-                onClick={() => {
-                  // TODO: Implement if needed
-                }}
-              />
-            </EuiToolTip>
+      <>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2>
+                <EuiTextTruncate text={title} />
+              </h2>
+            </EuiTitle>
           </EuiFlexItem>
-          <div
-            style={{
-              display: ' inline-block',
-              width: '1px',
-              height: euiTheme.size.base,
-              background: euiTheme.colors.lightShade,
-            }}
-          />
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={DETAILS_FLYOUT_LABELS.header.flyoutMenu.close}
-              disableScreenReaderOutput
-              display="inlineBlock"
-            >
-              <EuiButtonIcon
-                aria-label={DETAILS_FLYOUT_LABELS.header.flyoutMenu.close}
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-              />
-            </EuiToolTip>
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued">
+              <span>{formatSince(createdAt)}</span>
+              {'('}
+              <FormattedRelative value={createdAt} />
+              {')'}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyoutHeader>
+        <EuiSpacer size="m" />
+        <InvestigationHeaderBlocks
+          investigation={investigation}
+          statusOptions={statusOptions}
+          onChangeStatus={onChangeStatus}
+          onChangeAssignee={onChangeAssignee}
+        />
+      </>
     );
   }
 );
