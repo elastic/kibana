@@ -63,6 +63,30 @@ MISSING_REASONS = {
     "zai-glm-5-2": "connector blocked by upstream issue #288469",
 }
 
+# Golden model ids mix two spellings: EIS connector runs emit dash-separated
+# ids (anthropic-claude-4-5-haiku), older/local runs emit dotted ids that match
+# the reference board (anthropic-claude-4.5-haiku). Normalise both to the
+# reference spelling so one model cannot appear as two rows.
+ALIASES = {
+    "anthropic-claude-4-5-haiku": "anthropic-claude-4.5-haiku",
+    "anthropic-claude-4-5-opus": "anthropic-claude-4.5-opus",
+    "anthropic-claude-4-6-opus": "anthropic-claude-4.6-opus",
+    "anthropic-claude-4-6-sonnet": "anthropic-claude-4.6-sonnet",
+    "anthropic-claude-4-7-opus": "anthropic-claude-4.7-opus",
+    "anthropic-claude-4-8-opus": "anthropic-claude-4.8-opus",
+    "google-gemini-2-5-flash": "google-gemini-2.5-flash",
+    "google-gemini-2-5-flash-lite": "google-gemini-2.5-flash-lite",
+    "google-gemini-2-5-pro": "google-gemini-2.5-pro",
+    "google-gemini-3-1-pro": "google-gemini-3.1-pro",
+    "openai-gpt-5-2": "openai-gpt-5.2",
+    "openai-gpt-5-4": "openai-gpt-5.4",
+    "openai-gpt-5-4-mini": "openai-gpt-5.4-mini",
+    "openai-gpt-5-4-nano": "openai-gpt-5.4-nano",
+    "openai-gpt-5-5": "openai-gpt-5.5",
+    "deepseek/deepseek-v4-pro-0813": "deepseek/deepseek-v4-pro",
+    "openai/gpt-5.6-sol": "openai-gpt-5.6-sol",
+}
+
 
 def esc(s):
     return html.escape(str(s)) if s is not None else ""
@@ -77,7 +101,12 @@ def cell_status(cell):
 
 
 def render(traces, out, since, extra_missing=None):
-    cells = traces["cells"]
+    cells_raw = traces["cells"]
+    # normalise model ids to reference spelling (see ALIASES)
+    cells = {}
+    for k, v in cells_raw.items():
+        m, p = k.split(":", 1)
+        cells[f"{ALIASES.get(m, m)}:{p}"] = v
     meta = traces["meta"]
     covered = sorted({m for m, _ in (k.split(":", 1) for k in cells)})
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -208,7 +237,7 @@ code {{ font-family:ui-monospace,monospace; }}
 <li>Tool args: {n_args}/{n_tool} tool steps carry <code>gen_ai.tool.call.arguments</code> — captured via <code>--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true</code> in Kibana boot args (grep-verified in the runs' scout logs). Steps without args render an explicit "(args not captured)" marker — never invented. Historical runs predate this flag (383,098 tool steps, 100% null args).</li>
 <li>Cells: {n_cells} of {len(REFERENCE_MODELS) * len(PROMPT_IDS)} reference-model cells have data. Final answers present in {n_ans} cells with data.</li>
 <li>Multi-execution models (retry runs): each (model, prompt) cell renders the most-doc'd single execution — one real execution per cell, never a blend. Cells missing in a model's executions render blank with a "no score doc" tooltip.</li>
-<li>openai-gpt-oss-20b: no single execution completed all 21 prompts (best 16/21; prompt <code>alert-analysis-a</code> failed in all 4 attempts — deterministic for this model). Coverage per cell is visible in the scoreboard.</li>
+<li>openai-gpt-oss-20b: no single execution completed all 21 prompts (best single: 16/21; scatter across attempts). All 21 prompts have data only when taking the best execution per prompt — each cell is one real execution, and the selection is disclosed here rather than hidden.</li>
 <li>Models listed below the scoreboard have no EIS connector (or are blocked) — disclosed, not back-filled.</li>
 <li>The reference board (2026-08-26, 33 models, 693 cards) was rendered from run JSONL; this recreation is from golden docs, so counts differ where golden coverage differs. Judge: eis-google-gemini-3-1-pro.</li>
 </ul>
