@@ -11,6 +11,7 @@ import type {
   MatchActionPoliciesForRuleResponse,
   MatchedActionPolicy,
 } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
@@ -46,7 +47,7 @@ export const useMatchedActionPolicies = ({
     queryKey: ['matchedActionPolicies', ruleId, name, tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesForRuleResponse>(
-        '/api/alerting/v2/action_policies/_match_for_rule',
+        `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`,
         { method: 'POST', body: JSON.stringify(body) }
       ),
     enabled,

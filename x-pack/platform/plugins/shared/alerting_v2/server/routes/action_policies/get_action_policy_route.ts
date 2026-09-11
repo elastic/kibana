@@ -36,6 +36,7 @@ export class GetActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Get an action policy',
     description: 'Get an action policy by identifier.',
     oasOperationObject: getActionPolicyOasExamples,

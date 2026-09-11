@@ -16,7 +16,7 @@ import {
   testData,
 } from '../fixtures';
 
-const TAGS_URL = `${testData.RULE_API_PATH}/tags`;
+const TAGS_URL = `${testData.INTERNAL_RULE_API_PATH}/tags`;
 const OLD_TAGS_URL = `${testData.RULE_API_PATH}/_tags`;
 
 const tagsUrl = (params: Record<string, string | undefined> = {}): string => {

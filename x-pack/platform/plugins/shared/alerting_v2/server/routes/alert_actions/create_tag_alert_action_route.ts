@@ -18,4 +18,5 @@ export const CreateTagAlertActionRoute = createAlertActionRouteForType({
   summary: 'Add tags to an alert',
   bodySchema: createTagAlertActionBodySchema,
   oasOperationObject: createTagAlertActionOasExamples,
+  access: 'public' as const,
 });
