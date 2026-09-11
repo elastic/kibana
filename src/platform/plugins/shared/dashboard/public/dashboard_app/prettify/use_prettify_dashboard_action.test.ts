@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiThemeProvider } from '@elastic/eui';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import { PRETTIFY_DASHBOARD_ACTION_ID } from './prettify_dashboard_action';
-import { PrettifyDashboardButton } from './prettify_dashboard_button';
+import { usePrettifyDashboardAction } from './use_prettify_dashboard_action';
 
 type TestDashboardApi = DashboardApi & {
   viewMode$: BehaviorSubject<string>;
@@ -26,16 +24,7 @@ const createDashboardApi = (): TestDashboardApi =>
     children$: new BehaviorSubject({}),
   } as unknown as TestDashboardApi);
 
-const renderButton = (dashboardApi = createDashboardApi()) => {
-  render(
-    <EuiThemeProvider>
-      <PrettifyDashboardButton dashboardApi={dashboardApi} />
-    </EuiThemeProvider>
-  );
-  return dashboardApi;
-};
-
-describe('PrettifyDashboardButton', () => {
+describe('usePrettifyDashboardAction', () => {
   const mockExecute = jest.fn();
   const mockIsCompatible = jest.fn(async () => true);
 
@@ -47,8 +36,6 @@ describe('PrettifyDashboardButton', () => {
     (uiActionsService.getAction as jest.Mock).mockResolvedValue({
       isCompatible: mockIsCompatible,
       execute: mockExecute,
-      getDisplayName: () => 'Enhance this dashboard',
-      getIconType: () => 'sparkles',
       getCompatibilityChangesSubject: ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
         merge(dashboardApi.viewMode$, dashboardApi.children$).pipe(
           skip(1),
@@ -57,58 +44,59 @@ describe('PrettifyDashboardButton', () => {
     });
   });
 
-  it('is hidden when the action is not registered', () => {
+  it('returns null when the action is not registered', () => {
     (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
+    const dashboardApi = createDashboardApi();
 
-    renderButton();
+    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
 
-    expect(screen.queryByTestId('dashboardPrettifyButton')).not.toBeInTheDocument();
+    expect(result.current).toBeNull();
   });
 
-  it('is hidden when the action is incompatible', async () => {
+  it('returns null when the action is incompatible', async () => {
     mockIsCompatible.mockResolvedValue(false);
+    const dashboardApi = createDashboardApi();
 
-    renderButton();
+    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
 
     await waitFor(() => {
       expect(mockIsCompatible).toHaveBeenCalled();
     });
-    expect(screen.queryByTestId('dashboardPrettifyButton')).not.toBeInTheDocument();
+    expect(result.current).toBeNull();
   });
 
-  it('executes the action on click', async () => {
-    const dashboardApi = renderButton();
+  it('returns an execute handler when the action is compatible', async () => {
+    const dashboardApi = createDashboardApi();
+
+    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dashboardPrettifyButton')).toBeInTheDocument();
+      expect(result.current).not.toBeNull();
     });
-    expect(screen.getByTestId('dashboardPrettifyButton')).toHaveTextContent(
-      'Enhance this dashboard'
-    );
 
-    fireEvent.click(screen.getByTestId('dashboardPrettifyButton'));
+    await result.current?.execute();
 
-    await waitFor(() => {
-      expect(mockExecute).toHaveBeenCalledWith({
-        dashboardApi,
-        trigger: { id: PRETTIFY_DASHBOARD_ACTION_ID },
-      });
+    expect(mockExecute).toHaveBeenCalledWith({
+      dashboardApi,
+      trigger: { id: PRETTIFY_DASHBOARD_ACTION_ID },
     });
   });
 
-  it('hides when the action becomes incompatible', async () => {
+  it('returns null when the action becomes incompatible', async () => {
     mockIsCompatible.mockResolvedValue(true);
-    const dashboardApi = renderButton();
+    const dashboardApi = createDashboardApi();
+
+    const { result } = renderHook(() => usePrettifyDashboardAction(dashboardApi));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dashboardPrettifyButton')).toBeInTheDocument();
+      expect(result.current).not.toBeNull();
     });
 
     mockIsCompatible.mockResolvedValue(false);
     dashboardApi.viewMode$.next('view');
 
     await waitFor(() => {
-      expect(screen.queryByTestId('dashboardPrettifyButton')).not.toBeInTheDocument();
+      expect(result.current).toBeNull();
     });
   });
 });
