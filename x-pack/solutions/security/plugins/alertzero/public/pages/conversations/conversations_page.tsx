@@ -22,7 +22,7 @@ import {
   type CardActionType,
   type Investigation,
   type RecommendedAction,
-  useOpenConversationDetails,
+  InvestigationDetailsFlyout,
   BlastRadius,
   AssignActionModal,
   ApprovalModal,
@@ -56,7 +56,7 @@ export const ConversationsPage: React.FC = () => {
     string | undefined
   >(undefined);
 
-  const { openConversationDetails, openConversationId } = useOpenConversationDetails();
+  const [selectedIdForDetails, setSelectedIdForDetails] = useState<string | undefined>(undefined);
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
@@ -96,13 +96,6 @@ export const ConversationsPage: React.FC = () => {
     [setModalState]
   );
 
-  const onClickCard = useCallback(
-    (id: Investigation['id']) => {
-      openConversationDetails(id);
-    },
-    [openConversationDetails]
-  );
-
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
       ({ id }) => {
@@ -110,6 +103,14 @@ export const ConversationsPage: React.FC = () => {
       },
       [setSelectedIdForRecommendedAction]
     );
+
+  const closeDetails = useCallback(() => setSelectedIdForDetails(undefined), []);
+
+  const selectedDetailsConversation = useMemo(
+    () =>
+      selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
+    [conversations, selectedIdForDetails]
+  );
 
   const selectedRecommendedActionConversation = useMemo(
     () =>
@@ -178,6 +179,13 @@ export const ConversationsPage: React.FC = () => {
             );
           }}
           onClose={() => setSelectedIdForRecommendedAction(undefined)}
+        />
+      )}
+
+      {selectedDetailsConversation && (
+        <InvestigationDetailsFlyout
+          investigation={selectedDetailsConversation}
+          onClose={closeDetails}
         />
       )}
 
@@ -263,8 +271,8 @@ export const ConversationsPage: React.FC = () => {
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
                   onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
-                  onClickCard={onClickCard}
-                  selectedId={openConversationId}
+                  onClickCard={setSelectedIdForDetails}
+                  selectedId={selectedIdForDetails}
                 />
               </EuiFlexItem>
             ))

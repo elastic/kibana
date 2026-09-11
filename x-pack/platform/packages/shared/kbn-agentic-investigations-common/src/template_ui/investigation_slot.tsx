@@ -5,61 +5,66 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { Investigation } from '../types';
-import { useConversationInvestigation } from '../hooks/use_conversation_investigation';
 import { TEMPLATE_UI_LABELS } from './translations';
+
+/** Resolves the investigation backing an Agent Builder conversation. */
+export type InvestigationLoader = (conversationId: string) => Promise<Investigation>;
 
 export interface InvestigationSlotProps {
   conversation: Conversation;
-  /**
-   * Header and footer slots sit in tight chrome, so they collapse to nothing rather than showing
-   * a full empty prompt when the investigation is missing or fails to load.
-   */
-  compact?: boolean;
-  /** Rendered instead of the empty prompt when the investigation cannot be resolved. */
+  loadInvestigation: InvestigationLoader;
+  /** Rendered when the investigation cannot be resolved. Pass `null` to render nothing. */
   fallback?: ReactNode;
   children: (investigation: Investigation, refresh: () => void) => ReactNode;
 }
 
 /** Resolves the conversation's investigation and renders `children` once it is available. */
-export const InvestigationSlot = memo<InvestigationSlotProps>(
-  ({ conversation, compact = false, fallback, children }) => {
-    const { investigation, isLoading, error, refresh } = useConversationInvestigation(conversation);
+export const InvestigationSlot = ({
+  conversation,
+  loadInvestigation,
+  fallback,
+  children,
+}: InvestigationSlotProps) => {
+  const { id } = conversation;
+  const {
+    value: investigation,
+    loading,
+    error,
+    refresh,
+  } = useAbortableAsync(() => loadInvestigation(id), [id, loadInvestigation]);
 
-    if (isLoading) {
-      return (
-        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size={compact ? 'm' : 'l'} aria-label={TEMPLATE_UI_LABELS.loading} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    if (error || !investigation) {
-      if (fallback !== undefined) {
-        return <>{fallback}</>;
-      }
-      if (compact) {
-        return null;
-      }
-      return (
-        <EuiEmptyPrompt
-          iconType={error ? 'warning' : 'documents'}
-          color={error ? 'danger' : 'subdued'}
-          title={
-            <h3>{error ? TEMPLATE_UI_LABELS.loadErrorTitle : TEMPLATE_UI_LABELS.notFoundTitle}</h3>
-          }
-        />
-      );
-    }
-
-    return <>{children(investigation, refresh)}</>;
+  // `useAbortableAsync` reports `loading: false` until its effect runs, so the first render has
+  // neither a value nor an error yet.
+  if (loading || (!investigation && !error)) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" aria-label={TEMPLATE_UI_LABELS.loading} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
-);
 
-InvestigationSlot.displayName = 'InvestigationSlot';
+  if (!investigation) {
+    if (fallback !== undefined) {
+      return <>{fallback}</>;
+    }
+    return (
+      <EuiEmptyPrompt
+        iconType={error ? 'warning' : 'documents'}
+        color={error ? 'danger' : 'subdued'}
+        title={
+          <h3>{error ? TEMPLATE_UI_LABELS.loadErrorTitle : TEMPLATE_UI_LABELS.notFoundTitle}</h3>
+        }
+      />
+    );
+  }
+
+  return <>{children(investigation, refresh)}</>;
+};

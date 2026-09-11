@@ -28,6 +28,10 @@ export {
   type ConversationDetailsFlyoutFooterProps,
 } from './src/components/details/flyout_footer';
 export {
+  InvestigationDetailsFlyout,
+  type InvestigationDetailsFlyoutProps,
+} from './src/components/details/investigation_details_flyout';
+export {
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
@@ -43,26 +47,11 @@ export { TimelineEventList } from './src/components/timeline/timeline_event_list
 
 export { useOpenInChat } from './src/hooks/use_open_in_chat';
 export {
-  useOpenConversationDetails,
-  type UseOpenConversationDetailsResult,
-} from './src/hooks/use_open_conversation_details';
-export {
-  useConversationInvestigation,
-  type ConversationInvestigationState,
-} from './src/hooks/use_conversation_investigation';
-
-export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
-  DEFAULT_INVESTIGATION_STATUS_OPTIONS,
+  getInvestigationTabIds,
 } from './src/template_ui/register';
-export {
-  AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
-  AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-  AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
-  AGENTIC_INVESTIGATIONS_DEFAULT_TAB_IDS,
-} from './src/template_ui/constants';
-export type { InvestigationLoader, MetadataPatcher } from './src/template_ui/template_bindings';
+export type { InvestigationLoader } from './src/template_ui/investigation_slot';
 
 export { getEmptyValue, getActionButtonIconProps } from './src/components/helpers';
 
