@@ -28,6 +28,18 @@ export { DetailsBlock } from './src/components/details/detail_block';
 export { TimelineEventList } from './src/components/timeline/timeline_event_list';
 
 export { useOpenInChat } from './src/hooks/use_open_in_chat';
+export {
+  useConversationInvestigation,
+  type ConversationInvestigationState,
+} from './src/hooks/use_conversation_investigation';
+
+export {
+  AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
+  AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
+  AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
+  AGENTIC_INVESTIGATIONS_DEFAULT_TAB_IDS,
+} from './src/template_ui/constants';
+export type { InvestigationLoader, MetadataPatcher } from './src/template_ui/template_bindings';
 
 export { getEmptyValue, getActionButtonIconProps } from './src/components/helpers';
 
