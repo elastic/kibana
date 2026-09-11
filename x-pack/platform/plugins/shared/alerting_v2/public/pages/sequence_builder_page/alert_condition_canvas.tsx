@@ -343,15 +343,13 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
 
   const { nodes, edges } = useMemo(
     () =>
-      layoutSequence(
-        stages,
-        hopWindowStrings,
-        removeRule,
-        changeStepOperator,
-        addRuleToStep,
-        updateHopWindow,
-        closeAllHopPopoversTick
-      ),
+      layoutSequence(stages, hopWindowStrings, {
+        onRemoveRule: removeRule,
+        onOperatorChange: changeStepOperator,
+        onDropRule: addRuleToStep,
+        onHopWindowChange: updateHopWindow,
+        closeAllTick: closeAllHopPopoversTick,
+      }),
     [
       stages,
       hopWindowStrings,

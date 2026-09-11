@@ -44,12 +44,33 @@ type RecoveryMode = 'last' | 'all' | 'custom';
 
 export interface RecoveryConfig {
   mode: RecoveryMode;
-  selectedStepIndices: number[];
 }
 
 export const DEFAULT_RECOVERY_CONFIG: RecoveryConfig = {
   mode: 'last',
-  selectedStepIndices: [],
+};
+
+export const resolveRecoveryIndices = (
+  mode: RecoveryMode,
+  stepsLength: number,
+  currentIndices?: number[]
+): { recoveryStepIndex: number; recoveryStepIndices: number[] | undefined } => {
+  if (mode === 'all') {
+    return {
+      recoveryStepIndex: 0,
+      recoveryStepIndices: Array.from({ length: stepsLength }, (_, i) => i),
+    };
+  }
+  if (mode === 'custom' && currentIndices && currentIndices.length > 0) {
+    const valid = currentIndices.filter((i) => i < stepsLength).sort((a, b) => a - b);
+    if (valid.length > 0) {
+      return { recoveryStepIndex: valid[0], recoveryStepIndices: valid };
+    }
+  }
+  return {
+    recoveryStepIndex: Math.max(0, stepsLength - 1),
+    recoveryStepIndices: undefined,
+  };
 };
 
 const RECOVERY_MODE_OPTIONS = [
@@ -175,28 +196,23 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
     if (recoveryConfig.mode === 'all') {
       return new Set(seqValues.steps.map((_, i) => i));
     }
-    return new Set(recoveryConfig.selectedStepIndices);
-  }, [recoveryConfig, seqValues.steps]);
+    const indices = seqValues.recoveryStepIndices ?? [seqValues.recoveryStepIndex];
+    return new Set(indices.filter((i) => i < seqValues.steps.length));
+  }, [
+    recoveryConfig.mode,
+    seqValues.steps,
+    seqValues.recoveryStepIndices,
+    seqValues.recoveryStepIndex,
+  ]);
 
   const handleModeChange = useCallback(
     (id: string) => {
       const mode = id as RecoveryMode;
-      setRecoveryConfig((prev) => ({ ...prev, mode, selectedStepIndices: [] }));
-
-      setSeqValues((prev) => {
-        if (mode === 'all') {
-          return {
-            ...prev,
-            recoveryStepIndex: 0,
-            recoveryStepIndices: prev.steps.map((_, i) => i),
-          };
-        }
-        return {
-          ...prev,
-          recoveryStepIndex: Math.max(0, prev.steps.length - 1),
-          recoveryStepIndices: undefined,
-        };
-      });
+      setRecoveryConfig({ mode });
+      setSeqValues((prev) => ({
+        ...prev,
+        ...resolveRecoveryIndices(mode, prev.steps.length, prev.recoveryStepIndices),
+      }));
     },
     [setRecoveryConfig, setSeqValues]
   );
@@ -207,38 +223,18 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: SequenceNodeType) => {
       if (recoveryModeRef.current !== 'custom') return;
-      const idx = node.data.stageIndex as number;
+      const idx = node.data.stageIndex;
 
       setSeqValues((prev) => {
-        const current =
-          prev.recoveryStepIndices != null
-            ? prev.recoveryStepIndices
-            : prev.recoveryStepIndex < prev.steps.length - 1
-            ? [prev.recoveryStepIndex]
-            : [];
-
+        const current = prev.recoveryStepIndices ?? [prev.recoveryStepIndex];
         const already = current.includes(idx);
+        if (already && current.length <= 1) return prev;
         const next = already ? current.filter((i) => i !== idx) : [...current, idx];
         const sorted = [...next].sort((a, b) => a - b);
-
-        if (sorted.length === 0) {
-          return {
-            ...prev,
-            recoveryStepIndex: Math.max(0, prev.steps.length - 1),
-            recoveryStepIndices: undefined,
-          };
-        }
         return { ...prev, recoveryStepIndex: sorted[0], recoveryStepIndices: sorted };
       });
-
-      setRecoveryConfig((prev) => {
-        const current = prev.selectedStepIndices;
-        const already = current.includes(idx);
-        const next = already ? current.filter((i) => i !== idx) : [...current, idx];
-        return { ...prev, selectedStepIndices: [...next].sort((a, b) => a - b) };
-      });
     },
-    [setSeqValues, setRecoveryConfig]
+    [setSeqValues]
   );
 
   const stages = useMemo(
@@ -257,24 +253,14 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
   );
 
   const { nodes: baseNodes, edges } = useMemo(
-    () =>
-      layoutSequence(
-        stages,
-        hopWindowStrings,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        0,
-        false
-      ),
+    () => layoutSequence(stages, hopWindowStrings, { interactive: false }),
     [stages, hopWindowStrings]
   );
 
   const recoveryNodes = useMemo<SequenceNodeType[]>(
     () =>
       baseNodes.map((n) => {
-        const isActive = activeIndices.has(n.data.stageIndex as number);
+        const isActive = activeIndices.has(n.data.stageIndex);
         return {
           ...n,
           style: {
@@ -294,8 +280,7 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
   );
 
   const activeNodeIds = useMemo(
-    () =>
-      recoveryNodes.filter((n) => activeIndices.has(n.data.stageIndex as number)).map((n) => n.id),
+    () => recoveryNodes.filter((n) => activeIndices.has(n.data.stageIndex)).map((n) => n.id),
     [recoveryNodes, activeIndices]
   );
 

@@ -22,7 +22,11 @@ import { paths } from '../../constants';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
 import { AlertConditionCanvas } from './alert_condition_canvas';
-import { RecoveryConditionCanvas, DEFAULT_RECOVERY_CONFIG } from './recovery_condition_canvas';
+import {
+  RecoveryConditionCanvas,
+  DEFAULT_RECOVERY_CONFIG,
+  resolveRecoveryIndices,
+} from './recovery_condition_canvas';
 import type { RecoveryConfig } from './recovery_condition_canvas';
 
 const useRuleFormServicesBag = (): RuleFormServices => {
@@ -83,32 +87,18 @@ export const SequenceBuilderPage: React.FC = () => {
   const handleStepChange = useCallback(
     (nextStep: 'alert' | 'recovery') => {
       if (nextStep === 'recovery') {
-        uiState.setSeqValues((prev) => {
-          if (recoveryConfig.mode === 'all') {
-            return {
-              ...prev,
-              recoveryStepIndex: 0,
-              recoveryStepIndices: prev.steps.map((_, i) => i),
-            };
-          }
-          if (recoveryConfig.mode === 'custom' && recoveryConfig.selectedStepIndices.length > 0) {
-            const valid = recoveryConfig.selectedStepIndices.filter((i) => i < prev.steps.length);
-            return {
-              ...prev,
-              recoveryStepIndex: valid[0] ?? Math.max(0, prev.steps.length - 1),
-              recoveryStepIndices: valid.length > 0 ? valid : undefined,
-            };
-          }
-          return {
-            ...prev,
-            recoveryStepIndex: Math.max(0, prev.steps.length - 1),
-            recoveryStepIndices: undefined,
-          };
-        });
+        uiState.setSeqValues((prev) => ({
+          ...prev,
+          ...resolveRecoveryIndices(
+            recoveryConfig.mode,
+            prev.steps.length,
+            prev.recoveryStepIndices
+          ),
+        }));
       }
       uiState.setStep(nextStep);
     },
-    [uiState, recoveryConfig]
+    [uiState, recoveryConfig.mode]
   );
 
   const basePath = useService(CoreStart('http')).basePath;
