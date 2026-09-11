@@ -193,7 +193,7 @@ export const persistRoundInput = async ({
     conversation
   );
 
-  if (isNewConversation(conversation)) {
+  if (conversation.operation === 'CREATE') {
     const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
@@ -278,7 +278,7 @@ export const appendRoundTerminated$ = ({
     }),
     switchMap((persistedConversation) =>
       of(
-        isNewConversation(conversation)
+        conversation.operation === 'CREATE'
           ? createConversationCreatedEvent(persistedConversation)
           : createConversationUpdatedEvent(persistedConversation)
       )
@@ -393,10 +393,6 @@ export const appendResumeExecution$ = ({
 export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
-
-export const isNewConversation = (conversation: ConversationWithOperation): boolean => {
-  return conversation.operation === 'CREATE';
-};
 
 export const getConversation = async ({
   agentId,
