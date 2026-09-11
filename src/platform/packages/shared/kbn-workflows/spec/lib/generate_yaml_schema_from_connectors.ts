@@ -180,6 +180,92 @@ const LIQUID_TEMPLATE_SCHEMA = z
   .regex(WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX)
   .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
 
+/** A `.optional()` / `.default()` layer stripped off a params field so it can be replayed verbatim. */
+type FieldWrapper = { kind: 'optional' } | { kind: 'default'; value: unknown };
+
+/**
+ * Strips the `.optional()` / `.default()` layers off a params field, returning the wrapped type
+ * together with the layers in outermost-first order.
+ */
+function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: FieldWrapper[] } {
+  const wrappers: FieldWrapper[] = [];
+  let inner = field;
+  while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
+    wrappers.push(
+      inner instanceof z.ZodOptional
+        ? { kind: 'optional' }
+        : { kind: 'default', value: inner.def.defaultValue }
+    );
+    inner = inner.unwrap() as z.ZodType;
+  }
+  return { inner, wrappers };
+}
+
+/**
+ * Rebuilds the wrapper stack returned by {@link unwrapFieldWrappers} in its original order.
+ * The order is load-bearing: coalescing the layers into "optional, then default" would collapse
+ * stacked defaults onto the innermost value instead of the outermost one that Zod actually applies.
+ */
+function rewrapField(field: z.ZodType, wrappers: FieldWrapper[]): z.ZodType {
+  // `wrappers` is outermost-first, so replay it back-to-front to end up with the same stack.
+  return wrappers.reduceRight<z.ZodType>(
+    (acc, wrapper) => (wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.value)),
+    field
+  );
+}
+
+/** True when the object carries `.refine()` / `.superRefine()` checks of its own. */
+function hasObjectLevelChecks(schema: z.ZodObject): boolean {
+  return (schema.def.checks?.length ?? 0) > 0;
+}
+
+/**
+ * Re-attaches the object-level checks of `paramsSchema` to the widened object, but only for values
+ * that do not carry a template.
+ *
+ * Those checks are written against the declared field types, so once a field accepts
+ * `array | string` a refinement like `(v) => v.ids.every(...)` receives a string and throws a
+ * TypeError. That exception escapes `safeParse` and fails the whole create/update request, so the
+ * checks cannot simply be preserved as-is. A templated value cannot be meaningfully checked before
+ * it is rendered anyway, so it skips them; every other value is handed to the original schema and
+ * validated exactly as before (which costs a second parse of the shape, hence only doing this for
+ * the minority of connectors that declare checks).
+ */
+function deferChecksForTemplateValues(
+  paramsSchema: z.ZodObject,
+  widenedShape: Record<string, z.ZodType>,
+  widenedKeys: string[]
+): z.ZodType {
+  const rebuilt = z.object({ ...paramsSchema.shape, ...widenedShape });
+  // Rebuilding from the shape drops the unknownKeys policy, which lives on `catchall`
+  // (`z.never()` for strict objects, `z.unknown()` for loose ones).
+  const { catchall } = paramsSchema.def;
+  const widened = catchall ? rebuilt.catchall(catchall) : rebuilt;
+
+  return widened.superRefine((value, ctx) => {
+    const params = value as Record<string, unknown>;
+    if (widenedKeys.some((key) => typeof params[key] === 'string')) {
+      return;
+    }
+    const result = paramsSchema.safeParse(value);
+    if (result.success) {
+      return;
+    }
+    // Only the object's own checks can fail here — the rebuilt shape reuses the original field
+    // schemas, so anything they reject has already been reported and short-circuited this
+    // callback. Replaying path and message keeps the issue pointing at the offending field, which
+    // both Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
+    for (const issue of result.error.issues) {
+      ctx.addIssue({
+        code: 'custom',
+        path: issue.path,
+        message: issue.message,
+        input: issue.input,
+      });
+    }
+  });
+}
+
 /**
  * Widens top-level array fields of a connector params schema to also accept a whole-value
  * Liquid template expression like `"${{ event.messages }}"`, so that passing a templated value
@@ -187,10 +273,12 @@ const LIQUID_TEMPLATE_SCHEMA = z
  *
  * This is not editor-only: the same generated schema is the server-side gate for workflow
  * create/update (`workflow_crud_service` / `workflow_validation_service` in
- * workflows_management), so it decides what can be *persisted*, not just what Monaco
- * underlines. Connector params are not re-validated against `paramsSchema` at execution time,
- * which is why the accepted form is restricted to the one the templating engine is guaranteed
- * to resolve back to a native array.
+ * workflows_management), so it decides what can be *persisted*, not just what Monaco underlines.
+ * The accepted form is restricted to the one the templating engine resolves without stringifying,
+ * because connector params are not re-validated against `paramsSchema` at execution time. Note
+ * that this preserves the *expression's* type rather than guaranteeing an array: `${{ inputs.x }}`
+ * still resolves to whatever `x` holds. Catching that requires validating rendered params before
+ * invocation, which the execution engine does not do today.
  *
  * Only the direct children of the params schema (not nested objects) are widened, to avoid
  * disturbing deeply nested schemas such as the ES API's MappingTypeMapping.
@@ -199,41 +287,29 @@ function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
   if (!(paramsSchema instanceof z.ZodObject)) {
     return paramsSchema;
   }
-  const modifications: Record<string, z.ZodType> = {};
-  for (const [key, rawValue] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
-    let value: z.ZodType = rawValue;
-    let isOptional = false;
-    let hasDefault = false;
-    let defaultValue: unknown;
-
-    // `.optional()` and `.default()` can be applied in either order and stacked, so unwrap
-    // until the underlying type is reached, remembering what has to be re-applied afterwards.
-    while (value instanceof z.ZodOptional || value instanceof z.ZodDefault) {
-      if (value instanceof z.ZodOptional) {
-        isOptional = true;
-      } else {
-        hasDefault = true;
-        defaultValue = value.def.defaultValue;
-      }
-      value = value.unwrap() as z.ZodType;
-    }
-
-    if (value instanceof z.ZodArray) {
-      const widened: z.ZodType = z.union([LIQUID_TEMPLATE_SCHEMA, value]);
+  const widenedShape: Record<string, z.ZodType> = {};
+  for (const [key, field] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
+    const { inner, wrappers } = unwrapFieldWrappers(field);
+    if (inner instanceof z.ZodArray) {
       // Re-apply the wrappers that were stripped above. Dropping `.default()` here would turn a
       // defaulted param into a required one and break workflows that legitimately omit it.
-      const withOptionality = isOptional ? widened.optional() : widened;
-      modifications[key] = hasDefault ? withOptionality.default(defaultValue) : withOptionality;
+      widenedShape[key] = rewrapField(z.union([LIQUID_TEMPLATE_SCHEMA, inner]), wrappers);
     }
   }
-  if (Object.keys(modifications).length === 0) {
+
+  const widenedKeys = Object.keys(widenedShape);
+  if (widenedKeys.length === 0) {
     return paramsSchema;
   }
-  // safeExtend preserves object-level refinements and the unknownKeys policy (strict/passthrough),
-  // unlike extend() which throws when the schema contains refinements.
-  // `modifications` is built as a mutable record; ZodRawShape is the readonly shape safeExtend
+
+  if (hasObjectLevelChecks(paramsSchema)) {
+    return deferChecksForTemplateValues(paramsSchema, widenedShape, widenedKeys);
+  }
+
+  // safeExtend preserves the unknownKeys policy (strict/passthrough), unlike extend().
+  // `widenedShape` is built as a mutable record; ZodRawShape is the readonly shape safeExtend
   // expects, so the cast only relaxes mutability.
-  return paramsSchema.safeExtend(modifications as z.ZodRawShape);
+  return paramsSchema.safeExtend(widenedShape as z.ZodRawShape);
 }
 
 function generateStepSchemaForConnector(

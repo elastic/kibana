@@ -335,23 +335,40 @@ describe('generateYamlSchemaFromConnectors', () => {
       expect(omitted.data).toMatchObject({ steps: [{ with: { tags: [] } }] });
     });
 
-    it('widens array params wrapped in both .optional() and .default()', () => {
+    describe.each([
+      ['.optional().default()', () => z.array(z.string()).optional().default(['fallback'])],
+      ['.default().optional()', () => z.array(z.string()).default(['fallback']).optional()],
+      ['stacked defaults', () => z.array(z.string()).default(['inner']).default(['outer'])],
+    ])('array params wrapped in %s', (_label, buildField) => {
+      const paramsSchema = z.object({ tags: buildField() });
       const connector: ConnectorContractUnion = {
-        summary: 'Both',
+        summary: 'Wrapped',
         description: null,
-        type: 'both.step',
-        paramsSchema: z.object({ tags: z.array(z.string()).optional().default([]) }),
+        type: 'wrapped.step',
+        paramsSchema,
         outputSchema: z.unknown(),
       };
       const schema = generateYamlSchemaFromConnectors([connector]);
-      // Stacked wrappers must still be unwrapped down to the array, otherwise the field is
-      // silently skipped and the template string is reported as a type error.
-      expect(
+      const parseWith = (withValue: unknown) =>
         schema.safeParse({
           ...BASE_WORKFLOW,
-          steps: [{ name: 's', type: 'both.step', with: { tags: '${{ workflow.inputs.tags }}' } }],
-        }).success
-      ).toBe(true);
+          steps: [{ name: 's', type: 'wrapped.step', with: withValue }],
+        });
+
+      it('is widened to accept a template', () => {
+        // Stacked wrappers must still be unwrapped down to the array, otherwise the field is
+        // silently skipped and the template string is reported as a type error.
+        expect(parseWith({ tags: '${{ workflow.inputs.tags }}' }).success).toBe(true);
+      });
+
+      it('resolves an omitted value exactly as the original schema does', () => {
+        // Widening must replay the wrapper stack verbatim: `.optional()` and `.default()` are not
+        // commutative in general, so coalescing them could change what an omitted param resolves
+        // to. Comparing against the untouched schema pins the behaviour without hard-coding it.
+        const result = parseWith({});
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({ steps: [{ with: paramsSchema.parse({}) }] });
+      });
     });
 
     it('preserves the object unknownKeys policy of the original paramsSchema', () => {
@@ -378,40 +395,75 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).toBe(false);
     });
 
-    it('does not throw for a connector whose paramsSchema has object-level refinements', () => {
-      const connector: ConnectorContractUnion = {
+    describe('connectors whose paramsSchema has object-level refinements', () => {
+      // `.every()` rather than `.length`: an object-level refinement is written against the
+      // declared field types, so widening `ids` to `array | string` hands it a string. Array-only
+      // APIs then throw a TypeError that escapes safeParse and fails the whole request, which a
+      // `.length` refinement would hide because strings have a length too.
+      const refinedConnector: ConnectorContractUnion = {
         summary: 'Refined',
         description: null,
         type: 'refined.step',
         paramsSchema: z
           .object({ ids: z.array(z.string()), name: z.string() })
-          .refine((v) => v.ids.length > 0, 'ids must not be empty'),
+          .refine((v) => v.ids.every((id) => id.length > 0), 'ids must all be non-empty'),
         outputSchema: z.unknown(),
       };
-      // Schema construction must not throw even though paramsSchema has a refinement.
-      expect(() => generateYamlSchemaFromConnectors([connector])).not.toThrow();
 
-      const schema = generateYamlSchemaFromConnectors([connector]);
-      // Template string still accepted for the array field.
-      expect(
-        schema.safeParse({
+      const parseRefined = (withValue: unknown) =>
+        generateYamlSchemaFromConnectors([refinedConnector]).safeParse({
           ...BASE_WORKFLOW,
-          steps: [
-            {
-              name: 's',
-              type: 'refined.step',
-              with: { ids: '${{ workflow.inputs.ids }}', name: 'x' },
-            },
-          ],
-        }).success
-      ).toBe(true);
-      // The object-level refinement is preserved: an empty ids array fails.
-      expect(
-        schema.safeParse({
-          ...BASE_WORKFLOW,
-          steps: [{ name: 's', type: 'refined.step', with: { ids: [], name: 'x' } }],
-        }).success
-      ).toBe(false);
+          steps: [{ name: 's', type: 'refined.step', with: withValue }],
+        });
+
+      it('builds the schema without throwing', () => {
+        expect(() => generateYamlSchemaFromConnectors([refinedConnector])).not.toThrow();
+      });
+
+      it('accepts a template without running the refinement against it', () => {
+        // The refinement can only be evaluated once the expression is rendered, so a templated
+        // value has to skip it rather than be fed to an array-typed callback.
+        expect(() => parseRefined({ ids: '${{ workflow.inputs.ids }}', name: 'x' })).not.toThrow();
+        expect(parseRefined({ ids: '${{ workflow.inputs.ids }}', name: 'x' }).success).toBe(true);
+      });
+
+      it('still enforces the refinement for ordinary array values', () => {
+        expect(parseRefined({ ids: ['a'], name: 'x' }).success).toBe(true);
+        expect(parseRefined({ ids: [''], name: 'x' }).success).toBe(false);
+      });
+
+      it('still reports ordinary field errors at the offending field', () => {
+        // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON both key
+        // off the issue path, so deferring the refinements must not collapse it to the step root.
+        const result = parseRefined({ ids: ['a'] });
+        expect(result.success).toBe(false);
+        expect(result.error?.issues.some((issue) => issue.path.includes('name'))).toBe(true);
+      });
+
+      it('preserves the unknownKeys policy of a strict refined paramsSchema', () => {
+        const strictRefined: ConnectorContractUnion = {
+          summary: 'StrictRefined',
+          description: null,
+          type: 'strict.refined.step',
+          paramsSchema: z
+            .strictObject({ ids: z.array(z.string()) })
+            .refine((v) => v.ids.every((id) => id.length > 0), 'ids must all be non-empty'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([strictRefined]);
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [
+              {
+                name: 's',
+                type: 'strict.refined.step',
+                with: { ids: '${{ workflow.inputs.ids }}', unknown_key: 'bad' },
+              },
+            ],
+          }).success
+        ).toBe(false);
+      });
     });
   });
 });
