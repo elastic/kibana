@@ -19,6 +19,7 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import type { ExemplarsAvailabilityResult } from './hooks/use_exemplars_availability';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
@@ -42,6 +43,7 @@ export interface MetricsExperienceGridContentProps
   activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
   isTabSelected: boolean;
+  exemplarsAvailability: ExemplarsAvailabilityResult;
 }
 
 export const MetricsExperienceGridContent = ({
@@ -56,6 +58,7 @@ export const MetricsExperienceGridContent = ({
   histogramCss,
   isDiscoverLoading = false,
   isTabSelected,
+  exemplarsAvailability,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
@@ -149,6 +152,7 @@ export const MetricsExperienceGridContent = ({
           getUserMessages={getUserMessages}
           getDescription={getDescription}
           isTabSelected={isTabSelected}
+          exemplarsAvailability={exemplarsAvailability}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

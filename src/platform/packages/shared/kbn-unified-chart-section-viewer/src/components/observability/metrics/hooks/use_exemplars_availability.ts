@@ -42,7 +42,7 @@ export interface UseExemplarsAvailabilityParams {
   profileId: string;
 }
 
-export interface UseExemplarsAvailabilityResult {
+export interface ExemplarsAvailabilityResult {
   /**
    * Names of the metric fields that have exemplars. Empty while the probe is in
    * flight, when the flag is off, and if the probe failed.
@@ -57,12 +57,12 @@ export interface UseExemplarsAvailabilityResult {
 
 // Module-scope sentinels: consumers rebuild Lens props off these values' identity, so a
 // fresh object per render would re-trigger a rebuild on every render.
-const NOTHING_AVAILABLE: UseExemplarsAvailabilityResult = Object.freeze({
+const NOTHING_AVAILABLE: ExemplarsAvailabilityResult = Object.freeze({
   availableMetrics: new Set<string>(),
   hasProbeFailed: false,
 });
 
-const PROBE_FAILED: UseExemplarsAvailabilityResult = Object.freeze({
+const PROBE_FAILED: ExemplarsAvailabilityResult = Object.freeze({
   availableMetrics: new Set<string>(),
   hasProbeFailed: true,
 });
@@ -76,7 +76,7 @@ export const useExemplarsAvailability = ({
   fetchParams,
   services,
   profileId,
-}: UseExemplarsAvailabilityParams): UseExemplarsAvailabilityResult => {
+}: UseExemplarsAvailabilityParams): ExemplarsAvailabilityResult => {
   const isExemplarsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EXEMPLARS_ENABLED,
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]
@@ -90,7 +90,7 @@ export const useExemplarsAvailability = ({
     uiSettings,
   } = services;
 
-  const { value } = useAbortableAsync<UseExemplarsAvailabilityResult | undefined>(async () => {
+  const { value } = useAbortableAsync<ExemplarsAvailabilityResult | undefined>(async () => {
     // Gate before anything else: when the flag is off we do not fetch exemplars at all.
     if (!isExemplarsEnabled || !dataView) {
       return undefined;
