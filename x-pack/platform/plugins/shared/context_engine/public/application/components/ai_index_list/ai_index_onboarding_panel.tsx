@@ -24,7 +24,7 @@ import onboardingIllustrationLight from './assets/ai_index_onboarding_light.svg'
 const ILLUSTRATION_SIZE_PX = 236;
 
 export const AiIndexOnboardingPanel = () => {
-  const { colorMode } = useEuiTheme();
+  const isDarkMode = useIsDarkMode();  
   const onboardingIllustration =
     colorMode === COLOR_MODES_STANDARD.dark
       ? onboardingIllustrationDark
