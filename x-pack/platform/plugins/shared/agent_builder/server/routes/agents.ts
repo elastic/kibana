@@ -87,9 +87,6 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
   }
 );
 
-const AI_INDICES_NOT_ENABLED_MESSAGE =
-  '[request body.configuration.ai_indices]: the Context Engine is not enabled. Set contextEngine:enabled to true to enable it.';
-
 /**
  * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
  * registered by the `agentBuilderSml` plugin, a required dependency of `agentBuilder`.
@@ -368,12 +365,15 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        if (request.body.configuration.ai_indices !== undefined && !contextEngineEnabled) {
-          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
-        }
+
+        const { ai_indices: _stripAiIndices, ...restConfiguration } =
+          request.body.configuration;
+        const createBody = contextEngineEnabled
+          ? request.body
+          : { ...request.body, configuration: restConfiguration };
 
         try {
-          const createdProfile = await service.create(request.body);
+          const createdProfile = await service.create(createBody);
           analyticsService?.reportAgentCreated({
             agentId: request.body.id,
             toolSelection: request.body.configuration.tools,
@@ -519,12 +519,17 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        if (request.body.configuration?.ai_indices !== undefined && !contextEngineEnabled) {
-          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
-        }
+
+        const updateBody = (() => {
+          if (contextEngineEnabled || !request.body.configuration) {
+            return request.body;
+          }
+          const { ai_indices: _stripAiIndices, ...restConfig } = request.body.configuration;
+          return { ...request.body, configuration: restConfig };
+        })();
 
         try {
-          const profile = await service.update(request.params.id, request.body);
+          const profile = await service.update(request.params.id, updateBody);
           analyticsService?.reportAgentUpdated({
             agentId: profile.id,
             toolSelection: profile.configuration.tools,
