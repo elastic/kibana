@@ -18,20 +18,38 @@ import type { ActionsClientProvider } from '../types';
 import { getConnectorList } from './get_connector_list';
 
 /**
- * Given a merged connector list and the raw stack connectors, find the connector
- * matching `connectorId`. Falls back to resolving `.inference` stack connector
- * aliases (where the stack connector ID differs from the inference endpoint ID
- * returned in the merged list).
+ * Lists raw stack connectors for alias resolution. Users without the Actions
+ * privilege cannot list stack connectors, which must not prevent resolving
+ * inference endpoints, so authorization failures degrade to an empty list.
  */
-const findConnectorById = ({
+const getRawStackConnectors = async (
+  actionsClient: PublicMethodsOf<ActionsClient>,
+  logger: Logger
+): Promise<RawConnector[]> => {
+  try {
+    return await actionsClient.getAll({ includeSystemActions: false });
+  } catch (e) {
+    logger.debug(`Failed to retrieve stack connectors for alias resolution: ${e.message}`);
+    return [];
+  }
+};
+
+/**
+ * Given a merged connector list, find the connector matching `connectorId`.
+ * Falls back to resolving `.inference` stack connector aliases (where the stack
+ * connector ID differs from the inference endpoint ID returned in the merged list).
+ */
+const findConnectorById = async ({
   connectorId,
   connectors,
-  rawStackConnectors,
+  actionsClient,
+  logger,
 }: {
   connectorId: string;
   connectors: InferenceConnector[];
-  rawStackConnectors: RawConnector[];
-}): InferenceConnector | undefined => {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  logger: Logger;
+}): Promise<InferenceConnector | undefined> => {
   const match = connectors.find((c) => c.connectorId === connectorId);
   if (match) {
     return match;
@@ -40,6 +58,7 @@ const findConnectorById = ({
   // The requested ID may belong to a stack `.inference` connector whose underlying inference
   // endpoint was already returned in the list under `inferenceId`. Look up the raw stack
   // connector to resolve the alias.
+  const rawStackConnectors = await getRawStackConnectors(actionsClient, logger);
   const stackConnector = rawStackConnectors.find((c) => c.id === connectorId);
   if (stackConnector?.actionTypeId === InferenceConnectorType.Inference) {
     const inferenceId = stackConnector.config?.inferenceId as string | undefined;
@@ -72,15 +91,9 @@ export const getConnectorById = async ({
   logger: Logger;
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actions, request, esClient, logger });
+  const actionsClient = await actions.getActionsClientWithRequest(request);
 
-  const actionClient = await actions.getActionsClientWithRequest(request);
-  const allStackConnectors = await actionClient.getAll({ includeSystemActions: false });
-
-  const result = findConnectorById({
-    connectorId,
-    connectors,
-    rawStackConnectors: allStackConnectors,
-  });
+  const result = await findConnectorById({ connectorId, connectors, actionsClient, logger });
   if (result) {
     return result;
   }
@@ -111,13 +124,7 @@ export const getConnectorByIdWithoutClientRequest = async ({
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actionsClient, esClient, logger });
 
-  const allStackConnectors = await actionsClient.getAll({ includeSystemActions: false });
-
-  const result = findConnectorById({
-    connectorId,
-    connectors,
-    rawStackConnectors: allStackConnectors,
-  });
+  const result = await findConnectorById({ connectorId, connectors, actionsClient, logger });
   if (result) {
     return result;
   }
