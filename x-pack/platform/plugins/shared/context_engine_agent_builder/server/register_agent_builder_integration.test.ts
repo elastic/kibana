@@ -27,10 +27,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   const setup = ({
     aiIndices,
     authorized = true,
+    spaceId = 'default',
   }: {
     aiIndices: unknown[];
     /** Outcome of the privilege check: granted, denied, or the error it rejects with. */
     authorized?: boolean | Error;
+    spaceId?: string;
   }) => {
     const checkPrivileges =
       authorized instanceof Error
@@ -42,6 +44,8 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         actions: { api: { get: (privilege: string) => `api:${privilege}` } },
       },
     };
+    const getSpaceId = jest.fn().mockReturnValue(spaceId);
+    const spaces = { spacesService: { getSpaceId } };
 
     const list = jest.fn().mockResolvedValue(aiIndices);
     const coreSetup = {
@@ -50,6 +54,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         {
           contextEngine: { getAiIndexService: () => ({ list }) },
           security,
+          spaces,
         },
         {},
       ]),
@@ -76,7 +81,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     if (!resolver) {
       throw new Error('Expected an AI index resolver to be registered');
     }
-    return { resolver, list, security, checkPrivileges };
+    return { resolver, list, security, checkPrivileges, getSpaceId };
   };
 
   it('registers a resolver mapping registry items to id, esqlTarget (dest.value) and description', async () => {
@@ -107,6 +112,19 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       { id: 'wanted', esqlTarget: 'idx-wanted' },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
+    expect(list).toHaveBeenCalledWith('default');
+  });
+
+  it('lists AI indices with the request space id', async () => {
+    const { resolver, list, getSpaceId } = setup({
+      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
+      spaceId: 'marketing',
+    });
+
+    await resolver({ ids: ['wanted'], request });
+
+    expect(getSpaceId).toHaveBeenCalledWith(request);
+    expect(list).toHaveBeenCalledWith('marketing');
   });
 
   it('checks the Context Engine read privilege for the request before disclosing details', async () => {

@@ -15,6 +15,7 @@ import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+  MAX_AI_INDEX_TRACES,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
   aiIndexKiByIdPath,
@@ -83,6 +84,7 @@ const aiIndexItem: AiIndexHttpItem = {
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+  traces: [],
   date_created: '2026-07-08T12:10:30.000Z',
   date_modified: '2026-07-08T12:10:30.000Z',
 };
@@ -183,6 +185,7 @@ describe('ai indices routes', () => {
         return improvementsService as unknown as ImprovementsServiceApi;
       },
       getActions: async () => actions,
+      getSpaces: async () => undefined,
     });
   });
 
@@ -259,6 +262,7 @@ describe('ai indices routes', () => {
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+      traces: [],
     };
 
     it('returns 201 when the AI index is created', async () => {
@@ -352,6 +356,7 @@ describe('ai indices routes', () => {
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow', value: 'nightly-refresh' }],
         sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+        traces: [],
       },
     };
 
@@ -433,6 +438,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'default');
       expect(response.ok).toHaveBeenCalledWith({ body: aiIndexItem });
     });
 
@@ -446,13 +452,17 @@ describe('ai indices routes', () => {
       });
     });
 
-    it('rethrows unexpected errors after logging the audit event', async () => {
-      aiIndexService.get.mockRejectedValue(new Error('boom'));
+    it('returns 500 with the unexpected error message after logging it', async () => {
+      const boom = new Error('boom');
+      aiIndexService.get.mockRejectedValue(boom);
 
-      await expect(
-        callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } })
-      ).rejects.toThrow('boom');
+      await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
+      expect(logger.error).toHaveBeenCalledWith(boom.stack);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'boom' },
+      });
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -495,6 +505,7 @@ describe('ai indices routes', () => {
         query: { size: 25 },
       });
 
+      expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'default');
       expect(esSearch).toHaveBeenCalledWith(
         expect.objectContaining({
           index: aiIndexItem.dest.value,
@@ -708,6 +719,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexPath, {});
 
+      expect(aiIndexService.list).toHaveBeenCalledWith('default');
       expect(response.ok).toHaveBeenCalledWith({ body: { ai_indices: [] } });
     });
   });
@@ -944,6 +956,7 @@ describe('ai indices routes', () => {
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+      traces: [],
     };
 
     const validateBody = (body: Record<string, unknown>) => {
@@ -1025,6 +1038,38 @@ describe('ai indices routes', () => {
       }));
       expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
+
+    it('rejects a missing traces array', () => {
+      const { traces, ...bodyWithoutTraces } = validBody;
+      expect(() => validateBody(bodyWithoutTraces)).toThrow();
+    });
+
+    it('accepts each traces type', () => {
+      expect(() =>
+        validateBody({
+          ...validBody,
+          traces: [
+            { type: 'elastic_agent', value: 'my-agent' },
+            { type: 'index', value: 'logs-*' },
+            { type: 'esql', value: 'FROM traces-* | LIMIT 10' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an index trace with an invalid name', () => {
+      expect(() =>
+        validateBody({ ...validBody, traces: [{ type: 'index', value: 'bad index' }] })
+      ).toThrow(/index, data stream, alias, or pattern/);
+    });
+
+    it('rejects traces exceeding the max size', () => {
+      const traces = Array.from({ length: MAX_AI_INDEX_TRACES + 1 }, (_, i) => ({
+        type: 'index',
+        value: `logs-${i}`,
+      }));
+      expect(() => validateBody({ ...validBody, traces })).toThrow();
+    });
   });
 
   describe('PUT body validation', () => {
@@ -1032,6 +1077,7 @@ describe('ai indices routes', () => {
       dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
       sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+      traces: [],
     };
 
     const validateBody = (body: Record<string, unknown>) => {
@@ -1126,6 +1172,17 @@ describe('ai indices routes', () => {
       }));
       expect(() => validateBody({ ...validBody, sources })).toThrow();
     });
+
+    it('rejects a missing traces array', () => {
+      const { traces, ...bodyWithoutTraces } = validBody;
+      expect(() => validateBody(bodyWithoutTraces)).toThrow();
+    });
+
+    it('rejects an index trace with an invalid name', () => {
+      expect(() =>
+        validateBody({ ...validBody, traces: [{ type: 'index', value: 'bad index' }] })
+      ).toThrow(/index, data stream, alias, or pattern/);
+    });
   });
 
   describe('audit logging', () => {
@@ -1135,6 +1192,7 @@ describe('ai indices routes', () => {
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [],
         sources: [],
+        traces: [],
       },
     };
 
@@ -1144,6 +1202,7 @@ describe('ai indices routes', () => {
         dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [],
         sources: [],
+        traces: [],
       },
     };
 
@@ -1287,6 +1346,7 @@ describe('ai indices routes', () => {
           dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
           automations: [],
           sources: [],
+          traces: [],
           date_created: '2026-07-01T00:00:00.000Z',
           date_modified: '2026-07-01T00:00:00.000Z',
         });
@@ -1341,10 +1401,16 @@ describe('ai indices routes', () => {
       });
 
       it('logs outcome:failure on error', async () => {
-        aiIndexService.list.mockRejectedValue(new Error('boom'));
+        const boom = new Error('boom');
+        aiIndexService.list.mockRejectedValue(boom);
 
-        await expect(callRoute('GET', aiIndexPath, {})).rejects.toThrow('boom');
+        await callRoute('GET', aiIndexPath, {});
 
+        expect(logger.error).toHaveBeenCalledWith(boom.stack);
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: 500,
+          body: { message: 'boom' },
+        });
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({

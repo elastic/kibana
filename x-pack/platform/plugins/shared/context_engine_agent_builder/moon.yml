@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/workflows-management-plugin'
   - '@kbn/security-plugin'
+  - '@kbn/spaces-plugin'
   - '@kbn/zod'
   - '@kbn/core-http-server'
   - '@kbn/management-settings-ids'

@@ -23,3 +23,10 @@ function sha256Hex(value: string): string {
 export function toHashedId(value: string): string {
   return sha256Hex(value).slice(0, HASH_HEX_LENGTH);
 }
+
+const CUSTOM_HASH_PREFIX = 'custom-';
+
+/** Stable `custom-<hash>` label used for user-created agent/tool/skill ids. */
+export function toCustomHashedId(value: string): string {
+  return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
+}

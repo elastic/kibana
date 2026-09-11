@@ -31,8 +31,13 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
+import { buildTraceQueries } from './trace_queries';
 
-const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
+const toAiIndexItem = (
+  id: string,
+  document: AiIndexDocument,
+  spaceId: string
+): AiIndexHttpItem => ({
   id,
   ...(document.description !== undefined && { description: document.description }),
   ...(document.feedback_analysis !== undefined && {
@@ -42,6 +47,7 @@ const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem =
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
+  traces: buildTraceQueries(document.traces ?? [], spaceId),
   date_created: document.date_created,
   date_modified: document.date_modified,
 });
@@ -214,12 +220,12 @@ export class AiIndexService {
     return feedbackAnalysis;
   }
 
-  async get(aiIndexId: string): Promise<AiIndexHttpItem> {
+  async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
     const existing = await this.findDocument(aiIndexId);
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return toAiIndexItem(aiIndexId, existing.document);
+    return toAiIndexItem(aiIndexId, existing.document, spaceId);
   }
 
   /**
@@ -282,7 +288,7 @@ export class AiIndexService {
     );
   }
 
-  async list(): Promise<AiIndexHttpItem[]> {
+  async list(spaceId: string): Promise<AiIndexHttpItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
@@ -290,7 +296,9 @@ export class AiIndexService {
     // Sorted by id in memory: Elasticsearch disallows sorting on `_id`, and the
     // result set is bounded by MAX_AI_INDICES.
     return response.hits.hits
-      .flatMap((hit) => (hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []))
+      .flatMap((hit) =>
+        hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument, spaceId)] : []
+      )
       .sort((a, b) => a.id.localeCompare(b.id));
   }
 

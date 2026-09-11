@@ -8,6 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
+import { resolveSpaceId } from '../routes/space';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -21,6 +22,7 @@ export const getCreateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  getSpaces,
   analyticsService,
   logger,
 }: KiStepDependencies) =>
@@ -29,6 +31,7 @@ export const getCreateKiStepDefinition = ({
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
+      const spaceId = resolveSpaceId(await getSpaces(), request);
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
       return withKiWriteTelemetry({
@@ -39,7 +42,11 @@ export const getCreateKiStepDefinition = ({
         run: async (setManaged) => {
           await assertKiWritePrivilege(checkWritePrivilege, request);
 
-          const { dest, managed } = await resolveOrCreateAiIndex(getAiIndexService, aiIndexId);
+          const { dest, managed } = await resolveOrCreateAiIndex(
+            getAiIndexService,
+            aiIndexId,
+            spaceId
+          );
           setManaged(managed);
           assertWritableDest(aiIndexId, dest);
           if (kiId !== undefined && dest.type === 'data_stream') {

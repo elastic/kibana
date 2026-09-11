@@ -108,6 +108,31 @@ describe('getDeleteKiStepDefinition', () => {
     );
   });
 
+  it('resolves the AI index with the request space id', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+      getSpaces: async () => ({
+        spacesService: { getSpaceId: () => 'marketing' },
+      }),
+    });
+    await handler(context);
+
+    expect(service.get).toHaveBeenCalledWith('my-ai-index', 'marketing');
+  });
+
   it('throws ValidationError when the KI id matches documents in multiple backing indices', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({

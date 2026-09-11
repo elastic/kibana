@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES } from './constants';
+import { MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES, SAFE_INDEX_NAME_RE } from './constants';
 
 // Starts with a lowercase letter or number, then lowercase letters, numbers, hyphens, or underscores.
 export const AI_INDEX_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
@@ -18,6 +18,14 @@ export const validateAiIndexId = (value: string): string | undefined =>
     : i18n.translate('xpack.contextEngine.aiIndexId.error.invalidFormat', {
         defaultMessage:
           'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.',
+      });
+
+/** Returns a translated error message for an invalid `traces` index name, or `undefined` when valid. */
+export const validateAiIndexTraceIndexName = (value: string): string | undefined =>
+  SAFE_INDEX_NAME_RE.test(value)
+    ? undefined
+    : i18n.translate('xpack.contextEngine.aiIndexTrace.error.invalidIndexName', {
+        defaultMessage: 'Must be a valid Elasticsearch index, data stream, alias, or pattern name.',
       });
 
 const INTERVAL_PATTERN = /^([1-9][0-9]*)(m|h|d)$/;

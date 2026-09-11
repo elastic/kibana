@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
   - '@kbn/content-list'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-provider-client'
