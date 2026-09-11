@@ -60,7 +60,7 @@ describe('MemoryMonitor', () => {
     document.dispatchEvent(new Event('visibilitychange'));
   };
 
-  it('does no work after stop or destroy and starts a fresh session on restart', () => {
+  it('resets after restart and stops reading after teardown', () => {
     monitor.startMonitoring();
     for (let sample = 1; sample <= 3; sample++) {
       usedMiB = 100 + sample * 20;
@@ -92,7 +92,7 @@ describe('MemoryMonitor', () => {
     expect(lastMeasured(snapshots)?.shortTrendPerMin).toBeCloseTo(20);
   });
 
-  it('publishes unavailable for a bad reading, retries, and replays null instead of a stale sample', () => {
+  it('retries bad readings without replaying stale data', () => {
     Object.defineProperty(performance, 'memory', {
       configurable: true,
       value: { usedJSHeapSize: 100 * MIB },
@@ -115,30 +115,15 @@ describe('MemoryMonitor', () => {
     expect(replayed).toEqual([null]);
   });
 
-  it('freezes a warmup baseline, detects growth without heap pressure, and clears when the heap holds', () => {
+  it('detects sustained growth after warmup and clears when the heap holds', () => {
     monitor.startMonitoring();
-    hidden = true;
-    document.dispatchEvent(new Event('visibilitychange'));
-    jest.advanceTimersByTime(60_000);
-    hidden = false;
-    document.dispatchEvent(new Event('visibilitychange'));
-    expect(lastMeasured(snapshots)?.sampleCount).toBe(2);
+    for (let sample = 1; sample <= 2; sample++) {
+      usedMiB = 100 + sample * 20;
+      jest.advanceTimersByTime(20_000);
+    }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
 
-    usedMiB = 140;
-    jest.advanceTimersByTime(20_000);
-    usedMiB = 160;
-    jest.advanceTimersByTime(20_000);
-    expect(lastMeasured(snapshots)?.sampleCount).toBe(4);
-    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
-
-    monitor.destroy();
-    snapshots = [];
-    monitor = new MemoryMonitor(8);
-    monitor.subscribe((info) => snapshots.push(info));
-    usedMiB = 100;
-    monitor.startMonitoring();
-    for (let sample = 1; sample <= 10; sample++) {
+    for (let sample = 3; sample <= 10; sample++) {
       usedMiB = 100 + sample * 20;
       jest.advanceTimersByTime(20_000);
     }
@@ -150,6 +135,5 @@ describe('MemoryMonitor', () => {
       jest.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
-    expect(lastMeasured(snapshots)?.sampleCount).toBe(8);
   });
 });

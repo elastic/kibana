@@ -73,11 +73,6 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
   private startedAt = 0;
   private isMonitoring = false;
   private lastInfo: MemoryInfo | null | undefined;
-  private readonly maxHistory: number;
-
-  constructor(maxHistory = MemoryMonitor.MAX_HISTORY) {
-    this.maxHistory = Math.max(MemoryMonitor.MIN_BASELINE_SAMPLES, maxHistory);
-  }
 
   isSupported(): boolean {
     return MemoryMonitor.isSupported();
@@ -162,7 +157,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo | null> {
     const usedMB = mem.usedJSHeapSize / (1024 * 1024);
     this.history.push(usedMB);
     this.sampleTimes.push(performance.now());
-    if (this.history.length > this.maxHistory) {
+    if (this.history.length > MemoryMonitor.MAX_HISTORY) {
       this.history.shift();
       this.sampleTimes.shift();
     }

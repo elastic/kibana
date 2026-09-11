@@ -78,7 +78,7 @@ describe('PerformanceMonitor', () => {
     expect(snapshots.at(-1)?.jankPercentage).toBe(0);
   });
 
-  it('clears 30 FPS jank through history roll-off without lowering the baseline', () => {
+  it('keeps the 60 FPS floor for a stable 30 FPS plateau', () => {
     monitor.destroy();
     monitor = new PerformanceMonitor(20);
     monitor.subscribe((info) => snapshots.push(info));

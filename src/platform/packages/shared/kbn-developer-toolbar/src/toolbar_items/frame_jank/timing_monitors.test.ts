@@ -147,7 +147,7 @@ describe('LongTaskMonitor', () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('rejects pre-session tasks and accepts in-session tasks', () => {
+  it('ignores tasks that started before monitoring', () => {
     monitor.stopMonitoring();
     jest.advanceTimersByTime(5_000);
     monitor.startMonitoring();
@@ -203,7 +203,7 @@ describe('INPMonitor', () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('rejects buffered pre-session interactions and accepts in-session interactions', () => {
+  it('ignores interactions that started before monitoring', () => {
     monitor.stopMonitoring();
     jest.advanceTimersByTime(5_000);
     monitor.startMonitoring();

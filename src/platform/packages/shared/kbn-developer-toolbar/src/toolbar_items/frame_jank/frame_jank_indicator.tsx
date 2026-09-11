@@ -36,7 +36,7 @@ interface PerformanceWarning {
   severity: 'warning' | 'danger';
 }
 
-const getPerformanceWarning = (
+export const getPerformanceWarning = (
   perfInfo: PerformanceInfo | null,
   longTaskStats: LongTaskInfo,
   inpStats: INPInfo

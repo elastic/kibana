@@ -15,7 +15,7 @@ import type { LongTaskInfo } from './long_task_monitor';
 import { LongTaskMonitor } from './long_task_monitor';
 import type { INPInfo } from './inp_monitor';
 import { INPMonitor } from './inp_monitor';
-import { FrameJankIndicator } from './frame_jank_indicator';
+import { FrameJankIndicator, getPerformanceWarning } from './frame_jank_indicator';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -76,6 +76,55 @@ const neutralInp: INPInfo = {
 
 const warningTrigger = () => screen.getByLabelText(/^Performance warning:/);
 
+describe('getPerformanceWarning', () => {
+  it.each([
+    [
+      'detects input delay',
+      neutralPerf,
+      neutralTask,
+      { ...neutralInp, worstInteractionDelay: 100 },
+      { kind: 'input', severity: 'warning' },
+    ],
+    [
+      'detects a long task',
+      neutralPerf,
+      { ...neutralTask, worstTaskDuration: 100 },
+      neutralInp,
+      { kind: 'stall', severity: 'warning' },
+    ],
+    [
+      'detects blocking time',
+      neutralPerf,
+      { ...neutralTask, totalBlockingTime: 200 },
+      neutralInp,
+      { kind: 'blocking', severity: 'warning' },
+    ],
+    [
+      'detects frame jank',
+      { ...neutralPerf, jankPercentage: 15 },
+      neutralTask,
+      neutralInp,
+      { kind: 'frames', severity: 'warning' },
+    ],
+    [
+      'prefers danger over warning',
+      { ...neutralPerf, jankPercentage: 15 },
+      { ...neutralTask, worstTaskDuration: 300 },
+      { ...neutralInp, worstInteractionDelay: 100 },
+      { kind: 'stall', severity: 'danger' },
+    ],
+    [
+      'ignores frame jank before three samples',
+      { ...neutralPerf, jankPercentage: 100, history: [10, 10] },
+      neutralTask,
+      neutralInp,
+      null,
+    ],
+  ])('%s', (_name, perf, task, inp, expected) => {
+    expect(getPerformanceWarning(perf, task, inp)).toEqual(expected);
+  });
+});
+
 describe('FrameJankIndicator warnings', () => {
   let perfCallback: PerfCallback;
   let taskCallback: TaskCallback;
@@ -97,7 +146,6 @@ describe('FrameJankIndicator warnings', () => {
     });
     jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
     jest.spyOn(PerformanceMonitor.prototype, 'startMonitoring').mockImplementation();
-    jest.spyOn(PerformanceMonitor.prototype, 'stopMonitoring').mockImplementation();
     jest.spyOn(PerformanceMonitor.prototype, 'destroy').mockImplementation();
     jest.spyOn(LongTaskMonitor.prototype, 'startMonitoring').mockImplementation();
     jest.spyOn(LongTaskMonitor.prototype, 'destroy').mockImplementation();
@@ -151,60 +199,6 @@ describe('FrameJankIndicator warnings', () => {
     expect(screen.getByRole('tooltip').textContent).not.toContain('Measuring…');
   });
 
-  it('selects the worst live warning and ignores frame jank before three samples', () => {
-    render(<FrameJankIndicator />);
-    emit({
-      inp: {
-        ...neutralInp,
-        slowInteractionsCount: 1,
-        worstInteractionDelay: 300,
-      },
-    });
-    expect(warningTrigger().getAttribute('aria-label')).toBe(
-      'Performance warning: Slow interaction'
-    );
-    expect(screen.getByText('Jank 0%').getAttribute('data-color')).toBe('danger');
-
-    emit({
-      perf: { ...neutralPerf, jankPercentage: 15 },
-      task: {
-        ...neutralTask,
-        worstTaskDuration: 100,
-        totalBlockingTime: 200,
-      },
-      inp: {
-        ...neutralInp,
-        slowInteractionsCount: 1,
-        worstInteractionDelay: 100,
-      },
-    });
-    expect(warningTrigger().getAttribute('aria-label')).toBe(
-      'Performance warning: Slow interaction'
-    );
-
-    act(() => {
-      taskCallback({ ...neutralTask, worstTaskDuration: 300 });
-    });
-    expect(warningTrigger().getAttribute('aria-label')).toBe('Performance warning: Long task');
-    expect(screen.getByText('Jank 15%').getAttribute('data-color')).toBe('danger');
-
-    emit({
-      task: { ...neutralTask, totalBlockingTime: 200 },
-      inp: {
-        ...neutralInp,
-        slowInteractionsCount: 1,
-        worstInteractionDelay: 300,
-      },
-    });
-    act(() => inpCallback(neutralInp));
-    expect(warningTrigger().getAttribute('aria-label')).toBe('Performance warning: Blocking time');
-    act(() => taskCallback(neutralTask));
-    expect(screen.getByLabelText('Performance monitor')).toBeTruthy();
-
-    emit({ perf: { ...neutralPerf, jankPercentage: 100, history: [10, 10] } });
-    expect(screen.getByLabelText('Performance monitor')).toBeTruthy();
-  });
-
   it('keeps other warnings when a timing source is unsupported', () => {
     jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(false);
     const { unmount } = render(<FrameJankIndicator />);
@@ -215,6 +209,7 @@ describe('FrameJankIndicator warnings', () => {
       })
     );
     expect(warningTrigger().getAttribute('aria-label')).toBe('Performance warning: Long task');
+    expect(screen.getByText('Jank —').getAttribute('data-color')).toBe('danger');
     unmount();
 
     jest.spyOn(PerformanceMonitor.prototype, 'isSupported').mockReturnValue(true);
