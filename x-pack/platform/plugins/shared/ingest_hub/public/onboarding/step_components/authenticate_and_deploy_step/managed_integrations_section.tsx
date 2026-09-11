@@ -75,8 +75,8 @@ export function ManagedIntegrationsSection({
     isStaticKeysEditMode
       ? 'access_keys'
       : showIdentityFederation
-      ? 'identity_federation'
-      : 'access_keys'
+        ? 'identity_federation'
+        : 'access_keys'
   );
 
   useEffect(() => {

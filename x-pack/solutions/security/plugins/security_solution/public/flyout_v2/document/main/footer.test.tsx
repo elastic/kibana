@@ -28,7 +28,7 @@ const createMockHit = (): DataTableRecord =>
     id: 'test-id',
     raw: { _id: 'test-id', _index: 'test-index' },
     flattened: {},
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();

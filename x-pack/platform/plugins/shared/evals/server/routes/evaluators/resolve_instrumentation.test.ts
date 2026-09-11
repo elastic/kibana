@@ -319,7 +319,7 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry,
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: jest.fn() }) as unknown as InferenceServerStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -342,7 +342,7 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
           },
         },
       }),
-    } as const);
+    }) as const;
 
   it('registers manage privilege authz requirement', () => {
     const { routeConfig } = setup();

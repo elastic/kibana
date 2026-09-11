@@ -37,7 +37,7 @@ export function useInferenceFeatureConnectors(
   // ones, so we skip it and pick the first recommended connector instead.
   const picked = query.soEntryFound
     ? connectors[0]
-    : connectors.find((c) => c.isRecommended) ?? connectors[0];
+    : (connectors.find((c) => c.isRecommended) ?? connectors[0]);
 
   return {
     resolvedConnectorId: picked?.id,

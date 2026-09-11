@@ -11,9 +11,12 @@ import type { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInRuleTypes } from './rule_types';
 import { BUILT_IN_ALERTS_FEATURE, STACK_ALERTS_ONLY_FEATURE } from './feature';
 
-export class AlertingBuiltinsPlugin
-  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
-{
+export class AlertingBuiltinsPlugin implements Plugin<
+  void,
+  void,
+  StackAlertsDeps,
+  StackAlertsStartDeps
+> {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 

@@ -22,7 +22,7 @@ interface ParsedDefinition {
  * For ref entries it is `name ?? $ref`; for inline entries it is `name`.
  */
 const getEffectiveName = (field: FieldEntry): string | undefined =>
-  field.$ref !== undefined ? field.name ?? field.$ref : field.name;
+  field.$ref !== undefined ? (field.name ?? field.$ref) : field.name;
 
 /**
  * Appends a library reference entry (`{ $ref: fieldName }`) to the `fields` array of a

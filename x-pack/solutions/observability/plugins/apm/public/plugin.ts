@@ -339,9 +339,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const { fetchObservabilityOverviewPageData } = await import(
-          './services/rest/apm_observability_overview_fetchers'
-        );
+        const { fetchObservabilityOverviewPageData } =
+          await import('./services/rest/apm_observability_overview_fetchers');
         return await fetchObservabilityOverviewPageData(params);
       },
     });
@@ -353,9 +352,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const { fetchObservabilityOverviewPageData } = await import(
-          './services/rest/apm_observability_overview_fetchers'
-        );
+        const { fetchObservabilityOverviewPageData } =
+          await import('./services/rest/apm_observability_overview_fetchers');
         return await fetchObservabilityOverviewPageData(params);
       },
     });
@@ -379,9 +377,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-root-span-by-trace-id',
       fetchRootSpanByTraceId: async (params, signal) => {
-        const { fetchRootSpanByTraceId } = await import(
-          './services/rest/fetch_trace_root_span_by_trace_id'
-        );
+        const { fetchRootSpanByTraceId } =
+          await import('./services/rest/fetch_trace_root_span_by_trace_id');
         return fetchRootSpanByTraceId(params, signal);
       },
     });
@@ -397,9 +394,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-latency-overall-transaction-distribution',
       fetchLatencyOverallTransactionDistribution: async (params, signal) => {
-        const { fetchLatencyOverallTransactionDistribution } = await import(
-          './services/rest/fetch_latency_overall_transaction_distribution'
-        );
+        const { fetchLatencyOverallTransactionDistribution } =
+          await import('./services/rest/fetch_latency_overall_transaction_distribution');
         return fetchLatencyOverallTransactionDistribution(params, signal);
       },
     });
@@ -407,9 +403,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-latency-overall-span-distribution',
       fetchLatencyOverallSpanDistribution: async (params, signal) => {
-        const { fetchLatencyOverallSpanDistribution } = await import(
-          './services/rest/fetch_latency_overall_span_distribution'
-        );
+        const { fetchLatencyOverallSpanDistribution } =
+          await import('./services/rest/fetch_latency_overall_span_distribution');
         return fetchLatencyOverallSpanDistribution(params, signal);
       },
     });

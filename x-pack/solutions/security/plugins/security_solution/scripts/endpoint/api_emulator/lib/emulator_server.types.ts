@@ -30,8 +30,10 @@ export interface EmulatorServerPluginRegisterOptions<TServices extends Record<st
   services: TServices;
 }
 
-export interface EmulatorServerPlugin<TServices extends Record<string, any> = any>
-  extends Omit<HapiTypes.PluginBase<unknown, unknown>, 'register'> {
+export interface EmulatorServerPlugin<TServices extends Record<string, any> = any> extends Omit<
+  HapiTypes.PluginBase<unknown, unknown>,
+  'register'
+> {
   register: (options: EmulatorServerPluginRegisterOptions<TServices>) => void | Promise<void>;
   name: string;
   /**
@@ -44,7 +46,7 @@ export interface EmulatorServerRequest<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends object = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = any
+  TPre extends HapiTypes.Request['pre'] = any,
 > extends Omit<HapiTypes.Request, 'query'> {
   params: TParams;
   query: TQuery;
@@ -56,7 +58,7 @@ export type EmulatorServerRouteHandlerMethod<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends object = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = any
+  TPre extends HapiTypes.Request['pre'] = any,
 > = (
   request: EmulatorServerRequest<TParams, TQuery, TPayload, TPre>,
   h: HapiTypes.ResponseToolkit,
@@ -67,7 +69,7 @@ export interface EmulatorServerRouteDefinition<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends object = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = any
+  TPre extends HapiTypes.Request['pre'] = any,
 > extends Omit<HapiTypes.ServerRoute, 'handler'> {
   handler: EmulatorServerRouteHandlerMethod<TParams, TQuery, TPayload, TPre>;
 }

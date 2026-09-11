@@ -49,7 +49,7 @@ export const setKibanaServices = (
   expressionsService = deps.expressions;
   reportingService = Boolean(
     capabilities.canvas?.generatePdf === true ||
-      capabilities.reportingLegacy?.generateReport === true
+    capabilities.reportingLegacy?.generateReport === true
   )
     ? deps.reporting
     : undefined;

@@ -294,16 +294,16 @@ class AppContextService {
         T extends 'agentPolicyCreate'
           ? PostAgentPolicyCreateCallback
           : T extends 'agentPolicyUpdate'
-          ? PostAgentPolicyUpdateCallback
-          : T extends 'packagePolicyCreate'
-          ? PostPackagePolicyCreateCallback
-          : T extends 'packagePolicyDelete'
-          ? PostPackagePolicyDeleteCallback
-          : T extends 'packagePolicyPostDelete'
-          ? PostPackagePolicyPostDeleteCallback
-          : T extends 'packagePolicyPostCreate'
-          ? PostPackagePolicyPostCreateCallback
-          : PutPackagePolicyUpdateCallback
+            ? PostAgentPolicyUpdateCallback
+            : T extends 'packagePolicyCreate'
+              ? PostPackagePolicyCreateCallback
+              : T extends 'packagePolicyDelete'
+                ? PostPackagePolicyDeleteCallback
+                : T extends 'packagePolicyPostDelete'
+                  ? PostPackagePolicyPostDeleteCallback
+                  : T extends 'packagePolicyPostCreate'
+                    ? PostPackagePolicyPostCreateCallback
+                    : PutPackagePolicyUpdateCallback
       >
     | undefined {
     if (this.externalCallbacks) {
@@ -311,16 +311,16 @@ class AppContextService {
         T extends 'agentPolicyCreate'
           ? PostAgentPolicyCreateCallback
           : T extends 'agentPolicyUpdate'
-          ? PostAgentPolicyUpdateCallback
-          : T extends 'packagePolicyCreate'
-          ? PostPackagePolicyCreateCallback
-          : T extends 'packagePolicyDelete'
-          ? PostPackagePolicyDeleteCallback
-          : T extends 'packagePolicyPostDelete'
-          ? PostPackagePolicyPostDeleteCallback
-          : T extends 'packagePolicyPostCreate'
-          ? PostPackagePolicyPostCreateCallback
-          : PutPackagePolicyUpdateCallback
+            ? PostAgentPolicyUpdateCallback
+            : T extends 'packagePolicyCreate'
+              ? PostPackagePolicyCreateCallback
+              : T extends 'packagePolicyDelete'
+                ? PostPackagePolicyDeleteCallback
+                : T extends 'packagePolicyPostDelete'
+                  ? PostPackagePolicyPostDeleteCallback
+                  : T extends 'packagePolicyPostCreate'
+                    ? PostPackagePolicyPostCreateCallback
+                    : PutPackagePolicyUpdateCallback
       >;
     }
   }

@@ -217,8 +217,10 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName | EsFieldName[] | null;
 }
 
-export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
-  extends PivotAggsConfigWithUiBase {
+export interface PivotAggsConfigWithExtra<
+  T,
+  ESConfig extends { [key: string]: any },
+> extends PivotAggsConfigWithUiBase {
   /** Form component */
   AggFormComponent: FC<{
     aggConfig: Partial<T>;

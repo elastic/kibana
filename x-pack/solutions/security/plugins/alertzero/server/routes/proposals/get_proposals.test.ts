@@ -26,7 +26,7 @@ const makeConversationProposalsService = (
 ): ConversationProposalsService =>
   ({
     list: jest.fn().mockResolvedValue(listResult),
-  } as unknown as ConversationProposalsService);
+  }) as unknown as ConversationProposalsService;
 
 describe('registerGetProposalsRoute', () => {
   const logger = loggingSystemMock.createLogger();

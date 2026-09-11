@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable prettier/prettier */
- 
-
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const linuxEvaluations = {
-  integration: "linux",
-  evaluations: [
-  ],
+  integration: 'linux',
+  evaluations: [],
 } as const satisfies IntegrationEvaluations;

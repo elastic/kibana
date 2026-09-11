@@ -161,9 +161,8 @@ apiTest.describe(
         try {
           const defaultLocation =
             await apiServices.syntheticsPrivateLocations.getSharedPrivateLocation();
-          const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-            spaceId
-          );
+          const spaceLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
 
           await addMonitor(apiClient, adminHeaders, {
             type: 'http',

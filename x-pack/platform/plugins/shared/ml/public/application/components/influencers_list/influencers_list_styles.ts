@@ -40,36 +40,36 @@ export const useInfluencersListStyles = () => {
       severity.id === 'critical'
         ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme)
         : severity.id === 'major'
-        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme)
-        : severity.id === 'minor'
-        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme)
-        : severity.id === 'warning'
-        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme)
-        : severity.id === 'low'
-        ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme)
-        : euiTheme.colors.severity.unknown,
+          ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme)
+          : severity.id === 'minor'
+            ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme)
+            : severity.id === 'warning'
+              ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme)
+              : severity.id === 'low'
+                ? getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme)
+                : euiTheme.colors.severity.unknown,
     influencerBadgeBackgroundColor: (severity: MlSeverityType) =>
       severity.id === 'critical'
         ? euiTheme.colors.backgroundLightDanger
         : severity.id === 'major'
-        ? euiTheme.colors.backgroundLightRisk
-        : severity.id === 'minor'
-        ? euiTheme.colors.backgroundLightWarning
-        : severity.id === 'warning' || severity.id === 'low'
-        ? euiTheme.colors.backgroundLightNeutral
-        : euiTheme.colors.backgroundLightPrimary,
+          ? euiTheme.colors.backgroundLightRisk
+          : severity.id === 'minor'
+            ? euiTheme.colors.backgroundLightWarning
+            : severity.id === 'warning' || severity.id === 'low'
+              ? euiTheme.colors.backgroundLightNeutral
+              : euiTheme.colors.backgroundLightPrimary,
     influencerBadgeTextColor: (severity: MlSeverityType) =>
       css({
         color:
           severity.id === 'critical'
             ? euiTheme.colors.textDanger
             : severity.id === 'major'
-            ? euiTheme.colors.textRisk
-            : severity.id === 'minor'
-            ? euiTheme.colors.textWarning
-            : severity.id === 'warning' || severity.id === 'low'
-            ? euiTheme.colors.textNeutral
-            : euiTheme.colors.textSubdued,
+              ? euiTheme.colors.textRisk
+              : severity.id === 'minor'
+                ? euiTheme.colors.textWarning
+                : severity.id === 'warning' || severity.id === 'low'
+                  ? euiTheme.colors.textNeutral
+                  : euiTheme.colors.textSubdued,
       }),
   };
 };

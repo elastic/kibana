@@ -232,9 +232,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
-  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
-    DEFAULT_DATE_FORMAT_TZ
-  );
+  const uiSettingsDateFormatTimezone =
+    await core.uiSettings.client.get<string>(DEFAULT_DATE_FORMAT_TZ);
 
   const assistantGraph = await getDefaultAssistantGraph({
     // we need to pass it like this or streaming does not work for bedrock

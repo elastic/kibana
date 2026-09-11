@@ -23,7 +23,7 @@ import { retryOnConflict, type RetryOnConflictOptions } from '../../../infra/ela
 
 const getLogsExtractionOverrides = (attrs: EntityStoreGlobalStateOverrides) =>
   attrs.defaultsVersion === 'latest'
-    ? attrs.logsExtraction ?? {}
+    ? (attrs.logsExtraction ?? {})
     : getLegacyLogExtractionOverrides(attrs.logsExtraction ?? {});
 
 // takes existing config, strips legacy defaults (if exists) and merges with new overrides

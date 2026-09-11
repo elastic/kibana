@@ -219,15 +219,12 @@ interface PluginsStart {
   inspector?: InspectorStart;
 }
 
-export class Plugin
-  implements
-    CorePlugin<
-      TriggersAndActionsUIPublicPluginSetup,
-      TriggersAndActionsUIPublicPluginStart,
-      PluginsSetup,
-      PluginsStart
-    >
-{
+export class Plugin implements CorePlugin<
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+  PluginsSetup,
+  PluginsStart
+> {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
   private config: TriggersActionsUiConfigType;
@@ -354,7 +351,7 @@ export class Plugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,
-            unknown
+            unknown,
           ];
 
           const { renderRulesPageApp } = await import('./application/rules_page_app');
@@ -415,7 +412,7 @@ export class Plugin
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
           PluginsStart,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./application/connectors_app');
@@ -467,7 +464,7 @@ export class Plugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,
-            unknown
+            unknown,
           ];
           let kibanaFeatures: KibanaFeature[];
           try {

@@ -12,7 +12,10 @@ import type { KibanaClient } from './base_kibana_client';
 import { KibanaClientHttpError } from './base_kibana_client';
 
 export class FleetClient {
-  constructor(private readonly kibanaClient: KibanaClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly kibanaClient: KibanaClient,
+    private readonly logger: Logger
+  ) {}
   getFleetPackagePath(packageName: string, packageVersion?: string): string {
     let path = `/api/fleet/epm/packages/${packageName}`;
     if (packageVersion) {

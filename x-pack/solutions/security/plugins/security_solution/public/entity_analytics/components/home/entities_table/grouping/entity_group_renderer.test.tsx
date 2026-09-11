@@ -41,7 +41,7 @@ const createMockBucket = (
     key: 'user',
     doc_count: 10,
     ...overrides,
-  } as RawBucket<EntitiesGroupingAggregation>);
+  }) as RawBucket<EntitiesGroupingAggregation>;
 
 const emptyMetadata: TargetMetadataMap = new Map();
 

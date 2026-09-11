@@ -37,8 +37,8 @@ const RunComponent: React.FC<Props> = ({
   const tooltipContent = missingWorkflowsExecute
     ? i18n.MISSING_WORKFLOWS_EXECUTE_TOOLTIP
     : isDisabled
-    ? i18n.DISABLED_TOOLTIP
-    : i18n.RUN_TOOLTIP;
+      ? i18n.DISABLED_TOOLTIP
+      : i18n.RUN_TOOLTIP;
 
   return (
     <EuiToolTip content={tooltipContent} data-test-subj="runTooltip" position="bottom">

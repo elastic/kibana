@@ -308,7 +308,7 @@ describe('external_vis_context', () => {
             datasourceStates: { textBased },
           },
         },
-      } as unknown as UnifiedHistogramVisContext);
+      }) as unknown as UnifiedHistogramVisContext;
 
     const queryParams = { query: currentQuery, columnsMap: {} } as unknown as QueryParams;
 

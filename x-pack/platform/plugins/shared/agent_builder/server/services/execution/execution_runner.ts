@@ -511,8 +511,8 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
     typeof output?.statusCode === 'number'
       ? output.statusCode
       : typeof statusCode === 'number'
-      ? statusCode
-      : undefined;
+        ? statusCode
+        : undefined;
   return typeof candidate === 'number' && candidate >= 400 && candidate < 600
     ? candidate
     : undefined;

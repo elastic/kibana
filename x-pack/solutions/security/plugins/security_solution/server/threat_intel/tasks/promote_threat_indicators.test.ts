@@ -478,7 +478,7 @@ describe('promote task runner', () => {
       executionUuid: 'test-execution-uuid',
       setCustomTaskRunEventFields: jest.fn(),
       ...overrides,
-    } as unknown as RunContext);
+    }) as unknown as RunContext;
 
   const reportHit = (id: string, extractedAt = EXTRACTED_AT) => ({
     _id: id,

@@ -31,7 +31,11 @@ export {
 export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta> {
   public readonly statusCode: number | undefined;
 
-  constructor(message?: string, statusCode?: number, public readonly meta?: TMeta) {
+  constructor(
+    message?: string,
+    statusCode?: number,
+    public readonly meta?: TMeta
+  ) {
     super(message, meta);
 
     if (statusCode) {
@@ -63,7 +67,10 @@ export class RegistryConnectionError extends RegistryError {
   }
 }
 export class RegistryResponseError extends RegistryError {
-  constructor(message?: string, public readonly status?: number) {
+  constructor(
+    message?: string,
+    public readonly status?: number
+  ) {
     super(message);
     if (status) {
       this.attributes = { type: 'http', reason: String(status) };
@@ -210,7 +217,10 @@ export class IacProvisionerRenderError extends FleetError {
  * availability problem rather than a contract rejection.
  */
 export class IacProvisionerUnavailableError extends FleetError {
-  constructor(message: string, public readonly statusCode?: number) {
+  constructor(
+    message: string,
+    public readonly statusCode?: number
+  ) {
     super(`IaC Provisioner unavailable, ${message}`);
   }
 }

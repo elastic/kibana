@@ -39,7 +39,7 @@ export function useUninstallProductDoc(
     [REACT_QUERY_KEYS.UNINSTALL_PRODUCT_DOC],
     async (vars) => {
       const inferenceId =
-        typeof vars === 'string' ? vars : vars?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+        typeof vars === 'string' ? vars : (vars?.inferenceId ?? defaultInferenceEndpoints.ELSER);
       const resourceType = typeof vars === 'string' ? undefined : vars?.resourceType;
       return productDocBase.installation.uninstall({
         inferenceId,

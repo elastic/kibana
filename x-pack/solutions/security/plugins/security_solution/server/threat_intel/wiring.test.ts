@@ -65,16 +65,16 @@ const ALL_REGISTRATIONS = [
 ] as const;
 
 const features = (threatIntelSupplyEnabled: boolean) =>
-  ({ threatIntelSupplyEnabled } as unknown as ExperimentalFeatures);
+  ({ threatIntelSupplyEnabled }) as unknown as ExperimentalFeatures;
 
 const taskManager = () =>
   ({
     registerTaskDefinitions: jest.fn(),
     removeIfExists: jest.fn().mockResolvedValue(undefined),
-  } as never);
+  }) as never;
 
-const setupDeps = () => ({ taskManager: taskManager(), workflowsExtensions: {} } as never);
-const startDeps = () => ({ taskManager: taskManager() } as never);
+const setupDeps = () => ({ taskManager: taskManager(), workflowsExtensions: {} }) as never;
+const startDeps = () => ({ taskManager: taskManager() }) as never;
 
 describe('threat intel wiring', () => {
   beforeEach(() => {

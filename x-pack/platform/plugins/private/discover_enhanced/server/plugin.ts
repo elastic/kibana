@@ -19,9 +19,12 @@ interface StartDependencies {
   usageCollection?: unknown;
 }
 
-export class DiscoverEnhancedPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class DiscoverEnhancedPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   private config$: Observable<Config>;
 
   constructor(protected readonly context: PluginInitializerContext) {

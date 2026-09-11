@@ -1420,7 +1420,7 @@ describe('Fleet - validatePackagePolicy() additional_datastreams_permissions', (
       package: { name: 'mock-package', title: 'Mock package', version: '0.0.0' },
       inputs: [],
       additional_datastreams_permissions: permissions,
-    } as unknown as NewPackagePolicy);
+    }) as unknown as NewPackagePolicy;
 
   const errorsFor = (permissions: string[]) =>
     validatePackagePolicy(buildPolicy(permissions), minimalPackage, deps)

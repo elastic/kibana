@@ -77,7 +77,7 @@ export interface MiddlewareActionSpyHelper<S = State, A extends AppAction = AppA
  */
 export const createSpyMiddleware = <
   S = State,
-  A extends AppAction = AppAction
+  A extends AppAction = AppAction,
 >(): MiddlewareActionSpyHelper<S, A> => {
   type ActionWatcher = (action: A) => void;
 

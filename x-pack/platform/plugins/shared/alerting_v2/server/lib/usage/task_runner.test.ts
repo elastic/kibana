@@ -32,7 +32,7 @@ const createRunParams = (state = emptyState): Pick<RunContext, 'taskInstance' | 
   ({
     taskInstance: { state },
     signal: new AbortController().signal,
-  } as unknown as Pick<RunContext, 'taskInstance' | 'signal'>);
+  }) as unknown as Pick<RunContext, 'taskInstance' | 'signal'>;
 
 describe('TelemetryTaskRunner', () => {
   beforeEach(() => {

@@ -35,7 +35,7 @@ const createMockHit = (
     raw: { _id: rawId },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const renderAnalyzerPreview = (
   hit: DataTableRecord,

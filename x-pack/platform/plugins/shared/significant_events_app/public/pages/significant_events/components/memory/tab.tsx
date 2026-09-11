@@ -329,14 +329,14 @@ export function MemoryTab() {
                                 blocksActivity
                                   ? activityBlockTooltip
                                   : !workflowsEnabled && !isWorkflowsEnabledLoading
-                                  ? i18n.translate(
-                                      'xpack.significantEventsApp.memory.workflowActionRequiresEnabledTooltip',
-                                      {
-                                        defaultMessage:
-                                          'Enable background workflows before running this action.',
-                                      }
-                                    )
-                                  : undefined
+                                    ? i18n.translate(
+                                        'xpack.significantEventsApp.memory.workflowActionRequiresEnabledTooltip',
+                                        {
+                                          defaultMessage:
+                                            'Enable background workflows before running this action.',
+                                        }
+                                      )
+                                    : undefined
                               }
                               data-test-subj={action.testSubj}
                             >

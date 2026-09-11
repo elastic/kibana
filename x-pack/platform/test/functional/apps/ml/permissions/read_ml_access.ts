@@ -134,9 +134,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const filterItems = ['filter_item_permission'];
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
-      const uploadFilePath = require.resolve(
-        '../../../../fixtures/ml/files_to_import/artificial_server_log'
-      );
+      const uploadFilePath =
+        require.resolve('../../../../fixtures/ml/files_to_import/artificial_server_log');
       const expectedUploadFileTitle = 'artificial_server_log';
       before(async () => {
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');

@@ -63,7 +63,7 @@ export interface StepDocumentation {
 export interface BaseStepDefinition<
   InputSchema extends z.ZodType = z.ZodType,
   OutputSchema extends z.ZodType = z.ZodType,
-  ConfigSchema extends z.ZodObject = z.ZodObject
+  ConfigSchema extends z.ZodObject = z.ZodObject,
 > {
   /**
    * Unique identifier for this step type.

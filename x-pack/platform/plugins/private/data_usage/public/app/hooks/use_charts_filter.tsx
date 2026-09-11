@@ -80,8 +80,8 @@ export const useChartsFilter = ({
             ? 'on'
             : undefined
           : isDefaultMetricType(metricType) // default metrics are selected by default
-          ? 'on'
-          : undefined,
+            ? 'on'
+            : undefined,
         'data-test-subj': `${filterOptions.filterName}-filter-option`,
       })) as FilterItems;
     }
@@ -97,8 +97,8 @@ export const useChartsFilter = ({
             ? 'on'
             : undefined
           : i < DEFAULT_SELECTED_OPTIONS
-          ? 'on'
-          : undefined,
+            ? 'on'
+            : undefined,
         'data-test-subj': `${filterOptions.filterName}-filter-option`,
         truncationProps: {
           truncation: 'start',

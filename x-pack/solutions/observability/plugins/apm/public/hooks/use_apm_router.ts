@@ -24,7 +24,7 @@ export function useApmRouter(
           prependBasePath
             ? core.http.basePath.prepend('/app/apm' + router.link(...args))
             : router.link(...args),
-      } as unknown as ApmRouter),
+      }) as unknown as ApmRouter,
     [core.http.basePath, prependBasePath, router]
   );
 }

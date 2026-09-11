@@ -24,10 +24,12 @@ import { IlmLocatorDefinition } from './locator';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data_enricher';
 import { PublicApiService } from './services';
 
-export class IndexLifecycleManagementPlugin
-  implements
-    Plugin<void, IndexLifecycleManagementPluginStart, SetupDependencies, StartDependencies>
-{
+export class IndexLifecycleManagementPlugin implements Plugin<
+  void,
+  IndexLifecycleManagementPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private breadcrumbService = new BreadcrumbService();

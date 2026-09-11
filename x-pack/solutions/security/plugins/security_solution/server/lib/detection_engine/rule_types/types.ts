@@ -121,7 +121,7 @@ type SecurityActionGroupId = 'default';
 
 export type SecurityExecutorOptions<
   TParams extends RuleParams,
-  TState extends RuleTypeState
+  TState extends RuleTypeState,
 > = RuleExecutorOptions<
   TParams,
   TState,
@@ -257,7 +257,7 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 export type WrappedEventHit = BaseHit<EventHit>;
 
 export type SignalSearchResponse<
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type AlertSourceHit = estypes.SearchHit<DetectionAlert800>;

@@ -12,7 +12,7 @@ import { isAutomatedVersionBumpPR } from './utils';
 
 type PrChanges = RestEndpointMethodTypes['pulls']['listFiles']['response']['data'];
 
-const change = (filename: string): PrChanges[number] => ({ filename } as PrChanges[number]);
+const change = (filename: string): PrChanges[number] => ({ filename }) as PrChanges[number];
 
 describe('isAutomatedVersionBumpPR', () => {
   const originalEnv = process.env;

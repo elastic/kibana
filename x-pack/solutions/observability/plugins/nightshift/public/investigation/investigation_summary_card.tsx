@@ -202,13 +202,15 @@ function TryNextPanel({
           position: relative;
           width: 100%;
 
-          ${shouldShowChatAction
-            ? `
+          ${
+            shouldShowChatAction
+              ? `
           &:hover .${tryNextRowActionClassName}, &:focus-within .${tryNextRowActionClassName} {
             opacity: 1;
             pointer-events: auto;
           }`
-            : ''}
+              : ''
+          }
         `}
       >
         <InvestigationFormattedText text={recommendation.title} bold />

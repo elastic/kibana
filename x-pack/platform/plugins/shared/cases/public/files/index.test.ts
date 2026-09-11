@@ -15,7 +15,7 @@ const resolveMaxSizeBytes = (
   file: File
 ): number | undefined => (typeof maxSizeBytes === 'function' ? maxSizeBytes(file) : maxSizeBytes);
 
-const asFile = (type: string): File => ({ type } as File);
+const asFile = (type: string): File => ({ type }) as File;
 
 describe('ui files index', () => {
   describe('registerCaseFileKinds', () => {

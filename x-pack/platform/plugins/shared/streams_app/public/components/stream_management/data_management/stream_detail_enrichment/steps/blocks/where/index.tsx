@@ -126,9 +126,9 @@ export const WhereBlock = (props: StepConfigurationProps) => {
               `
             : css`
                 position: relative;
-                border: ${isSelected
-                  ? `1px solid ${euiTheme.colors.primary}`
-                  : euiTheme.border.thin};
+                border: ${
+                  isSelected ? `1px solid ${euiTheme.colors.primary}` : euiTheme.border.thin
+                };
                 background-color: ${isSelected ? euiTheme.colors.backgroundBasePrimary : 'inherit'};
                 border-radius: ${euiTheme.size.s};
               `
@@ -150,9 +150,9 @@ export const WhereBlock = (props: StepConfigurationProps) => {
               border-radius: calc(${euiTheme.border.radius.medium} * 2);
 
               &:hover {
-                background-color: ${!isSelected
-                  ? euiTheme.colors.backgroundBaseSubdued
-                  : 'inherit'};
+                background-color: ${
+                  !isSelected ? euiTheme.colors.backgroundBaseSubdued : 'inherit'
+                };
                 transition: background-color 50ms ease-in-out;
               }
             `}

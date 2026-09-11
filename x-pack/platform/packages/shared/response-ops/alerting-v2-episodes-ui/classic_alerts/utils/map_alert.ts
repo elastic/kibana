@@ -122,8 +122,8 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     durationUs != null
       ? Math.round(durationUs / 1000)
       : start
-      ? Math.max(0, new Date(lastTimestamp).getTime() - new Date(start).getTime())
-      : 0;
+        ? Math.max(0, new Date(lastTimestamp).getTime() - new Date(start).getTime())
+        : 0;
 
   return {
     '@timestamp': timestamp,

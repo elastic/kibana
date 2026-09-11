@@ -26,7 +26,7 @@ const createSeriesIdentifier = (agentName: string, ownerLabel: string): XYChartS
       ['aspnetcore.memory_pool.owner', ownerLabel],
     ]),
     seriesKeys: [agentName, ownerLabel],
-  } as unknown as XYChartSeriesIdentifier);
+  }) as unknown as XYChartSeriesIdentifier;
 
 describe('getColorSeriesAccessorFn', () => {
   it('uses palette colors for multi-split missing values mapped from formatted null labels', () => {

@@ -74,7 +74,7 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
       initialActiveMatchPositionRef.current = undefined;
 
       const nextActiveMatchPosition =
-        totalMatchesCount > 0 ? initialActiveMatchPosition ?? FIRST_ACTIVE_MATCH_POSITION : null;
+        totalMatchesCount > 0 ? (initialActiveMatchPosition ?? FIRST_ACTIVE_MATCH_POSITION) : null;
 
       setState({
         term,

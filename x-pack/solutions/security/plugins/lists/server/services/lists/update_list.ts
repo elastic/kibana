@@ -128,7 +128,7 @@ export const updateList = async ({
       description: description ?? list.description,
       id,
       immutable: list.immutable,
-      meta: isPatch ? meta ?? list.meta : meta,
+      meta: isPatch ? (meta ?? list.meta) : meta,
       name: name ?? list.name,
       tie_breaker_id: list.tie_breaker_id,
       type: list.type,

@@ -44,10 +44,10 @@ import { resolve, normalize } from 'node:path';
 const HOME = homedir();
 
 const SECRET_PATH_PREFIXES = [
-  resolve(HOME, '.netrc'),        // single file — exact match also caught below
-  resolve(HOME, '.aws'),          // AWS credentials directory
-  resolve(HOME, '.ssh'),          // SSH private keys
-  resolve(HOME, '.claude'),       // Claude Code settings, session tokens
+  resolve(HOME, '.netrc'), // single file — exact match also caught below
+  resolve(HOME, '.aws'), // AWS credentials directory
+  resolve(HOME, '.ssh'), // SSH private keys
+  resolve(HOME, '.claude'), // Claude Code settings, session tokens
   resolve(HOME, '.config', 'gh'), // GitHub CLI auth tokens
 ];
 
@@ -57,7 +57,7 @@ const SECRET_PATH_PREFIXES = [
  */
 const ENV_FILE_PATTERNS = [
   /^\.env$/,
-  /^\.env\./,   // .env.local, .env.production, etc.
+  /^\.env\./, // .env.local, .env.production, etc.
 ];
 
 /**
@@ -65,14 +65,7 @@ const ENV_FILE_PATTERNS = [
  * Bash arm. Each is a simple lowercase substring — no glob/regex, to keep
  * the false-positive rate low.
  */
-const BASH_SECRET_SUBSTRINGS = [
-  '.netrc',
-  '/.aws/',
-  '/.ssh/',
-  '/.claude/',
-  '/.config/gh/',
-  '/.env',
-];
+const BASH_SECRET_SUBSTRINGS = ['.netrc', '/.aws/', '/.ssh/', '/.claude/', '/.config/gh/', '/.env'];
 
 /**
  * Path substrings that identify skill instruction files in the Bash arm.
@@ -146,9 +139,7 @@ const DENY_SKILL_WRITE = (path) =>
 /** Normalise a file path and resolve HOME-relative ~/ notation. */
 const normalisePath = (filePath) => {
   if (typeof filePath !== 'string') return '';
-  const expanded = filePath.startsWith('~/')
-    ? resolve(HOME, filePath.slice(2))
-    : filePath;
+  const expanded = filePath.startsWith('~/') ? resolve(HOME, filePath.slice(2)) : filePath;
   return normalize(resolve(expanded));
 };
 

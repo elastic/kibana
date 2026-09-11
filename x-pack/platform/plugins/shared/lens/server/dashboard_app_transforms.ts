@@ -26,7 +26,7 @@ export function registerLensEmbeddableTransformsForDashboardApp(
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, true),
         transformOut: getTransformOut(builder, drilldownTransforms.transformOut, true),
-      } satisfies LensTransforms),
+      }) satisfies LensTransforms,
     getSchema: (getDrilldownsSchema) => {
       return builder.isEnabled ? getLensPanelSchema(getDrilldownsSchema) : undefined;
     },

@@ -163,7 +163,7 @@ export const DiscoverDocumentFlyout = memo(
         dispatch(
           setExpandedDoc({
             expandedDoc: doc,
-            expandedDocOwner: doc ? expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER : undefined,
+            expandedDocOwner: doc ? (expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER) : undefined,
           })
         );
       },

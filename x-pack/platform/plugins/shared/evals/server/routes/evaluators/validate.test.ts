@@ -165,7 +165,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: registry,
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: jest.fn() }) as unknown as InferenceServerStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
@@ -189,7 +189,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
           },
         },
       }),
-    } as const);
+    }) as const;
 
   it('registers manage privilege authz requirement', () => {
     const { routeConfig } = setup();

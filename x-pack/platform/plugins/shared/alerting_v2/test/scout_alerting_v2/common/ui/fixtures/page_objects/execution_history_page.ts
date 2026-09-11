@@ -11,7 +11,10 @@ export class ExecutionHistoryPage {
   public readonly emptyPrompt: Locator;
   public readonly retryButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.emptyPrompt = this.page.getByRole('cell').getByTestId('ruleExecutionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
   }

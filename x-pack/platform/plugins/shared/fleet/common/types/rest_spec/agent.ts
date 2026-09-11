@@ -200,7 +200,7 @@ export interface PostBulkAgentReassignRequest {
 }
 
 export enum RequestDiagnosticsAdditionalMetrics {
-  'CPU' = 'CPU',
+  CPU = 'CPU',
 }
 
 export interface PostRequestDiagnosticsRequest {

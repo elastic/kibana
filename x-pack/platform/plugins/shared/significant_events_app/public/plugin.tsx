@@ -29,15 +29,12 @@ import type {
 } from './types';
 import type { SignificantEventsAppServices } from './services/types';
 
-export class SignificantEventsAppPlugin
-  implements
-    Plugin<
-      SignificantEventsAppPublicSetup,
-      SignificantEventsAppPublicStart,
-      SignificantEventsAppSetupDependencies,
-      SignificantEventsAppStartDependencies
-    >
-{
+export class SignificantEventsAppPlugin implements Plugin<
+  SignificantEventsAppPublicSetup,
+  SignificantEventsAppPublicStart,
+  SignificantEventsAppSetupDependencies,
+  SignificantEventsAppStartDependencies
+> {
   // Built in start(); core guarantees every plugin start() runs before any app mount,
   // so the mount callback below can safely read it.
   private focusedSignificantEventService!: FocusedSignificantEventService;
@@ -119,16 +116,13 @@ export class SignificantEventsAppPlugin
           ).pipe(
             map(({ available }) => available),
             catchError(() => of(false)),
-            map(
-              (visible): AppUpdater =>
-                (app) => ({
-                  visibleIn: visible ? ['globalSearch'] : [],
-                  deepLinks: (app.deepLinks ?? []).map((link) => ({
-                    ...link,
-                    visibleIn: visible ? ['globalSearch'] : [],
-                  })),
-                })
-            )
+            map((visible): AppUpdater => (app) => ({
+              visibleIn: visible ? ['globalSearch'] : [],
+              deepLinks: (app.deepLinks ?? []).map((link) => ({
+                ...link,
+                visibleIn: visible ? ['globalSearch'] : [],
+              })),
+            }))
           )
         )
       ),

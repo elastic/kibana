@@ -223,10 +223,10 @@ export function Detail() {
         ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
         : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
       : !userCanInstallPackages
-      ? missingSecurityConfiguration
-        ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
-        : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
-      : undefined;
+        ? missingSecurityConfiguration
+          ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
+          : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+        : undefined;
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -394,10 +394,10 @@ export function Detail() {
   const baseIntegrationsPath = fromCollection
     ? getPath('integration_collection', { groupId: fromCollection.groupId })
     : fromIntegrations === 'updates_available'
-    ? getPath('integrations_installed_updates_available')
-    : fromIntegrations === 'installed'
-    ? getPath('integrations_installed')
-    : getPath('integrations_all');
+      ? getPath('integrations_installed_updates_available')
+      : fromIntegrations === 'installed'
+        ? getPath('integrations_installed')
+        : getPath('integrations_all');
 
   const fromIntegrationsPath = fromCollection
     ? baseIntegrationsPath
@@ -417,8 +417,8 @@ export function Detail() {
     const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
     const kibanaAssets =
       !installedSpaceId || installedSpaceId === spaceId
-        ? pkgInstallationInfo?.installed_kibana ?? []
-        : pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId ?? 'default'] ?? [];
+        ? (pkgInstallationInfo?.installed_kibana ?? [])
+        : (pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId ?? 'default'] ?? []);
     return kibanaAssets.filter((a) => a.type === KibanaSavedObjectType.alert && a.deferred === true)
       .length;
   }, [pkgInstallationInfo, spaceId]);
@@ -711,7 +711,7 @@ export function Detail() {
                   ]),
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
-                {item.isDivider ?? false ? (
+                {(item.isDivider ?? false) ? (
                   <Divider />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">

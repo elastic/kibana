@@ -12,7 +12,7 @@ import { getCommandListMock } from '../console/mocks';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 
 const buildCommandArgumentValueSelectorPropsMock = <
-  T extends CommandArgumentValueSelectorProps = CommandArgumentValueSelectorProps
+  T extends CommandArgumentValueSelectorProps = CommandArgumentValueSelectorProps,
 >(
   overrides: DeepPartial<T> = {}
 ): jest.Mocked<T> => {
@@ -42,10 +42,13 @@ const buildCommandArgumentValueSelectorPropsMock = <
         input: commandInput,
         hasArg: jest.fn().mockReturnValue(true),
         hasArgs: true,
-        args: commandArgNames.reduce((acc, argName) => {
-          acc[argName] = [];
-          return acc;
-        }, {} as ParsedCommandInterface['args']),
+        args: commandArgNames.reduce(
+          (acc, argName) => {
+            acc[argName] = [];
+            return acc;
+          },
+          {} as ParsedCommandInterface['args']
+        ),
       },
       commandDefinition,
     },

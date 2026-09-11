@@ -218,9 +218,9 @@ export abstract class FieldFormat {
   static isInstanceOfFieldFormat(fieldFormat: unknown): fieldFormat is FieldFormat {
     return Boolean(
       fieldFormat &&
-        typeof fieldFormat === 'object' &&
-        (typeof (fieldFormat as FieldFormat).convertToText === 'function' ||
-          typeof (fieldFormat as FieldFormat).convertToReact === 'function')
+      typeof fieldFormat === 'object' &&
+      (typeof (fieldFormat as FieldFormat).convertToText === 'function' ||
+        typeof (fieldFormat as FieldFormat).convertToReact === 'function')
     );
   }
 

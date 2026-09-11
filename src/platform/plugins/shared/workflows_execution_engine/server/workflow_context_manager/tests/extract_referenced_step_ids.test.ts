@@ -17,7 +17,7 @@ const makeAtomicNode = (configuration: Record<string, unknown>): GraphNodeUnion 
     stepId: 'test_step',
     stepType: 'connector',
     configuration,
-  } as unknown as GraphNodeUnion);
+  }) as unknown as GraphNodeUnion;
 
 const makeIfNode = (condition: string): GraphNodeUnion =>
   ({
@@ -27,7 +27,7 @@ const makeIfNode = (condition: string): GraphNodeUnion =>
     stepType: 'if',
     exitNodeId: 'exit-if',
     configuration: { condition },
-  } as unknown as GraphNodeUnion);
+  }) as unknown as GraphNodeUnion;
 
 const makeForeachNode = (foreachExpr: string): GraphNodeUnion =>
   ({
@@ -37,7 +37,7 @@ const makeForeachNode = (foreachExpr: string): GraphNodeUnion =>
     stepType: 'foreach',
     exitNodeId: 'exit-foreach',
     configuration: { foreach: foreachExpr },
-  } as unknown as GraphNodeUnion);
+  }) as unknown as GraphNodeUnion;
 
 describe('extractReferencedStepIds', () => {
   it('should extract a single step ID from a connector step with template', () => {

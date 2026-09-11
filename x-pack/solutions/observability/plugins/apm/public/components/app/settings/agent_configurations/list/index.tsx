@@ -124,12 +124,12 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
                   values: { error },
                 })
               : appliedByAgent
-              ? i18n.translate('xpack.apm.agentConfig.configTable.appliedTooltipMessage', {
-                  defaultMessage: 'Applied by at least one agent',
-                })
-              : i18n.translate('xpack.apm.agentConfig.configTable.notAppliedTooltipMessage', {
-                  defaultMessage: 'Not yet applied by any agents',
-                })
+                ? i18n.translate('xpack.apm.agentConfig.configTable.appliedTooltipMessage', {
+                    defaultMessage: 'Applied by at least one agent',
+                  })
+                : i18n.translate('xpack.apm.agentConfig.configTable.notAppliedTooltipMessage', {
+                    defaultMessage: 'Not yet applied by any agents',
+                  })
           }
         >
           {error ? (

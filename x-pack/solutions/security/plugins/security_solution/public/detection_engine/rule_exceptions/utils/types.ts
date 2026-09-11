@@ -31,10 +31,10 @@ export type Flattened<T> = {
     ? AliasType extends CodeSignature[]
       ? FlattenedCodeSignature[]
       : AliasType extends Array<infer rawType>
-      ? rawType
-      : AliasType extends object
-      ? Flattened<AliasType>
-      : AliasType
+        ? rawType
+        : AliasType extends object
+          ? Flattened<AliasType>
+          : AliasType
     : never;
 };
 

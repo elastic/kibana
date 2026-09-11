@@ -21,9 +21,10 @@ import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 import { createCoreUiamService } from './uiam';
 
-export class SecurityService
-  implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
-{
+export class SecurityService implements CoreService<
+  InternalSecurityServiceSetup,
+  InternalSecurityServiceStart
+> {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;

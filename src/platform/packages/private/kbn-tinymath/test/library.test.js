@@ -194,7 +194,6 @@ describe('Parser', () => {
     });
 
     it('strings with single quotes', () => {
-      /* eslint-disable prettier/prettier */
       expect(parse("'foo'")).toEqual(variableEqual('foo'));
       expect(parse("'f b'")).toEqual(variableEqual('f b'));
       expect(parse("'foo bar'")).toEqual(variableEqual('foo bar'));
@@ -208,7 +207,6 @@ describe('Parser', () => {
       expect(parse("'0foo'")).toEqual(variableEqual('0foo'));
       expect(parse(`'f"oo'`)).toEqual(variableEqual(`f"oo`));
       expect(parse(`'foo😀\t'`)).toEqual(variableEqual(`foo😀\t`));
-      /* eslint-enable prettier/prettier */
     });
 
     it('allowed characters', () => {

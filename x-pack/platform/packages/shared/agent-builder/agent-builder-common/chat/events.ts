@@ -54,7 +54,7 @@ export enum ChatEventType {
 
 export type ChatEventBase<
   TEventType extends ChatEventType,
-  TData extends Record<string, any>
+  TData extends Record<string, any>,
 > = AgentBuilderEvent<TEventType, TData>;
 
 // Tool call
@@ -118,7 +118,7 @@ export interface ToolUiEventData<TEvent = string, TData extends object = object>
 
 export type ToolUiEvent<
   TEvent extends string = string,
-  TData extends object = object
+  TData extends object = object,
 > = ChatEventBase<ChatEventType.toolUi, ToolUiEventData<TEvent, TData>>;
 
 export const isToolUiEvent = <TEvent extends string = string, TData extends object = object>(

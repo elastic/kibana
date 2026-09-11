@@ -26,12 +26,12 @@ export type EndpointStrategyResponseType<T extends EndpointFactoryQueryTypes> =
   T extends ResponseActionsQueries.actions
     ? ActionRequestStrategyResponse
     : T extends ResponseActionsQueries.results
-    ? ActionResponsesRequestStrategyResponse
-    : never;
+      ? ActionResponsesRequestStrategyResponse
+      : never;
 
 export type EndpointStrategyRequestType<T extends EndpointFactoryQueryTypes> =
   T extends ResponseActionsQueries.actions
     ? ActionRequestOptions
     : T extends ResponseActionsQueries.results
-    ? ActionResponsesRequestOptions
-    : never;
+      ? ActionResponsesRequestOptions
+      : never;

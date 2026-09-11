@@ -33,7 +33,10 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { OAUTH_API_TAG } from '../feature';
 
 class OAuthRouteError extends Error {
-  constructor(message: string, public readonly statusCode: number) {
+  constructor(
+    message: string,
+    public readonly statusCode: number
+  ) {
     super(message);
     this.name = 'OAuthRouteError';
   }
@@ -367,10 +370,10 @@ function handleOAuthStartError(
     err instanceof OAuthRouteError
       ? err.statusCode
       : Boom.isBoom(err)
-      ? err.output.statusCode
-      : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
-      ? (err as Error & { statusCode: number }).statusCode
-      : 500;
+        ? err.output.statusCode
+        : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
+          ? (err as Error & { statusCode: number }).statusCode
+          : 500;
 
   if (statusCode >= 500) {
     logger.error('Failed to initiate OAuth authorization', {

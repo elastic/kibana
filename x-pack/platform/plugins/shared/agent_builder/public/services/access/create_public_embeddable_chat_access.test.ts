@@ -14,7 +14,7 @@ const createApplication = (hasShowPrivilege: boolean): ApplicationStart =>
     capabilities: {
       agentBuilder: { show: hasShowPrivilege },
     },
-  } as unknown as ApplicationStart);
+  }) as unknown as ApplicationStart;
 
 describe('createPublicEmbeddableChatAccess', () => {
   it('returns denied access without calling the checker when show capability is missing', async () => {

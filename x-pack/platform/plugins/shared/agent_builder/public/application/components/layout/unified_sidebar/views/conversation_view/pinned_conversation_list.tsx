@@ -113,14 +113,18 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
                   placeHolderStyle,
                   css`
                     border: 1px dashed
-                      ${isDragging
-                        ? euiTheme.colors.borderBasePrimary
-                        : euiTheme.colors.borderBasePlain};
+                      ${
+                        isDragging
+                          ? euiTheme.colors.borderBasePrimary
+                          : euiTheme.colors.borderBasePlain
+                      };
                     padding: ${euiTheme.size.s};
                     text-align: center;
                     min-height: ${euiTheme.size.xxl};
                     background-color: ${isDragging ? backgroundColor : 'transparent'};
-                    transition: background-color 0.15s, border-color 0.15s;
+                    transition:
+                      background-color 0.15s,
+                      border-color 0.15s;
                   `,
                 ]}
               >

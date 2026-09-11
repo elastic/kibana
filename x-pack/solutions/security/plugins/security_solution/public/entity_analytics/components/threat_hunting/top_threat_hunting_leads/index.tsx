@@ -120,8 +120,8 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const generateTooltipContent = hasWritePermissionError
     ? i18n.GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP
     : hasNoConnectorSelected
-    ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
-    : undefined;
+      ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP
+      : undefined;
   const isGenerateDisabled = !!hasWritePermissionError || hasNoConnectorSelected;
   const renderCount = Math.min(leads.length, visibleCardCount);
   const hasFewLeads = leads.length < visibleCardCount;
@@ -234,12 +234,12 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     const description = isGenerating
       ? i18n.GENERATING_LEADS_DESCRIPTION
       : hasGenerated
-      ? i18n.NO_DATA_DESCRIPTION
-      : isAgentChatExperienceDisabled
-      ? i18n.NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION
-      : hasNoConnectorSelected
-      ? i18n.NO_CONNECTOR_SELECTED_DESCRIPTION
-      : i18n.NO_LEADS_DESCRIPTION;
+        ? i18n.NO_DATA_DESCRIPTION
+        : isAgentChatExperienceDisabled
+          ? i18n.NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION
+          : hasNoConnectorSelected
+            ? i18n.NO_CONNECTOR_SELECTED_DESCRIPTION
+            : i18n.NO_LEADS_DESCRIPTION;
 
     const actions = isGenerating ? undefined : isAgentChatExperienceDisabled ? (
       openGenAiSettingsButton

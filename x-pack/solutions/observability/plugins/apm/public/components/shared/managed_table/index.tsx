@@ -432,7 +432,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
             }
             items={renderedItems}
             columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
-            rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
+            rowHeader={rowHeader === false ? undefined : (rowHeader ?? columns[0]?.field)}
             sorting={sorting}
             onChange={onTableChange}
             tableCaption={props.tableCaption}

@@ -17,15 +17,12 @@ import type {
 } from './types';
 import { retrieveDocumentation } from './tasks';
 
-export class LlmTasksPlugin
-  implements
-    Plugin<
-      LlmTasksPluginSetup,
-      LlmTasksPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class LlmTasksPlugin implements Plugin<
+  LlmTasksPluginSetup,
+  LlmTasksPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   private logger: Logger;
 
   constructor(context: PluginInitializerContext<LlmTasksConfig>) {

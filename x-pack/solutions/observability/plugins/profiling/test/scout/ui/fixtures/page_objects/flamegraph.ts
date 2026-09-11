@@ -9,7 +9,10 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class FlamegraphPage {
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
     await this.page.goto(

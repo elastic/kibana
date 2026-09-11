@@ -22,7 +22,7 @@ const caseSO = mockCases[0];
 type AlertMgetDoc = NonNullable<Awaited<ReturnType<AlertService['getAlerts']>>>['docs'][number];
 
 const makeEcsDoc = (source: Record<string, unknown>): AlertMgetDoc =>
-  ({ _source: source, _id: 'doc-1', _index: 'index-1' } as unknown as AlertMgetDoc);
+  ({ _source: source, _id: 'doc-1', _index: 'index-1' }) as unknown as AlertMgetDoc;
 
 const makeCase = (extractObservables: boolean): Case =>
   ({
@@ -31,7 +31,7 @@ const makeCase = (extractObservables: boolean): Case =>
     settings: { syncAlerts: true, extractObservables },
     observables: [],
     total_observables: 0,
-  } as unknown as Case);
+  }) as unknown as Case;
 
 const legacyAlertAttachment: AttachmentRequestV2 = {
   type: AttachmentType.alert,

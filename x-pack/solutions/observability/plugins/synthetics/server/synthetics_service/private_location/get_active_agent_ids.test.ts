@@ -21,7 +21,7 @@ const makeServer = (): SyntheticsServerSetup =>
       elasticsearch: { client: { asScoped: () => ({ asCurrentUser: { search } }) } },
     },
     logger: loggerMock.create(),
-  } as unknown as SyntheticsServerSetup);
+  }) as unknown as SyntheticsServerSetup;
 
 const mockValidApiKey = () =>
   jest

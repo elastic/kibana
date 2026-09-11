@@ -93,7 +93,7 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
 }
 
 export function createEmptyTrackedAlerts<
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >(): TrackedAADAlerts<AlertData> {
   return {
     indices: {},

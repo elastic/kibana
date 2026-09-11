@@ -80,11 +80,13 @@ export const IntegrationCards = ({
             tabIndex={!isClickable ? -1 : undefined}
             css={css`
               ${maxCardWidth != null && `max-width: ${maxCardWidth}px;`}
-              ${!isClickable &&
-              `
+              ${
+                !isClickable &&
+                `
                 pointer-events: none;
                 cursor: default;
-              `}
+              `
+              }
             `}
           >
             <LazyPackageCard

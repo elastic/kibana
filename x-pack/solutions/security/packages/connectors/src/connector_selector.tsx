@@ -23,8 +23,9 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { useConnectorSelectorStyles } from './connector_selector.styles';
 import * as i18n from './translations';
 
-export interface ConnectorSelectorProps
-  extends Partial<Pick<EuiSuperSelectProps<string>, 'isLoading' | 'isInvalid'>> {
+export interface ConnectorSelectorProps extends Partial<
+  Pick<EuiSuperSelectProps<string>, 'isLoading' | 'isInvalid'>
+> {
   connectors: AiConnector[];
   onChange: (connectorId: string) => void;
   selectedId?: string;

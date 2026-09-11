@@ -34,12 +34,12 @@ const makeAttachment = (previewId: string): RulePreviewAttachment =>
     id: 'test-attachment',
     type: SecurityAgentBuilderAttachments.rulePreview,
     data: { previewId },
-  } as RulePreviewAttachment);
+  }) as RulePreviewAttachment;
 
 const makeSpaces = (spaceId = 'default'): SpacesPluginStart =>
   ({
     getActiveSpace: jest.fn().mockResolvedValue({ id: spaceId }),
-  } as unknown as SpacesPluginStart);
+  }) as unknown as SpacesPluginStart;
 
 const makeData = (totalHits = 0): DataPublicPluginStart =>
   ({
@@ -60,7 +60,7 @@ const makeData = (totalHits = 0): DataPublicPluginStart =>
         })
       ),
     },
-  } as unknown as DataPublicPluginStart);
+  }) as unknown as DataPublicPluginStart;
 
 const renderContent = (
   spaces: SpacesPluginStart,

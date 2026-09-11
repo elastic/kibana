@@ -92,8 +92,8 @@ export function ProductDocSetting({
     isProductDocInstalling || kbProductDocStatus === 'installing'
       ? 'installing'
       : isProductDocUninstalling || kbProductDocStatus === 'uninstalling'
-      ? 'uninstalling'
-      : kbProductDocStatus ?? 'uninstalled';
+        ? 'uninstalling'
+        : (kbProductDocStatus ?? 'uninstalled');
 
   const hasBackendError = kbProductDocStatus === 'error';
   const showErrorCallout = hasBackendError || Boolean(actionError);

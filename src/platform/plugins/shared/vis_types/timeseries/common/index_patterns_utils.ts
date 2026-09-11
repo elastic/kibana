@@ -22,7 +22,7 @@ export const isDataViewTypeIndexPattern = (
   Boolean(indexPatternValue) && typeof indexPatternValue === 'object';
 
 export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
-  isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : indexPatternValue?.id ?? '';
+  isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : (indexPatternValue?.id ?? '');
 
 export const extractIndexPatternValues = (panel: Panel, defaultIndexId?: string) => {
   const patterns: IndexPatternValue[] = [];

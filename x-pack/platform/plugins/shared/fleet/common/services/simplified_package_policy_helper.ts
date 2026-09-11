@@ -118,30 +118,33 @@ export function formatInputs(
   supportsAgentless?: boolean,
   packageInfo?: PackageInfo
 ) {
-  return inputs.reduce((acc, input) => {
-    const inputId = generateInputId(input);
-    if (!acc) {
-      acc = {};
-    }
+  return inputs.reduce(
+    (acc, input) => {
+      const inputId = generateInputId(input);
+      if (!acc) {
+        acc = {};
+      }
 
-    const isInputAllowed = isInputAllowedForDeploymentMode(
-      input,
-      supportsAgentless ? 'agentless' : 'default',
-      packageInfo
-    );
+      const isInputAllowed = isInputAllowedForDeploymentMode(
+        input,
+        supportsAgentless ? 'agentless' : 'default',
+        packageInfo
+      );
 
-    acc[inputId] = {
-      enabled: isInputAllowed ? input.enabled : false,
-      vars: formatVars(input.vars),
-      // Mirror the read path (`simplifiedPackagePolicytoNewPackagePolicy`, where a
-      // disallowed input forces its streams off)
-      // For `default` mode `isInputAllowed` is always true, so this is a no-op there.
-      streams: formatStreams(input.streams, isInputAllowed),
-      ...(input.condition !== undefined ? { condition: input.condition } : {}),
-    };
+      acc[inputId] = {
+        enabled: isInputAllowed ? input.enabled : false,
+        vars: formatVars(input.vars),
+        // Mirror the read path (`simplifiedPackagePolicytoNewPackagePolicy`, where a
+        // disallowed input forces its streams off)
+        // For `default` mode `isInputAllowed` is always true, so this is a no-op there.
+        streams: formatStreams(input.streams, isInputAllowed),
+        ...(input.condition !== undefined ? { condition: input.condition } : {}),
+      };
 
-    return acc;
-  }, {} as SimplifiedPackagePolicy['inputs']);
+      return acc;
+    },
+    {} as SimplifiedPackagePolicy['inputs']
+  );
 }
 
 export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {

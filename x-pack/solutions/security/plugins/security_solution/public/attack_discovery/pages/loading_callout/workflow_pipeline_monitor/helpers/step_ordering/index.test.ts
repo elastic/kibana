@@ -26,7 +26,7 @@ const createStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExecuti
     topologicalIndex: 0,
     workflowId: undefined,
     ...overrides,
-  } as unknown as StepExecutionWithLink);
+  }) as unknown as StepExecutionWithLink;
 
 describe('isAlertRetrievalStep', () => {
   it('returns true when pipelinePhase is retrieve_alerts', () => {

@@ -19,17 +19,16 @@ jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
   return {
     ...actualEui,
-    withEuiTheme: (Component: any) => (props: any) =>
-      (
-        <Component
-          {...props}
-          theme={{
-            euiTheme: {
-              size: { xxl: '32px' },
-            },
-          }}
-        />
-      ),
+    withEuiTheme: (Component: any) => (props: any) => (
+      <Component
+        {...props}
+        theme={{
+          euiTheme: {
+            size: { xxl: '32px' },
+          },
+        }}
+      />
+    ),
   };
 });
 

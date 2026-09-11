@@ -108,16 +108,14 @@ describe('custom_scripts_handler', () => {
   describe('and agentType is sentinel_one', () => {
     beforeEach(() => {
       // @ts-expect-error write to readonly property
-      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        true;
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = true;
       httpRequestMock.query.agentType = 'sentinel_one';
       httpRequestMock.query.osType = 'linux';
     });
 
     it('should return error if feature flag is disabled', async () => {
       // @ts-expect-error write to readonly property
-      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        false;
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = false;
       await callHandler();
 
       expect(httpResponseMock.customError).toHaveBeenCalledWith({

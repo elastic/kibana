@@ -1007,7 +1007,7 @@ describe('functions arg suggestions', () => {
           })
         ),
         getActiveProduct: jest.fn(
-          () => ({ type: 'observability', tier: 'complete' } as PricingProduct)
+          () => ({ type: 'observability', tier: 'complete' }) as PricingProduct
         ),
       };
 
@@ -1030,7 +1030,7 @@ describe('functions arg suggestions', () => {
           })
         ),
         getActiveProduct: jest.fn(
-          () => ({ type: 'observability', tier: 'complete' } as PricingProduct)
+          () => ({ type: 'observability', tier: 'complete' }) as PricingProduct
         ),
       };
 
@@ -1053,7 +1053,7 @@ describe('functions arg suggestions', () => {
           })
         ),
         getActiveProduct: jest.fn(
-          () => ({ type: 'observability', tier: 'logs_essentials' } as PricingProduct)
+          () => ({ type: 'observability', tier: 'logs_essentials' }) as PricingProduct
         ),
       };
 
@@ -1081,7 +1081,7 @@ describe('functions arg suggestions', () => {
               type: 'security',
               tier: 'essentials',
               product_lines: [],
-            } as PricingProduct)
+            }) as PricingProduct
         ),
       };
 

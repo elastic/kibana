@@ -10,7 +10,7 @@
 import { parseExpression } from '@babel/parser';
 import * as t from '@babel/types';
 import generate from '@babel/generator';
-import Prettier from 'prettier';
+import { formatWithOxfmt } from '@kbn/dev-utils';
 
 import type { ManagedConfigKey } from './managed_config_keys';
 
@@ -159,13 +159,17 @@ const mergeManagedProperties = (
  * We don't just use `JSON.parse()` and `JSON.stringify()` in order to support this customization and
  * also to support users using comments in this file, which is very useful for temporarily disabling settings.
  *
- * After the config file is updated it is formatted with prettier.
+ * After the config file is updated it is formatted with oxfmt.
  *
  * @param keys The config keys which are managed
  * @param infoText The text which should be written to the top of the file to educate users how to customize the settings
  * @param json The settings file as a string
  */
-export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, json?: string) {
+export async function updateVscodeConfig(
+  keys: ManagedConfigKey[],
+  infoText: string,
+  json?: string
+): Promise<string> {
   json = json || '{}';
   const ast = parseExpression(json);
 
@@ -240,8 +244,5 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
     ...(ast.leadingComments ?? [])?.filter((c) => !c.value.includes('@managed')),
   ];
 
-  return Prettier.format(generate(ast).code, {
-    endOfLine: 'auto',
-    filepath: 'settings.json',
-  });
+  return formatWithOxfmt('.vscode/settings.json', generate(ast).code);
 }

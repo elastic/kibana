@@ -88,7 +88,7 @@ export function createStateContainer<State extends BaseState, PureTransitions ex
 export function createStateContainer<
   State extends BaseState,
   PureTransitions extends object,
-  PureSelectors extends object
+  PureSelectors extends object,
 >(
   defaultState: State,
   pureTransitions: PureTransitions,
@@ -101,7 +101,7 @@ export function createStateContainer<
 export function createStateContainer<
   State extends BaseState,
   PureTransitions extends object,
-  PureSelectors extends object
+  PureSelectors extends object,
 >(
   defaultState: State,
   pureTransitions: PureTransitions = {} as PureTransitions, // TODO: https://github.com/elastic/kibana/issues/54439

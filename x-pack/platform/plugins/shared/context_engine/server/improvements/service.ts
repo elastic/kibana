@@ -183,7 +183,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? items.length;
+        : (response.hits.total?.value ?? items.length);
 
     return { items, total };
   }

@@ -855,11 +855,11 @@ export function DimensionEditorAdditionalSection({
   const hasDefaultTimeField = datasource?.hasDefaultTimeField();
   const metricHasReducedTimeRange = Boolean(
     state.metricAccessor &&
-      datasource?.getOperationForColumnId(state.metricAccessor)?.hasReducedTimeRange
+    datasource?.getOperationForColumnId(state.metricAccessor)?.hasReducedTimeRange
   );
   const secondaryMetricHasReducedTimeRange = Boolean(
     state.secondaryMetricAccessor &&
-      datasource?.getOperationForColumnId(state.secondaryMetricAccessor)?.hasReducedTimeRange
+    datasource?.getOperationForColumnId(state.secondaryMetricAccessor)?.hasReducedTimeRange
   );
 
   const supportingVisHelpTexts: string[] = [];
@@ -875,16 +875,16 @@ export function DimensionEditorAdditionalSection({
               'Line visualizations require use of a data view with a default time field.',
           })
         : metricHasReducedTimeRange
-        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
-            defaultMessage:
-              'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
-          })
-        : secondaryMetricHasReducedTimeRange
-        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
-            defaultMessage:
-              'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
-          })
-        : ''
+          ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
+              defaultMessage:
+                'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
+            })
+          : secondaryMetricHasReducedTimeRange
+            ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
+                defaultMessage:
+                  'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
+              })
+            : ''
     );
   }
 
@@ -902,8 +902,8 @@ export function DimensionEditorAdditionalSection({
 
   const supportsPercentPalette = Boolean(
     state.maxAccessor ||
-      (state.breakdownByAccessor && !state.collapseFn) ||
-      state.palette?.params?.rangeType === 'percent'
+    (state.breakdownByAccessor && !state.collapseFn) ||
+    state.palette?.params?.rangeType === 'percent'
   );
 
   const activePalette = state.palette || {

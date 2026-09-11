@@ -368,7 +368,7 @@ export class CaseCommentModel {
     // whose length does not match attachmentId has no sensible interpretation and is
     // rejected, mirroring the legacy paired-array strictness.
     const dedupeUnifiedAttachment = <
-      T extends { attachmentId: string | string[]; metadata?: unknown }
+      T extends { attachmentId: string | string[]; metadata?: unknown },
     >(
       attachment: T,
       idsAlreadyInCase: Set<string>
@@ -404,8 +404,8 @@ export class CaseCommentModel {
       const broadcastMetadataIndex = Array.isArray(rawMetadataIndex)
         ? rawMetadataIndex
         : rawMetadataIndex != null
-        ? ids.map(() => rawMetadataIndex)
-        : undefined;
+          ? ids.map(() => rawMetadataIndex)
+          : undefined;
       const newMetadataIndex =
         broadcastMetadataIndex != null
           ? removeItemsByPosition(broadcastMetadataIndex, idPositionsThatAlreadyExistInCase)
@@ -521,7 +521,7 @@ export class CaseCommentModel {
 
   private getAttachmentsByType<
     T extends AttachmentType,
-    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
+    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[],
   >(attachments: AttachmentRequestV2[], attachmentType: T): R {
     return attachments.filter((attachment) => attachment.type === attachmentType) as R;
   }

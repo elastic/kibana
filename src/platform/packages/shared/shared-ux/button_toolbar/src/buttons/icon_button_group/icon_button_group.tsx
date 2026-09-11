@@ -89,7 +89,7 @@ export const IconButtonGroup = ({
       {buttons.map((button, index) => {
         const { label, title, toolTipContent, toolTipProps, ...rest } = button;
         const id = buttonIds[index];
-        const titleProp = { title: toolTipContent !== undefined ? '' : title ?? label };
+        const titleProp = { title: toolTipContent !== undefined ? '' : (title ?? label) };
 
         const element = (
           <EuiButtonIcon {...rest} key={id} id={id} aria-label={title ?? label} {...titleProp} />

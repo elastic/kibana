@@ -132,7 +132,7 @@ const buildEmbeddable = async (
     initializeDrilldownsManager: jest.fn(),
     initialState,
     parentApi,
-    finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
+    finalizeApi: (api) => ({ ...api, uuid, parentApi }) as unknown as CustomContentApi,
     uuid,
   });
 

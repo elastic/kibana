@@ -108,7 +108,7 @@ describe('ChangePointSummaryCell', () => {
       fieldFormats: {},
       closePopover: jest.fn(),
       setCellProps,
-    } as unknown as DataGridCellValueElementProps);
+    }) as unknown as DataGridCellValueElementProps;
 
   const cellContext = (chartSectionProps$: ChangePointChartSectionProps$) => ({
     chartSectionProps$,

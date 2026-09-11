@@ -13,7 +13,7 @@ import { mergeDefinitionStepsIntoTree } from './merge_definition_steps_into_tree
 import type { StepExecutionTreeItem } from '../ui/build_step_executions_tree';
 
 const def = (steps: Array<{ name: string; type: string }>): WorkflowYaml =>
-  ({ name: 'wf', steps } as WorkflowYaml);
+  ({ name: 'wf', steps }) as WorkflowYaml;
 
 const node = (
   partial: Partial<StepExecutionTreeItem> & Pick<StepExecutionTreeItem, 'stepId' | 'stepType'>

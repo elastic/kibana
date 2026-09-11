@@ -31,7 +31,7 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
   }
 
   async findAcrossSpaces<
-    Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+    Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes,
   >(query: FindInvestigationsQuery<Fields>): Promise<FindInvestigationsAcrossSpacesResult<Fields>> {
     const result = await this.savedObjects.find<Pick<InvestigationAttributes, Fields>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,

@@ -21,7 +21,7 @@ const makeCommand = (fields: string[], prefix?: string): ESQLAstHighlightCommand
     args: [],
     location: { min: 0, max: 0 },
     incomplete: false,
-  } as unknown as ESQLAstHighlightCommand);
+  }) as unknown as ESQLAstHighlightCommand;
 
 describe('HIGHLIGHT > columnsAfter', () => {
   it('appends one highlight_ column per ON field with default prefix', () => {

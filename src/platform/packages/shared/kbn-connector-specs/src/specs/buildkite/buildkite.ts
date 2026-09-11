@@ -547,7 +547,7 @@ export const Buildkite: ConnectorSpec = {
             );
           const args = acceptsOrgSlug
             ? buildArgs(ctx, input.arguments ?? {})
-            : input.arguments ?? {};
+            : (input.arguments ?? {});
           const result = await mcp.callTool({ name: input.name, arguments: args });
           return result.content;
         });

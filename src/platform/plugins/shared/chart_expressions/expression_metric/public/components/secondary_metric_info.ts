@@ -216,7 +216,7 @@ export function getSecondaryMetricInfo({
     getEnhancedNumberSignFormatter(trendConfig)
   );
 
-  const label = showLabel ? secondaryLabel ?? secondaryMetricColumn?.name ?? '' : '';
+  const label = showLabel ? (secondaryLabel ?? secondaryMetricColumn?.name ?? '') : '';
 
   const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
   const formattedValue = secondaryMetricFormatter(rawValue);

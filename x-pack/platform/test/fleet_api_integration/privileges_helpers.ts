@@ -48,7 +48,7 @@ export function runPrivilegeTests(
             try {
               message = res.body.error
                 ? `${res.body.error}:${res.body.message}`
-                : res.body.message ?? '';
+                : (res.body.message ?? '');
             } catch (err) {
               // swallow error
             }

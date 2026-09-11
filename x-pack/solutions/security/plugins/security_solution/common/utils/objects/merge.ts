@@ -9,12 +9,13 @@ import fp from 'lodash/fp';
 import type { Expand } from './types';
 
 interface Merge {
-  <Source extends object, Target extends object>(source: Source): (
-    target: Target
-  ) => Expand<Target & Source>;
-  <Source extends object, Target extends object>(target: Target, source: Source): Expand<
-    Target & Source
-  >;
+  <Source extends object, Target extends object>(
+    source: Source
+  ): (target: Target) => Expand<Target & Source>;
+  <Source extends object, Target extends object>(
+    target: Target,
+    source: Source
+  ): Expand<Target & Source>;
 }
 
 /**

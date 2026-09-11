@@ -73,10 +73,10 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
             const hostStatusMessage = !isCompleted
               ? OUTPUT_MESSAGES.isPending(consoleCommandName)
               : wasSuccessful
-              ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
-              : action.isExpired
-              ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
-              : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
+                ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
+                : action.isExpired
+                  ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
+                  : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
             const hostName = action.hosts[agentId]?.name ?? agentId;
             let hostOutput: React.ReactNode = null;
 

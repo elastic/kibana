@@ -163,43 +163,43 @@ export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTeleme
   T extends AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded
     ? CreateIntegrationPageLoadedPayload
     : T extends AutomaticImportTelemetryEventType.EditIntegrationPageLoaded
-    ? EditIntegrationPageLoadedPayload
-    : T extends AutomaticImportTelemetryEventType.DataStreamFlyoutOpened
-    ? DataStreamFlyoutOpenedPayload
-    : T extends AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened
-    ? EditDataStreamFlyoutOpenedPayload
-    : T extends AutomaticImportTelemetryEventType.AnalyzeLogsTriggered
-    ? AnalyzeLogsTriggeredPayload
-    : T extends AutomaticImportTelemetryEventType.EditPipelineTabOpened
-    ? EditPipelineTabOpenedPayload
-    : T extends AutomaticImportTelemetryEventType.CodeEditorCopyClicked
-    ? CodeEditorCopyClickedPayload
-    : T extends AutomaticImportTelemetryEventType.CancelButtonClicked
-    ? CancelButtonClickedPayload
-    : T extends AutomaticImportTelemetryEventType.DoneButtonClicked
-    ? DoneButtonClickedPayload
-    : T extends AutomaticImportTelemetryEventType.DataStreamCreationComplete
-    ? DataStreamCreationCompletePayload
-    : T extends AutomaticImportTelemetryEventType.IntegrationInstalled
-    ? IntegrationInstalledPayload
-    : T extends AutomaticImportTelemetryEventType.ManageIntegrationsTableViewed
-    ? ManageIntegrationsTableViewedPayload
-    : T extends AutomaticImportTelemetryEventType.UploadIntegrationClicked
-    ? UploadIntegrationClickedPayload
-    : T extends AutomaticImportTelemetryEventType.ReviewApproveMenuClicked
-    ? ReviewApproveMenuClickedPayload
-    : T extends AutomaticImportTelemetryEventType.IntegrationDownloadZipClicked
-    ? IntegrationDownloadZipClickedPayload
-    : T extends AutomaticImportTelemetryEventType.ApproveModalCancelClicked
-    ? ApproveModalCancelClickedPayload
-    : T extends AutomaticImportTelemetryEventType.ApproveModalApproveClicked
-    ? ApproveModalApproveClickedPayload
-    : T extends AutomaticImportTelemetryEventType.ApproveModalApproveWithAutoInstallClicked
-    ? ApproveModalApproveWithAutoInstallClickedPayload
-    : T extends AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed
-    ? DataStreamDeleteConfirmedPayload
-    : T extends AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed
-    ? DataStreamRefreshConfirmedPayload
-    : T extends AutomaticImportTelemetryEventType.PipelineEdited
-    ? PipelineEditedPayload
-    : never;
+      ? EditIntegrationPageLoadedPayload
+      : T extends AutomaticImportTelemetryEventType.DataStreamFlyoutOpened
+        ? DataStreamFlyoutOpenedPayload
+        : T extends AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened
+          ? EditDataStreamFlyoutOpenedPayload
+          : T extends AutomaticImportTelemetryEventType.AnalyzeLogsTriggered
+            ? AnalyzeLogsTriggeredPayload
+            : T extends AutomaticImportTelemetryEventType.EditPipelineTabOpened
+              ? EditPipelineTabOpenedPayload
+              : T extends AutomaticImportTelemetryEventType.CodeEditorCopyClicked
+                ? CodeEditorCopyClickedPayload
+                : T extends AutomaticImportTelemetryEventType.CancelButtonClicked
+                  ? CancelButtonClickedPayload
+                  : T extends AutomaticImportTelemetryEventType.DoneButtonClicked
+                    ? DoneButtonClickedPayload
+                    : T extends AutomaticImportTelemetryEventType.DataStreamCreationComplete
+                      ? DataStreamCreationCompletePayload
+                      : T extends AutomaticImportTelemetryEventType.IntegrationInstalled
+                        ? IntegrationInstalledPayload
+                        : T extends AutomaticImportTelemetryEventType.ManageIntegrationsTableViewed
+                          ? ManageIntegrationsTableViewedPayload
+                          : T extends AutomaticImportTelemetryEventType.UploadIntegrationClicked
+                            ? UploadIntegrationClickedPayload
+                            : T extends AutomaticImportTelemetryEventType.ReviewApproveMenuClicked
+                              ? ReviewApproveMenuClickedPayload
+                              : T extends AutomaticImportTelemetryEventType.IntegrationDownloadZipClicked
+                                ? IntegrationDownloadZipClickedPayload
+                                : T extends AutomaticImportTelemetryEventType.ApproveModalCancelClicked
+                                  ? ApproveModalCancelClickedPayload
+                                  : T extends AutomaticImportTelemetryEventType.ApproveModalApproveClicked
+                                    ? ApproveModalApproveClickedPayload
+                                    : T extends AutomaticImportTelemetryEventType.ApproveModalApproveWithAutoInstallClicked
+                                      ? ApproveModalApproveWithAutoInstallClickedPayload
+                                      : T extends AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed
+                                        ? DataStreamDeleteConfirmedPayload
+                                        : T extends AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed
+                                          ? DataStreamRefreshConfirmedPayload
+                                          : T extends AutomaticImportTelemetryEventType.PipelineEdited
+                                            ? PipelineEditedPayload
+                                            : never;

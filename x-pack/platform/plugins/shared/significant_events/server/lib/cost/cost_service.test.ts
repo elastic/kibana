@@ -125,7 +125,7 @@ const aggregations = ({
 const createEsClient = (impl: (params: Record<string, unknown>) => unknown): ElasticsearchClient =>
   ({
     search: jest.fn(async (params: Record<string, unknown>) => impl(params)),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const calculate = async ({
   esClient,

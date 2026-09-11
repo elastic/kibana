@@ -15,18 +15,14 @@ type TestDocument = SavedObjectUnsanitizedDoc<{
 
 describe('composeMigrations function', () => {
   test('correctly composes two migration functions', () => {
-    const firstMigration = jest.fn(
-      (doc: TestDocument): TestDocument => ({
-        ...doc,
-        attributes: { ...doc.attributes, a: doc.attributes.a + 1 },
-      })
-    );
-    const secondMigration = jest.fn(
-      (doc: TestDocument): TestDocument => ({
-        ...doc,
-        attributes: { ...doc.attributes, a: doc.attributes.a ** 2 },
-      })
-    );
+    const firstMigration = jest.fn((doc: TestDocument): TestDocument => ({
+      ...doc,
+      attributes: { ...doc.attributes, a: doc.attributes.a + 1 },
+    }));
+    const secondMigration = jest.fn((doc: TestDocument): TestDocument => ({
+      ...doc,
+      attributes: { ...doc.attributes, a: doc.attributes.a ** 2 },
+    }));
 
     const composedMigrations = composeMigrations(firstMigration, secondMigration);
     const migrationContext = migrationMocks.createContext();

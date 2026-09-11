@@ -43,8 +43,8 @@ export const SharedChangeConfirmModal: React.FC<SharedChangeConfirmModalProps> =
   const title = isRemoving
     ? i18n.CONFIRM_REMOVE_SPACES_TITLE
     : action === 'edit-dataset'
-    ? i18n.CONFIRM_EDIT_DATASET_TITLE
-    : i18n.CONFIRM_EDIT_EXAMPLE_TITLE;
+      ? i18n.CONFIRM_EDIT_DATASET_TITLE
+      : i18n.CONFIRM_EDIT_EXAMPLE_TITLE;
 
   return (
     <EuiConfirmModal
@@ -73,7 +73,7 @@ export const SharedChangeConfirmModal: React.FC<SharedChangeConfirmModalProps> =
         </>
       ) : null}
       <DatasetSharedNotice
-        spaceIds={isRemoving ? nextSpaceIds ?? spaceIds : spaceIds}
+        spaceIds={isRemoving ? (nextSpaceIds ?? spaceIds) : spaceIds}
         action={action}
       />
     </EuiConfirmModal>

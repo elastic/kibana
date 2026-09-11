@@ -79,14 +79,14 @@ export type SyntheticsRestApiRouteFactory<
   ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = any,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > = () => SyntheticsRoute<ClientContract, Params, Query, Body>;
 
 export type SyntheticsRoute<
   ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = Record<string, any>,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, Params, Query, Body>>;
 
 export type SyntheticsRouteWrapper = (
@@ -98,7 +98,7 @@ export type SyntheticsRouteWrapper = (
 export interface RouteContext<
   Params = Record<string, any>,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > {
   syntheticsEsClient: SyntheticsEsClient;
   context: UptimeRequestHandlerContext;
@@ -117,7 +117,7 @@ export type SyntheticsRouteHandler<
   ClientContract extends HttpResponsePayload | ResponseError = any,
   Params = Record<string, any>,
   Query = Record<string, any>,
-  Body = any
+  Body = any,
 > = ({
   syntheticsEsClient,
   context,

@@ -22,9 +22,12 @@ export interface StartDependencies {
   exploratoryView: ExploratoryViewPublicStart;
 }
 
-export class ExploratoryViewExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class ExploratoryViewExamplePlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'exploratory_view_example',

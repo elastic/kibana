@@ -174,14 +174,17 @@ export const AgentlessPackagePoliciesTable = ({
       });
 
       setAgentsByPolicyId(
-        (agentsData?.items || []).reduce((acc, agent) => {
-          if (agent.policy_id) {
-            // Key by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]`
-            // resolves correctly for agents on version-specific variants.
-            acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
-          }
-          return acc;
-        }, {} as Record<string, Agent>)
+        (agentsData?.items || []).reduce(
+          (acc, agent) => {
+            if (agent.policy_id) {
+              // Key by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]`
+              // resolves correctly for agents on version-specific variants.
+              acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
+            }
+            return acc;
+          },
+          {} as Record<string, Agent>
+        )
       );
 
       if (agentsError) {

@@ -11,7 +11,10 @@ import { expect } from '@kbn/scout-oblt/ui';
 export class SLOApp {
   private readonly nav: ObservabilityNavigation;
 
-  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly config: ScoutTestConfig
+  ) {
     this.nav = new ObservabilityNavigation(page);
   }
 

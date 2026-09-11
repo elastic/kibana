@@ -96,7 +96,7 @@ export const getKis = async (
   const total =
     typeof response.hits.total === 'number'
       ? response.hits.total
-      : response.hits.total?.value ?? kis.length;
+      : (response.hits.total?.value ?? kis.length);
 
   const allKisAgg = response.aggregations?.all_kis;
   const buckets = allKisAgg?.counts_by_type?.buckets ?? [];

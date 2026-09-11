@@ -189,10 +189,10 @@ export function VariableName({
         defaultMessage: 'Variable name is required',
       })
     : variableExists
-    ? i18n.translate('esql.flyout.variableNameExists.error', {
-        defaultMessage: 'Variable name already exists',
-      })
-    : undefined;
+      ? i18n.translate('esql.flyout.variableNameExists.error', {
+          defaultMessage: 'Variable name already exists',
+        })
+      : undefined;
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {
@@ -494,12 +494,12 @@ export function Footer({
               !isSaveDisabled
                 ? undefined
                 : type === EsqlControlType.STATIC_VALUES
-                ? i18n.translate('esql.flyout.staticValues.saveTooltip', {
-                    defaultMessage: 'Add at least one value to save.',
-                  })
-                : i18n.translate('esql.flyout.valuesFromQuery.saveTooltip', {
-                    defaultMessage: 'Add a valid query to save.',
-                  })
+                  ? i18n.translate('esql.flyout.staticValues.saveTooltip', {
+                      defaultMessage: 'Add at least one value to save.',
+                    })
+                  : i18n.translate('esql.flyout.valuesFromQuery.saveTooltip', {
+                      defaultMessage: 'Add a valid query to save.',
+                    })
             }
           >
             <EuiButton

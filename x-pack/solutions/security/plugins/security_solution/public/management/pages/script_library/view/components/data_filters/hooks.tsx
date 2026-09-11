@@ -56,22 +56,22 @@ export const useScriptLibraryFilter = (
           'data-test-subj': `${filterName}-filter-option`,
         }))
       : isPlatformFilter
-      ? [...SUPPORTED_HOST_OS_TYPE].sort().map((key) => ({
-          key,
-          label: OS_TITLES[key],
-          searchableLabel: OS_TITLES[key],
-          checked: os?.includes(key) ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      : isTagsFilter
-      ? SORTED_SCRIPT_TAGS_KEYS.map((key) => ({
-          key,
-          label: SCRIPT_TAGS[key],
-          searchableLabel: SCRIPT_TAGS[key],
-          checked: category?.includes(key) ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      : [];
+        ? [...SUPPORTED_HOST_OS_TYPE].sort().map((key) => ({
+            key,
+            label: OS_TITLES[key],
+            searchableLabel: OS_TITLES[key],
+            checked: os?.includes(key) ? 'on' : undefined,
+            'data-test-subj': `${filterName}-filter-option`,
+          }))
+        : isTagsFilter
+          ? SORTED_SCRIPT_TAGS_KEYS.map((key) => ({
+              key,
+              label: SCRIPT_TAGS[key],
+              searchableLabel: SCRIPT_TAGS[key],
+              checked: category?.includes(key) ? 'on' : undefined,
+              'data-test-subj': `${filterName}-filter-option`,
+            }))
+          : [];
   }, [filterName, fileType, os, category, isFileTypeFilter, isPlatformFilter, isTagsFilter]);
 
   const filterOptions = useMemo(() => {

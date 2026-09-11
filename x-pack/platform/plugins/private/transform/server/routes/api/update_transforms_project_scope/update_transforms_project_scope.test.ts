@@ -30,7 +30,7 @@ describe('updateTransformsProjectScope', () => {
         getTransform: jest.fn().mockResolvedValue({ transforms }),
         updateTransform: jest.fn().mockResolvedValue({ acknowledged: true }),
       },
-    } as any);
+    }) as any;
 
   it('fetches transforms in batches and updates each transform with its full source config', async () => {
     const transforms = Array.from({ length: 101 }, (_, index) =>

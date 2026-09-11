@@ -29,8 +29,7 @@ import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from
 import type { NormalizedExternalConnectorClient } from '../../../../..';
 import type { RunScriptActionRequestBody } from '../../../../../../../../common/api/endpoint';
 
-export interface MicrosoftDefenderActionsClientOptionsMock
-  extends ResponseActionsClientOptionsMock {
+export interface MicrosoftDefenderActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
 }
 

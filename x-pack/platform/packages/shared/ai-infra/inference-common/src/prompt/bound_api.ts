@@ -21,7 +21,7 @@ export type UnboundPromptOptions<TPrompt extends Prompt = Prompt> = UnboundOptio
  */
 export type BoundPromptAPI = <
   TPrompt extends Prompt,
-  TPromptOptions extends UnboundPromptOptions<TPrompt>
+  TPromptOptions extends UnboundPromptOptions<TPrompt>,
 >(
   options: { prompt: TPrompt } & TPromptOptions
 ) => PromptAPIResponse<BoundOptions & TPromptOptions>;

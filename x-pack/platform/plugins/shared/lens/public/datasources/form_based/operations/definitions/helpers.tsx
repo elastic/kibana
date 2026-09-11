@@ -38,28 +38,28 @@ export function getInvalidFieldMessage(
   const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
   const fieldNames =
     hasField(column) && operationDefinition
-      ? operationDefinition?.getCurrentFields?.(column) ?? [column.sourceField]
+      ? (operationDefinition?.getCurrentFields?.(column) ?? [column.sourceField])
       : [];
   const fields = fieldNames.map((fieldName) => indexPattern.getFieldByName(fieldName));
   const filteredFields = fields.filter(Boolean) as IndexPatternField[];
 
   const isInvalid = Boolean(
     fields.length > filteredFields.length ||
-      !(
-        operationDefinition?.input === 'field' &&
-        filteredFields.every(
-          (field) => operationDefinition.getPossibleOperationForField(field) != null
-        )
+    !(
+      operationDefinition?.input === 'field' &&
+      filteredFields.every(
+        (field) => operationDefinition.getPossibleOperationForField(field) != null
       )
+    )
   );
 
   const isWrongType = Boolean(
     filteredFields.length &&
-      !operationDefinition?.isTransferable(
-        column as GenericIndexPatternColumn,
-        indexPattern,
-        operationDefinitionMap
-      )
+    !operationDefinition?.isTransferable(
+      column as GenericIndexPatternColumn,
+      indexPattern,
+      operationDefinitionMap
+    )
   );
 
   if (isInvalid) {

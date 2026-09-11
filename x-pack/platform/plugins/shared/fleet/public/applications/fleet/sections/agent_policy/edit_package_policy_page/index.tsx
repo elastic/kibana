@@ -327,8 +327,8 @@ export const EditPackagePolicyForm = memo<{
           pkgkey: pkgKeyFromPackageInfo(packageInfo!),
         })
       : policyId
-      ? getHref('policy_details', { policyId })
-      : getHref('agent_list');
+        ? getHref('policy_details', { policyId })
+        : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
     if (from === 'installed-integrations') {
@@ -340,8 +340,8 @@ export const EditPackagePolicyForm = memo<{
           pkgkey: pkgKeyFromPackageInfo(packageInfo!),
         })
       : policyId
-      ? getHref('policy_details', { policyId })
-      : getHref('agent_list');
+        ? getHref('policy_details', { policyId })
+        : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);
@@ -614,7 +614,7 @@ export const EditPackagePolicyForm = memo<{
 
   const agentPolicyBreadcrumb = useMemo(() => {
     return existingAgentPolicies.length > 0
-      ? existingAgentPolicies.find((policy) => policy.id === policyId) ?? existingAgentPolicies[0]
+      ? (existingAgentPolicies.find((policy) => policy.id === policyId) ?? existingAgentPolicies[0])
       : { name: '', id: '' };
   }, [existingAgentPolicies, policyId]);
 

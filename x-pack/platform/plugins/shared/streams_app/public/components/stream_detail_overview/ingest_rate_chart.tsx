@@ -89,8 +89,8 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
   const esqlSource = isQueryStream
     ? definition.stream.query.view
     : isDraft
-    ? getEsqlViewName(streamName)
-    : streamName;
+      ? getEsqlViewName(streamName)
+      : streamName;
 
   const { timeState } = useTimefilter();
   const minInterval = getMeaningfulBucketMs(

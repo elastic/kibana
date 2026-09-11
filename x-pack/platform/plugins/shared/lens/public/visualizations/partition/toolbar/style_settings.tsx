@@ -27,7 +27,7 @@ export function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisua
   const selectedOption = emptySizeRatioOptions
     ? emptySizeRatioOptions.find(
         ({ value }) =>
-          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
+          value === (state.shape === 'pie' ? 0 : (layer.emptySizeRatio ?? EmptySizeRatios.SMALL))
       )
     : undefined;
 

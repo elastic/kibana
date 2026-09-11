@@ -74,7 +74,7 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
 
   const queries = source.queries ?? [];
   const isPack = queries.length > 1 || packId;
-  const queryText = isPack ? '' : queries[0]?.query ?? '';
+  const queryText = isPack ? '' : (queries[0]?.query ?? '');
 
   const totalAgents =
     agentsList.length > 0

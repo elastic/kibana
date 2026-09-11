@@ -282,7 +282,10 @@ export const generateId = (
   docId: string,
   version: string,
   ruleId: string
-): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+): string =>
+  createHash('sha256')
+    .update(docIndex.concat(docId, version, ruleId))
+    .digest('hex');
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
@@ -581,8 +584,8 @@ export const getValidDateFromDoc = ({
     doc.fields != null && doc.fields[primaryTimestamp] != null
       ? doc.fields[primaryTimestamp][0]
       : doc._source != null
-      ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
-      : undefined;
+        ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
+        : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
       ? timestampValue
@@ -607,7 +610,7 @@ export const getValidDateFromDoc = ({
 };
 
 export const createSearchAfterReturnTypeFromResponse = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -751,8 +754,8 @@ export const getTotalHitsValue = (totalHits: number | { value: number } | undefi
   typeof totalHits === 'undefined'
     ? -1
     : typeof totalHits === 'number'
-    ? totalHits
-    : totalHits.value;
+      ? totalHits
+      : totalHits.value;
 
 export const calculateTotal = (
   prevTotal: number | { value: number } | undefined,

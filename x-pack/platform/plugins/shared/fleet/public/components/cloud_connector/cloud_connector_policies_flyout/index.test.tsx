@@ -93,7 +93,12 @@ describe('CloudConnectorPoliciesFlyout', () => {
       data: { items: mockUsageData, total: mockUsageData.length, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
-    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
+    } as unknown as UseQueryResult<{
+      items: CloudConnectorUsageItem[];
+      total: number;
+      page: number;
+      perPage: number;
+    }>);
 
     const mockMutate = jest.fn();
     mockUseUpdateCloudConnector.mockReturnValue({
@@ -154,7 +159,12 @@ describe('CloudConnectorPoliciesFlyout', () => {
       data: { items: [], total: 0, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
-    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
+    } as unknown as UseQueryResult<{
+      items: CloudConnectorUsageItem[];
+      total: number;
+      page: number;
+      perPage: number;
+    }>);
 
     renderFlyout();
 
@@ -169,7 +179,12 @@ describe('CloudConnectorPoliciesFlyout', () => {
       data: undefined,
       isLoading: true,
       error: null,
-    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
+    } as unknown as UseQueryResult<{
+      items: CloudConnectorUsageItem[];
+      total: number;
+      page: number;
+      perPage: number;
+    }>);
 
     renderFlyout();
 
@@ -183,7 +198,12 @@ describe('CloudConnectorPoliciesFlyout', () => {
       data: undefined,
       isLoading: false,
       error: new Error('Failed to fetch'),
-    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
+    } as unknown as UseQueryResult<{
+      items: CloudConnectorUsageItem[];
+      total: number;
+      page: number;
+      perPage: number;
+    }>);
 
     renderFlyout();
 

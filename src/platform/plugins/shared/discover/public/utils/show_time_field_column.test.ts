@@ -19,7 +19,7 @@ const createUiSettingsMock = ({ hideTimeColumn }: { hideTimeColumn: boolean }) =
       }
       return undefined;
     },
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 const uiSettingsMockWithHideTimeColumn = createUiSettingsMock({ hideTimeColumn: true });
 const uiSettingsMock = createUiSettingsMock({ hideTimeColumn: false });

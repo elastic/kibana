@@ -83,8 +83,8 @@ function parseJestConfigRules(configAbsPath: string): JestConfigRules {
     config.testMatch && config.testMatch.length
       ? config.testMatch
       : isIntegration
-      ? INTEGRATION_TEST_MATCH
-      : UNIT_TEST_MATCH;
+        ? INTEGRATION_TEST_MATCH
+        : UNIT_TEST_MATCH;
 
   return {
     rootDir,

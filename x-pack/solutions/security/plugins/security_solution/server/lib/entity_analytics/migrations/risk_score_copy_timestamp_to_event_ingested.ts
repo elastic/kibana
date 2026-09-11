@@ -78,9 +78,8 @@ export const createMigrationTask =
           soClient,
           kibanaVersion: '*',
         });
-        const riskScoreResponse = await riskScoreClient.copyTimestampToEventIngestedForRiskScore(
-          signal
-        );
+        const riskScoreResponse =
+          await riskScoreClient.copyTimestampToEventIngestedForRiskScore(signal);
         const failures = riskScoreResponse.failures?.map((failure) => failure.cause);
         const hasFailures = failures && failures?.length > 0;
 

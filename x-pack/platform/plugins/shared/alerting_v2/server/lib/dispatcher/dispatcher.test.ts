@@ -115,7 +115,7 @@ const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup
   ({
     getWorkflowsByIds: jest.fn().mockResolvedValue([]),
     bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  }) as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;

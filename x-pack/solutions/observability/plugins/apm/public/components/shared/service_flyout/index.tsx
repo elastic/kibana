@@ -124,7 +124,7 @@ export function ServiceFlyout({
   const { indices: indicesValue, loading: indicesLoading } = useApmIndices({
     http: deps.core.http,
   });
-  const indices = indicesLoading ? undefined : indicesValue ?? null;
+  const indices = indicesLoading ? undefined : (indicesValue ?? null);
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
@@ -148,14 +148,16 @@ export function ServiceFlyout({
     <>
       <Global
         styles={css`
-          ${preferDocumentBasedCharts
-            ? // Document-based hosts (Discover) show the flyout's ES|QL Lens charts,
-              // whose Elastic Charts ids are generated — they can't be targeted
-              // individually, so raise all chart tooltips while the flyout is open.
-              `body [id^='echTooltipPortalMainTooltip__'] {
+          ${
+            preferDocumentBasedCharts
+              ? // Document-based hosts (Discover) show the flyout's ES|QL Lens charts,
+                // whose Elastic Charts ids are generated — they can't be targeted
+                // individually, so raise all chart tooltips while the flyout is open.
+                `body [id^='echTooltipPortalMainTooltip__'] {
                 z-index: ${Number(euiTheme.levels.toast)} !important;
               }`
-            : ''}
+              : ''
+          }
           ${SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS} {
             z-index: ${Number(euiTheme.levels.flyout) - 1} !important;
           }

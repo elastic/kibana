@@ -65,7 +65,10 @@ export class LensWorkspace {
   private readonly shareModal;
   private readonly copyShareUrlButton;
 
-  constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly deps: LensWorkspaceDeps
+  ) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
     this.xyLegendItems = this.page.locator('.echLegendItem');
     this.convertToEsqlButton = this.page.getByRole('button', { name: 'Convert to ES|QL' });

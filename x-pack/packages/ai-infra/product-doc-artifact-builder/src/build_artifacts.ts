@@ -33,11 +33,11 @@ const getSourceClient = (config: TaskConfig) => {
   const auth = config.sourceClusterApiKey
     ? { apiKey: config.sourceClusterApiKey }
     : config.sourceClusterUsername && config.sourceClusterPassword
-    ? {
-        username: config.sourceClusterUsername,
-        password: config.sourceClusterPassword,
-      }
-    : undefined;
+      ? {
+          username: config.sourceClusterUsername,
+          password: config.sourceClusterPassword,
+        }
+      : undefined;
 
   return new ElasticsearchClient8({
     compression: true,

@@ -96,15 +96,18 @@ export class OtelFieldsRepository {
       return FieldsMetadataDictionary.create(this.otelFields);
     }
 
-    const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      const field = this.getByName(fieldName);
+    const fields = fieldNames.reduce(
+      (fieldsMetadata, fieldName) => {
+        const field = this.getByName(fieldName);
 
-      if (field) {
-        fieldsMetadata[fieldName] = field;
-      }
+        if (field) {
+          fieldsMetadata[fieldName] = field;
+        }
 
-      return fieldsMetadata;
-    }, {} as Record<OtelFieldName, FieldMetadata>);
+        return fieldsMetadata;
+      },
+      {} as Record<OtelFieldName, FieldMetadata>
+    );
 
     return FieldsMetadataDictionary.create(fields);
   }

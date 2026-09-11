@@ -162,7 +162,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     onSaveError,
   });
 
-  const canEditAgent = isCreateMode ? manageAgents : permissions?.update_agent ?? false;
+  const canEditAgent = isCreateMode ? manageAgents : (permissions?.update_agent ?? false);
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
@@ -271,7 +271,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             isCreateMode={isCreateMode}
             isFormDisabled={isFormDisabled || !canEditAgent}
             canChangeAccessControl={
-              isCreateMode ? manageAgents : permissions?.update_access_control ?? false
+              isCreateMode ? manageAgents : (permissions?.update_access_control ?? false)
             }
             owner={agentState?.created_by}
             agentId={editingAgentId}
@@ -622,20 +622,82 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           ...(!canEditAgent
             ? []
             : !isCreateMode
-            ? [
-                <EuiFlexGroup gutterSize="xs">
-                  {renderSaveButton({ size: 'm' })}
+              ? [
+                  <EuiFlexGroup gutterSize="xs">
+                    {renderSaveButton({ size: 'm' })}
+                    <EuiPopover
+                      aria-label={i18n.translate(
+                        'xpack.agentBuilder.agents.form.saveActionsMenuAriaLabel',
+                        {
+                          defaultMessage: 'Save actions',
+                        }
+                      )}
+                      panelPaddingSize="xs"
+                      isOpen={isAdditionalActionsMenuOpen}
+                      closePopover={() => setAdditionalActionsMenuOpen(false)}
+                      zIndex={Number(euiTheme.levels.header) - 1}
+                      button={
+                        <EuiToolTip
+                          content={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
+                            defaultMessage: 'Open menu',
+                          })}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            aria-label={i18n.translate(
+                              'xpack.agentBuilder.agents.form.openMenuLabel',
+                              {
+                                defaultMessage: 'Open menu',
+                              }
+                            )}
+                            size="m"
+                            isDisabled={isSaveDisabled}
+                            display="fill"
+                            iconType="chevronSingleDown"
+                            onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
+                            {...getEbtProps({
+                              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                              action: AGENT_BUILDER_UI_EBT.action.agentEdit.OPEN_MENU,
+                              detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                            })}
+                          />
+                        </EuiToolTip>
+                      }
+                    >
+                      <EuiContextMenuPanel
+                        items={[
+                          <EuiContextMenuItem
+                            icon="comment"
+                            disabled={isSaveDisabled}
+                            onClick={handleSubmit(handleSaveAndChat)}
+                            {...getEbtProps({
+                              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                              action: AGENT_BUILDER_UI_EBT.action.agentEdit.SAVE_AND_CHAT,
+                              detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                            })}
+                          >
+                            {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
+                              defaultMessage: 'Save and chat',
+                            })}
+                          </EuiContextMenuItem>,
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexGroup>,
+                ]
+              : [renderSaveButton({ size: 'm' })]),
+          renderChatButton({ size: 'm' }),
+          ...(!canEditAgent
+            ? []
+            : !isCreateMode
+              ? [
                   <EuiPopover
                     aria-label={i18n.translate(
-                      'xpack.agentBuilder.agents.form.saveActionsMenuAriaLabel',
+                      'xpack.agentBuilder.agents.form.agentActionsMenuAriaLabel',
                       {
-                        defaultMessage: 'Save actions',
+                        defaultMessage: 'Agent actions',
                       }
                     )}
-                    panelPaddingSize="xs"
-                    isOpen={isAdditionalActionsMenuOpen}
-                    closePopover={() => setAdditionalActionsMenuOpen(false)}
-                    zIndex={Number(euiTheme.levels.header) - 1}
                     button={
                       <EuiToolTip
                         content={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
@@ -644,17 +706,15 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         disableScreenReaderOutput
                       >
                         <EuiButtonIcon
+                          size="m"
                           aria-label={i18n.translate(
                             'xpack.agentBuilder.agents.form.openMenuLabel',
                             {
                               defaultMessage: 'Open menu',
                             }
                           )}
-                          size="m"
-                          isDisabled={isSaveDisabled}
-                          display="fill"
-                          iconType="chevronSingleDown"
-                          onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
+                          iconType="boxesVertical"
+                          onClick={() => setContextMenuOpen(!isContextMenuOpen)}
                           {...getEbtProps({
                             element: AGENT_BUILDER_UI_EBT.element.pageContent,
                             action: AGENT_BUILDER_UI_EBT.action.agentEdit.OPEN_MENU,
@@ -663,113 +723,56 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         />
                       </EuiToolTip>
                     }
+                    isOpen={isContextMenuOpen}
+                    closePopover={() => setContextMenuOpen(false)}
+                    anchorPosition="downLeft"
+                    panelPaddingSize="xs"
+                    zIndex={Number(euiTheme.levels.header) - 1}
                   >
                     <EuiContextMenuPanel
                       items={[
                         <EuiContextMenuItem
-                          icon="comment"
-                          disabled={isSaveDisabled}
-                          onClick={handleSubmit(handleSaveAndChat)}
+                          icon="copy"
+                          onClick={() => {
+                            setContextMenuOpen(false);
+                            navigateToAgentBuilderUrl(appPaths.agents.new, {
+                              [searchParamNames.sourceId]: editingAgentId,
+                            });
+                          }}
                           {...getEbtProps({
                             element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                            action: AGENT_BUILDER_UI_EBT.action.agentEdit.SAVE_AND_CHAT,
+                            action: AGENT_BUILDER_UI_EBT.action.agentEdit.CLONE,
                             detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
                           })}
                         >
-                          {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
-                            defaultMessage: 'Save and chat',
+                          {i18n.translate('xpack.agentBuilder.agents.form.cloneButton', {
+                            defaultMessage: 'Clone',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          icon="trash"
+                          css={css`
+                            color: ${euiTheme.colors.textDanger};
+                          `}
+                          onClick={() => {
+                            setContextMenuOpen(false);
+                            onDelete?.();
+                          }}
+                          {...getEbtProps({
+                            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                            action: AGENT_BUILDER_UI_EBT.action.agentEdit.DELETE,
+                            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                          })}
+                        >
+                          {i18n.translate('xpack.agentBuilder.agents.form.deleteButton', {
+                            defaultMessage: 'Delete',
                           })}
                         </EuiContextMenuItem>,
                       ]}
                     />
-                  </EuiPopover>
-                </EuiFlexGroup>,
-              ]
-            : [renderSaveButton({ size: 'm' })]),
-          renderChatButton({ size: 'm' }),
-          ...(!canEditAgent
-            ? []
-            : !isCreateMode
-            ? [
-                <EuiPopover
-                  aria-label={i18n.translate(
-                    'xpack.agentBuilder.agents.form.agentActionsMenuAriaLabel',
-                    {
-                      defaultMessage: 'Agent actions',
-                    }
-                  )}
-                  button={
-                    <EuiToolTip
-                      content={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
-                        defaultMessage: 'Open menu',
-                      })}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        size="m"
-                        aria-label={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
-                          defaultMessage: 'Open menu',
-                        })}
-                        iconType="boxesVertical"
-                        onClick={() => setContextMenuOpen(!isContextMenuOpen)}
-                        {...getEbtProps({
-                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.OPEN_MENU,
-                          detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-                        })}
-                      />
-                    </EuiToolTip>
-                  }
-                  isOpen={isContextMenuOpen}
-                  closePopover={() => setContextMenuOpen(false)}
-                  anchorPosition="downLeft"
-                  panelPaddingSize="xs"
-                  zIndex={Number(euiTheme.levels.header) - 1}
-                >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        icon="copy"
-                        onClick={() => {
-                          setContextMenuOpen(false);
-                          navigateToAgentBuilderUrl(appPaths.agents.new, {
-                            [searchParamNames.sourceId]: editingAgentId,
-                          });
-                        }}
-                        {...getEbtProps({
-                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.CLONE,
-                          detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-                        })}
-                      >
-                        {i18n.translate('xpack.agentBuilder.agents.form.cloneButton', {
-                          defaultMessage: 'Clone',
-                        })}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        icon="trash"
-                        css={css`
-                          color: ${euiTheme.colors.textDanger};
-                        `}
-                        onClick={() => {
-                          setContextMenuOpen(false);
-                          onDelete?.();
-                        }}
-                        {...getEbtProps({
-                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.DELETE,
-                          detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-                        })}
-                      >
-                        {i18n.translate('xpack.agentBuilder.agents.form.deleteButton', {
-                          defaultMessage: 'Delete',
-                        })}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>,
-              ]
-            : []),
+                  </EuiPopover>,
+                ]
+              : []),
         ]}
         rightSideGroupProps={{ gutterSize: 's' }}
       />

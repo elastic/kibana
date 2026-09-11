@@ -17,9 +17,7 @@ export interface LegacyShortUrlLocatorParams extends SerializableRecord {
   url: string;
 }
 
-export class LegacyShortUrlLocatorDefinition
-  implements LocatorDefinition<LegacyShortUrlLocatorParams>
-{
+export class LegacyShortUrlLocatorDefinition implements LocatorDefinition<LegacyShortUrlLocatorParams> {
   public readonly id = LEGACY_SHORT_URL_LOCATOR_ID;
 
   public async getLocation(params: LegacyShortUrlLocatorParams): Promise<KibanaLocation> {

@@ -21,7 +21,10 @@ export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
 ];
 
 export class EndpointDataLoadingError extends EndpointError {
-  constructor(message: string, public meta?: unknown) {
+  constructor(
+    message: string,
+    public meta?: unknown
+  ) {
     super(message);
   }
 }
@@ -156,12 +159,12 @@ createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
   createToolingLogger.defaultLogLevel = flags.verbose
     ? 'verbose'
     : flags.debug
-    ? 'debug'
-    : flags.silent
-    ? 'silent'
-    : flags.quiet
-    ? 'error'
-    : 'info';
+      ? 'debug'
+      : flags.silent
+        ? 'silent'
+        : flags.quiet
+          ? 'error'
+          : 'info';
 };
 
 /**

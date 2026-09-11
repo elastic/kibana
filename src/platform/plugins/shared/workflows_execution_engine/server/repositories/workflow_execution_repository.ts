@@ -532,7 +532,7 @@ export class WorkflowExecutionRepository {
       .filter((id): id is string => id !== undefined);
 
     const rawTotal = response.hits.total;
-    const total = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
+    const total = typeof rawTotal === 'number' ? rawTotal : (rawTotal?.value ?? 0);
 
     let nextSearchAfter: estypes.SortResults | undefined;
     if (results.length === pageSize && hits.length > 0) {

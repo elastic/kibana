@@ -585,7 +585,7 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
         [session.idleTimeout, providerSessionConfig?.idleTimeout],
         [session.lifespan, providerSessionConfig?.lifespan],
       ].map(([globalTimeout, providerTimeout]) => {
-        const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
+        const timeout = providerTimeout === undefined ? (globalTimeout ?? null) : providerTimeout;
         return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
       });
 

@@ -32,10 +32,10 @@ const getFieldFormatAndType = (
     fieldType === 'date'
       ? { id: 'date' }
       : fieldType === 'string'
-      ? { id: 'string' }
-      : fieldType === 'boolean'
-      ? { id: 'boolean' }
-      : { id: 'number' };
+        ? { id: 'string' }
+        : fieldType === 'boolean'
+          ? { id: 'boolean' }
+          : { id: 'number' };
 
   const fieldFormat = getFieldFormats().deserialize(
     shouldSkipFormatting ? defaultFieldFormat : serializedFieldFormat

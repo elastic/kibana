@@ -61,11 +61,11 @@ export const MonitorManagementPage: React.FC = () => {
   // excluded on purpose: it scopes status, not which monitors exist.
   const hasActiveOverviewFilter = Boolean(
     pageState.query ||
-      pageState.tags?.length ||
-      pageState.locations?.length ||
-      pageState.monitorTypes?.length ||
-      pageState.projects?.length ||
-      pageState.schedules?.length
+    pageState.tags?.length ||
+    pageState.locations?.length ||
+    pageState.monitorTypes?.length ||
+    pageState.projects?.length ||
+    pageState.schedules?.length
   );
 
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,

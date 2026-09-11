@@ -47,7 +47,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   const defaults = useMemo(() => {
     const jobDefaults = getNewJobDefaults();
     const bucketSpanSeconds =
-      jobBucketSpan !== undefined ? parseInterval(jobBucketSpan)?.asSeconds() ?? 0 : 0;
+      jobBucketSpan !== undefined ? (parseInterval(jobBucketSpan)?.asSeconds() ?? 0) : 0;
     return {
       queryDelay: '60s',
       frequency: calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) + 's',

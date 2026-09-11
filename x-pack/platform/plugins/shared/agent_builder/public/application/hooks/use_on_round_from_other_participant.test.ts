@@ -42,7 +42,7 @@ const setState = ({ conversationId, roundCount, isStreaming = false, isFetched =
   mockUseConversationRounds.mockReturnValue(
     Array.from(
       { length: roundCount },
-      (_, index) => ({ id: `round-${index}` } as ConversationRound)
+      (_, index) => ({ id: `round-${index}` }) as ConversationRound
     )
   );
   mockUseConversationStatus.mockReturnValue({

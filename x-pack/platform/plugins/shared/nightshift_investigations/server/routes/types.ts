@@ -18,8 +18,7 @@ export type GetInvestigationsClient = (
 
 export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> | undefined;
 
-export interface NightshiftInvestigationsRouteHandlerResources
-  extends DefaultRouteHandlerResources {
+export interface NightshiftInvestigationsRouteHandlerResources extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;

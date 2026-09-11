@@ -486,9 +486,8 @@ export const postEvaluateRoute = (
                     conversationMessages: [new HumanMessage(evaluationInput.input)],
                     logger,
                     formattedTime: getFormattedTime({
-                      uiSettingsDateFormatTimezone: await ctx.core.uiSettings.client.get<string>(
-                        DEFAULT_DATE_FORMAT_TZ
-                      ),
+                      uiSettingsDateFormatTimezone:
+                        await ctx.core.uiSettings.client.get<string>(DEFAULT_DATE_FORMAT_TZ),
                       screenContextTimezone: 'UTC',
                     }),
                     getInferenceConnectorById: getInferenceConnectorById(inference, request),

@@ -98,11 +98,11 @@ export function WorkflowVisualEditorFlyout({
       : target.triggerLabel;
   const subtitle =
     target.kind === 'step'
-      ? target.stepInfo?.stepType ?? target.stepType
+      ? (target.stepInfo?.stepType ?? target.stepType)
       : `trigger / ${target.triggerType}`;
   const iconStepType =
     target.kind === 'step'
-      ? target.stepInfo?.stepType ?? target.stepType ?? 'package'
+      ? (target.stepInfo?.stepType ?? target.stepType ?? 'package')
       : target.triggerType;
 
   const yamlSlice = useMemo(() => {
@@ -129,16 +129,16 @@ export function WorkflowVisualEditorFlyout({
         defaultMessage: 'Triggers cannot be run individually.',
       })
     : !canExecuteWorkflow
-    ? i18n.translate('workflows.visualEditor.flyout.runDisabledNoCapability', {
-        defaultMessage: 'You do not have permission to run workflows.',
-      })
-    : !isYamlValid
-    ? i18n.translate('workflows.visualEditor.flyout.runDisabledInvalidYaml', {
-        defaultMessage: 'Fix YAML errors to run this step.',
-      })
-    : i18n.translate('workflows.visualEditor.flyout.runStep', {
-        defaultMessage: 'Run step',
-      });
+      ? i18n.translate('workflows.visualEditor.flyout.runDisabledNoCapability', {
+          defaultMessage: 'You do not have permission to run workflows.',
+        })
+      : !isYamlValid
+        ? i18n.translate('workflows.visualEditor.flyout.runDisabledInvalidYaml', {
+            defaultMessage: 'Fix YAML errors to run this step.',
+          })
+        : i18n.translate('workflows.visualEditor.flyout.runStep', {
+            defaultMessage: 'Run step',
+          });
 
   return (
     <div

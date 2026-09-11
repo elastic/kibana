@@ -4055,7 +4055,7 @@ describe('createAggregator', () => {
     const mockDefinitions = (overrides: Record<string, { taskTypeGroup?: string }> = {}) =>
       ({
         get: (type: string) => overrides[type],
-      } as unknown as TaskTypeDictionary);
+      }) as unknown as TaskTypeDictionary;
 
     test('returns latest values for task overdue by time', async () => {
       const events = [

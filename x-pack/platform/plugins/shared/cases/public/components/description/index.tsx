@@ -50,21 +50,25 @@ const getFlexGroupCss = ({
 }) => css`
   padding: ${euiTheme.size.s};
   align-items: center;
-  ${!isCollapsed
-    ? css`
-        border-bottom: ${euiTheme.border.thin};
-        border-radius: none;
-      `
-    : css`
-        background: ${euiTheme.colors.lightestShade};
-        border-radius: ${euiTheme.border.radius.medium};
-        ${hasUnsavedChanges
-          ? css`
-              border-bottom-left-radius: 0;
-              border-bottom-right-radius: 0;
-            `
-          : css``}
-      `}
+  ${
+    !isCollapsed
+      ? css`
+          border-bottom: ${euiTheme.border.thin};
+          border-radius: none;
+        `
+      : css`
+          background: ${euiTheme.colors.lightestShade};
+          border-radius: ${euiTheme.border.radius.medium};
+          ${
+            hasUnsavedChanges
+              ? css`
+                  border-bottom-left-radius: 0;
+                  border-bottom-right-radius: 0;
+                `
+              : css``
+          }
+        `
+  }
 `;
 
 const getDraftDescription = (

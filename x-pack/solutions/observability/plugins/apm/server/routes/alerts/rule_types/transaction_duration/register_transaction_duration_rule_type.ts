@@ -239,10 +239,13 @@ export function registerTransactionDurationRuleType({
       const triggeredBuckets = [];
 
       for (const bucket of response.aggregations.series.buckets) {
-        const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
-          obj[allGroupByFields[bucketIndex]] = bucketKey as string;
-          return obj;
-        }, {} as Record<string, string>);
+        const groupByFields = bucket.key.reduce(
+          (obj, bucketKey, bucketIndex) => {
+            obj[allGroupByFields[bucketIndex]] = bucketKey as string;
+            return obj;
+          },
+          {} as Record<string, string>
+        );
 
         const bucketKey = bucket.key;
 

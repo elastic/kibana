@@ -19,8 +19,8 @@ export const useRuleDetailsUrlPathWithLandingTab = (ruleId: string) => {
     const landingTab = canReadAlerts
       ? RuleDetailTabs.alerts
       : canReadExceptions
-      ? RuleDetailTabs.exceptions
-      : RuleDetailTabs.executionResults;
+        ? RuleDetailTabs.exceptions
+        : RuleDetailTabs.executionResults;
 
     return getRuleDetailsTabUrl(ruleId, landingTab);
   }, [ruleId, canReadAlerts, canReadExceptions]);

@@ -34,10 +34,10 @@ export const SerializedStateContext = createContext<Record<string, string>>({});
 type Widen<T> = T extends boolean
   ? boolean
   : T extends number
-  ? number
-  : T extends string
-  ? string
-  : T;
+    ? number
+    : T extends string
+      ? string
+      : T;
 
 export const useSerializableState = <T extends string | number | boolean>(
   key: string,

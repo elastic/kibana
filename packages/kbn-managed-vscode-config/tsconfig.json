@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/kibana-manifest-schema"
+    "@kbn/kibana-manifest-schema",
+    "@kbn/dev-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -745,7 +745,7 @@ export function registerInternalToolsRoutes({
           return {
             connectorId,
             connector,
-            mcpServerTools: executeResult.status === 'ok' ? executeResult.data?.tools ?? [] : [],
+            mcpServerTools: executeResult.status === 'ok' ? (executeResult.data?.tools ?? []) : [],
             listToolsError: executeResult.status === 'error' ? executeResult.message : undefined,
           };
         })

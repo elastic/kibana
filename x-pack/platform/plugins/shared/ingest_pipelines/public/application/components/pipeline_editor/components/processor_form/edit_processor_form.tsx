@@ -133,12 +133,9 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
     });
   };
 
-  useEffect(
-    () => {
-      onOpen();
-    },
-    [] /* eslint-disable-line react-hooks/exhaustive-deps */
-  );
+  useEffect(() => {
+    onOpen();
+  }, [] /* eslint-disable-line react-hooks/exhaustive-deps */);
 
   const [activeTab, setActiveTab] = useState<TabType>('configuration');
 

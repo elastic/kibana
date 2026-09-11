@@ -33,20 +33,24 @@ export const getLinkCss = ({
     display: inline-flex;
     vertical-align: top;
     white-space: nowrap;
-    ${iconSide === 'left' &&
-    css`
-      .euiIcon {
-        margin-right: ${euiTheme.size.xs};
-      }
-    `}
-    ${iconSide === 'right' &&
-    css`
-      flex-direction: row-reverse;
+    ${
+      iconSide === 'left' &&
+      css`
+        .euiIcon {
+          margin-right: ${euiTheme.size.xs};
+        }
+      `
+    }
+    ${
+      iconSide === 'right' &&
+      css`
+        flex-direction: row-reverse;
 
-      .euiIcon {
-        margin-left: ${euiTheme.size.xs};
-      }
-    `}
+        .euiIcon {
+          margin-left: ${euiTheme.size.xs};
+        }
+      `
+    }
   `;
 
 export interface LinkIconProps extends LinkProps {

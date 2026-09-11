@@ -115,7 +115,7 @@ export const tryResolveWorkflowDisplayNameFromAttachments = (
   workflowAttachmentId: string
 ): string | undefined => {
   const data = findWorkflowAttachmentData(attachments, workflowAttachmentId);
-  return data ? data.name ?? parseWorkflowNameFromYaml(data.yaml) : undefined;
+  return data ? (data.name ?? parseWorkflowNameFromYaml(data.yaml)) : undefined;
 };
 
 export const tryResolveWorkflowEnabledFromAttachments = (

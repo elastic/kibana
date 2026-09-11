@@ -60,7 +60,7 @@ export const WorkpadFilters: FC<Props> = ({
   groupFiltersByField,
 }) => {
   const groupedByFilterGroupField = groupFiltersByField === 'filterGroup';
-  const formatter = groupFiltersByField ? formatByKey(groupFiltersByField) ?? identity : identity;
+  const formatter = groupFiltersByField ? (formatByKey(groupFiltersByField) ?? identity) : identity;
 
   const preparedFilterGroups = filtersGroups.map((filterGroup) => ({
     ...filterGroup,

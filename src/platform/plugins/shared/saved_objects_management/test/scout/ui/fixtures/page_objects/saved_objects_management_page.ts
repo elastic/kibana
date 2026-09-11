@@ -39,7 +39,10 @@ export class SavedObjectsManagementPage {
   public readonly overwriteCancelButton: Locator;
   public readonly codeEditorWrapper: KibanaCodeEditorWrapper;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.table = this.page.testSubj.locator('savedObjectsTable');
     this.selectAllCheckbox = this.page.testSubj.locator('checkboxSelectAll');
     this.deleteListButton = this.page.testSubj.locator('savedObjectsManagementDelete');

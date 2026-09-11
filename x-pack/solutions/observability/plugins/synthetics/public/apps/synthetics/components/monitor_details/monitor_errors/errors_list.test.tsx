@@ -39,7 +39,7 @@ const makePingState = (overrides: {
     },
     error: { message: 'boom' },
     docId: 'd',
-  } as unknown as PingState);
+  }) as unknown as PingState;
 
 describe('getNextUpStateForResolvedError', () => {
   const MONITOR = 'm-123';

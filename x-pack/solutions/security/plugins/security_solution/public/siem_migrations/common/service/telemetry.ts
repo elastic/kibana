@@ -241,7 +241,7 @@ export class SiemBaseMigrationsTelemetry {
       isRetry: !!retry,
       skipPrebuiltRulesMatching:
         'skipPrebuiltRulesMatching' in settings
-          ? settings.skipPrebuiltRulesMatching ?? false
+          ? (settings.skipPrebuiltRulesMatching ?? false)
           : false,
       eventName: siemMigrationEventNames[this.eventTypes.StartMigration],
       ...(retry && { retryFilter: retry }),

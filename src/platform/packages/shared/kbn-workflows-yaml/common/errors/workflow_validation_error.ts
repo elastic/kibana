@@ -10,7 +10,10 @@
 export class WorkflowValidationError extends Error {
   public readonly statusCode = 400;
 
-  constructor(message: string, public readonly validationErrors?: string[]) {
+  constructor(
+    message: string,
+    public readonly validationErrors?: string[]
+  ) {
     super(message);
     this.name = 'WorkflowValidationError';
   }

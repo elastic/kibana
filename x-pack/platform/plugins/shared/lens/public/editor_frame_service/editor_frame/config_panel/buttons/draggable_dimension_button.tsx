@@ -101,8 +101,8 @@ export function DraggableDimensionButton({
 
   const canCombine = Boolean(
     dropTypes.includes('combine_compatible') ||
-      dropTypes.includes('field_combine') ||
-      dropTypes.includes('combine_incompatible')
+    dropTypes.includes('field_combine') ||
+    dropTypes.includes('combine_incompatible')
   );
 
   const value = useMemo(

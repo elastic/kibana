@@ -200,7 +200,7 @@ export const FieldSelect: FC<FieldSelectProps> = ({
   ]);
 
   const selectedFieldLabel = selectedField
-    ? currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField
+    ? (currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField)
     : undefined;
 
   const activeField: EuiComboBoxOptionOption<FieldChoiceWithOperationType> | undefined =

@@ -15,8 +15,11 @@ export interface AsyncAction<Payload, SuccessPayload, ErrorPayload = IHttpFetchE
   success: (payload: SuccessPayload) => Action<SuccessPayload>;
   fail: (payload: ErrorPayload) => Action<ErrorPayload>;
 }
-export interface AsyncActionOptionalPayload<Payload, SuccessPayload, ErrorPayload>
-  extends AsyncAction<Payload, SuccessPayload, ErrorPayload> {
+export interface AsyncActionOptionalPayload<
+  Payload,
+  SuccessPayload,
+  ErrorPayload,
+> extends AsyncAction<Payload, SuccessPayload, ErrorPayload> {
   get: (payload?: Payload) => Action<Payload>;
 }
 

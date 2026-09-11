@@ -201,11 +201,14 @@ export const AssetInventoryDataTable = ({
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
     {
-      columns: defaultColumns.reduce((columnSettings, column) => {
-        const columnDefaultSettings = column.width ? { width: column.width } : {};
-        const newColumn = { [column.id]: columnDefaultSettings };
-        return { ...columnSettings, ...newColumn };
-      }, {} as UnifiedDataTableSettings['columns']),
+      columns: defaultColumns.reduce(
+        (columnSettings, column) => {
+          const columnDefaultSettings = column.width ? { width: column.width } : {};
+          const newColumn = { [column.id]: columnDefaultSettings };
+          return { ...columnSettings, ...newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
     }
   );
 

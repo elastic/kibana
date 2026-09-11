@@ -299,12 +299,12 @@ export const useSystemPromptUpdater = ({
         currentPromptConversationIds.includes(convo.id)
           ? selectedSystemPrompt?.id
           : convo.apiConfig && convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-          ? // remove the default System Prompt if it is assigned to a conversation
-            // but that conversation is not in the currentPromptConversationList
-            // This means conversation was removed in the current transaction
-            undefined
-          : //  leave it as it is .. if that conversation was neither added nor removed.
-            convo.apiConfig?.defaultSystemPromptId;
+            ? // remove the default System Prompt if it is assigned to a conversation
+              // but that conversation is not in the currentPromptConversationList
+              // This means conversation was removed in the current transaction
+              undefined
+            : //  leave it as it is .. if that conversation was neither added nor removed.
+              convo.apiConfig?.defaultSystemPromptId;
 
       if (selectedSystemPrompt != null) {
         setSelectedSystemPrompt({

@@ -45,14 +45,16 @@ interface SaveModalDashboardBaseProps<SaveResponse = void> {
   onCopyOnSaveChangeCb?: (newCopyOnSave: boolean) => void;
 }
 
-interface SaveModalDashboardByValueProps<SaveResponse = void>
-  extends SaveModalDashboardBaseProps<SaveResponse> {
+interface SaveModalDashboardByValueProps<
+  SaveResponse = void,
+> extends SaveModalDashboardBaseProps<SaveResponse> {
   /** object can not be saved by reference. */
   canSaveByReference: false;
 }
 
-interface SaveModalDashboardByValueAndByReferenceProps<SaveResponse = void>
-  extends SaveModalDashboardBaseProps<SaveResponse> {
+interface SaveModalDashboardByValueAndByReferenceProps<
+  SaveResponse = void,
+> extends SaveModalDashboardBaseProps<SaveResponse> {
   /** object can be saved by reference. */
   canSaveByReference: true;
   hasLibraryItemWithTitle: (title: string) => Promise<boolean>;

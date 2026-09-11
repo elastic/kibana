@@ -60,7 +60,7 @@ const caseWithDashboardAttachment = (attachmentId: string): CaseUI =>
         metadata: { title: 'D', soType: 'dashboard' },
       } as unknown as AttachmentUIV2,
     ],
-  } as CaseUI);
+  }) as CaseUI;
 
 const caseWithSavedObjectAttachment = ({
   attachmentId,
@@ -81,7 +81,7 @@ const caseWithSavedObjectAttachment = ({
         metadata: { title: 'Saved object', soType },
       } as unknown as AttachmentUIV2,
     ],
-  } as CaseUI);
+  }) as CaseUI;
 
 describe('AttachSavedObjectModal', () => {
   const attach = jest.fn();

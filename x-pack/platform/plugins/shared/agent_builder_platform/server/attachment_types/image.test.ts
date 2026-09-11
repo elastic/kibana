@@ -54,7 +54,7 @@ describe('image attachment type', () => {
 
     it('rejects a payload without file_id', async () => {
       const definition = createImageAttachmentType({
-        getFilesPlugin: async () => ({} as FilesStart),
+        getFilesPlugin: async () => ({}) as FilesStart,
       });
       const result = await definition.validate(
         { name: 'x.png', mime_type: 'image/png' },

@@ -55,7 +55,7 @@ jest.mock('../../../tools/browser_tool_adapter', () => ({
           name: `browser_${tool.id}`,
           description: tool.description,
           invoke: jest.fn(),
-        } as unknown as StructuredTool)
+        }) as unknown as StructuredTool
     );
 
     const idMappings = new Map();

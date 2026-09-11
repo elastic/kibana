@@ -8,8 +8,8 @@ export function parseOtelDuration(duration?: number[] | string) {
   const parsedDuration = Array.isArray(duration)
     ? duration[0]
     : duration
-    ? parseFloat(duration)
-    : 0;
+      ? parseFloat(duration)
+      : 0;
 
   return parsedDuration === undefined || Number.isNaN(parsedDuration) ? 0 : parsedDuration * 0.001;
 }

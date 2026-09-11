@@ -51,7 +51,7 @@ const createDocument = (
       snapshot: overrides.snapshot ?? { id: 'rule-1', metadata: { name: 'Rule' } },
     },
     service: { type: 'kibana', version: '9.0.0' },
-  } as ChangeHistoryDocument);
+  }) as ChangeHistoryDocument;
 
 const createChangeHistoryMock = (): jest.Mocked<
   Pick<ChangeHistoryClient, 'isInitialized' | 'getHistory'>

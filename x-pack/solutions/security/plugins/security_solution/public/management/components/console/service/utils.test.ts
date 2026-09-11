@@ -22,7 +22,7 @@ const mockArgDef = (overrides: Partial<CommandArgDefinition> = {}): CommandArgDe
 });
 
 const mockCommandDef = (name: string, args?: CommandDefinition['args']): CommandDefinition =>
-  ({ name, args } as unknown as CommandDefinition);
+  ({ name, args }) as unknown as CommandDefinition;
 
 describe('console service utils', () => {
   describe('getRequiredArgs()', () => {

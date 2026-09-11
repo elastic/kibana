@@ -19,7 +19,7 @@ const createMockCriteriaFn = () => {
         kind: 'LLM',
         direction: 'maximize',
         evaluate: innerEvaluate,
-      } as unknown as Evaluator)
+      }) as unknown as Evaluator
   );
 
   return { criteriaFn, innerEvaluate };
@@ -46,7 +46,12 @@ describe('stats_quality_calibration evaluator', () => {
           severity_score: 50,
         },
       ] as unknown as KIQueryGenerationOutput,
-    } as { input: KIQueryGenerationEvaluationExample['input']; output: KIQueryGenerationOutput; expected: Record<string, unknown>; metadata: null });
+    } as {
+      input: KIQueryGenerationEvaluationExample['input'];
+      output: KIQueryGenerationOutput;
+      expected: Record<string, unknown>;
+      metadata: null;
+    });
 
     expect(result.score).toBeNull();
     expect(innerEvaluate).not.toHaveBeenCalled();
@@ -59,7 +64,12 @@ describe('stats_quality_calibration evaluator', () => {
     const result = await evaluator.evaluate({
       ...baseParams,
       output: [] as unknown as KIQueryGenerationOutput,
-    } as { input: KIQueryGenerationEvaluationExample['input']; output: KIQueryGenerationOutput; expected: Record<string, unknown>; metadata: null });
+    } as {
+      input: KIQueryGenerationEvaluationExample['input'];
+      output: KIQueryGenerationOutput;
+      expected: Record<string, unknown>;
+      metadata: null;
+    });
 
     expect(result.score).toBeNull();
     expect(innerEvaluate).not.toHaveBeenCalled();
@@ -85,7 +95,12 @@ describe('stats_quality_calibration evaluator', () => {
           severity_score: 65,
         },
       ] as unknown as KIQueryGenerationOutput,
-    } as { input: KIQueryGenerationEvaluationExample['input']; output: KIQueryGenerationOutput; expected: Record<string, unknown>; metadata: null });
+    } as {
+      input: KIQueryGenerationEvaluationExample['input'];
+      output: KIQueryGenerationOutput;
+      expected: Record<string, unknown>;
+      metadata: null;
+    });
 
     expect(result.score).toBe(0.8);
     expect(innerEvaluate).toHaveBeenCalledTimes(1);
@@ -135,7 +150,12 @@ describe('stats_quality_calibration evaluator', () => {
           severity_score: 65,
         },
       ] as unknown as KIQueryGenerationOutput,
-    } as { input: KIQueryGenerationEvaluationExample['input']; output: KIQueryGenerationOutput; expected: Record<string, unknown>; metadata: null });
+    } as {
+      input: KIQueryGenerationEvaluationExample['input'];
+      output: KIQueryGenerationOutput;
+      expected: Record<string, unknown>;
+      metadata: null;
+    });
 
     expect(result.score).toBe(0.8);
     const passedOutput = innerEvaluate.mock.calls[0][0].output;
@@ -166,7 +186,12 @@ describe('stats_quality_calibration evaluator', () => {
           severity_score: 65,
         },
       ] as unknown as KIQueryGenerationOutput,
-    } as { input: KIQueryGenerationEvaluationExample['input']; output: KIQueryGenerationOutput; expected: Record<string, unknown>; metadata: null });
+    } as {
+      input: KIQueryGenerationEvaluationExample['input'];
+      output: KIQueryGenerationOutput;
+      expected: Record<string, unknown>;
+      metadata: null;
+    });
 
     expect(result.score).toBe(0.8);
     expect(innerEvaluate).toHaveBeenCalledTimes(1);
@@ -210,7 +235,12 @@ describe('stats_quality_calibration evaluator', () => {
           severity_score: 65,
         },
       ] as unknown as KIQueryGenerationOutput,
-    } as { input: KIQueryGenerationEvaluationExample['input']; output: KIQueryGenerationOutput; expected: Record<string, unknown>; metadata: null });
+    } as {
+      input: KIQueryGenerationEvaluationExample['input'];
+      output: KIQueryGenerationOutput;
+      expected: Record<string, unknown>;
+      metadata: null;
+    });
 
     expect(result.score).toBe(0.8);
     const passedOutput = innerEvaluate.mock.calls[0][0].output;

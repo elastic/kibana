@@ -45,15 +45,15 @@ const RISK_LEVEL_SCORES: Partial<Record<string, number>> = {
 
 const getSignificanceScore = (entity: LeadEntity): number => {
   const criticality = getAssetCriticality(entity);
-  const criticalityScore = criticality ? CRITICALITY_SCORES[criticality] ?? 0 : 0;
+  const criticalityScore = criticality ? (CRITICALITY_SCORES[criticality] ?? 0) : 0;
   const riskScore = getEntityRisk(entity)?.calculatedScoreNorm ?? 0;
   return Math.max(criticalityScore, riskScore);
 };
 
 export const getRelatedEntitySignificance = (related: RelatedEntity): number =>
   Math.max(
-    related.criticality ? CRITICALITY_SCORES[related.criticality] ?? 0 : 0,
-    related.riskLevel ? RISK_LEVEL_SCORES[related.riskLevel] ?? 0 : 0
+    related.criticality ? (CRITICALITY_SCORES[related.criticality] ?? 0) : 0,
+    related.riskLevel ? (RISK_LEVEL_SCORES[related.riskLevel] ?? 0) : 0
   );
 
 /**
