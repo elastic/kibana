@@ -47,6 +47,32 @@ const createV1PolicyDocument = (overrides: Record<string, unknown> = {}): SavedO
   references: [],
 });
 
+const createV2PolicyDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
+  id: 'policy-1',
+  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+  attributes: {
+    name: 'test-policy',
+    description: 'A test action policy',
+    enabled: true,
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    matcher: null,
+    groupBy: null,
+    tags: null,
+    groupingMode: null,
+    throttle: null,
+    snoozedUntil: null,
+    apiKeyOwner: 'elastic',
+    apiKeyCreatedByUser: true,
+    auth: { owner: 'elastic', createdByUser: true },
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    ...overrides,
+  },
+  references: [],
+});
+
 describe('actionPolicyModelVersions', () => {
   describe('v1 to v2 migration', () => {
     const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
@@ -111,6 +137,65 @@ describe('actionPolicyModelVersions', () => {
       const attrs = migrated.attributes as Record<string, unknown>;
       expect(attrs.apiKeyOwner).toBe('');
       expect(attrs.apiKeyCreatedByUser).toBe(false);
+    });
+  });
+
+  describe('v2 to v3 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
+
+    const migrate = (document: SavedObject) =>
+      migrator.migrate({ document, fromVersion: 2, toVersion: 3 }).attributes as Record<
+        string,
+        unknown
+      >;
+
+    it('wraps a KQL string matcher into the structured expression shape', () => {
+      const attrs = migrate(createV2PolicyDocument({ matcher: 'rule.tags : "prod"' }));
+      expect(attrs.matcher).toEqual({ expression: 'rule.tags : "prod"' });
+    });
+
+    it('leaves a null matcher untouched', () => {
+      const attrs = migrate(createV2PolicyDocument({ matcher: null }));
+      expect(attrs.matcher).toBeNull();
+    });
+
+    it('leaves a missing matcher untouched', () => {
+      const attrs = migrate(createV2PolicyDocument({ matcher: undefined }));
+      expect(attrs.matcher).toBeUndefined();
+    });
+
+    it('leaves an already-structured matcher untouched', () => {
+      const matcher = { tags: ['prod'], expression: 'data.env : "prod"' };
+      const attrs = migrate(createV2PolicyDocument({ matcher }));
+      expect(attrs.matcher).toEqual(matcher);
+    });
+
+    it('preserves unrelated attributes unchanged', () => {
+      const attrs = migrate(createV2PolicyDocument({ matcher: 'rule.tags : "prod"' }));
+      expect(attrs.name).toBe('test-policy');
+      expect(attrs.destinations).toEqual([{ type: 'workflow', id: 'workflow-1' }]);
+      expect(attrs.apiKeyOwner).toBe('elastic');
+      expect(attrs.apiKeyCreatedByUser).toBe(true);
+      expect(attrs.createdAt).toBe('2025-01-01T00:00:00.000Z');
+      expect(attrs.updatedAt).toBe('2025-01-01T00:00:00.000Z');
+    });
+  });
+
+  describe('v2 forward compatibility', () => {
+    const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
+
+    it('accepts a v3 document holding a structured matcher when rolling back to v2', () => {
+      const document = createV2PolicyDocument({
+        matcher: { tags: ['prod'], expression: 'data.env : "prod"' },
+      });
+
+      expect(() => migrator.migrate({ document, fromVersion: 3, toVersion: 2 })).not.toThrow();
+    });
+
+    it('still accepts a v2 document holding a KQL string matcher', () => {
+      const document = createV2PolicyDocument({ matcher: 'rule.tags : "prod"' });
+
+      expect(() => migrator.migrate({ document, fromVersion: 3, toVersion: 2 })).not.toThrow();
     });
   });
 });

@@ -24,7 +24,7 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   description: 'Route every critical-priority alert to #oncall',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
-  matcher: 'alert.severity = "critical"',
+  matcher: { expression: 'alert.severity = "critical"' },
   groupingMode: 'per_episode',
   tags: ['oncall', 'critical'],
   apiKeyOwner: 'elastic',
@@ -199,7 +199,7 @@ describe('createActionPolicySmlType', () => {
         content: [
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
-          'alert.severity = "critical"',
+          '(alert.severity = "critical")',
           'per_episode',
           'workflow:wf-critical-route',
           'oncall, critical',
@@ -295,6 +295,9 @@ describe('createActionPolicySmlType', () => {
       // — so the read goes through the user's authorization context.
       getActionPolicy.mockResolvedValueOnce({
         ...baseActionPolicyAttrs,
+        // TEMPORARY: the API response still carries `matcher` as a KQL string, while the saved
+        // object attributes above already use the structured shape.
+        matcher: 'alert.severity = "critical"',
         id: 'policy-1',
       });
 
