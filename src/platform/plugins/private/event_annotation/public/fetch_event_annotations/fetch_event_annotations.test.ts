@@ -360,8 +360,8 @@ describe('getFetchEventAnnotations', () => {
         ],
       } as unknown as FetchEventAnnotationsArgs;
       await runGetFetchEventAnnotations(sampleArgs);
-      expect(startServices[1].data.dataViews.create).toBeCalledTimes(2);
-      expect(handleRequest).toBeCalledTimes(2);
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(2);
+      expect(handleRequest).toHaveBeenCalledTimes(2);
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
       expect((handleRequest as jest.Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
     });
@@ -382,8 +382,8 @@ describe('getFetchEventAnnotations', () => {
         ],
       } as unknown as FetchEventAnnotationsArgs;
       await runGetFetchEventAnnotations(sampleArgs);
-      expect(startServices[1].data.dataViews.create).toBeCalledTimes(1);
-      expect(handleRequest).toBeCalledTimes(1);
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
+      expect(handleRequest).toHaveBeenCalledTimes(1);
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
     });
     test('runs two separate handleRequests if timeField is different', async () => {
@@ -403,8 +403,8 @@ describe('getFetchEventAnnotations', () => {
         ],
       } as unknown as FetchEventAnnotationsArgs;
       await runGetFetchEventAnnotations(sampleArgs);
-      expect(startServices[1].data.dataViews.create).toBeCalledTimes(1);
-      expect(handleRequest).toBeCalledTimes(2); // how many times and with what params
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
+      expect(handleRequest).toHaveBeenCalledTimes(2); // how many times and with what params
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
       expect((handleRequest as jest.Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
     });

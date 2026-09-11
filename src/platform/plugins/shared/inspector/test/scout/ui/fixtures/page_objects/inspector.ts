@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type InspectorView = 'Requests' | 'Data';
@@ -21,6 +22,7 @@ export class Inspector {
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
+  public readonly searchSessionId: Locator;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -37,6 +39,7 @@ export class Inspector {
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
     this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
+    this.searchSessionId = page.testSubj.locator('inspectorRequestSearchSessionId');
 
     this.requests = {
       requestChooser: page.testSubj.locator('inspectorRequestChooser'),
@@ -50,7 +53,14 @@ export class Inspector {
   }
 
   async open(openButtonTestSubj: string = 'openInspectorButton') {
-    await this.page.testSubj.click(openButtonTestSubj);
+    const openButton = this.page.testSubj.locator(openButtonTestSubj);
+    if (!(await openButton.isVisible())) {
+      const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
+      if (await overflowButton.isVisible()) {
+        await overflowButton.click();
+      }
+    }
+    await openButton.click();
     await this.panel.waitFor({ state: 'visible' });
   }
 
@@ -89,6 +99,21 @@ export class Inspector {
 
   async openInspectorRequestsView() {
     await this.openInspectorView('Requests');
+  }
+
+  /**
+   * The search session id surfaced by the open inspector's Requests view.
+   * Switches to the Requests view, reads the id, then closes the inspector.
+   * Throws if no id is present — a missing id means the assertion would be meaningless.
+   */
+  async getSearchSessionId(): Promise<string> {
+    await this.openInspectorRequestsView();
+    const sessionId = await this.searchSessionId.getAttribute('data-search-session-id');
+    await this.close();
+    if (!sessionId) {
+      throw new Error('No search session id exposed by the inspector');
+    }
+    return sessionId;
   }
 
   async openRequestsStatisticsTab() {

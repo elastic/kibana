@@ -6,8 +6,6 @@
  */
 import React, { useContext } from 'react';
 import {
-  EuiCallOut,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -15,6 +13,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { ErrorsTabContent } from './errors_tab_content';
 import { SyntheticsRefreshContext } from '../../../contexts';
@@ -97,24 +96,24 @@ export const ErrorsTab = () => {
       <EuiSpacer size="m" />
       {apiError && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={ERROR_TITLE}
-            color="danger"
-            iconType="warning"
             data-test-subj="syntheticsErrorsTabApiError"
-          >
-            <p>{ERROR_BODY}</p>
-            {apiErrorMessage && <p>{apiErrorMessage}</p>}
-            <EuiButton
-              data-test-subj="syntheticsErrorsTabRetryButton"
-              size="s"
-              color="danger"
-              onClick={() => refreshApp()}
-            >
-              {RETRY_LABEL}
-            </EuiButton>
-          </EuiCallOut>
+            text={
+              <>
+                <p>{ERROR_BODY}</p>
+                {apiErrorMessage && <p>{apiErrorMessage}</p>}
+              </>
+            }
+            actionProps={{
+              primary: {
+                'data-test-subj': 'syntheticsErrorsTabRetryButton',
+                onClick: () => refreshApp(),
+                children: RETRY_LABEL,
+              },
+            }}
+          />
           <EuiSpacer size="m" />
         </>
       )}

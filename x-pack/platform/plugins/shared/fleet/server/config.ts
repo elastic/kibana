@@ -51,9 +51,6 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
-    iacProvisioner: {
-      enabled: true,
-    },
     enableExperimental: true,
     experimentalFeatures: true,
     developer: {
@@ -281,6 +278,7 @@ export const config: PluginConfigDescriptor = {
       ),
       iacProvisioner: schema.maybe(
         schema.object({
+          // Schema-only. Runtime activation is fleet.enableIacProvisioner.
           enabled: schema.boolean({ defaultValue: false }),
           api: schema.maybe(
             schema.object({
@@ -390,8 +388,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
-        // Test/development escape hatch for uploading a package whose name exists in EPR or bundled packages.
-        allowRegistryPackageUploads: schema.boolean({ defaultValue: false }),
+        // Test/development escape hatch that skips all package upload validation, e.g. for
+        // uploading packages whose names exist in EPR or as bundled packages.
+        skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),

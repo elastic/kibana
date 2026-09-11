@@ -8,10 +8,13 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
+import { mockRouter as coreRouterMock } from '@kbn/core-http-router-server-mocks';
+import type { RouteValidatorFullConfigRequest } from '@kbn/core-http-server';
 import type { MockRouter } from '../../__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from '../../__mocks__/routes.mock';
 import { createRequestMock } from '../../__mocks__/request.mock';
 import { handleEsError } from '../../../../shared_imports';
+import type { RouteDependencies } from '../../..';
 
 import { registerConvertRequestRoute } from '.';
 
@@ -87,6 +90,50 @@ describe('Console convert request to language route', () => {
       );
 
       expect(resp.status).toEqual(200);
+    });
+  });
+
+  describe('body validation', () => {
+    const getRouteValidation = () => {
+      const router = coreRouterMock.create();
+      registerConvertRequestRoute({
+        router,
+        lib: { handleEsError },
+      } as unknown as RouteDependencies);
+      // The route registers the plain { query, body } validator config object
+      return router.post.mock.calls[0][0].validate as RouteValidatorFullConfigRequest<
+        unknown,
+        unknown,
+        unknown
+      >;
+    };
+
+    const createRequestWithBody = (dataStringLength: number) =>
+      coreRouterMock.createKibanaRequest({
+        method: 'post',
+        query: {
+          language: 'curl',
+          esHost: 'http://localhost:9200',
+          kibanaHost: 'http://localhost:5601',
+        },
+        body: [
+          {
+            method: 'PUT',
+            url: 'kbn:/api/dashboards/create',
+            data: ['x'.repeat(dataStringLength)],
+          },
+        ],
+        validation: getRouteValidation(),
+      });
+
+    it('accepts a data string of 100000 characters', () => {
+      expect(() => createRequestWithBody(100000)).not.toThrow();
+    });
+
+    it('rejects a data string of 100001 characters', () => {
+      expect(() => createRequestWithBody(100001)).toThrow(
+        'value has length [100001] but it must have a maximum length of [100000]'
+      );
     });
   });
 });

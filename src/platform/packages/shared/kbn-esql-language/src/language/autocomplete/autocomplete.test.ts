@@ -38,7 +38,6 @@ import { suggest } from './autocomplete';
 import { datasets, editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
-import { PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED } from '../../commands/definitions/utils/autocomplete/expressions/positions/after_complete';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -1225,18 +1224,15 @@ describe('autocomplete', () => {
       expect(labels).not.toContain(',');
     });
 
-    (PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED ? it : it.skip)(
-      'suggests a comma alongside operators inside a parenthesized expression',
-      async () => {
-        const { suggest: suggestFn } = await setup();
-        const suggestions = await suggestFn('FROM index | WHERE (keywordField /)');
-        const labels = suggestions.map(({ label }) => label);
-        const commaSuggestion = suggestions.find(({ label }) => label === ',');
+    it('suggests a comma alongside operators inside a parenthesized expression', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField /)');
+      const labels = suggestions.map(({ label }) => label);
+      const commaSuggestion = suggestions.find(({ label }) => label === ',');
 
-        expect(labels).toEqual(expect.arrayContaining([',', '==', 'IN']));
-        expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
-      }
-    );
+      expect(labels).toEqual(expect.arrayContaining([',', '==', 'IN']));
+      expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
+    });
 
     it('suggests a comma after a complete tuple item', async () => {
       const { suggest: suggestFn } = await setup();
@@ -1285,6 +1281,10 @@ describe('autocomplete', () => {
     it.each([
       ['CASE', 'FROM index | WHERE CASE(doubleField IN /'],
       ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN /'],
+      ['EVAL CASE', 'FROM index | EVAL col0 = CASE(doubleField IN /'],
+      ['EVAL COALESCE', 'FROM index | EVAL col0 = COALESCE(doubleField IN /'],
+      ['STATS WHERE', 'FROM index | STATS COUNT(*) WHERE doubleField IN /'],
+      ['INLINE STATS WHERE', 'FROM index | INLINE STATS COUNT(*) WHERE doubleField IN /'],
     ])('suggests subqueries inside %s', async (_, query) => {
       const { suggest: suggestFn } = await setup();
       const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
@@ -1315,6 +1315,9 @@ describe('autocomplete', () => {
         'COALESCE inside a FROM subquery',
         'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM /)))',
       ],
+      ['EVAL CASE', 'FROM index | EVAL col0 = CASE(doubleField IN (FROM /), true, false)'],
+      ['STATS WHERE', 'FROM index | STATS COUNT(*) WHERE doubleField IN (FROM /)'],
+      ['INLINE STATS WHERE', 'FROM index | INLINE STATS COUNT(*) WHERE doubleField IN (FROM /)'],
     ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
       const { suggest: suggestFn } = await setup();
       const suggestions = await suggestFn(query);

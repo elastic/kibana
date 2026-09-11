@@ -16,7 +16,7 @@ import type {
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
 import {
-  ConversationRoundStatus,
+  getConversationRoundAuthorDisplayName,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
@@ -40,7 +40,14 @@ import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice, formatSubagentRosterNotice } from '../prompts/utils/actions';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type { ProcessedConversation } from './prepare_conversation';
+import {
+  groupTimelineRounds,
+  isAwaitingPrompt,
+  roundResponse,
+  type ProcessedTimelineEvent,
+  type TimelineRound,
+} from './context_timeline';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
@@ -74,12 +81,10 @@ export interface ConversationToLangchainOptions {
 }
 
 /**
- * Converts a conversation to langchain format.
- *
- * When `resultTransformer` is provided, tool results from previous rounds
- * will be passed through the transformer function.
+ * Builds the LangChain message history from the processed timeline, one round group at a time.
+ * When `resultTransformer` is provided, previous rounds' tool results are passed through it.
  */
-export const convertPreviousRounds = async ({
+export const prepareMessages = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,
@@ -90,17 +95,18 @@ export const convertPreviousRounds = async ({
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
 
-  let rounds = conversation.previousRounds;
+  const previousRounds = groupTimelineRounds(conversation.timeline);
+  let rounds = previousRounds;
   let input = conversation.nextInput;
   let inputTimestamp = conversationTimestamp;
 
   // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
-  const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
-  if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
+  const lastRound = previousRounds[previousRounds.length - 1];
+  if (lastRound && isAwaitingPrompt(lastRound)) {
     rounds = rounds.slice(0, rounds.length - 1);
-    input = lastRound.input;
-    inputTimestamp = lastRound.started_at;
+    input = lastRound.userMessage.data;
+    inputTimestamp = lastRound.userMessage.created_at;
   }
 
   // Inject compaction summary as a user/assistant exchange before remaining rounds
@@ -150,7 +156,7 @@ export interface RoundToLangchainOptions {
 }
 
 export const roundToLangchain = async (
-  round: ProcessedConversationRound,
+  round: TimelineRound<ProcessedTimelineEvent>,
   {
     resultTransformer,
     ignoreSteps = false,
@@ -163,8 +169,8 @@ export const roundToLangchain = async (
   // user message
   messages.push(
     formatRoundInput({
-      input: round.input,
-      timestamp: round.started_at,
+      input: round.userMessage.data,
+      timestamp: round.userMessage.created_at,
       attachmentTypes,
       attachmentTypeInstructionsProvided,
     })
@@ -214,7 +220,7 @@ export const roundToLangchain = async (
   }
 
   // assistant response
-  messages.push(formatAssistantResponse({ response: round.response }));
+  messages.push(formatAssistantResponse({ response: roundResponse(round) }));
 
   return messages;
 };
@@ -302,17 +308,25 @@ const formatInputPrefix = ({
 
 const getAuthorLabel = (author?: ConversationRoundAuthor): string | undefined => {
   if (!author) return undefined;
-  return author.username || author.full_name || author.id || undefined;
+
+  const displayName = getConversationRoundAuthorDisplayName(author);
+
+  if (displayName) {
+    return displayName;
+  }
+
+  return author.id;
 };
 
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
+  const { representation } = attachment;
   return {
     tagName: 'attachment',
     attributes: {
       type: attachment.attachment.type,
       id: attachment.attachment.id,
     },
-    children: [attachment.representation.value],
+    children: [representation.type === 'text' ? representation.value : ''],
   };
 };
 

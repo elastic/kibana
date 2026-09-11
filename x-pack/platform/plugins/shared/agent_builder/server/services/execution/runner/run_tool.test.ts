@@ -102,7 +102,7 @@ describe('runTool', () => {
         toolExecutionParams: params,
         parentManager: runnerManager,
       })
-    ).rejects.toThrowError(/Tool test-tool was called with invalid parameters/);
+    ).rejects.toThrow(/Tool test-tool was called with invalid parameters/);
   });
 
   it('calls the tool handler with the expected parameters', async () => {
@@ -495,6 +495,51 @@ describe('runInternalTool - confirmation policy', () => {
         })
       );
       expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('auto-declines a pre-call confirmation instead of prompting when interactivity is off', async () => {
+      runnerDeps.interactivity = { enabled: false };
+      tool.confirmation = { askUser: 'always' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const result = await runInternalTool({
+        toolExecutionParams: {
+          tool,
+          toolParams: { foo: 'bar' },
+          toolCallId: 'call-non-interactive',
+          source: 'agent',
+        },
+        parentManager: new RunnerManager(runnerDeps),
+      });
+
+      expect(result.prompt).toBeUndefined();
+      expect(result.results?.[0].type).toBe(ToolResultType.error);
+      expect((result.results?.[0].data as { message: string }).message).toContain(
+        'non-interactive mode'
+      );
+      expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('returns an on-demand handler prompt when interactivity is on', async () => {
+      toolHandler.mockReturnValue({
+        prompt: { type: AgentPromptType.confirmation, id: 'handler-prompt' },
+      });
+
+      const result = await runInternalTool({
+        toolExecutionParams: {
+          tool,
+          toolParams: { foo: 'bar' },
+          toolCallId: 'call-on-demand-interactive',
+          source: 'agent',
+        },
+        parentManager: runnerManager,
+      });
+
+      expect(result.prompt).toEqual(
+        expect.objectContaining({ type: AgentPromptType.confirmation, id: 'handler-prompt' })
+      );
     });
 
     it('passes toolParams and toolHandlerContext to getConfirmation', async () => {

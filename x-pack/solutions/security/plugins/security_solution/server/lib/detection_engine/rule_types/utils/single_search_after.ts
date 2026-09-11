@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { performance } from 'perf_hooks';
 import type {
@@ -73,9 +74,18 @@ export const singleSearchAfter = async <
         loggedRequests,
       };
     } catch (exc) {
-      ruleExecutionLogger.error(`Error searching events\nError: ${exc}`, {
-        consoleLogLevel: 'error',
-      });
+      if (isMaximumResponseSizeExceededError(exc)) {
+        // callers may recover from this error by reducing the search page size,
+        // so leave it to them to decide whether it's an error or a warning
+        ruleExecutionLogger.debug(`Error searching events\nError: ${exc}`, {
+          consoleLogLevel: 'warn',
+        });
+      } else {
+        ruleExecutionLogger.error(`Error searching events\nError: ${exc}`, {
+          consoleLogLevel: 'error',
+        });
+      }
+
       throw exc;
     }
   });

@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/ui-ai-components'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/deeplinks-analytics'
   - '@kbn/react-kibana-context-render'
@@ -89,6 +90,7 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/core-rendering-browser'
   - '@kbn/grid-layout'
+  - '@kbn/rxjs-history'
   - '@kbn/ui-actions-browser'
   - '@kbn/esql-types'
   - '@kbn/saved-objects-tagging-plugin'
@@ -149,6 +151,7 @@ fileGroups:
     - test/scout_oas_schema/**/*
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
