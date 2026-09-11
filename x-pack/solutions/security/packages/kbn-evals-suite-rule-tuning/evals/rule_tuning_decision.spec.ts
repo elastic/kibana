@@ -6,10 +6,12 @@
  */
 
 /**
- * Tuning-decision eval for the managed `system-security-rule-tuning` workflow.
+ * Tuning-decision eval for the managed `system-security-rule-tuning-worker` +
+ * `system-security-rule-tuning-review` workflows (post-#290097 split).
  *
  * Drives the real workflow end-to-end: each example seeds one rule plus a cluster of
- * analyst-dismissed (false-positive) alerts, triggers the worker's sweep, and grades the
+ * analyst-dismissed (false-positive) alerts, triggers the worker's sweep (which fans out
+ * one review per rule), auto-approves each review's gate, and grades the review's
  * `diagnose_rule` step's structured change_type against the golden label.
  *
  * Each task seeds a UNIQUE rule uuid and fresh alert ids per run. The workflow's re-harvest
@@ -43,7 +45,18 @@ const SUMMARY_CRITERIA = [
   'The summary does not invent alert fields, hosts, users, or commands that are not in the seeded data',
 ];
 
-/** Golden tuning-path fixtures, one per decision path the worker can take. */
+/** Golden tuning-path fixtures, one per decision path the review workflow can take.
+ *
+ * LABEL PROVENANCE (2026-09-11 port): the fork's golden labels included `risk_score`
+ * (6) and `manual` (17), which the post-split review schema can no longer emit (enum
+ * is [exception, suppression, query, threshold]). Those 23 labels were re-derived
+ * from the new diagnose prompt's stated semantics — prefer query; exception for
+ * identity-keyed benign sources; suppression for volume on capable rule types;
+ * threshold as the remaining in-band noise reducer. These are PRELIMINARY until
+ * validated on the live stack: the first full run must be treated as a
+ * characterization baseline, and any relabel must go through the golden-label
+ * characterization test in the same commit.
+ */
 const TUNING_FIXTURES: Array<{
   id: string;
   expected: ChangeType;
@@ -64,20 +77,20 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-volume-suppression',
-    expected: 'manual',
+    expected: 'suppression',
     ruleType: 'query',
     description:
       'Low-value alert flood from a repeated benign process — no automated path, recommend suppression manually',
   },
   {
     id: 'fp-low-value-risk',
-    expected: 'risk_score',
+    expected: 'exception',
     ruleType: 'query',
     description: 'Alerts are real but low-value — downgrade risk score and severity',
   },
   {
     id: 'fp-unfixable-noise',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'query',
     description:
       'Rule fires exclusively on benign activity with no discriminating signal — disable',
@@ -89,7 +102,7 @@ const TUNING_FIXTURES: Array<{
   // exercised against a real model on a real rule.
   {
     id: 'fp-suppression-incapable-rule-type',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'new_terms',
     description:
       'Repeated single-entity FPs on a new_terms rule — suppression is not applicable to ' +
@@ -162,133 +175,133 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-suppression-healthcheck',
-    expected: 'manual',
+    expected: 'suppression',
     ruleType: 'query',
     description:
       'Benign curl re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-vulnscan',
-    expected: 'manual',
+    expected: 'suppression',
     ruleType: 'query',
     description:
       'Benign nessus re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-inventory',
-    expected: 'manual',
+    expected: 'suppression',
     ruleType: 'query',
     description:
       'Benign osqueryd re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-patchagent',
-    expected: 'manual',
+    expected: 'suppression',
     ruleType: 'query',
     description:
       'Benign wuauclt re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-logship',
-    expected: 'manual',
+    expected: 'suppression',
     ruleType: 'query',
     description:
       'Benign filebeat re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-low-value-admin-tools',
-    expected: 'risk_score',
+    expected: 'exception',
     ruleType: 'query',
     description:
       'Sanctioned admin tooling generates true but unremarkable hits - lower risk score and severity',
   },
   {
     id: 'fp-low-value-devtools',
-    expected: 'risk_score',
+    expected: 'exception',
     ruleType: 'query',
     description:
       'Developer tooling on build laptops fires constantly with no incident value - downgrade scoring',
   },
   {
     id: 'fp-low-value-remote-support',
-    expected: 'risk_score',
+    expected: 'exception',
     ruleType: 'query',
     description:
       'Approved remote-support sessions are real yet routine - reduce risk score rather than exclude',
   },
   {
     id: 'fp-low-value-archive',
-    expected: 'risk_score',
+    expected: 'exception',
     ruleType: 'query',
     description:
       'Routine archive extraction is benign in this environment - downgrade instead of suppressing',
   },
   {
     id: 'fp-low-value-scripting',
-    expected: 'risk_score',
+    expected: 'exception',
     ruleType: 'query',
     description:
       'Everyday scripting by platform engineers is expected - lower severity to keep visibility',
   },
   {
     id: 'fp-unfixable-telemetry',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'query',
     description:
       'Only telemetry agents match, with no field separating benign from malicious - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-agentmesh',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'query',
     description:
       'Service-mesh sidecars account for every hit and share no discriminating attribute - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-buildfarm',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'query',
     description:
       'Ephemeral build-farm workers regenerate identifiers each run, so no stable filter exists - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-imaging',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'query',
     description:
       'OS imaging fleets reproduce the pattern wholesale with nothing to key an exception on - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-mailflow',
-    expected: 'manual',
+    expected: 'threshold',
     ruleType: 'query',
     description:
       'Mail-gateway scanning is indistinguishable from the targeted behaviour - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-manual-newterms-dns',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
       'New DNS resolvers trip a new_terms rule; suppression is unsupported for this rule type, so escalate',
   },
   {
     id: 'fp-manual-newterms-proxy',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
       'A newly introduced proxy host looks novel to a new_terms rule - needs human review, not suppression',
   },
   {
     id: 'fp-manual-newterms-vpn',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
       'A replacement VPN concentrator registers as an unseen term - escalate rather than auto-tune',
   },
   {
     id: 'fp-manual-newterms-ntp',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
       'A re-pointed NTP source appears novel on a new_terms rule - route to manual review',
@@ -319,7 +332,7 @@ evaluate.describe(
 
     evaluate(
       'proposes the golden tuning path for each seeded FP cluster',
-      async ({ executorClient, evaluators, fetch, log, esClient, connector }) => {
+      async ({ executorClient, evaluators, fetch, log, esClient, connector: _judgeConnector }) => {
         const examples: RuleTuningExample[] = TUNING_FIXTURES.map((fixture) => ({
           id: fixture.id,
           input: { fixtureId: fixture.id },
@@ -347,9 +360,10 @@ evaluate.describe(
               {
                 name: 'security: rule-tuning-workflow-decision',
                 description:
-                  'Runs the managed system-security-rule-tuning workflow end-to-end against ' +
+                  'Runs the managed system-security-rule-tuning-worker/review workflows ' +
+                  'end-to-end against ' +
                   `${TUNING_FIXTURES.length} seeded false-positive clusters (one per tuning path: ` +
-                  'exception, query, suppression, risk_score, disable) and grades the diagnose_rule ' +
+                  'exception, query, suppression, threshold) and grades the diagnose_rule ' +
                   "step's change_type against the golden label.",
                 examples,
               } satisfies EvaluationDataset,
@@ -373,10 +387,10 @@ evaluate.describe(
               );
 
               try {
-                // Pin the workflow's ai.agent step to the connector under test. Without
-                // this the step falls back to the space default and every Playwright
-                // project scores the same model under six different labels.
-                return await runRuleTuningWorkflow({ fetch, log, connectorId: connector.id });
+                // No connector pinning post-split (see runRuleTuningWorkflow): the
+                // worker schema rejects extra inputs, so the review's ai.agent
+                // resolves the space-default connector like the rule-creation suite.
+                return await runRuleTuningWorkflow({ fetch, log });
               } finally {
                 await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
               }
@@ -407,24 +421,28 @@ evaluate.describe(
       expect(outOfEnum?.score).toBe(0);
       expect(outOfEnum?.label).toBe('invalid');
 
-      // Well-formed change_type but empty payload — minItems gate must bite.
+      // Well-formed change_type but empty payload — the review gate needs a
+      // non-empty payload to render an approval decision from. Post-split the
+      // exception payload is the free-form exception_condition string.
       const emptyEntries = await validProposal.evaluate?.({
         output: {
           ...completedRun,
           change_type: 'exception' as ChangeType,
-          exception_entries: [],
+          exception_condition: '   ',
         },
         metadata: { ruleType: 'query' },
       } as never);
       expect(emptyEntries?.score).toBe(0);
 
       // Suppression proposed for a rule type that cannot carry it — must reject
-      // rather than fall through to a free pass.
+      // rather than fall through to a free pass. Post-split the suppression
+      // payload rides proposed_query's sibling contract; a blank proposal with
+      // change_type suppression still has no renderable gate content.
       const suppressionIncapable = await validProposal.evaluate?.({
         output: {
           ...completedRun,
           change_type: 'suppression' as ChangeType,
-          suppression_group_by: ['host.id'],
+          exception_condition: '',
         },
         metadata: { ruleType: 'new_terms' },
       } as never);

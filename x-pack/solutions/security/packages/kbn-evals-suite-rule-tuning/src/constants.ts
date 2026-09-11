@@ -36,15 +36,13 @@ export const RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-revie
 /** Public workflows_management API version (`Elastic-Api-Version` header). */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
-/** The five tuning paths plus the manual hand-off the `ai.agent` step can emit. */
-export const CHANGE_TYPES = [
-  'exception',
-  'query',
-  'suppression',
-  'risk_score',
-  'disable',
-  'manual',
-] as const;
+/**
+ * The review workflow's diagnose step enum (rule_tuning_review.yaml). Post-split,
+ * `risk_score`/`disable`/`manual` are no longer emittable — the closest intents
+ * (low-value rules, unfixable noise) now route to the analyst via the approval
+ * gate's Dismiss/Approve, so the old `manual` label has no successor in-band.
+ */
+export const CHANGE_TYPES = ['exception', 'suppression', 'query', 'threshold'] as const;
 
 export type ChangeType = (typeof CHANGE_TYPES)[number];
 

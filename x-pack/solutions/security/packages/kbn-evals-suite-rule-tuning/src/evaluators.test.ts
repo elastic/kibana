@@ -33,7 +33,7 @@ describe('rule-tuning evaluators', () => {
 
     it('scores 0 when the predicted change_type differs from the golden label', async () => {
       const output: RuleTuningVerdict = {
-        change_type: 'manual',
+        change_type: 'threshold',
         executionId: 'exec-2',
         executionStatus: 'completed' as never,
       };
@@ -62,7 +62,7 @@ describe('rule-tuning evaluators', () => {
   describe('validProposal', () => {
     const base: RuleTuningVerdict = {
       change_type: 'exception',
-      exception_entries: [{ field: 'host.name', operator: 'is', value: 'web-01' }],
+      exception_condition: 'host.name is web-01 (backup host)',
       executionId: 'exec-4',
       executionStatus: 'completed' as never,
     };
@@ -72,9 +72,9 @@ describe('rule-tuning evaluators', () => {
       expect(result.score).toBe(1);
     });
 
-    it('rejects an exception proposal with zero entries (minItems gate)', async () => {
+    it('rejects an exception proposal with a blank exception_condition', async () => {
       const result = await validProposal.evaluate!({
-        output: { ...base, exception_entries: [] },
+        output: { ...base, exception_condition: '' },
       } as never);
       expect(result.score).toBe(0);
     });
@@ -94,20 +94,23 @@ describe('rule-tuning evaluators', () => {
       expect(result.score).toBe(0);
     });
 
-    it('rejects a risk_score proposal missing proposed_severity (PATCH would fail)', async () => {
+    it('rejects a threshold proposal missing proposed_query content', async () => {
+      // Post-split, threshold is the in-band noise reducer and its payload rides the
+      // proposal strings; a bare change_type with no renderable content must fail
+      // (the old risk_score + proposed_severity pair no longer exists).
       const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'risk_score', proposed_risk_score: 20 },
+        output: { ...base, change_type: 'threshold' as ChangeType, exception_condition: '' },
       } as never);
       expect(result.score).toBe(0);
     });
 
-    it('accepts a risk_score proposal with both score and severity', async () => {
+    it('accepts a threshold proposal with renderable content', async () => {
       const result = await validProposal.evaluate!({
         output: {
           ...base,
-          change_type: 'risk_score',
-          proposed_risk_score: 20,
-          proposed_severity: 'low',
+          change_type: 'threshold' as ChangeType,
+          exception_condition: 'raise threshold above benign daily volume',
+          summary: 'benign volume dominates',
         },
       } as never);
       expect(result.score).toBe(1);
@@ -115,7 +118,11 @@ describe('rule-tuning evaluators', () => {
 
     it('rejects suppression on a rule type whose PATCH has no alert_suppression field', async () => {
       const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'suppression', suppression_group_by: ['host.name'] },
+        output: {
+          ...base,
+          change_type: 'suppression' as ChangeType,
+          exception_condition: 'group by host.name',
+        },
         metadata: { ruleType: 'machine_learning' },
       } as never);
       expect(result.score).toBe(0);
@@ -127,7 +134,11 @@ describe('rule-tuning evaluators', () => {
       // proposal valid. Removing that clause (so a missing ruleType fails the check) is
       // the mutation under test here — this test goes RED if the clause returns.
       const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'suppression', suppression_group_by: ['host.name'] },
+        output: {
+          ...base,
+          change_type: 'suppression' as ChangeType,
+          exception_condition: 'group by host.name',
+        },
         metadata: {},
       } as never);
       expect(result.score).toBe(0);
@@ -136,7 +147,11 @@ describe('rule-tuning evaluators', () => {
 
     it('accepts suppression on a suppression-capable rule type', async () => {
       const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'suppression', suppression_group_by: ['host.name'] },
+        output: {
+          ...base,
+          change_type: 'suppression' as ChangeType,
+          exception_condition: 'group by host.name',
+        },
         metadata: { ruleType: 'query' },
       } as never);
       expect(result.score).toBe(1);

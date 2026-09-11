@@ -28,20 +28,15 @@ import {
  */
 const AGENT_STEP_TYPE = 'ai.agent';
 
-/** Structured output the diagnose step is schema-constrained to return. */
+/** Structured output the diagnose step is schema-constrained to return (post-split schema). */
 export interface RuleTuningProposal {
   change_type?: ChangeType;
   summary?: string;
-  exception_entries?: Array<{
-    field?: string;
-    operator?: string;
-    value?: string;
-    values?: string[];
-  }>;
+  current_query?: string;
   proposed_query?: string;
-  suppression_group_by?: string[];
-  proposed_risk_score?: number;
-  proposed_severity?: string;
+  /** Free-form condition describing the exception; no structured entries post-split. */
+  exception_condition?: string;
+  rekey_required?: boolean;
 }
 
 /** Verdict graded by the suite's evaluators: the diagnose proposal plus run metadata. */
@@ -230,19 +225,18 @@ const resumeApprovalGate = async (
 export const runRuleTuningWorkflow = async ({
   fetch,
   log,
-  connectorId,
   maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   /**
-   * Connector the review's `diagnose_rule` ai.agent step must run on. Required so each
-   * Playwright project actually evaluates its own model: with no `connector-id` on the
-   * step, `resolveConnectorOrInferenceId` returns undefined and the step silently falls
-   * back to the space default agent — every model project would score one same model.
+   * No connector pinning post-split: the worker's manual-trigger schema is
+   * `additionalProperties: false` with no connector input (the fork's unified
+   * workflow had one). The review's ai.agent step resolves the space-default
+   * connector — same contract as the merged rule-creation suite, where the
+   * multi-model matrix is driven by the stack's connector configuration.
    */
-  connectorId: string;
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<{
@@ -277,11 +271,11 @@ export const runRuleTuningWorkflow = async ({
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       body: JSON.stringify({
-        // min_fp_count: 1 so the single seeded FP cluster is harvested in this
-        // sweep. The old `concurrency_key` input belonged to the unified
-        // workflow's own concurrency group and has no meaning for the worker,
-        // which fans out reviews instead of serialising whole runs.
-        inputs: { min_fp_count: 1, connector_id: connectorId },
+        // min_fp_count: 2 is the schema floor (a 1-alert group returns alert_ids as
+        // a scalar and fails the review's array input); 2 keeps every seeded
+        // cluster harvested. The old `concurrency_key` input belonged to the
+        // unified workflow and has no post-split meaning.
+        inputs: { min_fp_count: 2 },
       }),
     }
   )) as { workflowExecutionId: string };
@@ -303,10 +297,10 @@ export const runRuleTuningWorkflow = async ({
     // gate — approve, don't leave parked.
     const activeReviews = await listActiveExecutions(fetch, RULE_TUNING_REVIEW_WORKFLOW_ID);
     for (const review of activeReviews.results ?? []) {
-      if (approvedReviews.has(review.id)) continue;
-      if (!isAwaitingApproval(review.status)) continue;
-      const resumed = await resumeApprovalGate(fetch, log, review.id, pollIntervalMs);
-      if (resumed) approvedReviews.add(review.id);
+      if (!approvedReviews.has(review.id) && isAwaitingApproval(review.status)) {
+        const resumed = await resumeApprovalGate(fetch, log, review.id, pollIntervalMs);
+        if (resumed) approvedReviews.add(review.id);
+      }
     }
 
     await sleep(pollIntervalMs);
