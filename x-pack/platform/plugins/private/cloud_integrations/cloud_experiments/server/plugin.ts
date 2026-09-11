@@ -18,7 +18,6 @@ import { LaunchDarklyProvider } from '@launchdarkly/openfeature-node-server';
 import type { LogLevelId } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
 import { getAllFlags, registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
@@ -28,13 +27,7 @@ interface CloudExperimentsPluginSetupDeps {
   usageCollection: UsageCollectionSetup;
 }
 
-interface CloudExperimentsPluginStartDeps {
-  dataViews: DataViewsServerPluginStart;
-}
-
-export class CloudExperimentsPlugin
-  implements Plugin<void, void, CloudExperimentsPluginSetupDeps, CloudExperimentsPluginStartDeps>
-{
+export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimentsPluginSetupDeps> {
   private readonly logger: Logger;
   private readonly metadataService: MetadataService;
 
@@ -93,9 +86,9 @@ export class CloudExperimentsPlugin
     }));
   }
 
-  public start(core: CoreStart, deps: CloudExperimentsPluginStartDeps) {
+  public start(core: CoreStart) {
     this.metadataService.start({
-      hasDataFetcher: async () => await this.addHasDataMetadata(core, deps.dataViews),
+      hasDataFetcher: async () => await this.addHasDataMetadata(core),
     });
   }
 
@@ -121,18 +114,10 @@ export class CloudExperimentsPlugin
     });
   }
 
-  private async addHasDataMetadata(
-    core: CoreStart,
-    dataViews: DataViewsServerPluginStart
-  ): Promise<{ has_data: boolean }> {
-    const dataViewsService = await dataViews.dataViewsServiceFactory(
-      core.savedObjects.createInternalRepository(),
-      core.elasticsearch.client.asInternalUser,
-      void 0, // No Kibana Request to scope the check
-      true // Ignore capabilities checks
-    );
-    return {
-      has_data: await dataViewsService.hasUserDataView(),
-    };
+  private async addHasDataMetadata(core: CoreStart): Promise<{ has_data: boolean }> {
+    const repo = core.savedObjects.createInternalRepository();
+    // same semantics as the previous data-views service check: any data view saved object exists
+    const { total } = await repo.find({ type: 'index-pattern', perPage: 0 });
+    return { has_data: total > 0 };
   }
 }

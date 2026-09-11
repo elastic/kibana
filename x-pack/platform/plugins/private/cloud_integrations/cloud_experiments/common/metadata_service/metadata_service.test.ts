@@ -126,7 +126,7 @@ describe('MetadataService', () => {
     });
 
     test(
-      'emits hasData after resolving the `hasUserDataView`',
+      'emits hasData after resolving the `hasDataView`',
       fakeSchedulers(async (advance) => {
         metadataService.start({ hasDataFetcher: async () => ({ has_data: true }) });
 
