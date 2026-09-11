@@ -370,6 +370,7 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/dev @elastic/kibana-operations
+src/platform/kbn-ui/ai-components @elastic/appex-sharedux
 src/platform/kbn-ui/app-header @elastic/appex-sharedux
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
@@ -3466,6 +3467,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/ai4soc @elastic/security-defend-workflows

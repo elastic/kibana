@@ -2767,6 +2767,8 @@
       "@kbn/ui-actions-browser/*": ["./src/platform/packages/shared/kbn-ui-actions-browser/*"],
       "@kbn/ui-actions-plugin": ["./src/platform/plugins/shared/ui_actions"],
       "@kbn/ui-actions-plugin/*": ["./src/platform/plugins/shared/ui_actions/*"],
+      "@kbn/ui-ai-components": ["./src/platform/kbn-ui/ai-components"],
+      "@kbn/ui-ai-components/*": ["./src/platform/kbn-ui/ai-components/*"],
       "@kbn/ui-app-header": ["./src/platform/kbn-ui/app-header"],
       "@kbn/ui-app-header/*": ["./src/platform/kbn-ui/app-header/*"],
       "@kbn/ui-app-menu": ["./src/platform/kbn-ui/app-menu"],
