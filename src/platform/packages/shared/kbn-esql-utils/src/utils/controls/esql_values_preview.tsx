@@ -123,13 +123,24 @@ export const ESQLValuesPreview: React.FC<{
     );
   }
 
+  const visibleOptions = previewOptions.slice(0, 10);
+  const hiddenCount = previewOptions.length - visibleOptions.length;
+
   return (
-    <div style={{ maxHeight: '200px', overflow: 'auto' }}>
+    <div>
       <EuiBadgeGroup data-test-subj="esqlValuesPreviewStrings">
-        {previewOptions.map((option, i) => (
+        {visibleOptions.map((option, i) => (
           <EuiBadge key={`${i}-${option}`}>{option === '' ? EMPTY_LABEL : option}</EuiBadge>
         ))}
       </EuiBadgeGroup>
+      {hiddenCount > 0 && (
+        <p>
+          {i18n.translate('esqlUtils.valuesPreview.hiddenCount', {
+            defaultMessage: '+{hiddenCount} more',
+            values: { hiddenCount },
+          })}
+        </p>
+      )}
     </div>
   );
 };
