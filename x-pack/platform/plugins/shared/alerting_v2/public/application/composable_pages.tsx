@@ -24,6 +24,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -31,6 +32,7 @@ import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
+import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
 import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
@@ -39,6 +41,7 @@ export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   hostApp?: AlertingV2HostApp;
+  tabs?: AppHeaderTab[];
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -50,11 +53,13 @@ const StandardProviders = ({
   container,
   setBreadcrumbs,
   hostApp = MANAGEMENT_HOST,
+  tabs,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   hostApp?: AlertingV2HostApp;
+  tabs?: AppHeaderTab[];
   children: React.ReactNode;
 }) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -66,17 +71,29 @@ const StandardProviders = ({
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
         <LocatorProvider locators={locators}>
-          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-            <I18nProvider>{children}</I18nProvider>
-          </BreadcrumbProvider>
+          <TabsProvider tabs={tabs}>
+            <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+              <I18nProvider>{children}</I18nProvider>
+            </BreadcrumbProvider>
+          </TabsProvider>
         </LocatorProvider>
       </QueryClientProvider>
     </Context.Provider>
   );
 };
 
-export const AlertingV2RulesPage = ({ container, setBreadcrumbs, hostApp }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
+export const AlertingV2RulesPage = ({
+  container,
+  setBreadcrumbs,
+  hostApp,
+  tabs,
+}: InternalPageProps) => (
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    tabs={tabs}
+  >
     <RulesApp />
   </StandardProviders>
 );
