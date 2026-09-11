@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { CREATE_CASE_TITLE, PAGE_TITLE } from '../../../../common/translations';
-import { useAllCasesNavigation } from '../../../../common/navigation/hooks';
-import { CasesAppHeader } from '../../../app/cases_app_header';
+import { CREATE_CASE_TITLE, PAGE_TITLE } from '../../../common/translations';
+import { useAllCasesNavigation } from '../../../common/navigation/hooks';
+import { CasesAppHeader } from '../../app/cases_app_header';
 
 export const CreateCaseAppHeader: FC = () => {
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
