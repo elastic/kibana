@@ -656,7 +656,7 @@ class ConversationClientImpl implements ConversationClient {
           throw createConversationNotFoundError({ conversationId });
         }
 
-        const feedbackEventId = `${roundId}::feedback`;
+        const feedbackEventId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback}`;
         const otherEvents = (current.events ?? []).filter((e) => e.id !== feedbackEventId);
 
         if (feedback.vote === null) {
