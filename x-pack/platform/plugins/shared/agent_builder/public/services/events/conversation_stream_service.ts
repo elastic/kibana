@@ -17,7 +17,6 @@ interface ConversationStream {
   conversationId: string;
   state$: BehaviorSubject<ActiveExecutionDraft | null>;
   sub: Subscription;
-  ended: boolean;
 }
 
 export class ConversationStreamService {
@@ -26,12 +25,7 @@ export class ConversationStreamService {
   constructor(private readonly source: ChatEventSource) {}
 
   private ensure(conversationId: string): ConversationStream {
-    const existing = this.streams.get(conversationId);
-    if (existing) {
-      existing.ended = false;
-      return existing;
-    }
-    return this.createStream(conversationId);
+    return this.streams.get(conversationId) ?? this.createStream(conversationId);
   }
 
   private createStream(conversationId: string): ConversationStream {
@@ -39,16 +33,14 @@ export class ConversationStreamService {
     const sub = this.source
       .getChatEvents$(conversationId)
       .subscribe((event) => state$.next(activeExecutionReducer(state$.getValue(), event)));
-    const stream: ConversationStream = { conversationId, state$, sub, ended: false };
+    const stream: ConversationStream = { conversationId, state$, sub };
     this.streams.set(conversationId, stream);
 
     sub.add(this.source.getRunEnded$(conversationId).subscribe(() => this.onRunEnded(stream)));
     return stream;
   }
 
-  private onRunEnded(stream: ConversationStream) {
-    const { conversationId, state$ } = stream;
-    stream.ended = true;
+  private onRunEnded({ conversationId, state$ }: ConversationStream) {
     if (state$.getValue()) {
       state$.next(null);
     }
@@ -60,8 +52,7 @@ export class ConversationStreamService {
     if (!stream) {
       return;
     }
-    const isIdle = !stream.state$.getValue();
-    const canReclaim = !stream.state$.observed && (stream.ended || isIdle);
+    const canReclaim = !stream.state$.observed && !stream.state$.getValue();
     if (!canReclaim) {
       return;
     }

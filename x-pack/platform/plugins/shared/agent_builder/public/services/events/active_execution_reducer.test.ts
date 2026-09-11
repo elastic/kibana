@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStepType,
+  ToolResultType,
+  isCompactionStep,
+  isToolCallStep,
+  findTodosStep,
+  type ChatEvent,
+  type TodoItem,
+} from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import type { ActiveExecutionDraft } from './active_execution_reducer';
 import { activeExecutionReducer } from './active_execution_reducer';
 
@@ -49,11 +58,17 @@ const toolProgressEvent = (tool_call_id: string, message: string): ChatEvent =>
     data: { tool_call_id, message },
   } as ChatEvent);
 
-const toolResultEvent = (tool_call_id: string, results: any[]): ChatEvent =>
+const toolResultEvent = (tool_call_id: string, results: ToolResult[]): ChatEvent =>
   ({
     type: ChatEventType.toolResult,
     data: { tool_call_id, tool_id: 'some_tool', results },
   } as ChatEvent);
+
+const toolResult = (content: string): ToolResult => ({
+  tool_result_id: `tr-${content}`,
+  type: ToolResultType.other,
+  data: { content },
+});
 
 const promptRequestEvent = (): ChatEvent =>
   ({
@@ -79,7 +94,7 @@ const compactionCompletedEvent = (
     data: { token_count_after, summarized_round_count },
   } as ChatEvent);
 
-const todosUpdatedEvent = (todos: any[]): ChatEvent =>
+const todosUpdatedEvent = (todos: TodoItem[]): ChatEvent =>
   ({
     type: ChatEventType.toolUi,
     data: {
@@ -153,9 +168,11 @@ describe('activeExecutionReducer', () => {
     const state = activeExecutionReducer(null, toolCallEvent('tc-1', 'my_tool'));
     const steps = state?.steps ?? [];
     expect(steps).toHaveLength(1);
-    expect(steps[0].type).toBe(ConversationRoundStepType.toolCall);
-    expect((steps[0] as any).tool_call_id).toBe('tc-1');
-    expect((steps[0] as any).tool_id).toBe('my_tool');
+    const [step] = steps;
+    expect(isToolCallStep(step)).toBe(true);
+    if (!isToolCallStep(step)) return;
+    expect(step.tool_call_id).toBe('tc-1');
+    expect(step.tool_id).toBe('my_tool');
   });
 
   it('tool_progress appends to matching tool-call step progression; unmatched id is a no-op', () => {
@@ -163,9 +180,10 @@ describe('activeExecutionReducer', () => {
     const s2 = activeExecutionReducer(s1, toolProgressEvent('tc-1', 'step 1'));
     const s3 = activeExecutionReducer(s2, toolProgressEvent('tc-99', 'orphan'));
 
-    const step = s2?.steps[0] as any;
+    const step = s2?.steps[0];
+    if (!step || !isToolCallStep(step)) throw new Error('expected a tool call step');
     expect(step.progression).toHaveLength(1);
-    expect(step.progression[0].message).toBe('step 1');
+    expect(step.progression?.[0].message).toBe('step 1');
 
     // unmatched progress - steps unchanged
     expect(s3?.steps[0]).toEqual(s2?.steps[0]);
@@ -173,35 +191,40 @@ describe('activeExecutionReducer', () => {
 
   it('tool_result sets results on the matching tool-call step', () => {
     const s1 = activeExecutionReducer(null, toolCallEvent('tc-1', 'my_tool'));
-    const s2 = activeExecutionReducer(s1, toolResultEvent('tc-1', [{ content: 'ok' }]));
+    const results = [toolResult('ok')];
+    const s2 = activeExecutionReducer(s1, toolResultEvent('tc-1', results));
 
-    const step = s2?.steps[0] as any;
-    expect(step.results).toEqual([{ content: 'ok' }]);
+    const step = s2?.steps[0];
+    if (!step || !isToolCallStep(step)) throw new Error('expected a tool call step');
+    expect(step.results).toEqual(results);
   });
 
   it('prompt_request sets status to awaiting_prompt and appends to pendingPrompts', () => {
     const state = activeExecutionReducer(null, promptRequestEvent());
     expect(state?.status).toBe('awaiting_prompt');
     expect(state?.pendingPrompts).toHaveLength(1);
-    expect((state?.pendingPrompts?.[0] as any).id).toBe('p1');
+    expect(state?.pendingPrompts?.[0].id).toBe('p1');
   });
 
   it('compaction_started then compaction_completed creates one compaction step patched with token_count_after and summarized_round_count', () => {
     const s1 = activeExecutionReducer(null, compactionStartedEvent(1000));
     expect(s1?.steps).toHaveLength(1);
-    expect(s1?.steps[0].type).toBe(ConversationRoundStepType.compaction);
-    expect((s1?.steps[0] as any).token_count_before).toBe(1000);
-    expect((s1?.steps[0] as any).token_count_after).toBe(0);
+    const started = s1?.steps[0];
+    if (!started || !isCompactionStep(started)) throw new Error('expected a compaction step');
+    expect(started.token_count_before).toBe(1000);
+    expect(started.token_count_after).toBe(0);
 
     const s2 = activeExecutionReducer(s1, compactionCompletedEvent(500, 3));
     expect(s2?.steps).toHaveLength(1);
-    expect((s2?.steps[0] as any).token_count_after).toBe(500);
-    expect((s2?.steps[0] as any).summarized_round_count).toBe(3);
+    const completed = s2?.steps[0];
+    if (!completed || !isCompactionStep(completed)) throw new Error('expected a compaction step');
+    expect(completed.token_count_after).toBe(500);
+    expect(completed.summarized_round_count).toBe(3);
   });
 
   it('todos_updated adds a todos step first time; patches same step on second call (not a second step)', () => {
-    const todos1 = [{ id: 't1', text: 'first', completed: false }];
-    const todos2 = [{ id: 't2', text: 'second', completed: false }];
+    const todos1: TodoItem[] = [{ content: 'first', status: 'pending' }];
+    const todos2: TodoItem[] = [{ content: 'second', status: 'in_progress' }];
 
     const s1 = activeExecutionReducer(null, todosUpdatedEvent(todos1));
     expect(s1?.steps).toHaveLength(1);
@@ -209,7 +232,7 @@ describe('activeExecutionReducer', () => {
 
     const s2 = activeExecutionReducer(s1, todosUpdatedEvent(todos2));
     expect(s2?.steps).toHaveLength(1);
-    expect((s2?.steps[0] as any).todos).toEqual(todos2);
+    expect(findTodosStep(s2?.steps ?? [])?.todos).toEqual(todos2);
   });
 
   it('round_complete is ignored - it belongs to the rounds path, not the events timeline', () => {
@@ -243,7 +266,8 @@ describe('activeExecutionReducer', () => {
 
     state = activeExecutionReducer(state, reasoningEvent('thinking'));
     state = activeExecutionReducer(state, toolCallEvent('tc-1', 'search'));
-    state = activeExecutionReducer(state, toolResultEvent('tc-1', [{ content: 'results' }]));
+    const results = [toolResult('results')];
+    state = activeExecutionReducer(state, toolResultEvent('tc-1', results));
     state = activeExecutionReducer(state, messageChunkEvent('answer '));
     state = activeExecutionReducer(state, messageChunkEvent('here'));
     state = activeExecutionReducer(state, messageCompleteEvent('answer here'));
@@ -255,6 +279,8 @@ describe('activeExecutionReducer', () => {
     expect(steps).toHaveLength(2); // reasoning step + tool_call step
     expect(steps[0].type).toBe(ConversationRoundStepType.reasoning);
     expect(steps[1].type).toBe(ConversationRoundStepType.toolCall);
-    expect((steps[1] as any).results).toEqual([{ content: 'results' }]);
+    const toolCall = steps[1];
+    if (!isToolCallStep(toolCall)) throw new Error('expected a tool call step');
+    expect(toolCall.results).toEqual(results);
   });
 });

@@ -175,6 +175,28 @@ describe('ConversationStreamService', () => {
     expect(state?.message).toBe('second answer');
   });
 
+  it('keeps a second run alive when the consumer leaves mid-stream', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    // Run 1 finishes
+    const sub = service.getActiveStream$('A').subscribe(() => {});
+    getSubject('A').next(messageChunkEvent('first'));
+    endRun('A');
+
+    // Run 2 starts, then the user navigates to another conversation
+    getSubject('A').next(messageChunkEvent('second'));
+    sub.unsubscribe();
+
+    // Run 2 is still in flight, so the stream must survive and keep folding
+    expect(getSubject('A').observed).toBe(true);
+    getSubject('A').next(messageChunkEvent(' half'));
+
+    let state: ActiveExecutionDraft | null | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+    expect(state?.message).toBe('second half');
+  });
+
   it('releaseStream keeps a stream whose run is still in flight', () => {
     const { source, getSubject } = makeFakeSource();
     const service = new ConversationStreamService(source);
