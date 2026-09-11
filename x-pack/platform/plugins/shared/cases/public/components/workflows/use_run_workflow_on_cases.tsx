@@ -67,7 +67,8 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
         ? getAppUrl({ path: `${workflowId}?executionId=${response.workflowExecutionId}` })
         : undefined;
 
-      const text = executionHref ? buildViewExecutionText(executionHref, rendering) : undefined;
+      const text =
+        executionHref && rendering ? buildViewExecutionText(executionHref, rendering) : undefined;
 
       if (response.activityStatus === 'failed') {
         toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED, text });
