@@ -70,10 +70,7 @@ export function registerRoutes(
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
   registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
-  if (config.iacProvisioner?.enabled) {
-    registerIacProvisionerRoutes(fleetAuthzRouter);
-  }
-
+  registerIacProvisionerRoutes(fleetAuthzRouter);
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
   // Conditional config routes

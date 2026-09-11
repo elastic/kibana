@@ -75,6 +75,7 @@ export {
   isAttachmentActive,
   getActiveAttachments,
   isVersionedAttachmentWithOrigin,
+  isVersionedAttachmentOfType,
   hashContent,
   estimateTokens,
   getContentKey,
