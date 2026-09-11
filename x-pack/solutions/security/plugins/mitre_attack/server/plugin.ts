@@ -12,16 +12,25 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 import type { MitreAttackConfig } from './config';
-import type { MitreAttackServerSetup, MitreAttackServerStart } from './types';
-import { mitreAttackEntityType, MITRE_ATTACK_ENTITY_SO_TYPE } from './saved_objects';
+import type {
+  MitreAttackApiRequestHandlerContext,
+  MitreAttackRequestHandlerContext,
+  MitreAttackServerSetup,
+  MitreAttackServerStart,
+} from './types';
+import { mitreAttackEntityType } from './saved_objects';
 import { MitreAttackDataService } from './services/mitre_attack_data_service';
 import { createMitreAttackDataClient } from './services/mitre_attack_data_client/mitre_attack_data_client';
+import type { MitreAttackDataClient } from './services/mitre_attack_data_client/mitre_attack_data_client_interface';
+import { registerRoutes } from './routes';
 
 export class MitreAttackPlugin implements Plugin<MitreAttackServerSetup, MitreAttackServerStart> {
   private readonly config: MitreAttackConfig;
   private readonly logger: Logger;
   private readonly dataService: MitreAttackDataService;
+  private mitreDataClient?: MitreAttackDataClient;
 
   constructor(context: PluginInitializerContext<MitreAttackConfig>) {
     this.config = context.config.get<MitreAttackConfig>();
@@ -35,6 +44,15 @@ export class MitreAttackPlugin implements Plugin<MitreAttackServerSetup, MitreAt
     }
 
     core.savedObjects.registerType(mitreAttackEntityType);
+
+    const router = core.http.createRouter<MitreAttackRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<MitreAttackRequestHandlerContext, 'mitreAttack'>(
+      'mitreAttack',
+      (): MitreAttackApiRequestHandlerContext => ({
+        getMitreDataClient: () => this.mitreDataClient,
+      })
+    );
+    registerRoutes({ router, logger: this.logger });
 
     return {};
   }
@@ -59,6 +77,8 @@ export class MitreAttackPlugin implements Plugin<MitreAttackServerSetup, MitreAt
       logger: this.logger,
       dataService: this.dataService,
     });
+
+    this.mitreDataClient = mitreDataClient;
 
     return {
       getMitreDataClient: () => mitreDataClient,
