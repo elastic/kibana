@@ -2421,7 +2421,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint", "eslint-plugin-oxlint"],
+      "matchDepNames": ["oxlint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

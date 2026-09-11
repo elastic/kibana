@@ -9,11 +9,8 @@
 
 require('@kbn/swc-register').install();
 
-const Path = require('path');
-
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
-const { buildFromOxlintConfigFile } = require('eslint-plugin-oxlint');
 const { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } = require('@kbn/scout-info');
 
 /**
@@ -514,40 +511,12 @@ const DEPRECATED_IMPORTS = [
   },
 ];
 
-/**
- * Rules enforced by oxlint (`.oxlintrc.json`, `node scripts/lint`) are turned off in ESLint so
- * each rule runs in exactly one linter. Files oxlint ignores keep the full ESLint rule set. A rule
- * whose ESLint options are stricter than oxlint's implementation must not be enabled in oxlint.
- *
- * These must be the first overrides: later, path-specific overrides that configure one of
- * these rules differently (e.g. stricter options) still win and keep it in ESLint there.
- *
- * `eslint-comments/no-unused-disable` is turned off as well: oxlint honors `eslint-disable`
- * directives, so directives suppressing oxlint-enforced rules are still needed even though ESLint
- * no longer runs those rules. Left on, its autofix strips them repo-wide and breaks oxlint. Its
- * oxlint counterpart (`reportUnusedDisableDirectives`) must stay off for the mirrored reason.
- */
-const oxlintConfigs = buildFromOxlintConfigFile(Path.resolve(REPO_ROOT, '.oxlintrc.json'));
-const oxlintIgnores = oxlintConfigs.find((config) => config.ignores)?.ignores ?? [];
-const oxlintOverrides = oxlintConfigs
-  .filter((config) => config.rules)
-  .map((config) => ({
-    files: config.files ?? ['**/*.{js,mjs,ts,tsx}'],
-    excludedFiles: oxlintIgnores,
-    rules: {
-      ...config.rules,
-      '@eslint-community/eslint-comments/no-unused-disable': 'off',
-    },
-  }));
-
 module.exports = {
   root: true,
 
   extends: ['@kbn/eslint-config'],
 
   overrides: [
-    ...oxlintOverrides,
-
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */

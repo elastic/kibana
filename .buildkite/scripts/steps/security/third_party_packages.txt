@@ -64,4 +64,3 @@ reselect-v4
 @swc/plugin-emotion
 graphql
 @cfworker/json-schema
-eslint-plugin-oxlint
