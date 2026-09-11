@@ -151,7 +151,7 @@ describe('useRunWorkflowAction', () => {
       expect(result.current.isModalVisible).toBe(true);
     });
 
-    it('closes the modal and calls onActionSuccess via modalProps.onClose', () => {
+    it('closes the modal without calling onActionSuccess when no workflow ran', () => {
       const { result, onActionSuccess } = renderAction();
       act(() => {
         (result.current.getAction([basicCase]).onClick as () => void)();
@@ -160,15 +160,26 @@ describe('useRunWorkflowAction', () => {
         result.current.modalProps.onClose();
       });
       expect(result.current.isModalVisible).toBe(false);
+      expect(onActionSuccess).not.toHaveBeenCalled();
+    });
+
+    it('calls onActionSuccess after workflow execution settles', () => {
+      const { result, onActionSuccess } = renderAction();
+
+      act(() => {
+        result.current.modalProps.onExecutionSettled?.();
+      });
+
       expect(onActionSuccess).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('modalProps', () => {
-    it('contains onClose, inputs, runWorkflow, filterWorkflow, sortWorkflow', () => {
+    it('contains lifecycle callbacks, inputs, runWorkflow, filterWorkflow, sortWorkflow', () => {
       const { result } = renderAction();
       const { modalProps } = result.current;
       expect(typeof modalProps.onClose).toBe('function');
+      expect(typeof modalProps.onExecutionSettled).toBe('function');
       expect(modalProps.inputs).toBeDefined();
       expect(typeof modalProps.runWorkflow).toBe('function');
       expect(typeof modalProps.filterWorkflow).toBe('function');

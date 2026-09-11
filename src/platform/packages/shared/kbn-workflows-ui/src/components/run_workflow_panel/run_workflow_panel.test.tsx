@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
@@ -440,8 +440,9 @@ describe('RunWorkflowPanel', () => {
         .fn()
         .mockResolvedValue({ workflowExecutionId: 'exec-ok' });
       const onClose = jest.fn();
+      const onExecutionSettled = jest.fn();
 
-      renderComponent({ runWorkflow, onClose });
+      renderComponent({ runWorkflow, onClose, onExecutionSettled });
 
       fireEvent.click(screen.getByTestId('select-workflow-option'));
       fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
@@ -450,6 +451,7 @@ describe('RunWorkflowPanel', () => {
       expect(mockAddSuccess).toHaveBeenCalledWith(
         expect.objectContaining({ title: i18n.WORKFLOW_START_SUCCESS_TOAST })
       );
+      expect(onExecutionSettled).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
 
@@ -470,6 +472,51 @@ describe('RunWorkflowPanel', () => {
         { title: i18n.WORKFLOW_START_FAILED_TOAST }
       );
       expect(onClose).toHaveBeenCalled();
+    });
+
+    it('prefers the API error message in the error toast', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest.fn().mockRejectedValue(
+        Object.assign(new Error('Bad Request'), {
+          body: { message: 'Select 10 or fewer cases', statusCode: 400 },
+        })
+      );
+
+      renderComponent({ runWorkflow });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      await waitFor(() =>
+        expect(mockAddError).toHaveBeenCalledWith(
+          expect.objectContaining({ message: 'Select 10 or fewer cases' }),
+          { title: i18n.WORKFLOW_START_FAILED_TOAST }
+        )
+      );
+    });
+
+    it('does not close a newly mounted panel when a dismissed execution settles', async () => {
+      let resolveExecution: (value: { workflowExecutionId: string }) => void = () => {};
+      const runWorkflow: RunWorkflowExecutor = jest.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveExecution = resolve;
+          })
+      );
+      const onClose = jest.fn();
+      const onExecutionSettled = jest.fn();
+
+      const { unmount } = renderComponent({ runWorkflow, onClose, onExecutionSettled });
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+      unmount();
+
+      renderComponent({ onClose });
+      await act(async () => {
+        resolveExecution({ workflowExecutionId: 'exec-after-dismiss' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onExecutionSettled).not.toHaveBeenCalled();
     });
 
     it('merges extra inputs from the inputs modal with the base inputs when using injected executor', async () => {

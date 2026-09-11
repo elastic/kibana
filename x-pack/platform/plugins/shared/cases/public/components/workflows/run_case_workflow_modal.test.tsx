@@ -14,10 +14,12 @@ import { RunCaseWorkflowModal } from './run_case_workflow_modal';
 jest.mock('@kbn/workflows-ui', () => ({
   RunWorkflowPanel: ({
     onClose,
+    onExecutionSettled,
     inputs,
     runWorkflow,
   }: {
     onClose: () => void;
+    onExecutionSettled?: () => void;
     inputs: unknown;
     runWorkflow?: RunWorkflowExecutor;
   }) => (
@@ -25,6 +27,14 @@ jest.mock('@kbn/workflows-ui', () => ({
       <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
       <button data-test-subj="panel-close" type="button" onClick={onClose}>
         {'Close'}
+      </button>
+      <button
+        data-test-subj="panel-settled"
+        type="button"
+        onClick={onExecutionSettled}
+        disabled={!onExecutionSettled}
+      >
+        {'Settled'}
       </button>
       <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
     </div>
@@ -72,6 +82,22 @@ describe('RunCaseWorkflowModal', () => {
     fireEvent.click(screen.getByTestId('panel-close'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards the execution-settled callback to RunWorkflowPanel', () => {
+    const onExecutionSettled = jest.fn();
+    render(
+      <RunCaseWorkflowModal
+        inputs={inputs}
+        runWorkflow={mockExecutor}
+        onClose={onClose}
+        onExecutionSettled={onExecutionSettled}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('panel-settled'));
+
+    expect(onExecutionSettled).toHaveBeenCalledTimes(1);
   });
 
   it('uses the cases-run-workflow-modal test id', () => {

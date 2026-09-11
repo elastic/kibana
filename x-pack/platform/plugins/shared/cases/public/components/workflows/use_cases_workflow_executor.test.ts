@@ -14,6 +14,10 @@ import * as api from './api';
 
 // Mock dependencies injected via useKibana hooks
 jest.mock('../../common/lib/kibana');
+const mockRefreshCaseViewPage = jest.fn();
+jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
+  useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+}));
 
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
@@ -87,6 +91,7 @@ describe('useCasesWorkflowExecutor', () => {
 
     expect(mockToasts.addWarning).toHaveBeenCalledTimes(1);
     expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+    expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
   });
 
   it('shows a success toast when activityStatus is "succeeded"', async () => {
@@ -103,6 +108,7 @@ describe('useCasesWorkflowExecutor', () => {
     expect(mockToasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ text: expect.anything() })
     );
+    expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
   });
 
   it('propagates errors thrown by the API', async () => {
@@ -113,5 +119,6 @@ describe('useCasesWorkflowExecutor', () => {
     await expect(result.current({ workflowId: 'wf-1', inputs: {} })).rejects.toThrow(
       'network error'
     );
+    expect(mockRefreshCaseViewPage).not.toHaveBeenCalled();
   });
 });
