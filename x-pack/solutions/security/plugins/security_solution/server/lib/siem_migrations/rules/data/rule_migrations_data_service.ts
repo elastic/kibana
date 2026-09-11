@@ -27,6 +27,7 @@ import {
   ruleMigrationsFieldMap,
 } from './field_maps';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
+import { resolveElserInferenceId } from './utils/resolve_elser_inference_id';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
 
 interface CreateClientParams {
@@ -49,7 +50,11 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
 
   private readonly adapters: RuleMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string, elserInferenceId?: string) {
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string,
+    private readonly elserInferenceId?: string
+  ) {
     super(kibanaVersion);
     this.adapters = {
       migrations: this.createRuleIndexPatternAdapter({
@@ -101,6 +106,15 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
   }
 
   public async setup(params: SetupParams): Promise<void> {
+    const elserInferenceId = await resolveElserInferenceId(params.esClient, this.elserInferenceId);
+    this.adapters.integrations = this.createRuleIndexAdapter({
+      adapterId: 'integrations',
+      fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
+    });
+    this.adapters.prebuiltrules = this.createRuleIndexAdapter({
+      adapterId: 'prebuiltrules',
+      fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
+    });
     await this.install(params);
     await this.runIndexMigrations(params.esClient);
   }

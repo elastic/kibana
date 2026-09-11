@@ -29,8 +29,7 @@ jest.mock('./rule_migrations_data_client', () => ({
   }),
 }));
 
-// @ts-expect-error accessing protected property
-const INDEX_PATTERN = new RuleMigrationsDataService().baseIndexName;
+const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
 const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedClass<
   typeof IndexPatternAdapter
@@ -48,6 +47,7 @@ describe('SiemRuleMigrationsDataService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    esClient.inference.get.mockReset().mockResolvedValue({ endpoints: [] });
   });
 
   describe('constructor', () => {
@@ -156,11 +156,63 @@ describe('SiemRuleMigrationsDataService', () => {
       };
       await service.setup(params);
       const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
-      const [indexAdapter] = MockedIndexAdapter.mock.instances;
+      const indexAdapters = MockedIndexAdapter.mock.instances.slice(2);
 
       expect(indexPatternAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
-      expect(indexAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
+      for (const adapter of [...MockedIndexPatternAdapter.mock.instances, ...indexAdapters]) {
+        expect(adapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
+      }
+      for (const adapter of MockedIndexAdapter.mock.instances.slice(0, 2)) {
+        expect(adapter.install).not.toHaveBeenCalled();
+      }
       expect(RuleMigrationIndexMigrator).toHaveBeenCalled();
+    });
+  });
+
+  describe('endpoint selection during setup', () => {
+    it.each([
+      [undefined, defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID],
+      ['custom-elser', 'custom-elser'],
+    ])('installs the resolved endpoint with override %s', async (configuredId, expectedId) => {
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [
+          {
+            inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+            service: 'elastic',
+            task_type: 'sparse_embedding',
+            service_settings: {},
+            task_settings: {},
+          },
+        ],
+      });
+      const service = new RuleMigrationsDataService(logger, kibanaVersion, configuredId);
+      await service.setup({ esClient, pluginStop$: new Subject<void>() });
+      const installedAdapters = MockedIndexAdapter.mock.instances.slice(2);
+      expect(installedAdapters).toHaveLength(2);
+      for (const adapter of installedAdapters) {
+        expect(getComponentTemplate(adapter).fieldMap.elser_embedding.inference_id).toBe(
+          expectedId
+        );
+        expect(adapter.install).toHaveBeenCalledTimes(1);
+        expect(jest.mocked(adapter.setComponentTemplate).mock.invocationCallOrder[0]).toBeLessThan(
+          jest.mocked(adapter.install).mock.invocationCallOrder[0]
+        );
+      }
+      if (configuredId) {
+        expect(esClient.inference.get).not.toHaveBeenCalled();
+      }
+    });
+
+    it('installs local ELSER when discovery fails', async () => {
+      esClient.inference.get.mockRejectedValue(new Error('Discovery unavailable'));
+      const service = new RuleMigrationsDataService(logger, kibanaVersion);
+      await service.setup({ esClient, pluginStop$: new Subject<void>() });
+      for (const adapter of MockedIndexAdapter.mock.instances.slice(2)) {
+        expect(getComponentTemplate(adapter).fieldMap.elser_embedding.inference_id).toBe(
+          defaultInferenceEndpoints.ELSER
+        );
+        expect(adapter.install).toHaveBeenCalledTimes(1);
+      }
     });
   });
 
