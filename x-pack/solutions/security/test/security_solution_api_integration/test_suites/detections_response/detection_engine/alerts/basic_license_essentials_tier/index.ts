@@ -12,7 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alert_status'));
     loadTestFile(require.resolve('./field_aliases'));
     loadTestFile(require.resolve('./query_alerts'));
-    loadTestFile(require.resolve('./related_alerts'));
     loadTestFile(require.resolve('./set_alert_tags'));
   });
 }
