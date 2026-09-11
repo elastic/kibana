@@ -9,5 +9,5 @@
 
 export { spaceTest } from '../../../scout/common/ui/fixtures';
 export * from './constants';
-export { captureNextDialogMessage, openSurroundingDocs } from './helpers';
+export { captureNextDialogMessage, getGridColumnIds, openSurroundingDocs } from './helpers';
 export { setupContextAwareness, teardownContextAwareness } from './setup';

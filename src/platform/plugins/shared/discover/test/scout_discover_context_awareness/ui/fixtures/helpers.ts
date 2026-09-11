@@ -21,6 +21,21 @@ async function waitForSurroundingDocs(page: ScoutPage) {
 }
 
 /**
+ * Ids of the grid's data columns, in display order, with control columns excluded.
+ *
+ * Ids rather than header text: a column header also renders its field-type label for screen
+ * readers, so the visible text of `log.level` reads as `Keywordlog.level`. The summary column keeps
+ * its id `_source` while displaying as "Summary".
+ */
+export function getGridColumnIds(page: ScoutPage): Promise<string[]> {
+  return page
+    .locator('.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn)')
+    .evaluateAll((cells) =>
+      cells.map((cell) => cell.getAttribute('data-gridcell-column-id') ?? '')
+    );
+}
+
+/**
  * Resolves with the message of the next native dialog, then dismisses it. Call this *before* the
  * click that raises the dialog: with nothing listening Playwright dismisses dialogs on its own, so
  * the message would already be gone by the time it could be read.

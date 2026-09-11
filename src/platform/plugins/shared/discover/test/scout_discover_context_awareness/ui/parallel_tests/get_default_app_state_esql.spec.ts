@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import {
+  spaceTest,
+  setupContextAwareness,
+  teardownContextAwareness,
+  BREAKDOWN_FIELD,
+  CONTEXT_AWARENESS_DATA_VIEWS,
+  DEFAULT_PROFILE_COLUMNS,
+  getGridColumnIds,
+  LOGS_PROFILE_COLUMNS,
+} from '../fixtures';
+
+const ROW_HEIGHT_LINE_COUNT = 'unifiedDataTableRowHeightSettings_lineCountNumber';
+const BREAKDOWN_SELECTOR = 'unifiedHistogramBreakdownSelectorButton';
+
+/**
+ * `example-data-source-profile` supplies default columns, a custom row height and a histogram
+ * breakdown for a logs data source; `my-example-*` resolves no data source defaults and falls back
+ * to the summary column with a row height of 3. The defaults have to be re-applied whenever the
+ * resolved profile changes — on a new query, and when "New" resets the session.
+ */
+spaceTest.describe(
+  'Discover context awareness - extension getDefaultAppState, ES|QL mode',
+  { tag: tags.deploymentAgnostic },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await setupContextAwareness(scoutSpace);
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await teardownContextAwareness(scoutSpace);
+    });
+
+    spaceTest('renders the profile default state', async ({ page, pageObjects }) => {
+      const { dataGrid, discover } = pageObjects;
+
+      await discover.writeAndSubmitEsqlQuery(`from ${CONTEXT_AWARENESS_DATA_VIEWS.LOGS}`);
+
+      await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
+
+      await dataGrid.openGridDisplaySettings();
+      expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
+      await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('5');
+
+      await expect(page.testSubj.locator(BREAKDOWN_SELECTOR)).toHaveAttribute(
+        'data-selected-value',
+        BREAKDOWN_FIELD
+      );
+    });
+
+    spaceTest(
+      'reapplies the default state when the query changes data source',
+      async ({ page, pageObjects }) => {
+        const { dataGrid, discover } = pageObjects;
+
+        await discover.writeAndSubmitEsqlQuery(`from ${CONTEXT_AWARENESS_DATA_VIEWS.ALL}`);
+
+        await expect.poll(() => getGridColumnIds(page)).toStrictEqual(DEFAULT_PROFILE_COLUMNS);
+
+        await dataGrid.openGridDisplaySettings();
+        expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
+        await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('3');
+
+        await discover.writeAndSubmitEsqlQuery(`from ${CONTEXT_AWARENESS_DATA_VIEWS.LOGS}`);
+
+        await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
+
+        await dataGrid.openGridDisplaySettings();
+        expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
+        await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('5');
+
+        await expect(page.testSubj.locator(BREAKDOWN_SELECTOR)).toHaveAttribute(
+          'data-selected-value',
+          BREAKDOWN_FIELD
+        );
+      }
+    );
+
+    spaceTest('restores the default state when clicking New', async ({ page, pageObjects }) => {
+      const { dataGrid, discover, unifiedFieldList } = pageObjects;
+
+      await discover.writeAndSubmitEsqlQuery(`from ${CONTEXT_AWARENESS_DATA_VIEWS.LOGS}`);
+      await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
+
+      await unifiedFieldList.clickFieldListItemRemove('log.level');
+      await unifiedFieldList.clickFieldListItemRemove('message');
+      await expect.poll(() => getGridColumnIds(page)).toStrictEqual(DEFAULT_PROFILE_COLUMNS);
+
+      await dataGrid.openGridDisplaySettings();
+      await dataGrid.setRowHeight('Auto');
+      expect(await dataGrid.getCurrentRowHeight()).toBe('Auto');
+
+      await discover.clickNewSearch();
+
+      await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
+
+      await dataGrid.openGridDisplaySettings();
+      expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
+      await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('5');
+
+      await expect(page.testSubj.locator(BREAKDOWN_SELECTOR)).toHaveAttribute(
+        'data-selected-value',
+        BREAKDOWN_FIELD
+      );
+    });
+  }
+);

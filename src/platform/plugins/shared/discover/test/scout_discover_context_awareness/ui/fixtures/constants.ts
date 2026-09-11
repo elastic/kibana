@@ -71,5 +71,21 @@ export const LOGSTASH_TIME_RANGE = {
   to: '2015-09-24T16:30:00.000Z',
 };
 
+/** Column ids `example-data-source-profile` defaults to for a logs data source. */
+export const LOGS_PROFILE_COLUMNS = ['@timestamp', 'log.level', 'message'];
+
+/**
+ * Column ids shown when no profile contributes defaults. `_source` is the summary column, which
+ * displays as "Summary".
+ */
+export const DEFAULT_PROFILE_COLUMNS = ['@timestamp', '_source'];
+
+/**
+ * Field `example-data-source-profile` defaults the histogram breakdown to for a logs data source.
+ * Asserted through the selector button's `data-selected-value`: its label duplicates the field name
+ * into a truncation overlay, so the rendered text reads as `Breakdown by log.levellog.level`.
+ */
+export const BREAKDOWN_FIELD = 'log.level';
+
 /** Query the `example-root-profile` supplies through `getDefaultEsqlQuery`. */
 export const ROOT_PROFILE_DEFAULT_ESQL_QUERY = 'FROM my-example-* | LIMIT 10';
