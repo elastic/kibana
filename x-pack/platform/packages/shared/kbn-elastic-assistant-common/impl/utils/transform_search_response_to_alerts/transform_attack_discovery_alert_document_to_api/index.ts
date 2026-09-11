@@ -13,6 +13,7 @@ import {
   ALERT_UPDATED_BY_USER_ID,
   ALERT_UPDATED_BY_USER_NAME,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_TAGS,
@@ -108,6 +109,7 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       : undefined, // optional field
     alert_updated_by_user_id: attackDiscoveryAlertDocument[ALERT_UPDATED_BY_USER_ID],
     alert_updated_by_user_name: attackDiscoveryAlertDocument[ALERT_UPDATED_BY_USER_NAME],
+    alert_workflow_reason: attackDiscoveryAlertDocument[ALERT_WORKFLOW_REASON],
     alert_workflow_status: attackDiscoveryAlertDocument[ALERT_WORKFLOW_STATUS],
     alert_workflow_status_updated_at: moment(
       attackDiscoveryAlertDocument[ALERT_WORKFLOW_STATUS_UPDATED_AT]

@@ -50,6 +50,11 @@ export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.ta
   defaultMessage: 'Blocklist',
 });
 
+export const CUSTOM_YARA_SIGNATURES_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.customYaraSignatures',
+  { defaultMessage: 'Custom YARA signatures' }
+);
+
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',

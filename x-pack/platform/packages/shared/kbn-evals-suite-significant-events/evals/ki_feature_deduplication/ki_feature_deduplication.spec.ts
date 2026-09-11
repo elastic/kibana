@@ -7,8 +7,6 @@
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  EMPTY_TOKENS,
-  formatRawDocument,
   identifyFeatures,
   sumTokens,
   toPreviouslyIdentifiedFeature,
@@ -27,6 +25,8 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -52,6 +52,7 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
@@ -170,7 +171,20 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
+
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
         (dataset) => dataset.kiFeatureDeduplication,
@@ -178,6 +192,20 @@ evaluate.describe(
         log
       );
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -228,10 +256,11 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            inferenceClient,
+            fetch,
+            connector,
             evaluators,
             evaluationConnector,
-            logger,
+            inferenceClient,
             executorClient,
             traceEsClient,
             log,
@@ -305,9 +334,7 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
-                  // Deduplication identifies once per iteration, so provider
-                  // token counts are summed to match the trace-derived totals.
-                  let tokensUsed = EMPTY_TOKENS;
+                  let tokensUsed = sumTokens({});
 
                   for (let i = 0; i < input.iterations; i++) {
                     const sampledHits = await collectSampleDocuments({
@@ -315,32 +342,26 @@ evaluate.describe(
                       scenario: extractionScenario,
                       log,
                     });
-                    const sampleDocuments = sampledHits.flatMap((hit) => {
-                      const document = formatRawDocument({ hit });
-                      return document ? [document] : [];
-                    });
+                    const sampleDocuments = compactInferenceDocuments(sampledHits);
 
                     const previouslyIdentifiedFeatures = accumulated
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const { features: identifiedFeatures, tokensUsed: iterationTokens } =
-                      await identifyFeatures({
-                        target: {
-                          id: input.stream_name,
-                          name: input.stream_name,
-                          sources: [input.stream_name, `${input.stream_name}.*`],
-                          samplingSource: input.stream_name,
-                        } satisfies AnalysisTarget,
-                        sampleDocuments,
-                        systemPrompt: featuresPrompt,
-                        inferenceClient,
-                        logger,
-                        signal: new AbortController().signal,
-                        previouslyIdentifiedFeatures,
-                      });
+                    const iterationResult = await runFeatureIdentificationAgent({
+                      fetch,
+                      log,
+                      streamName: MANAGED_STREAM_NAME,
+                      connectorId: connector.id,
+                      sampleDocuments,
+                      previouslyIdentifiedFeatures,
+                    });
 
-                    tokensUsed = sumTokens({ accumulated: tokensUsed, added: iterationTokens });
+                    const identifiedFeatures = iterationResult.features;
+                    tokensUsed = sumTokens({
+                      accumulated: tokensUsed,
+                      added: iterationResult.tokensUsed,
+                    });
 
                     iterations.push({
                       features: identifiedFeatures,
@@ -369,8 +390,8 @@ evaluate.describe(
                     mergeEvents,
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
-                    traceId: getCurrentTraceId(),
                     tokens_used: tokensUsed,
+                    traceId: getCurrentTraceId(),
                   };
                 },
               },
