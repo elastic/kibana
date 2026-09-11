@@ -315,7 +315,11 @@ if [ "$JUDGE_IS_SELFHOST" = "1" ]; then
   # Add/overwrite the judge entry in the exported base64 connector map.
   # Endpoint id MUST equal the connector id: converse resolves the model by
   # CONNECTOR id, not inferenceId (same trap as the openrouter-* branch).
-  CONNS=$(CONNS_B64="$CONNS" JUDGE_ID="$EVAL_CONNECTOR_ID" OR_PORT=8088 \
+  # Judge proxy rides its own port (8089): the candidate proxy owns 8088. If
+  # both fired (selfhost candidate + selfhost judge) the judge branch would
+  # otherwise kill the candidate's proxy mid-run via the port-8088 lsof kill.
+  JUDGE_PROXY_PORT=8089
+  CONNS=$(CONNS_B64="$CONNS" JUDGE_ID="$EVAL_CONNECTOR_ID" OR_PORT=$JUDGE_PROXY_PORT \
     JUDGE_MODEL_ID="$JUDGE_MODEL_ID" JUDGE_KEY="$SELFHOST_API_KEY" python3 -c "
 import json, base64, os
 conns = json.loads(base64.b64decode(os.environ['CONNS_B64']))
@@ -340,10 +344,10 @@ print(base64.b64encode(json.dumps(conns).encode()).decode())
   export KIBANA_TESTING_AI_CONNECTORS="$CONNS"
   # Proxy up before the endpoint references it; kill stale instances first
   # (an old process keeps serving the previous upstream).
-  kill -9 $(lsof -t -i:8088 2>/dev/null) 2>/dev/null || true
-  PROXY_UPSTREAM="$SELFHOST_UPSTREAM" nohup python3 /tmp/openrouter_proxy.py --port 8088 > /tmp/or-proxy-judge.log 2>&1 &
+  kill -9 $(lsof -t -i:$JUDGE_PROXY_PORT 2>/dev/null) 2>/dev/null || true
+  PROXY_UPSTREAM="$SELFHOST_UPSTREAM" nohup python3 /tmp/openrouter_proxy.py --port $JUDGE_PROXY_PORT > /tmp/or-proxy-judge.log 2>&1 &
   for i in $(seq 1 30); do
-    CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8088/ 2>/dev/null)
+    CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$JUDGE_PROXY_PORT/ 2>/dev/null)
     [ "$CODE" != "000" ] && break
     sleep 1
   done
@@ -356,7 +360,7 @@ print(base64.b64encode(json.dumps(conns).encode()).decode())
       python3 /tmp/create_openrouter_endpoint.py "$1" "$2" "$3" "$4" >> /tmp/or-endpoint-judge.log 2>&1
       sleep 10
     done
-  ' _ "$EVAL_CONNECTOR_ID" "$JUDGE_MODEL_ID" "$SELFHOST_API_KEY" 8088 \
+  ' _ "$EVAL_CONNECTOR_ID" "$JUDGE_MODEL_ID" "$SELFHOST_API_KEY" $JUDGE_PROXY_PORT \
     > /dev/null 2>&1 &
   echo "judge endpoint watcher started (log: /tmp/or-endpoint-judge.log)"
 fi

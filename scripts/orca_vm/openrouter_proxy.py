@@ -44,7 +44,11 @@ import urllib.error
 import sys
 import os
 
-TARGET = "https://openrouter.ai/api/v1"
+# Upstream is configurable so non-openrouter routes (selfhost cells, omniroute
+# judge combos) reuse this proxy: run_model.sh exports PROXY_UPSTREAM before
+# launching. Import-time read is correct — the env prefix sits on the launch
+# line itself. Default keeps openrouter-* candidates unchanged.
+TARGET = os.environ.get("PROXY_UPSTREAM") or "https://openrouter.ai/api/v1"
 LISTEN_PORT = 8088
 
 
