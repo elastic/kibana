@@ -242,14 +242,11 @@ export class CasesWorkflowRunService {
       ]);
       resolvedAttachmentOrigin = validateOrigin({
         origin: body.origin,
-        caseId: caseIds[0],
-        selectedAlerts,
         theCase,
-        attachedAlerts,
-        selectedDocuments,
-        attachedEvents,
-        attachmentTypeRegistry: this.attachmentTypeRegistry,
         inputs: body.inputs,
+        attachmentTypeRegistry: this.attachmentTypeRegistry,
+        alerts: { selected: selectedAlerts, attached: attachedAlerts },
+        documents: { selected: selectedDocuments, attached: attachedEvents },
       });
     }
 
