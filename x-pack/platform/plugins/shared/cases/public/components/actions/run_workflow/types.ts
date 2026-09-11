@@ -11,7 +11,12 @@ import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 export interface RunCaseWorkflowModalProps
   extends Pick<
     RunWorkflowPanelProps,
-    'inputs' | 'runWorkflow' | 'sortWorkflow' | 'filterWorkflow' | 'showSuccessToast'
+    | 'inputs'
+    | 'runWorkflow'
+    | 'sortWorkflow'
+    | 'filterWorkflow'
+    | 'onExecutionSettled'
+    | 'showSuccessToast'
   > {
   onClose: () => void;
   focusButtonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;

@@ -10,6 +10,7 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import { useAppUrl, useHttp, useKibana, useToasts } from '../../common/lib/kibana';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { runCaseWorkflow } from './api';
 import { buildViewExecutionText } from './use_run_workflow_on_cases';
 import * as i18n from './translations';
@@ -35,6 +36,7 @@ export const useCasesWorkflowExecutor = ({
   const toasts = useToasts();
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const { rendering } = useKibana().services;
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useCallback(
     async ({ workflowId, inputs }) => {
@@ -60,9 +62,10 @@ export const useCasesWorkflowExecutor = ({
       } else {
         toasts.addSuccess({ title: i18n.RUN_WORKFLOW_STARTED(1), text });
       }
+      refreshCaseViewPage();
 
       return { workflowExecutionId: response.workflowExecutionId };
     },
-    [caseId, getAppUrl, http, origin, rendering, toasts]
+    [caseId, getAppUrl, http, origin, refreshCaseViewPage, rendering, toasts]
   );
 };
