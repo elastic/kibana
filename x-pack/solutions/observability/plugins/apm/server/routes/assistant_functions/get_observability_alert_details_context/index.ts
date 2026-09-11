@@ -170,8 +170,8 @@ export const getAlertDetailsContextHandler = (
       });
     }
 
-    // log rate analysis
     if (hasEntityFilters) {
+      // log rate analysis
       dataFetchers.push(async () => {
         const { logRateAnalysisType, significantItems } = await getLogRateAnalysisForAlert({
           esClient,
@@ -206,10 +206,8 @@ export const getAlertDetailsContextHandler = (
           data: significantItems,
         };
       });
-    }
 
-    // log categories
-    if (hasEntityFilters) {
+      // log categories
       dataFetchers.push(async () => {
         const downstreamDependencies = await downstreamDependenciesPromise;
         const { logCategories, entities } = await getLogCategories({
