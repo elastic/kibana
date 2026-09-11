@@ -54,15 +54,16 @@ See the YAML block above.
 
 | Surface | Path |
 |---|---|
-| This plugin | [`x-pack/solutions/security/plugins/discoveries/`](.) |
+| [`executeGenerationWorkflow()`](../../packages/kbn-discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts) is the single shared entry point for all four ways to run AD (`POST /_generate`, Alerting Framework `workflowExecutor`, workflows `security.attack-discovery.run` step, `Agent Builder` skill ) | [`@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts) |
+| executeGenerationWorkflow() -> [`runManualOrchestration()`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts) invokes the chain of worklfows with timeout budgets | [`@kbn/discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts) |
+| System workflow definitions | [`@kbn/workflows/managed/definitions/discoveries`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries) |
+| UI hook (frontend entry to `_generate`) | [`use_attack_discovery`](../security_solution/public/attack_discovery/pages/use_attack_discovery/) |
 | Shared server logic (LangGraph, event logging, telemetry definitions) | [`@kbn/discoveries`](../../packages/kbn-discoveries/) |
 | OpenAPI schemas + generated types | [`@kbn/discoveries-schemas`](../../packages/kbn-discoveries-schemas/) |
-| System workflow definitions (the live source-of-truth — seven inline YAML strings) | [`@kbn/workflows/managed/definitions/discoveries/index.ts`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries/index.ts) |
 | Plugin-side managed-workflow install + integrity check | [`server/managed_workflows/`](server/managed_workflows/) |
 | Workflow step common definitions | [`common/step_types/`](common/step_types/) |
 | Workflow step server handlers | [`server/workflows/steps/`](server/workflows/steps/) |
 | Step registration | [`server/workflows/register_workflow_steps.ts`](server/workflows/register_workflow_steps.ts) |
-| UI hook (frontend entry to `_generate`) | [`use_attack_discovery`](../security_solution/public/attack_discovery/pages/use_attack_discovery/) |
 
 ### 3. Run the example workflow
 
@@ -303,7 +304,7 @@ See [Using the `security.attack-discovery.run` Step](#using-the-securityattack-d
 
 ## Timeouts
 
-Attack Discovery generation is bounded by **layered** timeouts (see [ADR-008](#adr-008--layered-timeout-architecture-30-min-total-budget)). Timeouts propagate inside-out: a slow LLM call trips the connector timeout, which fails the workflow step, which `runManualOrchestration` catches against the total pipeline budget. The only **hard wall-clock kill** of an in-flight run is the scheduled rule-task timeout; the ad-hoc route, the run step, and the run tool are fire-and-forget / soft-handoff, so the background pipeline keeps running up to the pipeline budget.
+Attack Discovery generation is bounded by **layered** timeouts (see [ADR-008](#adr-008--layered-timeout-architecture-30-min-total-budget)). Timeouts propagate inside-out: a slow LLM call trips the connector timeout, which fails the workflow step, which `runManualOrchestration` catches against the total pipeline budget. The only **hard wall-clock kill** of an in-flight run is the scheduled rule-task timeout; the ad-hoc route and the run tool are fire-and-forget / soft-handoff, so the background pipeline keeps running up to the pipeline budget. The run **step** in sync mode instead awaits the pipeline and is bounded by its authored `timeout`.
 
 ### Per-method entry timeouts
 
@@ -311,8 +312,9 @@ Attack Discovery generation is bounded by **layered** timeouts (see [ADR-008](#a
 |---|---|---|---|---|
 | Scheduled (Alerting Framework) | Rule task timeout | **15m** | `ruleTaskTimeout` — [`register_schedule/definition.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/definition.ts) | **Hard kill**: the Alerting Framework cancels the task; `shouldStopExecution()` flips true and the run is reported failed. |
 | Ad hoc (`POST /internal/attack_discovery/_generate`) | Route handler `idleSocket` | **10m** | `DEFAULT_ROUTE_HANDLER_TIMEOUT_MS` — [`routes/constants.ts`](server/routes/constants.ts) | Effectively moot: the route is fire-and-forget and returns `execution_uuid` immediately, so this does not bound the generation. |
-| Run tool (`security.attack-discovery.run`) & run step, sync mode | Soft deadline | **90s** | `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` — [`run_step/constants.ts`](server/workflows/steps/run_step/constants.ts) | **Not a kill**: on deadline the call returns `execution_uuid` and the pipeline keeps running in the background for slow-path resume. |
-| Agent Builder workflow-tool wrapper | Wait-for-completion ceiling | **120s** | `WAIT_FOR_COMPLETION_TIMEOUT_SEC` — `@kbn/agent-builder-common` | External AB ceiling the 90s soft deadline sits safely under. |
+| Run **tool** (Agent Builder builtin), sync mode | Soft deadline | **90s** | `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` — [`run_step/constants.ts`](server/workflows/steps/run_step/constants.ts) | **Not a kill**: on deadline the call returns `execution_uuid` and the pipeline keeps running in the background for slow-path resume. |
+| Run **step** (`security.attack-discovery.run` in workflow YAML), sync mode | Step `timeout` | **authored per call site** | `timeout:` on the step — no soft deadline | Awaits the pipeline to completion. Keep the authored value **above** the 30m pipeline budget so the budget wins the race and fails with an attributed `PipelineStepError`; an engine step timeout is an opaque kill that does **not** cancel the background pipeline. |
+| Agent Builder workflow-tool wrapper | Wait-for-completion ceiling | **120s** | `WAIT_FOR_COMPLETION_TIMEOUT_SEC` — `@kbn/agent-builder-common` | Applies only to generic `ToolType.workflow` tools. The AD skill does **not** use one (see ADR-012), so this does not bound the skill's run path. |
 
 ### Pipeline (orchestration) layer
 
@@ -764,7 +766,7 @@ The skill registers a single Agent Builder skill. In its conversational role it 
 
 1. **Loads the analyst prompt** — same "world-class cyber security analyst" framing used by the LangGraph generate node, plus stricter rules layered on top: a Validation Standard ("when in doubt, discard"), a default-to-split independent-evaluation rule, and Entity Correlation Hygiene guidance that calls out service accounts, shared infrastructure, and same-tactic-different-host coincidence as **not** sufficient correlation evidence.
 2. **Tells the agent to corroborate before deciding** — the skill content intentionally does not enumerate which tools to use. It instructs the agent to *enumerate the tools available in this conversation* and call those that gather supporting evidence (threat hunting, threat intelligence, entity context, knowledge base, etc.). The skill exposes a small set of platform tools (`execute_esql`, `generate_esql`, `search`, `get_document_by_id`, `get_index_mapping`, `get_workflow_execution_status`) plus the inline `get_default_esql_query` and `security.attack-discovery.get_status` tools, but other tools active in the session are also fair game.
-3. **Mode A — Generate**: once the agent has corroborated, it invokes `security.attack-discovery.run` per [ADR-012](#adr-012--agent-builder-uses-run-in-sync-mode-with-a-soft-deadline). The pipeline handles anonymization, LangGraph generation, hallucination detection, validation, and persistence to the Attack Discovery alerts index. Sync mode races a ~90s soft deadline against the 120s Agent Builder workflow-tool ceiling — fast generations return discoveries inline; slower generations return only an `execution_uuid` and the agent hands off cleanly with an in-progress acknowledgement.
+3. **Mode A — Generate**: once the agent has corroborated, it invokes the `security.attack-discovery.run` **tool** per [ADR-012](#adr-012--agent-builder-uses-run-in-sync-mode-with-a-soft-deadline). The pipeline handles anonymization, LangGraph generation, hallucination detection, validation, and persistence to the Attack Discovery alerts index. The tool races a ~90s soft deadline against the 120s Agent Builder ceiling — fast generations return discoveries inline; slower generations return only an `execution_uuid` and the agent hands off cleanly with an in-progress acknowledgement.
 4. **Mode B — Status-only**: when the user supplies an `execution_uuid` (or asks about a previously-started generation), the agent calls `security.attack-discovery.get_status` and emits the insights JSON if the run has succeeded, reports progress with the active phase if still running, or reports the failure cleanly. No new generation is started.
 5. **Persists discoveries through the shared pipeline** — discoveries are written through the same `defaultValidation` + `persistDiscoveries` chain used by every other execution path (so they appear in the AD UI and via `GET /api/attack_discovery/generations`), regardless of which mode emitted them in the agent reply.
 
@@ -775,7 +777,7 @@ flowchart TB
   USER["Agent Builder user"]
   AGENT["Agent + skill content"]
   CORR["Corroboration phase<br/>(execute_esql, search, threat intel, ...)"]
-  RUN["security.attack-discovery.run<br/>(sync mode + ~90s soft deadline)"]
+  RUN["security.attack-discovery.run tool<br/>(sync mode + ~90s soft deadline)"]
   ORCH["Orchestrator pipeline<br/>(retrieve → generate → validate → persist)"]
   STATUS["security.attack-discovery.get_status"]
   AD["Attack Discovery alerts index"]
@@ -807,7 +809,7 @@ The skill teaches the agent to pick the `security.attack-discovery.run` mode tha
 
 ⛔ The skill explicitly forbids bare connector-ID-only invocations (`{ "connector_id": "..." }`) because they rely on server-side defaults that do not reflect the investigation context.
 
-Sync mode is the default and the only mode the skill actively instructs the agent to use, per [ADR-012](#adr-012--agent-builder-uses-run-in-sync-mode-with-a-soft-deadline). The run step's executor races the pipeline against `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` (90s) so the wrapping Agent Builder workflow tool — which itself caps at 120s — always gets a clean response well inside its window. When the soft deadline wins, only `execution_uuid` is returned; the pipeline keeps running in the background and the agent resumes via `security.attack-discovery.get_status` when the user asks for status.
+Sync mode is the default and the only mode the skill actively instructs the agent to use, per [ADR-012](#adr-012--agent-builder-uses-run-in-sync-mode-with-a-soft-deadline). The **tool's** handler races the pipeline against `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` (90s) so the agent always gets a clean response well inside the 120s Agent Builder ceiling. When the soft deadline wins, only `execution_uuid` is returned; the pipeline keeps running in the background and the agent resumes via `security.attack-discovery.get_status` when the user asks for status. The workflow **step** of the same name does not apply this soft deadline — see ADR-012.
 
 #### Connector resolution
 
@@ -1609,11 +1611,13 @@ gantt
 
 ### ADR-012 — Agent Builder uses `run` in sync mode with a soft deadline
 
-**Context.** Agent Builder tools execute as part of a larger agent conversation. The agent needs the result inline to formulate its response. The Agent Builder workflow tool that wraps `security.attack-discovery.run` waits up to `WAIT_FOR_COMPLETION_TIMEOUT_SEC = 120s` for the workflow to complete. Real Attack Discovery generations frequently exceed two minutes, but the run step itself has a 10-minute internal timeout. Without intervention, the wrapping AB tool would hit its own timeout and return only a workflow execution ID — useless for an AD-specific resume path. Async-mode polling is not the current Agent Builder pattern (`platform.core.get_workflow_execution_status` explicitly tells agents not to auto-poll within a turn).
+**Context.** Agent Builder tools execute as part of a larger agent conversation. The agent needs the result inline to formulate its response. Real Attack Discovery generations frequently exceed two minutes (ADR-007: routinely 2–5 minutes), so an integration that waits for completion within a turn would stall the conversation. Async-mode polling is not the current Agent Builder pattern (`platform.core.get_workflow_execution_status` explicitly tells agents not to auto-poll within a turn). The generic `ToolType.workflow` wrapper caps its wait at `WAIT_FOR_COMPLETION_TIMEOUT_SEC = 120s`, which sets the ceiling any AB-facing generation path must stay under.
 
-**Decision.** Agent Builder integrations call `security.attack-discovery.run` in **sync mode**. The run step's executor races the generation pipeline against a hard-coded `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS = 90s` soft deadline (≈30s of headroom under the 120s AB ceiling). If the pipeline finishes first, the step returns the full sync output (`attack_discoveries`, `execution_uuid`, `alerts_context_count`, `discovery_count`). If the soft deadline wins, the step returns `{ execution_uuid }` only and lets the underlying pipeline keep running in the background. The agent skill exposes a dedicated `security.attack-discovery.get_status` tool so the user can resume by `execution_uuid` on a subsequent prompt.
+**Decision.** The Agent Builder AD path uses a **native `ToolType.builtin` tool** — [`run_attack_discovery_tool/index.ts`](server/agent_builder/skills/tools/run_attack_discovery_tool/index.ts), registered as an inline tool of the `attack-discovery-generator` skill — which calls `executeGenerationWorkflow` directly in sync mode and races it against a hard-coded `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS = 90s` soft deadline (≈30s of headroom under the 120s ceiling). If the pipeline finishes first, the tool returns the full sync output (`attack_discoveries`, `execution_uuid`, `alerts_context_count`, `discovery_count`). If the soft deadline wins, it returns `{ execution_uuid }` only and lets the pipeline keep running in the background. The skill exposes a dedicated `security.attack-discovery.get_status` tool so the user can resume by `execution_uuid` on a subsequent prompt.
 
-**Consequence.** The AB workflow tool always receives a clean response well inside its 120s window — it never times out. Fast generations return inline discoveries (today's behavior). Slow generations return a clean `execution_uuid` handoff; the agent acknowledges the in-progress state, the pipeline persists discoveries automatically when complete, and the user can ask for status to resume. The agent never sees the `replacements` map (excluded by schema).
+**The soft deadline is the tool's, not the step's.** The Agent Builder tool id and the workflow step type id are the same string, `security.attack-discovery.run`, but they are two separate implementations. Only the **tool** applies the 90s soft deadline. The **step** ([`get_run_step_definition.ts`](server/workflows/steps/run_step/get_run_step_definition.ts)) awaits the pipeline to completion in sync mode, because a workflow caller has no 120s ceiling to respect and needs the discoveries inline to fan out over them. Workflow call sites bound the wait with the step's own `timeout` instead, authored above the 30m pipeline budget (see Timeouts).
+
+**Consequence.** The Agent Builder path always receives a clean response well inside its 120s window — it never times out. Fast generations return inline discoveries; slow generations return a clean `execution_uuid` handoff, the pipeline persists discoveries automatically when complete, and the user can ask for status to resume. The agent never sees the `replacements` map (excluded by schema). One residual risk: an operator who hand-configures a generic `ToolType.workflow` tool pointing at a workflow that uses the run **step** gets the step's semantics (no 90s cap), so that tool must respect the 120s ceiling itself. Nothing in the repo registers such a tool.
 
 ### ADR-013 — SHA-256 integrity verification of required default workflows *(superseded)*
 

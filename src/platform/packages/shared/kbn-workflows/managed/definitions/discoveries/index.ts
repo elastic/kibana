@@ -83,7 +83,7 @@ export const ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW = {
   id: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 3,
+  version: 4,
   yaml: RUN_EXAMPLE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

@@ -1,0 +1,204 @@
+version: "1"
+name: Attack Discovery Review
+description: >
+  Reviews one Attack Discovery: opens an Investigation, runs FP/TP analysis, and
+  applies the resulting verdict.
+  
+  Every action in this workflow is a console stub; the real steps land in the referenced issues.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+triggers:
+  # Manual only: this workflow is always launched by the Attack Discovery worker
+  # (or by hand for testing). It owns no schedule of its own.
+  - type: manual
+    inputs:
+      properties:
+        title:
+          type: string
+          maxLength: 1024
+          description: Title of the Attack Discovery under review.
+        alert_ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+            maxLength: 512
+          description: >-
+            Document ids of the DETECTION alerts the Attack Discovery correlated.
+            Not the Attack Discovery alert's `_id`: the run step currently returns
+            the persist handover, so no persisted document id is available here.
+            #19022 will consume that id once the run step returns persist-projected
+            discoveries with document ids in-context. Do not treat the handover's
+            optional `id` as that value — it is the LLM UUID, not the ES `_id`.
+        summary_markdown:
+          type: string
+          maxLength: 8000
+          description: Summary of the Attack Discovery, shown to the analyst and the analysis agent.
+        autonomy:
+          type: string
+          enum:
+            - manual
+            - assisted
+            - supervised
+          description: >-
+            Worker autonomy level, which decides how a true-positive or
+            inconclusive verdict is promoted: `manual` requires an analyst gate,
+            the others promote without one. Defaults to `manual`.
+        stub_verdict:
+          type: string
+          enum:
+            - false_positive
+            - true_positive
+            - inconclusive
+            - failed
+          description: >-
+            Stands in for the verdict the real FP/TP analysis workflow will return
+            (#19211). Defaults to
+            `inconclusive`, which #19214 routes to the same Promote-to-Incident
+            proposal as true_positive. Overridable by hand so every branch of the
+            switch below is reachable before the real analysis exists.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Workflow execution id of the runner that launched this review, logged by
+            the investigation step below. It is the only link back to the parent the
+            engine keeps. Empty on a standalone run.
+      # Only the attack's identity is required. Everything else defaults from
+      # `consts` so the worker and this workflow can be upgraded independently
+      # without a one-sided input-validation failure.
+      required:
+        - title
+      additionalProperties: false
+outputs:
+  - name: title
+    type: string
+  - name: verdict
+    type: string
+  - name: investigation_opened
+    type: boolean
+consts:
+  default_verdict: inconclusive
+  default_autonomy: manual
+  # Liquid has no array literal, so `| default: []` yields undefined rather than an
+  # empty array. A const is the only way to spell an empty-array fallback, which is
+  # what keeps `| size` from erroring when `alert_ids` is omitted.
+  no_alert_ids: []
+steps:
+  # STUB — #19022 replaces this
+  # with `ai.conversation.create` using `template_id: investigation`. Left as a
+  # console step here on purpose: a real call would open one Investigation per
+  # attack per Worker run, which is an unbounded side effect for a shape-only
+  # workflow and the opposite of #19022 (one Investigation per attack, never per
+  # run). A repeated grouping of the same alerts must not open a second
+  # Investigation while the first is still open. Dedup is supposed to happen
+  # upstream at Attack Discovery persistence via the attack hash, so a duplicate
+  # should not reach this step; confirming that (or adding a Worker-side check)
+  # is part of #19022.
+  - name: open_investigation
+    type: console
+    with:
+      message: >-
+        STUB open_investigation (#19022): would open one Investigation for Attack
+        Discovery "{{ inputs.title }}" covering
+        {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
+        Parent worker run: {{ inputs.parent_run_id }}
+
+  # STUB — #19211 replaces this
+  # with the real AlertZero FP/TP analysis workflow, which generates a
+  # corroborating-evidence report and returns the verdict this workflow switches
+  # on. Its own built-in retries live in that workflow, not here.
+  - name: run_fp_tp_analysis
+    type: console
+    with:
+      message: >-
+        STUB run_fp_tp_analysis (#19211): would run the AlertZero FP/TP analysis
+        workflow for "{{ inputs.title }}" and return a verdict.
+        Summary under review: {{ inputs.summary_markdown }}
+
+  # One explicit case per known analysis outcome so an unknown value cannot
+  # silently take an action — it matches nothing and lands in the default arm.
+  # Every branch is console-only: applying these outcomes for real is #19214.
+  # Verdict and autonomy read `inputs` with `| default` rather than a `data.set`
+  # step: `data.set` outputs are untyped, and the editor warns on every
+  # `steps.*.output.*` read.
+  - name: apply_verdict
+    type: switch
+    expression: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+    cases:
+      - match: false_positive
+        steps:
+          - name: close_as_false_positive
+            type: console
+            with:
+              message: >-
+                STUB false_positive (#19214): would close the Investigation for
+                "{{ inputs.title }}" and mark the Attack Discovery as false_positive.
+      - match: true_positive
+        steps:
+          # The workflow's Incident promotion decision. Under `manual` autonomy
+          # this becomes an analyst gate that can accept (promote) or reject
+          # (close); under the other levels it promotes without a gate. Both routes
+          # are one console line here.
+          - name: promote_per_autonomy
+            type: console
+            with:
+              message: >-
+                STUB true_positive (#19214): autonomy is
+                {{ inputs.autonomy | default: consts.default_autonomy }}, so this would
+                {% assign autonomy = inputs.autonomy | default: consts.default_autonomy %}
+                {% if autonomy == 'manual' %}present an
+                analyst gate that promotes the Investigation for "{{ inputs.title }}"
+                to an Incident on accept and closes it on reject{% else %}promote the
+                Investigation for "{{ inputs.title }}" to an Incident with no
+                gate{% endif %}.
+      - match: inconclusive
+        steps:
+          # Same Promote-to-Incident HITL as true_positive
+          - name: promote_inconclusive_per_autonomy
+            type: console
+            with:
+              message: >-
+                STUB inconclusive (#19214): would take the same Promote-to-Incident
+                path as true_positive. Autonomy is
+                {{ inputs.autonomy | default: consts.default_autonomy }}, so this would
+                {% assign autonomy = inputs.autonomy | default: consts.default_autonomy %}
+                {% if autonomy == 'manual' %}present an
+                analyst gate that promotes the Investigation for "{{ inputs.title }}"
+                to an Incident on accept and closes it on reject{% else %}promote the
+                Investigation for "{{ inputs.title }}" to an Incident with no
+                gate{% endif %}. Not handed to Forensics.
+      - match: failed
+        steps:
+          - name: record_analysis_failure
+            type: console
+            with:
+              message: >-
+                STUB failed (#19214): would record the failed verdict and its error
+                explanation on the Investigation for "{{ inputs.title }}" and leave
+                it open. No additional HITL gate.
+    default:
+      # Unreachable through the four cases above; only a verdict outside the enum
+      # lands here. Reported rather than ignored so a contract drift after #19211
+      # is visible instead of silent.
+      - name: report_unknown_verdict
+        type: console
+        with:
+          message: >-
+            Attack Discovery review for "{{ inputs.title }}" received an unexpected
+            verdict "{{ inputs.stub_verdict | default: consts.default_verdict }}" and took no action.
+
+  # The worker reads this payload back per branch, so the contract has to be
+  # explicit: `workflow.execute` resolves to the child's `context.output`, and a
+  # child without a `workflow.output` step hands its parent nothing.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      title: "{{ inputs.title }}"
+      verdict: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
+      # Always true while open_investigation is a console stub. Becomes a real
+      # assertion about the created Investigation in #19022.
+      investigation_opened: true
