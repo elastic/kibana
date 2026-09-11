@@ -64,6 +64,8 @@ const compileBarChart = (values: ChartRow[], clickToFilter: boolean): Spec => {
     encoding: {
       x: { field: 'category', type: 'nominal', title: 'Category' },
       y: { field: 'amount', type: 'quantitative', title: 'Amount' },
+      // Stable SVG aria-label for Scout (and a11y); avoids positional bar clicks.
+      description: { field: 'category', type: 'nominal' },
     },
   }).spec as Spec;
 

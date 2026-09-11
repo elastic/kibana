@@ -40,7 +40,7 @@ test.describe('Vega sandbox example', { tag: ['@local-stateful-classic'] }, () =
     await page.testSubj.locator('vegaSandboxExampleFilterBtn').click();
     const frame = page.frameLocator('[data-test-subj="vegaSandboxExampleFrame"]');
     await expect(frame.getByText('Click a bar to send applyFilter')).toBeVisible();
-    await frame.locator('svg .mark-rect rect').first().click();
+    await frame.getByLabel('A').click();
     await expect(page.testSubj.locator('vegaSandboxExampleAppliedFilter')).toContainText(
       'category:A'
     );
