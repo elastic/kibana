@@ -7,7 +7,11 @@
 
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
-import { ConversationRoundStatus, type Conversation } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  isSharedConversation,
+  type Conversation,
+} from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -18,13 +22,16 @@ import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
+import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
+
+const POLL_INTERVAL_MS = 5_000;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { activeStreams, byConversationId } = useStreamingContext();
+  const { byConversationId } = useStreamingContext();
 
   // Disable the query when this conversation is being written to by a stream, OR when
   // its cached state shows a HITL pause, OR when there's an unpersisted error in the
@@ -36,7 +43,7 @@ export const useConversation = () => {
     queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
     ConversationRoundStatus.awaitingPrompt;
 
-  const isThisConversationStreaming = Boolean(conversationId && activeStreams.has(conversationId));
+  const isThisConversationStreaming = useIsCurrentConversationStreaming();
 
   const hasUnpersistedError = conversationId
     ? Boolean(byConversationId[conversationId]?.error)
@@ -72,6 +79,9 @@ export const useConversation = () => {
     // Refetching an errored query (no cached success) resets status `error` → `loading`,
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
+    // Shared conversations can be written to by other participants, so poll for their rounds.
+    refetchInterval: (data) =>
+      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
@@ -196,9 +206,8 @@ export const useHasPersistedConversation = () => {
 
 export const useIsUnpersistedConversation = (conversation?: Conversation) => {
   const conversationId = useConversationId();
-  const { activeStreams } = useStreamingContext();
   const { pendingMessage, error } = useStreamRecord(conversationId);
-  const isConversationStreaming = Boolean(conversationId && activeStreams.has(conversationId));
+  const isConversationStreaming = useIsCurrentConversationStreaming();
 
   return Boolean(
     (isConversationStreaming && conversation?.rounds[0]?.id === pendingRoundId) ||

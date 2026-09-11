@@ -15,6 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
@@ -40,6 +41,17 @@ import type {
 export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
+export interface InlineAppHeaderState {
+  title?: AppHeaderTitle;
+}
+
+/** @internal */
+export interface InlineAppHeaderRegistration {
+  update(title?: AppHeaderTitle): void;
+  unregister(): void;
+}
+
+/** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
    * Dependencies used by Chrome-owned React components that live outside
@@ -49,6 +61,7 @@ export interface InternalChromeStart extends ChromeStart {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
     readonly capabilities: Capabilities;
+    readonly docTitleParts$: Observable<readonly string[]>;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -156,6 +169,18 @@ export interface InternalChromeStart extends ChromeStart {
   /** Help action registration, including getters for Chrome-owned renderers. */
   help: InternalChromeHelp;
 
+  /** Chrome-owned app-header registry. Public apps should use `@kbn/app-header`. */
+  appHeader: {
+    set(config: ChromeAppHeaderConfig): () => void;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
+  };
+
+  /** Whether the active app currently mounts an inline `AppHeader`. */
+  inlineAppHeader: {
+    get$(): Observable<InlineAppHeaderState | undefined>;
+    register(title?: AppHeaderTitle): InlineAppHeaderRegistration;
+  };
+
   /** @internal Extends public `next` with `get$` for Chrome layout components. */
   next: InternalChromeNext;
 }
@@ -192,11 +217,6 @@ export interface InternalChromeNext extends ChromeNext {
   projectPicker: InternalChromeControls['projectPicker'];
   globalSearch: InternalChromeControls['globalSearch'];
   userMenu: InternalChromeControls['userMenu'];
-  inlineAppHeader: {
-    get$(): Observable<boolean>;
-    set(mounted: boolean): void;
-  };
-  appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<ChromeAppHeaderConfig | undefined>;
-  };
+  inlineAppHeader: InternalChromeStart['inlineAppHeader'];
+  appHeader: InternalChromeStart['appHeader'];
 }

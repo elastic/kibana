@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { ChromeNext } from './chrome_next';
+export type { ChromeAiButton, GlobalSearchConfig } from '../controls';
 export type {
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderConfig,
-  ChromeAppHeaderConfig,
   AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderFavoriteAction,
   AppHeaderFavoriteStatus,
   AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
@@ -31,6 +37,5 @@ export type {
   AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
-  ChromeNext,
-} from './chrome_next';
-export type { ChromeAiButton, GlobalSearchConfig } from '../controls';
+  ChromeAppHeaderConfig,
+} from '../app_header';

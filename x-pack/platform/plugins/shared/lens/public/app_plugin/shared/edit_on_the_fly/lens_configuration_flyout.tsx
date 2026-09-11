@@ -21,7 +21,11 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
+import type {
+  DatasourceStates,
+  TypedLensSerializedState,
+  LensDatasourceId,
+} from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
@@ -185,11 +189,27 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : previousAttrs.state.datasourceStates[previousDatasourceId];
+        // restore every datasource state from the previous attributes, not only the
+        // active one, so non-active loaded states are not dropped on cancel
+        const allPreviousDatasourceStates: DatasourceStates = Object.fromEntries(
+          Object.entries(previousAttrs.state.datasourceStates).map(([id, state]) => [
+            id,
+            {
+              isLoading: false,
+              state:
+                datasourceMap[id as LensDatasourceId]?.injectReferencesToLayers?.(
+                  state,
+                  previousAttrs.references
+                ) ?? state,
+            },
+          ])
+        );
         updatePanelState?.(
           currentDatasourceState,
           previousAttrs.state.visualization,
           undefined,
-          previousDatasourceId
+          previousDatasourceId,
+          allPreviousDatasourceStates
         );
       } else {
         updateSuggestion?.(previousAttrs);

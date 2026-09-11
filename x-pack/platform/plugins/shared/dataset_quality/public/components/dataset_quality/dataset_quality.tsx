@@ -68,9 +68,7 @@ export const DatasetQuality = ({
 function DatasetQualityContent() {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexItem grow={false}>
-        <Header />
-      </EuiFlexItem>
+      <Header />
       <EuiFlexItem grow={false}>
         <Warnings />
       </EuiFlexItem>
