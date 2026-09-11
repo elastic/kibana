@@ -48,6 +48,10 @@ export class AgentBuilderDashboardsPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.dashboard.client;
     };
+    const getFilesStart = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.files;
+    };
 
     setupDeps.agentBuilder.attachments.registerType(
       createDashboardAttachmentType({
@@ -57,7 +61,7 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder);
+    registerSkills(setupDeps.agentBuilder, { getFilesStart });
 
     return {};
   }

@@ -15,7 +15,9 @@ export const removePanelsOperation = defineOperation({
     panelIds: z
       .array(z.string().max(256))
       .min(1)
-      .describe('Panel ids to remove from the dashboard.'),
+      .describe(
+        'Panel ids the user authorized deleting. Do not use to fix, move, or prettify panels; use edit_panels or update_panel_layouts.'
+      ),
   }),
   handler: ({ dashboardData, operation, context }) => {
     const { dashboardData: dashboardWithoutPanels, removedPanels } = removePanelsFromDashboard({

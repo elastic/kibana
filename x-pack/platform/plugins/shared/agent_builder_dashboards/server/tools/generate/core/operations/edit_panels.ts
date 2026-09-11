@@ -41,7 +41,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Use for title, label, and presentation fixes during Prettify; never remove and re-add panels to apply edits. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). Leave unsupported panels unchanged and report the limitation; replacement requires explicit user authorization.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -123,6 +123,7 @@ export const editPanelsOperation = defineOperation({
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
+            appearanceOnly: panelInput.appearanceOnly,
             existingPanel,
           })
         )

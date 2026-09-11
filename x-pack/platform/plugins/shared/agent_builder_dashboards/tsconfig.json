@@ -15,6 +15,7 @@
     "@kbn/custom-content-common",
     "@kbn/custom-content-server",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/controls-constants",
     "@kbn/dashboard-plugin",
     "@kbn/agent-builder-dashboards-common",

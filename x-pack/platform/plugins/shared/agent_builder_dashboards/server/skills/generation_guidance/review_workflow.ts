@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { attachmentTools } from '@kbn/agent-builder-common';
+import { dashboardTools } from '../../../common';
+
+/** Assigns dashboard meaning and layout to the main agent and panel presentation to one review. */
+export const reviewWorkflowPrompt = `## Improving an Existing Dashboard (Prettify)
+
+When asked to prettify, enhance, or clean up a dashboard, improve the attached dashboard in place. Prettify is not permission to rebuild: preserve every existing panel ID, even when every panel needs changes. Never use \`remove_panels\` followed by \`add_panels\` or inline \`add_section.panels\` to apply fixes. You own semantic correctness and dashboard composition: what the data represents, whether charts make sense, truthful dashboard and panel titles, sections, ordering, sizing, and grid packing. Use the composition and layout guidance above yourself. The \`${dashboardTools.reviewDashboard}\` tool checks only whether charts apply the listed presentation defaults; its findings are advisory and do not replace your assessment.
+
+Use the review only for Prettify requests on an existing dashboard. Do not run it on a dashboard you have just generated, and not for focused edits ("make the error series blue", "rename this panel"): apply those directly.
+
+Before review, assess semantics and layout only. Leave colors, fills, legends, axes, label visibility, and number-formatting defaults to \`${dashboardTools.reviewDashboard}\`. Do not inspect these settings against defaults yourself or produce a separate presentation critique before calling the reviewer. You may inspect queries and labels to establish meaning; checking whether a title is truthful remains your responsibility.
+
+**Prettify flow**
+1. **Assess meaning and layout.** Read the full dashboard attachment with \`${attachmentTools.read}\`. Inspect each panel's query and configuration; use mappings or sample data when its meaning or units are unclear. Check the dashboard title, description, and every panel title and data label against what the queries actually measure. For example, sample web-log queries with security-related titles need truthful web-log titles; keep the queries. Identify misleading labels, questionable chart choices, missing or redundant content, and plan sections, ordering, panel sizes, and packed grid coordinates. Investigate uncertain semantics; do not guess from existing titles. Additions, removals, replacements, and query changes remain suggestions unless the user authorized content changes.
+2. **Review presentation once.** Call \`${dashboardTools.reviewDashboard}\` exactly once per Prettify request, before applying edits. Pass \`dashboardAttachmentId\`. Include optional \`userPreferences\` only for explicit user choices that override defaults (for example, "keep the existing colors"); omit it for plain prettify requests. Do not send your analysis, edit plan, or a dashboard summary to the reviewer. Pass \`screenshotAttachmentId\` only when it shows the current dashboard version. The reviewer checks the listed defaults for label visibility, formats, legends, axes, colors, and fills; you remain responsible for meaning and layout even if it returns no findings.
+3. **Apply combined edits.** Combine your semantic and layout plan with the reviewer's \`panel_findings\` in one \`${dashboardTools.generateDashboard}\` call where possible. Use \`set_metadata\` for the dashboard title and description, \`add_section\` / \`remove_section\` and \`update_panel_layouts\` for composition, and \`edit_panels\` using original panel IDs for panel corrections. Create new sections without inline panels, then move existing IDs into them with \`update_panel_layouts\`. When removing a section, use \`panelAction: "promote"\` to retain its panels. Each panel's \`findings\` is an array of correction strings. Merge all changes for each panel into one edit instruction. For Lens edits that only change labels or presentation, set \`appearanceOnly: true\`. Preserve existing queries when applying presentation corrections. Your grounded semantic corrections and explicit user choices take precedence over conflicting review advice; explain any findings left unapplied.
+4. **Report.** Summarize what changed and what could not be assessed or edited, including \`could_not_assess\` and \`unreviewed_panel_ids\`. Do not run another review after applying edits or to fill gaps in the initial review. There is no post-edit screenshot, so never claim the updated dashboard was visually verified.
+
+**Preserve throughout.** Keep panel identities and move panels instead of recreating them. Keep queries, filters, controls, and the time range unless the user asked to change them. Explicit user choices and meaningful business thresholds or goals take precedence over defaults. If an edit fails or a panel is unsupported, keep the original panel and report the limitation; do not fall back to recreating it. Before submitting operations, verify that the plan retains all original panel IDs and contains no panel deletion or replacement unless explicitly authorized by the user.`;

@@ -6,4 +6,7 @@
  */
 
 export { registerSkills } from './register_skills';
-export { dashboardManagementSkill } from './dashboard_management_skill';
+export {
+  createDashboardManagementSkill,
+  type DashboardManagementSkillDeps,
+} from './dashboard_management_skill';

@@ -12,10 +12,19 @@ import { z } from '@kbn/zod/v4';
 import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
 import { defineOperation } from './types';
 import { addSectionPanelItemSchema } from './panels';
+import { findSectionIndex } from '../dashboard_state';
 
 export const addSectionOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_section'),
+    key: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'Optional key for referencing this new section in later operations in the same call, using sectionId (or remove_section.id). Must be unique within the call and must not match an existing section id. Not saved; future calls use the generated section id from the result.'
+      ),
     title: z.string().max(256).describe('Section title.'),
     grid: sectionGridSchema,
     panels: z
@@ -23,10 +32,20 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (source: "config" or source: "request") to create inside the new section. Panel grids are section-relative.'
+        'Optional new panels (source: "config" or source: "request") to create inside the section. To group existing panels, omit this field and move their IDs with update_panel_layouts. Panel grids are section-relative.'
       ),
   }),
   handler: async ({ dashboardData, operation, operationIndex, context }) => {
+    const { key } = operation;
+    if (key !== undefined) {
+      if (context.sectionIdsByKey.has(key)) {
+        throw new Error(`Section key "${key}" is already used in this call.`);
+      }
+      if (findSectionIndex(dashboardData.panels, key) !== -1) {
+        throw new Error(`Section key "${key}" conflicts with an existing section id.`);
+      }
+    }
+
     let nextSection: DashboardSection = {
       id: uuidv4(),
       title: operation.title,
@@ -76,6 +95,10 @@ export const addSectionOperation = defineOperation({
         ...nextSection,
         panels: sectionPanels,
       };
+    }
+
+    if (key !== undefined) {
+      context.sectionIdsByKey.set(key, nextSection.id);
     }
 
     return {

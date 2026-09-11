@@ -131,6 +131,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'change the title',
+      appearanceOnly: true,
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
@@ -143,6 +144,7 @@ describe('createVisPanelResolver', () => {
       expect.objectContaining({
         existingConfig: JSON.stringify({ type: 'xy' }),
         parsedExistingConfig: { type: 'xy' },
+        appearanceOnly: true,
       })
     );
   });

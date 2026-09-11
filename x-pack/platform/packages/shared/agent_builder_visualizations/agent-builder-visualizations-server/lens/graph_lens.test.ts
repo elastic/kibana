@@ -350,4 +350,52 @@ describe('createVisualizationGraph', () => {
       expect(layer.data_source).toEqual({ type: 'esql', query: canonicalQuery });
     }
   });
+
+  it('keeps every layer data_source and skips esql generation on an appearance-only edit', async () => {
+    const firstQuery = 'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1h)';
+    const secondQuery = 'FROM metrics-* | STATS cpu = AVG(cpu) BY bucket = BUCKET(@timestamp, 1h)';
+    const parsedExistingConfig = {
+      type: 'xy',
+      layers: [
+        { type: 'series', data_source: { type: 'esql', query: firstQuery } },
+        { type: 'series', data_source: { type: 'esql', query: secondQuery } },
+      ],
+    } as unknown as VisualizationConfig;
+    const restyledConfig = asAuthoringResponse({
+      type: 'xy',
+      legend: { position: 'bottom' },
+      layers: [{ type: 'series' }, { type: 'series' }],
+    });
+
+    const graph = await createVisualizationGraph(
+      createMockModel(restyledConfig) as never,
+      logger,
+      events,
+      esClient
+    );
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Move the legend below the plot',
+      index: undefined,
+      chartType: SupportedChartType.XY,
+      schema: {},
+      existingConfig: JSON.stringify(parsedExistingConfig),
+      parsedExistingConfig,
+      appearanceOnly: true,
+      esqlQuery: firstQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    const validated = finalState.validatedConfig as {
+      layers?: Array<{ data_source?: { type: string; query: string } }>;
+    };
+    expect(validated.layers?.map((layer) => layer.data_source?.query)).toEqual([
+      firstQuery,
+      secondQuery,
+    ]);
+  });
 });
