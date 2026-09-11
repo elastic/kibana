@@ -58,7 +58,7 @@ outputs:
     type: string
 steps:
   - name: kill_process
-    type: security.killProcess
+    type: security.endpointKillProcess
     with:
       endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
       parameters: "${{ inputs.actionInput.parameters }}"

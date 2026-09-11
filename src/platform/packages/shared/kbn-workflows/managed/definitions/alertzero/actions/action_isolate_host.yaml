@@ -47,7 +47,7 @@ outputs:
     type: string
 steps:
   - name: isolate_host
-    type: security.isolateHost
+    type: security.endpointIsolateHost
     with:
       endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
       comment: "{{ inputs.actionInput.comment | default: '' }}"

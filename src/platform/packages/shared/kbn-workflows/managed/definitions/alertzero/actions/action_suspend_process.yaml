@@ -58,7 +58,7 @@ outputs:
     type: string
 steps:
   - name: suspend_process
-    type: security.suspendProcess
+    type: security.endpointSuspendProcess
     with:
       endpoint_ids: "${{ inputs.actionInput.endpoint_ids }}"
       parameters: "${{ inputs.actionInput.parameters }}"
