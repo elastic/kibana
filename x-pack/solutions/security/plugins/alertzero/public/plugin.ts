@@ -42,15 +42,6 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversation
   defaultMessage: 'Investigation',
 });
 
-/** Statuses an AlertZero investigation moves between, offered by the details flyout header. */
-const INVESTIGATION_STATUS_OPTIONS: readonly string[] = [
-  'open',
-  'investigating',
-  'in-progress',
-  'escalated',
-  'closed',
-];
-
 export class AlertZeroPublicPlugin
   implements
     Plugin<
@@ -104,14 +95,11 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
-    // Contributes the header, tabs and footer that Agent Builder renders in its conversation
-    // details flyout for AlertZero investigations.
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
-      statusOptions: INVESTIGATION_STATUS_OPTIONS,
       loadInvestigation: async (conversationId) => {
         const { investigation } = await core.http.get<GetInvestigationResponse>(
           buildInvestigationUrl(conversationId),
@@ -119,9 +107,6 @@ export class AlertZeroPublicPlugin
         );
         return investigation;
       },
-      // `patchMetadata` is intentionally omitted, which renders the status and assignee tiles
-      // read-only: the only write path today is Agent Builder's `/internal` metadata route, which
-      // is not exposed on its public start contract or as a package constant.
     });
 
     return {};

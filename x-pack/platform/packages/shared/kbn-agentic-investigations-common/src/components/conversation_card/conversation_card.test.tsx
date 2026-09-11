@@ -6,17 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { ConversationCard } from './conversation_card';
-
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider>
-    <EuiProvider>{children}</EuiProvider>
-  </I18nProvider>
-);
 
 const investigation: Investigation = {
   id: 'inv-1',
@@ -31,7 +24,7 @@ const investigation: Investigation = {
 };
 
 const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
-  render(
+  renderWithKibanaRenderContext(
     <ConversationCard
       investigation={investigation}
       hasBorder={false}
@@ -39,8 +32,7 @@ const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
       onClickRecommendedAction={jest.fn()}
-    />,
-    { wrapper }
+    />
   );
   return { onClickCard };
 };

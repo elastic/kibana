@@ -128,9 +128,8 @@ export const AttachmentsTab = memo<AttachmentsTabProps>(({ conversation, attachm
         .filter(({ hidden }) => !hidden)
         .flatMap((attachment) => {
           const definition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-          const renderContent = definition?.renderConversationDetailsContent;
 
-          if (!definition || !renderContent) {
+          if (!definition?.renderConversationDetailsContent) {
             return [];
           }
 
@@ -161,7 +160,7 @@ export const AttachmentsTab = memo<AttachmentsTabProps>(({ conversation, attachm
             {
               id,
               title: definition.getLabel(flattened),
-              content: renderContent({ attachment: flattened }),
+              content: definition.renderConversationDetailsContent({ attachment: flattened }),
             },
           ];
         }),

@@ -20,14 +20,8 @@ export const TEMPLATE_UI_LABELS = Object.freeze({
   status: i18n.translate('xpack.alertzero.templateUi.status', {
     defaultMessage: 'Status',
   }),
-  statusMenuAriaLabel: i18n.translate('xpack.alertzero.templateUi.statusMenuAriaLabel', {
-    defaultMessage: 'Change status',
-  }),
   assignees: i18n.translate('xpack.alertzero.templateUi.assignees', {
     defaultMessage: 'Assignees',
-  }),
-  assignAriaLabel: i18n.translate('xpack.alertzero.templateUi.assignAriaLabel', {
-    defaultMessage: 'Assign',
   }),
   unassigned: i18n.translate('xpack.alertzero.templateUi.unassigned', {
     defaultMessage: 'Unassigned',

@@ -6,15 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Conversation, VersionedAttachment } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { AttachmentsTab } from './details_flyout_tab_contents';
-
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <EuiProvider>{children}</EuiProvider>
-);
 
 const buildAttachment = (overrides: Partial<VersionedAttachment> = {}): VersionedAttachment => ({
   id: 'attachment-1',
@@ -68,12 +64,11 @@ describe('AttachmentsTab', () => {
       })
     );
 
-    render(
+    renderWithKibanaRenderContext(
       <AttachmentsTab
         conversation={buildConversation([buildAttachment()])}
         attachmentsService={service}
-      />,
-      { wrapper }
+      />
     );
 
     expect(screen.getByText('Blast radius')).toBeInTheDocument();
@@ -84,12 +79,11 @@ describe('AttachmentsTab', () => {
   it('skips attachment types without a details renderer', () => {
     const service = createService(jest.fn().mockReturnValue({ getLabel: () => 'Plain' }));
 
-    render(
+    renderWithKibanaRenderContext(
       <AttachmentsTab
         conversation={buildConversation([buildAttachment()])}
         attachmentsService={service}
-      />,
-      { wrapper }
+      />
     );
 
     expect(screen.getByText('No attachments')).toBeInTheDocument();
@@ -103,12 +97,11 @@ describe('AttachmentsTab', () => {
       })
     );
 
-    render(
+    renderWithKibanaRenderContext(
       <AttachmentsTab
         conversation={buildConversation([buildAttachment({ hidden: true })])}
         attachmentsService={service}
-      />,
-      { wrapper }
+      />
     );
 
     expect(screen.getByText('No attachments')).toBeInTheDocument();
@@ -117,9 +110,9 @@ describe('AttachmentsTab', () => {
   it('renders the empty prompt when the conversation has no attachments', () => {
     const service = createService(jest.fn());
 
-    render(<AttachmentsTab conversation={buildConversation([])} attachmentsService={service} />, {
-      wrapper,
-    });
+    renderWithKibanaRenderContext(
+      <AttachmentsTab conversation={buildConversation([])} attachmentsService={service} />
+    );
 
     expect(screen.getByText('No attachments')).toBeInTheDocument();
     expect(service.getAttachmentUiDefinition).not.toHaveBeenCalled();

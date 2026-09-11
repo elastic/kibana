@@ -6,6 +6,10 @@
  */
 
 export {
+  InvestigationDetailsFlyout,
+  type InvestigationDetailsFlyoutProps,
+} from './investigation_details_flyout';
+export {
   ConversationDetailsFlyoutHeader,
   type ConversationDetailsFlyoutHeaderProps,
 } from './flyout_header';

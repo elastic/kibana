@@ -6,17 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
-
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider>
-    <EuiProvider>{children}</EuiProvider>
-  </I18nProvider>
-);
 
 const investigation: Investigation = {
   id: 'inv-1',
@@ -40,11 +33,8 @@ describe('ConversationDetailsFlyoutFooter', () => {
   it('calls the supplied onOpenChat rather than reaching for Kibana services', () => {
     const onOpenChat = jest.fn();
 
-    render(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={onOpenChat} />,
-      {
-        wrapper,
-      }
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={onOpenChat} />
     );
 
     fireEvent.click(screen.getByTestId('investigationFlyoutOpenChat'));
@@ -53,9 +43,8 @@ describe('ConversationDetailsFlyoutFooter', () => {
   });
 
   it('owns the assign modal, so it opens without a page-level host', () => {
-    render(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />,
-      { wrapper }
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
     );
 
     openActionsMenu();
@@ -65,9 +54,8 @@ describe('ConversationDetailsFlyoutFooter', () => {
   });
 
   it('owns the dismiss modal', () => {
-    render(
-      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />,
-      { wrapper }
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter investigation={investigation} onOpenChat={jest.fn()} />
     );
 
     openActionsMenu();
