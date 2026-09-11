@@ -34,7 +34,11 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
   const { docLinks, hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
 
   return (
-    <EuiPageSection restrictWidth={1200} paddingSize="xl" css={{ marginBlockStart: euiTheme.size.xl }}>
+    <EuiPageSection
+      restrictWidth={1200}
+      paddingSize="xl"
+      css={{ marginBlockStart: euiTheme.size.xl }}
+    >
       <EuiFlexGroup alignItems="center" gutterSize="xl" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size="l">
