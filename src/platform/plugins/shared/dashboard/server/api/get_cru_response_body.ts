@@ -36,7 +36,8 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest,
-      strictValidationSchema
+      strictValidationSchema,
+      operation === 'read'
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {

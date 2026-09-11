@@ -11,17 +11,20 @@ import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
 const mockGetTransforms = jest.fn();
+const mockGetPanelTypeMigrations = jest.fn();
 
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
     getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
+    getPanelTypeMigrations: mockGetPanelTypeMigrations,
   };
 });
 
 beforeEach(() => {
   mockGetTransforms.mockReset();
+  mockGetPanelTypeMigrations.mockReset();
 });
 
 describe('transformPanelsOut', () => {
@@ -240,5 +243,134 @@ describe('transformPanelsOut', () => {
         "warnings": Array [],
       }
     `);
+  });
+
+  describe('panel type migration pipeline', () => {
+    const panelsJSON = JSON.stringify([
+      {
+        type: 'source',
+        embeddableConfig: { foo: 'bar' },
+        panelIndex: 'panel-1',
+        gridData: { h: 10, w: 10, x: 0, y: 0 },
+      },
+    ]);
+    const passthroughTransforms = {
+      transformOut: (value: Record<string, unknown>) => value,
+      schema: { parse: (value: Record<string, unknown>) => value },
+    };
+
+    beforeEach(() => {
+      mockGetTransforms.mockReturnValue(passthroughTransforms);
+    });
+
+    it('replaces type and config when a migration succeeds', () => {
+      mockGetPanelTypeMigrations.mockImplementation((from: string) => {
+        if (from !== 'source') return [];
+        return [
+          {
+            from: 'source',
+            to: 'target',
+            migrateOut: () => [{ panelId: 'panel-1', config: { migrated: true } }],
+          },
+        ];
+      });
+
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
+      expect(result).toEqual({
+        panels: [
+          {
+            config: { migrated: true },
+            grid: { h: 10, w: 10, x: 0, y: 0 },
+            id: 'panel-1',
+            type: 'target',
+          },
+        ],
+        warnings: [],
+      });
+    });
+
+    it('drops a migrated panel when target schema validation fails', () => {
+      mockGetTransforms.mockImplementation((type: string) => {
+        if (type === 'target') {
+          return {
+            schema: {
+              parse: jest.fn().mockImplementation(() => {
+                throw new Error('Target schema failure');
+              }),
+            },
+          };
+        }
+        return passthroughTransforms;
+      });
+
+      mockGetPanelTypeMigrations.mockReturnValue([
+        {
+          from: 'source',
+          to: 'target',
+          migrateOut: () => [{ panelId: 'panel-1', config: { migrated: true } }],
+        },
+      ]);
+
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
+      expect(result.panels).toEqual([]);
+      expect(result.warnings[0]).toMatchObject({
+        type: 'dropped_panel',
+        panel_type: 'target',
+        panel_config: { migrated: true },
+      });
+    });
+
+    it('keeps a panel unchanged when migrations omit it', () => {
+      mockGetPanelTypeMigrations.mockReturnValue([
+        {
+          from: 'source',
+          to: 'target',
+          migrateOut: () => [],
+        },
+      ]);
+
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
+      expect(result.panels[0]).toMatchObject({ type: 'source', config: { foo: 'bar' } });
+      expect(result.warnings).toEqual([]);
+    });
+
+    it('drops a panel when a migration returns a per-panel error', () => {
+      mockGetPanelTypeMigrations.mockReturnValue([
+        {
+          from: 'source',
+          to: 'target',
+          migrateOut: () => [{ panelId: 'panel-1', error: new Error('nope') }],
+        },
+      ]);
+
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
+      expect(result.panels).toEqual([]);
+      expect(result.warnings[0]).toMatchObject({
+        type: 'dropped_panel',
+        panel_type: 'source',
+      });
+      expect(result.warnings[0].message).toContain('Unable to migrate panel type');
+    });
+
+    it('drops a panel when multiple migrations claim it', () => {
+      mockGetPanelTypeMigrations.mockReturnValue([
+        {
+          from: 'source',
+          to: 'target_a',
+          migrateOut: () => [{ panelId: 'panel-1', config: { a: true } }],
+        },
+        {
+          from: 'source',
+          to: 'target_b',
+          migrateOut: () => [{ panelId: 'panel-1', config: { b: true } }],
+        },
+      ]);
+
+      const result = transformPanelsOut(panelsJSON, [], [], false, true);
+      expect(result.panels).toEqual([]);
+      expect(result.warnings[0].message).toContain(
+        'Multiple panel type migrations claimed this panel'
+      );
+    });
   });
 });

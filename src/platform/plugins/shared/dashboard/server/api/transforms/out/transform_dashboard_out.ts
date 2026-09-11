@@ -24,7 +24,8 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  migratePanelTypes: boolean = false
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
@@ -52,7 +53,8 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    migratePanelTypes
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
