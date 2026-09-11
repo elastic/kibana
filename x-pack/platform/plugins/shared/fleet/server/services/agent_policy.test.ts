@@ -893,8 +893,8 @@ describe('Agent policy', () => {
         package_policies: ['package-1'],
         supports_agentless: true,
       });
-      // agentless policies are allowed to have active agents; the count check is bypassed
-      esClient.count.mockResolvedValue({ count: 1 } as any);
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({ agents: [], total: 0, page: 1, perPage: 10 });
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([]);
       const deleteAgentlessAgentSpy = jest
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValue(undefined as any);
@@ -920,7 +920,8 @@ describe('Agent policy', () => {
         package_policies: ['package-1'],
         supports_agentless: true,
       });
-      esClient.count.mockResolvedValue({ count: 1 } as any);
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({ agents: [], total: 0, page: 1, perPage: 10 });
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([]);
       const callOrder: string[] = [];
 
       jest.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
