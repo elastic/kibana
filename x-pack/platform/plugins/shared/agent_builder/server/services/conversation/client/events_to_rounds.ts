@@ -8,10 +8,12 @@
 import type {
   ConversationRound,
   ConversationRoundAuthor,
+  ConversationRoundFeedback,
   ConversationRoundStep,
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
   PromptResponseEvent,
+  RoundFeedbackEvent,
   RoundInput,
   TimelineEvent,
   UserMessageEvent,
@@ -138,7 +140,22 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     rounds.push(round);
   }
 
-  return rounds;
+  const feedbackByRound = new Map<string, ConversationRoundFeedback>();
+  for (const event of events) {
+    if (event.type === TimelineEventType.roundFeedback) {
+      const { round_id, ...feedbackFields } = (event as RoundFeedbackEvent).data;
+      feedbackByRound.set(round_id, feedbackFields);
+    }
+  }
+
+  if (feedbackByRound.size === 0) {
+    return rounds;
+  }
+
+  return rounds.map((round) => {
+    const feedback = feedbackByRound.get(round.id);
+    return feedback ? { ...round, feedback } : round;
+  });
 };
 
 /** ask_user_question answers carried by a prompt_response, keyed by prompt_id. */

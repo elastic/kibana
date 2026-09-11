@@ -12,6 +12,7 @@ import type {
   EventActor,
   ExecutionOutcome,
   ExecutionRunSummary,
+  RoundFeedbackEvent,
   RoundInput,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
@@ -160,8 +161,24 @@ export const roundToEvents = (
     ...roundStartEvents(round, conversation),
     ...roundStepEvents(round, conversation),
     ...(terminated ? [terminated] : []),
+    ...(round.feedback ? [roundFeedbackEvent(round, conversation)] : []),
   ];
 };
+
+/** Emits a {@link RoundFeedbackEvent} for a round that carries feedback. */
+const roundFeedbackEvent = (
+  round: ConversationRound,
+  conversation: Conversation
+): RoundFeedbackEvent => ({
+  id: `${round.id}::feedback`,
+  type: TimelineEventType.roundFeedback,
+  created_at: round.feedback!.submitted_at,
+  actor: agentActor(conversation),
+  data: {
+    round_id: round.id,
+    ...round.feedback!,
+  },
+});
 
 /**
  * Converts a rounds-based conversation into a timeline, on read. Maps each round with
