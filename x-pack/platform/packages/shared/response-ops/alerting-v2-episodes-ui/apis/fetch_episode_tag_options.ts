@@ -8,6 +8,7 @@
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   buildEpisodeTagOptionsQuery,
   type EpisodeTagOptionRow,
@@ -50,5 +51,6 @@ export const fetchEpisodeTagOptions = ({
     query,
     input,
     abortSignal,
+    timeField: DEFAULT_TIME_FIELD,
   });
 };

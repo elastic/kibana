@@ -44,7 +44,7 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | STATS count() BY status' timeField='@timestamp'",
+      "esql 'FROM index | STATS count() BY status'",
       null,
       undefined
     );
@@ -71,6 +71,33 @@ describe('executeEsqlQuery', () => {
       expressions: mockExpressionsService,
       query: 'FROM logs',
       input,
+    });
+
+    expect(mockExpressionsService.execute).toHaveBeenCalledWith(
+      "esql 'FROM logs'",
+      input,
+      undefined
+    );
+  });
+
+  it('should pass timeField to the esql function when provided', async () => {
+    const mockDatatable: Datatable = {
+      type: 'datatable',
+      columns: [],
+      rows: [],
+    };
+    const mockExecutionContract = {
+      getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+      cancel: jest.fn(),
+    };
+    mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
+
+    const input = { timeRange: { from: 'now-15m', to: 'now' } };
+    await executeEsqlQuery({
+      expressions: mockExpressionsService,
+      query: 'FROM logs',
+      input,
+      timeField: '@timestamp',
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
@@ -101,7 +128,7 @@ describe('executeEsqlQuery', () => {
     });
 
     expect(mockExpressionsService.execute).toHaveBeenCalledWith(
-      "esql 'FROM index | WHERE status == \\'active\\'' timeField='@timestamp'",
+      "esql 'FROM index | WHERE status == \\'active\\''",
       null,
       undefined
     );

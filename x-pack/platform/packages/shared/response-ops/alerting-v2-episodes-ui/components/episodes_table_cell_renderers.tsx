@@ -31,6 +31,7 @@ import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
+import { EMPTY_VALUE } from '../constants';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -62,6 +63,31 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       episodeAction={episodeAction}
       groupAction={groupAction}
     />
+  );
+};
+
+/**
+ * Renders the episode duration, marked as a lower bound when the query did not
+ * see the episode start because it predates the selected time range.
+ */
+export const EpisodeDurationCell = ({ row, columnId, dataView }: CellRendererProps) => {
+  const duration = row.flattened[columnId] as number | null | undefined;
+  if (duration == null) {
+    return <>{EMPTY_VALUE}</>;
+  }
+  const field = dataView.getFieldByName(columnId);
+  const formatted = field
+    ? dataView.getFormatterForField(field).convertToText(duration)
+    : `${duration}`;
+  if (!row.flattened.duration_is_lower_bound) {
+    return <>{formatted}</>;
+  }
+  return (
+    <EuiToolTip content={i18n.DURATION_LOWER_BOUND_TOOLTIP}>
+      <span tabIndex={0} data-test-subj="episodeDurationLowerBound">
+        {i18n.getDurationLowerBoundLabel(formatted)}
+      </span>
+    </EuiToolTip>
   );
 };
 
