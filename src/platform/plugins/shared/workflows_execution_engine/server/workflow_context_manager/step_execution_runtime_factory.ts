@@ -105,6 +105,9 @@ export class StepExecutionRuntimeFactory {
     stackFrames: StackFrame[];
   }): StepExecutionRuntime {
     const node = this.params.workflowExecutionGraph.getNode(nodeId);
+    if (!node) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
     const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
 
     // Guard against duplicate node entries in stack frames by removing self-references.

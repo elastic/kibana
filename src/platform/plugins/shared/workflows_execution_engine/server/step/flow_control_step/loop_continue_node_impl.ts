@@ -42,7 +42,11 @@ export class LoopContinueNodeImpl implements NodeImplementation {
     // Evict stale outputs from the current iteration before looping back.
     // Without this, a 1000-iteration loop accumulates all stale outputs
     // in memory until the loop fully exits.
-    const loopStepId = this.workflowGraph.getNode(this.node.loopExitNodeId).stepId;
+    const loopExit = this.workflowGraph.getNode(this.node.loopExitNodeId);
+    if (!loopExit) {
+      throw new Error(`Node not found for node id: ${this.node.loopExitNodeId}`);
+    }
+    const loopStepId = loopExit.stepId;
     const innerStepIds = this.workflowGraph.getInnerStepIds(loopStepId);
     this.stepIoService.evictStaleLoopOutputs(innerStepIds);
     this.workflowLogger.logDebug(

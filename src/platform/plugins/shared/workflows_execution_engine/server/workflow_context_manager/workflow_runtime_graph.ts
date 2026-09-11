@@ -105,15 +105,9 @@ export class WorkflowRuntimeGraph {
     return enterSynthetic.id;
   }
 
-  /** Node the cursor or a step should run, by id. */
-  public getNode(nodeId: string): GraphNodeUnion {
-    const node = this.nodesInTopologicalOrder.find((candidate) => candidate.id === nodeId);
-
-    if (!node) {
-      throw new Error(`Node not found for node id: ${nodeId}`);
-    }
-
-    return node;
+  /** Node the cursor or a step should run, by id. Missing id is `undefined`. */
+  public getNode(nodeId: string): GraphNodeUnion | undefined {
+    return this.nodesInTopologicalOrder.find((candidate) => candidate.id === nodeId);
   }
 
   /**
@@ -127,7 +121,7 @@ export class WorkflowRuntimeGraph {
         return this.compiledGraph.getDirectSuccessors(synthetic.ownerId);
       }
 
-      return [this.getNode(synthetic.ownerId)];
+      return this.requireNodeList(synthetic.ownerId);
     }
 
     const mintedUnderNode = this.mintedSyntheticAt(nodeId);
@@ -169,7 +163,7 @@ export class WorkflowRuntimeGraph {
       collect(pred.id);
     }
 
-    return [...visited].map((id) => this.getNode(id));
+    return [...visited].map((id) => this.requireNode(id));
   }
 
   /** Step ids nested inside a compound step (foreach body, if branch, and so on). */
@@ -259,6 +253,18 @@ export class WorkflowRuntimeGraph {
     return node.type.startsWith('exit-');
   }
 
+  private requireNode(nodeId: string): GraphNodeUnion {
+    const node = this.getNode(nodeId);
+    if (!node) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
+    return node;
+  }
+
+  private requireNodeList(nodeId: string): GraphNodeUnion[] {
+    return [this.requireNode(nodeId)];
+  }
+
   private mintedSyntheticAt(ownerNodeId: string): SyntheticGraphNode | undefined {
     const syntheticId = this.syntheticNodeIdByOwnerId.get(ownerNodeId);
     return syntheticId ? this.syntheticNodesById.get(syntheticId)?.node : undefined;
@@ -268,7 +274,7 @@ export class WorkflowRuntimeGraph {
     const synthetic = this.syntheticNodesById.get(nodeId);
     if (synthetic) {
       if (this.isEnterNode(synthetic.node)) {
-        return [this.getNode(synthetic.ownerId)];
+        return this.requireNodeList(synthetic.ownerId);
       }
 
       return this.directCompiledPredecessors(synthetic.ownerId);

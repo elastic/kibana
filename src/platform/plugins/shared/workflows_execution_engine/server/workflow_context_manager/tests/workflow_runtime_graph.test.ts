@@ -82,10 +82,10 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     expect(outerEnter).toBe(outer.enterId);
     expect(innerEnter).toBe(inner.enterId);
     expect(outerEnter).not.toBe(innerEnter);
-    expect(overlay.getNode(outer.enterId).type).toBe('enter-iteration');
-    expect(overlay.getNode(outer.exitId).type).toBe('exit-iteration');
-    expect(overlay.getNode(inner.enterId).type).toBe('enter-iteration');
-    expect(overlay.getNode(inner.exitId).type).toBe('exit-iteration');
+    expect(overlay.getNode(outer.enterId)?.type).toBe('enter-iteration');
+    expect(overlay.getNode(outer.exitId)?.type).toBe('exit-iteration');
+    expect(overlay.getNode(inner.enterId)?.type).toBe('enter-iteration');
+    expect(overlay.getNode(inner.exitId)?.type).toBe('exit-iteration');
   });
 
   it('replaces the pair when the same owner remints the same stepId', () => {
@@ -94,7 +94,7 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     const remint = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
 
     expect(remint).toBe(first);
-    expect(overlay.getNode(first).type).toBe('enter-iteration');
+    expect(overlay.getNode(first)?.type).toBe('enter-iteration');
     expect(overlay.topologicalOrder.filter((id) => id.startsWith(ENTER_SYNTHETIC_PREFIX))).toEqual([
       first,
     ]);
@@ -123,8 +123,8 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     const hydrated = new WorkflowRuntimeGraph(compiled, stack);
     const remint = hydrated.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
 
-    expect(hydrated.getNode(enterId).type).toBe('enter-iteration');
-    expect(hydrated.getNode(enterId).id).toBe(enterId);
+    expect(hydrated.getNode(enterId)?.type).toBe('enter-iteration');
+    expect(hydrated.getNode(enterId)?.id).toBe(enterId);
     expect(remint).toBe(enterId);
   });
 
@@ -146,11 +146,9 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
       const exit1 = enter1.replace(/^enter/, 'exit');
       const order = overlay.topologicalOrder;
 
-      expect(() => overlay.getNode(enter0)).toThrow(`Node not found for node id: ${enter0}`);
-      expect(() => overlay.getNode(enter0.replace(/^enter/, 'exit'))).toThrow(
-        `Node not found for node id: ${enter0.replace(/^enter/, 'exit')}`
-      );
-      expect(overlay.getNode(enter1).stepType).toBe('iteration');
+      expect(overlay.getNode(enter0)).toBeUndefined();
+      expect(overlay.getNode(enter0.replace(/^enter/, 'exit'))).toBeUndefined();
+      expect(overlay.getNode(enter1)?.stepType).toBe('iteration');
       expect(order).not.toContain(enter0);
       expect(order[order.indexOf(enter1) + 1]).not.toBe(exit1);
       expect(order[order.indexOf(exit1) + 1]).toBe('exitForeach_outerLoop');
