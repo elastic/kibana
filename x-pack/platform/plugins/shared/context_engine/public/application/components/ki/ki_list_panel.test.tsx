@@ -28,6 +28,7 @@ jest.mock('../../hooks/use_ki_list', () => ({
 const aiIndex: GetAiIndexResponse = {
   id: 'sample-ki',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'index', value: 'ai-index-idx-sample-ki' },
   automations: [],
   sources: [{ type: 'connector', value: 'connector-1' }],
