@@ -156,8 +156,12 @@ apiTest.describe(
       }
     });
 
-    apiTest('project monitors - fetches all monitors - api', async ({ apiClient }) => {
+    apiTest('project monitors - fetches all monitors - api', async ({ apiClient, config }) => {
       apiTest.setTimeout(TEST_TIMEOUT);
+      apiTest.skip(
+        config.serverless,
+        'API Journey monitors are not yet supported on Serverless (see the dedicated Serverless test below)'
+      );
       const project = `test-api-suite-${uuidv4()}`;
       const monitors = buildMonitors(
         projectApiMonitorFixture.monitors[0],
@@ -176,6 +180,36 @@ apiTest.describe(
         ).catch(() => {});
       }
     });
+
+    apiTest(
+      'project monitors - rejects api monitors on Serverless',
+      async ({ apiClient, config }) => {
+        apiTest.skip(!config.serverless, 'only relevant on Serverless');
+
+        const project = `test-api-suite-${uuidv4()}`;
+        const monitors = buildMonitors(
+          projectApiMonitorFixture.monitors[0],
+          'test api id',
+          TOTAL_MONITORS
+        );
+        try {
+          const res = await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
+
+          // API Journey monitors aren't supported on Serverless yet, so none
+          // of the pushed monitors were created; there's nothing to page through.
+          const body = res.body as { createdMonitors: string[]; failedMonitors: unknown[] };
+          expect(body.createdMonitors).toHaveLength(0);
+          expect(body.failedMonitors).toHaveLength(TOTAL_MONITORS);
+        } finally {
+          await deleteProjectMonitors(
+            apiClient,
+            editorHeaders,
+            project,
+            monitors.map((m) => m.id)
+          ).catch(() => {});
+        }
+      }
+    );
 
     apiTest('project monitors - fetches all monitors - http', async ({ apiClient }) => {
       apiTest.setTimeout(TEST_TIMEOUT);
