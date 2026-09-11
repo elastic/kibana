@@ -84,7 +84,7 @@ export class InMemoryExecutionPersistence
       }
       let copy: Record<string, unknown>;
       try {
-        copy = structuredClone(execution) as Record<string, unknown>;
+        copy = structuredClone(execution) as unknown as Record<string, unknown>;
       } catch (err) {
         throw new Error(
           `Failed to clone step execution ${id}: step execution state contains a non-serializable value. Root cause: ${
@@ -104,7 +104,7 @@ export class InMemoryExecutionPersistence
           delete copy[key];
         }
       }
-      return [copy as EsWorkflowStepExecution];
+      return [copy as unknown as EsWorkflowStepExecution];
     });
   }
 
