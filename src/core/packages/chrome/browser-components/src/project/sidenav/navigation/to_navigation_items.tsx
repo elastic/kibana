@@ -392,7 +392,7 @@ function warnAboutDuplicateIds(primaryItems: MenuItem[], footerItems: MenuItem[]
 function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuItem[]) {
   if (SKIP_WARNINGS) return;
 
-  const maxNewItemsPerLevel = 2;
+  const maxNewItemsPerLevel = 4;
   const allMenuItems = [...primaryItems, ...footerItems];
   const newPrimaryItems: MenuItem[] = [];
   const isNew = (item: MenuItem | SecondaryMenuItem) => item.badgeType === 'new';

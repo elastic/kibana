@@ -37,9 +37,11 @@ const createMockServices = (): AlertingV2KibanaServices => {
   };
   const uiSettings = uiSettingsServiceMock.createStartContract();
   (uiSettings.get as jest.Mock).mockReturnValue(true);
+  const http = httpServiceMock.createStartContract();
+  http.basePath.prepend = jest.fn((path: string) => path);
 
   return {
-    http: httpServiceMock.createStartContract(),
+    http,
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
@@ -150,9 +152,14 @@ describe('CreateRuleOptionsFlyout', () => {
       await waitFor(() => {
         expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
       });
+      // Picker stays mounted under the form for continuous flyout history.
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       expect(capturedComposeProps.initialQuery).toBe('FROM logs-*');
       expect(capturedComposeProps.mode).toBe('create');
-      expect(capturedComposeProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.session).toBe('start');
+      expect(capturedComposeProps.historyKey).toBeDefined();
+      expect(capturedComposeProps.onClose).toBeDefined();
+      expect(capturedComposeProps.onClose).not.toBe(onClose);
       expect(capturedComposeProps.onCreateRule).toBeDefined();
     });
 
@@ -207,9 +214,12 @@ describe('CreateRuleOptionsFlyout', () => {
       await waitFor(() => {
         expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
       });
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.builderType).toBe('threshold');
-      expect(capturedComposeProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.session).toBe('start');
+      expect(capturedComposeProps.onClose).toBeDefined();
+      expect(capturedComposeProps.onClose).not.toBe(onClose);
     });
   });
 
@@ -397,6 +407,26 @@ describe('CreateRuleOptionsFlyout', () => {
         expect.stringContaining('Failed to create rule')
       );
       expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Manage rules footer', () => {
+    it('navigates to the v2 rules list and closes the flyout', async () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      expect(typeof capturedSelectorProps.onManageRules).toBe('function');
+      (capturedSelectorProps.onManageRules as () => void)();
+
+      expect(mockServices.application.navigateToUrl).toHaveBeenCalledWith(
+        expect.stringContaining('/app/management/alertingV2/rules')
+      );
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });

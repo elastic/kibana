@@ -43,11 +43,11 @@ describe('ActionPoliciesListHeader', () => {
     mockPhase = 'populated';
   });
 
-  it('renders the page title and experimental badge', () => {
+  it('renders the page title without an experimental badge', () => {
     renderHeader();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
   it('renders the create split button when the user can write and the list is populated', () => {

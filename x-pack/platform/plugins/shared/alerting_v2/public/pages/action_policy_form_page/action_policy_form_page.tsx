@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageHeader,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
@@ -36,6 +26,7 @@ import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
 import { useFetchActionPolicy } from '../../hooks/use_fetch_action_policy';
 import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
+import { ActionPolicyFormHeader } from './action_policy_form_header';
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();
@@ -53,76 +44,46 @@ export const ActionPolicyFormPage = () => {
   useBreadcrumbs(isEditMode ? 'action_policy_edit' : 'action_policy_create');
   const isReady = !isEditMode || !!existingPolicy;
 
-  const navigateToList = useCallback(() => {
-    navigateToUrl(basePath.prepend(paths.actionPolicyList));
-  }, [navigateToUrl, basePath]);
+  const listHref = useMemo(() => basePath.prepend(paths.actionPolicyList), [basePath]);
 
-  const returnButton = (
-    <EuiFlexGroup justifyContent="flexStart">
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          iconType="chevronSingleLeft"
-          onClick={navigateToList}
-          data-test-subj="returnButton"
-          style={{ paddingInline: 0 }}
-        >
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.formPage.return"
-            defaultMessage="Return"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const navigateToList = useCallback(() => {
+    navigateToUrl(listHref);
+  }, [navigateToUrl, listHref]);
 
   if (isEditMode && isFetchingPolicy) {
     return (
-      <>
-        {returnButton}
-        <EuiPageHeader
-          pageTitle={
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.editTitle"
-              defaultMessage="Edit action policy"
-            />
-          }
-        />
-        <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="center">
-          <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
-        </EuiFlexGroup>
-      </>
+      <div data-test-subj="actionPolicyFormPage">
+        <ActionPolicyFormHeader isEditMode={true} listHref={listHref} onBack={navigateToList} />
+        <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+          <EuiFlexGroup justifyContent="center">
+            <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
+          </EuiFlexGroup>
+        </EuiPageTemplate.Section>
+      </div>
     );
   }
 
   if (isEditMode && isFetchError) {
     return (
-      <>
-        {returnButton}
-        <EuiPageHeader
-          pageTitle={
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.editTitle"
-              defaultMessage="Edit action policy"
-            />
-          }
-        />
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          announceOnMount
-          title={
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.fetchErrorTitle"
-              defaultMessage="Failed to load action policy"
-            />
-          }
-          color="danger"
-          iconType="error"
-          data-test-subj="fetchErrorCallout"
-        >
-          {fetchError?.message}
-        </EuiCallOut>
-      </>
+      <div data-test-subj="actionPolicyFormPage">
+        <ActionPolicyFormHeader isEditMode={true} listHref={listHref} onBack={navigateToList} />
+        <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.formPage.fetchErrorTitle"
+                defaultMessage="Failed to load action policy"
+              />
+            }
+            color="danger"
+            iconType="error"
+            data-test-subj="fetchErrorCallout"
+          >
+            {fetchError?.message}
+          </EuiCallOut>
+        </EuiPageTemplate.Section>
+      </div>
     );
   }
 
@@ -133,6 +94,7 @@ export const ActionPolicyFormPage = () => {
   return (
     <ActionPolicyFormPageContent
       initialPolicy={existingPolicy}
+      listHref={listHref}
       onCancel={navigateToList}
       onSuccess={navigateToList}
     />
@@ -141,10 +103,12 @@ export const ActionPolicyFormPage = () => {
 
 const ActionPolicyFormPageContent = ({
   initialPolicy,
+  listHref,
   onCancel,
   onSuccess,
 }: {
   initialPolicy?: ActionPolicyResponse;
+  listHref: string;
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
@@ -223,81 +187,21 @@ const ActionPolicyFormPageContent = ({
   const isLoading = isCreating || isUpdating || isCreatingWorkflows;
 
   return (
-    <EuiPageTemplate.Section
-      paddingSize="none"
-      restrictWidth={true}
-      data-test-subj="actionPolicyFormPage"
-    >
-      <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="chevronSingleLeft"
-            onClick={onCancel}
-            data-test-subj="returnButton"
-            style={{ paddingInline: 0 }}
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.return"
-              defaultMessage="Return"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPageHeader
-        pageTitle={
-          isEditMode ? (
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.editTitle"
-              defaultMessage="Edit action policy"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.createTitle"
-              defaultMessage="Create action policy"
-            />
-          )
-        }
-        data-test-subj="pageTitle"
+    <div data-test-subj="actionPolicyFormPage">
+      <ActionPolicyFormHeader
+        isEditMode={isEditMode}
+        listHref={listHref}
+        onBack={onCancel}
+        onSubmit={handleSubmit}
+        isSubmitEnabled={isSubmitEnabled}
+        isLoading={isLoading}
       />
-      <EuiSpacer size="m" />
 
-      <FormProvider {...methods}>
-        <ActionPolicyForm />
-      </FormProvider>
-
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.formPage.cancel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            disabled={!isSubmitEnabled}
-            data-test-subj="submitButton"
-          >
-            {isEditMode ? (
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.formPage.update"
-                defaultMessage="Update policy"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicy.formPage.save"
-                defaultMessage="Create policy"
-              />
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+        <FormProvider {...methods}>
+          <ActionPolicyForm />
+        </FormProvider>
+      </EuiPageTemplate.Section>
+    </div>
   );
 };

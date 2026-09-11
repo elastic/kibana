@@ -77,11 +77,11 @@ describe('RulesListHeader', () => {
     mockCanReadV1Rules = true;
   });
 
-  it('renders the page title and experimental badge', () => {
+  it('renders the page title without an experimental badge', () => {
     renderHeader();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
   it('renders V1 rules and V2 rules tabs with V2 selected', async () => {

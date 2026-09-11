@@ -78,7 +78,7 @@ export class ObservabilityAlertingPlugin
         {
           id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.inboxTitle', {
-            defaultMessage: 'Alerts (Inbox)',
+            defaultMessage: 'Inbox',
           }),
           path: OBSERVABILITY_ALERTING_INBOX_PATH,
           visibleIn: [],
@@ -105,7 +105,7 @@ export class ObservabilityAlertingPlugin
         {
           id: OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.ruleLibraryTitle', {
-            defaultMessage: 'Rule Library',
+            defaultMessage: 'Rules library',
           }),
           path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
           visibleIn: [],
@@ -123,7 +123,7 @@ export class ObservabilityAlertingPlugin
         {
           id: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.executionHistoryTitle', {
-            defaultMessage: 'Execution History',
+            defaultMessage: 'Execution history',
           }),
           path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
           visibleIn: [],

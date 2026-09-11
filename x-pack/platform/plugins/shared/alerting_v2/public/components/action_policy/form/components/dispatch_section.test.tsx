@@ -110,4 +110,15 @@ describe('DispatchSection', () => {
     );
     expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toHaveValue(5);
   });
+
+  it('renders a frequency help control without field helper text under Frequency', () => {
+    renderSection();
+
+    expect(screen.getByTestId('frequencyHelpButton')).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.'
+      )
+    ).not.toBeInTheDocument();
+  });
 });

@@ -34,7 +34,8 @@ export const getV1RulesPageTabs = ({
     isSelected: false,
     href: v2Href,
     badge: {
-      iconType: 'sparkles',
+      iconType: 'dot',
+      color: 'primary',
       tooltip: i18n.translate('xpack.triggersActionsUI.rulesPage.v2RulesTabNewBadgeTooltip', {
         defaultMessage: 'New',
       }),

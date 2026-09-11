@@ -26,10 +26,15 @@ const renderSummary = (overrides: {
   );
 
 describe('DispatchConfigSummary', () => {
-  it('renders the title', () => {
+  it('renders the title and mode help text', () => {
     renderSummary({});
 
     expect(screen.getByText('Notification summary')).toBeDefined();
+    expect(
+      screen.getByText(
+        'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.'
+      )
+    ).toBeDefined();
   });
 
   describe('per_episode mode', () => {

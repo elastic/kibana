@@ -31,7 +31,11 @@ import {
   getAgentBuilderSkillsRequirements,
 } from './hooks/use_are_agent_builder_skills_available';
 import { RulesApi } from './services/rules_api';
-import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import {
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  AGENT_BUILDER_NEW_CONVERSATION_PATH,
+  paths,
+} from './constants';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -181,7 +185,15 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
+  const navigateToManageRules = useCallback(() => {
+    if (!value?.services) return;
+    const href = value.services.http.basePath.prepend(paths.ruleList);
+    value.services.application.navigateToUrl(href);
+    onClose();
+  }, [value, onClose]);
+
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
+  const returnToSelector = useCallback(() => setStep({ type: 'selector' }), []);
 
   const rulesApi = useMemo(
     () => (value?.services ? new RulesApi(value.services.http) : undefined),
@@ -257,40 +269,7 @@ const CreateRuleOptionsFlyoutInner = ({
   );
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
-  if (step.type === 'esql') {
-    return (
-      <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-        />
-      </Context.Provider>
-    );
-  }
-
-  if (step.type === 'threshold') {
-    return (
-      <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          builderType="threshold"
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-        />
-      </Context.Provider>
-    );
-  }
+  const showAuthoringFlyout = step.type === 'esql' || step.type === 'threshold';
 
   if (step.type === 'legacy') {
     const legacyItem = legacyRuleTypes?.find((item) => item.id === step.id);
@@ -300,15 +279,35 @@ const CreateRuleOptionsFlyoutInner = ({
   }
 
   return (
-    <RuleCreateOptionsFlyout
-      onClose={onClose}
-      onCreateEsqlRule={() => setStep({ type: 'esql' })}
-      onCreateWithAgent={navigateToAgentBuilder}
-      createWithAgentDisabled={createWithAgentDisabled}
-      createWithAgentTooltipText={createWithAgentTooltipText}
-      onCreateThresholdRule={() => setStep({ type: 'threshold' })}
-      legacyRuleTypes={legacyPanelItems}
-    />
+    <>
+      <RuleCreateOptionsFlyout
+        historyKey={historyKey}
+        onClose={onClose}
+        onCreateEsqlRule={() => setStep({ type: 'esql' })}
+        onCreateWithAgent={navigateToAgentBuilder}
+        createWithAgentDisabled={createWithAgentDisabled}
+        createWithAgentTooltipText={createWithAgentTooltipText}
+        onCreateThresholdRule={() => setStep({ type: 'threshold' })}
+        legacyRuleTypes={legacyPanelItems}
+        onManageRules={navigateToManageRules}
+      />
+      {showAuthoringFlyout ? (
+        <Context.Provider value={services.container}>
+          <ComposeDiscoverFlyout
+            historyKey={historyKey}
+            session="start"
+            mode="create"
+            onClose={returnToSelector}
+            services={services}
+            builderType={step.type === 'threshold' ? 'threshold' : undefined}
+            onCreateRule={handleCreateRule}
+            isSaving={isSaving}
+            initialQuery={query}
+            esqlVariables={esqlVariables}
+          />
+        </Context.Provider>
+      ) : null}
+    </>
   );
 };
 

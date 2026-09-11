@@ -28,10 +28,7 @@ const LogsList = lazy(() => import('../rule_details/components/global_rule_event
 export const LogsListContainer = () => {
   const history = useHistory();
   const {
-    application: {
-      getUrlForApp,
-      capabilities: { rulesSettings = {} },
-    },
+    application: { getUrlForApp },
     chrome: { docTitle },
     http,
     notifications: { toasts },
@@ -43,10 +40,7 @@ export const LogsListContainer = () => {
     toasts,
     filteredRuleTypes: [],
   });
-  const { openCreateRuleModal, openSettingsFlyout } = useRulesPageActions();
-
-  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
-  const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
+  const { openCreateRuleModal } = useRulesPageActions();
 
   const docLink = docLinks.links.alerting.guide;
   const rulesListHref = http.basePath.prepend(triggersActionsRoute);
@@ -62,11 +56,11 @@ export const LogsListContainer = () => {
     () =>
       getRulesPageMenu({
         authorizedToCreateAnyRules,
-        canShowSettings,
+        canShowSettings: false,
         onCreateRule: openCreateRuleModal,
-        onOpenSettings: openSettingsFlyout,
+        onOpenSettings: () => undefined,
       }),
-    [authorizedToCreateAnyRules, canShowSettings, openCreateRuleModal, openSettingsFlyout]
+    [authorizedToCreateAnyRules, openCreateRuleModal]
   );
 
   const classicLogsTabs = useMemo(
@@ -76,12 +70,7 @@ export const LogsListContainer = () => {
 
   const heading =
     mode !== RULES_PAGE_MODE.triggersActionsTabs ? (
-      <LogsListHeader
-        backHref={rulesListHref}
-        shouldShowSettings={canShowSettings}
-        docLink={docLink}
-        onOpenSettings={openSettingsFlyout}
-      />
+      <LogsListHeader backHref={rulesListHref} docLink={docLink} />
     ) : (
       <RulesPageHeader
         back={{

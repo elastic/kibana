@@ -13,7 +13,7 @@ The MISP connector uses the [Malware Information Sharing Platform (MISP) automat
 
 ## Create connectors in {{kib}} [define-misp-ui]
 
-Create an MISP connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
+Create an MISP connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Automation / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 
 ### Connector configuration [misp-connector-configuration]
 

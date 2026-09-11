@@ -5,33 +5,37 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+} from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchRuleEventFields } from '../../../../hooks/use_fetch_rule_event_fields';
 import {
-  AGGREGATE_STRATEGY_HELP_TEXT,
   AGGREGATE_STRATEGY_OPTIONS,
   DEFAULT_STRATEGY_FOR_MODE,
   DEFAULT_THROTTLE_INTERVAL,
-  GROUPING_MODE_HELP_TEXT,
   GROUPING_MODE_OPTIONS,
-  PER_EPISODE_STRATEGY_HELP_TEXT,
   PER_EPISODE_STRATEGY_OPTIONS,
   THROTTLE_INTERVAL_PATTERN,
 } from '../constants';
 import { needsInterval } from '../form_utils';
 import type { ActionPolicyFormState } from '../types';
-import { DispatchConfigSummary } from './dispatch_config_summary';
 import { DurationInput } from './duration_input/duration_input';
+import { FrequencyHelpPopover } from './frequency_help_popover';
 
 export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<ActionPolicyFormState>();
-  const [groupingMode, groupBy, throttleStrategy, throttleInterval, matcher] = useWatch({
+  const [groupingMode, throttleStrategy, matcher] = useWatch({
     control,
-    name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
+    name: ['groupingMode', 'throttleStrategy', 'matcher'],
   });
   const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
 
@@ -50,8 +54,19 @@ export const DispatchSection = () => {
 
   const strategyOptions =
     groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
-  const strategyHelpText =
-    groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_HELP_TEXT : AGGREGATE_STRATEGY_HELP_TEXT;
+
+  const frequencyLabel = (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        {i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.frequency', {
+          defaultMessage: 'Frequency',
+        })}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FrequencyHelpPopover groupingMode={groupingMode} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <>
@@ -64,7 +79,6 @@ export const DispatchSection = () => {
               defaultMessage: 'Notify per',
             })}
             fullWidth
-            helpText={GROUPING_MODE_HELP_TEXT[field.value]}
           >
             <EuiButtonGroup
               legend={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.modeLegend', {
@@ -142,13 +156,7 @@ export const DispatchSection = () => {
         name="throttleStrategy"
         control={control}
         render={({ field: { ref, ...field } }) => (
-          <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.frequency', {
-              defaultMessage: 'Frequency',
-            })}
-            fullWidth
-            helpText={strategyHelpText[throttleStrategy]}
-          >
+          <EuiFormRow label={frequencyLabel} fullWidth>
             <EuiSelect
               {...field}
               inputRef={ref}
@@ -201,14 +209,6 @@ export const DispatchSection = () => {
           )}
         />
       )}
-
-      <EuiSpacer size="m" />
-      <DispatchConfigSummary
-        groupingMode={groupingMode}
-        groupBy={groupBy}
-        throttleStrategy={throttleStrategy}
-        throttleInterval={throttleInterval}
-      />
     </>
   );
 };

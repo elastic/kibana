@@ -42,7 +42,7 @@ interface BaseParams {
 };
 ```
 
-1. The `title` for the report. This is shown in the listing of reports in **Stack Management > Alerts and Insights > Reporting** and used as the filename when the report is downloaded.
+1. The `title` for the report. This is shown in the listing of reports in **Stack Management > Automation > Reporting** and used as the filename when the report is downloaded.
 2. The `objectType` field is automatically added when using internal Reporting APIs. This value used for choosing an icon for the report job in the listing of reports in {{kib}}.
 3. The `browserTimezone` field is automatically added when using internal Reporting APIs to craft the job parameters. This is used to correctly format time-based data in the user’s desired timezone.
 4. The `version` field is automatically added when using internal Reporting APIs. This is used in cases where job parameters are reused after an upgrade of Kibana, and a migration may be needed.

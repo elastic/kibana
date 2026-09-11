@@ -9,6 +9,7 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { GROUPING_MODE_HELP_TEXT } from '../constants';
 
 interface DispatchConfigSummaryProps {
   groupingMode: GroupingMode;
@@ -165,16 +166,20 @@ const getDispatchSummary = ({
   return '';
 };
 
+/**
+ * Left-column notification summary for the Notification controls described form group:
+ * selected Notify-per mode help plus the live frequency/interval outcome copy.
+ */
 export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
-  const summary = getDispatchSummary(props);
-
-  if (!summary) return null;
+  const modeHelp = GROUPING_MODE_HELP_TEXT[props.groupingMode];
+  const outcome = getDispatchSummary(props);
 
   return (
     <EuiPanel
       color="subdued"
-      paddingSize="m"
       hasBorder={false}
+      hasShadow={false}
+      paddingSize="m"
       data-test-subj="dispatchConfigCallout"
     >
       <EuiTitle size="xxs">
@@ -185,9 +190,17 @@ export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
         </h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued" data-test-subj="dispatchConfigSummaryText">
-        {summary}
+      <EuiText size="s" color="subdued" data-test-subj="dispatchConfigModeHelpText">
+        {modeHelp}
       </EuiText>
+      {outcome ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued" data-test-subj="dispatchConfigSummaryText">
+            {outcome}
+          </EuiText>
+        </>
+      ) : null}
     </EuiPanel>
   );
 };

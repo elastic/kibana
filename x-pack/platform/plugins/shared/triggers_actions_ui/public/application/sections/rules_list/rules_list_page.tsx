@@ -28,7 +28,6 @@ export const RulesListContainer = () => {
   const history = useHistory();
   const {
     application: {
-      getUrlForApp,
       capabilities: { rulesSettings = {} },
     },
     chrome: { docTitle },
@@ -53,7 +52,6 @@ export const RulesListContainer = () => {
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
 
   const docLink = docLinks.links.alerting.guide;
-  const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
   const mode = useRulesPageMode();
 
   useEffect(() => {
@@ -113,12 +111,6 @@ export const RulesListContainer = () => {
   return (
     <>
       <RulesPageHeader
-        back={{
-          href: alertsBackHref,
-          label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
-            defaultMessage: 'Alerts',
-          }),
-        }}
         tabs={rulesListTabs}
         menu={rulesListMenu}
         docLink={docLink}

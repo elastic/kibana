@@ -95,13 +95,13 @@ export const EPISODE_NOT_FOUND_BODY = i18n.translate(
 );
 
 export const BACK_TO_ALERT_EPISODES = i18n.translate('xpack.alertingV2.episodes.backToEpisodes', {
-  defaultMessage: 'Back to alert episodes',
+  defaultMessage: 'Back to alert inbox',
 });
 
 export const EPISODES_LIST_BACK_LABEL = i18n.translate(
   'xpack.alertingV2.episodeDetails.episodesListBackLabel',
   {
-    defaultMessage: 'Alert episodes',
+    defaultMessage: 'Inbox',
   }
 );
 

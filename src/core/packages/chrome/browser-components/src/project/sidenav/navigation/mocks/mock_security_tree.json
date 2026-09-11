@@ -1094,7 +1094,7 @@
           ]
         },
         {
-          "title": "Alerts and Insights",
+          "title": "Automation",
           "id": "node-1",
           "path": "stack_management.node-1",
           "isExternalLink": false,

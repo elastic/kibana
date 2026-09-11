@@ -84,7 +84,7 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
           },
           {
             title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.alertsAndInsights', {
-              defaultMessage: 'Alerts and insights',
+              defaultMessage: 'Automation',
             }),
             breadcrumbStatus: 'hidden',
             children: [

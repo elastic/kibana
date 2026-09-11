@@ -244,11 +244,11 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('renders the experimental badge in the page header', async () => {
+  it('does not render the experimental badge in the page header', async () => {
     renderPage();
     await waitForRules();
 
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
   describe('centralized action policies banner', () => {

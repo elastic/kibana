@@ -155,22 +155,78 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('uses an Alerting panel opener that combines v1 and v2 destinations', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
-    const alertsPanel = body.find(
+    const alertingPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );
     const flatAlerts = body.find((item) => item.link === 'observability-overview:alerts');
+    const flatSlos = body.find((item) => item.link === 'slo');
 
-    expect(alertsPanel).toBeUndefined();
-    expect(flatAlerts).toEqual(
+    expect(flatAlerts).toBeUndefined();
+    expect(flatSlos).toBeUndefined();
+    expect(alertingPanel).toEqual(
       expect.objectContaining({
-        link: 'observability-overview:alerts',
+        id: 'alerting',
+        title: 'Alerting',
         icon: 'warning',
+        renderAs: 'panelOpener',
+        children: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'alerting_inbox',
+            children: [expect.objectContaining({ link: 'management:episodes', title: 'Inbox' })],
+          }),
+          expect.objectContaining({
+            id: 'alerting_rule_management',
+            children: expect.arrayContaining([
+              expect.objectContaining({ link: 'management:rules', title: 'Rules' }),
+              expect.objectContaining({
+                link: 'management:rule_library',
+                title: 'Rules library',
+              }),
+            ]),
+          }),
+          expect.objectContaining({
+            id: 'alerting_notifications',
+            children: expect.arrayContaining([
+              expect.objectContaining({
+                link: 'management:action_policies',
+                title: 'Action Policies',
+              }),
+              expect.objectContaining({ link: 'management:maintenanceWindows' }),
+            ]),
+          }),
+          expect.objectContaining({
+            id: 'alerting_operations',
+            children: [
+              expect.objectContaining({
+                link: 'management:execution_history',
+                title: 'Execution history',
+              }),
+            ],
+          }),
+        ]),
       })
     );
+  });
+
+  it('shows the classic Alerts page under Inbox when alerting:v1:enabled is on', () => {
+    core.settings.globalClient.get = <T>(key: string) =>
+      (key === 'alerting:v1:enabled' ? true : false) as T;
+
+    const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
+    const alertingPanel = body.find(
+      (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
+    );
+    const inbox = alertingPanel?.children?.find((item) => item.id === 'alerting_inbox');
+
+    expect(inbox?.children).toEqual([
+      expect.objectContaining({ link: 'management:episodes', title: 'Inbox' }),
+      expect.objectContaining({
+        link: 'observability-overview:alerts',
+        title: 'Alerts',
+      }),
+    ]);
   });
 
   it('includes Data Federation under Data management > Indices and data streams', () => {

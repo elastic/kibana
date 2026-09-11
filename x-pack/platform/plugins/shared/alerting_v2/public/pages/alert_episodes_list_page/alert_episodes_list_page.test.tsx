@@ -117,6 +117,10 @@ jest.mock('./components/episodes_kpis', () => ({
   EpisodesKpis: () => null,
 }));
 
+jest.mock('./inbox_announcement_banner', () => ({
+  InboxAnnouncementBanner: () => null,
+}));
+
 // Capture filter-bar props so tests can drive refresh + filter changes from outside the component.
 // onRefresh is typed as returning unknown so tests can await the result (invalidateEpisodeQueries returns a Promise).
 let capturedFilterBarOnRefresh: (() => unknown) | undefined;
@@ -260,9 +264,9 @@ describe('AlertEpisodesListPage', () => {
     });
   });
 
-  it('renders the experimental badge in the page header', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alert episodes');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  it('renders the page title without an experimental badge', () => {
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Inbox');
+    expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
   it('renders the manage rules link in the app header menu', async () => {

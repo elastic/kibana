@@ -65,6 +65,8 @@ export interface AppHeaderBadgeItem {
 export interface AppHeaderTabIconBadge {
   /** EUI icon type rendered in the tab badge. */
   iconType: string;
+  /** Optional EUI icon color. Use `primary` for the blue “new” dot. */
+  color?: string;
   /** Optional tooltip shown when hovering the badge icon. */
   tooltip?: string;
 }

@@ -110,6 +110,8 @@ export type StreamsLinkId = 'overview';
 
 export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
 
+export type SloLinkId = 'management' | 'settings';
+
 export type ObservabilityAlertingLinkId =
   | 'inbox'
   | 'rules-v1'
@@ -140,4 +142,5 @@ export type DeepLinkId =
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`
   | `${SignificantEventsApp}:${SignificantEventsLinkId}`
+  | `${SloApp}:${SloLinkId}`
   | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`;

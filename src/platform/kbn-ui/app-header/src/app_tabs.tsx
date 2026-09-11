@@ -43,9 +43,9 @@ const renderTabBadge = (badge: AppHeaderTab['badge']) => {
   const tooltip = asOptionalPlainText(badge.tooltip);
 
   return tooltip !== undefined ? (
-    <EuiIconTip type={badge.iconType} content={tooltip} position="bottom" />
+    <EuiIconTip type={badge.iconType} color={badge.color} content={tooltip} position="bottom" />
   ) : (
-    <EuiIcon type={badge.iconType} aria-hidden />
+    <EuiIcon type={badge.iconType} color={badge.color} aria-hidden />
   );
 };
 

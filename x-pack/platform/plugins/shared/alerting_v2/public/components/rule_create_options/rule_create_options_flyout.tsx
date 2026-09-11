@@ -7,11 +7,13 @@
 
 import React from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   EuiToolTip,
@@ -21,6 +23,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
+
+/**
+ * Match ComposeDiscoverFlyout width so picker ↔ form history transitions stay balanced.
+ */
+const CREATE_FLOW_OPTIONS_FLYOUT_SIZE = 540;
 
 export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
@@ -38,6 +45,14 @@ export interface RuleCreateOptionsFlyoutProps {
   createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
+  /** Opens the v2 Rules page. When set, a footer with a Manage rules action is shown. */
+  onManageRules?: () => void;
+  /**
+   * Shared EUI flyout-history key for a continuous create session (picker → form → Back).
+   * When set, the picker mounts as `session="start"`. The form must also use
+   * `session="start"` with this same key (not `inherit`) so history stacks.
+   */
+  historyKey?: symbol;
 }
 
 export const RuleCreateOptionsFlyout = ({
@@ -48,13 +63,30 @@ export const RuleCreateOptionsFlyout = ({
   createWithAgentTooltipText,
   onCreateThresholdRule,
   legacyRuleTypes,
+  onManageRules,
+  historyKey,
 }: RuleCreateOptionsFlyoutProps) => {
+  const isHistorySession = historyKey !== undefined;
+  const flyoutTitle = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.title', {
+    defaultMessage: 'Create rule',
+  });
+
   return (
     <EuiFlyout
-      type="push"
-      size="s"
+      type={isHistorySession ? 'overlay' : 'push'}
+      size={isHistorySession ? CREATE_FLOW_OPTIONS_FLYOUT_SIZE : 's'}
       ownFocus
-      hideCloseButton
+      hideCloseButton={!isHistorySession}
+      session={isHistorySession ? 'start' : undefined}
+      historyKey={historyKey}
+      flyoutMenuProps={
+        isHistorySession
+          ? {
+              title: flyoutTitle,
+              titleId: FLYOUT_TITLE_ID,
+            }
+          : undefined
+      }
       onClose={onClose}
       aria-labelledby={FLYOUT_TITLE_ID}
       data-test-subj="ruleCreateOptionsFlyout"
@@ -63,32 +95,29 @@ export const RuleCreateOptionsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
-                  defaultMessage="Create rule"
-                />
-              </h2>
+              <h2>{flyoutTitle}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
-                defaultMessage: 'Close',
-              })}
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+          {!isHistorySession ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
                   defaultMessage: 'Close',
                 })}
-                data-test-subj="ruleCreateOptionsFlyoutCloseButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="cross"
+                  color="text"
+                  onClick={onClose}
+                  aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+                    defaultMessage: 'Close',
+                  })}
+                  data-test-subj="ruleCreateOptionsFlyoutCloseButton"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -102,6 +131,26 @@ export const RuleCreateOptionsFlyout = ({
           legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>
+      {onManageRules ? (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="text"
+                iconType="gear"
+                iconSide="left"
+                onClick={onManageRules}
+                data-test-subj="ruleCreateOptionsFlyoutManageRules"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleCreateOptionsFlyout.manageRules"
+                  defaultMessage="Manage rules"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      ) : null}
     </EuiFlyout>
   );
 };

@@ -130,6 +130,16 @@ describe('ActionPolicyForm', () => {
     jest.clearAllMocks();
   });
 
+  it('renders described form group section titles', () => {
+    renderForm();
+
+    expect(screen.getByRole('heading', { name: 'Policy details' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Policy scope' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Notification controls' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Notification summary' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Destination' })).toBeInTheDocument();
+  });
+
   it('renders tags input', () => {
     renderForm();
     expect(screen.getByTestId('tagsInput')).toBeInTheDocument();

@@ -136,7 +136,7 @@ Ensure your local LLM is running and accessible via an OpenAI-compatible API end
 ::::{step} Create the OpenAI connector
 
 1. Log in to your Elastic deployment
-2. Find connectors under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)
+2. Find connectors under **Automation / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)
 3. Select **Create Connector** and select **OpenAI**
 4. Name your connector to help track the model version you're using
 5. Under **Select an OpenAI provider**, select **Other (OpenAI Compatible Service)**

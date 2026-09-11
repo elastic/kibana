@@ -120,7 +120,7 @@ const getEnabledAppsByCategory = (
     {
       id: appCategories.ALERTS,
       title: i18n.translate('management.landing.withCardNavigation.alertsTitle', {
-        defaultMessage: 'Alerts and insights',
+        defaultMessage: 'Automation',
       }),
       apps: getAppsForCategory(appCategories.ALERTS, filteredApps),
     },

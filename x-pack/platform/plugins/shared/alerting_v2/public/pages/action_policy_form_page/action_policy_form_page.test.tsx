@@ -9,9 +9,10 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
@@ -185,8 +186,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const TEST_SUBJ = {
-  pageTitle: 'pageTitle',
-  cancelButton: 'cancelButton',
   submitButton: 'submitButton',
   nameInput: 'nameInput',
   descriptionInput: 'descriptionInput',
@@ -219,9 +218,9 @@ const EXISTING_POLICY: ActionPolicyResponse = {
 
 const renderPage = () => {
   return render(
-    <I18nProvider>
+    <ListPageTestProviders>
       <ActionPolicyFormPage />
-    </I18nProvider>
+    </ListPageTestProviders>
   );
 };
 
@@ -247,11 +246,16 @@ describe('ActionPolicyFormPage', () => {
       mockUseParams.mockReturnValue({});
     });
 
-    it('renders create title and save button', () => {
+    it('renders create title and save button in the app header', async () => {
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create action policy'
+      );
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+      expect(await screen.findByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
+      expect(screen.queryByTestId('returnButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cancelButton')).not.toBeInTheDocument();
     });
 
     it('submits create payload on save', async () => {
@@ -346,11 +350,11 @@ describe('ActionPolicyFormPage', () => {
       );
     });
 
-    it('navigates to listing page on cancel', async () => {
+    it('navigates to listing page from the app header back control', async () => {
       const user = userEvent.setup({ delay: null });
       renderPage();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
+      await user.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });
@@ -367,7 +371,7 @@ describe('ActionPolicyFormPage', () => {
       mockUseParams.mockReturnValue({ id: 'policy-1' });
     });
 
-    it('renders edit title and update button when policy is loaded', () => {
+    it('renders edit title and update button in the app header when policy is loaded', async () => {
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
         isLoading: false,
@@ -377,8 +381,10 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
-      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Edit action policy'
+      );
+      expect(await screen.findByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
     });
 
     it('shows loading state while fetching', () => {
@@ -445,7 +451,7 @@ describe('ActionPolicyFormPage', () => {
       });
     });
 
-    it('navigates to listing page on cancel', async () => {
+    it('navigates to listing page from the app header back control', async () => {
       const user = userEvent.setup({ delay: null });
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
@@ -456,7 +462,7 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
+      await user.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });

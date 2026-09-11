@@ -153,7 +153,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
-  - '@kbn/alerting-v2-utils'
+  - '@kbn/alerting-v2-constants'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-evals'
   - '@kbn/observability-agent-builder-plugin'

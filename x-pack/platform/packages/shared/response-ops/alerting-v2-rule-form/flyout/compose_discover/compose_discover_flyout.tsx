@@ -213,6 +213,12 @@ const getFlyoutTitle = ({
  */
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
+  /**
+   * EUI flyout session mode. Use `start` (default) with a shared `historyKey` to
+   * stack on the create-options picker. Do not use `inherit` for that flow —
+   * inherit is parent/child and opens side-by-side on wide viewports.
+   */
+  session?: 'start' | 'inherit';
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
   rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
@@ -305,6 +311,7 @@ const EMPTY_FORM_VALUES: FormValues = {
 
 export function ComposeDiscoverFlyout({
   historyKey,
+  session = 'start',
   mode = 'create',
   rule,
   ruleId,
@@ -1234,8 +1241,9 @@ export function ComposeDiscoverFlyout({
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
-            session="start"
+            session={session}
             historyKey={historyKey}
+            flyoutMenuProps={{ title }}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
             size={540}

@@ -52,6 +52,24 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('uses a managed overlay session when historyKey is provided', () => {
+    const historyKey = Symbol('createRuleSession');
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={historyKey}
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleCreateOptionsFlyoutCloseButton')).not.toBeInTheDocument();
+  });
+
   it('calls onCreateEsqlRule when the ES|QL option is selected', () => {
     renderFlyout();
 
@@ -104,5 +122,32 @@ describe('RuleCreateOptionsFlyout', () => {
 
     fireEvent.click(screen.getByTestId('createWithAgentCard'));
     expect(onCreateWithAgent).not.toHaveBeenCalled();
+  });
+
+  it('does not render the Manage rules footer when onManageRules is omitted', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyoutManageRules')).not.toBeInTheDocument();
+  });
+
+  it('renders a Manage rules footer action on the right and calls onManageRules', () => {
+    const onManageRules = jest.fn();
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+          onManageRules={onManageRules}
+        />
+      </I18nProvider>
+    );
+
+    const manageRulesButton = screen.getByTestId('ruleCreateOptionsFlyoutManageRules');
+    expect(manageRulesButton).toHaveTextContent('Manage rules');
+    expect(manageRulesButton.querySelector('[data-euiicon-type="gear"]')).toBeInTheDocument();
+    fireEvent.click(manageRulesButton);
+    expect(onManageRules).toHaveBeenCalledTimes(1);
   });
 });

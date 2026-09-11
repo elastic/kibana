@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { UiSettingsParams } from '@kbn/core/types';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V1_ENABLED_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
 } from '@kbn/alerting-v2-constants';
@@ -41,5 +42,18 @@ export const alertingAdvancedSettings = {
     schema: schema.boolean(),
     requiresPageReload: true,
     experimental: true,
+  },
+  [ALERTING_V1_ENABLED_SETTING_ID]: {
+    category: [ALERTING_V2_CATEGORY],
+    name: i18n.translate('xpack.alertingVTwo.v1EnabledSettingName', {
+      defaultMessage: 'Alerts v1 classic experience',
+    }),
+    type: 'boolean',
+    value: false,
+    description: i18n.translate('xpack.alertingVTwo.v1EnabledSettingDescription', {
+      defaultMessage: 'Shows the classic Alerts page under Alerting.',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration;
