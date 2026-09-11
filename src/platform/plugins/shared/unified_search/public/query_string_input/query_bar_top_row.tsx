@@ -127,18 +127,10 @@ const getWrapperWithTooltip = (
   children: JSX.Element,
   enableTooltip: boolean,
   query?: Query | AggregateQuery,
-  tooltipOverride?: string
+  tooltipContent?: string
 ) => {
   if (!enableTooltip) {
     return children;
-  }
-
-  if (tooltipOverride) {
-    return (
-      <EuiToolTip position="top" content={tooltipOverride}>
-        {children}
-      </EuiToolTip>
-    );
   }
 
   if (query && isOfAggregateQueryType(query)) {
@@ -147,11 +139,14 @@ const getWrapperWithTooltip = (
     return (
       <EuiToolTip
         position="top"
-        content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
-          defaultMessage:
-            'Date range selection for {language} queries requires an @timestamp field in the dataset.',
-          values: { language: displayName },
-        })}
+        content={
+          tooltipContent ??
+          i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
+            defaultMessage:
+              'Date range selection for {language} queries requires an @timestamp field in the dataset.',
+            values: { language: displayName },
+          })
+        }
       >
         {children}
       </EuiToolTip>
@@ -166,7 +161,7 @@ const getWrapperWithTooltip = (
 };
 
 // @internal
-export type ShowDatePicker = boolean | { disabled: boolean; disabledTooltip?: string };
+export type ShowDatePicker = boolean | { disabled: boolean; disabledReason?: string };
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -206,14 +201,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showDatePicker?: ShowDatePicker;
   isDisabled?: boolean;
   /**
-   * Disables only the submit / Search button, unlike `isDisabled` which
-   * greys out the entire query bar.
+   * Disables only the submit / Search button. Pass `{ tooltip }` to show a
+   * reason on hover; pass `true` to disable silently.
    */
   disableSubmitAction?: boolean;
-  /**
-   * Tooltip shown on the Search button when `disableSubmitAction` is true.
-   */
-  disableSubmitActionTooltip?: string;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
@@ -307,7 +298,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     onChange: (isApproximate: boolean) => void;
     additionalText?: string;
     disabled?: boolean;
-    disabledTooltip?: string;
+    disabledReason?: string;
   };
 }
 
@@ -384,14 +375,11 @@ export const QueryBarTopRow = React.memo(
     }, [props.isLoading]);
 
     const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
-    const { onEsqlEditorInitialStateChange } = props;
-    const handleEsqlEditorInitialStateChange = useCallback(
-      (state: NonNullable<ESQLEditorProps['initialState']>) => {
-        onEsqlEditorInitialStateChange?.(state);
-        esqlEditorRef.current?.refreshInitialState();
-      },
-      [onEsqlEditorInitialStateChange]
-    );
+
+    // Temporary, the empty page will change and we wont need to control it
+    useEffect(() => {
+      esqlEditorRef.current?.refreshInitialState();
+    }, [props.esqlEditorInitialState]);
 
     const {
       showQueryInput = true,
@@ -877,7 +865,8 @@ export const QueryBarTopRow = React.memo(
       // Consumers (e.g. Discover, Dashboard) opt into a disabled picker via `showDatePicker={{ disabled: true }}`.
       const consumerDatePicker =
         typeof props.showDatePicker === 'object' ? props.showDatePicker : undefined;
-      const isConsumerDisabled = consumerDatePicker?.disabled === true;
+      const isConsumerDisabled = Boolean(consumerDatePicker?.disabled);
+      const consumerDisabledTooltip = consumerDatePicker?.disabledReason;
 
       // ES|QL self-detects a missing @timestamp on its ad-hoc data view, unless the consumer already disabled it.
       const esqlNoTimeField =
@@ -1003,7 +992,7 @@ export const QueryBarTopRow = React.memo(
         datePicker,
         isDatePickerDisabled,
         props.query,
-        consumerDatePicker?.disabledTooltip
+        consumerDisabledTooltip
       );
 
       return (
@@ -1115,8 +1104,7 @@ export const QueryBarTopRow = React.memo(
         ariaLabel: buttonAriaLabel,
         color: buttonColor,
       } = getSubmitButtonProps();
-      const submitTooltip =
-        (props.disableSubmitAction && props.disableSubmitActionTooltip) || buttonAriaLabel;
+      const submitTooltip = buttonAriaLabel;
       const splitButton = (
         <EuiSplitButton color={buttonColor} size="s">
           <EuiSplitButton.ActionPrimary
@@ -1134,14 +1122,10 @@ export const QueryBarTopRow = React.memo(
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
             onClick={onClickSendToBackground}
-            tooltipProps={
-              props.disableSubmitAction && props.disableSubmitActionTooltip
-                ? undefined
-                : {
-                    content: strings.getSendToBackgroundLabel(),
-                    disableScreenReaderOutput: true,
-                  }
-            }
+            tooltipProps={{
+              content: strings.getSendToBackgroundLabel(),
+              disableScreenReaderOutput: true,
+            }}
             aria-label={strings.getSendToBackgroundLabel()}
             data-test-subj="querySubmitButton-secondary-button"
           />
@@ -1149,13 +1133,7 @@ export const QueryBarTopRow = React.memo(
       );
 
       const updateButton = props.useBackgroundSearchButton ? (
-        props.disableSubmitAction && props.disableSubmitActionTooltip ? (
-          <EuiToolTip position="bottom" content={props.disableSubmitActionTooltip}>
-            {splitButton}
-          </EuiToolTip>
-        ) : (
-          splitButton
-        )
+        splitButton
       ) : (
         <EuiSuperUpdateButton
           iconType={buttonIcon}
@@ -1205,7 +1183,7 @@ export const QueryBarTopRow = React.memo(
                       onChange={props.esqlApproximation.onChange}
                       additionalText={props.esqlApproximation.additionalText}
                       disabled={props.esqlApproximation.disabled}
-                      disabledTooltip={props.esqlApproximation.disabledTooltip}
+                      disabledReason={props.esqlApproximation.disabledReason}
                     />
                   )}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
@@ -1390,7 +1368,7 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
-            onInitialStateChange={handleEsqlEditorInitialStateChange}
+            onInitialStateChange={props.onEsqlEditorInitialStateChange}
             controlsContext={
               props.esqlVariablesConfig
                 ? {
@@ -1475,7 +1453,7 @@ export const QueryBarTopRow = React.memo(
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
                     disabled={props.esqlApproximation.disabled}
-                    disabledTooltip={props.esqlApproximation.disabledTooltip}
+                    disabledReason={props.esqlApproximation.disabledReason}
                   />
                 )}
                 {renderDatePickerWithUpdateBtn()}
