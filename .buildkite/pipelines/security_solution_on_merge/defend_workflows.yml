@@ -1,0 +1,80 @@
+steps:
+  - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
+    label: 'Osquery Cypress Tests'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-highmem-4
+      diskSizeGb: 130
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
+    label: 'Osquery Cypress Tests on Serverless'
+    branches: main
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-highmem-4
+      diskSizeGb: 130
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    label: 'Defend Workflows Cypress Tests'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      diskSizeGb: 130
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    timeout_in_minutes: 60
+    parallelism: 24
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    label: 'Defend Workflows Cypress Tests on Serverless'
+    branches: main
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      diskSizeGb: 130
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    timeout_in_minutes: 60
+    parallelism: 16
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
