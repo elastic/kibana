@@ -7,11 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import {
-  AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-  AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
-  AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
-} from '@kbn/agentic-investigations-common';
+import { getInvestigationTabIds } from '@kbn/agentic-investigations-common';
 import type { AlertZeroClientConfig } from './types';
 import { AlertZeroPublicPlugin } from './plugin';
 
@@ -65,18 +61,9 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
       'investigation',
       expect.any(Function)
     );
-    expect(conversationTemplates.registerTab).toHaveBeenCalledWith(
-      AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
-      expect.any(Function)
-    );
-    expect(conversationTemplates.registerTab).toHaveBeenCalledWith(
-      AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-      expect.any(Function)
-    );
-    expect(conversationTemplates.registerTab).toHaveBeenCalledWith(
-      AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
-      expect.any(Function)
-    );
+    for (const tabId of getInvestigationTabIds('investigation')) {
+      expect(conversationTemplates.registerTab).toHaveBeenCalledWith(tabId, expect.any(Function));
+    }
   });
 
   it('registers nothing when disabled', () => {

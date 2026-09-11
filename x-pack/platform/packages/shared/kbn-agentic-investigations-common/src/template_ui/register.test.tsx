@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type {
   AttachmentServiceStartContract,
@@ -18,19 +17,7 @@ import type {
   ConversationTemplateUIDefinition,
 } from '@kbn/agent-builder-browser';
 import type { Investigation } from '../types';
-import { registerAgenticInvestigationTemplateUI } from './register';
-import {
-  AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-  AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
-  AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
-} from './constants';
-
-/** Mirrors what Agent Builder mounts the flyout with (`toMountPoint` + `core.rendering`). */
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider>
-    <EuiProvider>{children}</EuiProvider>
-  </I18nProvider>
-);
+import { getInvestigationTabIds, registerAgenticInvestigationTemplateUI } from './register';
 
 const investigation: Investigation = {
   id: 'conversation-1',
@@ -132,9 +119,9 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
     register(contract);
 
-    expect(contract.getTab(AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID)?.label).toBe('Overview');
-    expect(contract.getTab(AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID)?.label).toBe('Attachments');
-    expect(contract.getTab(AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID)?.label).toBe('Timeline');
+    expect(contract.getTab('investigation.overview')?.label).toBe('Overview');
+    expect(contract.getTab('investigation.attachments')?.label).toBe('Attachments');
+    expect(contract.getTab('investigation.timeline')?.label).toBe('Timeline');
   });
 
   it('registers the template UI definition with a header and footer', () => {
@@ -145,30 +132,67 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     const definition = contract.getTemplateUIDefinition('investigation');
     expect(definition?.name).toBe('Investigation');
     expect(definition?.icon).toBe('securitySignalDetected');
-    expect(definition?.tabs).toEqual([
-      AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
-      AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-      AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
-    ]);
+    expect(definition?.tabs).toEqual(getInvestigationTabIds('investigation'));
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeDefined();
   });
 
-  it('does not re-register the shared tabs when a second solution registers a template', () => {
+  it('gives each solution its own tab ids, so a second one does not collide', () => {
     const { contract } = createFakeService();
 
     register(contract);
 
-    // Agent Builder throws on a duplicate tab id, so this would fail without the guard.
+    // Agent Builder throws on a duplicate tab id, and the package is bundled per plugin, so tab
+    // ids have to be derived from the template id rather than shared across solutions.
     expect(() =>
       register(contract, {
         templateId: 'observabilityInvestigation',
         name: 'Observability investigation',
       })
     ).not.toThrow();
-    expect(contract.getTemplateUIDefinition('observabilityInvestigation')?.name).toBe(
-      'Observability investigation'
+    expect(contract.getTemplateUIDefinition('observabilityInvestigation')?.tabs).toEqual(
+      getInvestigationTabIds('observabilityInvestigation')
     );
+    expect(contract.getTab('observabilityInvestigation.overview')).toBeDefined();
+  });
+
+  it('resolves each solution through its own loader', async () => {
+    const { contract } = createFakeService();
+    const observabilityInvestigation = { ...investigation, title: 'Latency spike' };
+    register(contract);
+    register(contract, {
+      templateId: 'observabilityInvestigation',
+      name: 'Observability investigation',
+      loadInvestigation: jest.fn().mockResolvedValue(observabilityInvestigation),
+    });
+    const Header = getSlot(contract, 'observabilityInvestigation', 'header');
+
+    renderWithKibanaRenderContext(
+      <Header
+        conversation={{ ...conversation, template_id: 'observabilityInvestigation' }}
+        isOpenedFromChat={false}
+      />
+    );
+
+    expect(await screen.findByText('Latency spike')).toBeInTheDocument();
+  });
+
+  it('shares one request between the slots of an open flyout', async () => {
+    const { contract } = createFakeService();
+    const loadInvestigation = jest.fn().mockResolvedValue(investigation);
+    register(contract, { loadInvestigation });
+    const Header = getSlot(contract, 'investigation', 'header');
+    const Footer = getSlot(contract, 'investigation', 'footer');
+
+    renderWithKibanaRenderContext(
+      <>
+        <Header conversation={conversation} isOpenedFromChat={false} />
+        <Footer conversation={conversation} isOpenedFromChat={false} />
+      </>
+    );
+    await screen.findByTestId('investigationFlyoutOpenChat');
+
+    expect(loadInvestigation).toHaveBeenCalledTimes(1);
   });
 
   it('renders the investigation title and status in the header slot', async () => {
@@ -176,7 +200,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     register(contract);
     const Header = getSlot(contract, 'investigation', 'header');
 
-    render(<Header conversation={conversation} isOpenedFromChat={false} />, { wrapper });
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
 
     expect(await screen.findByText('Impossible travel — exec account')).toBeInTheDocument();
     expect(screen.getByText('open')).toBeInTheDocument();
@@ -190,12 +214,8 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     });
     const Header = getSlot(contract, 'failing', 'header');
 
-    render(
-      <Header
-        conversation={{ ...conversation, template_id: 'failing' }}
-        isOpenedFromChat={false}
-      />,
-      { wrapper }
+    renderWithKibanaRenderContext(
+      <Header conversation={{ ...conversation, template_id: 'failing' }} isOpenedFromChat={false} />
     );
 
     // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not be empty.
@@ -207,7 +227,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     register(contract);
     const Footer = getSlot(contract, 'investigation', 'footer');
 
-    render(<Footer conversation={conversation} isOpenedFromChat={false} />, { wrapper });
+    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat={false} />);
 
     fireEvent.click(await screen.findByTestId('investigationFlyoutOpenChat'));
 

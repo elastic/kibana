@@ -8,10 +8,8 @@
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
-import type {
-  ConversationTemplateDetailsFlyoutRenderProps,
-  ConversationTemplateServiceStartContract,
-} from '@kbn/agent-builder-browser';
+import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import type { Investigation } from '../types';
 import { ConversationDetailsFlyoutHeader } from '../components/details/flyout_header';
 import { ConversationDetailsFlyoutFooter } from '../components/details/flyout_footer';
 import {
@@ -20,94 +18,54 @@ import {
   TimelineTab,
 } from '../components/details/details_flyout_tab_contents';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
-import { InvestigationSlot } from './investigation_slot';
-import { setTemplateBindings } from './template_bindings';
-import type { InvestigationLoader, MetadataPatcher } from './template_bindings';
-import {
-  AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-  AGENTIC_INVESTIGATIONS_DEFAULT_TAB_IDS,
-  AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID,
-  AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID,
-} from './constants';
+import { InvestigationSlot, type InvestigationLoader } from './investigation_slot';
 
-/** Statuses offered by the header's status menu when a solution does not supply its own. */
-export const DEFAULT_INVESTIGATION_STATUS_OPTIONS: readonly string[] = [
-  'open',
-  'investigating',
-  'escalated',
-  'closed',
+/**
+ * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
+ * global keyspace and duplicate registration throws. `timeline` is deliberately not reused: Agent
+ * Builder's built-in tab of that name renders chat execution events, not investigation events.
+ */
+export const getInvestigationTabIds = (templateId: string): readonly string[] => [
+  `${templateId}.overview`,
+  `${templateId}.attachments`,
+  `${templateId}.timeline`,
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
-  /** Solution-owned conversation template id. Must be unique across solutions. */
+  /** Solution-owned conversation template id. Agent Builder throws if it is already registered. */
   templateId: string;
   /** Localized template display name, shown in Agent Builder's title badge. */
   name: string;
   icon?: IconType;
   loadInvestigation: InvestigationLoader;
-  /** Omit to render the header's status and assignee read-only. */
-  patchMetadata?: MetadataPatcher;
-  statusOptions?: readonly string[];
-  /** Defaults to the overview, attachments and timeline tabs, in that order. */
-  tabs?: readonly string[];
 }
 
-const OverviewTabContent = ({ conversation }: ConversationTemplateDetailsFlyoutRenderProps) => (
-  <InvestigationSlot conversation={conversation}>
-    {(investigation) => <OverviewTab investigation={investigation} />}
-  </InvestigationSlot>
-);
-
-const TimelineTabContent = ({ conversation }: ConversationTemplateDetailsFlyoutRenderProps) => (
-  <InvestigationSlot conversation={conversation}>
-    {(investigation) => <TimelineTab events={investigation.events} />}
-  </InvestigationSlot>
-);
-
 /**
- * Agent Builder throws on duplicate tab ids, so the shared tabs are registered at most once per
- * service instance no matter how many solutions register a template.
+ * Every slot of an open flyout resolves the same investigation, so concurrent loads for one
+ * conversation share a request instead of issuing one per slot.
  */
-const contractsWithRegisteredTabs = new WeakSet<ConversationTemplateServiceStartContract>();
+const shareConcurrentLoads = (load: InvestigationLoader): InvestigationLoader => {
+  const inFlight = new Map<string, Promise<Investigation>>();
 
-const ensureTabsRegistered = (
-  conversationTemplates: ConversationTemplateServiceStartContract
-): void => {
-  if (contractsWithRegisteredTabs.has(conversationTemplates)) {
-    return;
-  }
-  contractsWithRegisteredTabs.add(conversationTemplates);
+  return (conversationId) => {
+    const pending = inFlight.get(conversationId);
+    if (pending) {
+      return pending;
+    }
 
-  conversationTemplates.registerTab(AGENTIC_INVESTIGATIONS_OVERVIEW_TAB_ID, () => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.overview,
-    content: OverviewTabContent,
-  }));
-
-  conversationTemplates.registerTab(
-    AGENTIC_INVESTIGATIONS_ATTACHMENTS_TAB_ID,
-    ({ attachmentsService }) => ({
-      label: DETAILS_FLYOUT_LABELS.tabs.attachments,
-      // Defined here so the service is captured once, at registration.
-      content: function AttachmentsTabContent({ conversation }) {
-        return (
-          <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />
-        );
-      },
-    })
-  );
-
-  conversationTemplates.registerTab(AGENTIC_INVESTIGATIONS_TIMELINE_TAB_ID, () => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.timeline,
-    content: TimelineTabContent,
-  }));
+    const request = load(conversationId).finally(() => inFlight.delete(conversationId));
+    inFlight.set(conversationId, request);
+    return request;
+  };
 };
 
 /**
- * Registers the shared agentic investigation flyout tabs and one solution's template UI.
+ * Registers one solution's agentic investigation flyout UI: the tabs Agent Builder renders, plus
+ * the header and footer of its conversation details flyout.
  *
- * Call once per solution from the plugin's `start`, passing the solution's own `templateId` and
- * investigation loader.
+ * Call once per solution from the plugin's `start`. Tabs are registered per template rather than
+ * shared, so each solution's tab components close over its own investigation loader.
  */
 export const registerAgenticInvestigationTemplateUI = ({
   conversationTemplates,
@@ -115,59 +73,64 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   loadInvestigation,
-  patchMetadata,
-  statusOptions = DEFAULT_INVESTIGATION_STATUS_OPTIONS,
-  tabs = AGENTIC_INVESTIGATIONS_DEFAULT_TAB_IDS,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  setTemplateBindings(templateId, { loadInvestigation, patchMetadata });
-  ensureTabsRegistered(conversationTemplates);
+  const load = shareConcurrentLoads(loadInvestigation);
+  const [overviewTabId, attachmentsTabId, timelineTabId] = getInvestigationTabIds(templateId);
+
+  conversationTemplates.registerTab(overviewTabId, () => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.overview,
+    content: function OverviewTabContent({ conversation }) {
+      return (
+        <InvestigationSlot conversation={conversation} loadInvestigation={load}>
+          {(investigation) => <OverviewTab investigation={investigation} />}
+        </InvestigationSlot>
+      );
+    },
+  }));
+
+  conversationTemplates.registerTab(attachmentsTabId, ({ attachmentsService }) => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.attachments,
+    content: function AttachmentsTabContent({ conversation }) {
+      return <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />;
+    },
+  }));
+
+  conversationTemplates.registerTab(timelineTabId, () => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.timeline,
+    content: function TimelineTabContent({ conversation }) {
+      return (
+        <InvestigationSlot conversation={conversation} loadInvestigation={load}>
+          {(investigation) => <TimelineTab events={investigation.events} />}
+        </InvestigationSlot>
+      );
+    },
+  }));
 
   conversationTemplates.registerTemplateUIDefinition(templateId, ({ openSidebarConversation }) => ({
     name,
     icon,
-    tabs,
+    tabs: [overviewTabId, attachmentsTabId, timelineTabId],
     detailsFlyout: {
       header: function InvestigationFlyoutHeader({ conversation }) {
         return (
           <InvestigationSlot
             conversation={conversation}
-            compact
-            // Keeps the flyout's `aria-labelledby` target populated when the load fails.
+            loadInvestigation={load}
+            // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
+            // collapse to nothing when the investigation is unavailable.
             fallback={
               <EuiTitle size="s">
                 <h2>{conversation.title}</h2>
               </EuiTitle>
             }
           >
-            {(investigation, refresh) => (
-              <ConversationDetailsFlyoutHeader
-                investigation={investigation}
-                statusOptions={statusOptions}
-                // Refreshing on rejection too: either way the server is the source of truth
-                // for what the tile should show next.
-                onChangeStatus={
-                  patchMetadata &&
-                  ((status) => {
-                    patchMetadata(conversation.id, { status }).then(refresh, refresh);
-                  })
-                }
-                onChangeAssignee={
-                  patchMetadata &&
-                  ((assignee) => {
-                    patchMetadata(conversation.id, { assignees: [assignee] }).then(
-                      refresh,
-                      refresh
-                    );
-                  })
-                }
-              />
-            )}
+            {(investigation) => <ConversationDetailsFlyoutHeader investigation={investigation} />}
           </InvestigationSlot>
         );
       },
       footer: function InvestigationFlyoutFooter({ conversation }) {
         return (
-          <InvestigationSlot conversation={conversation} compact>
+          <InvestigationSlot conversation={conversation} loadInvestigation={load} fallback={null}>
             {(investigation) => (
               <ConversationDetailsFlyoutFooter
                 investigation={investigation}
