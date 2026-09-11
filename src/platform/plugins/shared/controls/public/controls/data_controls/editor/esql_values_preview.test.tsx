@@ -16,9 +16,6 @@ import { ESQLValuesPreview } from './esql_values_preview';
 
 const noopProps = {
   updateQuery: jest.fn(),
-  isQueryRunning: false,
-  queryNeedsRunning: false,
-  dataSource: 'index',
 };
 
 const numericColumn: ESQLColumn = { name: 'bytes', type: 'long' };

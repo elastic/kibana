@@ -8,21 +8,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiBadgeGroup,
   EuiCallOut,
-  EuiCode,
   EuiFlexGrid,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
   EuiStat,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiIconTip,
 } from '@elastic/eui';
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
@@ -38,20 +29,8 @@ export const ESQLValuesPreview: React.FC<{
   previewColumns: ESQLColumn[];
   previewError?: Error;
   updateQuery: (column: string) => void;
-  queryNeedsRunning: boolean;
-  isQueryRunning: boolean;
-  dataSource: string;
   selectedControlType?: DataControlType;
-}> = ({
-  previewOptions,
-  previewError,
-  previewColumns,
-  updateQuery,
-  queryNeedsRunning,
-  isQueryRunning,
-  dataSource,
-  selectedControlType,
-}) => {
+}> = ({ previewOptions, previewError, previewColumns, updateQuery, selectedControlType }) => {
   const isEmpty = useMemo(() => previewOptions.length === 0, [previewOptions]);
 
   const multiColumnResult = useMemo(() => previewColumns.length > 1, [previewColumns]);
@@ -68,121 +47,79 @@ export const ESQLValuesPreview: React.FC<{
     return null;
   }, [previewOptions, selectedControlType, singleColumn]);
 
-  const body = previewError ? (
-    <EuiCallOut
-      announceOnMount
-      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
-      color="danger"
-      iconType="error"
-      size="s"
-    >
-      <p>{previewError.message}</p>
-    </EuiCallOut>
-  ) : multiColumnResult ? (
-    <EuiCallOut
-      announceOnMount
-      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
-      color="warning"
-      iconType="warning"
-      size="s"
-      data-test-subj="esqlMoreThanOneColumnCallout"
-    >
-      <p>
-        {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
-          previewColumns.length
-        )}
-      </p>
-      <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
-    </EuiCallOut>
-  ) : isEmpty ? (
-    <EuiCallOut
-      announceOnMount
-      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
-      color="warning"
-      iconType="warning"
-      size="s"
-      data-test-subj="esqlMoreThanOneColumnCallout"
-    >
-      <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
-    </EuiCallOut>
-  ) : range ? (
-    <EuiFlexGrid columns={2} data-test-subj="esqlValuesPreviewRange">
-      <EuiStat
-        titleSize="s"
-        title={range.min}
-        description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMinText()}
-      />
-      <EuiStat
-        titleSize="s"
-        title={range.max}
-        description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMaxText()}
-      />
-    </EuiFlexGrid>
-  ) : (
-    <div
-      style={{
-        maxHeight: '200px',
-        overflow: 'auto',
-      }}
-    >
+  if (previewError) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
+        color="danger"
+        iconType="error"
+        size="s"
+      >
+        <p>{previewError.message}</p>
+      </EuiCallOut>
+    );
+  }
+
+  if (multiColumnResult) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
+        color="warning"
+        iconType="warning"
+        size="s"
+        data-test-subj="esqlMoreThanOneColumnCallout"
+      >
+        <p>
+          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
+            previewColumns.length
+          )}
+        </p>
+        <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
+      </EuiCallOut>
+    );
+  }
+
+  if (isEmpty) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
+        color="warning"
+        iconType="warning"
+        size="s"
+        data-test-subj="esqlMoreThanOneColumnCallout"
+      >
+        <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
+      </EuiCallOut>
+    );
+  }
+
+  if (range) {
+    return (
+      <EuiFlexGrid columns={2} data-test-subj="esqlValuesPreviewRange">
+        <EuiStat
+          titleSize="s"
+          title={range.min}
+          description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMinText()}
+        />
+        <EuiStat
+          titleSize="s"
+          title={range.max}
+          description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMaxText()}
+        />
+      </EuiFlexGrid>
+    );
+  }
+
+  return (
+    <div style={{ maxHeight: '200px', overflow: 'auto' }}>
       <EuiBadgeGroup data-test-subj="esqlValuesPreviewStrings">
         {previewOptions.map((option, i) => (
           <EuiBadge key={`${i}-${option}`}>{option === '' ? EMPTY_LABEL : option}</EuiBadge>
         ))}
       </EuiBadgeGroup>
     </div>
-  );
-
-  return isQueryRunning ? (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      paddingSize="xl"
-      css={css`
-        text-align: center;
-      `}
-    >
-      <EuiLoadingSpinner size="l" />
-    </EuiPanel>
-  ) : (
-    <>
-      {singleColumn && (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getDataSourceLabel()}
-              >
-                <EuiCode>{dataSource}</EuiCode>
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={
-                  <>
-                    {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getFieldLabel()}{' '}
-                    <EuiIconTip
-                      type="question"
-                      color="primary"
-                      content={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getFieldTooltip()}
-                    />
-                  </>
-                }
-              >
-                <EuiCode>{singleColumn.name}</EuiCode>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {!queryNeedsRunning && (
-        <EuiFormRow
-          label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getTitle()}
-        >
-          {body}
-        </EuiFormRow>
-      )}
-    </>
   );
 };

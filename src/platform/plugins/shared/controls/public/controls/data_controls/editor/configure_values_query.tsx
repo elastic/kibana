@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { appendStatsByToQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -25,6 +35,7 @@ import { getControlsTimezone } from '../../utils';
 import { ESQLValuesPreview } from './esql_values_preview';
 import type { DataControlEditorState } from './types';
 import { getDataViewIdFromESQLQuery } from '../../utils/get_data_view_id_from_esql_query';
+import { DataControlEditorStrings } from '../data_control_constants';
 
 interface ConfigureValuesQueryProps {
   editorState: Partial<DataControlEditorState>;
@@ -147,6 +158,11 @@ export const ConfigureValuesQuery = ({
     [editorState.esql_query]
   );
 
+  const singleColumn = useMemo(
+    () => (previewColumns.length === 1 ? previewColumns[0] : null),
+    [previewColumns]
+  );
+
   const controlsContext = useMemo(() => {
     const supportsControls = apiCanAddNewPanel(parentApi) || apiCanPinPanels(parentApi);
     if (!supportsControls) return undefined;
@@ -202,16 +218,64 @@ export const ConfigureValuesQuery = ({
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <ESQLValuesPreview
-        previewOptions={previewOptions}
-        previewColumns={previewColumns}
-        previewError={previewError}
-        queryNeedsRunning={previewQueryNeedsRunning}
-        updateQuery={appendColumnToESQLQuery}
-        isQueryRunning={isPreviewQueryRunning}
-        dataSource={dataSource}
-        selectedControlType={selectedControlType}
-      />
+      {isPreviewQueryRunning ? (
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="xl"
+          css={css`
+            text-align: center;
+          `}
+        >
+          <EuiLoadingSpinner size="l" />
+        </EuiPanel>
+      ) : (
+        <>
+          {singleColumn && (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getDataSourceLabel()}
+                  >
+                    <EuiCode>{dataSource}</EuiCode>
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={
+                      <>
+                        {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getFieldLabel()}{' '}
+                        <EuiIconTip
+                          type="question"
+                          color="primary"
+                          content={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getFieldTooltip()}
+                        />
+                      </>
+                    }
+                  >
+                    <EuiCode>{singleColumn.name}</EuiCode>
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {!previewQueryNeedsRunning && (
+            <EuiFormRow
+              label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getTitle()}
+            >
+              <ESQLValuesPreview
+                previewOptions={previewOptions}
+                previewColumns={previewColumns}
+                previewError={previewError}
+                updateQuery={appendColumnToESQLQuery}
+                selectedControlType={selectedControlType}
+              />
+            </EuiFormRow>
+          )}
+        </>
+      )}
     </>
   );
 };
