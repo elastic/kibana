@@ -72,6 +72,7 @@
     "@kbn/resizable-layout",
     "@kbn/rule-data-utils",
     "@kbn/core-chrome-browser",
+    "@kbn/recently-accessed",
     "@kbn/core-plugins-server",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/shared-ux-toolbar-selector",
