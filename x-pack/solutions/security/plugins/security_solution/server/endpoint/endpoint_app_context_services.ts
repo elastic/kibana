@@ -597,8 +597,8 @@ export class EndpointAppContextService {
     /**
      * Whether the action is system/rule-triggered (`true`, the default — preserves behavior for
      * detection-rule response actions and the pending-actions task runner) or was requested
-     * directly by an analyst/user (`false` — e.g. AI Agent skill tools gated behind HITL
-     * confirmation). `RESPONSE_ACTIONS_SUPPORT_MAP` gates several actions (isolate, unisolate,
+     * directly by an analyst/user (`false` — e.g. workflow steps gated behind HITL confirmation).
+     * `RESPONSE_ACTIONS_SUPPORT_MAP` gates several actions (isolate, unisolate,
      * running-processes, scan) as unsupported for `automated` on some agent types, so callers
      * representing user-initiated actions MUST pass `false`.
      */

@@ -12,7 +12,7 @@ import { killProcessStepCommonDefinition } from '../../../../common/workflows/st
 export const killProcessStepDefinition = createPublicStepDefinition({
   ...killProcessStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/cross').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
       default: icon,
     }))
   ),

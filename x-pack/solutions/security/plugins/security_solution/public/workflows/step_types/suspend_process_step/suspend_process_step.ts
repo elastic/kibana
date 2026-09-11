@@ -12,7 +12,7 @@ import { suspendProcessStepCommonDefinition } from '../../../../common/workflows
 export const suspendProcessStepDefinition = createPublicStepDefinition({
   ...suspendProcessStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pause').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/app_security').then(({ icon }) => ({
       default: icon,
     }))
   ),

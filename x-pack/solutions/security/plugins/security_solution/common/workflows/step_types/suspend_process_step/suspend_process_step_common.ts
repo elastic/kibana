@@ -11,7 +11,7 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import { MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/constants';
 
-export const SuspendProcessStepId = 'security.suspendProcess' as const;
+export const SuspendProcessStepId = 'security.endpointSuspendProcess' as const;
 
 const MAX_ENDPOINT_ID_LENGTH = 256;
 const MAX_ENDPOINT_IDS = 250;
@@ -50,8 +50,8 @@ export const suspendProcessOutputSchema = z.object({
   action_id: z.string().describe('The ID of the dispatched suspend-process action.'),
   status: z
     .enum(['failed', 'pending', 'successful', 'canceled'])
-    .describe('Status of the action at dispatch time (usually pending).'),
-  was_successful: z.boolean().describe('Whether the action was already successful at dispatch.'),
+    .describe('Final status of the response action after polling for completion.'),
+  was_successful: z.boolean().describe('Whether the response action completed successfully.'),
   message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
 });
 
@@ -60,22 +60,25 @@ export const suspendProcessStepCommonDefinition: BaseStepDefinition<
   typeof suspendProcessOutputSchema
 > = {
   id: SuspendProcessStepId,
-  label: i18n.translate('xpack.securitySolution.workflows.steps.suspendProcess.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.endpointSuspendProcess.label', {
     defaultMessage: 'Suspend Process',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.suspendProcess.description', {
-    defaultMessage:
-      'Suspends a process on an endpoint via the Elastic Defend response action. Reversible alternative to kill when the evidence is strong but you want to retain the process for investigation.',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.endpointSuspendProcess.description',
+    {
+      defaultMessage:
+        'Suspends a process on an endpoint via the Elastic Defend response action. Reversible alternative to kill when the evidence is strong but you want to retain the process for investigation.',
+    }
+  ),
   category: StepCategory.KibanaSecurity,
   inputSchema: suspendProcessInputSchema,
   outputSchema: suspendProcessOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.suspendProcess.documentation.details',
+      'xpack.securitySolution.workflows.steps.endpointSuspendProcess.documentation.details',
       {
         defaultMessage:
-          'Dispatches an Elastic Defend suspend-process response action. The process is identified by PID or entity_id taken from endpoint telemetry. Unlike kill, suspend is reversible. Status is typically `pending` until the endpoint agent checks in. Requires the `canSuspendProcess` endpoint privilege.',
+          'Dispatches an Elastic Defend suspend-process response action, then polls every 10 seconds until the action completes or times out (up to 10 minutes / 60 attempts). The process is identified by PID or entity_id taken from endpoint telemetry. Unlike kill, suspend is reversible. The returned status and was_successful fields reflect the final outcome. Requires the `canSuspendProcess` endpoint privilege.',
       }
     ),
     examples: [
