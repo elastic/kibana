@@ -275,7 +275,10 @@ test.describe(
       await test.step('list rule-name href is createHref on the observability mount', async () => {
         await rules.openListAndSearch(ruleName);
         await expect(rules.ruleNameLink(ruleName)).toBeVisible({ timeout: 30_000 });
-        await expect(rules.ruleNameLink(ruleName)).toHaveAttribute('href', OBS_V1_RULE_NAME_HREF_RE);
+        await expect(rules.ruleNameLink(ruleName)).toHaveAttribute(
+          'href',
+          OBS_V1_RULE_NAME_HREF_RE
+        );
         await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
           'href',
           MANAGEMENT_CLASSIC_RULES_URL_RE
