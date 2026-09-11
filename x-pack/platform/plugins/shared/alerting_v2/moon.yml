@@ -134,6 +134,8 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/announcement-banner'
   - '@kbn/app-header'
+  - '@kbn/flyout-template'
+  - '@kbn/flyout-sections'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/change-history'
   - '@kbn/change-history-ui'
