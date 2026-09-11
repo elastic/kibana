@@ -17,9 +17,9 @@ describe('LogExtractionTypeOverride', () => {
   });
 
   it('accepts null for a cleared field', () => {
-    expect(
-      LogExtractionTypeOverride.safeParse({ frequency: null, delay: null }).success
-    ).toBe(true);
+    expect(LogExtractionTypeOverride.safeParse({ frequency: null, delay: null }).success).toBe(
+      true
+    );
   });
 
   it('accepts all overridable fields at once', () => {
