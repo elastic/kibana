@@ -24,9 +24,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
-% FEATURES, ENHANCEMENTS, FIXES
-% Paste in index.md
-
 ## 9.5.4 [kibana-9.5.4-release-notes]
 
 ### Fixes [kibana-9.5.4-fixes]
