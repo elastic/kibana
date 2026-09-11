@@ -129,7 +129,8 @@ export const registerGetExperimentTracesRoute = ({
                   item !== undefined && 'error' in item
                     ? item.error?.reason ?? item.error?.type ?? 'unknown error'
                     : 'missing msearch response item';
-                throw new Error(`Span search failed for trace ${reference.trace_id}: ${reason}`);
+                logger.warn(`Span search failed for trace ${reference.trace_id}: ${reason}`);
+                return { ...reference, spans: [], total_spans: 0, duration_ms: 0 };
               }
               // A trace whose spans aged out of traces-* keeps its reference with
               // empty spans, so callers can tell an expired trace from a run that
