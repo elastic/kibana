@@ -80,6 +80,9 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
 export const CASE_TEMPLATE_DETAILS_URL = `${CASE_TEMPLATES_URL}/{template_id}` as const;
+export const CASE_FIELD_DEFINITIONS_URL = `${CASES_URL}/field_definitions` as const;
+export const CASE_FIELD_DEFINITION_DETAILS_URL =
+  `${CASE_FIELD_DEFINITIONS_URL}/{field_definition_id}` as const;
 // Public discovery of the `extended_fields` a caller may apply. `fields` is a static segment,
 // so — like `templates`/`reporters`/`tags` — it resolves ahead of the `{case_id}` param route.
 export const CASE_FIELDS_URL = `${CASES_URL}/fields` as const;
@@ -213,6 +216,10 @@ export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
+export const MAX_FIELD_DEFINITION_ID_LENGTH = 36 as const; // uuidv4 length
+export const MAX_FIELD_DEFINITION_NAME_LENGTH = 50 as const;
+export const MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_FIELD_DEFINITION_DEFINITION_LENGTH = 30000 as const;
 /**
  * Caps on the templates-v2 / extended-fields system, enforced on new writes only (existing data is
  * never retroactively rejected). These bound what the public mutative template API can create so

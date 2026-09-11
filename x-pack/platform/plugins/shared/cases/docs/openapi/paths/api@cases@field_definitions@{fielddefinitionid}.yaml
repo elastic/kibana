@@ -1,0 +1,137 @@
+put:
+  summary: Update editable attributes of a reusable field definition
+  operationId: updateCaseFieldDefinitionDefaultSpace
+  description: >
+    Updates editable attributes of a reusable field definition. Server-managed attributes
+    (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege
+    for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable
+    after creation — an attempt to change either returns `409` with
+    `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity
+    attributes were modified. Requires the Cases feature to be enabled in the space.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/field_definition_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/field_definition_write_request.yaml'
+        examples:
+          updateCaseFieldDefinitionRequest:
+            $ref: '../components/examples/field_definition_write_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call. Returns the updated field definition.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/field_definition_response.yaml'
+          examples:
+            updateCaseFieldDefinitionResponse:
+              $ref: '../components/examples/get_case_field_definition_response.yaml'
+    '400':
+      description: >
+        The request body is invalid, the YAML definition is malformed, the `name` does not match
+        the YAML definition's `name`, or the owner would be changed.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response400:
+              $ref: '../components/examples/response_400_invalid_template.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the manage templates privilege for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The field definition was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'
+    '409':
+      description: >
+        A field's name or type cannot be changed after creation, or a global field cannot be
+        demoted while linked to an active custom field.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409.yaml'
+delete:
+  summary: Delete a reusable field definition
+  operationId: deleteCaseFieldDefinitionDefaultSpace
+  description: >
+    Deletes a reusable field definition. You must have the "Manage templates" sub-privilege for the
+    Cases feature of the owning solution. A field definition cannot be deleted while it is referenced
+    by an active template or linked to an active v1 custom field in the Cases configuration.
+    Requires the Cases feature to be enabled in the space.
+  x-state: Technical preview
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/field_definition_id.yaml'
+  responses:
+    '204':
+      description: The field definition was deleted.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have the manage templates privilege for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
+    '404':
+      description: The field definition was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response404:
+              $ref: '../components/examples/response_404.yaml'
+    '409':
+      description: >
+        The field definition is referenced by one or more active templates, or is linked to an
+        active custom field in the Cases configuration.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409.yaml'

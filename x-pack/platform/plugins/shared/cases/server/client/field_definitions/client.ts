@@ -105,6 +105,31 @@ export const createFieldDefinitionsSubClient = (
   const { fieldDefinitionsService, caseConfigureService } = services;
 
   /**
+   * Authorizes a mutation on an existing field definition without becoming an existence oracle: a
+   * user with no read access for the owner gets the same 404 as a missing id, while a user who can
+   * read (but not manage) field definitions gets an honest 403. Mirrors the templates client pattern.
+   */
+  const ensureCanManageOrHideExistence = async (
+    fieldDef: SavedObject<FieldDefinition>,
+    fieldDefinitionId: string
+  ): Promise<void> => {
+    const entities = [{ owner: fieldDef.attributes.owner, id: fieldDef.id }];
+    try {
+      await authorization.ensureAuthorized({ operation: Operations.manageTemplate, entities });
+    } catch (manageError) {
+      try {
+        await authorization.ensureAuthorized({
+          operation: Operations.getFieldDefinitions,
+          entities,
+        });
+      } catch {
+        throw Boom.notFound(`Field definition with id ${fieldDefinitionId} not found`);
+      }
+      throw manageError;
+    }
+  };
+
+  /**
    * A4 guard: true when the given definition is **actively linked** — i.e. one
    * of the owner's configured v1 custom fields resolves to it (via `legacyKey`
    * or an unambiguous name match). Actively linked definitions cannot be
@@ -221,10 +246,7 @@ export const createFieldDefinitionsSubClient = (
       clientArgs,
       async (id: string, input: UpdateFieldDefinitionInput) => {
         const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
-        await authorization.ensureAuthorized({
-          operation: Operations.manageTemplate,
-          entities: [{ owner: fieldDef.attributes.owner, id: fieldDef.id }],
-        });
+        await ensureCanManageOrHideExistence(fieldDef, id);
         if (input.owner !== fieldDef.attributes.owner) {
           throw Boom.badRequest(
             `Cannot change the owner of a field definition. Current owner: ${fieldDef.attributes.owner}`
@@ -298,10 +320,7 @@ export const createFieldDefinitionsSubClient = (
       clientArgs,
       async (id: string) => {
         const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
-        await authorization.ensureAuthorized({
-          operation: Operations.manageTemplate,
-          entities: [{ owner: fieldDef.attributes.owner, id: fieldDef.id }],
-        });
+        await ensureCanManageOrHideExistence(fieldDef, id);
 
         const { templatesService } = services;
         const referencingTemplates = await templatesService.getActiveTemplatesReferencingField(

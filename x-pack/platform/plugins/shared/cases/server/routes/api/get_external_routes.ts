@@ -31,6 +31,7 @@ import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 import { postFileRoute } from './files/post_file';
 import { getPublicTemplateRoutes } from './templates';
+import { getPublicFieldDefinitionRoutes } from './field_definitions';
 
 export const getExternalRoutes = ({
   isServerless,
@@ -66,4 +67,5 @@ export const getExternalRoutes = ({
     getAllAlertsAttachedToCaseRoute,
     postFileRoute,
     ...getPublicTemplateRoutes(config),
+    ...getPublicFieldDefinitionRoutes(config),
   ] as CaseRoute[];

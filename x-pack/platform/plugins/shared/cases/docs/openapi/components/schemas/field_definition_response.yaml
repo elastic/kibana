@@ -1,0 +1,41 @@
+title: Field definition response
+description: >
+  A reusable field definition from the field library. The `legacyKey` attribute, which is a
+  server-managed link to a migrated v1 custom field, is not included in the public API response.
+type: object
+required:
+  - fieldDefinitionId
+  - name
+  - definition
+  - owner
+properties:
+  fieldDefinitionId:
+    type: string
+    maxLength: 36
+    description: Unique server-assigned identifier for the field definition (UUIDv4).
+  name:
+    type: string
+    maxLength: 50
+    description: >
+      The field name. Must match the `name` property in the YAML definition and is unique per owner
+      (case-insensitive). Immutable after creation.
+  definition:
+    type: string
+    maxLength: 30000
+    description: The field definition as a YAML string.
+  owner:
+    $ref: 'owner.yaml'
+  description:
+    type: string
+    maxLength: 1000
+    description: Optional human-readable description of the field's purpose.
+  isGlobal:
+    type: boolean
+    description: >
+      When true, this field is rendered in every case regardless of which template the case uses.
+  displayOrder:
+    type: integer
+    minimum: 0
+    description: >
+      Position of a global field in the case details view. Assigned by the server and changed via
+      the Field Library reorder controls.
