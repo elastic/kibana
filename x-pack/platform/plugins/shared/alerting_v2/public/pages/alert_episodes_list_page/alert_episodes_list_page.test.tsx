@@ -93,7 +93,7 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => ({
 
 // The stub echoes the props the page passes so tests can assert on them from the DOM, which keeps
 // the mock factory free of module scope references it cannot reach while jest hoists it.
-jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
+jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => ({
   RuleSummaryFlyoutContainer: ({
     ruleId,
     type,

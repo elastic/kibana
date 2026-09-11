@@ -62,7 +62,7 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
-import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';

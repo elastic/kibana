@@ -27,7 +27,7 @@ export interface RuleDetailsTableProps {
   items: RuleDetailsTableItem[];
 }
 
-// Fixed so every RuleDetailsTable instance (rule conditions, metadata) shares
+// Fixed so every RuleDetailsTable instance (rule conditions) shares
 // the same column widths regardless of its own content.
 const TITLE_COLUMN_WIDTH = 130;
 
