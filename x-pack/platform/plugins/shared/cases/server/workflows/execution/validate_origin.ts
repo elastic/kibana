@@ -36,6 +36,11 @@ interface DocumentPair {
   _index: string;
 }
 
+interface DocumentValidationContext {
+  selected: DocumentPair[];
+  attached: DocumentResponse;
+}
+
 /** The maximum number of documents that may be submitted in `inputs.event.documents` per run. */
 const MAX_DOCUMENTS_PER_WORKFLOW_RUN = 1000 as const;
 
@@ -261,7 +266,7 @@ const validateDefaultTargetAlignment = ({
 };
 
 /**
- * Validates that the requested workflow `origin` is consistent with `caseId`
+ * Validates that the requested workflow `origin` is consistent with the case
  * and, when alert or document inputs are present, that every selected item is attached
  * to the case.
  *
@@ -275,25 +280,21 @@ const validateDefaultTargetAlignment = ({
  */
 export const validateOrigin = ({
   origin,
-  caseId,
-  selectedAlerts,
   theCase,
-  attachedAlerts,
-  selectedDocuments,
-  attachedEvents,
-  attachmentTypeRegistry,
   inputs,
+  attachmentTypeRegistry,
+  alerts: { selected: selectedAlerts, attached: attachedAlerts },
+  documents: { selected: selectedDocuments, attached: attachedEvents },
 }: {
   origin: CaseWorkflowRunOrigin;
-  caseId: string;
-  selectedAlerts: DocumentPair[];
   theCase: Case;
-  attachedAlerts: DocumentResponse;
-  selectedDocuments: DocumentPair[];
-  attachedEvents: DocumentResponse;
-  attachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   inputs: Record<string, unknown>;
+  attachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  alerts: DocumentValidationContext;
+  documents: DocumentValidationContext;
 }): ResolvedWorkflowAttachmentOrigin | undefined => {
+  const { id: caseId } = theCase;
+
   // Step 1 — origin-entity membership checks.
   if (origin.caseId !== caseId) {
     throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
