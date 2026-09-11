@@ -142,6 +142,8 @@ def render_cards(rows):
         if not cards:
             continue
         body = []
+        exec_note = (" (2 executions — union)"
+                     if len(cards) > 1 else "")
         for t in cards:
             for ins in t["insights"]:
                 tactics = ", ".join(ins.get("mitre_attack_tactics") or [])
@@ -157,7 +159,7 @@ def render_cards(rows):
         if body:
             out.append(
                 f'<details class="model-block"><summary>{html.escape(display)}'
-                f' — {len(body)} discoveries</summary>'
+                f' — {len(body)} discoveries{exec_note}</summary>'
                 + "".join(body) + "</details>")
     return "\n".join(out)
 
