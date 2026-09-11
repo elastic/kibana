@@ -7,10 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import type { ToastInput } from '@kbn/core/public';
+import type { AnalyticsServiceStart, ToastInput } from '@kbn/core/public';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
   MAX_IMAGE_BYTES,
+  MAX_IMAGES_PER_ROUND,
   SUPPORTED_IMAGE_MIME_TYPES,
 } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -29,6 +31,10 @@ const labels = {
   uploadError: i18n.translate('xpack.agentBuilder.uploadImage.uploadError', {
     defaultMessage: 'Could not upload the image.',
   }),
+  tooMany: i18n.translate('xpack.agentBuilder.uploadImage.tooMany', {
+    defaultMessage: 'You can attach up to {max} images per message.',
+    values: { max: MAX_IMAGES_PER_ROUND },
+  }),
 };
 
 /** Returns a name that is not already in `existingNames`. Appends ` 2`, ` 3`, ... as needed. */
@@ -43,6 +49,25 @@ export const getUniqueName = (originalName: string, existingNames: Set<string>):
 };
 
 /**
+ * Blocks adding another image once `currentImageCount` has reached the per-round limit.
+ * Shows a toast and reports telemetry. Returns whether the image was rejected.
+ */
+export const rejectIfTooManyImages = ({
+  currentImageCount,
+  addErrorToast,
+  reportEvent,
+}: {
+  currentImageCount: number;
+  addErrorToast: (input: ToastInput) => void;
+  reportEvent: AnalyticsServiceStart['reportEvent'];
+}): boolean => {
+  if (currentImageCount < MAX_IMAGES_PER_ROUND) return false;
+  addErrorToast({ title: labels.tooMany });
+  reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, { reason: 'too_many' });
+  return true;
+};
+
+/**
  * Validates a File, uploads it to the Files service, and calls upsertAttachments.
  * Returns whether the attachment was created - `false` tells the caller to remove
  * the inline editor placeholder.
@@ -53,6 +78,7 @@ export const processImageFile = async ({
   filesClient,
   upsertAttachments,
   addErrorToast,
+  reportEvent,
   abortSignal,
 }: {
   file: File;
@@ -60,15 +86,25 @@ export const processImageFile = async ({
   filesClient: ScopedFilesClient;
   upsertAttachments: (attachments: ConversationAttachment[]) => void;
   addErrorToast: (input: ToastInput) => void;
+  reportEvent: AnalyticsServiceStart['reportEvent'];
   abortSignal?: AbortSignal;
 }): Promise<boolean> => {
   if (!(SUPPORTED_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
     addErrorToast({ title: labels.invalidType });
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'invalid_type',
+      mime_type: file.type,
+    });
     return false;
   }
 
   if (file.size > MAX_IMAGE_BYTES) {
     addErrorToast({ title: labels.tooLarge });
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'too_large',
+      mime_type: file.type,
+      file_size: file.size,
+    });
     return false;
   }
 
@@ -81,6 +117,10 @@ export const processImageFile = async ({
   );
   if (!isRealImage) {
     addErrorToast({ title: labels.invalidType });
+    reportEvent(AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected, {
+      reason: 'invalid_type',
+      mime_type: file.type,
+    });
     return false;
   }
 

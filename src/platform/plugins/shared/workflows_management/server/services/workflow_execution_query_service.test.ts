@@ -257,7 +257,7 @@ describe('WorkflowExecutionQueryService', () => {
       await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.sort).toEqual([{ createdAt: 'desc' }]);
+      expect(call.sort).toEqual([{ createdAt: 'desc' }, { id: 'desc' }]);
     });
 
     it('uses explicit execution sort when provided', async () => {
@@ -269,7 +269,7 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }]);
+      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }, { id: 'desc' }]);
     });
 
     it('uses default page size and page 1 when not specified', async () => {

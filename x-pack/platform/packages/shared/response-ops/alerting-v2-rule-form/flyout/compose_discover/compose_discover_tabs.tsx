@@ -28,6 +28,7 @@ interface ComposeDiscoverTabsProps {
   tabs: QueryTab[];
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
+  onBaseEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
    * When true, only the editor content is rendered — the tab bar is omitted.
    * Used when the parent renders tabs in the flyout header instead.
@@ -264,6 +265,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   tabs,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  onBaseEditorMount,
   hideTabBar = false,
   readOnly = false,
 }) => {
@@ -295,6 +297,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
             value={baseQuery}
             onChange={onBaseQueryChange}
             lineNumberOffset={0}
+            onEditorMount={onBaseEditorMount}
             readOnly={readOnly}
             dataTestSubj="composeDiscoverBlockEditor-base"
           />

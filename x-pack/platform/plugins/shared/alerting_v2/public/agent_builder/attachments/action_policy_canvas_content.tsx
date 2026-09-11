@@ -187,6 +187,7 @@ export const ActionPolicyCanvasContent = ({
         icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
+          // TODO: migrate to actionPolicyLocators.navigateSync once agent_builder is wrapped in LocatorProvider
           application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));
         },
       },

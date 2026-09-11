@@ -69,6 +69,7 @@ export interface UsageStats {
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
   'workflows:ui:showManagedWorkflows': boolean;
+  'workflows:executionFlyout:aiDiagnose:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
