@@ -21,6 +21,7 @@ const { runNode } = require('./run_node');
 describe('executionFlowLoop', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (runNode as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('calls runNode while the execution cursor is executing', async () => {
@@ -67,6 +68,33 @@ describe('executionFlowLoop', () => {
 
     expect(runNode).toHaveBeenCalledTimes(1);
     expect(workflowExecutionCursor.stop).toHaveBeenCalled();
+  });
+
+  it('does not commit navigation after runNode parks the cursor', async () => {
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
+      currentNode: { id: 'wait-node' } as GraphNodeUnion,
+    });
+    (runNode as jest.Mock).mockImplementation(async () => {
+      workflowExecutionCursor.stop();
+    });
+
+    const saveState = jest.fn().mockResolvedValue(undefined);
+    const params = {
+      workflowExecutionCursor,
+      workflowRuntime: {
+        executionCursor: workflowExecutionCursor,
+        saveState,
+      },
+    } as any;
+
+    await executionFlowLoop(params);
+
+    expect(runNode).toHaveBeenCalledTimes(1);
+    expect(workflowExecutionCursor.commitPendingNavigation).not.toHaveBeenCalled();
+    expect(saveState).toHaveBeenCalledTimes(1);
+    expect(workflowExecutionCursor.currentNode).toEqual(
+      expect.objectContaining({ id: 'wait-node' })
+    );
   });
 
   it('does not call runNode when execution cursor is not executing', async () => {

@@ -20,6 +20,11 @@ export type {
   AppHeaderFavoriteAction,
   AppHeaderFavoriteStatus,
   AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
@@ -36,8 +41,11 @@ export type {
   ChromeBadge,
   ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
+  ChromeAiButton,
+  ChromeControls,
+  ChromeHelp,
+  ChromeNewsfeedHandler,
   ChromeNext,
-  GlobalHeaderAiButton,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,
@@ -48,8 +56,6 @@ export type {
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuLink,
-  ChromeNavControl,
-  ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeRecentlyAccessed,

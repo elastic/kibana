@@ -979,7 +979,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.field_extract', {
         defaultMessage: 'FIELD_EXTRACT',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
