@@ -6,6 +6,7 @@
  */
 
 export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
+export const ALERTING_V1_ENABLED_SETTING_ID = 'alerting:v1:enabled';
 
 /**
  * Space-scoped. When Alerting v2 is enabled, controls whether the V1
@@ -18,6 +19,7 @@ export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experim
 
 export interface AlertingAdvancedSettingValueMap {
   [ALERTING_V2_ENABLED_SETTING_ID]: boolean;
+  [ALERTING_V1_ENABLED_SETTING_ID]: boolean;
   [ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]: boolean;
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: boolean;
 }

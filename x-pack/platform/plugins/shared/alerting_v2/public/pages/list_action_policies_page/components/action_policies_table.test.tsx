@@ -231,7 +231,7 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
-  it('renders the experimental badge in the page header', async () => {
+  it('renders the page title without an experimental badge', async () => {
     renderTable();
 
     await waitFor(() =>
@@ -239,7 +239,7 @@ describe('ActionPoliciesTable', () => {
         'Action Policies'
       )
     );
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
   it('renders the create button when policies exist and the user can write', async () => {

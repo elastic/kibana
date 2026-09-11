@@ -132,25 +132,12 @@ describe('rulesPage', () => {
     expect(await screen.findAllByRole('tab')).toHaveLength(1);
   });
 
-  it('omits the list back button when hideListBackButton is set', async () => {
-    useKibanaMock().services.hideListBackButton = true;
+  it('does not show a back button on the rules list', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
-  });
-
-  it('points the back button at Alerts on the rules list', async () => {
-    useKibanaMock().services.application.getUrlForApp = jest.fn(
-      () => '/app/observability-overview/alerts'
-    );
-    const history = createMemoryHistory({ initialEntries: ['/'] });
-    renderRulesPage(history);
-
-    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName(
-      'Back to Alerts'
-    );
   });
 
   it('keeps classic Logs on the Rules heading with a back button to Alerts', async () => {
@@ -301,6 +288,7 @@ describe('rulesPage', () => {
         expect(screen.queryByTestId('v1RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('v2RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('rulesSettingsLink')).not.toBeInTheDocument();
 
         await openAppMenuOverflow();
         expect(screen.queryByTestId('rulesLogsLink')).not.toBeInTheDocument();

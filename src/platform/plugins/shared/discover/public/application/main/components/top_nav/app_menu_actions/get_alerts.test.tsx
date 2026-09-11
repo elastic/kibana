@@ -182,7 +182,7 @@ describe('getAlertsAppMenuItem', () => {
       expect(createAlertItem?.disableButton).toBe(false);
     });
 
-    it('should include the manage rules and connectors link', async () => {
+    it('should include the manage rules link', async () => {
       const alertsMenuItem = await getAlertsMenuItem();
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
@@ -222,16 +222,17 @@ describe('getAlertsAppMenuItem', () => {
       expect(createAlertItem?.disableButton).toBe(true);
     });
 
-    it('should include the manage rules and connectors link', async () => {
+    it('should include the manage rules link', async () => {
       const alertsMenuItem = await getAlertsMenuItem();
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
       );
       expect(manageAlertsItem).toBeDefined();
+      expect(manageAlertsItem?.label).toBe('Manage rules');
     });
   });
 
-  describe('Manage rules and connectors link', () => {
+  describe('Manage rules link', () => {
     it('should link to the unified rules page when rules app is registered', async () => {
       const services = createDiscoverServicesMock();
       jest.mocked(services.application.isAppRegistered).mockReturnValue(true);

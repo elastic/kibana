@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
@@ -99,6 +100,24 @@ export class SLOPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       mount,
       keywords: ['observability', 'monitor', 'slos'],
+      deepLinks: [
+        {
+          id: 'management',
+          title: i18n.translate('xpack.slo.deepLinks.managementTitle', {
+            defaultMessage: 'Manage SLOs',
+          }),
+          path: '/management',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
+        {
+          id: 'settings',
+          title: i18n.translate('xpack.slo.deepLinks.settingsTitle', {
+            defaultMessage: 'Settings',
+          }),
+          path: '/settings',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
+      ],
     };
     // Register an application into the side navigation menu
     core.application.register(app);

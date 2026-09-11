@@ -238,7 +238,7 @@ export const getAlertsAppMenuItem = ({
       id: AppMenuActionId.manageRulesAndConnectors,
       order: Number.MAX_SAFE_INTEGER,
       label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
-        defaultMessage: 'Manage rules and connectors',
+        defaultMessage: 'Manage rules',
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',

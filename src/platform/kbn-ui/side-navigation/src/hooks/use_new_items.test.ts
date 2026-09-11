@@ -64,6 +64,8 @@ const primaryItemsWithNewSecondaryItems: MenuItem[] = [
         createSecondary('dashboards-subitem-1', 'Subitem 1', 'new'),
         createSecondary('dashboards-subitem-2', 'Subitem 2', 'new'),
         createSecondary('dashboards-subitem-3', 'Subitem 3', 'new'),
+        createSecondary('dashboards-subitem-4', 'Subitem 4', 'new'),
+        createSecondary('dashboards-subitem-5', 'Subitem 5', 'new'),
       ],
     },
   ]),
@@ -92,14 +94,16 @@ describe('useNewItems', () => {
       expect(result.current.getIsNewPrimary('settings')).toBe(false);
     });
 
-    it('enforces max 2 new secondary items per parent', () => {
+    it('enforces max 4 new secondary items per parent', () => {
       const { result } = renderHook(() =>
         useNewItems([...primaryItemsWithNewSecondaryItems, ...footerItems])
       );
 
       expect(result.current.getIsNewSecondary('dashboards-subitem-1')).toBe(true);
       expect(result.current.getIsNewSecondary('dashboards-subitem-2')).toBe(true);
-      expect(result.current.getIsNewSecondary('dashboards-subitem-3')).toBe(false);
+      expect(result.current.getIsNewSecondary('dashboards-subitem-3')).toBe(true);
+      expect(result.current.getIsNewSecondary('dashboards-subitem-4')).toBe(true);
+      expect(result.current.getIsNewSecondary('dashboards-subitem-5')).toBe(false);
     });
   });
 

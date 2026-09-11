@@ -27,7 +27,7 @@ const dataTip = i18n.translate('management.sections.dataTip', {
 });
 
 const insightsAndAlertingTitle = i18n.translate('management.sections.insightsAndAlertingTitle', {
-  defaultMessage: 'Alerts and Insights',
+  defaultMessage: 'Automation',
 });
 
 const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAlertingTip', {

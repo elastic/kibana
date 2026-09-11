@@ -63,7 +63,6 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
@@ -80,6 +79,7 @@ import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
+import { InboxAnnouncementBanner } from './inbox_announcement_banner';
 import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
 import {
   filterAlertActionsByPrivilege,
@@ -605,11 +605,11 @@ const AlertsListPageContent = () => {
       <AppHeader
         sticky={false}
         title={i18n.EPISODES_LIST_PAGE_TITLE}
-        badges={[experimentalBadge]}
         spacing="bleed"
         menu={alertsMenu}
       />
       <EuiSpacer size="m" />
+      <InboxAnnouncementBanner />
 
       <EuiFlexGroup
         direction="column"

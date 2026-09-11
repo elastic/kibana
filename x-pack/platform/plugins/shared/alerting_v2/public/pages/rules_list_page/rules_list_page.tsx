@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
@@ -41,15 +41,27 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
+
+  // One history key for the whole create session so the form can stack on the
+  // options picker and Back returns to it (rna-program#960 prototype).
+  const createSessionHistoryKey = useMemo(() => Symbol('createRuleSession'), []);
+
   const {
     flyout,
     confirmationModal,
+    closeFlyout,
     openCreateFlyout,
     openCreateBuilderFlyout,
     openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
-  } = useComposeDiscoverFlyout();
+  } = useComposeDiscoverFlyout({
+    historyKey: createSessionHistoryKey,
+    // Same historyKey as the options picker; both use session="start" so EUI
+    // stacks history (form covers picker; Back returns). session="inherit" is
+    // parent/child and lays out side-by-side on wide screens.
+    onCreateSuccess: closeCreateOptionsFlyout,
+  });
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
@@ -57,16 +69,22 @@ export const RulesListPage = () => {
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
   }, [rulesLocators]);
-  const onCreateEsqlRuleFromOptionsFlyout = () => {
+
+  const handleCloseCreateOptionsFlyout = useCallback(() => {
+    // Closing the picker exits the whole create session — also dismiss any form on top.
+    closeFlyout();
     closeCreateOptionsFlyout();
+  }, [closeFlyout, closeCreateOptionsFlyout]);
+
+  // Keep the picker mounted underneath; open the authoring flyout on top.
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
     openCreateFlyout();
   };
   const onCreateWithAgentFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
+    handleCloseCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
   const onCreateThresholdRuleFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
     openCreateBuilderFlyout('threshold');
   };
 
@@ -171,7 +189,8 @@ export const RulesListPage = () => {
       </ContentListProvider>
       {isCreateOptionsFlyoutOpen ? (
         <RuleCreateOptionsFlyout
-          onClose={closeCreateOptionsFlyout}
+          historyKey={createSessionHistoryKey}
+          onClose={handleCloseCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}

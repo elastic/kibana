@@ -229,7 +229,7 @@ export const i18nStrings = {
     },
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.alertsAndInsights', {
-        defaultMessage: 'Alerts and Insights',
+        defaultMessage: 'Automation',
       }),
     },
     security: {
@@ -319,7 +319,7 @@ export const i18nStrings = {
     },
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.alertsInsights', {
-        defaultMessage: 'Alerts and Insights',
+        defaultMessage: 'Automation',
       }),
     },
     security: {

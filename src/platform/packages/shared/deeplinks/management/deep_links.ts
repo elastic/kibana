@@ -80,6 +80,7 @@ export type ManagementId =
   | 'transform'
   | 'action_policies'
   | 'execution_history'
+  | 'rule_library'
   | 'rules'
   | 'triggersActions'
   | 'triggersActionsAlerts'

@@ -47,10 +47,19 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
 
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
+  /**
+   * Shared with the create-options picker. Both flyouts use `session="start"` and
+   * this key so Back navigates stacked history (form covers picker).
+   */
+  historyKey?: symbol;
+  /** Called after a successful create (in addition to closing the authoring flyout). */
+  onCreateSuccess?: () => void;
 }
 
 export const useComposeDiscoverFlyout = ({
   createSuccessRedirectPath,
+  historyKey: historyKeyProp,
+  onCreateSuccess,
 }: UseComposeDiscoverFlyoutOptions = {}) => {
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
@@ -80,7 +89,10 @@ export const useComposeDiscoverFlyout = ({
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
-  const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+  const historyKey = useMemo(
+    () => historyKeyProp ?? Symbol('ruleAuthoring'),
+    [historyKeyProp]
+  );
 
   const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
     setTargetRule(rule);
@@ -150,10 +162,11 @@ export const useComposeDiscoverFlyout = ({
 
   const closeAndRedirect = useCallback(() => {
     setFlyoutOpen(false);
+    onCreateSuccess?.();
     if (createSuccessRedirectPath) {
       application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
     }
-  }, [application, createSuccessRedirectPath, http]);
+  }, [application, createSuccessRedirectPath, http, onCreateSuccess]);
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
@@ -237,6 +250,7 @@ export const useComposeDiscoverFlyout = ({
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       historyKey={historyKey}
+      session="start"
       mode={flyoutMode}
       rule={targetRule ?? undefined}
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
@@ -258,6 +272,7 @@ export const useComposeDiscoverFlyout = ({
   return {
     flyout,
     confirmationModal,
+    closeFlyout,
     openCreateFlyout,
     openCreateBuilderFlyout,
     openCreateFromTemplateFlyout,

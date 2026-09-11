@@ -26,7 +26,6 @@ export const RulesListContainer = () => {
   const history = useHistory();
   const {
     application: {
-      getUrlForApp,
       capabilities: { rulesSettings = {} },
     },
     chrome: { docTitle },
@@ -34,7 +33,6 @@ export const RulesListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
-    hideListBackButton,
     tabs: hostTabs,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
@@ -54,7 +52,6 @@ export const RulesListContainer = () => {
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
 
   const docLink = docLinks.links.alerting.guide;
-  const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
   const mode = useRulesPageMode();
 
   useEffect(() => {
@@ -114,16 +111,6 @@ export const RulesListContainer = () => {
   return (
     <>
       <RulesPageHeader
-        back={
-          hideListBackButton
-            ? undefined
-            : {
-                href: alertsBackHref,
-                label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
-                  defaultMessage: 'Alerts',
-                }),
-              }
-        }
         tabs={rulesListTabs}
         menu={rulesListMenu}
         docLink={docLink}

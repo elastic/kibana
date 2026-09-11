@@ -201,7 +201,7 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
       },
       {
         id: 'alerts_and_insights',
-        label: 'Alerts and insights',
+        label: 'Automation',
         items: [
           {
             id: 'alerts-rules',
