@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CiStatsClient } from './client.ts';
+import { loadKibanaModule } from '../../pipeline-utils/load_kibana_module.ts';
 
-const ciStats = new CiStatsClient();
-
-export async function onMetricsViable() {
-  if (!process.env.CI_STATS_BUILD_ID) {
-    return;
-  }
-
-  console.log('Marking build as a "valid baseline" so that it can be used to power PR reports');
-  await ciStats.markBuildAsValidBaseline(process.env.CI_STATS_BUILD_ID);
+interface AffectedPackagesModule {
+  main: () => Promise<void>;
 }
+
+const { main } = loadKibanaModule<AffectedPackagesModule>(
+  './src/platform/kbn-ui/_tooling/affected_packages'
+);
+
+main().catch((error) => {
+  process.stderr.write(`${(error as Error).stack ?? error}\n`);
+  process.exit(1);
+});

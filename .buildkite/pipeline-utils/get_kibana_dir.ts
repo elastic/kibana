@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CiStatsClient } from './client.ts';
+import { execFileSync } from 'node:child_process';
 
-const ciStats = new CiStatsClient();
+export const getKibanaDir = (() => {
+  let kibanaDir: string | undefined;
 
-export async function onMetricsViable() {
-  if (!process.env.CI_STATS_BUILD_ID) {
-    return;
-  }
+  return (): string => {
+    kibanaDir ??= execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      encoding: 'utf8',
+    }).trim();
 
-  console.log('Marking build as a "valid baseline" so that it can be used to power PR reports');
-  await ciStats.markBuildAsValidBaseline(process.env.CI_STATS_BUILD_ID);
-}
+    return kibanaDir;
+  };
+})();
