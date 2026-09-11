@@ -227,6 +227,7 @@ export const useEditorConfig = ({
         horizontalScrollbarSize: 6,
         vertical: 'auto',
         verticalScrollbarSize: 6,
+        alwaysConsumeMouseWheel: false,
       },
       scrollBeyondLastLine: false,
       acceptSuggestionOnTab: 'off',
