@@ -236,7 +236,13 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     const row = this.page.testSubj
       .locator('ESQLEditor-queryHistory')
       .locator('tr')
-      .filter({ hasText: query });
+      .filter({
+        // Match the whole text of the query cell rather than `hasText` on the
+        // row: that is a case-insensitive substring match over the timestamp and
+        // action buttons too, so one query would also match a row whose query
+        // merely contains it.
+        has: this.page.testSubj.locator('queryString').getByText(query, { exact: true }),
+      });
     await row.locator('[data-test-subj="ESQLEditor-history-starred-queries-run-button"]').click();
     await this.waitUntilSearchingHasFinished();
   }
