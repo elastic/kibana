@@ -183,7 +183,7 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
 
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
-  conversation: Pick<Conversation, 'user'>,
+  conversation: Conversation,
   round: Pick<ConversationRound, 'author' | 'origin'>
 ): EventActor => {
   if (round.author) {

@@ -137,7 +137,7 @@ export class ConversationServiceImpl implements ConversationService {
           id: uuidv4(),
           type: TimelineEventType.userMessage,
           created_at: new Date().toISOString(),
-          actor: userMessageActor({ user }, { author }),
+          actor: userMessageActor({ ...conversation, user }, { author }),
           data: { message, attachment_refs: stateManager.getAccessedRefs() },
         },
       ],
