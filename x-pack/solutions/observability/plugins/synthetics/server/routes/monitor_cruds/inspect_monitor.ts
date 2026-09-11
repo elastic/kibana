@@ -49,11 +49,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       ...monitor,
     };
 
-    const validationResult = validateMonitor(
-      monitorWithDefaults as MonitorFields,
-      spaceId,
-      server.config.enableApiJourneyPublicLocations
-    );
+    const validationResult = validateMonitor(monitorWithDefaults as MonitorFields, spaceId);
 
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;

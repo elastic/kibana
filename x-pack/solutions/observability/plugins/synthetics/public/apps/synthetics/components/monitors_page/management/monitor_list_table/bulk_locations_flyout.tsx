@@ -126,12 +126,7 @@ export const BulkLocationsFlyout = ({
         next = formattedSelected;
       }
 
-      if (
-        monitorTypeRequiresPrivateLocations(
-          monitor[ConfigKey.MONITOR_TYPE],
-          kibanaService.enableApiJourneyPublicLocations
-        )
-      ) {
+      if (monitorTypeRequiresPrivateLocations(monitor[ConfigKey.MONITOR_TYPE])) {
         next = next.filter((loc) => !loc.isServiceManaged);
       }
 

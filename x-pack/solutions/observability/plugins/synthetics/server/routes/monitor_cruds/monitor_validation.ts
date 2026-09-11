@@ -84,13 +84,24 @@ export class MonitorValidationError extends Error {
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
  * @param spaceId
  */
+// TODO: API Journey isn't supported on Serverless yet; remove this gate once
+// it ships there (planned after the 9.6.0 stack release).
 export function validateMonitor(
   monitorFields: MonitorFields,
   spaceId: string,
-  enableApiJourneyPublicLocations = false
+  isServerless = false
 ): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
+
+  if (monitorType === MonitorTypeEnum.API && isServerless) {
+    return {
+      valid: false,
+      reason: API_NOT_SUPPORTED_ON_SERVERLESS_ERROR,
+      details: API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS,
+      payload: monitorFields,
+    };
+  }
 
   if (
     monitorType !== MonitorTypeEnum.BROWSER &&
@@ -186,7 +197,7 @@ export function validateMonitor(
     }
 
     if (
-      monitorTypeRequiresPrivateLocations(monitorType, enableApiJourneyPublicLocations) &&
+      monitorTypeRequiresPrivateLocations(monitorType) &&
       hasPublicServiceLocation(monitorFields.locations)
     ) {
       return {
@@ -427,18 +438,24 @@ const validateJSON = (jsonString: string | any) => {
   }
 };
 
+// TODO: API Journey isn't supported on Serverless yet; remove this gate once
+// it ships there (planned after the 9.6.0 stack release).
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
   privateLocations: SyntheticsPrivateLocations,
-  enableApiJourneyPublicLocations = false
+  isServerless = false
 ): ValidationResult {
-  const locationsError = validateLocation(
-    monitorFields,
-    publicLocations,
-    privateLocations,
-    enableApiJourneyPublicLocations
-  );
+  if (monitorFields.type === MonitorTypeEnum.API && isServerless) {
+    return {
+      valid: false,
+      reason: API_NOT_SUPPORTED_ON_SERVERLESS_ERROR,
+      details: API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS,
+      payload: monitorFields,
+    };
+  }
+
+  const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
   const decodedMonitor = ProjectMonitorCodec.decode(monitorFields);
 
@@ -468,16 +485,12 @@ export function validateProjectMonitor(
 export function validateLocation(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: SyntheticsPrivateLocations,
-  enableApiJourneyPublicLocations = false
+  privateLocations: SyntheticsPrivateLocations
 ) {
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;
 
-  if (
-    monitorTypeRequiresPrivateLocations(monitorFields.type, enableApiJourneyPublicLocations) &&
-    hasPublicLocationsConfigured
-  ) {
+  if (monitorTypeRequiresPrivateLocations(monitorFields.type) && hasPublicLocationsConfigured) {
     return API_PUBLIC_LOCATION_PROJECT_ERROR;
   }
 
@@ -655,6 +668,20 @@ const API_PUBLIC_LOCATION_PROJECT_ERROR = i18n.translate(
   {
     defaultMessage:
       'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
+  }
+);
+
+const API_NOT_SUPPORTED_ON_SERVERLESS_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.apiNotSupportedOnServerlessErrorMessage',
+  {
+    defaultMessage: 'API Journey monitors are not yet supported on Serverless',
+  }
+);
+
+const API_NOT_SUPPORTED_ON_SERVERLESS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.apiNotSupportedOnServerlessDetailsErrorMessage',
+  {
+    defaultMessage: 'API Journey monitor support is not yet available on Serverless.',
   }
 );
 

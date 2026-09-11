@@ -101,7 +101,6 @@ describe('SyntheticsService', () => {
       manifestUrl: 'https://test-manifest.com',
     },
     enabled: true,
-    enableApiJourneyPublicLocations: false,
   };
 
   mockLicense();
@@ -190,7 +189,6 @@ describe('SyntheticsService', () => {
         password: '12345',
       },
       enabled: true,
-      enableApiJourneyPublicLocations: false,
     };
     const service = new SyntheticsService(serverMock);
 

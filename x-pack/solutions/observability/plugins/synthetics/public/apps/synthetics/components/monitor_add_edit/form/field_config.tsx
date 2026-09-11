@@ -115,13 +115,6 @@ const API_PRIVATE_LOCATION_REQUIRED = i18n.translate(
   }
 );
 
-const API_LOCATION_REQUIRED = i18n.translate(
-  'xpack.synthetics.monitorConfig.monitorType.api.locationRequiredTooltip',
-  {
-    defaultMessage: 'API Journey requires at least one location.',
-  }
-);
-
 const getScheduleContent = (value: number, seconds?: boolean) => {
   if (seconds) {
     return i18n.translate('xpack.synthetics.monitorConfig.schedule.seconds.label', {
@@ -295,9 +288,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     controlled: true,
     props: ({ field, reset, space, locations }) => {
       const hasUsableApiJourneyLocation = locations.some(
-        (location) =>
-          !location.isInvalid &&
-          (!location.isServiceManaged || kibanaService.enableApiJourneyPublicLocations)
+        (location) => !location.isInvalid && !location.isServiceManaged
       );
       return {
         onChange: (_: string, monitorType: FormMonitorType) => {
@@ -305,17 +296,19 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           reset(defaultFields);
         },
         selectedOption: field?.value,
-        options: Object.values(MONITOR_TYPE_CONFIG).map((option) =>
-          option.value === FormMonitorType.API
-            ? {
-                ...option,
-                isDisabled: !hasUsableApiJourneyLocation,
-                disabledReason: kibanaService.enableApiJourneyPublicLocations
-                  ? API_LOCATION_REQUIRED
-                  : API_PRIVATE_LOCATION_REQUIRED,
-              }
-            : option
-        ),
+        // API Journey isn't supported on Serverless yet; hide it there until
+        // it ships in a stack release. Remove this filter once it's enabled.
+        options: Object.values(MONITOR_TYPE_CONFIG)
+          .filter((option) => option.value !== FormMonitorType.API || !kibanaService.isServerless)
+          .map((option) =>
+            option.value === FormMonitorType.API
+              ? {
+                  ...option,
+                  isDisabled: !hasUsableApiJourneyLocation,
+                  disabledReason: API_PRIVATE_LOCATION_REQUIRED,
+                }
+              : option
+          ),
       };
     },
     validation: () => ({
@@ -495,12 +488,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: ([monitorType]) => ({
       validate: {
         privateLocationsOnly: (value: FormLocation[]) => {
-          if (
-            !monitorTypeRequiresPrivateLocations(
-              monitorType as string,
-              kibanaService.enableApiJourneyPublicLocations
-            )
-          ) {
+          if (!monitorTypeRequiresPrivateLocations(monitorType as string)) {
             return true;
           }
           return value?.some((location) => location.isServiceManaged)
@@ -511,8 +499,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     props: ({ field, setValue, locations, trigger, formState }) => {
       const isPrivateLocationsOnly = monitorTypeRequiresPrivateLocations(
-        formState.defaultValues?.[ConfigKey.MONITOR_TYPE],
-        kibanaService.enableApiJourneyPublicLocations
+        formState.defaultValues?.[ConfigKey.MONITOR_TYPE]
       );
       return {
         options: Object.values(locations).map((location) => {
