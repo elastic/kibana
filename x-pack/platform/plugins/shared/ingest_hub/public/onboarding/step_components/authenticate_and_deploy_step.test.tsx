@@ -32,6 +32,14 @@ jest.mock('./ecf_deployment_section', () => ({
   EcfDeploymentSection: jest.fn(),
 }));
 
+jest.mock('./authenticate_and_deploy_step/use_agent_based_deploy', () => ({
+  useAgentBasedDeploy: jest.fn(),
+}));
+
+jest.mock('./authenticate_and_deploy_step/agent_based_section', () => ({
+  AgentBasedSection: jest.fn(() => null),
+}));
+
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -42,6 +50,8 @@ import { useOnboardingFlow } from '../onboarding_flow_context';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
+import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
+import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
@@ -50,6 +60,8 @@ const mockUseDeploy = useDeploy as jest.Mock;
 const MockManagedIntegrationsSection = ManagedIntegrationsSection as unknown as jest.Mock;
 const mockUseEcfDeployment = useEcfDeployment as jest.Mock;
 const MockEcfDeploymentSection = EcfDeploymentSection as unknown as jest.Mock;
+const mockUseAgentBasedDeploy = useAgentBasedDeploy as jest.Mock;
+const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -129,11 +141,23 @@ describe('AuthenticateAndDeployStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseOnboardingFlow.mockReturnValue({
-      servicesStep: { selectedServiceIds: ['guardduty'] },
+      servicesStep: { selectedServiceIds: ['guardduty'], dataFormat: 'json' },
       awsServicesMap: awsServicesMapWithMI,
       deploymentMethod: 'managed_integration',
       setDeploymentMethod: jest.fn(),
+      detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
     });
+    mockUseAgentBasedDeploy.mockReturnValue({
+      targets: [],
+      isDeploying: false,
+      failedInstances: [],
+      isAlreadyDeployed: false,
+      handleDeploy: jest.fn(),
+      namespace: 'default',
+      setNamespace: jest.fn(),
+    });
+    // clearAllMocks wipes the factory's default implementation, so restore it here.
+    MockAgentBasedSection.mockImplementation(() => null);
     mockUseDeploy.mockReturnValue(makeDeployReturn());
     mockUseEcfDeployment.mockReturnValue(makeEcfReturn());
     mockUseSessionStorage.mockReturnValue([
@@ -231,10 +255,11 @@ describe('AuthenticateAndDeployStep', () => {
   describe('Next button gating — no MI services', () => {
     it('Next is enabled without deploying when no MI or ECF services', () => {
       mockUseOnboardingFlow.mockReturnValue({
-        servicesStep: { selectedServiceIds: [] },
+        servicesStep: { selectedServiceIds: [], dataFormat: 'json' },
         awsServicesMap: awsServicesMapEmpty,
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
       renderStep();
@@ -273,12 +298,83 @@ describe('AuthenticateAndDeployStep', () => {
     });
   });
 
+  describe('agent-based — stale failure does not leak in', () => {
+    // Regression: failedInstances is one shared session key that the MI path also writes, so an
+    // un-gated hasFailed check surfaced a stale MI failure (or one from a previous session) as an
+    // agent-based "Deployment failed" callout that survived restarting onboarding.
+    const agentService = {
+      id: 'vpcflow',
+      name: 'AWS VPC Flow Logs',
+      deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+      identityFederationSupported: true,
+      showInUI: true,
+    };
+
+    beforeEach(() => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['vpcflow'], dataFormat: 'json' },
+        awsServicesMap: new Map([['vpcflow', agentService]]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+      });
+      MockAgentBasedSection.mockImplementation(({ hasFailed }: { hasFailed: boolean }) =>
+        hasFailed ? <span data-test-subj="mock-agent-failed">Failed</span> : null
+      );
+    });
+
+    it('does not pass hasFailed when the hook reports failures with no deploy attempted', () => {
+      mockUseAgentBasedDeploy.mockReturnValue({
+        targets: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
+        isDeploying: false,
+        failedInstances: ['vpcflow'],
+        isAlreadyDeployed: false,
+        handleDeploy: jest.fn(),
+        namespace: 'default',
+        setNamespace: jest.fn(),
+      });
+      renderStep();
+      expect(screen.queryByTestId('mock-agent-failed')).not.toBeInTheDocument();
+    });
+
+    it('passes hasFailed once a deploy has actually been attempted', () => {
+      const handleDeploy = jest.fn();
+      mockUseAgentBasedDeploy.mockReturnValue({
+        targets: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
+        isDeploying: false,
+        failedInstances: ['vpcflow'],
+        isAlreadyDeployed: false,
+        handleDeploy,
+        namespace: 'default',
+        setNamespace: jest.fn(),
+      });
+      MockAgentBasedSection.mockImplementation(
+        ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
+          <div>
+            <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
+              Add agent
+            </button>
+            {hasFailed && <span data-test-subj="mock-agent-failed">Failed</span>}
+          </div>
+        )
+      );
+      renderStep();
+      expect(screen.queryByTestId('mock-agent-failed')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mock-agent-deploy-btn'));
+      expect(screen.getByTestId('mock-agent-failed')).toBeInTheDocument();
+    });
+  });
+
   describe('ECF section — Next button gating', () => {
     beforeEach(() => {
       // Switch to ECF-only service (no MI)
       mockUseOnboardingFlow.mockReturnValue({
-        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'json' },
         awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
     });
 
@@ -310,11 +406,14 @@ describe('AuthenticateAndDeployStep', () => {
   describe('ECF + MI both present', () => {
     beforeEach(() => {
       mockUseOnboardingFlow.mockReturnValue({
-        servicesStep: { selectedServiceIds: ['guardduty', 'cloudtrail'] },
+        servicesStep: { selectedServiceIds: ['guardduty', 'cloudtrail'], dataFormat: 'json' },
         awsServicesMap: new Map([
           ['guardduty', miService],
           ['cloudtrail', ecfService],
         ]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
       });
     });
 

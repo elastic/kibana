@@ -156,4 +156,75 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.getLatestFailedInstances()).toEqual(['inst_x']);
     });
   });
+
+  describe('setDeploymentMethod', () => {
+    // Regression: a failed deploy under one method left failedInstances populated, so switching
+    // method (or restarting onboarding into the other method) showed a stale "Deployment failed"
+    // callout for a deploy the user never attempted under the new method.
+    it('clears deploy results when the method changes', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          failedInstances: ['inst_x'],
+          serviceStatuses: { inst_x: 'error' },
+          deployErrors: { inst_x: 'boom' },
+        });
+      });
+      rerender();
+      expect(result.current.detectAndReviewStep.failedInstances).toEqual(['inst_x']);
+
+      act(() => {
+        result.current.setDeploymentMethod('agent_based');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.failedInstances).toEqual([]);
+      expect(result.current.detectAndReviewStep.serviceStatuses).toEqual({});
+      expect(result.current.detectAndReviewStep.deployErrors).toEqual({});
+      expect(result.current.deploymentMethod).toBe('agent_based');
+    });
+
+    it('clears the persisted agentPolicyId so the new method cannot inherit it', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setDeploymentMethod('agent_based');
+      });
+      rerender();
+      act(() => {
+        result.current.setAgentBasedDeployment({
+          agentPolicyId: 'policy-1',
+          agentPolicyName: 'AWS Onboarding',
+        });
+      });
+      rerender();
+      expect(result.current.agentBasedDeployment.agentPolicyId).toBe('policy-1');
+
+      act(() => {
+        result.current.setDeploymentMethod('managed_integration');
+      });
+      rerender();
+
+      expect(result.current.agentBasedDeployment.agentPolicyId).toBeUndefined();
+      expect(result.current.agentBasedDeployment.agentPolicyName).toBeUndefined();
+    });
+
+    it('is a no-op when the method is unchanged, preserving an in-progress deploy', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({ failedInstances: ['inst_x'] });
+      });
+      rerender();
+
+      act(() => {
+        // 'managed_integration' is the default, so this must not wipe deploy state.
+        result.current.setDeploymentMethod('managed_integration');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.failedInstances).toEqual(['inst_x']);
+    });
+  });
 });

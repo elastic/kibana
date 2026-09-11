@@ -14,6 +14,9 @@ import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
 
+/** Method used when nothing is persisted. Read and compared against in exactly one place each. */
+const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
+
 export interface AuthenticateAndDeployStepState {
   connectorId?: string;
   connectorName?: string;
@@ -30,13 +33,31 @@ export interface DetectAndReviewStepState {
   deployErrors: Record<string, string>;
 }
 
-// Only non-sensitive fields are persisted — password values are never written to session storage
+// Only non-sensitive fields are persisted — password values are never written to session storage.
+// secret_access_key and session_token (agent-based) live in memory only and are never persisted.
 interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
   connectorName?: string;
   authType?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
+  // Agent-based deploy fields — persisted so Back/Next round trips preserve state.
+  // Note: agentPolicyId presence doubles as the durable "deploy succeeded" flag (no separate bool).
+  agentHostsMode?: 'new' | 'existing';
+  agentPolicyId?: string; // set after new-policy deploy; used as double-creation guard on retry
+  agentPolicyName?: string; // denormalised so step 4 needs no GET
+  selectedAgentPolicyIds?: string[]; // for existing-policy mode
+  // Agent-based credential method — persisted so switching steps preserves the selection.
+  agentCredentialMethod?:
+    | 'direct_access_keys'
+    | 'temporary_keys'
+    | 'shared_credentials'
+    | 'assume_role';
+  // Non-secret credential fields for shared_credentials and assume_role methods.
+  // secret_access_key / session_token are never persisted (memory only).
+  sharedCredentialFile?: string;
+  credentialProfileName?: string;
+  roleArn?: string;
 }
 
 export interface ServicesStepState {
@@ -59,10 +80,27 @@ interface PersistedDetectAndReviewStep {
 
 const DEFAULT_SELECTED_IDS: string[] = [];
 
+export interface AgentBasedDeploymentState {
+  agentHostsMode: 'new' | 'existing';
+  agentPolicyId?: string;
+  agentPolicyName?: string;
+  selectedAgentPolicyIds: string[];
+  agentCredentialMethod:
+    | 'direct_access_keys'
+    | 'temporary_keys'
+    | 'shared_credentials'
+    | 'assume_role';
+  sharedCredentialFile?: string;
+  credentialProfileName?: string;
+  roleArn?: string;
+}
+
 interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
+  agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
@@ -131,6 +169,35 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         connectorName: undefined,
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
+      });
+    },
+    [setPersistedAuthenticateAndDeployStep]
+  );
+
+  // Single write using persistedAuthStepRef.current — prevents stale-closure races when two
+  // callers update the same ref within the same event-loop tick. Same pattern as setDataFormat.
+  const setAgentBasedDeployment = useCallback(
+    (update: Partial<AgentBasedDeploymentState>) => {
+      setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthStepRef.current,
+        ...(update.agentHostsMode !== undefined ? { agentHostsMode: update.agentHostsMode } : {}),
+        ...(update.agentPolicyId !== undefined ? { agentPolicyId: update.agentPolicyId } : {}),
+        ...(update.agentPolicyName !== undefined
+          ? { agentPolicyName: update.agentPolicyName }
+          : {}),
+        ...(update.selectedAgentPolicyIds !== undefined
+          ? { selectedAgentPolicyIds: update.selectedAgentPolicyIds }
+          : {}),
+        ...(update.agentCredentialMethod !== undefined
+          ? { agentCredentialMethod: update.agentCredentialMethod }
+          : {}),
+        ...(update.sharedCredentialFile !== undefined
+          ? { sharedCredentialFile: update.sharedCredentialFile }
+          : {}),
+        ...(update.credentialProfileName !== undefined
+          ? { credentialProfileName: update.credentialProfileName }
+          : {}),
+        ...(update.roleArn !== undefined ? { roleArn: update.roleArn } : {}),
       });
     },
     [setPersistedAuthenticateAndDeployStep]
@@ -251,22 +318,54 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const deploymentMethod: DeploymentMethod =
-    persistedAuthenticateAndDeployStep?.deploymentMethod ?? 'managed_integration';
+    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
 
   const setDeploymentMethod = useCallback(
     (method: DeploymentMethod) => {
+      const prev = persistedAuthStepRef.current;
+      // Compare against the same default the context exposes. An unset persisted field still
+      // reads as 'managed_integration' everywhere else, so comparing the raw undefined would
+      // treat the first select of the default method as a change and wipe an in-progress deploy.
+      const current = prev?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+      if (current === method) return;
+
+      // Switching method invalidates every artifact of the previous one: an agent policy is
+      // meaningless to the agentless path and a cloud connector is meaningless to the agent-based
+      // path. Without this reset, failures from the abandoned method keep the "Deployment failed"
+      // callout up and gate Next on a deploy the user is no longer attempting.
       setPersistedAuthenticateAndDeployStep({
-        ...persistedAuthenticateAndDeployStep,
+        ...prev,
         deploymentMethod: method,
+        agentPolicyId: undefined,
+        agentPolicyName: undefined,
+      });
+      setPersistedDetectAndReviewStep({
+        serviceStatuses: {},
+        policyIdsByInstance: {},
+        failedInstances: [],
+        deployErrors: {},
       });
     },
-    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
+    [setPersistedAuthenticateAndDeployStep, setPersistedDetectAndReviewStep]
   );
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
     connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
+  };
+
+  const agentBasedDeployment: AgentBasedDeploymentState = {
+    agentHostsMode: persistedAuthenticateAndDeployStep?.agentHostsMode ?? 'new',
+    agentPolicyId: persistedAuthenticateAndDeployStep?.agentPolicyId,
+    agentPolicyName: persistedAuthenticateAndDeployStep?.agentPolicyName,
+    selectedAgentPolicyIds:
+      persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? ([] as string[]),
+    agentCredentialMethod:
+      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'direct_access_keys',
+    sharedCredentialFile: persistedAuthenticateAndDeployStep?.sharedCredentialFile,
+    credentialProfileName: persistedAuthenticateAndDeployStep?.credentialProfileName,
+    roleArn: persistedAuthenticateAndDeployStep?.roleArn,
   };
 
   const detectAndReviewStep: DetectAndReviewStepState = {
@@ -280,6 +379,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        setAgentBasedDeployment,
+        agentBasedDeployment,
         deploymentMethod,
         setDeploymentMethod,
         servicesStep,
