@@ -61,7 +61,8 @@ export function InvestigationSeverityTiles({
                   ? `2px solid ${euiTheme.colors.primary}`
                   : '2px solid transparent'};
                 transition: outline 150ms ease;
-                &:hover {
+                &:hover,
+                &:focus-visible {
                   outline: 2px solid ${euiTheme.colors.primary};
                 }
               `}

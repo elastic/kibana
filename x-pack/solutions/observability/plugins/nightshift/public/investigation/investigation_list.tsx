@@ -109,6 +109,25 @@ export function InvestigationList({
             </p>
           </EuiText>
         </EuiPanel>
+        {hasPrev && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup justifyContent="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="nightshiftInvestigationsPrevPageButton"
+                  iconType="arrowLeft"
+                  size="s"
+                  onClick={() => onPageChange(page - 1)}
+                >
+                  {i18n.translate('xpack.nightshift.investigations.prevPageButton', {
+                    defaultMessage: 'Previous',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </>
     );
   }
