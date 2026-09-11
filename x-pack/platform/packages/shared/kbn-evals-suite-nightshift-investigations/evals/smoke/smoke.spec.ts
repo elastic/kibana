@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@playwright/test';
 import { selectEvaluators } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { toEvaluationDataset } from '../../src/datasets';
@@ -26,15 +27,29 @@ evaluate.describe('Nightshift investigations: smoke', { tag: tags.stateful.class
     evaluate.describe(dataset.id, () => {
       const seedData = withSeedData(dataset);
 
-      evaluate('seeds its data into the eval cluster', async ({ executorClient, esClient }) => {
-        await executorClient.runExperiment(
-          {
-            datasets: [toEvaluationDataset(dataset)],
-            task: () => summarizeSeedData({ esClient, indices: seedData().indices }),
-          },
-          selectEvaluators(smokeEvaluators)
-        );
-      });
+      evaluate(
+        'seeds its data into the eval cluster and records the scores',
+        async ({ executorClient, esClient, evalsClient }) => {
+          const evaluators = selectEvaluators(smokeEvaluators);
+
+          expect(evaluators.length).toBeGreaterThan(0);
+
+          const [experiment] = await executorClient.runExperiment(
+            {
+              datasets: [toEvaluationDataset(dataset)],
+              task: () => summarizeSeedData({ esClient, indices: seedData().indices }),
+            },
+            evaluators
+          );
+
+          const scores = experiment.evaluationRuns.map((run) => run.result?.score);
+          expect(scores.length).toBeGreaterThanOrEqual(evaluators.length);
+          expect(scores.every((score) => score === 1)).toBe(true);
+
+          const recorded = await evalsClient.getExperimentScores(experiment.id);
+          expect(recorded.length).toBeGreaterThanOrEqual(evaluators.length);
+        }
+      );
     });
   }
 });
