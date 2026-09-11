@@ -12,6 +12,7 @@ import type {
   IUiSettingsClient,
   NotificationsStart,
 } from '@kbn/core/public';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -41,6 +42,7 @@ export interface RuleFormServices {
   esqlMenu?: React.ComponentType<{
     hideHistory?: boolean;
     onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+    docsFlyoutSize?: EuiFlyoutProps['size'];
   }>;
   /** Context provider the injected {@link esqlMenu} needs; injected alongside it. */
   esqlEditorActionsProvider?: React.ComponentType<{ children: React.ReactNode }>;

@@ -424,7 +424,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           {EsqlMenu && EsqlEditorActionsProvider && (
             <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
               <EsqlEditorActionsProvider>
-                <EsqlMenu hideHistory />
+                <EsqlMenu hideHistory docsFlyoutSize="s" />
               </EsqlEditorActionsProvider>
             </EuiFlexItem>
           )}
