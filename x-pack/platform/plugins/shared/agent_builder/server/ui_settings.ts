@@ -7,15 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
-  AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID,
-  AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID,
-  AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -25,59 +21,6 @@ import {
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
-
-/**
- * Shared definition (registered in both per-user and global scope so a single
- * Global Advanced Settings entry applies to every user of the deployment).
- */
-const DEDUCTIVE_UI_SETTINGS: Record<string, UiSettingsParams> = {
-  [AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID]: {
-    description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEnabled.description', {
-      defaultMessage:
-        'Enables routing the Deductive AI agent to the external Deductive backend (per-deployment feature flag must also be on).',
-    }),
-    name: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEnabled.name', {
-      defaultMessage: 'Elastic Agent Builder: Deductive AI Agent',
-    }),
-    schema: schema.boolean(),
-    value: false,
-    experimental: true,
-    requiresPageReload: false,
-    readonly: true,
-    readonlyMode: 'ui',
-  },
-  [AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID]: {
-    description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEndpoint.description', {
-      defaultMessage:
-        'Base URL of the Deductive backend to route the Deductive AI agent to (for example https://turing.deductive.ai or https://app.deductive.ai).',
-    }),
-    name: i18n.translate('xpack.agentBuilder.uiSettings.deductiveEndpoint.name', {
-      defaultMessage: 'Elastic Agent Builder: Deductive AI Endpoint',
-    }),
-    schema: schema.string(),
-    value: 'https://turing.deductive.ai',
-    experimental: true,
-    requiresPageReload: false,
-    readonly: true,
-    readonlyMode: 'ui',
-  },
-  [AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID]: {
-    description: i18n.translate('xpack.agentBuilder.uiSettings.deductiveApiKey.description', {
-      defaultMessage:
-        'Bearer token for the Deductive backend. Use a dak_ API key generated on the target cluster. Warning: stored in plaintext in Advanced Settings; internal use only.',
-    }),
-    name: i18n.translate('xpack.agentBuilder.uiSettings.deductiveApiKey.name', {
-      defaultMessage: 'Elastic Agent Builder: Deductive AI API Key',
-    }),
-    schema: schema.string(),
-    value: '',
-    sensitive: true,
-    experimental: true,
-    requiresPageReload: false,
-    readonly: true,
-    readonlyMode: 'ui',
-  },
-};
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
@@ -125,7 +68,6 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       requiresPageReload: false,
       readonly: false,
     },
-    ...DEDUCTIVE_UI_SETTINGS,
     [AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.enabled.name', {
         defaultMessage: 'Collect conversation traces',
@@ -241,17 +183,4 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonlyMode: 'ui',
     },
   });
-};
-
-/**
- * Registers the Deductive AI settings in the GLOBAL scope so they can be
- * configured once (Stack Management -> Advanced Settings -> Global) and apply
- * to every user of the deployment. User-scoped values still take precedence.
- */
-export const registerGlobalDeductivUISettings = ({
-  uiSettings,
-}: {
-  uiSettings: UiSettingsServiceSetup;
-}) => {
-  uiSettings.registerGlobal(DEDUCTIVE_UI_SETTINGS);
 };

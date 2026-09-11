@@ -5,7 +5,70 @@
  * 2.0.
  */
 
-import { resolveDeductiveConfig, shouldUseDeductive } from './config';
+import { getDeductiveConfig, resolveDeductiveConfig, shouldUseDeductive } from './config';
+
+describe('getDeductiveConfig', () => {
+  const deps = ({
+    flagEnabled = false,
+    settings = {},
+  }: {
+    flagEnabled?: boolean;
+    settings?: Record<string, unknown>;
+  }) => {
+    const get = jest.fn((key: string) => Promise.resolve(settings[key]));
+    return {
+      request: {} as any,
+      uiSettings: { globalAsScopedToClient: jest.fn(() => ({ get })) } as any,
+      savedObjects: { getScopedClient: jest.fn(() => ({})) } as any,
+      featureFlags: { getBooleanValue: jest.fn(async () => flagEnabled) } as any,
+    };
+  };
+
+  it('is disabled when the feature flag is off even if settings are configured', async () => {
+    const cfg = await getDeductiveConfig(
+      deps({
+        flagEnabled: false,
+        settings: {
+          'agentBuilder:deductiveEnabled': true,
+          'agentBuilder:deductiveEndpoint': 'https://app.deductive.ai',
+          'agentBuilder:deductiveApiKey': 'dak_key',
+        },
+      })
+    );
+    expect(cfg.enabled).toBe(false);
+  });
+
+  it('is disabled when the Advanced Setting is off even if the flag is on', async () => {
+    const cfg = await getDeductiveConfig(deps({ flagEnabled: true }));
+    expect(cfg.enabled).toBe(false);
+  });
+
+  it('reads endpoint and key from the global scope when both gates are on', async () => {
+    const cfg = await getDeductiveConfig(
+      deps({
+        flagEnabled: true,
+        settings: {
+          'agentBuilder:deductiveEnabled': true,
+          'agentBuilder:deductiveEndpoint': 'https://app.deductive.ai/',
+          'agentBuilder:deductiveApiKey': 'dak_key',
+        },
+      })
+    );
+    expect(cfg).toEqual({
+      enabled: true,
+      endpoint: 'https://app.deductive.ai',
+      apiKey: 'dak_key',
+    });
+  });
+
+  it('falls back to the default endpoint when unset', async () => {
+    const cfg = await getDeductiveConfig(
+      deps({ flagEnabled: true, settings: { 'agentBuilder:deductiveEnabled': true } })
+    );
+    expect(cfg.endpoint).toBe('https://turing.deductive.ai');
+    expect(cfg.apiKey).toBeUndefined();
+  });
+});
 
 describe('resolveDeductiveConfig', () => {
   afterEach(() => {

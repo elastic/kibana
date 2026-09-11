@@ -159,6 +159,32 @@ describe('runDeductiveAgent', () => {
     );
   });
 
+  it('performs session recovery and one-shot token refresh in the same run', async () => {
+    const ctx = context();
+    // env fallback carries the refresh token (settings path leaves it undefined)
+    ctx.deductive = { enabled: true };
+    process.env.DEDUCTIVE_REFRESH_TOKEN = 'env-refresh';
+    const params = baseParams({
+      id: 'conv-1',
+      metadata: { deductive_session_id: 'gone' },
+    });
+
+    clientMock.sendDeductiveMessageAndReadSse
+      .mockRejectedValueOnce(new DeductiveSessionUnavailableError(404)) // persisted session gone
+      .mockRejectedValueOnce(new DeductiveError('401', 401)) // fresh session rejects the token
+      .mockResolvedValueOnce({ answer: 'recovered answer', timeToFirstTokenMs: 10 });
+
+    const result = await runDeductiveAgent(params, ctx);
+
+    expect(clientMock.createDeductiveSession).toHaveBeenCalledTimes(1);
+    expect(clientMock.refreshDeductiveToken).toHaveBeenCalledTimes(1);
+    // session-gone, 401-with-refresh, then a real retry with the refreshed token
+    expect(clientMock.sendDeductiveMessageAndReadSse).toHaveBeenCalledTimes(3);
+    expect(result.round.response.message).toBe('recovered answer');
+
+    delete process.env.DEDUCTIVE_REFRESH_TOKEN;
+  });
+
   it('fails when both settings and env are absent', async () => {
     delete process.env.DEDUCTIVE_API_KEY;
     const ctx = context({ enabled: true, endpoint: 'https://app.deductive.ai', apiKey: '' }); // no apiKey

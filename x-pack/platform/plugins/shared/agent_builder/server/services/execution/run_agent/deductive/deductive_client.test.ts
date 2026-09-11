@@ -200,6 +200,45 @@ describe('deductive_client', () => {
       }
     });
 
+    it('clears the deadline timer when the stream fails before completion', async () => {
+      jest.useFakeTimers();
+      try {
+        fetchMock.mockResolvedValueOnce(asResponse({ status: 404 }));
+
+        await expect(
+          sendDeductiveMessageAndReadSse({
+            endpoint: 'https://turing.deductive.ai',
+            token: 'tok',
+            sessionId: 'gone',
+            message: 'hi',
+          })
+        ).rejects.toBeInstanceOf(DeductiveSessionUnavailableError);
+
+        // the `finally` must release the 5-minute deadline timer on the early-throw path
+        expect(jest.getTimerCount()).toBe(0);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('maps session-gone statuses on the message POST to DeductiveSessionUnavailableError', async () => {
+      fetchMock.mockImplementation(async (url) => {
+        if (String(url).endsWith('/stream')) {
+          return asResponse({ status: 200, body: sseBody(['data: {"type":"connected"}\n\n']) });
+        }
+        return asResponse({ status: 410 });
+      });
+
+      await expect(
+        sendDeductiveMessageAndReadSse({
+          endpoint: 'https://turing.deductive.ai',
+          token: 'tok',
+          sessionId: 's1',
+          message: 'hi',
+        })
+      ).rejects.toBeInstanceOf(DeductiveSessionUnavailableError);
+    });
+
     it('throws DeductiveError when the stream closes without an answer', async () => {
       fetchMock.mockResolvedValueOnce(asResponse({ status: 200, body: sseBody([]) }));
 

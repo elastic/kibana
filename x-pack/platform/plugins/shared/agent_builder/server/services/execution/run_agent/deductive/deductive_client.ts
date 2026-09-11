@@ -74,12 +74,14 @@ const withTimeoutSignal = (
   }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  abortSignal?.addEventListener?.('abort', () => controller.abort(), { once: true });
+  // Capture the handler so `clear` detaches the exact listener that was added.
+  const onAbort = () => controller.abort();
+  abortSignal?.addEventListener?.('abort', onAbort, { once: true });
   return {
     signal: controller.signal,
     clear: () => {
       clearTimeout(timer);
-      abortSignal?.removeEventListener?.('abort', () => controller.abort());
+      abortSignal?.removeEventListener?.('abort', onAbort);
     },
   };
 };
@@ -184,138 +186,151 @@ export const sendDeductiveMessageAndReadSse = async ({
   // aborts a pending `fetch` if the backend stalls before headers or between SSE chunks.
   const { signal: combinedSignal, clear } = withTimeoutSignal(timeoutMs, abortSignal);
 
-  const response = await fetch(streamUrl, {
-    method: 'GET',
-    headers: {
-      Accept: 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-      ...authHeaders(token, teamId),
-    },
-    signal: combinedSignal,
-  });
+  // This flow can throw at many points (401, session-unavailable, non-200, SSE error);
+  // `finally` guarantees the deadline timer and caller-signal listener are always released.
+  try {
+    const response = await fetch(streamUrl, {
+      method: 'GET',
+      headers: {
+        Accept: 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        ...authHeaders(token, teamId),
+      },
+      signal: combinedSignal,
+    });
 
-  if (response.status === 401) {
-    throw new DeductiveError('deductive stream authentication failed', 401);
-  }
-  if (response.status === 403 || response.status === 404 || response.status === 410) {
-    throw new DeductiveSessionUnavailableError(response.status);
-  }
-  if (response.status !== 200) {
-    throw new DeductiveError(`server returned status ${response.status}`, response.status);
-  }
-  if (!response.body) {
-    throw new DeductiveError('deductive stream returned no body');
-  }
-
-  const startedAt = Date.now();
-  const deadline = startedAt + timeoutMs;
-  let connected = false;
-  let messageSent = false;
-  let completed = false;
-  let answer = '';
-  let timeToFirstTokenMs: number | undefined;
-
-  const parserFeedBuffer: string[] = [];
-  const parser = createParser({
-    onEvent: (event) => {
-      parserFeedBuffer.push(event.data);
-    },
-  });
-
-  const feed = (raw: string) => {
-    let event: { type?: string; content?: string; message?: string };
-    try {
-      event = JSON.parse(raw);
-    } catch {
-      return;
+    if (response.status === 401) {
+      throw new DeductiveError('deductive stream authentication failed', 401);
     }
-    switch (event.type) {
-      case 'connected':
-        connected = true;
+    if (response.status === 403 || response.status === 404 || response.status === 410) {
+      throw new DeductiveSessionUnavailableError(response.status);
+    }
+    if (response.status !== 200) {
+      throw new DeductiveError(`server returned status ${response.status}`, response.status);
+    }
+    if (!response.body) {
+      throw new DeductiveError('deductive stream returned no body');
+    }
+
+    const startedAt = Date.now();
+    const deadline = startedAt + timeoutMs;
+    let connected = false;
+    let messageSent = false;
+    let completed = false;
+    let answer = '';
+    let timeToFirstTokenMs: number | undefined;
+
+    const parserFeedBuffer: string[] = [];
+    const parser = createParser({
+      onEvent: (event) => {
+        parserFeedBuffer.push(event.data);
+      },
+    });
+
+    const feed = (raw: string) => {
+      let event: { type?: string; content?: string; message?: string };
+      try {
+        event = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      switch (event.type) {
+        case 'connected':
+          connected = true;
+          break;
+        case 'progress':
+          callbacks?.onProgress?.(event.message ?? '');
+          break;
+        case 'answer':
+          if (timeToFirstTokenMs === undefined) {
+            timeToFirstTokenMs = Date.now() - startedAt;
+          }
+          answer += event.content ?? '';
+          callbacks?.onAnswerChunk?.(event.content ?? '');
+          break;
+        case 'complete':
+          completed = true;
+          break;
+        case 'error':
+          throw new DeductiveError(event.message ?? 'deductive stream error');
+        default:
+          break;
+      }
+    };
+
+    const decoder = new TextDecoder();
+
+    async function drainEventBuffer() {
+      for (const raw of parserFeedBuffer.splice(0)) {
+        feed(raw);
+      }
+    }
+
+    for await (const chunk of response.body) {
+      if (Date.now() > deadline) {
+        throw new DeductiveError('deductive stream timed out', 408);
+      }
+      parser.feed(typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true }));
+      await drainEventBuffer();
+
+      if (completed) {
         break;
-      case 'progress':
-        callbacks?.onProgress?.(event.message ?? '');
-        break;
-      case 'answer':
-        if (timeToFirstTokenMs === undefined) {
-          timeToFirstTokenMs = Date.now() - startedAt;
+      }
+
+      // The stream stays open while the agent works; the message is only
+      // accepted once the server has confirmed we are connected.
+      if (connected && !messageSent) {
+        messageSent = true;
+        const body: Record<string, string> = { message };
+        if (outputSchema) {
+          body.output_schema = outputSchema;
         }
-        answer += event.content ?? '';
-        callbacks?.onAnswerChunk?.(event.content ?? '');
-        break;
-      case 'complete':
-        completed = true;
-        break;
-      case 'error':
-        throw new DeductiveError(event.message ?? 'deductive stream error');
-      default:
-        break;
+        const messageResponse = await fetch(
+          `${endpoint}/api/v1/sessions/${encodeURIComponent(sessionId)}/messages`,
+          {
+            method: 'POST',
+            headers: jsonHeaders(token, teamId),
+            body: JSON.stringify(body),
+            signal: combinedSignal,
+          }
+        );
+        // The endpoints can expire/validate the session independently, so map the same
+        // session-gone statuses here as on the stream GET to keep recovery symmetric.
+        if (
+          messageResponse.status === 403 ||
+          messageResponse.status === 404 ||
+          messageResponse.status === 410
+        ) {
+          throw new DeductiveSessionUnavailableError(messageResponse.status);
+        }
+        if (messageResponse.status !== 200 && messageResponse.status !== 202) {
+          throw new DeductiveError(
+            `failed to send message: ${messageResponse.status}`,
+            messageResponse.status
+          );
+        }
+      }
     }
-  };
 
-  const decoder = new TextDecoder();
-
-  async function drainEventBuffer() {
-    for (const raw of parserFeedBuffer.splice(0)) {
-      feed(raw);
-    }
-  }
-
-  for await (const chunk of response.body) {
-    if (Date.now() > deadline) {
-      throw new DeductiveError('deductive stream timed out', 408);
-    }
-    parser.feed(typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true }));
+    // Flush any trailing buffered SSE.
+    parser.feed(decoder.decode());
     await drainEventBuffer();
 
-    if (completed) {
-      break;
+    if (!completed) {
+      // Premature EOF: the stream closed without the protocol's `complete` event. Treat it as
+      // an error rather than presenting a truncated answer as finished.
+      throw new DeductiveError('deductive stream closed before completion', 500);
+    }
+    if (answer.length === 0) {
+      throw new DeductiveError('deductive stream closed without an answer');
     }
 
-    // The stream stays open while the agent works; the message is only
-    // accepted once the server has confirmed we are connected.
-    if (connected && !messageSent) {
-      messageSent = true;
-      const body: Record<string, string> = { message };
-      if (outputSchema) {
-        body.output_schema = outputSchema;
-      }
-      const messageResponse = await fetch(
-        `${endpoint}/api/v1/sessions/${encodeURIComponent(sessionId)}/messages`,
-        {
-          method: 'POST',
-          headers: jsonHeaders(token, teamId),
-          body: JSON.stringify(body),
-          signal: combinedSignal,
-        }
-      );
-      if (messageResponse.status !== 200 && messageResponse.status !== 202) {
-        throw new DeductiveError(
-          `failed to send message: ${messageResponse.status}`,
-          messageResponse.status
-        );
-      }
-    }
+    return {
+      answer,
+      timeToFirstTokenMs: timeToFirstTokenMs ?? 0,
+    };
+  } finally {
+    clear();
   }
-
-  // Flush any trailing buffered SSE.
-  parser.feed(decoder.decode());
-  await drainEventBuffer();
-  // Stop the deadline timer now the flow is done.
-  clear();
-
-  if (!completed) {
-    // Premature EOF: the stream closed without the protocol's `complete` event. Treat it as
-    // an error rather than presenting a truncated answer as finished.
-    throw new DeductiveError('deductive stream closed before completion', 500);
-  }
-  if (answer.length === 0) {
-    throw new DeductiveError('deductive stream closed without an answer');
-  }
-
-  return {
-    answer,
-    timeToFirstTokenMs: timeToFirstTokenMs ?? 0,
-  };
 };

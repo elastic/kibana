@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { DeductiveRuntimeConfig } from '@kbn/agent-builder-server/agents';
+import {
+  AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID,
+  AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID,
+  AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID,
+} from '@kbn/management-settings-ids';
+
 /**
  * Configuration for the external Deductive execution path.
  *
@@ -118,4 +129,41 @@ export const resolveDeductiveConfig = (contextDeductive?: {
  */
 export const shouldUseDeductive = (agentId: string | undefined): boolean => {
   return agentId === DEDUCTIVE_AGENT_ID;
+};
+
+/**
+ * Resolves the runtime Deductive configuration from the GLOBAL (deployment-wide) Advanced
+ * Settings. Config is global-scope only (readonly for users) so endpoint+key always come
+ * from the same deployment-wide source — a user cannot point the endpoint at a host of
+ * their choosing to leak the shared key (SSRF/credential-exfiltration mitigation).
+ *
+ * `enabled` = per-deployment feature flag AND the `agentBuilder:deductiveEnabled` Advanced
+ * Setting, matching the agent availability gate so visibility and execution share one
+ * kill-switch. The runner only calls this for the `deductive.ai` agent, so ordinary agents
+ * never read the flag/credentials.
+ */
+export const getDeductiveConfig = async ({
+  request,
+  uiSettings,
+  savedObjects,
+  featureFlags,
+}: {
+  request: KibanaRequest;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  featureFlags: FeatureFlagsStart;
+}): Promise<DeductiveRuntimeConfig> => {
+  const global = uiSettings.globalAsScopedToClient(savedObjects.getScopedClient(request));
+  const readGlobal = async (key: string) => global.get<string>(key).catch(() => undefined);
+  const [flagEnabled, globalEndpoint, globalKey, globalEnabled] = await Promise.all([
+    featureFlags.getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false).catch(() => false),
+    readGlobal(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID),
+    readGlobal(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID),
+    global.get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID).catch(() => undefined),
+  ]);
+  return {
+    enabled: flagEnabled && globalEnabled === true,
+    endpoint: globalEndpoint?.trim().replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
+    apiKey: globalKey,
+  };
 };

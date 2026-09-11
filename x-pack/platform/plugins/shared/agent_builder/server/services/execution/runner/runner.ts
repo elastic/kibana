@@ -46,9 +46,6 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
-  AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID,
-  AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID,
-  AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
@@ -66,11 +63,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
-import {
-  DEDUCTIVE_AGENT_ID,
-  DEFAULT_DEDUCTIVE_ENDPOINT,
-  DEDUCTIVE_ENABLED_FLAG,
-} from '../run_agent/deductive/config';
+import { DEDUCTIVE_AGENT_ID, getDeductiveConfig } from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
@@ -348,39 +341,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     // ordinary agents and tool runs never read the flag/credentials or pay the cost.
     const deductive =
       agentId === DEDUCTIVE_AGENT_ID
-        ? await (async () => {
-            // Per-user values take precedence; fall back to the global (deployment-wide)
-            // scope so a single Global Advanced Settings entry applies to every user unless
-            // a user overrides it. `uiSettings.get` falls back to the registered default
-            // (turing) for unset keys, so the user scope must be read via getUserProvided
-            // to avoid an unset value shadowing the global.
-            // Config is global-scope only (readonly for users) so endpoint+key always come from
-            // the same deployment-wide source — a user cannot point the endpoint at a host of
-            // their choosing to leak the shared key (SSRF/credential-exfiltration mitigation).
-            const global = runnerDeps.uiSettings.globalAsScopedToClient(
-              runnerDeps.savedObjects.getScopedClient(request)
-            );
-            const readGlobal = async (key: string) =>
-              global.get<string>(key).catch(() => undefined);
-            const [flagEnabled, globalEndpoint, globalKey] = await Promise.all([
-              runnerDeps.featureFlags
-                .getBooleanValue(DEDUCTIVE_ENABLED_FLAG, false)
-                .catch(() => false),
-              readGlobal(AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID),
-              readGlobal(AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID),
-            ]);
-            const globalEnabled = await global
-              .get<boolean>(AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID)
-              .catch(() => undefined);
-            // `enabled` = deployment flag AND Advanced Setting(on/off), matching the
-            // availability gate so visibility and execution share one kill-switch.
-            const settingEnabled = globalEnabled === true;
-            return {
-              enabled: flagEnabled && settingEnabled,
-              endpoint: globalEndpoint?.trim().replace(/\/+$/, '') || DEFAULT_DEDUCTIVE_ENDPOINT,
-              apiKey: globalKey,
-            };
-          })()
+        ? await getDeductiveConfig({
+            request,
+            uiSettings: runnerDeps.uiSettings,
+            savedObjects: runnerDeps.savedObjects,
+            featureFlags: runnerDeps.featureFlags,
+          })
         : undefined;
 
     const allDeps = {

@@ -81,15 +81,16 @@ export const runDeductiveAgent = async (
     },
   });
 
-  // One recovery attempt: if the persisted session is gone (404/403/410), mint a
-  // fresh session and replay the same message (mirrors the dx CLI behavior).
+  // Session recovery (mint a fresh session when the persisted one is gone) and the one-shot
+  // OAuth refresh have independent budgets, so a run can do both: recovery on one attempt and
+  // a refresh on a later attempt is still followed by a real retry. Each budget is one-way,
+  // which bounds the loop.
   let sessionId = existingSessionId;
-  let attempt = 0;
+  let sessionRecoveryAttempted = false;
   let refreshed = false;
   let result: DeductiveRunResult | undefined;
 
-  while (result === undefined && attempt < 2) {
-    attempt += 1;
+  while (result === undefined) {
     try {
       if (sessionId === undefined) {
         const session = await createDeductiveSession({
@@ -118,10 +119,11 @@ export const runDeductiveAgent = async (
         },
       });
     } catch (error) {
-      if (error instanceof DeductiveSessionUnavailableError && attempt < 2) {
+      if (error instanceof DeductiveSessionUnavailableError && !sessionRecoveryAttempted) {
         logger.warn(
           `Deductive session ${sessionId} unavailable (${error.statusCode}); creating a fresh session`
         );
+        sessionRecoveryAttempted = true;
         sessionId = undefined;
         continue;
       }
@@ -132,7 +134,7 @@ export const runDeductiveAgent = async (
         !refreshed
       ) {
         // One-shot auth refresh: a persistent 401 (e.g. token/cluster mismatch) must not
-        // loop forever refunding `attempt`; fail after a single refresh attempt.
+        // loop forever; fail after a single refresh attempt.
         const refreshedTokens = await refreshDeductiveToken({
           endpoint: config.endpoint,
           refreshToken: config.refreshToken,
