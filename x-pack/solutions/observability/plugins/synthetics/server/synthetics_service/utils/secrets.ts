@@ -15,6 +15,8 @@ import type {
 import { ConfigKey } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
+const secretKeySet = new Set<string>(secretKeys);
+
 export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecretsAttributes {
   const monitorWithoutSecrets = omit(monitor, secretKeys) as SyntheticsMonitorWithSecretsAttributes;
   const secrets = pick(monitor, secretKeys);
@@ -23,6 +25,30 @@ export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWith
     ...monitorWithoutSecrets,
     secrets: JSON.stringify(secrets),
   };
+}
+
+/**
+ * Guards the saved object write paths. `secrets` is the only encrypted attribute on the monitor
+ * types, so a secret left at the top level of the attributes would be persisted in the clear, and
+ * a document with no payload at all would drop the monitor's secrets — the write paths replace
+ * attributes rather than merging them. Callers must pass the monitor through {@link formatSecrets}.
+ */
+export function assertSecretsEncapsulated(attributes: object, monitorId: string): void {
+  // Key names only, never the values.
+  const strayKeys = Object.keys(attributes).filter((key) => secretKeySet.has(key));
+  if (strayKeys.length > 0) {
+    throw new Error(
+      `Monitor ${monitorId} carries plaintext secret attributes [${strayKeys.join(
+        ', '
+      )}]. Pass it through formatSecrets before writing it.`
+    );
+  }
+
+  if (typeof (attributes as { secrets?: unknown }).secrets !== 'string') {
+    throw new Error(
+      `Monitor ${monitorId} has no 'secrets' payload. Pass it through formatSecrets before writing it.`
+    );
+  }
 }
 
 export function normalizeSecrets(
