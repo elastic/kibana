@@ -63,7 +63,9 @@ apiTest.describe('Threat Intel - source catalog API', { tag: [...tags.stateful.c
       // every confidence tier to Indicator Match rules.
       const aliasName = `${THREAT_INTEL_INDICATORS_INDEX}-default`;
       const aliases = await esClient.indices.getAlias({ name: aliasName });
-      const entry = Object.values(aliases)[0] as {
+      const entries = Object.values(aliases);
+      expect(entries.length).toBeGreaterThan(0); // alias not created = route regression
+      const entry = entries[0] as {
         aliases: Record<string, { filter?: Record<string, unknown> }>;
       };
       const filter = entry.aliases[aliasName]?.filter;

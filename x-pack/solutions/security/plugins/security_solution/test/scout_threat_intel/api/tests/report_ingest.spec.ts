@@ -91,6 +91,9 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
     });
 
     expect(res).toHaveStatusCode(400);
+    // Assert the body too: Kibana's generic 404 handler and a schema rejection both
+    // return 400/404, so a status-only check passes when no handler is registered.
+    expect((res.body as { message: string }).message).toMatch(/title|body_text|source_name/);
   });
 
   apiTest('extracts indicators from pasted text without calling a model', async ({ apiClient }) => {

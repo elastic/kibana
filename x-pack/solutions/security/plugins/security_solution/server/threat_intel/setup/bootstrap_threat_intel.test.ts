@@ -174,7 +174,11 @@ describe('ensureThreatIntelBootstrap', () => {
 
   it('skips the semantic_text endpoint check when the reports index does not exist yet', async () => {
     const esClient = makeEsClient(0);
-    const notFound = new EsErrors.ResponseError({ statusCode: 404, meta: {} as any, warnings: [] });
+    const notFound = new EsErrors.ResponseError({
+      statusCode: 404,
+      meta: {} as never,
+      warnings: [],
+    });
     (esClient.indices.getFieldMapping as jest.Mock).mockRejectedValue(notFound);
 
     // Bootstrap must resolve — the 404 is not retried and seeding continues.

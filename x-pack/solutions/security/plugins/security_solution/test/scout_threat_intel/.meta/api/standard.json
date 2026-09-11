@@ -1,5 +1,5 @@
 {
-  "sha1": "b255e536cb140e7c54bcf6ca6057cb12a859d9cc",
+  "sha1": "46971bea2dca6ea3c4e8cc52a6b84c55f4c98dff",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/report_ingest.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 38,
+        "column": 20
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/report_ingest.spec.ts",
-        "line": 86,
-        "column": 10
+        "line": 70,
+        "column": 27
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/report_ingest.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 86,
+        "column": 74
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 43,
+        "column": 11
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 64,
+        "column": 28
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 105,
-        "column": 10
+        "line": 88,
+        "column": 16
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 124,
-        "column": 10
+        "line": 107,
+        "column": 11
       }
     }
   ]
