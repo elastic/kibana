@@ -546,14 +546,26 @@ describe('eventsToRounds — feedback projection', () => {
         type: TimelineEventType.roundFeedback,
         created_at: '2024-01-01T00:01:00.000Z',
         actor: userActor,
-        data: { round_id: 'r1', vote: 'up', chips: [], comment: '', submitted_at: '2024-01-01T00:01:00.000Z' },
+        data: {
+          round_id: 'r1',
+          vote: 'up',
+          chips: [],
+          comment: '',
+          submitted_at: '2024-01-01T00:01:00.000Z',
+        },
       },
       {
         id: 'r1::feedback::2',
         type: TimelineEventType.roundFeedback,
         created_at: '2024-01-01T00:02:00.000Z',
         actor: userActor,
-        data: { round_id: 'r1', vote: 'down', chips: ['inaccurate'], comment: '', submitted_at: '2024-01-01T00:02:00.000Z' },
+        data: {
+          round_id: 'r1',
+          vote: 'down',
+          chips: ['inaccurate'],
+          comment: '',
+          submitted_at: '2024-01-01T00:02:00.000Z',
+        },
       },
     ];
 
@@ -574,7 +586,13 @@ describe('eventsToRounds — feedback projection', () => {
         type: TimelineEventType.roundFeedback,
         created_at: '2024-01-01T00:01:00.000Z',
         actor: userActor,
-        data: { round_id: 'unknown', vote: 'up', chips: [], comment: '', submitted_at: '2024-01-01T00:01:00.000Z' },
+        data: {
+          round_id: 'unknown',
+          vote: 'up',
+          chips: [],
+          comment: '',
+          submitted_at: '2024-01-01T00:01:00.000Z',
+        },
       },
     ];
 

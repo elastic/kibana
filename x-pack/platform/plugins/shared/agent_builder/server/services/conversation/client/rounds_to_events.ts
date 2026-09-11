@@ -34,6 +34,7 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   execution: '::execution',
   stepPrefix: '::step::',
   promptResponse: '::prompt_response',
+  feedback: '::feedback',
 } as const;
 
 const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
@@ -41,6 +42,7 @@ const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
   ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted,
   ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated,
   ROUND_DERIVED_EVENT_ID_SUFFIXES.execution,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback,
 ];
 
 const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
@@ -173,7 +175,11 @@ const roundFeedbackEvent = (
   id: `${round.id}::feedback`,
   type: TimelineEventType.roundFeedback,
   created_at: round.feedback!.submitted_at,
-  actor: agentActor(conversation),
+  actor: {
+    type: EventActorType.user,
+    id: conversation.user.id ?? conversation.user.username,
+    ...(conversation.user.username ? { username: conversation.user.username } : {}),
+  },
   data: {
     round_id: round.id,
     ...round.feedback!,

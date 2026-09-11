@@ -90,6 +90,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
@@ -586,8 +587,10 @@ class ConversationClientImpl implements ConversationClient {
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
+        const feedbackEventId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback}`;
+        const feedbackEvent = currentEvents.find((e) => e.id === feedbackEventId);
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
-        const replaced = [...nonRoundEvents, ...events];
+        const replaced = [...nonRoundEvents, ...(feedbackEvent ? [feedbackEvent] : []), ...events];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,

@@ -148,10 +148,6 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     }
   }
 
-  if (feedbackByRound.size === 0) {
-    return rounds;
-  }
-
   return rounds.map((round) => {
     const feedback = feedbackByRound.get(round.id);
     return feedback ? { ...round, feedback } : round;
