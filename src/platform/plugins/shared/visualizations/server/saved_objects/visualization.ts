@@ -24,7 +24,7 @@ export const getVisualizationSavedObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'visualizeApp',
+    icon: 'chartBarVertical',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {

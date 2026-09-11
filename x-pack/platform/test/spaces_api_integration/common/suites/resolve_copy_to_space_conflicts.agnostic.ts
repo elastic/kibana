@@ -130,7 +130,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               type: 'index-pattern',
               meta: {
                 title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
-                icon: 'indexPatternApp',
+                icon: 'pattern',
               },
               destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
               overwrite: true,
@@ -141,7 +141,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               type: 'visualization',
               meta: {
                 title: `CTS vis 3 from ${sourceSpaceId} space`,
-                icon: 'visualizeApp',
+                icon: 'chartBarVertical',
               },
               destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               overwrite: true,
@@ -171,7 +171,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               type: 'dashboard',
               meta: {
                 title: `This is the ${sourceSpaceId} test space CTS dashboard`,
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
               },
               destinationId: `cts_dashboard_${destinationSpaceId}`, // this conflicted with another dashboard in the destination space because of a shared originId
               overwrite: true,
@@ -209,7 +209,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               id: `cts_ip_1_${sourceSpaceId}`,
               meta: {
                 title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
-                icon: 'indexPatternApp',
+                icon: 'pattern',
               },
               type: 'index-pattern',
             },
@@ -221,7 +221,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               id: `cts_vis_3_${sourceSpaceId}`,
               meta: {
                 title: `CTS vis 3 from ${sourceSpaceId} space`,
-                icon: 'visualizeApp',
+                icon: 'chartBarVertical',
               },
               type: 'visualization',
             },
@@ -256,7 +256,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
               type: 'dashboard',
               meta: {
                 title: `This is the ${sourceSpaceId} test space CTS dashboard`,
-                icon: 'dashboardApp',
+                icon: 'productDashboard',
               },
             },
           ],
