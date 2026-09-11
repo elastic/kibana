@@ -86,7 +86,7 @@ describe('CreateDataSourceFlyout', () => {
       </EuiProvider>
     );
 
-    expect(getByTestId('createDataSourceFlyoutSubmit')).toHaveTextContent('Save and test');
+    expect(getByTestId('createDataSourceFlyoutSubmit')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
@@ -100,22 +100,39 @@ describe('CreateDataSourceFlyout', () => {
     });
   });
 
-  it('offers a single action that saves and checks the connection', () => {
+  it('shows a success callout when test connection succeeds', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+
     const services = createServicesMock();
 
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <CreateDataSourceFlyout
-            onClose={jest.fn()}
-            onSave={jest.fn()}
-            existingDataSourceNames={[]}
-          />
+          <CreateDataSourceFlyout onClose={jest.fn()} onSave={jest.fn()} existingDataSourceNames={[]} />
         </KibanaContextProvider>
       </EuiProvider>
     );
 
-    expect(getByTestId('createDataSourceFlyoutSubmit')).toHaveTextContent('Connect and test');
-    expect(queryByTestId('createDataSourceFlyoutTestConnection')).toBeNull();
+    fireEvent.click(getByTestId('createDataSourceFlyoutTestConnection'));
+
+    expect(getByTestId('createDataSourceFlyoutTestConnectionCallout-success')).toBeInTheDocument();
+  });
+
+  it('shows an error callout when test connection fails', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.9);
+
+    const services = createServicesMock();
+
+    const { getByTestId } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout onClose={jest.fn()} onSave={jest.fn()} existingDataSourceNames={[]} />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(getByTestId('createDataSourceFlyoutTestConnection'));
+
+    expect(getByTestId('createDataSourceFlyoutTestConnectionCallout-error')).toBeInTheDocument();
   });
 });

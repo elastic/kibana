@@ -12,7 +12,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
-import { useDataSourceConnectionCheck } from './use_data_source_connection_check';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
 import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_modal';
 import { DataSourcesTable } from './data_sources_table';
@@ -58,9 +57,6 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     services: { dataSourcesClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
   const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>([]);
-  // The table shows the check in its status column, so it needs no progress toast.
-  const { connectionStatuses, checkingDataSourceNames, startConnectionCheck } =
-    useDataSourceConnectionCheck();
 
   const existingDataSourceNames = useMemo(() => dataSources.map((ds) => ds.name), [dataSources]);
 
@@ -190,14 +186,12 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
         }
 
         onClose({ savedChanges: true });
-        // Keyed by the name we just saved, which is how the reloaded row identifies itself.
-        void startConnectionCheck(dataSource.name);
         return null;
       } catch (e) {
         return extractFlyoutSaveErrorMessage(e);
       }
     },
-    [dataSourcesClient, flyout.mode, onClose, startConnectionCheck]
+    [dataSourcesClient, flyout.mode, onClose]
   );
 
   return (
@@ -207,8 +201,6 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
         selectedDataSources={selectedDataSources}
         onSelectionChange={setSelectedDataSources}
         dataSetsCountByDataSource={dataSetsCountByDataSource}
-        connectionStatuses={connectionStatuses}
-        checkingDataSourceNames={checkingDataSourceNames}
         onCreate={() => setFlyout({ mode: 'create' })}
         onEdit={(item: DataSource) =>
           setFlyout({

@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
-import { MOCK_CONNECTION_CHECK_DELAY_MS } from './data_source_connection_status';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import type { DataFederationKibanaServices } from './types';
@@ -180,78 +179,6 @@ describe('DataSourcesTabContent', () => {
 
     await waitFor(() => {
       expect(loadDataSources).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('connection check after saving', () => {
-    const saveAndStartCheck = async () => {
-      const toasts = createToastsMock();
-      const addMock = jest.fn().mockResolvedValue(undefined);
-      const { getByTestId, queryByTestId } = await renderComponent({
-        dataSources: [createDataSource('ds1')],
-        dataSets: [],
-        dataSourcesClient: { delete: jest.fn(), add: addMock },
-        loadDataSources: jest.fn().mockResolvedValue(undefined),
-        toasts,
-      });
-
-      fireEvent.click(getByTestId('mockCreate'));
-      await act(async () => {
-        fireEvent.click(getByTestId('mockFlyoutSave'));
-      });
-
-      expect(addMock).toHaveBeenCalledTimes(1);
-      // The flyout closes and the row reports the check as in flight.
-      expect(queryByTestId('mockCreateDataSourceFlyout')).toBeNull();
-      expect(getByTestId('mockChecking')).toHaveTextContent('ds1');
-      expect(getByTestId('mockStatuses')).toBeEmptyDOMElement();
-
-      return { getByTestId, toasts };
-    };
-
-    const finishCheck = async () => {
-      await act(async () => {
-        jest.advanceTimersByTime(MOCK_CONNECTION_CHECK_DELAY_MS);
-      });
-    };
-
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-      jest.restoreAllMocks();
-    });
-
-    it('reports a successful check in the status column and a toast', async () => {
-      jest.spyOn(Math, 'random').mockReturnValue(0.1);
-
-      const { getByTestId, toasts } = await saveAndStartCheck();
-      await finishCheck();
-
-      expect(getByTestId('mockChecking')).toBeEmptyDOMElement();
-      expect(getByTestId('mockStatuses')).toHaveTextContent('ds1:connected');
-      expect(toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Connection successful',
-        text: mainTranslations.connectionCheck.successText('ds1'),
-      });
-      expect(toasts.addDanger).not.toHaveBeenCalled();
-    });
-
-    it('reports a failed check in the status column and a toast', async () => {
-      jest.spyOn(Math, 'random').mockReturnValue(0.9);
-
-      const { getByTestId, toasts } = await saveAndStartCheck();
-      await finishCheck();
-
-      expect(getByTestId('mockChecking')).toBeEmptyDOMElement();
-      expect(getByTestId('mockStatuses')).toHaveTextContent('ds1:broken');
-      expect(toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Connection failed',
-        text: mainTranslations.connectionCheck.errorText('ds1'),
-      });
-      expect(toasts.addSuccess).not.toHaveBeenCalled();
     });
   });
 
