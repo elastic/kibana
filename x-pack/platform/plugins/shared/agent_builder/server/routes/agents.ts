@@ -366,11 +366,15 @@ export function registerAgentRoutes({
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
 
-        const { ai_indices: _stripAiIndices, ...restConfiguration } =
-          request.body.configuration;
-        const createBody = contextEngineEnabled
-          ? request.body
-          : { ...request.body, configuration: restConfiguration };
+        // Strip ai_indices from the write but leave stored values intact so they
+        // reactivate when the flag is toggled back on.
+        const createBody = (() => {
+          if (contextEngineEnabled) {
+            return request.body;
+          }
+          const { ai_indices: _stripped, ...restConfig } = request.body.configuration;
+          return { ...request.body, configuration: restConfig };
+        })();
 
         try {
           const createdProfile = await service.create(createBody);
@@ -520,11 +524,13 @@ export function registerAgentRoutes({
 
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
 
+        // Strip ai_indices from the write but leave stored values intact so they
+        // reactivate when the flag is toggled back on.
         const updateBody = (() => {
           if (contextEngineEnabled || !request.body.configuration) {
             return request.body;
           }
-          const { ai_indices: _stripAiIndices, ...restConfig } = request.body.configuration;
+          const { ai_indices: _stripped, ...restConfig } = request.body.configuration;
           return { ...request.body, configuration: restConfig };
         })();
 
