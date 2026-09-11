@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import {
+  WorkflowDisabledError,
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
@@ -19,6 +20,8 @@ import {
   isWorkflowConflictError,
   isWorkflowValidationError,
 } from '@kbn/workflows-yaml';
+import type { WorkflowsRouteErrorLogContext } from './log_workflows_route_error';
+import { logWorkflowsRouteError } from './log_workflows_route_error';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
@@ -31,10 +34,16 @@ import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
  * @param options - Optional configuration for error handling
  * @returns Appropriate error response
  */
+export interface HandleRouteErrorOptions {
+  checkNotFound?: boolean;
+  logger?: Logger;
+  logContext?: WorkflowsRouteErrorLogContext;
+}
+
 export function handleRouteError(
   response: KibanaResponseFactory,
   error: Error,
-  options?: { checkNotFound?: boolean }
+  options?: HandleRouteErrorOptions
 ) {
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
     return response.notFound();
@@ -120,6 +129,18 @@ export function handleRouteError(
         message: error.message,
       },
     });
+  }
+
+  if (error instanceof WorkflowDisabledError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  if (options?.logger && options.logContext) {
+    logWorkflowsRouteError(options.logger, error, options.logContext);
   }
 
   return response.customError({
