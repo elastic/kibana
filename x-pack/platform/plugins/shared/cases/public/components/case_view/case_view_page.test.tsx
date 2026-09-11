@@ -8,11 +8,11 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
-import { CaseViewPageRedesign } from './case_view_page';
+import { CaseViewPage } from './case_view_page';
 import { renderWithTestingProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { useOnUpdateField } from './use_on_update_field';
-import type { CaseViewPageRedesignProps } from './case_view_page';
+import type { CaseViewPageComponentProps } from './case_view_page';
 
 jest.mock('./use_on_update_field');
 jest.mock('./use_on_refresh_case_view_page');
@@ -35,8 +35,8 @@ jest.mock('./components/case_view_tab_content', () => ({
   onUpdateField: jest.fn(),
 });
 
-describe('CaseViewPageRedesign', () => {
-  const defaultProps: CaseViewPageRedesignProps = {
+describe('CaseViewPage', () => {
+  const defaultProps: CaseViewPageComponentProps = {
     caseData: basicCase,
     refreshRef: { current: null },
   };
@@ -50,19 +50,19 @@ describe('CaseViewPageRedesign', () => {
   });
 
   it('renders the case details header', async () => {
-    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} />);
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} />);
 
     expect(await screen.findByTestId('case-details-app-header')).toBeInTheDocument();
   });
 
   it('renders the tab content', async () => {
-    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} />);
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} />);
 
     expect(await screen.findByTestId('case-view-tab-content')).toBeInTheDocument();
   });
 
   it('renders metrics by default', async () => {
-    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} />);
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} />);
 
     expect(await screen.findByTestId('case-view-metrics')).toBeInTheDocument();
   });
@@ -72,7 +72,7 @@ describe('CaseViewPageRedesign', () => {
       refreshCase: () => Promise<void>;
     } | null>;
 
-    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} refreshRef={refreshRef} />);
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} refreshRef={refreshRef} />);
 
     await waitFor(() => {
       expect(refreshRef.current).toEqual({ refreshCase: expect.any(Function) });

@@ -13,7 +13,7 @@ import { useGetCase } from '../../containers/use_get_case';
 import { useKibana } from '../../common/lib/kibana';
 
 import { renderWithTestingProviders } from '../../common/mock';
-import CaseViewRedesign from '.';
+import CaseView from '.';
 import { screen } from '@testing-library/react';
 import { caseViewProps, defaultGetCase } from './mocks';
 
@@ -22,7 +22,7 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../containers/api');
 jest.mock('./case_view_page', () => ({
-  CaseViewPageRedesign: () => <div data-test-subj="case-view-page-redesign" />,
+  CaseViewPage: () => <div data-test-subj="case-view-page" />,
 }));
 
 const useFetchCaseMock = useGetCase as jest.Mock;
@@ -35,7 +35,7 @@ const spacesUiApiMock = {
   },
 };
 
-describe('CaseViewRedesign', () => {
+describe('CaseView', () => {
   const mockGetCase = (props: Partial<UseGetCase> = {}) => {
     const data = {
       ...defaultGetCase.data,
@@ -56,22 +56,22 @@ describe('CaseViewRedesign', () => {
 
   it('should show an error if a case returns error', async () => {
     mockGetCase({ isError: true });
-    renderWithTestingProviders(<CaseViewRedesign {...caseViewProps} />);
+    renderWithTestingProviders(<CaseView {...caseViewProps} />);
 
     expect(screen.getByTestId('case-view-does-not-exist')).toBeInTheDocument();
   });
 
   it('should return spinner if loading', async () => {
     mockGetCase({ isLoading: true });
-    renderWithTestingProviders(<CaseViewRedesign {...caseViewProps} />);
+    renderWithTestingProviders(<CaseView {...caseViewProps} />);
     expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
   });
 
   it('should return case view when data is there', async () => {
     mockGetCase({ data: { ...defaultGetCase.data, outcome: 'exactMatch' } });
-    renderWithTestingProviders(<CaseViewRedesign {...caseViewProps} />);
+    renderWithTestingProviders(<CaseView {...caseViewProps} />);
 
-    expect(screen.getByTestId('case-view-page-redesign')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-page')).toBeInTheDocument();
     expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
     expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe('CaseViewRedesign', () => {
         aliasPurpose: resolveAliasPurpose,
       },
     });
-    renderWithTestingProviders(<CaseViewRedesign {...caseViewProps} />);
+    renderWithTestingProviders(<CaseView {...caseViewProps} />);
     expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
     expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
       path: `/cases/${resolveAliasId}`,
@@ -102,7 +102,7 @@ describe('CaseViewRedesign', () => {
       data: { ...defaultGetCase.data, outcome: 'conflict', aliasTargetId: resolveAliasId },
     });
 
-    renderWithTestingProviders(<CaseViewRedesign {...caseViewProps} />);
+    renderWithTestingProviders(<CaseView {...caseViewProps} />);
 
     expect(screen.getByTestId('conflict-component')).toBeInTheDocument();
 
