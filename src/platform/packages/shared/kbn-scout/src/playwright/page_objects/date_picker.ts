@@ -23,6 +23,12 @@ const DATE_UNIT_LABELS: Record<DateUnitSelector, string> = {
   [DateUnitSelector.Hours]: 'Hours',
 };
 
+const MS_PER_DATE_UNIT: Record<DateUnitSelector, number> = {
+  [DateUnitSelector.Seconds]: 1_000,
+  [DateUnitSelector.Minutes]: 60_000,
+  [DateUnitSelector.Hours]: 3_600_000,
+};
+
 export interface RefreshConfig {
   interval: string;
   units: string;
@@ -459,26 +465,29 @@ export class DatePicker {
 
   async getRefreshConfig(): Promise<RefreshConfig> {
     if (await this.isNewDateRangePicker()) {
-      await this.openDateRangePickerSettingsPanel();
+      const button = this.page.testSubj.locator('dateRangePickerControlButton');
+      const intervalMsAttr = await button.getAttribute('data-refresh-interval');
+      const intervalUnitAttr = await button.getAttribute('data-refresh-interval-unit');
+      const isPausedAttr = await button.getAttribute('data-refresh-paused');
 
-      const interval =
-        (await this.page.testSubj
-          .locator('dateRangePickerAutoRefreshIntervalCount')
-          .getAttribute('value')) ?? '';
-      const unit = (await this.page.testSubj
-        .locator('dateRangePickerAutoRefreshIntervalUnit')
-        .inputValue()) as DateUnitSelector;
-      const toggleChecked =
-        (await this.page.testSubj
-          .locator('dateRangePickerAutoRefreshToggle')
-          .getAttribute('aria-checked')) === 'true';
+      // Attributes are absent when auto-refresh is not configured
+      if (intervalMsAttr === null) {
+        return { interval: '', units: DATE_UNIT_LABELS[DateUnitSelector.Seconds], isPaused: true };
+      }
 
-      await this.closeDateRangePickerSettingsPanel();
+      const intervalMs = Number(intervalMsAttr);
+      if (!Number.isFinite(intervalMs)) {
+        throw new Error(`Unexpected data-refresh-interval value: "${intervalMsAttr}"`);
+      }
+
+      const unit = Object.hasOwn(DATE_UNIT_LABELS, intervalUnitAttr ?? '')
+        ? (intervalUnitAttr as DateUnitSelector)
+        : DateUnitSelector.Seconds;
 
       return {
-        interval,
+        interval: String(Math.round(intervalMs / MS_PER_DATE_UNIT[unit])),
         units: DATE_UNIT_LABELS[unit],
-        isPaused: !toggleChecked,
+        isPaused: isPausedAttr !== 'false',
       };
     }
 
@@ -619,3 +628,4 @@ export class DatePicker {
       .catch(() => false);
   }
 }
+

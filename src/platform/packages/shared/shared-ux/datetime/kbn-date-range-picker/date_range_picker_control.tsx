@@ -209,6 +209,7 @@ export function DateRangePickerControl() {
   // because the label (e.g. "Last 15 minutes") already conveys the duration.
   const hideBadge = rangeIsRelativeToNow && !collapsed;
 
+
   // The CSS custom properties are not set by this component,
   // allowing consumers to override the widths; the rem values are defaults.
   const wrapperRestrictedStyles = css`
@@ -321,6 +322,9 @@ export function DateRangePickerControl() {
               `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
+              data-refresh-interval={settings.autoRefresh?.intervalMs}
+              data-refresh-interval-unit={settings.autoRefresh?.intervalDisplayUnit}
+              data-refresh-paused={settings.autoRefresh?.isPaused}
               buttonRef={buttonRef}
               aria-label={collapsed ? accessibleDisplayText : undefined}
               onClick={onButtonClick}
