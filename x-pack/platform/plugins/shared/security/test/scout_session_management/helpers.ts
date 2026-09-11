@@ -247,6 +247,9 @@ export async function loginWithSAML(
 ): Promise<string> {
   const { cookie, location } = await startSAMLHandshake(apiClient, providerName);
   const sessionCookie = await finishSAMLHandshake(apiClient, config, cookie, location);
+  // Flush the pre-auth doc deletion so callers polling getSessionCount see the
+  // correct count without waiting for the next auto-refresh cycle.
+  await refreshSessionIndex(apiClient, config);
   await assertSessionCookie(apiClient, sessionCookie, 'a@b.c', {
     type: 'saml',
     name: providerName,
