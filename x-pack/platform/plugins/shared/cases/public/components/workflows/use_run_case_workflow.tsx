@@ -38,7 +38,7 @@ const CASE_TRIGGER_TYPES = new Set<string>([
  * Stable empty array used as the default for workflowTags to avoid
  * re-creating the array on every render (which would defeat downstream memos).
  */
-const NO_WORKFLOW_TAGS: readonly string[] = [];
+export const NO_WORKFLOW_TAGS: readonly string[] = [];
 
 /**
  * Returns a predicate that keeps workflows matching any configured tag.
@@ -105,7 +105,7 @@ interface UseRunCaseWorkflowArgs {
   /**
    * Tag allowlist from the case configuration (empty = show all workflows).
    * When omitted the hook uses an empty list (no filtering).
-   * Pass an explicit value to override (e.g. from #19047 integration).
+   * Pass an explicit value to override (e.g. from the cases configuration integration).
    */
   workflowTags?: string[];
 }

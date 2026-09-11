@@ -43,7 +43,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
     <EuiModal
       aria-label={i18n.SELECT_WORKFLOW_TITLE}
       onClose={onClose}
-      style={{ width: 400 }}
+      css={{ width: '400px' }}
       data-test-subj="cases-run-workflow-modal"
       focusTrapProps={focusTrapProps}
     >

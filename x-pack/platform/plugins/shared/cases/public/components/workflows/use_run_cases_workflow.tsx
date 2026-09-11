@@ -10,6 +10,7 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CasesUI } from '../../containers/types';
 import {
+  NO_WORKFLOW_TAGS,
   createCaseWorkflowFilter,
   createCaseWorkflowComparator,
   useCanRunCaseWorkflow,
@@ -37,8 +38,6 @@ interface UseRunCasesWorkflowResult {
    */
   showSuccessToast: boolean;
 }
-
-const NO_WORKFLOW_TAGS: readonly string[] = [];
 
 /**
  * Multi-case variant of `useRunCaseWorkflow`.
