@@ -20,13 +20,14 @@ import type { DataControlType } from '@kbn/controls-constants';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 export const ESQLValuesPreview: React.FC<{
-  previewOptions: string[] | number[];
+  // The raw values returned by the query — shown as badges or a range stat
+  values: string[] | number[];
   previewColumns: ESQLColumn[];
   previewError?: Error;
   updateQuery: (column: string) => void;
   selectedControlType?: DataControlType;
-}> = ({ previewOptions, previewError, previewColumns, updateQuery, selectedControlType }) => {
-  const isEmpty = useMemo(() => previewOptions.length === 0, [previewOptions]);
+}> = ({ values, previewError, previewColumns, updateQuery, selectedControlType }) => {
+  const isEmpty = useMemo(() => values.length === 0, [values]);
 
   const multiColumnResult = useMemo(() => previewColumns.length > 1, [previewColumns]);
   const singleColumn = useMemo(
@@ -36,11 +37,11 @@ export const ESQLValuesPreview: React.FC<{
 
   const range = useMemo(() => {
     if (selectedControlType === RANGE_SLIDER_CONTROL && isNumericType(singleColumn?.type)) {
-      const optionsAsNumbers = previewOptions.map((v) => Number(v));
+      const optionsAsNumbers = values.map((v) => Number(v));
       return { min: min(optionsAsNumbers), max: max(optionsAsNumbers) };
     }
     return null;
-  }, [previewOptions, selectedControlType, singleColumn]);
+  }, [values, selectedControlType, singleColumn]);
 
   if (previewError) {
     return (
@@ -125,8 +126,8 @@ export const ESQLValuesPreview: React.FC<{
     );
   }
 
-  const visibleOptions = previewOptions.slice(0, 10);
-  const hiddenCount = previewOptions.length - visibleOptions.length;
+  const visibleOptions = values.slice(0, 10);
+  const hiddenCount = values.length - visibleOptions.length;
 
   return (
     <div>

@@ -266,7 +266,7 @@ export const ConfigureValuesQuery = ({
               label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getTitle()}
             >
               <ESQLValuesPreview
-                previewOptions={previewOptions}
+                values={previewOptions}
                 previewColumns={previewColumns}
                 previewError={previewError}
                 updateQuery={appendColumnToESQLQuery}

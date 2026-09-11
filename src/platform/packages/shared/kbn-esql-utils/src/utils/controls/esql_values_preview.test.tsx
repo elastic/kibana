@@ -27,7 +27,7 @@ describe('ESQLValuesPreview', () => {
       <I18nProvider>
         <ESQLValuesPreview
           {...noopProps}
-          previewOptions={[6, 7, 67]}
+          values={[6, 7, 67]}
           previewColumns={[numericColumn]}
           selectedControlType={RANGE_SLIDER_CONTROL}
         />
@@ -44,7 +44,7 @@ describe('ESQLValuesPreview', () => {
       <I18nProvider>
         <ESQLValuesPreview
           {...noopProps}
-          previewOptions={[6, 7, 67]}
+          values={[6, 7, 67]}
           previewColumns={[numericColumn]}
           selectedControlType={OPTIONS_LIST_CONTROL}
         />
@@ -60,7 +60,7 @@ describe('ESQLValuesPreview', () => {
       <I18nProvider>
         <ESQLValuesPreview
           {...noopProps}
-          previewOptions={[
+          values={[
             'some',
             'BODY',
             'once',
@@ -95,7 +95,7 @@ describe('ESQLValuesPreview', () => {
       <I18nProvider>
         <ESQLValuesPreview
           {...noopProps}
-          previewOptions={[]}
+          values={[]}
           previewColumns={[numericColumn, stringColumn]}
         />
       </I18nProvider>
