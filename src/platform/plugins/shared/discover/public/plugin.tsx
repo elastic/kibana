@@ -266,8 +266,8 @@ export class DiscoverPlugin
       lists: [
         {
           id: 'recentlyViewed',
-          title: i18n.translate('discover.navigation.recentlyViewedTitle', {
-            defaultMessage: 'Recently viewed',
+          title: i18n.translate('discover.navigation.recentSessionsTitle', {
+            defaultMessage: 'Recent sessions',
           }),
           items$: getDiscoverRecentlyAccessedService(core.http)
             .get$()
