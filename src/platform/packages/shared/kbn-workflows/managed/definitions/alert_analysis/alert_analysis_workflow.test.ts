@@ -639,7 +639,7 @@ const makeRenderContext = (batchAlerts: unknown[], relatedSummaries: unknown[] =
     batch_llm_calls: 1,
     batch_input_tokens: 0,
     batch_output_tokens: 0,
-    normalized_version: 'v0_0_3',
+    normalized_version: 'v0_0_2',
     connector_id: 'test-connector',
   },
   steps: {

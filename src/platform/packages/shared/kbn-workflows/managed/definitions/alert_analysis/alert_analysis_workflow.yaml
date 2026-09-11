@@ -63,7 +63,7 @@ settings:
 # Adjust these values to tune workflow behaviour without editing step logic.
 
 consts:
-  workflow_version: "v0.0.3"
+  workflow_version: "v0.0.2"
 
   # When false, the workflow skips alerts that already carry the workflow tag prefix.
   # Set to true to re-evaluate previously analyzed alerts.
@@ -705,6 +705,8 @@ steps:
                 Apply hypothesis testing: weigh observable evidence against competing explanations.
 
                 Missing context lowers confidence but must not change classification.
+
+                Don't use any tools. Just reason about the alerts and the context.
                 </epistemic_framework>
 
                 <reasoning_process>
@@ -1007,11 +1009,6 @@ steps:
               # partial batch: the verdicts it did return are applied, the rest get error notes.
               continue: true
             with:
-              # Context is pre-built, so strip the tool belt: no tool calls, and smaller framework prompt.
-              configuration_overrides:
-                enable_elastic_capabilities: false
-                tools: []
-                skill_ids: []
               message: "{{ steps.build_agent_message.output.message }}"
 
               # Structured output schema the AI agent must conform to: one verdict object per
