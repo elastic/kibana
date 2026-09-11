@@ -28,6 +28,7 @@ export const createConversationPublicClient = ({
   return {
     get: client.get.bind(client),
     list: client.list.bind(client),
+    search: client.search.bind(client),
     create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 

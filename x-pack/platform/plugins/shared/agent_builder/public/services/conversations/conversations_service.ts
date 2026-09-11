@@ -6,7 +6,7 @@
  */
 
 import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
-import type { FeedbackChipId } from '@kbn/agent-builder-common';
+import type { ConversationSearchOptions, FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   GetConversationResponse,
   ListConversationsResponse,
@@ -21,7 +21,6 @@ import type {
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
-  ConversationSearchOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';

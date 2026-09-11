@@ -56,6 +56,7 @@ import { registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
+import { runConversationAttachmentsBackfill } from './backfills/conversation_attachments_backfill';
 
 export class AgentBuilderPlugin
   implements
@@ -408,12 +409,26 @@ export class AgentBuilderPlugin
   }
 
   /**
-   * Applies all registered tool ID backfills.
+   * Applies all registered backfills:
+   * - Tool ID backfill.
+   * - Conversation attachments backfill, re-indexing conversations whose attachments predate
+   *   the searchable attachment mappings.
    */
   private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
     const logger = this.logger.get('backfill');
     const esClient = elasticsearch.client.asInternalUser;
-    await runToolIdBackfill(logger, esClient);
+
+    // Run independently so a failure in one backfill does not skip the other.
+    const results = await Promise.allSettled([
+      runToolIdBackfill(logger, esClient),
+      runConversationAttachmentsBackfill(logger, esClient),
+    ]);
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        throw result.reason;
+      }
+    }
   }
 
   /**

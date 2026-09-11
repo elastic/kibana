@@ -166,7 +166,18 @@ export {
   createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
-export type { ConversationListOptions } from './conversation_list';
+export type {
+  ConversationListOptions,
+  ConversationSearchOptions,
+  ConversationSearchSort,
+  ConversationSearchSortField,
+  ConversationSearchFilterField,
+} from './conversation_list';
+export {
+  CONVERSATION_SEARCH_FILTER_FIELDS,
+  CONVERSATION_SEARCH_METADATA_FIELD_PREFIX,
+  CONVERSATION_SEARCH_SORT_FIELDS,
+} from './conversation_list';
 export {
   CONVERSATION_SCHEMA_VERSION,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,

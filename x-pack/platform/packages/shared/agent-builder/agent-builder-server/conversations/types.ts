@@ -8,6 +8,7 @@
 import type {
   ConversationAccessControlInput,
   ConversationListOptions,
+  ConversationSearchOptions,
   ConversationWithPermissions,
   ConversationListResult,
   MetadataFieldValue,
@@ -36,7 +37,7 @@ export interface ConversationCreatePublicRequest {
 }
 
 /**
- * A conversation client exposing get, list, and create operations.
+ * A conversation client exposing get, list, search, and create operations.
  */
 export interface ConversationPublicClient {
   /**
@@ -47,6 +48,11 @@ export interface ConversationPublicClient {
    * List conversations for the current user, optionally filtered by agent ID.
    */
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  /**
+   * Search the conversations readable by the current user, by free-text title query, by KQL
+   * filter, or both.
+   */
+  search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */

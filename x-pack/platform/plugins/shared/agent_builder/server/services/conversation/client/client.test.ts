@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { nodeBuilder } from '@kbn/es-query';
 import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
@@ -25,6 +26,7 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
 import type {
+  ConversationSearchOptions,
   ConversationTemplate,
   SerializedMetadataValue,
   TimelineEvent,
@@ -707,6 +709,92 @@ describe.skip('ConversationClient', () => {
       expectNoReadByInList(results);
       expectOwnerPermissionsInList(results);
       expectNoRoundsInList(results);
+    });
+
+    // --- filter ---
+
+    const searchFilterClauses = async (options: ConversationSearchOptions): Promise<unknown[]> => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search(options);
+
+      return mockEsClient.search.mock.calls[0][0].query.bool.filter;
+    };
+
+    it('appends the compiled filter to the access filters', async () => {
+      const withoutFilter = await searchFilterClauses({ query: 'anything' });
+
+      mockEsClient.search.mockClear();
+      const withFilter = await searchFilterClauses({
+        query: 'anything',
+        filter: 'attachment_type: alert',
+      });
+
+      expect(withFilter).toEqual([
+        ...withoutFilter,
+        {
+          bool: {
+            should: [{ term: { 'attachments.type': { value: 'alert' } } }],
+            minimum_should_match: 1,
+          },
+        },
+      ]);
+    });
+
+    it('accepts a pre-built filter AST as well as a KQL string', async () => {
+      const fromString = await searchFilterClauses({ filter: 'attachment_type: alert' });
+
+      mockEsClient.search.mockClear();
+      const fromNode = await searchFilterClauses({
+        filter: nodeBuilder.is('attachment_type', 'alert'),
+      });
+
+      expect(fromNode).toEqual(fromString);
+    });
+
+    it('searches by filter alone, with no query', async () => {
+      const filterClauses = await searchFilterClauses({ filter: 'status: completed' });
+
+      expect(filterClauses).toContainEqual({
+        bool: {
+          should: [{ term: { status: { value: 'completed' } } }],
+          minimum_should_match: 1,
+        },
+      });
+      expect(mockEsClient.search.mock.calls[0][0].query.bool.must).toEqual([]);
+    });
+
+    it('sorts by the requested field alone when no query narrows relevance', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ filter: 'status: completed' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ updated_at: { order: 'desc' } }, { created_at: { order: 'desc' } }],
+        })
+      );
+    });
+
+    it('applies an explicit sort below relevance when a query is present', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything', sort: { field: 'created_at', order: 'asc' } });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ _score: { order: 'desc' } }, { created_at: { order: 'asc' } }],
+        })
+      );
+    });
+
+    it('rejects an invalid filter before touching Elasticsearch', async () => {
+      await expect(client.search({ filter: 'space: default' })).rejects.toThrow(
+        /Invalid filter field "space"/
+      );
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
     });
   });
 

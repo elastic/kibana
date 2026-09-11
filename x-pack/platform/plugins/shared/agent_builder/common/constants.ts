@@ -28,6 +28,16 @@ export const MAX_CONVERSATION_SEARCH_PER_PAGE = 50;
 export const CONVERSATION_SEARCH_QUERY_MAX_LENGTH = 512;
 
 /**
+ * Maximum length for a conversation search KQL filter expression.
+ */
+export const CONVERSATION_SEARCH_FILTER_MAX_LENGTH = 2048;
+
+/**
+ * Maximum number of nodes a parsed conversation search filter may contain.
+ */
+export const CONVERSATION_SEARCH_FILTER_MAX_NODES = 100;
+
+/**
  * ES default `index.max_result_window`. Conversations beyond this offset are
  * not reachable through offset pagination; requests past it return 400.
  */
