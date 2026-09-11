@@ -20,6 +20,7 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
+    await pageObjects.discover.waitForHistogramRendered();
     await pageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
   });
 
@@ -73,6 +74,7 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
 
     await discover.chooseBreakdownField('extension.raw');
     await discover.waitUntilTabIsLoaded();
+    await discover.waitForHistogramRendered();
     await discover.navigateToLensEditor();
 
     await expect(
