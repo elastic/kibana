@@ -171,7 +171,7 @@ export const AlertEpisodesListPage = () => (
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
-  const { rulesLocators } = useAlertingLocators();
+  const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
@@ -398,6 +398,15 @@ const AlertEpisodesListPageContent = () => {
     [services, queryClient, rulesCache, alertsCapability]
   );
 
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
+    [episodesLocators]
+  );
+
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
     (hit) => {
       if (!episodeSupportsTimeline(dataTableRecordToEpisode(hit))) {
@@ -415,6 +424,8 @@ const AlertEpisodesListPageContent = () => {
           groupHash={hit.flattened.group_hash as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
+          getRuleDetailsHref={getRuleDetailsHref}
+          getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             data: services.data,
             http: services.http,
@@ -428,7 +439,7 @@ const AlertEpisodesListPageContent = () => {
         />
       );
     },
-    [closeFlyout, episodeActions, services]
+    [closeFlyout, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
@@ -478,11 +489,6 @@ const AlertEpisodesListPageContent = () => {
   );
 
   const manageRulesHref = rulesLocators.useUrl({});
-
-  const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
-    [rulesLocators]
-  );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
