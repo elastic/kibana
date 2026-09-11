@@ -33,9 +33,9 @@ export const InstallDependencies: Task = {
 
     await exec(
       log,
-      NODE_EXEC,
+      'pnpm',
       [
-        config.resolveFromRepo('node_modules/.bin/patch-package'),
+        'patch-package',
         '--error-on-fail',
         '--patch-dir',
         relative(build.resolvePath(), config.resolveFromRepo('patches')),
