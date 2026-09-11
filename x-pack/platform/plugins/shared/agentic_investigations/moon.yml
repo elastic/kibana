@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

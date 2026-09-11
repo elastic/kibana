@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -30,6 +31,7 @@ export interface InvestigationListProps {
   total: number;
   page: number;
   onPageChange: (page: number) => void;
+  isInitialLoading?: boolean;
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: ListInvestigationItem) => void;
 }
@@ -39,6 +41,7 @@ export function InvestigationList({
   total,
   page,
   onPageChange,
+  isInitialLoading = false,
   selectedInvestigationId,
   onInvestigationClick,
 }: InvestigationListProps): React.ReactElement {
@@ -53,7 +56,6 @@ export function InvestigationList({
   const shown = (page - 1) * INVESTIGATION_LIST_PAGE_SIZE + investigations.length;
   const hasMore = shown < total;
   const hasPrev = page > 1;
-
   const heading = (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -71,13 +73,28 @@ export function InvestigationList({
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge>{total}</EuiBadge>
-        </EuiFlexItem>
+        {!isInitialLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge data-test-subj="nightshiftInvestigationsCount">{total}</EuiBadge>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
   );
+
+  if (isInitialLoading) {
+    return (
+      <>
+        {heading}
+        <EuiPanel hasBorder hasShadow={false} paddingSize="l" css={roundedPanelCss}>
+          <div aria-hidden data-test-subj="nightshiftInvestigationListSkeleton">
+            <EuiSkeletonText lines={3} />
+          </div>
+        </EuiPanel>
+      </>
+    );
+  }
 
   if (investigations.length === 0) {
     return (

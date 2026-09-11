@@ -55,7 +55,6 @@ export const setNightshiftSeverityParam = (params: URLSearchParams, severity: st
 export const clearNightshiftSeverityParam = (params: URLSearchParams): void => {
   params.delete(NIGHTSHIFT_SEVERITY_QUERY_PARAM);
 };
-
 export const getNightshiftInvestigationIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM) ?? undefined;
 

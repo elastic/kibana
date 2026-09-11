@@ -61,7 +61,7 @@ function isSeverity(value: string | undefined): value is Severity {
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { application } = useKibana().services;
+  const { application, nightshiftInvestigations } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
 
@@ -79,12 +79,13 @@ export function NightshiftApp(): React.ReactElement {
     [activeSeverity]
   );
 
-  const { data, error, isFetching, isLoading, refetch } = useFetchInvestigations({
+  const { data, error, isFetching, isInitialLoading, refetch } = useFetchInvestigations({
     page,
     size: INVESTIGATION_LIST_PAGE_SIZE,
     query: searchQuery,
     severities,
   });
+  const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
 
   // Separate request: the counts are independent of page, sort and the selected severity, so
   // they resolve on their own and the list does not wait on the aggregation.
@@ -147,14 +148,13 @@ export function NightshiftApp(): React.ReactElement {
   const handlePageChange = useCallback((nextPage: number) => {
     setPage(nextPage);
   }, []);
-
   const hasActiveInvestigations = investigations.some(
     ({ status }) => status === 'pending' || status === 'running'
   );
 
   usePageReady({
-    isReady: !isLoading && !error,
-    isRefreshing: isFetching && !isLoading,
+    isReady: !isInitialLoading && !error,
+    isRefreshing: isFetching && !isInitialLoading,
     customMetrics: {
       key1: 'investigation_count',
       value1: investigations.length,
@@ -173,8 +173,8 @@ export function NightshiftApp(): React.ReactElement {
 
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.
-  if (!isLoading && error && !data) {
-    if (isHttpNotFoundError(error)) {
+  if (!isInvestigationsAvailable || (!isInitialLoading && error && !data)) {
+    if (!isInvestigationsAvailable || isHttpNotFoundError(error)) {
       return (
         <EuiCallOut
           announceOnMount
@@ -205,7 +205,7 @@ export function NightshiftApp(): React.ReactElement {
       `}
     >
       <NightshiftHeader
-        isLoading={isLoading}
+        isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
       />
@@ -232,7 +232,6 @@ export function NightshiftApp(): React.ReactElement {
       />
 
       <EuiSpacer size="l" />
-
       {error && data && (
         <div
           css={css`
@@ -269,6 +268,7 @@ export function NightshiftApp(): React.ReactElement {
         total={data?.total ?? 0}
         page={page}
         onPageChange={handlePageChange}
+        isInitialLoading={isInitialLoading}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
       />
