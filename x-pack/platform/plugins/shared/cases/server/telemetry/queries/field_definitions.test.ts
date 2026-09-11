@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { getEmptyFieldLibraryTelemetry, getFieldLibraryTelemetryData } from './field_definitions';
+import { getFieldLibraryTelemetryData } from './field_definitions';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 const emptyScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
@@ -166,17 +166,6 @@ describe('field definitions', () => {
           },
           ...ownerAggregations,
         },
-      });
-    });
-  });
-
-  describe('getEmptyFieldLibraryTelemetry', () => {
-    it('returns every scope zeroed', () => {
-      expect(getEmptyFieldLibraryTelemetry()).toEqual({
-        all: emptyScope,
-        sec: emptyScope,
-        obs: emptyScope,
-        main: emptyScope,
       });
     });
   });
