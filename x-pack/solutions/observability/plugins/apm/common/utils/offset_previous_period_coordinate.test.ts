@@ -32,6 +32,19 @@ describe('mergePeriodsTimeseries', () => {
     });
   });
 
+  it('does not throw when current period timeseries is empty', () => {
+    const previousPeriodTimeseries: Coordinate[] = [
+      { x: new Date('2021-01-27T14:45:00.000Z').valueOf(), y: 1 },
+    ];
+
+    expect(() =>
+      offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: [],
+        previousPeriodTimeseries,
+      })
+    ).not.toThrow();
+  });
+
   it('offsets previous period timeseries', () => {
     const previousPeriodTimeseries: Coordinate[] = [
       { x: new Date('2021-01-27T14:45:00.000Z').valueOf(), y: 1 },
