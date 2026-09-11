@@ -51,15 +51,19 @@ jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
 }));
 
+let mockRuleFormServices: Record<string, unknown> = {};
+
 jest.mock('../../form/contexts/rule_form_context', () => ({
-  useRuleFormServices: () => ({
-    http: {},
-    data: { search: { search: jest.fn() } },
-    dataViews: {},
-    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
-    lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
-  }),
+  useRuleFormServices: () => mockRuleFormServices,
 }));
+
+const buildBaseServices = () => ({
+  http: {},
+  data: { search: { search: jest.fn() } },
+  dataViews: {},
+  notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
+  lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
+});
 
 jest.mock('./compose_discover_chart', () => ({
   ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
@@ -106,12 +110,28 @@ describe('QuerySandbox', () => {
   beforeEach(() => {
     mockRun.mockClear();
     mockExecutionResult = { ...defaultExecutionResult };
+    mockRuleFormServices = buildBaseServices();
     jest.clearAllMocks();
   });
 
   it('renders the sandbox container', () => {
     renderSandbox();
     expect(screen.getByTestId('querySandbox')).toBeInTheDocument();
+  });
+
+  it('renders the injected ES|QL menu when provided by the host', () => {
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: () => <div data-test-subj="stubEsqlMenu" />,
+    };
+    renderSandbox();
+    expect(screen.getByTestId('stubEsqlMenu')).toBeInTheDocument();
+  });
+
+  it('renders no ES|QL menu when the host does not inject one', () => {
+    renderSandbox();
+    expect(screen.queryByTestId('stubEsqlMenu')).not.toBeInTheDocument();
   });
 
   it('renders the editor and results panels', () => {

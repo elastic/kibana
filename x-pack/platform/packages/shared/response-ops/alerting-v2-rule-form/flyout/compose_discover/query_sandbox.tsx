@@ -165,6 +165,8 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     onResizeKeyDown,
   } = useEditorHeightResize();
   const services = useRuleFormServices();
+  // Injected by the host plugin (see RuleFormServices); PascalCase for JSX use.
+  const { esqlMenu: EsqlMenu, esqlEditorActionsProvider: EsqlEditorActionsProvider } = services;
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
@@ -429,6 +431,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           {headerActions && (
             <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
               {headerActions}
+            </EuiFlexItem>
+          )}
+          {EsqlMenu && EsqlEditorActionsProvider && (
+            <EuiFlexItem grow={false} css={headerActions ? undefined : { marginLeft: 'auto' }}>
+              <EsqlEditorActionsProvider>
+                <EsqlMenu hideHistory />
+              </EsqlEditorActionsProvider>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

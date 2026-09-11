@@ -34,6 +34,16 @@ export interface RuleFormServices {
   dashboard?: DashboardStart;
   cps?: CPSPluginStart;
   minimumScheduleInterval?: string;
+  /**
+   * ES|QL help/docs menu, injected by the host plugin from `@kbn/esql`. Absent →
+   * the sandbox renders no menu.
+   */
+  esqlMenu?: React.ComponentType<{
+    hideHistory?: boolean;
+    onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  }>;
+  /** Context provider the injected {@link esqlMenu} needs; injected alongside it. */
+  esqlEditorActionsProvider?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';
