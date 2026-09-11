@@ -578,15 +578,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
   },
   'agentBuilder:deductiveEndpoint': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Base URL of the external Deductive backend.' },
   },
   'agentBuilder:deductiveApiKey': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting (internal dogfooding).' },
+    _meta: { description: 'API key for the external Deductive backend (redacted from telemetry).' },
   },
   'contextEngine:enabled': {
     type: 'boolean',
