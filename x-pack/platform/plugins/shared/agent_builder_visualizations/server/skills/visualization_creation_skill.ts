@@ -8,12 +8,18 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  getChartDesignPromptContent,
   getChartTypeSelectionPromptContent,
+  getPaletteCatalogPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 const chartTypeSelectionContent = getChartTypeSelectionPromptContent();
+const chartDesignContent = getChartDesignPromptContent();
+
+/** Referenced skill file holding the Kibana palette catalog, loaded on demand. */
+const PALETTE_CATALOG_FILE = 'color-palettes';
 
 export const visualizationCreationSkill = defineSkillType({
   id: 'visualization-creation',
@@ -161,6 +167,14 @@ ${chartTypeSelectionContent}
 
 For every new Lens visualization, choose and pass \`chartType\`; it is required. For a new Vega visualization, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On updates, \`chartType\` is optional because the existing visualization provides the current form. When editing a Lens visualization, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
+## Chart Design Guidance
+
+Use this when describing a new chart's important visual choices and when writing update instructions. Pass along only the requested change on updates; choices you leave unspecified fall back to these same defaults in the chart author.
+
+${chartDesignContent}
+
+When choosing or checking palettes, read this skill's \`${PALETTE_CATALOG_FILE}\` reference file for the palette names, ids, and colors.
+
 ## Edge Cases
 
 - **Requested field missing:** suggest nearest valid fields from the index mapping.
@@ -169,6 +183,11 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 - **Needs full Vega (beyond Vega-Lite):** do not fake it or ship a broken chart. State plainly that the requested chart is not supported in Vega-Lite yet and that full Vega is not available, then offer alternatives (closest Vega-Lite approximation, a Lens chart, or multiple charts) and let the user choose.
 `,
   referencedContent: [
+    {
+      relativePath: '.',
+      name: PALETTE_CATALOG_FILE,
+      content: getPaletteCatalogPromptContent(),
+    },
     {
       relativePath: './examples',
       name: 'create-visualization-requests',

@@ -37,6 +37,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 **Grid Packing Rules:**
 
+- **Automatic upward movement:** Kibana moves each panel upward at its current \`x\` until another panel or the top of its grid blocks it. A larger \`y\` does not preserve empty space above a panel or guarantee row alignment. Use sections, not blank rows, to separate semantic groups.
 - **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
   placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
 - **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
@@ -54,10 +55,10 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
 6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
 
-### Reflow after removals
+### Reflow after layout changes
 
-- If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
-- If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
+- After resizing, moving, or removing panels, choose final sizes first, then recalculate positions across the affected layout, including panels whose sizes did not change. Pack rows using the rules above; do not keep old coordinates that leave gaps. Reflow each section separately.
+- Update existing panels in place. Before applying, check the planned coordinates for avoidable gaps, overlaps, and grid bounds.
 
 ### Section grid rules
 
