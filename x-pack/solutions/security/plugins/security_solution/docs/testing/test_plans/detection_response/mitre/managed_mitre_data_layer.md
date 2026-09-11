@@ -55,10 +55,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: `list()` excludes revoked and deprecated entities by default**](#scenario-list-excludes-revoked-and-deprecated-entities-by-default)
     - [**Scenario: `list()` includes revoked and deprecated entities when `status` is "all"**](#scenario-list-includes-revoked-and-deprecated-entities-when-status-is-all)
     - [**Scenario: `list()` returns an empty collection when the index is empty**](#scenario-list-returns-an-empty-collection-when-the-index-is-empty)
-    - [**Scenario: `search()` returns relevance-scored results ordered by score**](#scenario-search-returns-relevance-scored-results-ordered-by-score)
-    - [**Scenario: `search()` respects the `size` parameter**](#scenario-search-respects-the-size-parameter)
-    - [**Scenario: `search()` in keyword mode uses BM25 multi-match with field boosting**](#scenario-search-in-keyword-mode-uses-bm25-multi-match-with-field-boosting)
-    - [**Scenario: `search()` filters by `types`**](#scenario-search-filters-by-types)
+  - [Entities API: authorization](#entities-api-authorization)
+    - [**Scenario: The entities API is accessible without security privileges**](#scenario-the-entities-api-is-accessible-without-security-privileges)
   - [Error handling](#error-handling)
     - [**Scenario: The entities API returns 404 when the feature flag is off**](#scenario-the-entities-api-returns-404-when-the-feature-flag-is-off)
     - [**Scenario: The entities API returns 200 with empty buckets when population has not completed**](#scenario-the-entities-api-returns-200-with-empty-buckets-when-population-has-not-completed)
@@ -309,12 +307,14 @@ And the response body should describe a validation error for the <parameter> par
 | `framework`         | value is not "enterprise"                                     |
 | `types`             | contains a value not in tactic / technique / subtechnique     |
 | `types`             | array contains more than 3 elements                           |
+| `types`             | empty string                                                  |
 | `framework_version` | string longer than 32 characters                              |
+| `framework_version` | empty string                                                  |
 | `status`            | value is not "active" or "all"                                |
 
 ### Server-side data client
 
-`list()` returns a `MitreEntityCollection` — a structured object with typed buckets, lookup maps, and version metadata — rather than a flat array. `getById()` and `search()` return full entities including `description`.
+`list()` returns a `MitreEntityCollection` — a structured object with typed buckets, lookup maps, and version metadata — rather than a flat array. `getById()` returns full entities including `description`.
 
 #### **Scenario: `getById()` returns the correct entity for a known ID**
 
@@ -419,47 +419,18 @@ Then it should return a MitreEntityCollection with empty tactics, techniques, an
 And no error should be thrown
 ```
 
-#### **Scenario: `search()` returns relevance-scored results ordered by score**
+### Entities API: authorization
 
-**Automation**: 1 unit test.
+#### **Scenario: The entities API is accessible without security privileges**
 
-```Gherkin
-When search({ query: "credential dumping" }) is called
-Then the result should be an array of hits each containing an entity and a numeric score
-And hits should be ordered by score descending
-```
-
-#### **Scenario: `search()` respects the `size` parameter**
-
-**Automation**: 1 unit test.
+**Automation**: 1 integration test.
 
 ```Gherkin
-Given the index contains more entities matching the query than the requested size
-When search({ query: "execution", size: 5 }) is called
-Then at most 5 hits should be returned
+Given a user with neither detection rules nor security solution privileges
+When that user calls the entities API
+Then the response status should be 200
+And the entities bucket should contain the seeded entities
 ```
-
-#### **Scenario: `search()` in keyword mode uses BM25 multi-match with field boosting**
-
-**Automation**: 1 unit test.
-
-```Gherkin
-When search({ query: "T1003", mode: "keyword" }) is called
-Then the underlying query should be a BM25 multi-match across name.text (boost 3), description (boost 1), and id (boost 2)
-```
-
-#### **Scenario: `search()` filters by `types`**
-
-**Automation**: 1 unit test per type.
-
-```Gherkin
-When search({ query: "lateral movement", types: ["<type>"] }) is called
-Then only hits whose entity type is "<type>" should be returned
-```
-
-**Examples:**
-
-`<type>` = tactic | technique | subtechnique
 
 ### Error handling
 
@@ -492,11 +463,12 @@ And the tactics, techniques, and subtechniques buckets should all be empty
 When the entities API is called with a framework_version value that was never populated
 Then the response status should be 200
 And the tactics, techniques, and subtechniques buckets should all be empty
+And the response framework_version field should echo back the requested value
 ```
 
 #### **Scenario: When startup population failed, the first API call triggers lazy re-population and returns data on success**
 
-**Automation**: 1 integration test.
+**Automation**: 1 unit test.
 
 ```Gherkin
 Given startup population failed and the service's initialized flag is false
