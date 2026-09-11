@@ -172,6 +172,85 @@ describe('When using the ArtifactListPage component', () => {
           expect(getByTestId('testPage-deleteModal')).toBeTruthy();
         });
       });
+
+      it('should request list data with the default sort when the URL has no sort params', async () => {
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'created_at',
+              sort_order: 'desc',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with the default sort field when the URL sortField is not sortable', async () => {
+        history.push('somepage?sortField=invalid_field&sortOrder=desc');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'created_at',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with a valid URL sortField', async () => {
+        history.push('somepage?sortField=name&sortOrder=asc');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'name',
+              sort_order: 'asc',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with the default sort order when the URL sortOrder is invalid', async () => {
+        history.push('somepage?sortField=name&sortOrder=ascending');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'name',
+              sort_order: 'desc',
+            }),
+          })
+        );
+      });
+
+      it('should persist table sort to the URL and refetch with that sortField', async () => {
+        const { getByText } = await renderWithListData({ showAsSimpleTable: true });
+
+        await userEvent.click(getByText('Name'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/sortField=name/);
+          expect(history.location.search).toMatch(/sortOrder=asc/);
+        });
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              query: expect.objectContaining({
+                sort_field: 'name',
+                sort_order: 'asc',
+              }),
+            })
+          );
+        });
+      });
     });
 
     it('should show card actions', async () => {
@@ -180,6 +259,20 @@ describe('When using the ArtifactListPage component', () => {
 
       expect(getByTestId('testPage-card-cardEditAction')).toBeTruthy();
       expect(getByTestId('testPage-card-cardDeleteAction')).toBeTruthy();
+    });
+
+    it('should not clamp an invalid URL sortField when the list is shown as cards', async () => {
+      history.push('somepage?sortField=invalid_field&sortOrder=desc');
+
+      await renderWithListData();
+
+      expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            sort_field: 'invalid_field',
+          }),
+        })
+      );
     });
 
     it('should persist pagination `page` changes to the URL', async () => {

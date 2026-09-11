@@ -115,6 +115,12 @@ interface ArtifactListPageWithSimpleTableProps {
 export type ArtifactListPageProps = ArtifactListPageBaseProps &
   XOR<ArtifactListPageWithCardProps, ArtifactListPageWithSimpleTableProps>;
 
+/**
+ * Column fields that can be sorted when artifacts are shown as a simple table.
+ * Has no effect on the card list view.
+ */
+const SORTABLE_FIELDS: readonly string[] = ['name', 'updated_by', 'updated_at'];
+
 export const ArtifactListPage = memo<ArtifactListPageProps>(
   ({
     apiClient,
@@ -165,7 +171,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       error,
       refetch: refetchListData,
       dataUpdatedAt,
-    } = useWithArtifactListData(apiClient, searchableFields);
+    } = useWithArtifactListData(
+      apiClient,
+      searchableFields,
+      showAsSimpleTable ? SORTABLE_FIELDS : undefined
+    );
 
     useEffect(() => {
       if (!isLoading && error) {
@@ -548,6 +558,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 allowCardDeleteAction={allowCardDeleteAction}
                 sortField={sortField}
                 sortOrder={sortOrder}
+                sortableFields={SORTABLE_FIELDS}
                 data-test-subj={getTestId('simpleTable')}
               />
             ) : (

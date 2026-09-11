@@ -73,6 +73,7 @@ describe('ArtifactSimpleTable', () => {
       onChange,
       onAction,
       labels: artifactListPageLabels,
+      sortableFields: ['name', 'updated_by', 'updated_at'],
       'data-test-subj': 'testTable',
     };
 
@@ -229,6 +230,59 @@ describe('ArtifactSimpleTable', () => {
       'aria-sort',
       'descending'
     );
+  });
+
+  it('does not mark a sort when sortField is not among sortableFields', () => {
+    render({ sortField: 'os_types', sortOrder: 'desc' });
+
+    const sortedHeaders = renderResult
+      .getAllByRole('columnheader')
+      .filter((column) =>
+        ['ascending', 'descending'].includes(column.getAttribute('aria-sort') ?? '')
+      );
+
+    expect(sortedHeaders).toHaveLength(0);
+  });
+
+  it('does not mark a sort when sortField is the list default field', () => {
+    render({ sortField: 'created_at', sortOrder: 'desc' });
+
+    const sortedHeaders = renderResult
+      .getAllByRole('columnheader')
+      .filter((column) =>
+        ['ascending', 'descending'].includes(column.getAttribute('aria-sort') ?? '')
+      );
+
+    expect(sortedHeaders).toHaveLength(0);
+  });
+
+  it('does not make columns sortable when sortableFields is empty', () => {
+    render({ sortableFields: [] });
+
+    fireEvent.click(renderResult.getByText('Name'));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('does not sort when a non-sortable column header is clicked', () => {
+    render();
+
+    fireEvent.click(renderResult.getByText('Operating systems'));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('invokes onChange with sort when the updated by column header is clicked', () => {
+    render();
+
+    fireEvent.click(renderResult.getByText('Updated by'));
+
+    expect(onChange).toHaveBeenCalledWith({
+      pageIndex: 0,
+      pageSize: 10,
+      sortField: 'updated_by',
+      sortOrder: 'asc',
+    });
   });
 
   describe('policy assignment column', () => {

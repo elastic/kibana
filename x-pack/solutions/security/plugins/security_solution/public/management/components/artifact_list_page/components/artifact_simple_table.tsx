@@ -36,6 +36,7 @@ import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_poli
 import { PolicyAssignmentCell } from './policy_assignment_cell';
 
 const EMPTY_OS_TYPES: OsType[] = [];
+const EMPTY_SORTABLE_FIELDS: readonly string[] = [];
 
 const getOsTitle = (os: OsType): string => OS_TITLES[os as OperatingSystem] ?? os;
 
@@ -61,6 +62,7 @@ export interface ArtifactSimpleTableProps {
   allowCardDeleteAction?: boolean;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+  sortableFields?: readonly string[];
   'data-test-subj'?: string;
 }
 
@@ -96,6 +98,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     allowCardDeleteAction = true,
     sortField,
     sortOrder,
+    sortableFields = EMPTY_SORTABLE_FIELDS,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -128,7 +131,6 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           field: 'name',
           name: labels.tableColumnNameLabel,
           truncateText: true,
-          sortable: true,
           render: (name: string) => (
             <EuiToolTip content={name} anchorClassName="eui-textTruncate">
               <EuiText
@@ -171,7 +173,6 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         {
           field: 'updated_by',
           name: labels.tableColumnUpdatedByLabel,
-          sortable: true,
           render: (updatedBy: string) => (
             <EuiFlexGroup
               responsive={false}
@@ -207,7 +208,6 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           field: 'updated_at',
           name: labels.tableColumnLastUpdatedLabel,
           truncateText: true,
-          sortable: true,
           render: (updatedAt: string) => (
             <span data-test-subj={getTestId('columnUpdatedAt')} className="eui-textTruncate">
               <FormattedDate
@@ -265,6 +265,12 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         });
       }
 
+      for (const column of tableColumns) {
+        if ('field' in column && column.field && sortableFields.includes(String(column.field))) {
+          column.sortable = true;
+        }
+      }
+
       return tableColumns;
     }, [
       allowCardDeleteAction,
@@ -274,10 +280,11 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
       loadingPoliciesList,
       onAction,
       policies,
+      sortableFields,
     ]);
 
     const sorting = useMemo(() => {
-      if (!sortField || !sortOrder) {
+      if (!sortField || !sortOrder || !sortableFields.includes(sortField)) {
         return { sort: undefined };
       }
 
@@ -287,7 +294,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           direction: sortOrder as Direction,
         },
       };
-    }, [sortField, sortOrder]);
+    }, [sortField, sortOrder, sortableFields]);
 
     return (
       <EuiBasicTable<ExceptionListItemSchema>

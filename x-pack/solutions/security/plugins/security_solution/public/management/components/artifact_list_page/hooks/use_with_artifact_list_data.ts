@@ -43,7 +43,8 @@ type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
 
 export const useWithArtifactListData = (
   apiClient: ExceptionsListApiClient,
-  searchableFields: MaybeImmutable<string[]>
+  searchableFields: MaybeImmutable<string[]>,
+  sortableFields: MaybeImmutable<string[]> = []
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
@@ -81,8 +82,15 @@ export const useWithArtifactListData = (
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
-  const sortField = sortFieldParam || MANAGEMENT_DEFAULT_SORT_FIELD;
-  const sortOrder = sortOrderParam || MANAGEMENT_DEFAULT_SORT_ORDER;
+  const requestedSortField = sortFieldParam || MANAGEMENT_DEFAULT_SORT_FIELD;
+  const sortField =
+    sortableFields.length > 0 && !sortableFields.includes(requestedSortField)
+      ? MANAGEMENT_DEFAULT_SORT_FIELD
+      : requestedSortField;
+  const sortOrder =
+    sortOrderParam && ['asc', 'desc'].includes(sortOrderParam)
+      ? sortOrderParam
+      : MANAGEMENT_DEFAULT_SORT_ORDER;
 
   const listDataRequest = useListArtifact(
     apiClient,
