@@ -251,7 +251,9 @@ export const getIDsAndIndicesAsArrays = (
     // The broadcast is the intentional semantic — match the behaviour of
     // `getAndValidateIndexedAttachmentInfo` in validate_attachment_ids.ts.
     const isBroadcast = typeof metadataIndex === 'string' && metadataIndex.length > 0;
-    const indices = isBroadcast ? ids.map(() => metadataIndex as string) : toStringArray(metadataIndex);
+    const indices = isBroadcast
+      ? ids.map(() => metadataIndex as string)
+      : toStringArray(metadataIndex);
     return { ids, indices };
   }
 
