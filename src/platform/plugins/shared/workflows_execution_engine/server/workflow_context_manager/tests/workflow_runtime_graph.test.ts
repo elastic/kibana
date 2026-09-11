@@ -49,7 +49,10 @@ function createOverlay(): WorkflowRuntimeGraph {
   );
 }
 
-function syntheticPairIds(ownerNodeId: string, stepId: string): { enterId: string; exitId: string } {
+function syntheticPairIds(
+  ownerNodeId: string,
+  stepId: string
+): { enterId: string; exitId: string } {
   return {
     enterId: `${ENTER_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`,
     exitId: `${EXIT_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`,
