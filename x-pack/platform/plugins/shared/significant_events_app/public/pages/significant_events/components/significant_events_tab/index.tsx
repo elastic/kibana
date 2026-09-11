@@ -56,6 +56,7 @@ import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
+import { DismissEventModal } from './dismiss_event_modal';
 
 export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
@@ -70,6 +71,13 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.closeEventButton.ariaLabel',
   {
     defaultMessage: 'Close this significant event',
+  }
+);
+
+const DISMISS_EVENT_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.dismissEventButton.ariaLabel',
+  {
+    defaultMessage: 'Dismiss this significant event',
   }
 );
 
@@ -130,6 +138,38 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
         data-test-subj="sigEventCloseIconButton"
       />
     </EuiToolTip>
+  );
+};
+
+const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
+  const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
+
+  if (event.status !== 'open') {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiToolTip content={DISMISS_EVENT_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="eyeSlash"
+          aria-label={DISMISS_EVENT_ARIA_LABEL}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            setIsDismissModalOpen(true);
+          }}
+          size="s"
+          color="danger"
+          data-test-subj="sigEventDismissIconButton"
+        />
+      </EuiToolTip>
+      {isDismissModalOpen && (
+        <DismissEventModal
+          eventUuid={event.event_uuid}
+          onClose={() => setIsDismissModalOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
@@ -292,12 +332,15 @@ export const getSignificantEventTableColumns = ({
   },
   {
     name: '',
-    width: '88px',
+    width: '112px',
     align: 'right' as const,
     render: (item: SignificantEvent) => (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <RunInvestigationCell event={item} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DismissEventCell event={item} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <CloseEventCell event={item} />
