@@ -13,7 +13,7 @@
     {
       "path": "/s/{spaceId}/internal/observability/slos/_definitions",
       "method": "get",
-      "reason": "False-positive: oasdiff reports response-body-one-of-added when a property is added to a schema referenced by oneOf subschemas. Actual change is adding optional preventCrossProjectSearch to SLOs_settings — backwards-compatible.",
+      "reason": "False-positive: oasdiff reports response-body-one-of-added when a property is added to a schema referenced by oneOf subschemas. Actual change is adding optional preventCrossProjectSearch to SLOs_settings \u2014 backwards-compatible.",
       "approvedBy": "@elastic/obs-ux-management-team",
       "oasdiffId": "response-body-one-of-added"
     },
@@ -103,7 +103,7 @@
     {
       "path": "/api/spaces/space",
       "method": "get",
-      "reason": "Replace schema.conditional with schema.maybe(schema.boolean()) for include_authorized_purposes query param. Runtime behavior is identical — the custom validate function still rejects include_authorized_purposes=true when purpose is set. The OAS type widens from conditional literal(false)/boolean to always boolean. TF provider codegen simplifies from union type to plain *bool, but the endpoint is unused in provider code.",
+      "reason": "Replace schema.conditional with schema.maybe(schema.boolean()) for include_authorized_purposes query param. Runtime behavior is identical \u2014 the custom validate function still rejects include_authorized_purposes=true when purpose is set. The OAS type widens from conditional literal(false)/boolean to always boolean. TF provider codegen simplifies from union type to plain *bool, but the endpoint is unused in provider code.",
       "approvedBy": "@elastic/kibana-security",
       "prUrl": "https://github.com/elastic/kibana/pull/260831"
     },
@@ -375,6 +375,86 @@
       "approvedBy": "@elastic/response-ops",
       "oasdiffId": "request-property-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/288179"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "delete",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "get",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "patch",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "patch",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "post",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "post",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "put",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "request-property-one-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules",
+      "method": "put",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules/_bulk_action",
+      "method": "post",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
+    },
+    {
+      "path": "/api/detection_engine/rules/_find",
+      "method": "get",
+      "reason": "Adds maxLength validation to rule response action fields for better security posture.",
+      "approvedBy": "@elastic/security-defend-workflows",
+      "oasdiffId": "response-property-one-of-added",
+      "prUrl": "https://github.com/elastic/kibana/pull/275716"
     }
   ]
 }

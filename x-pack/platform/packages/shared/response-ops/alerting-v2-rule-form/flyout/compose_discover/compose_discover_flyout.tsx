@@ -81,7 +81,7 @@ import {
   resolveUnifiedAlertApplyQuery,
   splitResultToRuleQuery,
 } from './use_heuristic_split';
-import { useSplitQueryCompletion } from './use_split_query_completion';
+import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { buildRuleNotificationTag } from '../../actions_form/helpers/rule_scoped_action_policies';
@@ -647,14 +647,8 @@ export function ComposeDiscoverFlyout({
    * are immune to React Strict Mode double-mount disposal.
    */
   const sandboxBase = sandboxQuery.format === 'composed' ? sandboxQuery.base : '';
-  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
-    baseQuery: sandboxBase,
-    search: services.data.search.search,
-  });
-  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
-    baseQuery: sandboxBase,
-    search: services.data.search.search,
-  });
+  const { onAlertEditorMount, onRecoveryEditorMount, onBaseEditorMount, onSingleEditorMount } =
+    useSandboxEditorMounts({ baseQuery: sandboxBase, services: baseServices });
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
@@ -1423,6 +1417,8 @@ export function ComposeDiscoverFlyout({
                 onTabChange={handleSandboxTabChange}
                 onAlertEditorMount={onAlertEditorMount}
                 onRecoveryEditorMount={onRecoveryEditorMount}
+                onBaseEditorMount={onBaseEditorMount}
+                onSingleEditorMount={onSingleEditorMount}
                 onClose={handleSandboxClose}
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}

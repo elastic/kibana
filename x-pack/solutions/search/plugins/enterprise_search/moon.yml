@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/ml-common-types'
   - '@kbn/react-kibana-context-render'
   - '@kbn/ui-callout'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
