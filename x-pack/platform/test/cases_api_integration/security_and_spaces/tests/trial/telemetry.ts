@@ -13,13 +13,16 @@ import {
   CASES_URL,
   CASE_TELEMETRY_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
+  INTERNAL_FIELD_DEFINITIONS_URL,
   OBSERVABLE_TYPE_IPV4,
 } from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
+  deleteFieldDefinitions,
   createCase,
+  getSpaceUrlPrefix,
   getTelemetry,
   runTelemetryTask,
   createComment,
@@ -450,7 +453,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(totalEnabled + totalDisabled).toBe(total);
 
           expect(casesTelemetry.templates).toEqual({
-            featureEnabled: true,
             all: {
               // The edited template counts once despite its three versions, and the
               // soft-deleted one does not count at all.
@@ -475,6 +477,88 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             },
             sec: zeroedScope,
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
+      });
+    });
+
+    describe('field library', () => {
+      const createFieldDefinition = async (
+        name: string,
+        owner: string,
+        overrides: Record<string, unknown> = {},
+        space?: string
+      ) => {
+        await supertest
+          .post(`${getSpaceUrlPrefix(space)}${INTERNAL_FIELD_DEFINITIONS_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
+          .send({
+            name,
+            owner,
+            definition: `name: ${name}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+            ...overrides,
+          })
+          .expect(200);
+      };
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      const zeroedScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
+
+      it('should report the field library snapshot', async () => {
+        // The counts below are absolute, so they only stay diagnostic from an empty start. A
+        // single leftover reusable definition would reproduce them even with a broken query.
+        await deleteFieldDefinitions(es);
+
+        await createFieldDefinition('sec_global', 'securitySolution', { isGlobal: true });
+        await createFieldDefinition('sec_reusable', 'securitySolution', { isGlobal: false });
+        // No `isGlobal` key at all, which the create route allows and nothing backfills.
+        await createFieldDefinition('sec_unset', 'securitySolution');
+
+        // Not one of the three real owners, so it must reach `all` and no solution scope.
+        await createFieldDefinition('fixture_global', 'securitySolutionFixture', {
+          isGlobal: true,
+        });
+
+        // The type is `multiple-isolated`, so a definition outside the default space is only
+        // counted while the query keeps searching every namespace.
+        await createFieldDefinition(
+          'space1_global',
+          'securitySolution',
+          { isGlobal: true },
+          'space1'
+        );
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          expect(casesTelemetry.fieldLibrary).toBeDefined();
+
+          expect(casesTelemetry.fieldLibrary.sec.totalReusable).toBe(2);
+
+          expect(casesTelemetry.fieldLibrary).toEqual({
+            all: { total: 5, totalGlobal: 3, totalReusable: 2 },
+            sec: { total: 4, totalGlobal: 2, totalReusable: 2 },
             obs: zeroedScope,
             main: zeroedScope,
           });
