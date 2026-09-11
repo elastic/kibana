@@ -1301,11 +1301,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
           }
 
           // 'timeField' is dropped and re-inferred at runtime from the data view unless the ESQL query refers to a specific time field
-          if (layer.timeField) {
-            layer.timeField = layer.query?.esql
-              ? parseTimeFieldFromESQLQuery(layer.query.esql)
-              : undefined;
-          }
+          layer.timeField = layer.query?.esql
+            ? parseTimeFieldFromESQLQuery(layer.query.esql) || undefined
+            : undefined;
 
           // 'allColumns' is a runtime-only property, not persisted or produced by transform
           if ('allColumns' in layer) {
