@@ -79,6 +79,7 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -126,6 +127,7 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -270,6 +272,7 @@ describe('getInitialAppState', () => {
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
 
   test('should set view mode correctly', () => {

@@ -11,12 +11,14 @@ import { isEqual, has, isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { WATCH_TYPES } from '../../../../common/constants';
 import type { BaseWatch } from '../../../../common/types/watch_types';
 import { getPageErrorCode, PageError, SectionLoading } from '../../components';
 import { loadWatch } from '../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../lib/breadcrumbs';
+import { getWatcherListBack } from '../../lib/watcher_app_header';
 import { useAppContext } from '../../app_context';
 import { Watch } from '../../models/watch';
 import { PageError as GenericPageError } from '../../shared_imports';
@@ -112,7 +114,7 @@ export const WatchEditPage = ({
   };
 }) => {
   // hooks
-  const { setBreadcrumbs } = useAppContext();
+  const { setBreadcrumbs, history } = useAppContext();
   const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
 
   const setWatchProperty = (property: string, value: any) => {
@@ -152,33 +154,53 @@ export const WatchEditPage = ({
     setBreadcrumbs([listBreadcrumb, id ? editBreadcrumb : createBreadcrumb]);
   }, [id, setBreadcrumbs]);
 
+  const back = getWatcherListBack(history);
+  const loadingTitle = id
+    ? i18n.translate('xpack.watcher.sections.watchEdit.json.titlePanel.editWatchTitle', {
+        defaultMessage: 'Edit {watchName}',
+        values: { watchName: id },
+      })
+    : i18n.translate('xpack.watcher.sections.watchEdit.loadingCreateTitle', {
+        defaultMessage: 'Create watch',
+      });
+
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
-    return <PageError errorCode={errorCode} id={id} />;
+    return (
+      <>
+        <AppHeader title={loadingTitle} back={back} spacing="bleed" />
+        <PageError errorCode={errorCode} id={id} />
+      </>
+    );
   } else if (loadError) {
     return (
-      <GenericPageError
-        title={
-          <FormattedMessage
-            id="xpack.watcher.sections.watchEdit.errorTitle"
-            defaultMessage="Error loading watch"
-          />
-        }
-        error={loadError}
-      />
+      <>
+        <AppHeader title={loadingTitle} back={back} spacing="bleed" />
+        <GenericPageError
+          title={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchEdit.errorTitle"
+              defaultMessage="Error loading watch"
+            />
+          }
+          error={loadError}
+        />
+      </>
     );
   }
 
   if (!watch) {
     return (
-      <EuiPageTemplate.EmptyPrompt>
-        <SectionLoading>
+      <>
+        <AppHeader title={loadingTitle} back={back} spacing="bleed" />
+        <EuiSpacer size="l" />
+        <SectionLoading inline>
           <FormattedMessage
             id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
             defaultMessage="Loading watch…"
           />
         </SectionLoading>
-      </EuiPageTemplate.EmptyPrompt>
+      </>
     );
   }
 

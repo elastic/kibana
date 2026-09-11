@@ -12,7 +12,9 @@ import type {
   ConversationRoundStep,
   ConversationWithoutRounds,
   CurrentUser,
+  RoundInput,
   ToolResult,
+  TimelineEvent,
   UserIdAndName,
   SerializedMetadataValue,
   ConversationParentRelation,
@@ -50,6 +52,7 @@ import type {
 } from './types';
 import type { ConversationProperties } from './storage';
 import { isReadBy, migrateReadBy } from './read_by';
+import { isPinnedBy, migratePinnedBy } from './pinned_by';
 import type { ConversationTemplateResolver } from '../templates/serialize';
 import { withDeserializedMetadata } from '../templates/serialize';
 import {
@@ -58,7 +61,12 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import {
+  isRoundDerivedEventId,
+  parseExecutionId,
+  roundToEvents,
+  roundsToEvents,
+} from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -79,14 +87,45 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
+/** True when a round's stored timeline spans more than one execution (a HITL resume). */
+const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
+  storedEvents.some((event) => {
+    const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
+    return execution?.roundId === roundId && execution.index > 0;
+  });
+
 /**
- * Rebuilds the stored timeline on write: round events keep their order, and additive events
- * (like errors) get slotted in by timestamp. That keeps a future error where it actually
- * happened instead of dumped at the end.
+ * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
+ * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
+ * original user message. Undefined refs mean no update; an empty array explicitly clears them.
  */
-const reconcileEvents = (merged: Conversation) => {
-  const roundDerived = roundsToEvents(merged);
-  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
+const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
+  const stored = merged.events ?? [];
+  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
+
+  const roundDerived: TimelineEvent[] = [];
+  for (const round of merged.rounds) {
+    const storedForRound = stored.filter(
+      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
+    );
+    if (hasResumeExecution(round.id, storedForRound)) {
+      const userMessageId = `${round.id}::user_message`;
+      roundDerived.push(
+        ...storedForRound.map((event) => {
+          if (event.id !== userMessageId || !round.input.attachment_refs) {
+            return event;
+          }
+          const data = event.data as RoundInput;
+          return {
+            ...event,
+            data: { ...data, attachment_refs: round.input.attachment_refs },
+          } as TimelineEvent;
+        })
+      );
+    } else {
+      roundDerived.push(...roundToEvents(round, merged));
+    }
+  }
 
   const events = [...roundDerived];
   for (const event of additive) {
@@ -120,7 +159,7 @@ export const fromEsWithoutRounds = (
     updated_at: document._source.updated_at,
     status: document._source.status,
     read: isReadBy({ source: document._source, user }),
-    pinned: document._source.pinned,
+    pinned: isPinnedBy({ source: document._source, user }),
     read_only: document._source.read_only ?? false,
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
@@ -246,8 +285,9 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 
 export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
-  const readBy = {
+  const perUserFlags = {
     read_by: migrateReadBy(document._source),
+    pinned_by: migratePinnedBy(document._source),
   };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
@@ -276,7 +316,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
 
   const conversation: NormalizedConversation = {
     ...base,
-    ...readBy,
+    ...perUserFlags,
     rounds: roundsWithRefs,
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
@@ -333,7 +373,11 @@ const verifyRoundTrip = (conversation: Conversation): Conversation =>
     : conversation;
 
 const stripInternalFields = (conversation: NormalizedConversation): Conversation => {
-  const { read_by: _readBy, ...conversationWithoutInternalFields } = conversation;
+  const {
+    read_by: _readBy,
+    pinned_by: _pinnedBy,
+    ...conversationWithoutInternalFields
+  } = conversation;
 
   return conversationWithoutInternalFields;
 };
@@ -414,7 +458,9 @@ export const toEs = (
     // Explicitly omit read to ensure migration
     read: undefined,
     read_by: conversation.read_by ?? [],
-    pinned: conversation.pinned,
+    // Explicitly omit pinned to ensure migration
+    pinned: undefined,
+    pinned_by: conversation.pinned_by ?? [],
     read_only: conversation.read_only,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
@@ -455,7 +501,7 @@ export const updateConversation = ({
   updateDate: Date;
 }) => {
   const {
-    events: _ignoredEvents,
+    events: updateEvents,
     schema_version: _ignoredSchemaVersion,
     ...safeUpdate
   } = update as ConversationUpdatableFields & {
@@ -471,7 +517,16 @@ export const updateConversation = ({
     schema_version: conversation.schema_version,
   } as Conversation;
 
-  if (!isEventsNativeVersion(merged.schema_version)) {
+  if (updateEvents !== undefined) {
+    return {
+      ...merged,
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: updateEvents,
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
+    };
+  }
+
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
     return merged;
   }
 
@@ -498,8 +553,6 @@ export const createRequestToEs = ({
   const effectiveUser = conversation.user ?? currentUser;
   const createdAt = creationDate.toISOString();
 
-  // The initial timeline is derived from the rounds being created, using the same user that
-  // gets persisted so `user_message` actors match the stored ownership.
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
@@ -510,7 +563,10 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events = roundsToEvents(forEvents);
+  const events =
+    conversation.events && conversation.events.length > 0
+      ? conversation.events
+      : roundsToEvents(forEvents);
 
   return {
     agent_id: conversation.agent_id,
@@ -527,7 +583,7 @@ export const createRequestToEs = ({
     state: conversation.state,
     status: conversation.status,
     read_by: [],
-    pinned: false,
+    pinned_by: [],
     read_only: conversation.read_only ?? false,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
