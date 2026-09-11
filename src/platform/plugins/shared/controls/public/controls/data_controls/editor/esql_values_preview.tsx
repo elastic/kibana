@@ -69,69 +69,42 @@ export const ESQLValuesPreview: React.FC<{
   }, [previewOptions, selectedControlType, singleColumn]);
 
   const body = previewError ? (
-    <EuiPanel
-      hasBorder
-      paddingSize="xs"
+    <EuiCallOut
+      announceOnMount
+      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
       color="danger"
-      css={css`
-        text-align: center;
-      `}
+      iconType="error"
+      size="s"
     >
-      <EuiCallOut
-        announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
-        color="danger"
-        iconType="error"
-        size="s"
-      >
-        <p>{previewError.message}</p>
-      </EuiCallOut>
-    </EuiPanel>
+      <p>{previewError.message}</p>
+    </EuiCallOut>
   ) : multiColumnResult ? (
-    <EuiPanel
-      hasBorder
-      paddingSize="xs"
+    <EuiCallOut
+      announceOnMount
+      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
       color="warning"
-      css={css`
-        text-align: center;
-      `}
+      iconType="warning"
+      size="s"
+      data-test-subj="esqlMoreThanOneColumnCallout"
     >
-      <EuiCallOut
-        announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
-        color="warning"
-        iconType="warning"
-        size="s"
-        data-test-subj="esqlMoreThanOneColumnCallout"
-      >
-        <p>
-          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
-            previewColumns.length
-          )}
-        </p>
-        <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
-      </EuiCallOut>
-    </EuiPanel>
+      <p>
+        {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
+          previewColumns.length
+        )}
+      </p>
+      <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
+    </EuiCallOut>
   ) : isEmpty ? (
-    <EuiPanel
-      hasBorder
-      paddingSize="xs"
+    <EuiCallOut
+      announceOnMount
+      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
       color="warning"
-      css={css`
-        text-align: center;
-      `}
+      iconType="warning"
+      size="s"
+      data-test-subj="esqlMoreThanOneColumnCallout"
     >
-      <EuiCallOut
-        announceOnMount
-        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyTitle()}
-        color="warning"
-        iconType="warning"
-        size="s"
-        data-test-subj="esqlMoreThanOneColumnCallout"
-      >
-        <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
-      </EuiCallOut>
-    </EuiPanel>
+      <p>{DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}</p>
+    </EuiCallOut>
   ) : range ? (
     <EuiFlexGrid columns={2} data-test-subj="esqlValuesPreviewRange">
       <EuiStat
