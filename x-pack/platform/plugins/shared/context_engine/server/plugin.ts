@@ -23,6 +23,7 @@ import type {
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
+  DeleteWorkflowsApi,
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
@@ -55,6 +56,8 @@ export class ContextEnginePlugin
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
+  private workflowsManagementApiPromise: Promise<DeleteWorkflowsApi | undefined> =
+    Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -65,6 +68,7 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+    this.setupWorkflowsManagement(coreSetup);
 
     this.analyticsService = new ContextEngineAnalyticsService(
       coreSetup.analytics,
@@ -132,6 +136,11 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+      getWorkflowsManagementApi: () => this.workflowsManagementApiPromise,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
     });
 
     registerStepDefinitions({
@@ -180,6 +189,21 @@ export class ContextEnginePlugin
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
+  }
+
+  private setupWorkflowsManagement(
+    coreSetup: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
+  ): void {
+    try {
+      this.workflowsManagementApiPromise = coreSetup.plugins
+        .onSetup<{ workflowsManagement: { management: DeleteWorkflowsApi } }>('workflowsManagement')
+        .then(({ workflowsManagement }) =>
+          workflowsManagement.found ? workflowsManagement.contract.management : undefined
+        )
+        .catch(() => undefined);
+    } catch {
+      this.workflowsManagementApiPromise = Promise.resolve(undefined);
+    }
   }
 
   start(coreStart: CoreStart, startDeps: ContextEngineStartDependencies): ContextEnginePluginStart {
