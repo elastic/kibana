@@ -190,7 +190,7 @@ export const EmptyState: React.FC<
                       type={notFound}
                       alt=""
                       fullWidth={false}
-                      style={{ maxInlineSize: 200 }}
+                      style={{ maxInlineSize: 160 }}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
