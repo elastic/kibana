@@ -72,6 +72,7 @@ export function ProjectPickerFilterForm({
   const form = useForm<FilterInput>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
+    shouldFocusError: false,
     ...(parsedDefaultFilterExpression ? { values: parsedDefaultFilterExpression } : {}),
   });
 

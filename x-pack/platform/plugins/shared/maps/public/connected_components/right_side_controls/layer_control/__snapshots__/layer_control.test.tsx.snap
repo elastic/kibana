@@ -3,7 +3,7 @@
 exports[`LayerControl is rendered 1`] = `
 <Fragment>
   <EuiPanel
-    className="mapWidgetControl mapWidgetControl-hasShadow"
+    className="mapWidgetControl"
     grow={false}
     paddingSize="none"
   >
@@ -145,7 +145,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with loading ic
 exports[`LayerControl isReadOnly 1`] = `
 <Fragment>
   <EuiPanel
-    className="mapWidgetControl mapWidgetControl-hasShadow"
+    className="mapWidgetControl"
     grow={false}
     paddingSize="none"
   >
@@ -232,7 +232,7 @@ exports[`LayerControl isReadOnly 1`] = `
 exports[`LayerControl should disable buttons when flyout is open 1`] = `
 <Fragment>
   <EuiPanel
-    className="mapWidgetControl mapWidgetControl-hasShadow"
+    className="mapWidgetControl"
     grow={false}
     paddingSize="none"
   >

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { RULES_CONTENT_LIST_ID } from '../../constants';
+import { RULES_CONTENT_LIST_ID, paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
 import {
-  useIsRuleManagementABSkillAvailable,
-  useRuleManagementABSkillRequirements,
-} from '../../hooks/use_is_rule_management_ab_skill_available';
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import {
   RuleCreateOptionsPanel,
@@ -35,6 +36,7 @@ import {
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
+import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -46,11 +48,25 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
-  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
-    useComposeDiscoverFlyout();
+  const {
+    flyout,
+    confirmationModal,
+    openCreateFlyout,
+    openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
+
+  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
-  const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
-  const abSkillRequirements = useRuleManagementABSkillRequirements();
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+  const navigateToSequenceBuilder = useCallback(() => {
+    navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
+  }, [navigateToUrl, basePath]);
   // We always render the "Create with agent" entry points; when the skill is unavailable they
   // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
@@ -72,7 +88,7 @@ export const RulesListPage = () => {
     <RuleCreateOptionsPanel
       onCreateEsqlRule={openCreateFlyout}
       onCreateWithAgent={navigateToAgentBuilder}
-      createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
       createWithAgentTooltipText={createWithAgentTooltipText}
       onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
     />
@@ -153,9 +169,11 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+          onBuildSequence={navigateToSequenceBuilder}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
+        <CentralizedActionPoliciesBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
@@ -175,12 +193,13 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
-          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
         />
       ) : null}
       {flyout}
+      {confirmationModal}
     </div>
   );
 };

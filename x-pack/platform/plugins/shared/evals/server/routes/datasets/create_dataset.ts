@@ -21,7 +21,7 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
-import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
+import { DatasetAlreadyExistsError } from '../../storage/datasets/dataset_already_exists_error';
 import { resolveTargetSpaces, withoutSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 

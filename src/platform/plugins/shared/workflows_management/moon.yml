@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
@@ -24,6 +25,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/shared-ux-ai-components'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-hooks'
@@ -90,7 +92,6 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/workflows-extensions'
   - '@kbn/alerts-ui-shared'
-  - '@kbn/ai-assistant-icon'
   - '@kbn/licensing-plugin'
   - '@kbn/securitysolution-rules'
   - '@kbn/alerts-as-data-utils'

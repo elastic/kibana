@@ -40,6 +40,7 @@ export function validateStepNameUniqueness(
         errors.push({
           id: `${stepName}-${occurrence.startLineNumber}-${occurrence.startColumn}-${occurrence.endLineNumber}-${occurrence.endColumn}`,
           owner: 'step-name-validation',
+          ruleId: 'duplicateStepName',
           message: `Step name "${stepName}" is not unique. Found ${occurrences.length} steps with this name.`,
           startLineNumber: occurrence.startLineNumber,
           startColumn: occurrence.startColumn,

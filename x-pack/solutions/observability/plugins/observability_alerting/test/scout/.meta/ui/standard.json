@@ -1,0 +1,232 @@
+{
+  "sha1": "1f3f9dcb87a98944645634b2c2603c2bae619698",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4d3ed4f3fcadbdc-4581a5fa6b57e94",
+      "title": "Reset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "648c81c97fb0579-c98c179092568db",
+      "title": "Observability Alerting URLs returns app not found for Inbox (/inbox) when alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "648c81c97fb0579-99c04cee2e65cb7",
+      "title": "Observability Alerting URLs loads Inbox (/inbox) when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-cb20ab0acc1e0a2",
+      "title": "Observability Alerting URLs returns app not found for Rules (v1) (/rules/v1) when alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "648c81c97fb0579-92e4d3add9be7ef",
+      "title": "Observability Alerting URLs loads Rules (v1) (/rules/v1) when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-559bab69cdfd1bb",
+      "title": "Observability Alerting URLs returns app not found for Rules (/rules/v2) when alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "648c81c97fb0579-139a5f2c0f56362",
+      "title": "Observability Alerting URLs loads Rules (/rules/v2) when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-b27aee39b31f3f6",
+      "title": "Observability Alerting URLs returns app not found for Rule library (/rule-library) when alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "648c81c97fb0579-8f577f92b6a2f05",
+      "title": "Observability Alerting URLs loads Rule library (/rule-library) when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-c06ece6fd1fb469",
+      "title": "Observability Alerting URLs returns app not found for Action Policies (/action-policies) when alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "648c81c97fb0579-7225ee707d879ae",
+      "title": "Observability Alerting URLs loads Action Policies (/action-policies) when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-70dca49fbee5066",
+      "title": "Observability Alerting URLs returns app not found for Execution history (/execution-history) when alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "648c81c97fb0579-17a6d1e516b217e",
+      "title": "Observability Alerting URLs loads Execution history (/execution-history) when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "0a33a70a958b321-4581a5fa6b57e94",
+      "title": "Reset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

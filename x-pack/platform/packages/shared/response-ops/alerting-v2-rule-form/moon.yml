@@ -9,8 +9,6 @@ owners:
   defaultOwner: '@elastic/rna-project-team'
 toolchains:
   default: node
-  javascript:
-    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/alerting-v2-rule-form'
@@ -31,6 +29,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/react-query'
   - '@kbn/search-types'
+  - '@kbn/alerting-v2-browser-shared'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-constants'
   - '@kbn/alerting-v2-utils'
@@ -51,11 +50,11 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/core-di-browser'
   - '@kbn/core-di'
-  - '@kbn/announcement-banner'
   - '@kbn/kibana-react-plugin'
   - '@kbn/dashboard-plugin'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser-mocks'
 tags:
   - shared-browser
   - package

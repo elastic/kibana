@@ -51,8 +51,6 @@ export class DashboardPanelActionsService extends FtrService {
       await Promise.all([
         // global fixed eui headers, TODO: remove when Kibana switched to grid layout
         this.find.allByCssSelector('[data-fixed-header="true"]', 500),
-        // fixed header with actions from project navigation
-        this.find.allByCssSelector('[data-test-subj="kibanaProjectHeaderActionMenu"]', 500),
         // sticky unified search bar
         this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 500),
       ])

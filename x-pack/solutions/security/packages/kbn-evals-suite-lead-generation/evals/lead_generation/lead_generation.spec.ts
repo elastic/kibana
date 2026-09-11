@@ -106,7 +106,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
                 title: '', // empty title — isValidLead requires title.length > 0
                 byline: 'User jdoe performed suspicious actions',
                 description: 'Investigation needed',
-                entities: [{ type: 'user', name: 'jdoe' }],
+                entity: { type: 'user', name: 'jdoe', id: 'user:jdoe' },
                 tags: ['lateral-movement'],
                 priority: 7,
                 chatRecommendations: ['What did jdoe access in the past 24h?'],
@@ -135,7 +135,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
                 title: 'Lateral Movement Detected',
                 byline: 'Host web-server-01 shows lateral movement patterns',
                 description: 'Multiple lateral movement indicators observed',
-                entities: [{ type: 'host', name: 'web-server-01' }],
+                entity: { type: 'host', name: 'web-server-01', id: 'host:web-server-01' },
                 tags: ['lateral-movement'],
                 priority: 15, // out of 1–10 range — isValidLead fails
                 chatRecommendations: ['What processes ran on web-server-01?'],
@@ -213,7 +213,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
                   title: 'Something happened',
                   byline: 'A user did something',
                   description: 'There might be an issue. Please investigate.',
-                  entities: [{ type: 'user', name: 'unknown' }],
+                  entity: { type: 'user', name: 'unknown', id: 'user:unknown' },
                   tags: [],
                   priority: 5,
                   chatRecommendations: ['Check logs'],
@@ -270,6 +270,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
             {
               name: 'Ran',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => ({
                 score: Array.isArray(output?.leads) && !output?.errors?.length ? 1 : 0,
               }),
@@ -333,6 +334,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
             {
               name: 'StatusMatchesExecution',
               kind: 'CODE',
+              direction: 'maximize',
               evaluate: async ({ output }) => {
                 const typedOutput = output as
                   | (typeof output & {

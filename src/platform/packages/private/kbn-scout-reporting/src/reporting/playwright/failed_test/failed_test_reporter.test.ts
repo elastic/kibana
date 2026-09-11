@@ -14,6 +14,8 @@ import type {
   TestCase,
   TestResult,
 } from '@playwright/test/reporter';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getKibanaModuleData } from '../../../helpers';
 import { ScoutFailedTestReporter } from './failed_test_reporter';
 import { ScoutFailureTracker } from './failure_tracking';
 
@@ -22,7 +24,20 @@ jest.mock('@kbn/code-owners', () => ({
   getOwningTeamsForPath: jest.fn(() => []),
 }));
 
-const createMockConfig = (): FullConfig => ({ configFile: undefined } as unknown as FullConfig);
+jest.mock('../../../helpers', () => {
+  const actual = jest.requireActual('../../../helpers');
+  return {
+    ...actual,
+    getKibanaModuleData: jest.fn(),
+  };
+});
+
+const mockedGetKibanaModuleData = getKibanaModuleData as jest.MockedFunction<
+  typeof getKibanaModuleData
+>;
+
+const createMockConfig = (configFile?: string): FullConfig =>
+  ({ configFile } as unknown as FullConfig);
 
 const createMockSuite = (tests: TestCase[]): Suite =>
   ({ allTests: () => tests } as unknown as Suite);
@@ -76,6 +91,7 @@ describe('ScoutFailedTestReporter', () => {
     jest.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
     trackerSaveSpy = jest.spyOn(ScoutFailureTracker.prototype, 'save').mockImplementation(() => {});
     trackerAddFailureSpy = jest.spyOn(ScoutFailureTracker.prototype, 'addFailure');
+    mockedGetKibanaModuleData.mockReset();
   });
 
   afterEach(() => {
@@ -154,5 +170,54 @@ describe('ScoutFailedTestReporter', () => {
 
     expect(() => reporter.onEnd(createMockFullResult())).not.toThrow();
     expect(trackerSaveSpy).toHaveBeenCalledWith({ excludeTestIds: new Set() });
+  });
+
+  it('leaves kibanaModule unset and keeps reporting when kibana.jsonc cannot be resolved', () => {
+    const configFile =
+      '/repo/src/core/packages/user-storage/test/scout_user_storage/api/playwright.config.ts';
+    mockedGetKibanaModuleData.mockImplementation(() => {
+      throw new Error('Manifest file not found: /repo/src/core/packages/user-storage/kibana.jsonc');
+    });
+    const warningSpy = jest.spyOn(ToolingLog.prototype, 'warning').mockImplementation(() => {});
+    const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
+
+    expect(() =>
+      reporter.onBegin(createMockConfig(configFile), createMockSuite([hardFailure]))
+    ).not.toThrow();
+
+    expect(warningSpy).toHaveBeenCalledWith(
+      expect.stringContaining(`Unable to resolve kibana.jsonc for Scout config ${configFile}`)
+    );
+    expect(warningSpy).toHaveBeenCalledWith(expect.stringContaining('Manifest file not found'));
+
+    reporter.onTestEnd(hardFailure, createMockResult({ status: 'failed', retry: 0 }));
+    reporter.onEnd(createMockFullResult());
+
+    expect(reportLogEventSpy.mock.calls[0][0].kibanaModule).toBeUndefined();
+    expect(trackerSaveSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('stamps kibanaModule onto failures when the manifest is resolved', () => {
+    mockedGetKibanaModuleData.mockReturnValue({
+      id: '@kbn/my-plugin',
+      type: 'plugin',
+      visibility: 'shared',
+      group: 'platform',
+      owner: ['@elastic/kibana-qa'],
+    });
+    const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
+
+    reporter.onBegin(
+      createMockConfig('/repo/plugins/my_plugin/test/scout/ui/playwright.config.ts'),
+      createMockSuite([hardFailure])
+    );
+    reporter.onTestEnd(hardFailure, createMockResult({ status: 'failed', retry: 0 }));
+
+    expect(reportLogEventSpy.mock.calls[0][0].kibanaModule).toEqual({
+      id: '@kbn/my-plugin',
+      type: 'plugin',
+      visibility: 'shared',
+      group: 'platform',
+    });
   });
 });

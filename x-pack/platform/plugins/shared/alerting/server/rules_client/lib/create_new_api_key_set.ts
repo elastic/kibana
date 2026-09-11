@@ -28,12 +28,19 @@ export async function createNewAPIKeySet(
     errorMessage?: string;
     apiKeyOwnership?: RuleApiKeyOwnership;
   }
-): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'>> {
+): Promise<
+  Pick<
+    RawRule,
+    'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+  >
+> {
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
     const name = generateAPIKeyName(id, ruleName);
-    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, apiKeyOwnership);
+    const resolved = await resolveRuleAPIKey(context, name, shouldUpdateApiKey, {
+      apiKeyOwnership,
+    });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {

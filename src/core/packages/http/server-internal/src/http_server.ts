@@ -64,7 +64,7 @@ import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { getEcsResponseLog } from './logging';
+import { getEcsResponseLog, getSlimInfoResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
 import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
 
@@ -548,9 +548,19 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
+      const logAtInfo =
+        (request.route?.settings as { app?: KibanaRouteOptions } | undefined)?.app
+          ?.httpResponseLogLevel === 'info';
+
       if (log.isLevelEnabled('debug')) {
         const { message, meta } = getEcsResponseLog(request, this.log);
         log.debug(message!, meta);
+        return;
+      }
+
+      if (logAtInfo && log.isLevelEnabled('info')) {
+        const { message, meta } = getSlimInfoResponseLog(request);
+        log.info(message, meta);
       }
     };
 
@@ -590,7 +600,9 @@ export class HttpServer {
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const app = request.app as KibanaRequestState;
-      app.httpSpan?.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      if (app.httpSpan?.isRecording()) {
+        app.httpSpan.updateName(`${request.route.method.toUpperCase()} ${request.route.path}`);
+      }
 
       const stop = app.measureElu;
 
@@ -1072,7 +1084,13 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
-      ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
+      ...omitBy(
+        {
+          excludeFromRateLimiter: route.options.excludeFromRateLimiter,
+          httpResponseLogLevel: route.options.httpResponseLogLevel,
+        },
+        isNil
+      ),
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

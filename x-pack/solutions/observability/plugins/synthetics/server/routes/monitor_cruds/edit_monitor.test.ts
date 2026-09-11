@@ -29,7 +29,7 @@ jest.mock('../telemetry/monitor_upgrade_sender', () => ({
 // mocked here to reach the route's space-authorization check without exercising
 // the full monitor/location validation and normalization pipeline.
 jest.mock('./monitor_locations_utils', () => ({
-  assertCanUpdateMonitorInAllSpaces: jest.fn(),
+  assertCanPerformMonitorBulkActionInAllSpaces: jest.fn(),
   validateMonitorPrivateLocationSpaces: jest.fn().mockReturnValue(null),
 }));
 
@@ -207,9 +207,11 @@ describe('editSyntheticsMonitorRoute', () => {
   });
 
   it("authorizes the union of the monitor's previous and newly-submitted spaces, not just the new ones", async () => {
-    const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('./monitor_locations_utils');
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+      './monitor_locations_utils'
+    );
     const forbidden = { status: 403 };
-    assertCanUpdateMonitorInAllSpaces.mockResolvedValue(forbidden);
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 
     const { routeContext } = getRouteContextMock();
     routeContext.request = {
@@ -243,8 +245,8 @@ describe('editSyntheticsMonitorRoute', () => {
     const result = await editSyntheticsMonitorRoute().handler(routeContext);
 
     expect(result).toBe(forbidden);
-    expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledTimes(1);
-    const [, spacesArg] = assertCanUpdateMonitorInAllSpaces.mock.calls[0];
+    expect(assertCanPerformMonitorBulkActionInAllSpaces).toHaveBeenCalledTimes(1);
+    const [, spacesArg] = assertCanPerformMonitorBulkActionInAllSpaces.mock.calls[0];
     // 'space-b' was dropped from the submitted payload but must still be
     // authorized - removing a monitor from a space is itself a change that
     // requires bulk_update privileges there.

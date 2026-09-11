@@ -232,7 +232,7 @@ describe('getBucketColumns', () => {
     };
 
     expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toEqual([]);
-    expect(mockConvertBucketToColumns).toBeCalledTimes(0);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if metric is invalid', () => {
@@ -258,7 +258,7 @@ describe('getBucketColumns', () => {
     mockConvertBucketToColumns.mockReturnValueOnce(null);
 
     expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toBeNull();
-    expect(mockConvertBucketToColumns).toBeCalledTimes(1);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if no buckets are returned', () => {
@@ -284,7 +284,7 @@ describe('getBucketColumns', () => {
     mockConvertBucketToColumns.mockReturnValueOnce([null]);
 
     expect(getBucketColumns(visType, visSchemas, keys, dataView, false, [])).toBeNull();
-    expect(mockConvertBucketToColumns).toBeCalledTimes(1);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(1);
   });
   test('should return columns', () => {
     const metricKey = 'metric';
@@ -326,7 +326,7 @@ describe('getBucketColumns', () => {
       ...returnValue,
       ...returnValue,
     ]);
-    expect(mockConvertBucketToColumns).toBeCalledTimes(2);
+    expect(mockConvertBucketToColumns).toHaveBeenCalledTimes(2);
   });
 });
 

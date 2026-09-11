@@ -96,7 +96,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     core
       .getStartServices()
       .then(([coreStart, depsStart]) => {
-        plugins.cases?.attachmentFramework.registerUnified(
+        plugins.cases?.attachmentFramework.registerAttachment(
           getOsqueryCaseAttachment({
             ...coreStart,
             ...depsStart,

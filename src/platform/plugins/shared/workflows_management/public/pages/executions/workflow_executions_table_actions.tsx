@@ -24,9 +24,10 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import { getWorkflowExecutionActionContextFromDto } from './workflow_executions_table_cells';
 import { useKibana } from '../../hooks/use_kibana';
+import { useTelemetry } from '../../hooks/use_telemetry';
 
 export const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_ID = 'actions';
-const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 64;
+const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 56;
 
 export interface WorkflowExecutionActionContext {
   executionId?: string;
@@ -59,10 +60,12 @@ const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions
 const useExecutionActionListItems = (
   { executionId, workflowId, context }: WorkflowExecutionActionContext,
   onClosePopover: () => void,
+  origin: 'table_actions' | 'flyout_actions',
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => void
 ): EuiListGroupProps['listItems'] => {
   const { application } = useKibana().services;
+  const telemetry = useTelemetry();
   const { canExecuteWorkflow, canReadWorkflowExecution, canUpdateWorkflow } =
     useWorkflowsCapabilities();
 
@@ -106,6 +109,7 @@ const useExecutionActionListItems = (
           if (!workflowId) {
             return;
           }
+          telemetry.reportWorkflowExecutionsOpenInEditorClicked({ workflowId, origin });
           navigateToWorkflow(`/${workflowId}`);
         },
         isDisabled: !workflowId,
@@ -142,6 +146,8 @@ const useExecutionActionListItems = (
     onClosePopover,
     onReRunExecution,
     onViewAllExecutionsForWorkflow,
+    origin,
+    telemetry,
     workflowId,
   ]);
 };
@@ -151,6 +157,7 @@ export interface WorkflowExecutionActionsMenuProps {
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   variant?: 'icon' | 'takeAction';
+  origin?: 'table_actions' | 'flyout_actions';
 }
 
 export const WorkflowExecutionActionsMenu = ({
@@ -158,6 +165,7 @@ export const WorkflowExecutionActionsMenu = ({
   onReRunExecution,
   onViewAllExecutionsForWorkflow,
   variant = 'icon',
+  origin = 'table_actions',
 }: WorkflowExecutionActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'workflowExecutionActionsPopover' });
@@ -165,6 +173,7 @@ export const WorkflowExecutionActionsMenu = ({
   const listItems = useExecutionActionListItems(
     actionContext,
     closePopover,
+    origin,
     onViewAllExecutionsForWorkflow,
     onReRunExecution
   );
@@ -181,7 +190,7 @@ export const WorkflowExecutionActionsMenu = ({
   });
 
   const anchorPosition: EuiPopoverProps['anchorPosition'] =
-    variant === 'takeAction' ? 'upRight' : 'upCenter';
+    variant === 'takeAction' ? 'upRight' : 'downLeft';
 
   if (!listItems?.length) {
     return null;
@@ -204,7 +213,7 @@ export const WorkflowExecutionActionsMenu = ({
           aria-label={showActionsLabel}
           color="text"
           data-test-subj="workflowExecutionActionsButton"
-          iconType="boxesVertical"
+          iconType="ellipsis"
           onClick={() => setIsOpen((prev) => !prev)}
         />
       </EuiToolTip>

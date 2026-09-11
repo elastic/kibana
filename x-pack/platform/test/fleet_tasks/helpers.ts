@@ -56,15 +56,15 @@ export async function cleanupAgentDocs(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
 
-  try {
-    await es.deleteByQuery({
-      index: AGENTS_INDEX,
-      refresh: true,
-      query: {
-        match_all: {},
-      },
-    });
-  } catch (err) {
-    // index doesn't exist
-  }
+  // Refresh first so the status-change task's just-committed last_known_status writes are searchable: the suite gates teardown on a realtime GET, which can observe a write before refresh, so without this the delete's search snapshots a stale version and aborts on conflict, leaving active agents that make the policy delete 400.
+  await es.indices.refresh({ index: AGENTS_INDEX, ignore_unavailable: true });
+  await es.deleteByQuery({
+    index: AGENTS_INDEX,
+    ignore_unavailable: true,
+    refresh: true,
+    conflicts: 'proceed',
+    query: {
+      match_all: {},
+    },
+  });
 }

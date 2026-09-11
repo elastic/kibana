@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiTitleSize } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiTitle } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
@@ -38,9 +38,7 @@ export const AlertEpisodeDetailsHeader = ({
   titleSize = 'l',
 }: AlertEpisodeDetailsHeaderProps) => {
   const isLoading = isLoadingEpisode || isRuleLoading(ruleState);
-  const titleContent = isLoading
-    ? i18n.HEADER_LOADING_TITLE
-    : isRuleLoaded(ruleState)
+  const titleContent = isRuleLoaded(ruleState)
     ? ruleState.rule.metadata.name
     : i18n.HEADER_EPISODE_TITLE_FALLBACK;
   const showBadgeRow = Boolean(status) || isSupportedEpisodeSeverity(severity);
@@ -53,11 +51,22 @@ export const AlertEpisodeDetailsHeader = ({
           The badges are grouped into one flex item (wrap={false} inside) so they jump down
           together as a unit rather than wrapping individually mid-cluster. */}
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size={titleSize}>
-            <h2 data-test-subj="alertingV2EpisodeDetailsHeaderTitle">{titleContent}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
+        {isLoading ? (
+          // The skeleton needs a growing item: EuiSkeletonTitle sizes itself as a
+          // percentage of its container, which collapses in a content-sized item.
+          <EuiFlexItem>
+            <EuiSkeletonTitle
+              size={titleSize}
+              data-test-subj="alertingV2EpisodeDetailsHeaderTitleSkeleton"
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiTitle size={titleSize}>
+              <h2 data-test-subj="alertingV2EpisodeDetailsHeaderTitle">{titleContent}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         {showBadgeRow ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>

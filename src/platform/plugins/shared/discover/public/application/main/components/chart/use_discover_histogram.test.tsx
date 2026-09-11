@@ -489,6 +489,31 @@ describe('useDiscoverHistogram', () => {
         })
       );
     });
+
+    it('should pass esqlApproximation from the app state to the histogram as isApproximate', async () => {
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      const { toolkit } = await setup();
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      dataStateContainer.fetchChart$ = fetch$;
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { esql: 'from *' }, esqlApproximation: true },
+        })
+      );
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      act(() => {
+        fetch$.next({});
+      });
+      expect(api.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isApproximate: true,
+        })
+      );
+    });
   });
 
   describe('fetching', () => {

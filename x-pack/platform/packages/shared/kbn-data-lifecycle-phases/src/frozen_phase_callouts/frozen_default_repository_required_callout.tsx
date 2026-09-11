@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer, EuiSplitButton, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiSplitButton, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export interface FrozenDefaultRepositoryRequiredCalloutProps {
   onCreateDefaultRepository?: () => void;
@@ -49,9 +50,8 @@ export const FrozenDefaultRepositoryRequiredCallout = ({
   const shouldManageExisting = hasExistingRepositories && Boolean(manageRepositoriesUrl);
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       size="s"
-      color="warning"
       announceOnMount={false}
       title={i18n.translate(
         'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.title',
@@ -114,6 +114,6 @@ export const FrozenDefaultRepositoryRequiredCallout = ({
           </EuiSplitButton>
         </>
       )}
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

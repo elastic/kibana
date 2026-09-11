@@ -1,0 +1,36 @@
+{
+  "sha1": "f6c436bc2b89a4b8fd499932c4bda4a2220908e2",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f501f95e1e7f128-298eb9245c64f5f",
+      "title": "Vector DB deployment stats API privileges reports only the indices and documents the caller can read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats_privileges.spec.ts",
+        "line": 82,
+        "column": 58
+      }
+    },
+    {
+      "id": "f501f95e1e7f128-1d8685effdfe371",
+      "title": "Vector DB deployment stats API privileges reports both indices to a caller that can read them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats_privileges.spec.ts",
+        "line": 102,
+        "column": 15
+      }
+    }
+  ]
+}

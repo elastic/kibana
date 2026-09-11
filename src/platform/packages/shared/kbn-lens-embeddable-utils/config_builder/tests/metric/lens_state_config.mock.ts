@@ -67,7 +67,7 @@ export const breakdownMetricAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
     },
     query: {
       query: '',
@@ -192,7 +192,7 @@ export const complexMetricAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
     },
     query: {
       query: '',
@@ -284,7 +284,7 @@ export const simpleMetricAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
     },
     query: {
       query: '',
@@ -359,7 +359,7 @@ export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
     },
     query: {
       query: '',
@@ -501,7 +501,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
       palette: {
         type: 'palette',
         name: 'status',
@@ -593,7 +593,7 @@ export const selectorColorByValueAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
       palette: {
         type: 'palette',
         name: 'temperature',
@@ -728,7 +728,7 @@ export const dynamicColorsMetricAttributes: LensAttributes = {
       secondaryTrend: {
         type: 'none',
       },
-      secondaryLabelPosition: 'before',
+      secondaryNameVisibility: 'before',
     },
     query: {
       query: '',

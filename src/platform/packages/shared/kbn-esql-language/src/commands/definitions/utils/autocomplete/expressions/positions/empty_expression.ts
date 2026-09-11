@@ -9,7 +9,11 @@
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../utils';
+import {
+  isTupleExpression,
+  matchesSpecialFunction,
+  normalizePreferredExpressionTypes,
+} from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import {
   hasArbitraryExpressionSignature,
@@ -35,6 +39,7 @@ import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
   allStarConstant,
+  commaWithAutoSuggestCompleteItem,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
@@ -313,6 +318,19 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
       Boolean(context?.supportsControls)
     );
     suggestions.push(...controlSuggestions);
+  }
+
+  // Keep expression suggestions while offering the separator for the next tuple value.
+  if (
+    isTupleExpression(ctx.expressionRoot) &&
+    shouldSuggestComma({
+      position: 'inside_list',
+      innerText: ctx.innerText,
+      listHasValues: ctx.expressionRoot.values.length > 0,
+      isCursorFollowedByComma: options.isCursorFollowedByComma,
+    })
+  ) {
+    suggestions.push(commaWithAutoSuggestCompleteItem);
   }
 
   return suggestions;
