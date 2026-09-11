@@ -151,7 +151,6 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByText('Mar 4, 2026')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutCreatedByBlock')).toHaveTextContent('Alice');
     expect(screen.getByTestId('ruleSummaryFlyoutUpdatedByBlock')).toHaveTextContent('Bob');
-    expect(screen.getByTestId('ruleSummaryFlyoutLastExecutionBlock')).toHaveTextContent('-');
   });
 
   it('calls onClose when the flyout close button is clicked', () => {

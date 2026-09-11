@@ -25,7 +25,6 @@ import { RuleProvider } from '../../../rule_details/rule_context';
 import { DashboardArtifactsSubsection } from '../../../rule_details/overview/artifacts/dashboard_artifacts_subsection';
 import { ActionPoliciesArtifactsSubsection } from '../../../rule_details/overview/artifacts/action_policies_artifacts_subsection';
 import { RuleConditions } from '../../../rule_details/sidebar/rule_conditions';
-import { EMPTY_VALUE } from '../../../rule_details/utils';
 import { RuleSummaryAboutCard } from './rule_summary_about_card';
 import { RuleSummaryRunbookCard } from './rule_summary_runbook_card';
 
@@ -133,14 +132,6 @@ export const RuleSummaryFlyout = ({
               onChange={() => onToggleEnabled(rule)}
               data-test-subj="ruleSummaryFlyoutEnabledSwitch"
             />
-          </InfoBlock>
-          <InfoBlock
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
-              defaultMessage: 'Last execution',
-            })}
-            data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
-          >
-            {EMPTY_VALUE}
           </InfoBlock>
           <InfoBlock
             title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
