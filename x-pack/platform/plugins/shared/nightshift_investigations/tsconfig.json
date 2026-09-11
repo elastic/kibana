@@ -30,6 +30,7 @@
     "@kbn/search-inference-endpoints",
     "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/investigation-output"
   ]
 }

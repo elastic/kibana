@@ -22,7 +22,7 @@ responses:
                 provider: 'aws'
                 connectorId: 'cloud-connector-id-1'
                 mechanisms:
-                  - 'agentless'
+                  - 'managed_integration'
                 deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
                 deploymentName: 'elastic-aws-onboarding'
                 services:
@@ -43,3 +43,14 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundResponseExample:
+            description: 'The requested cloud onboarding deployment does not exist'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found'
