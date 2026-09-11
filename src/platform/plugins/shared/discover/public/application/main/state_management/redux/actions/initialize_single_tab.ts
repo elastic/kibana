@@ -13,7 +13,7 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { DataViewSource, EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
@@ -201,7 +201,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       });
       services.dataSourceService.registerEsqlSource(esqlSource);
       dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
-      selectTabRuntimeState(runtimeStateManager, tabId).currentEsqlSource$.next(esqlSource);
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
@@ -216,6 +216,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       });
 
       dataView = result.dataView;
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(
+        new DataViewSource(dataView)
+      );
     }
 
     dispatch(setDataView({ tabId, dataView }));

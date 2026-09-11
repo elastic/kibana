@@ -23,7 +23,6 @@ import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
-import { DataViewSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -107,9 +106,7 @@ const UnifiedHistogramGuard = ({
     currentTabRuntimeState.scopedProfilesManager$
   );
   const currentScopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
-  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
-  const currentEsqlSource = useRuntimeState(currentTabRuntimeState.currentEsqlSource$);
-  const currentDataSource = currentEsqlSource ?? (currentDataView ? new DataViewSource(currentDataView) : undefined);
+  const currentDataSource = useRuntimeState(currentTabRuntimeState.currentDataSource$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
 

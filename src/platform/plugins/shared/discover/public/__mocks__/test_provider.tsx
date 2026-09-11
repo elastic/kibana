@@ -31,7 +31,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ScopedDiscoverEBTManager } from '../ebt_manager';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { type InternalStateMockToolkit } from './discover_state.mock';
-import { DataViewSource } from '@kbn/data-source';
 import { from } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -67,9 +66,7 @@ export const DiscoverToolkitTestProvider = ({
   const currentTabRuntimeState = selectTabRuntimeState(toolkit.runtimeStateManager, currentTabId);
   const customizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const adHocDataViews = useRuntimeState(toolkit.runtimeStateManager.adHocDataViews$);
-  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
-  const currentEsqlSource = useRuntimeState(currentTabRuntimeState.currentEsqlSource$);
-  const currentDataSource = currentEsqlSource ?? (currentDataView ? new DataViewSource(currentDataView) : undefined);
+  const currentDataSource = useRuntimeState(currentTabRuntimeState.currentDataSource$);
   const runtimeState = useMemo<CombinedRuntimeState | undefined>(
     () => (currentDataSource ? { adHocDataViews, currentDataSource } : undefined),
     [adHocDataViews, currentDataSource]

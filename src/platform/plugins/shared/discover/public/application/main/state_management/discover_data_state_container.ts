@@ -639,7 +639,7 @@ export function getDataStateContainer({
           nextSource
         );
         services.dataSourceService.registerEsqlSource(nextSource);
-        selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentEsqlSource$.next(
+        selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataSource$.next(
           nextSource
         );
         if (nextDataView) {

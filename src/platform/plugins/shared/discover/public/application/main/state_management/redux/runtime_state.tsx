@@ -9,7 +9,7 @@
 
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataSource, EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
@@ -48,7 +48,7 @@ interface TabRuntimeState {
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   currentDataView: DataView;
-  currentEsqlSource: EsqlSource;
+  currentDataSource: DataSource;
   unsubscribeFn: (() => void) | undefined;
 }
 
@@ -60,7 +60,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataView' | 'currentEsqlSource'
+  'currentDataView' | 'currentDataSource'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -121,7 +121,7 @@ export const createTabRuntimeState = ({
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    currentEsqlSource$: new BehaviorSubject<EsqlSource | undefined>(undefined),
+    currentDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
