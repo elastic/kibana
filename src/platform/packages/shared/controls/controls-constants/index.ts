@@ -26,7 +26,6 @@ export {
   ControlValuesSource,
   SELECTIONS_MAX,
 } from './src/control_constants';
-export type { DataControlType } from './src/control_constants';
 export {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,

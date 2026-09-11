@@ -43,8 +43,12 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { ControlValuesSource, DEFAULT_CONTROL_VALUES_SOURCE } from '@kbn/controls-constants';
-import type { DataControlType } from '@kbn/controls-constants';
+import {
+  ControlValuesSource,
+  DEFAULT_CONTROL_VALUES_SOURCE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { type CreateControlTypeAction } from '../../../actions/control_panel_actions';
@@ -60,7 +64,7 @@ import { ConfigureValuesQuery } from './configure_values_query';
 
 export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: Partial<State>;
-  controlType?: DataControlType;
+  controlType?: typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL;
   controlId?: string;
   initialDefaultPanelTitle?: string;
   parentApi: unknown;
@@ -112,8 +116,8 @@ const CompatibleControlTypesComponent = ({
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
 }: Partial<DataControlEditorState> & {
-  selectedControlType?: DataControlType;
-  setSelectedControlType: (type: DataControlType) => void;
+  selectedControlType?: typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL;
+  setSelectedControlType: (type: typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL) => void;
 }) => {
   const controlActionRegistry = useControlActionRegistry();
   const [isCompatible, setIsCompatible] = useState<{ [type: string]: boolean }>({});
@@ -163,7 +167,7 @@ const CompatibleControlTypesComponent = ({
               data-test-subj={`create__${action.type}`}
               isSelected={action.type === selectedAction}
               disabled={disabled}
-              onClick={() => setSelectedAction(action.type as DataControlType)}
+              onClick={() => setSelectedAction(action.type as typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL)}
               label={action.getDisplayName(controlTypeContext)}
             >
               <EuiIcon
@@ -219,7 +223,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     initialDefaultPanelTitle ?? initialState.field_name ?? ''
   );
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
-  const [selectedControlType, setSelectedControlType] = useState<DataControlType | undefined>(
+  const [selectedControlType, setSelectedControlType] = useState<typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL | undefined>(
     controlType
   );
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
@@ -338,7 +342,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           }
           return undefined;
         })();
-        if (firstCompatible) setSelectedControlType(firstCompatible.type as DataControlType);
+        if (firstCompatible) setSelectedControlType(firstCompatible.type as typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL);
       }
 
       /**

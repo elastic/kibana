@@ -13,8 +13,6 @@ export const OPTIONS_LIST_CONTROL = 'options_list_control';
 export const RANGE_SLIDER_CONTROL = 'range_slider_control';
 export const TIME_SLIDER_CONTROL = 'time_slider_control';
 
-export type DataControlType = typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL;
-
 export const DEFAULT_DATA_CONTROL_STATE = {
   use_global_filters: true,
   ignore_validations: false,
