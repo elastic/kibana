@@ -45,7 +45,7 @@ export const RuleSummaryFlyoutContainer = ({
 
   const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
-  const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
+  const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
@@ -73,8 +73,8 @@ export const RuleSummaryFlyoutContainer = ({
       <RuleSummaryFlyout
         rule={rule}
         canWrite={canWrite}
+        isToggleLoading={isToggling}
         type={type}
-        hasAnimation={false}
         ownFocus={false}
         session="start"
         onClose={onClose}

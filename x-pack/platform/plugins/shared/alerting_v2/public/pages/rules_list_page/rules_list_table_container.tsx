@@ -253,6 +253,10 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         <RuleSummaryFlyout
           rule={expandedRule}
           canWrite={canWrite}
+          isToggleLoading={
+            toggleEnabledMutation.isLoading &&
+            toggleEnabledMutation.variables?.id === expandedRule.id
+          }
           onClose={() => setExpandedRuleId(null)}
           onEdit={(r) => {
             setExpandedRuleId(null);

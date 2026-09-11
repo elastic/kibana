@@ -120,7 +120,7 @@ describe('RuleSummaryFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryFlyoutTitle')).toHaveTextContent('My Rule');
+    expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
     expect(screen.getByTestId('ruleSummaryFlyoutAbout')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutAboutCard')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
@@ -175,6 +175,13 @@ describe('RuleSummaryFlyout', () => {
     fireEvent.click(screen.getByTestId('ruleSummaryFlyoutEnabledSwitch'));
 
     expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('replaces the switch with a spinner while the toggle is in flight', () => {
+    renderFlyout({ isToggleLoading: true });
+
+    expect(screen.getByTestId('ruleSummaryFlyoutEnabledSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryFlyoutEnabledSwitch')).not.toBeInTheDocument();
   });
 
   describe('Take action menu', () => {

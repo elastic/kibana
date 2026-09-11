@@ -6,7 +6,7 @@
  */
 
 import type { EuiFlyoutProps } from '@elastic/eui';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
@@ -41,11 +41,10 @@ export interface RuleSummaryFlyoutProps {
   onUpdateApiKey?: (rule: RuleApiResponse) => void;
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
+  isToggleLoading?: boolean;
   type?: EuiFlyoutProps['type'];
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
-  /** Kept for callers; FlyoutTemplate does not forward EUI flyout animation. */
-  hasAnimation?: boolean;
 }
 
 export const RuleSummaryFlyout = ({
@@ -59,6 +58,7 @@ export const RuleSummaryFlyout = ({
   onUpdateApiKey,
   onViewChangeHistory,
   canWrite = true,
+  isToggleLoading = false,
   type = 'push',
   session,
   ownFocus = true,
@@ -97,13 +97,8 @@ export const RuleSummaryFlyout = ({
         session={session}
         onClose={onClose}
         data-test-subj="ruleSummaryFlyout"
-        closeButtonProps={{ 'data-test-subj': 'ruleSummaryFlyoutCloseButton' }}
       >
-        <Header
-          title={rule.metadata.name}
-          description={updatedAtFormatted}
-          data-test-subj="ruleSummaryFlyoutTitle"
-        >
+        <Header title={rule.metadata.name} description={updatedAtFormatted}>
           <Badge
             color="hollow"
             iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
@@ -123,15 +118,19 @@ export const RuleSummaryFlyout = ({
             })}
             data-test-subj="ruleSummaryFlyoutEnabledBlock"
           >
-            <EuiSwitch
-              compressed
-              checked={rule.enabled}
-              disabled={!canWrite}
-              showLabel={false}
-              label={enabledLabel}
-              onChange={() => onToggleEnabled(rule)}
-              data-test-subj="ruleSummaryFlyoutEnabledSwitch"
-            />
+            {isToggleLoading ? (
+              <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutEnabledSpinner" size="m" />
+            ) : (
+              <EuiSwitch
+                compressed
+                checked={rule.enabled}
+                disabled={!canWrite}
+                showLabel={false}
+                label={enabledLabel}
+                onChange={() => onToggleEnabled(rule)}
+                data-test-subj="ruleSummaryFlyoutEnabledSwitch"
+              />
+            )}
           </InfoBlock>
           <InfoBlock
             title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
