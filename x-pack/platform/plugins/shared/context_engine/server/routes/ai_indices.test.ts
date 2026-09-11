@@ -103,6 +103,7 @@ const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
   description: 'Customer support context',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
   sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
@@ -1767,6 +1768,16 @@ describe('ai indices routes', () => {
       expect(() => validateBody(validBody)).not.toThrow();
     });
 
+    it('defaults memory_enabled to false', () => {
+      expect(validateBody(validBody)).toMatchObject({ memory_enabled: false });
+    });
+
+    it('accepts memory_enabled', () => {
+      expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
+        memory_enabled: true,
+      });
+    });
+
     it('rejects a missing id', () => {
       const { id, ...bodyWithoutId } = validBody;
       expect(() => validateBody(bodyWithoutId)).toThrow();
@@ -1853,6 +1864,16 @@ describe('ai indices routes', () => {
 
     it('accepts a valid body', () => {
       expect(() => validateBody(validBody)).not.toThrow();
+    });
+
+    it('defaults memory_enabled to false', () => {
+      expect(validateBody(validBody)).toMatchObject({ memory_enabled: false });
+    });
+
+    it('accepts memory_enabled', () => {
+      expect(validateBody({ ...validBody, memory_enabled: true })).toMatchObject({
+        memory_enabled: true,
+      });
     });
 
     it('accepts empty automations and sources arrays', () => {
@@ -2093,6 +2114,7 @@ describe('ai indices routes', () => {
         aiIndexService.get.mockResolvedValue({
           id: 'customer_support',
           managed: false,
+          memory_enabled: false,
           dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
           automations: [],
           sources: [],

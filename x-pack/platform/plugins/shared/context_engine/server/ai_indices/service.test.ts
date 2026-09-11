@@ -95,7 +95,7 @@ const aiIndexDocument: AiIndexDocument = {
 
 const toHttpItem = (document: AiIndexDocument) => {
   const { space: _space, ...item } = document;
-  return item;
+  return { ...item, memory_enabled: item.memory_enabled ?? false };
 };
 
 const storedHit = (
@@ -184,6 +184,16 @@ describe('AiIndexService', () => {
       });
       expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('id');
       expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('op_type');
+    });
+
+    it('defaults memory_enabled to false', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, properties);
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ memory_enabled: false }),
+        })
+      );
     });
 
     it('throws AiIndexAlreadyExistsError when the id already exists', async () => {
@@ -293,6 +303,17 @@ describe('AiIndexService', () => {
         enabled: true,
         agent_id: 'my-analysis-agent',
       });
+    });
+
+    it('persists memory_enabled when updating an existing AI index', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+
+      await expect(
+        service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true })
+      ).resolves.toBe('updated');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.memory_enabled).toBe(true);
     });
 
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
@@ -763,6 +784,22 @@ describe('AiIndexService', () => {
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
         toHttpItem(aiIndexDocument)
+      );
+    });
+
+    it('defaults memory_enabled to false for legacy documents without the field', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', memory_enabled: false })
+      );
+    });
+
+    it('round-trips memory_enabled from the stored document to the item', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: true }));
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
       );
     });
 
