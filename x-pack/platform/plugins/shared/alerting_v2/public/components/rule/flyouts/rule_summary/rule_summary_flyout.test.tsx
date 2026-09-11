@@ -31,19 +31,25 @@ jest.mock('../../../../services/user_capabilities', () => ({
 }));
 
 jest.mock('@kbn/core-di-browser', () => {
+  const canRead = jest.fn(() => true);
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => `/base${p}` } };
       }
       if (token === 'UserCapabilities') {
-        return { canRead: () => true, canWrite: () => true };
+        return { canRead, canWrite: () => true };
       }
       return {};
     },
     CoreStart: (key: string) => key,
+    mockCanRead: canRead,
   };
 });
+
+const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
+  mockCanRead: jest.Mock;
+};
 
 jest.mock('../../../rule_details/sidebar/rule_conditions', () => ({
   RuleConditions: ({ variant }: { variant?: string }) => (
@@ -106,6 +112,10 @@ const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
 };
 
 describe('RuleSummaryFlyout', () => {
+  beforeEach(() => {
+    mockCanRead.mockImplementation(() => true);
+  });
+
   it('renders the template flyout with header, accordion sections, and take action', () => {
     renderFlyout();
 
@@ -124,6 +134,15 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryFlyoutTakeActionButton')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleSummaryFlyoutFooterCloseButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockRuleMetadata')).not.toBeInTheDocument();
+  });
+
+  it('omits action policies when the user cannot read them', () => {
+    mockCanRead.mockImplementation((capability: string) => capability !== 'actionPolicies');
+    renderFlyout();
+
+    expect(screen.queryByTestId('ruleSummaryFlyoutActionPolicies')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutArtifacts')).toBeInTheDocument();
   });
 
   it('shows last-update timestamp and audit info blocks in the header', () => {

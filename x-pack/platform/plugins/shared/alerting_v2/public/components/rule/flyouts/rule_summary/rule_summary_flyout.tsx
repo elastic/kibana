@@ -188,18 +188,21 @@ export const RuleSummaryFlyout = ({
             <RuleSummaryRunbookCard />
           </FlyoutAccordion>
 
-          <EuiSpacer size="m" />
-
-          <FlyoutAccordion
-            title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.actionPolicies', {
-              defaultMessage: 'Action Policies',
-            })}
-            hasBorder={false}
-            initialIsOpen={canReadActionPolicies}
-            data-test-subj="ruleSummaryFlyoutActionPolicies"
-          >
-            <ActionPoliciesArtifactsSubsection />
-          </FlyoutAccordion>
+          {canReadActionPolicies ? (
+            <>
+              <EuiSpacer size="m" />
+              <FlyoutAccordion
+                title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.actionPolicies', {
+                  defaultMessage: 'Action Policies',
+                })}
+                hasBorder={false}
+                initialIsOpen
+                data-test-subj="ruleSummaryFlyoutActionPolicies"
+              >
+                <ActionPoliciesArtifactsSubsection />
+              </FlyoutAccordion>
+            </>
+          ) : null}
 
           <EuiSpacer size="m" />
 

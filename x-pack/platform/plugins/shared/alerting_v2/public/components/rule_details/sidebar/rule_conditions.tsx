@@ -137,7 +137,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       : []),
   ];
 
-  // The summary flyout renders the description in its header.
+  // Summary flyout shows the description on the About card, not here.
   const description = isSummary ? undefined : rule.metadata.description;
 
   return (
