@@ -27,7 +27,10 @@ export const SHARD_ANNOTATION_SEP = '||shard=';
  * the empty-config filter, and the shard map.
  */
 export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): string[] {
-  const raw = globJestConfigs(['**/jest.config.js', '!**/__fixtures__/**'], limitSolutions);
+  const raw = globJestConfigs(
+    ['**/jest.config.js', '**/jest.config.cjs', '!**/__fixtures__/**'],
+    limitSolutions
+  );
   return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
 }
 
@@ -37,7 +40,7 @@ export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): s
  */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
   const raw = globJestConfigs(
-    ['**/jest.integration.config.js', '!**/__fixtures__/**'],
+    ['**/jest.integration.config.js', '**/jest.integration.config.cjs', '!**/__fixtures__/**'],
     limitSolutions
   );
   return expandShardedJestConfigs(filterEmptyJestConfigs(raw));

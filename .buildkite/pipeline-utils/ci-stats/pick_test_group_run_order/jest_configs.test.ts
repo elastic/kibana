@@ -31,6 +31,7 @@ jest.mock('#pipeline-utils', () => ({
 
 import {
   SHARD_ANNOTATION_SEP,
+  discoverJestIntegrationConfigs,
   discoverJestUnitConfigs,
   expandShardedJestConfigs,
   globsForSolutions,
@@ -128,5 +129,23 @@ describe('discoverJestUnitConfigs', () => {
     process.chdir(otherCwd);
 
     expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/has_tests/jest.config.js']);
+  });
+
+  it('discovers CommonJS configs', () => {
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/unit'), { recursive: true });
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/unit/jest.config.cjs'), 'module.exports = {};');
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/unit/foo.test.ts'), '');
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/integration'), { recursive: true });
+    Fs.writeFileSync(
+      Path.join(repoRoot, 'pkg/integration/jest.integration.config.cjs'),
+      'module.exports = {};'
+    );
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/integration/integration_tests'));
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/integration/integration_tests/foo.test.ts'), '');
+
+    expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/unit/jest.config.cjs']);
+    expect(discoverJestIntegrationConfigs(undefined)).toEqual([
+      'pkg/integration/jest.integration.config.cjs',
+    ]);
   });
 });
