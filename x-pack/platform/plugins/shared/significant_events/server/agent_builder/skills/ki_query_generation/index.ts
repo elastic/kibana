@@ -31,22 +31,18 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
     excludeFromElasticCapabilities: true,
     description,
     content,
-    getInlineTools: () => {
-      const tools: BuiltinSkillBoundedTool[] = [
-        createMemorySearchTool(options),
-        createMemoryReadTool(options),
-        createMemoryListTool(options),
-        createGetFeaturesTool({
-          getScopedClients,
-          logger: logger.get('ki_features_get_tool'),
-        }),
-        createValidateQueriesTool({
-          getScopedClients,
-          logger: logger.get('ki_queries_validate_tool'),
-        }),
-      ];
-
-      return tools.map(({ id, ...rest }) => ({ ...rest, id: id.replaceAll('.', '_') }));
-    },
+    getInlineTools: (): BuiltinSkillBoundedTool[] => [
+      createMemorySearchTool(options),
+      createMemoryReadTool(options),
+      createMemoryListTool(options),
+      createGetFeaturesTool({
+        getScopedClients,
+        logger: logger.get('ki_features_get_tool'),
+      }),
+      createValidateQueriesTool({
+        getScopedClients,
+        logger: logger.get('ki_queries_validate_tool'),
+      }),
+    ],
   });
 };

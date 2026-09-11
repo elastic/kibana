@@ -27,8 +27,23 @@ const getFeaturesSchema = z.object({
     .max(20)
     .optional()
     .describe('Optional KI feature types to return. Unknown types produce no matches.'),
-  min_confidence: z.number().min(0).max(100).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  min_confidence: z
+    .number()
+    .min(0)
+    .max(100)
+    .optional()
+    .describe(
+      'Only return features with confidence at or above this value (0-100). Omit to include inferred low-confidence features.'
+    ),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Maximum number of features to return, highest confidence first. Omit on the first call to load all features; combine with min_confidence for focused follow-up calls.'
+    ),
 });
 
 export const createGetFeaturesTool = ({

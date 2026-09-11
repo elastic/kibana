@@ -28,15 +28,51 @@ const MAX_FEATURE_IDS_PER_QUERY = 100;
 const TOOL_EXECUTION_TIMEOUT_MS = 240_000;
 
 const candidateQuerySchema = z.object({
-  type: z.enum(['match', 'stats']).optional(),
-  esql: z.string().max(MAX_TEXT_LENGTH),
-  title: z.string().max(MAX_TITLE_LENGTH),
-  description: z.string().max(MAX_TEXT_LENGTH),
-  category: z.enum(['operational', 'configuration', 'resource_health', 'error', 'security']),
-  severity_score: z.number().min(0).max(100),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).max(100).optional(),
-  replaces: z.string().max(MAX_ID_LENGTH).optional(),
-  feature_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_FEATURE_IDS_PER_QUERY),
+  type: z
+    .enum(['match', 'stats'])
+    .optional()
+    .describe(
+      'Hint for query type. "match" for WHERE-only filters, "stats" for aggregation queries. The system derives the authoritative type from ES|QL content.'
+    ),
+  esql: z.string().max(MAX_TEXT_LENGTH).describe('The ES|QL detection query.'),
+  title: z.string().max(MAX_TITLE_LENGTH).describe('Short human-readable name for the query.'),
+  description: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .describe(
+      'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.'
+    ),
+  category: z
+    .enum(['operational', 'configuration', 'resource_health', 'error', 'security'])
+    .describe('Significant event category the query belongs to.'),
+  severity_score: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      'Severity from 0 (low) to 100 (critical): 80-100 critical, 60-79 high, 40-59 medium, 0-39 low.'
+    ),
+  evidence: z
+    .array(z.string().max(MAX_TEXT_LENGTH))
+    .max(100)
+    .optional()
+    .describe(
+      'Optional free-text supporting evidence, such as observed log snippets or the feature values the query is grounded in.'
+    ),
+  replaces: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query it supersedes.'
+    ),
+  feature_ids: z
+    .array(z.string().max(MAX_ID_LENGTH))
+    .min(1)
+    .max(MAX_FEATURE_IDS_PER_QUERY)
+    .describe(
+      'IDs of the features that informed this query. Each ID must match a feature `id` returned by a previous platform_sig_events_ki_features_get call; unknown IDs are stripped and queries with zero valid IDs are rejected.'
+    ),
 });
 
 const validateQueriesSchema = z.object({
@@ -83,7 +119,7 @@ export const createValidateQueriesTool = ({
           title: query.title,
           type: query.type,
           severity_score: query.severity_score,
-          description: query.description.slice(0, 200),
+          description: query.description,
           esql: query.esql.query,
         }));
         const signal = AbortSignal.any([

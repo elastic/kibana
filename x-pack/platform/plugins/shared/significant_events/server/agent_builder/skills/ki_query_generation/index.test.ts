@@ -7,6 +7,9 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MemoryToolsOptions } from '../../../memory_and_investigation/tools/memory';
+import { platformStreamsMemoryTools } from '../../../memory_and_investigation/tools/memory/tool_ids';
+import { SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID } from './get_features/tool';
+import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from './validate_queries/tool';
 import { createKIQueryGenerationSkill } from '.';
 
 describe('createKIQueryGenerationSkill', () => {
@@ -18,11 +21,11 @@ describe('createKIQueryGenerationSkill', () => {
     } as unknown as MemoryToolsOptions);
 
     expect(skill.getInlineTools?.()).toEqual([
-      expect.objectContaining({ id: 'platform_sig_events_memory_search' }),
-      expect.objectContaining({ id: 'platform_sig_events_memory_read' }),
-      expect.objectContaining({ id: 'platform_sig_events_memory_list' }),
-      expect.objectContaining({ id: 'platform_sig_events_ki_features_get' }),
-      expect.objectContaining({ id: 'platform_sig_events_ki_queries_validate' }),
+      expect.objectContaining({ id: platformStreamsMemoryTools.memorySearch }),
+      expect.objectContaining({ id: platformStreamsMemoryTools.memoryRead }),
+      expect.objectContaining({ id: platformStreamsMemoryTools.memoryList }),
+      expect.objectContaining({ id: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID }),
+      expect.objectContaining({ id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID }),
     ]);
     expect(skill.getRegistryTools).toBeUndefined();
   });
