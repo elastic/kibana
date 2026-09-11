@@ -72,7 +72,7 @@ export const isolateHostStepCommonDefinition: BaseStepDefinition<
       `## Isolate a single endpoint
 \`\`\`yaml
 - name: isolate_host
-  type: security.isolateHost
+  type: security.endpointIsolateHost
   with:
     endpoint_ids:
       - "{{ steps.resolve_agent.output.agent_id }}"

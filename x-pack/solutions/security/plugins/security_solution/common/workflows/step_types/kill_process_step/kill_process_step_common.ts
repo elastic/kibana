@@ -86,7 +86,7 @@ export const killProcessStepCommonDefinition: BaseStepDefinition<
       `## Kill a process by PID
 \`\`\`yaml
 - name: kill_process
-  type: security.killProcess
+  type: security.endpointKillProcess
   with:
     endpoint_ids:
       - "{{ steps.resolve_agent.output.agent_id }}"
@@ -97,7 +97,7 @@ export const killProcessStepCommonDefinition: BaseStepDefinition<
       `## Kill a process by entity_id
 \`\`\`yaml
 - name: kill_process
-  type: security.killProcess
+  type: security.endpointKillProcess
   with:
     endpoint_ids:
       - "{{ steps.resolve_agent.output.agent_id }}"

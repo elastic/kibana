@@ -85,7 +85,7 @@ export const suspendProcessStepCommonDefinition: BaseStepDefinition<
       `## Suspend a process by PID
 \`\`\`yaml
 - name: suspend_process
-  type: security.suspendProcess
+  type: security.endpointSuspendProcess
   with:
     endpoint_ids:
       - "{{ steps.resolve_agent.output.agent_id }}"
@@ -96,7 +96,7 @@ export const suspendProcessStepCommonDefinition: BaseStepDefinition<
       `## Suspend a process by entity_id
 \`\`\`yaml
 - name: suspend_process
-  type: security.suspendProcess
+  type: security.endpointSuspendProcess
   with:
     endpoint_ids:
       - "{{ steps.resolve_agent.output.agent_id }}"
