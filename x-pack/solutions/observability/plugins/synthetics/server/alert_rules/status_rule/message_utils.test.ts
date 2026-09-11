@@ -244,6 +244,36 @@ describe('message_utils', () => {
       expect(message).toContain(`2 times from ${locationName}`);
       expect(message).toContain(`1 time from ${secondLocationName}`);
     });
+
+    it('uses pendingCount in the ungrouped pending reason', () => {
+      const message = getUngroupedReasonMessage({
+        statusConfigs: [
+          {
+            status: 'pending',
+            configId: monitorId,
+            monitorQueryId: monitorId,
+            locationId,
+            pendingCount: 2,
+            monitorInfo: {
+              monitor: { name: monitorName, id: monitorId, type: 'http' },
+              observer: { geo: { name: locationName } },
+              tags: [],
+            },
+          },
+        ],
+        monitorName,
+        reason: 'pending',
+        params: {
+          condition: {
+            alertOnNoData: true,
+            pendingThreshold: 2,
+            window: { numberOfChecks: 5 },
+          },
+        },
+      });
+
+      expect(message).toBe(`Monitor "${monitorName}" is pending 2 times from ${locationName}.`);
+    });
   });
 
   describe('getMonitorAlertDocument', () => {

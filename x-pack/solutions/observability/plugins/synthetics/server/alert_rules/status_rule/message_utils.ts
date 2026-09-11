@@ -209,6 +209,8 @@ export const getUngroupedReasonMessage = ({
       let downCount = 1;
       if ('checks' in c) {
         downCount = useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down;
+      } else if ('pendingCount' in c) {
+        downCount = c.pendingCount ?? 1;
       }
       return i18n.translate(
         'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
