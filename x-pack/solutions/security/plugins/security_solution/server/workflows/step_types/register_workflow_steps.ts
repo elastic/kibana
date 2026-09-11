@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
@@ -34,7 +35,8 @@ import { createSuspendProcessStepDefinition } from './suspend_process_step/suspe
  */
 export const registerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  endpointAppContextService: EndpointAppContextService
+  endpointAppContextService: EndpointAppContextService,
+  experimentalFeatures: ExperimentalFeatures
 ): void => {
   workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
   workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
@@ -54,13 +56,15 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(updateNoteStepDefinition);
   workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
-  workflowsExtensions.registerStepDefinition(
-    createIsolateHostStepDefinition(endpointAppContextService)
-  );
-  workflowsExtensions.registerStepDefinition(
-    createKillProcessStepDefinition(endpointAppContextService)
-  );
-  workflowsExtensions.registerStepDefinition(
-    createSuspendProcessStepDefinition(endpointAppContextService)
-  );
+  if (experimentalFeatures.endpointResponseActionsWorkflowStepsEnabled) {
+    workflowsExtensions.registerStepDefinition(
+      createIsolateHostStepDefinition(endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createKillProcessStepDefinition(endpointAppContextService)
+    );
+    workflowsExtensions.registerStepDefinition(
+      createSuspendProcessStepDefinition(endpointAppContextService)
+    );
+  }
 };

@@ -891,7 +891,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, this.endpointAppContextService);
+      registerWorkflowSteps(
+        plugins.workflowsExtensions,
+        this.endpointAppContextService,
+        this.config.experimentalFeatures
+      );
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
