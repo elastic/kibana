@@ -16,12 +16,12 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type {
-  DataTableColumnsMeta,
-  SortOrder,
+import {
   DataGridDensity,
-  JsonModeSettings,
-  DocumentsDisplayMode,
+  type DataTableColumnsMeta,
+  type SortOrder,
+  type JsonModeSettings,
+  type DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -126,6 +126,8 @@ describe('SearchEmbeddableGridComponent', () => {
     autoApplyDiscoverColumnDefaults,
     profileColumns,
     parentApi,
+    showKeyboardShortcuts,
+    showSortSelector,
   }: {
     isEsql: boolean;
     columns?: string[];
@@ -134,6 +136,8 @@ describe('SearchEmbeddableGridComponent', () => {
     autoApplyDiscoverColumnDefaults?: boolean;
     profileColumns?: Array<{ name: string; width?: number }>;
     parentApi?: SearchEmbeddableApi['parentApi'];
+    showKeyboardShortcuts?: boolean;
+    showSortSelector?: boolean;
   }) => {
     const savedSearch = createSavedSearch({ isEsql, columns, query });
     const api = createApi(savedSearch, parentApi);
@@ -170,6 +174,8 @@ describe('SearchEmbeddableGridComponent', () => {
           stateManager={stateManager}
           enableDocumentViewer={true}
           autoApplyDiscoverColumnDefaults={autoApplyDiscoverColumnDefaults}
+          showKeyboardShortcuts={showKeyboardShortcuts}
+          showSortSelector={showSortSelector}
           inlineEditing={{
             isActive: false,
             hasPendingChanges: false,
@@ -208,6 +214,25 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('onUpdateDataGridDensity', () => {
+    it('updates density from the Display control', async () => {
+      const { stateManager } = await renderComponent({ isEsql: false });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      const onUpdateDataGridDensity = lastCallProps?.onUpdateDataGridDensity as (
+        density: DataGridDensity | undefined
+      ) => void;
+
+      expect(stateManager.density.getValue()).toBeUndefined();
+      onUpdateDataGridDensity(DataGridDensity.COMPACT);
+      expect(stateManager.density.getValue()).toBe(DataGridDensity.COMPACT);
     });
   });
 
@@ -420,6 +445,24 @@ describe('SearchEmbeddableGridComponent', () => {
           'variableColumn',
         ]);
       });
+    });
+  });
+
+  describe('toolbar chrome overrides', () => {
+    it('forwards keyboard shortcut and sort selector flags', async () => {
+      await renderComponent({
+        isEsql: false,
+        showKeyboardShortcuts: false,
+        showSortSelector: false,
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      expect(lastCallProps?.showKeyboardShortcuts).toBe(false);
+      expect(lastCallProps?.showSortSelector).toBe(false);
     });
   });
 });

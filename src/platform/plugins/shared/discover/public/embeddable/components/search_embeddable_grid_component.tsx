@@ -11,11 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  SORT_DEFAULT_ORDER_SETTING,
-  DEFAULT_COLUMNS_SETTING,
-  getSortArray,
-} from '@kbn/discover-utils';
+import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
 import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -66,6 +62,9 @@ interface SavedSearchEmbeddableComponentProps {
   stateManager: SearchEmbeddableStateManager;
   documentViewerFlyoutType?: 'push' | 'overlay';
   autoApplyDiscoverColumnDefaults?: boolean;
+  wrapToolbar?: boolean;
+  showKeyboardShortcuts?: boolean;
+  showSortSelector?: boolean;
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
@@ -83,6 +82,9 @@ export function SearchEmbeddableGridComponent({
   stateManager,
   documentViewerFlyoutType,
   autoApplyDiscoverColumnDefaults = false,
+  wrapToolbar = true,
+  showKeyboardShortcuts,
+  showSortSelector,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const parentApi = api.parentApi;
@@ -148,7 +150,6 @@ export function SearchEmbeddableGridComponent({
       autoApplyDiscoverColumnDefaults,
       persistedColumns: savedSearch.columns,
       profileColumns: defaultAppState.columns,
-      defaultColumnsFromSettings: discoverServices.uiSettings.get(DEFAULT_COLUMNS_SETTING, []),
       dataView,
       isEsql,
       esql: isOfAggregateQueryType(savedSearchQuery) ? savedSearchQuery.esql : undefined,
@@ -158,7 +159,6 @@ export function SearchEmbeddableGridComponent({
     autoApplyDiscoverColumnDefaults,
     columnsMeta,
     dataView,
-    discoverServices.uiSettings,
     getDefaultAppState,
     isEsql,
     savedSearch.columns,
@@ -361,6 +361,9 @@ export function SearchEmbeddableGridComponent({
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
       documentViewerFlyoutType={documentViewerFlyoutType}
+      wrapToolbar={wrapToolbar}
+      showKeyboardShortcuts={showKeyboardShortcuts}
+      showSortSelector={showSortSelector}
     />
   );
 }

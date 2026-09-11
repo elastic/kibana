@@ -29,6 +29,21 @@ export interface NonPersistedDisplayOptions {
    * Dashboard hosts should leave this unset.
    */
   autoApplyDiscoverColumnDefaults?: boolean;
+  /**
+   * When false, keep the document table toolbar on one line. Defaults to wrapping.
+   * Dashboard hosts should leave this unset.
+   */
+  wrapToolbar?: boolean;
+  /**
+   * When false, hide the keyboard shortcuts toolbar control. Defaults to showing it.
+   * Dashboard hosts should leave this unset.
+   */
+  showKeyboardShortcuts?: boolean;
+  /**
+   * When false, hide the Sort toolbar control. Column-header sorting stays available.
+   * Dashboard hosts should leave this unset.
+   */
+  showSortSelector?: boolean;
 }
 
 export type EditableSavedSearchAttributes = Partial<

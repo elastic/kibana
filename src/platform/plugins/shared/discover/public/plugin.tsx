@@ -262,6 +262,8 @@ export class DiscoverPlugin
         agentBuilder: plugins.agentBuilder,
         unifiedSearch: plugins.unifiedSearch,
         locator: this.locator,
+        embeddable: plugins.embeddable,
+        application: core.application,
       });
     }
 

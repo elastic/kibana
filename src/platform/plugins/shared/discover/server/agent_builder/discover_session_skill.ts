@@ -38,9 +38,9 @@ Lens \`data_table\` is only for aggregated tabular summaries. It is not a substi
 2. If creating a new table, call \`${platformCoreTools.generateEsql}\` once to produce a **document** query (\`FROM\` or \`TS\` with \`WHERE\` / \`LIMIT\` as needed). Do not invent ES|QL. Do not use \`STATS\`.
 3. Call \`${platformCoreTools.createDiscoverSession}\` **exactly once**:
    - **Always omit \`attachment_id\`** unless a previous result of this tool in this conversation returned that exact id. Never invent an id. The skill name (\`discover-session\`) and attachment type (\`discover.session\`) are not ids. Never pass \`screen-context\`, \`.\`, or \`{attachment_id}\`.
-   - To **create** when the conversation has no Discover session: omit \`attachment_id\`. Pass \`esql\` as the **string** from generateEsql (the \`esql\` field, not the whole tool result). \`title\` is optional. Optional \`time_range\` and \`columns\`.
+   - To **create** when the conversation has no Discover session: omit \`attachment_id\`. Pass \`esql\` as the **string** from generateEsql (the \`esql\` field, not the whole tool result). \`title\` is optional. Optional \`time_range\`. Omit \`columns\` unless the user named specific fields — the table then uses a matching Discover profile, or Summary plus time.
    - If a Discover session already exists, omit \`attachment_id\` to **update** that table. Do **not** create a second session unless the user asked for another table.
-   - Call \`${platformCoreTools.generateEsql}\` on update **only** when the user wants a different query. For title, columns, or time-range-only changes, omit \`esql\` so the stored query is kept.
+   - Call \`${platformCoreTools.generateEsql}\` on update **only** when the user wants a different query. For title or time-range-only changes, omit \`esql\` so the stored query is kept. Pass \`columns\` only when the user named specific fields.
 4. After a successful tool result, **stop calling tools**. Paste the returned \`render\` string into your reply verbatim. Do not construct a \`<render_attachment>\` tag yourself. Do not call \`${platformCoreTools.createDiscoverSession}\` again for the same request.
 
 Do not paste rows, tab JSON, or vis_context into the conversation. This skill does not execute ES|QL; the Discover table in chat runs the query.

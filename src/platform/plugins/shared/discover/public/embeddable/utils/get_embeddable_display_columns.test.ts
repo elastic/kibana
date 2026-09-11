@@ -31,7 +31,6 @@ describe('getEmbeddableDisplayColumns', () => {
           { name: 'Sparkline', width: 150 },
           { name: 'Pattern' },
         ],
-        defaultColumnsFromSettings: ['message'],
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
@@ -46,7 +45,6 @@ describe('getEmbeddableDisplayColumns', () => {
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: ['message', 'host'],
         profileColumns: [{ name: 'Count' }, { name: 'Pattern' }],
-        defaultColumnsFromSettings: ['message'],
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
@@ -65,7 +63,6 @@ describe('getEmbeddableDisplayColumns', () => {
           { name: 'Sparkline', width: 150 },
           { name: 'Pattern' },
         ],
-        defaultColumnsFromSettings: ['message'],
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
@@ -88,7 +85,6 @@ describe('getEmbeddableDisplayColumns', () => {
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: ['_source'],
         profileColumns: [{ name: 'Count' }, { name: 'Pattern' }],
-        defaultColumnsFromSettings: ['message'],
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
@@ -107,7 +103,6 @@ describe('getEmbeddableDisplayColumns', () => {
           { name: 'Sparkline', width: 150 },
           { name: 'Pattern' },
         ],
-        defaultColumnsFromSettings: ['message'],
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
@@ -130,7 +125,6 @@ describe('getEmbeddableDisplayColumns', () => {
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: [],
         profileColumns: [{ name: 'message' }],
-        defaultColumnsFromSettings: ['message'],
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | STATS count = COUNT(*) BY status',
@@ -150,7 +144,6 @@ describe('getEmbeddableDisplayColumns', () => {
       getEmbeddableDisplayColumns({
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: [],
-        defaultColumnsFromSettings: [],
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | WHERE response == "404"',
@@ -166,13 +159,12 @@ describe('getEmbeddableDisplayColumns', () => {
     ).toEqual({ columns: [], grid: undefined });
   });
 
-  it('uses valid configured default columns when neither profile nor ES|QL defaults apply', () => {
+  it('uses Summary for document queries when no profile matches', () => {
     expect(
       getEmbeddableDisplayColumns({
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: [],
         profileColumns: [{ name: 'message' }],
-        defaultColumnsFromSettings: ['default_column'],
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | WHERE response == "404"',
@@ -181,12 +173,27 @@ describe('getEmbeddableDisplayColumns', () => {
           b: { type: 'string' },
           c: { type: 'string' },
           d: { type: 'string' },
-          e: { type: 'string' },
-          f: { type: 'string' },
           default_column: { type: 'string' },
         },
       })
-    ).toEqual({ columns: ['default_column'], grid: undefined });
+    ).toEqual({ columns: [], grid: undefined });
+  });
+
+  it('does not use a narrow document-query result set as default columns', () => {
+    expect(
+      getEmbeddableDisplayColumns({
+        autoApplyDiscoverColumnDefaults: true,
+        persistedColumns: [],
+        dataView: dataViewMock,
+        isEsql: true,
+        esql: 'FROM logs | KEEP host, message, status',
+        columnsMeta: {
+          host: { type: 'string' },
+          message: { type: 'string' },
+          status: { type: 'string' },
+        },
+      })
+    ).toEqual({ columns: [], grid: undefined });
   });
 
   it('keeps empty columns until ES|QL columnsMeta is available', () => {
@@ -195,7 +202,6 @@ describe('getEmbeddableDisplayColumns', () => {
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: [],
         profileColumns: [{ name: 'Count' }],
-        defaultColumnsFromSettings: [],
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
@@ -210,7 +216,6 @@ describe('getEmbeddableDisplayColumns', () => {
         autoApplyDiscoverColumnDefaults: true,
         persistedColumns: [],
         profileColumns: [{ name: 'message', width: 100 }, { name: 'extension' }],
-        defaultColumnsFromSettings: ['bytes'],
         dataView: dataViewMock,
         isEsql: false,
         columnsMeta: undefined,

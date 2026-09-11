@@ -294,6 +294,9 @@ export const getSearchEmbeddableFactory = ({
       const autoApplyDiscoverColumnDefaults = Boolean(
         runtimeState.nonPersistedDisplayOptions?.autoApplyDiscoverColumnDefaults
       );
+      const wrapToolbar = runtimeState.nonPersistedDisplayOptions?.wrapToolbar !== false;
+      const showKeyboardShortcuts = runtimeState.nonPersistedDisplayOptions?.showKeyboardShortcuts;
+      const showSortSelector = runtimeState.nonPersistedDisplayOptions?.showSortSelector;
 
       const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
       const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -463,6 +466,9 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         documentViewerFlyoutType={documentViewerFlyoutType}
                         autoApplyDiscoverColumnDefaults={autoApplyDiscoverColumnDefaults}
+                        wrapToolbar={wrapToolbar}
+                        showKeyboardShortcuts={showKeyboardShortcuts}
+                        showSortSelector={showSortSelector}
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
                         onAddFilter={enableFilters ? addFilter : undefined}

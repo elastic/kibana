@@ -11,7 +11,9 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { DataGridDensity } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
+import { omit } from 'lodash';
 import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
 import { NEW_TAB_ID } from '../../common/constants';
 import type { DiscoverAppLocatorParams } from '../../common';
@@ -19,6 +21,7 @@ import type {
   DiscoverSessionApiData,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
+  DiscoverSessionEmbeddableByValueState,
 } from '../../server';
 import type { SearchEmbeddableInputState } from '../embeddable/types';
 
@@ -38,16 +41,33 @@ export const getDiscoverSessionSeedTimeRange = ({
 export const buildDiscoverSessionEmbeddableInput = (
   data: DiscoverSessionApiData,
   timeRange: TimeRange
-): SearchEmbeddableInputState => ({
-  ...toSearchEmbeddableByValueState(data),
-  time_range: timeRange,
-  nonPersistedDisplayOptions: {
-    enableDocumentViewer: true,
-    enableFilters: false,
-    documentViewerFlyoutType: 'overlay',
-    autoApplyDiscoverColumnDefaults: true,
-  },
-});
+): DiscoverSessionEmbeddableByValueState &
+  Pick<SearchEmbeddableInputState, 'nonPersistedDisplayOptions'> => {
+  const mappedState = toSearchEmbeddableByValueState(data);
+  const [tab] = mappedState.tabs;
+
+  return {
+    ...mappedState,
+    tabs: [
+      {
+        ...tab,
+        density: tab.density ?? DataGridDensity.COMPACT,
+        header_row_height: tab.header_row_height ?? 1,
+        row_height: tab.row_height ?? 1,
+      },
+    ],
+    time_range: timeRange,
+    nonPersistedDisplayOptions: {
+      enableDocumentViewer: true,
+      enableFilters: false,
+      documentViewerFlyoutType: 'overlay',
+      autoApplyDiscoverColumnDefaults: true,
+      wrapToolbar: false,
+      showKeyboardShortcuts: false,
+      showSortSelector: false,
+    },
+  };
+};
 
 export const getDiscoverSessionLocatorParams = ({
   data,
@@ -82,4 +102,43 @@ export const getDiscoverSessionLocatorParams = ({
   }
 
   return params;
+};
+
+export const isDiscoverSessionByValueState = (
+  state: unknown
+): state is DiscoverSessionEmbeddableByValueState =>
+  typeof state === 'object' &&
+  state !== null &&
+  'tabs' in state &&
+  Array.isArray((state as { tabs: unknown }).tabs);
+
+export const buildDiscoverSessionDashboardSaveState = ({
+  liveState,
+  visibleColumns,
+  title,
+  description,
+}: {
+  liveState: DiscoverSessionEmbeddableByValueState;
+  visibleColumns?: string[];
+  title: string;
+  description?: string;
+}): DiscoverSessionEmbeddableByValueState => {
+  const rest = omit(liveState, ['time_range', 'nonPersistedDisplayOptions']) as Omit<
+    DiscoverSessionEmbeddableByValueState,
+    'time_range'
+  >;
+  const [tab, ...otherTabs] = rest.tabs;
+
+  return {
+    ...rest,
+    title,
+    description,
+    tabs: [
+      {
+        ...tab,
+        ...(visibleColumns !== undefined ? { column_order: visibleColumns } : {}),
+      },
+      ...otherTabs,
+    ],
+  };
 };

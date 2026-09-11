@@ -8,18 +8,26 @@
  */
 
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-utils';
 import { NEW_TAB_ID } from '../../common/constants';
-import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '../../server';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionApiTab,
+  DiscoverSessionEmbeddableByValueState,
+} from '../../server';
 import {
+  buildDiscoverSessionDashboardSaveState,
   buildDiscoverSessionEmbeddableInput,
   DEFAULT_DISCOVER_SESSION_TIME_RANGE,
   getDiscoverSessionLocatorParams,
   getDiscoverSessionSeedTimeRange,
+  isDiscoverSessionByValueState,
 } from './discover_session_inline_state';
 
 const esqlTab: DiscoverSessionApiTab = {
   id: 'tab-1',
   label: 'Documents',
+  type: DiscoverTabType.Default,
   data_source: {
     type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
     query: 'FROM logs-* | LIMIT 100',
@@ -65,16 +73,62 @@ describe('discover session inline state', () => {
   describe('buildDiscoverSessionEmbeddableInput', () => {
     it('adds overlay document viewer display options and the local time range', () => {
       const data = createSession({ title: 'Nginx errors', tabs: [esqlTab] });
+      const originalTab = { ...data.tabs[0] };
       const result = buildDiscoverSessionEmbeddableInput(data, { from: 'now-15m', to: 'now' });
 
       expect(result.time_range).toEqual({ from: 'now-15m', to: 'now' });
+      expect(result.tabs[0]).toEqual(
+        expect.objectContaining({
+          density: DataGridDensity.COMPACT,
+          row_height: 1,
+          header_row_height: 1,
+        })
+      );
       expect(result.nonPersistedDisplayOptions).toEqual({
         enableDocumentViewer: true,
         enableFilters: false,
         documentViewerFlyoutType: 'overlay',
         autoApplyDiscoverColumnDefaults: true,
+        wrapToolbar: false,
+        showKeyboardShortcuts: false,
+        showSortSelector: false,
       });
       expect(result).not.toHaveProperty('attributes');
+      expect(data.tabs[0]).toEqual(originalTab);
+      expect(data.tabs[0]).not.toHaveProperty('density');
+    });
+
+    it('keeps an explicit tab density', () => {
+      const data = createSession({
+        title: 'Nginx errors',
+        tabs: [{ ...esqlTab, density: DataGridDensity.NORMAL }],
+      });
+
+      const result = buildDiscoverSessionEmbeddableInput(data, { from: 'now-15m', to: 'now' });
+
+      expect(result.tabs[0]).toEqual(
+        expect.objectContaining({
+          density: DataGridDensity.NORMAL,
+          row_height: 1,
+          header_row_height: 1,
+        })
+      );
+    });
+
+    it('keeps explicit row and header heights', () => {
+      const data = createSession({
+        title: 'Nginx errors',
+        tabs: [{ ...esqlTab, row_height: 3, header_row_height: 2 }],
+      });
+
+      const result = buildDiscoverSessionEmbeddableInput(data, { from: 'now-15m', to: 'now' });
+
+      expect(result.tabs[0]).toEqual(
+        expect.objectContaining({
+          row_height: 3,
+          header_row_height: 2,
+        })
+      );
     });
   });
 
@@ -93,6 +147,49 @@ describe('discover session inline state', () => {
         timeRange: { from: 'now-15m', to: 'now' },
         hideChart: true,
         tab: { id: NEW_TAB_ID, label: 'Nginx errors' },
+      });
+    });
+  });
+
+  describe('buildDiscoverSessionDashboardSaveState', () => {
+    it('writes visible columns and omits the local time range', () => {
+      const liveState: DiscoverSessionEmbeddableByValueState & {
+        nonPersistedDisplayOptions: { wrapToolbar: boolean };
+      } = {
+        title: 'Original',
+        description: 'old',
+        time_range: { from: 'now-15m', to: 'now' },
+        nonPersistedDisplayOptions: { wrapToolbar: false },
+        tabs: [
+          {
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: ['@timestamp'],
+            density: DataGridDensity.COMPACT,
+            sort: [],
+          },
+        ],
+      };
+
+      expect(isDiscoverSessionByValueState(liveState)).toBe(true);
+
+      expect(
+        buildDiscoverSessionDashboardSaveState({
+          liveState,
+          visibleColumns: ['event.action', '@timestamp'],
+          title: 'Saved table',
+          description: 'From chat',
+        })
+      ).toEqual({
+        title: 'Saved table',
+        description: 'From chat',
+        tabs: [
+          {
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: ['event.action', '@timestamp'],
+            density: DataGridDensity.COMPACT,
+            sort: [],
+          },
+        ],
       });
     });
   });

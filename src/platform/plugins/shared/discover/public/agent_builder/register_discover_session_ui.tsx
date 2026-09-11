@@ -8,9 +8,11 @@
  */
 
 import React, { Suspense } from 'react';
+import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
 import type { DiscoverAppLocator } from '../../common';
@@ -25,10 +27,14 @@ export const registerDiscoverSessionAttachmentUi = ({
   agentBuilder,
   unifiedSearch,
   locator,
+  embeddable,
+  application,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   locator?: DiscoverAppLocator;
+  embeddable?: EmbeddableStart;
+  application?: ApplicationStart;
 }) => {
   agentBuilder.attachments.addAttachmentType<
     Attachment<typeof DISCOVER_SESSION_ATTACHMENT_TYPE, DiscoverSessionApiData>
@@ -50,6 +56,8 @@ export const registerDiscoverSessionAttachmentUi = ({
           screenContextTimeRange={screenContext?.time_range}
           unifiedSearch={unifiedSearch}
           locator={locator}
+          embeddable={embeddable}
+          application={application}
           registerActionButtons={callbacks?.registerActionButtons}
         />
       </Suspense>

@@ -56,6 +56,7 @@ export const useDiscoverSessionUnifiedSearch = ({
       useDefaultBehaviors: false,
       disableSubscribingToGlobalDataServices: true,
       enableDateRangePicker: true,
+      showTimeWindowButtons: false,
       showQueryInput: false,
       showFilterBar: false,
       showQueryMenu: false,

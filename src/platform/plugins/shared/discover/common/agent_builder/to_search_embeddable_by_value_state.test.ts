@@ -11,6 +11,7 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '../../server';
 import { toStoredSearchEmbeddableByValue } from '../embeddable/transform_utils';
@@ -19,6 +20,7 @@ import { toSearchEmbeddableByValueState } from './to_search_embeddable_by_value_
 const esqlTab: DiscoverSessionApiTab = {
   id: 'tab-1',
   label: 'Documents',
+  type: DiscoverTabType.Default,
   data_source: {
     type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
     query: 'FROM logs-* | WHERE status >= 500 | LIMIT 100',
@@ -33,6 +35,7 @@ const esqlTab: DiscoverSessionApiTab = {
 const classicTab: DiscoverSessionApiTab = {
   id: 'tab-classic',
   label: 'Logs',
+  type: DiscoverTabType.Default,
   data_source: {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     ref_id: 'logs-data-view',
