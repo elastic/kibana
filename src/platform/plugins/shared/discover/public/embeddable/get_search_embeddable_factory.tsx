@@ -32,13 +32,14 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PresentationPanelError } from '@kbn/embeddable-plugin/public';
 import { getDiscoverSessionEmbeddableComparators } from './utils/get_search_embeddable_comparators';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
 import { SearchEmbeddableDeletedTabPrompt } from './components/search_embeddable_deleted_tab_prompt';
-import { SearchEmbeddableErrorPrompt } from './components/search_embeddable_error_prompt';
+import { SavedSearchEmbeddableBase } from './components/saved_search_embeddable_base';
 import { SearchEmbeddableMissingDataViewPrompt } from './components/search_embeddable_missing_data_view_prompt';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
@@ -444,20 +445,21 @@ export const getSearchEmbeddableFactory = ({
           }
 
           if (searchError) {
-            // Outside inline editing the platform renders the blocking panel over this content,
-            // so rendering the prompt too would duplicate the error panel in the DOM
             return isInlineEditing ? (
-              // The reused platform error panel styles itself from the Emotion theme
               <KibanaRenderContextProvider {...discoverServices.core}>
-                <SearchEmbeddableErrorPrompt
-                  error={searchError}
+                <SavedSearchEmbeddableBase
                   inlineEditing={{
                     hasPendingChanges: hasPendingInlineTabChanges,
                     isActive: isInlineEditing,
                     onApply: inlineEditingApi.applyInlineTabSelection,
                     onCancel: inlineEditingApi.cancelInlineTabSelection,
                   }}
-                />
+                  isLoading={false}
+                >
+                  <div style={{ height: '100%' }} data-test-subj="discoverEmbeddableErrorCallout">
+                    <PresentationPanelError error={searchError} />
+                  </div>
+                </SavedSearchEmbeddableBase>
               </KibanaRenderContextProvider>
             ) : null;
           }

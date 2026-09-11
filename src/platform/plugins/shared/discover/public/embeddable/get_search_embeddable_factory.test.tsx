@@ -47,7 +47,6 @@ import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drill
 jest.mock('./utils/serialization_utils', () => ({}));
 
 describe('saved search embeddable', () => {
-  // The reused platform error panel resolves its edit action through the embeddable plugin services
   setStubKibanaServices();
 
   const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
@@ -260,25 +259,13 @@ describe('saved search embeddable', () => {
       await waitOneTick(); // wait for build to complete
       const discoverComponent = renderWithI18n(<Component />);
 
-      // wait for data fetching
-      expect(api.dataLoading$.getValue()).toBe(true);
       rejectSearch();
       await waitOneTick();
-      expect(api.dataLoading$.getValue()).toBe(false);
 
-      await waitFor(() => {
-        expect(discoverComponent.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
-      });
-
-      // outside inline editing, search errors surface in the platform's blocking panel,
-      // consistent with other embeddables
+      // the platform panel reads blockingError$ and renders the error itself,
+      // so the embeddable hands the error over and renders nothing of its own
       expect(api.blockingError$.getValue()).toBe(searchError);
-
-      // rendering the prompt here too would duplicate the platform's error panel in the DOM
-      expect(
-        discoverComponent.queryByTestId('discoverEmbeddableErrorCallout')
-      ).not.toBeInTheDocument();
-      expect(discoverComponent.queryByTestId('embeddableError')).not.toBeInTheDocument();
+      expect(discoverComponent.container).toBeEmptyDOMElement();
     });
 
     it('should keep a query failure non-blocking while inline editing so apply/discard stay reachable', async () => {
@@ -286,16 +273,7 @@ describe('saved search embeddable', () => {
       const { search, rejectSearch } = createSearchErrorFnMock(searchError);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL, savedObjectId: 'id' },
-      });
-
-      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
-        navigateToEditor: jest.fn(),
-      }));
-      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
-        app: 'discover',
-        path: '/mock-url',
-        state: {},
+        partialState: { savedObjectId: 'id' },
       });
 
       const { Component, api } = await factory.buildEmbeddable({
@@ -311,21 +289,18 @@ describe('saved search embeddable', () => {
       await act(async () => {
         await api.onEdit?.();
       });
-
       rejectSearch();
       await waitOneTick();
 
-      await waitFor(() => {
-        expect(discoverComponent.getByTestId('discoverEmbeddableErrorCallout')).toBeInTheDocument();
-        // the platform error panel is reused so both modes render the error identically
-        expect(discoverComponent.getByTestId('embeddableError')).toBeInTheDocument();
-        expect(
-          discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton')
-        ).toBeInTheDocument();
-      });
+      // there should be no blocking error in the inline editing mode
+      expect(api.blockingError$.getValue()).toBe(undefined);
 
-      // the platform panel would hide our content along with the discard button
-      expect(api.blockingError$.getValue()).toBeUndefined();
+      await waitFor(() => {
+        expect(discoverComponent.getByTestId('embeddableError')).toBeInTheDocument();
+      });
+      expect(
+        discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton')
+      ).toBeInTheDocument();
     });
   });
 
