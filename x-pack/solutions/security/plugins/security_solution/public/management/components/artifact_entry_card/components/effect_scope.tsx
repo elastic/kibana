@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
+import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
@@ -83,7 +83,9 @@ export const EffectScope = memo<EffectScopeProps>(
           canReadPolicies={canReadPolicyManagement}
           data-test-subj={getTestId('popupMenu')}
         >
-          {effectiveScopeLabel}
+          <EuiButtonEmpty size="xs" data-test-subj={getTestId('popupMenu-button')}>
+            {effectiveScopeLabel}
+          </EuiButtonEmpty>
         </WithContextMenu>
       </StyledWithContextMenuShiftedWrapper>
     ) : (
@@ -93,15 +95,14 @@ export const EffectScope = memo<EffectScopeProps>(
 );
 EffectScope.displayName = 'EffectScope';
 
-type WithContextMenuProps = Pick<CommonProps, 'data-test-subj'> &
-  PropsWithChildren<{
-    policies: Required<EffectScopeProps>['policies'];
-  }> & {
-    canReadPolicies: boolean;
-    loadingPoliciesList?: boolean;
-  };
+type WithContextMenuProps = Pick<CommonProps, 'data-test-subj'> & {
+  policies: Required<EffectScopeProps>['policies'];
+  canReadPolicies: boolean;
+  loadingPoliciesList?: boolean;
+  children: ReactElement;
+};
 
-const WithContextMenu = memo<WithContextMenuProps>(
+export const WithContextMenu = memo<WithContextMenuProps>(
   ({
     policies,
     loadingPoliciesList = false,
@@ -109,8 +110,6 @@ const WithContextMenu = memo<WithContextMenuProps>(
     children,
     'data-test-subj': dataTestSubj,
   }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
-
     const menuItems: ContextMenuItemNavByRouterProps[] = useMemo(() => {
       return policies.map((policyMenuItem) => {
         const hasHref = Boolean(policyMenuItem.href);
@@ -141,11 +140,7 @@ const WithContextMenu = memo<WithContextMenuProps>(
         anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}
         data-test-subj={dataTestSubj}
         loading={loadingPoliciesList}
-        button={
-          <EuiButtonEmpty size="xs" data-test-subj={getTestId('button')}>
-            {children}
-          </EuiButtonEmpty>
-        }
+        button={children}
         title={POLICY_EFFECT_SCOPE_TITLE(policies.length)}
         isNavigationDisabled={!canReadPolicies}
       />
