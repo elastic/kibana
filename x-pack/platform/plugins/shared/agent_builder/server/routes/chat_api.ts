@@ -57,6 +57,7 @@ export function registerChatApiRoutes({
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+
   const { validateAction, validateConfigurationOverrides, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
