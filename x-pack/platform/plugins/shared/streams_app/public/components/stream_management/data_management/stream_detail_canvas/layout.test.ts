@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { COLUMN_GAP } from './canvas_constants';
+import { COLUMN_GAP, DESTINATION_NODE_HEIGHT, SOURCE_NODE_HEIGHT } from './canvas_constants';
 import { applyLayout, layoutGraph } from './layout';
+import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 describe('layoutGraph', () => {
   it('returns an empty map for no nodes', () => {
@@ -24,8 +25,42 @@ describe('layoutGraph', () => {
 
     expect(source.x).toBe(0);
     expect(destination.x).toBe(COLUMN_GAP);
-    // A 1:1 chain shares a row so the connector is a straight horizontal line.
+    // Untyped nodes fall back to a single height estimate, so sharing a row also
+    // means sharing a top edge.
     expect(source.y).toBe(destination.y);
+  });
+
+  it('centers a source -> destination pair vertically so the connector is straight', () => {
+    const positions = layoutGraph(
+      [
+        { id: 'source', type: SOURCE_NODE_TYPE },
+        { id: 'destination', type: DESTINATION_NODE_TYPE },
+      ],
+      [{ source: 'source', target: 'destination' }]
+    );
+
+    const source = positions.get('source')!;
+    const destination = positions.get('destination')!;
+
+    expect(source.y + SOURCE_NODE_HEIGHT / 2).toBe(destination.y + DESTINATION_NODE_HEIGHT / 2);
+    expect(source.y).toBe(0);
+    expect(destination.y).toBe((SOURCE_NODE_HEIGHT - DESTINATION_NODE_HEIGHT) / 2);
+  });
+
+  it('prefers a measured height over the per-kind estimate', () => {
+    const measuredHeight = SOURCE_NODE_HEIGHT + 40;
+    const positions = layoutGraph(
+      [
+        { id: 'source', type: SOURCE_NODE_TYPE, measured: { height: measuredHeight } },
+        { id: 'destination', type: DESTINATION_NODE_TYPE },
+      ],
+      [{ source: 'source', target: 'destination' }]
+    );
+
+    const source = positions.get('source')!;
+    const destination = positions.get('destination')!;
+
+    expect(source.y + measuredHeight / 2).toBe(destination.y + DESTINATION_NODE_HEIGHT / 2);
   });
 
   it('stacks independent flows on distinct rows, each starting in column 0', () => {
@@ -83,8 +118,13 @@ describe('applyLayout', () => {
 
   it('repositions every node and preserves other node properties', () => {
     const nodes = [
-      { id: 'source', position: { x: 999, y: 999 }, type: 'source', data: { keep: true } },
-      { id: 'destination', position: { x: -50, y: 5 }, type: 'destination' },
+      {
+        id: 'source',
+        position: { x: 999, y: 999 },
+        type: SOURCE_NODE_TYPE,
+        data: { keep: true },
+      },
+      { id: 'destination', position: { x: -50, y: 5 }, type: DESTINATION_NODE_TYPE },
     ];
 
     const result = applyLayout(nodes, edges);
@@ -93,9 +133,12 @@ describe('applyLayout', () => {
 
     expect(source.position).toEqual({ x: 0, y: 0 });
     expect(destination.position.x).toBe(COLUMN_GAP);
-    expect(source.position.y).toBe(destination.position.y);
+    // The cards have different heights, so tidying aligns their centers.
+    expect(source.position.y + SOURCE_NODE_HEIGHT / 2).toBe(
+      destination.position.y + DESTINATION_NODE_HEIGHT / 2
+    );
     // Non-position fields survive the re-layout.
-    expect(source.type).toBe('source');
+    expect(source.type).toBe(SOURCE_NODE_TYPE);
     expect(source.data).toEqual({ keep: true });
   });
 
