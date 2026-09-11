@@ -616,6 +616,70 @@ describe('Data Loader', () => {
     );
   });
 
+  it('should call setApproximationApplied onData', async () => {
+    const setApproximationApplied = jest.fn();
+    const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
+    const parentApi = {
+      ...createUnifiedSearchApi(),
+      searchSessionId$: new BehaviorSubject<string>(''),
+      esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
+      onLoad: jest.fn(),
+      onBeforeBadgesRender: jest.fn(),
+      onBrushEnd: jest.fn(),
+      onFilter: jest.fn(),
+      onTableRowClick: jest.fn(),
+    };
+    const api: LensApi = { ...getLensApiMock(), parentApi };
+    const getState = jest.fn(() => runtimeState);
+    const internalApi = getLensInternalApiMock({
+      attributes$: new BehaviorSubject(runtimeState.attributes),
+    });
+    const services = {
+      ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+      }),
+      documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+    };
+
+    const { cleanup } = loadEmbeddableData(
+      faker.string.uuid(),
+      getState,
+      api,
+      parentApi,
+      internalApi,
+      services,
+      undefined,
+      setApproximationApplied
+    );
+
+    jest.advanceTimersByTime(100);
+    await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
+
+    await waitForValue(
+      internalApi.expressionParams$,
+      (v: unknown) => isObject(v) && 'onData$' in v
+    );
+
+    const params = internalApi.expressionParams$.getValue();
+    params?.onData$?.(undefined, {
+      tables: {
+        tables: {
+          layer1: {
+            type: 'datatable' as const,
+            columns: [],
+            rows: [],
+            meta: { approximationApplied: true },
+          },
+        },
+      },
+    });
+
+    expect(setApproximationApplied).toHaveBeenCalledWith(true);
+
+    cleanup();
+  });
+
   it('should not re-render on ES|QL variable identical changes', async () => {
     const baseAttributes = getLensAttributesMock();
     const variables: ESQLControlVariable[] = [

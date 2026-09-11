@@ -16,7 +16,7 @@ type RunQuotaGroup = 'detection' | 'investigation' | 'ki_extraction';
 type RunQuotaConsumeBody =
   | { group: 'detection' }
   | { group: 'ki_extraction' }
-  | { group: 'investigation'; critical: boolean };
+  | { group: 'investigation' };
 
 interface RunQuotaSnapshot {
   enabled: boolean;
@@ -136,35 +136,32 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'denies a non-critical admission at a finite limit without incrementing',
-      async ({ apiClient }) => {
-        let before = await readSnapshot(apiClient);
-        if (before.counts.ki_extraction === 0) {
-          await updateSettings(apiClient, {
-            enabled: false,
-            limits: { ki_extraction: 0 },
-          });
-          await consumeAllowed(apiClient, { group: 'ki_extraction' });
-          before = await readSnapshot(apiClient);
-        }
-        const finiteLimit = Math.min(before.counts.ki_extraction, 10_000);
-        before = await updateSettings(apiClient, {
-          enabled: true,
-          limits: { ki_extraction: finiteLimit },
+    apiTest('denies an admission at a finite limit without incrementing', async ({ apiClient }) => {
+      let before = await readSnapshot(apiClient);
+      if (before.counts.ki_extraction === 0) {
+        await updateSettings(apiClient, {
+          enabled: false,
+          limits: { ki_extraction: 0 },
         });
-
-        const response = await consume(apiClient, { group: 'ki_extraction' });
-
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({ allowed: false });
-        const after = await readSnapshot(apiClient);
-        expect(after.counts.ki_extraction).toBe(before.counts.ki_extraction);
+        await consumeAllowed(apiClient, { group: 'ki_extraction' });
+        before = await readSnapshot(apiClient);
       }
-    );
+      const finiteLimit = Math.min(before.counts.ki_extraction, 10_000);
+      before = await updateSettings(apiClient, {
+        enabled: true,
+        limits: { ki_extraction: finiteLimit },
+      });
+
+      const response = await consume(apiClient, { group: 'ki_extraction' });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ allowed: false });
+      const after = await readSnapshot(apiClient);
+      expect(after.counts.ki_extraction).toBe(before.counts.ki_extraction);
+    });
 
     apiTest(
-      'allows and counts a critical investigation beyond its finite limit',
+      'denies an investigation at a finite limit without incrementing',
       async ({ apiClient }) => {
         let before = await readSnapshot(apiClient);
         if (before.counts.investigation === 0) {
@@ -172,10 +169,7 @@ apiTest.describe(
             enabled: false,
             limits: { investigation: 0 },
           });
-          await consumeAllowed(apiClient, {
-            group: 'investigation',
-            critical: false,
-          });
+          await consumeAllowed(apiClient, { group: 'investigation' });
           before = await readSnapshot(apiClient);
         }
         const finiteLimit = Math.min(before.counts.investigation, 10_000);
@@ -184,22 +178,12 @@ apiTest.describe(
           limits: { investigation: finiteLimit },
         });
 
-        const deniedResponse = await consume(apiClient, {
-          group: 'investigation',
-          critical: false,
-        });
-        expect(deniedResponse).toHaveStatusCode(200);
-        expect(deniedResponse.body).toStrictEqual({ allowed: false });
+        const response = await consume(apiClient, { group: 'investigation' });
 
-        const criticalResponse = await consume(apiClient, {
-          group: 'investigation',
-          critical: true,
-        });
-        expect(criticalResponse).toHaveStatusCode(200);
-        expect(criticalResponse.body).toStrictEqual({ allowed: true });
-
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ allowed: false });
         const after = await readSnapshot(apiClient);
-        expect(after.counts.investigation).toBe(before.counts.investigation + 1);
+        expect(after.counts.investigation).toBe(before.counts.investigation);
       }
     );
   }

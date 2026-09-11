@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { getRegularEcsField } from '@kbn/streams-schema';
+import { getRegularEcsField, isBuiltInRootStreamField, Streams } from '@kbn/streams-schema';
 import { getFormattedError } from '../../../../util/errors';
 import { useControls } from './hooks/use_controls';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -141,7 +141,14 @@ export function SchemaEditor({
                   size="xs"
                   isLoading={isLoadingRecommendations}
                   onClick={() => {
-                    getRecommendations(fieldSelection);
+                    const editableSelection = fieldSelection.filter(
+                      (fieldName) =>
+                        !(
+                          Streams.WiredStream.Definition.is(stream) &&
+                          isBuiltInRootStreamField(stream.name, fieldName)
+                        )
+                    );
+                    getRecommendations(editableSelection);
                   }}
                 >
                   {i18n.translate(
@@ -158,6 +165,12 @@ export function SchemaEditor({
                   size="xs"
                   onClick={() => {
                     fieldSelection.forEach((fieldName) => {
+                      if (
+                        Streams.WiredStream.Definition.is(stream) &&
+                        isBuiltInRootStreamField(stream.name, fieldName)
+                      ) {
+                        return;
+                      }
                       const field = fields.find(({ name }) => name === fieldName)!;
                       onFieldUpdate(omit({ ...field, status: 'unmapped' }, 'type') as SchemaField);
                       onFieldSelection(fieldSelection, false);
@@ -185,6 +198,7 @@ export function SchemaEditor({
     fieldSelection,
     onFieldUpdate,
     isLoadingRecommendations,
+    stream,
   ]);
 
   return (
