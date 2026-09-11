@@ -25,6 +25,20 @@ export interface GenAiRecoveryTarget {
   cacheKey: string;
 }
 
+/** Returns the first non-empty scalar value found in `hit.flattened` for any of
+ * the given field names.  Handles ES|QL's single-element-array wrapping via
+ * `castArray`.
+ */
+const readFirst = (hit: DataTableRecord, fieldNames: string[]): string | undefined => {
+  for (const name of fieldNames) {
+    const raw = hit.flattened[name];
+    if (raw == null) continue;
+    const val = castArray(raw)[0];
+    if (typeof val === 'string' && val !== '') return val;
+  }
+  return undefined;
+};
+
 /**
  * Resolves an ES search target (index + query) from a document record so that
  * the GenAI long-message recovery fetch can run even when `_id` / `_index` are
@@ -69,9 +83,7 @@ export const getGenAiRecoveryTarget = ({
     'span_id', // OTel native (no constant exists)
   ]);
   if (!spanId) return undefined;
-
-  const index = indexPattern;
-  if (!index) return undefined;
+  if (!indexPattern) return undefined;
 
   const traceId = readFirst(hit, [
     TRACE_ID_FIELD, // 'trace.id' — APM / ECS alias
@@ -84,23 +96,8 @@ export const getGenAiRecoveryTarget = ({
   }
 
   return {
-    index,
+    index: indexPattern,
     query: { bool: { filter } },
-    cacheKey: `span:${spanId}@${traceId ?? ''}@${index}`,
+    cacheKey: `span:${spanId}@${traceId ?? ''}@${indexPattern}`,
   };
-};
-
-/**
- * Returns the first non-empty scalar value found in `hit.flattened` for any of
- * the given field names.  Handles ES|QL's single-element-array wrapping via
- * `castArray`.
- */
-const readFirst = (hit: DataTableRecord, fieldNames: string[]): string | undefined => {
-  for (const name of fieldNames) {
-    const raw = hit.flattened[name];
-    if (raw == null) continue;
-    const val = castArray(raw)[0];
-    if (typeof val === 'string' && val !== '') return val;
-  }
-  return undefined;
 };

@@ -371,9 +371,10 @@ describe('useGenAiData', () => {
     expect(result.current.genAi?.inputMessages[1].content).toHaveLength(2000);
   });
 
-  it('flags a partial array as unrecoverable when the row has no _id/_index', () => {
-    // Reproduces `FROM traces-* | WHERE ... | SORT ...` with no METADATA: the
-    // short message renders, the long one is gone, and nothing can be fetched.
+  it('flags a partial array as unrecoverable when the row has no _id/_index and no span.id', () => {
+    // Reproduces `FROM traces-* | WHERE ... | SORT ... | KEEP @timestamp, ...`
+    // with span.id projected away: the short message renders, the long one is
+    // gone, and nothing can be fetched.
     const { result } = renderHook(() =>
       useGenAiData({
         hit: buildHit({
@@ -415,7 +416,7 @@ describe('useGenAiData', () => {
     expect(mockSearch).not.toHaveBeenCalled();
   });
 
-  it('does not fetch in ES|QL mode when the row has no _id/_index', () => {
+  it('does not fetch in ES|QL mode when the row has no _id/_index and no span.id', () => {
     const { result } = renderHook(() =>
       useGenAiData({
         hit: buildHit({
