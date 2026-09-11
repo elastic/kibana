@@ -106,9 +106,9 @@ entries:
   - https://github.com/elastic/kibana/pull/287472
 - file:
     name: 288709.yaml
-    checksum: 7e92ab805e81c5ed9255abfbfb440b9bb33566b3
+    checksum: 8677a696130cef8742600a817da119afe075e539
   type: feature
-  title: Add an approximation applied badge to dashboard panels
+  title: Add a badge to dashboard panels when ES|QL approximation is applied
   products:
   - product: cloud-serverless
   - product: kibana
@@ -122,13 +122,13 @@ entries:
   - https://github.com/elastic/kibana/issues/275335
 - file:
     name: 286413.yaml
-    checksum: 725baf76d510542a303dfdcd45d71604bf722adf
+    checksum: 4d7fc31e814c5cbf2167dfd3baa8797044c1461e
   type: bug-fix
-  title: Fix Stack Rules privilege label in Search and VectorDB serverless
+  title: Fix Stack Rules privilege label in Search and Vector Database projects
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes role management in Search and VectorDB serverless projects so the Stack Rules privilege is labeled Stack Rules instead of Alerts.
+  description: Fixes role management in Search and Vector Database serverless projects so the Stack Rules privilege is labeled Stack Rules instead of Alerts.
   prs:
   - https://github.com/elastic/kibana/pull/286413
   issues:
@@ -290,13 +290,13 @@ entries:
   - https://github.com/elastic/kibana/pull/285533
 - file:
     name: 289394.yaml
-    checksum: 57692235b0bb2c4ad035f64447d3cd798c7c18c2
+    checksum: 678dc4f9287122cd5f304ad70bd63ee3c13cf634
   type: bug-fix
   title: Fix managed integrations showing in Fleet
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes an issue where managed integrations could appear in the Fleet agents view when they are on a versioned policy. Also fixes an issue where `agent_status_change_task` may not evaluate if an agent from a managed integration correctly if it was on a versioned policy.
+  description: Fixes an issue where managed integrations could appear in the Fleet agents view when they are on a versioned policy. Also fixes an issue where `agent_status_change_task` might not correctly an agent from a managed integration when it was on a versioned policy.
   areas:
   - Search and data
   prs:
@@ -341,9 +341,9 @@ entries:
   - https://github.com/elastic/kibana/pull/276414
 - file:
     name: 288541.yaml
-    checksum: ce9cda3825625be4e09a5c60e88e07c1b9f624f0
+    checksum: 65a8f622a58ec64df758a979c2b5e7e80f2e0e3e
   type: bug-fix
-  title: Fix source event links for EQL sequence alerts in the alert flyout
+  title: Fix source event links for EQL sequence alerts in the Alert Details flyout
   products:
   - product: cloud-serverless
   - product: kibana
