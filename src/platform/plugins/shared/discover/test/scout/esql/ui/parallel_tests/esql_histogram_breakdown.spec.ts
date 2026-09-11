@@ -32,7 +32,9 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     await discover.waitUntilTabIsLoaded();
     await discover.chooseBreakdownField('extension');
     await discover.waitUntilTabIsLoaded();
-    expect(await discover.getHistogramLegendLabels()).toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+    await expect
+      .poll(() => discover.getHistogramLegendLabels())
+      .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
   });
 
   spaceTest(
@@ -66,11 +68,13 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
       await discover.saveSearch(savedSearchTitle);
       await discover.clickNewSearch();
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHistogramLegendLabels()).toStrictEqual([]);
+      await expect.poll(() => discover.getHistogramLegendLabels()).toStrictEqual([]);
 
       await discover.loadSavedSearch(savedSearchTitle);
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHistogramLegendLabels()).toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+      await expect
+        .poll(() => discover.getHistogramLegendLabels())
+        .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
     }
   );
 
@@ -81,6 +85,8 @@ spaceTest.describe('Discover ES|QL histogram breakdown', { tag: tags.deploymentA
     await discover.waitUntilTabIsLoaded();
     await unifiedFieldList.clickFieldListAddBreakdownField('extension');
     await discover.waitUntilTabIsLoaded();
-    expect(await discover.getHistogramLegendLabels()).toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+    await expect
+      .poll(() => discover.getHistogramLegendLabels())
+      .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
   });
 });
