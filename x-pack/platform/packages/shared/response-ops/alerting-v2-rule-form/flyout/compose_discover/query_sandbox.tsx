@@ -63,7 +63,7 @@ import { useEditorHeightResize } from './use_editor_height_resize';
  *
  * ## Layout
  *
- * The in-editor toolbar (Search, time field, date range, `headerActions`) sits
+ * The in-editor toolbar (Search, time field, date range) sits
  * inside the bordered editor panel. The Monaco viewport is resizable via a drag
  * handle (capped at a max height) so the flyout keeps scrolling the results
  * table as one surface — the table is never trapped in a squeezed pane.
@@ -92,12 +92,6 @@ export interface QuerySandboxProps {
    * nothing is rendered.
    */
   helpText?: React.ReactNode;
-  /**
-   * Optional actions rendered at the end of the in-editor toolbar (after Search,
-   * time field, and date range). Use for header-level controls such as Split /
-   * Merge buttons. Absent or `undefined` → nothing is rendered.
-   */
-  headerActions?: React.ReactNode;
   /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
@@ -143,7 +137,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   isTimeFieldResolved: isTimeFieldResolvedProp,
   helpText,
   tabProps,
-  headerActions,
   validationError,
   onSingleEditorMount,
 }) => {
@@ -428,13 +421,8 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          {headerActions && (
-            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-              {headerActions}
-            </EuiFlexItem>
-          )}
           {EsqlMenu && EsqlEditorActionsProvider && (
-            <EuiFlexItem grow={false} css={headerActions ? undefined : { marginLeft: 'auto' }}>
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
               <EsqlEditorActionsProvider>
                 <EsqlMenu hideHistory />
               </EsqlEditorActionsProvider>
