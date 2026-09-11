@@ -15,6 +15,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { DataViewSource } from '@kbn/data-source';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -32,7 +33,6 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../../common/data_sources';
-import { DataViewSource } from '@kbn/data-source';
 import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { fetchData } from './tab_state';
@@ -45,7 +45,10 @@ export const setDataView: InternalStateThunkActionCreator<
 > =
   ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager }) => {
-    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
 
     if (dataView.id !== currentDataView$.getValue()?.id) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));

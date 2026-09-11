@@ -100,19 +100,22 @@ describe('sidebar reducer', function () {
     const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        dataSource: createMockEsqlSource([], [
-          {
-            id: '1',
-            name: 'text1',
-            meta: { type: 'number' },
-            isNull: true,
-          },
-          {
-            id: '2',
-            name: 'text2',
-            meta: { type: 'string', esType: 'keyword' },
-          },
-        ]),
+        dataSource: createMockEsqlSource(
+          [],
+          [
+            {
+              id: '1',
+              name: 'text1',
+              meta: { type: 'number' },
+              isNull: true,
+            },
+            {
+              id: '2',
+              name: 'text2',
+              meta: { type: 'string', esType: 'keyword' },
+            },
+          ]
+        ),
         fieldCounts: {},
       },
     });

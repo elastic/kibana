@@ -132,7 +132,9 @@ describe('CascadedDocumentsFetcher', () => {
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
     mockFetchEsql.mockResolvedValue({
       records,
-      dataSource: createMockEsqlSource([{ name: 'extension', type: 'string', source: 'esql-result' }]),
+      dataSource: createMockEsqlSource([
+        { name: 'extension', type: 'string', source: 'esql-result' },
+      ]),
     });
 
     const params = createFetchParams({ nodeId: 'node-2' });
@@ -196,7 +198,9 @@ describe('CascadedDocumentsFetcher', () => {
     mockConstructCascadeQuery.mockReturnValueOnce(cascadeQuery);
     mockFetchEsql.mockResolvedValue({
       records,
-      dataSource: createMockEsqlSource([{ name: 'extension', type: 'string', source: 'esql-result' }]),
+      dataSource: createMockEsqlSource([
+        { name: 'extension', type: 'string', source: 'esql-result' },
+      ]),
     });
 
     await fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-same-meta' }));

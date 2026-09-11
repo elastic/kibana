@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import type { Column } from '@kbn/data-source';
 import {
   type DiscoverAppState,
   PROFILE_APP_STATE_DEFAULT_FIELDS,
@@ -20,7 +21,6 @@ import {
 } from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
-import type { Column } from '@kbn/data-source';
 
 export const getProfileAppStateDefaults = ({
   scopedProfilesManager,

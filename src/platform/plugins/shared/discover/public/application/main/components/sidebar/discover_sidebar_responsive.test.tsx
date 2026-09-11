@@ -557,11 +557,14 @@ describe('discover responsive sidebar', function () {
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         result: getDataTableRecords(stubLogstashDataView),
-        dataSource: createMockEsqlSource([], [
-          { id: '1', name: 'extension', meta: { type: 'string' } },
-          { id: '2', name: 'bytes', meta: { type: 'number' } },
-          { id: '3', name: '@timestamp', meta: { type: 'date' } },
-        ]),
+        dataSource: createMockEsqlSource(
+          [],
+          [
+            { id: '1', name: 'extension', meta: { type: 'string' } },
+            { id: '2', name: 'bytes', meta: { type: 'number' } },
+            { id: '3', name: '@timestamp', meta: { type: 'date' } },
+          ]
+        ),
       }) as DataDocuments$,
     };
     await renderComponent(
