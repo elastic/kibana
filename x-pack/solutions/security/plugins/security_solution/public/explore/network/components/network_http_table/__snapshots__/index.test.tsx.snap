@@ -77,7 +77,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
     data-test-subj="table-http-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-1fo8g3b-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div

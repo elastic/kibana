@@ -1968,6 +1968,7 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
@@ -1984,7 +1985,8 @@
         "jest-runtime",
         "jest-snapshot",
         "jest-styled-components",
-        "jest"
+        "jest",
+        "magic-string"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],

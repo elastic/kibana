@@ -7,27 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Jest transformer built on @swc/jest.
+ *
+ * SWC performs the TypeScript, JSX, CommonJS and jest.mock() hoisting transforms. The Babel-era
+ * behaviors Kibana depends on are applied as source rewrites before SWC runs, using a single
+ * parse of the file:
+ *
+ *  - multiline JSX string attributes collapse indentation to one space
+ *  - enum members initialized from string constants are inlined
+ *  - jest.mock() calls with identifier module names get the literal inlined
+ *  - pure constants referenced from jest.mock() factories are hoisted with the mock
+ *  - the lazyObject() compile-time macro is expanded
+ *
+ * SWC's own CommonJS export helpers are then adjusted so Jest and Sinon can replace exports the
+ * way they could with Babel's output, and a sole default export is exposed through
+ * module.exports for CommonJS consumers.
+ */
+
 const Crypto = require('crypto');
 const Fs = require('fs');
 const Path = require('path');
-const babelJest = require('babel-jest');
 const MagicString = require('magic-string');
-const remapping = require('@jridgewell/remapping');
+const remapping = require('@ampproject/remapping');
 const { parseSync } = require('@swc/core');
 const { createTransformer } = require('@swc/jest');
 const { getJestSwcConfig } = require('@kbn/swc-config/jest');
 const { getNodeRegisterParserConfig } = require('@kbn/swc-config/node_register');
-const babelTransformer = require('../babel');
-const createBabelTransformerConfig = require('../babel/transformer_config');
 
 const THIS_FILE = Fs.readFileSync(__filename);
-const SWC_CORE_VERSION = require('@swc/core').version;
-const SWC_JEST_VERSION = require('@swc/jest/package.json').version;
-const EMOTION_PLUGIN_VERSION = require('@swc/plugin-emotion/package.json').version;
-const SOURCE_START = Symbol('sourceStart');
-const babelEsmTransformer = babelJest.default.createTransformer(
-  createBabelTransformerConfig({ modules: false })
-);
+const DEPENDENCY_VERSIONS = [
+  ['@swc/core', require('@swc/core/package.json').version],
+  ['@swc/jest', require('@swc/jest/package.json').version],
+  ['@swc/plugin-emotion', require('@swc/plugin-emotion/package.json').version],
+]
+  .map(([name, version]) => `${name}@${version}`)
+  .join(',');
+const GENERATED_PATH = '/__kbn_jest_generated__.js';
+const SOURCE_SENTINEL = '__KBN_SOURCE_SPAN_SENTINEL__';
+const JEST_HOISTED_METHODS = new Set([
+  'mock',
+  'unmock',
+  'deepUnmock',
+  'enableAutomock',
+  'disableAutomock',
+]);
+const LAZY_OBJECT_MODULE = '@kbn/lazy-object';
+const TYPE_ONLY_KEYS = new Set([
+  'typeAnnotation',
+  'typeArguments',
+  'typeParams',
+  'typeParameters',
+  'returnType',
+  'superTypeParams',
+  'implements',
+]);
 
 const swcTransformers = new Map(
   ['.js', '.mjs', '.ts', '.tsx'].map((extension) => [
@@ -40,12 +74,7 @@ function getSwcTransformer(sourcePath) {
   return swcTransformers.get(Path.extname(sourcePath)) ?? swcTransformers.get('.js');
 }
 
-const REQUIRES_BABEL_JEST_HOIST =
-  /\bjest\s*\.\s*(?:disableAutomock|enableAutomock|mock|unmock)\s*\(/;
-
-function requiresBabelJestHoist(sourceText) {
-  return REQUIRES_BABEL_JEST_HOIST.test(sourceText);
-}
+// --- AST helpers -------------------------------------------------------------------------------
 
 function visitAst(node, visitor) {
   if (!node || typeof node !== 'object') {
@@ -67,151 +96,8 @@ function visitAst(node, visitor) {
   }
 }
 
-function visitAstWithAncestors(node, visitor, ancestors = []) {
-  if (!node || typeof node !== 'object') {
-    return;
-  }
-
-  visitor(node, ancestors);
-  const nextAncestors = [...ancestors, node];
-
-  for (const [key, value] of Object.entries(node)) {
-    if (key === 'span') {
-      continue;
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((item) => visitAstWithAncestors(item, visitor, nextAncestors));
-    } else {
-      visitAstWithAncestors(value, visitor, nextAncestors);
-    }
-  }
-}
-
-function parseSource(sourceText, sourcePath) {
-  const sentinelPrefix = '\n';
-  const sentinelName = '__KBN_SOURCE_SPAN_SENTINEL__';
-  const ast = parseSync(
-    `${sourceText}${sentinelPrefix}const ${sentinelName} = 0;`,
-    getNodeRegisterParserConfig(sourcePath)
-  );
-  const sentinelIndex = ast.body.findLastIndex(
-    (item) =>
-      item.type === 'VariableDeclaration' &&
-      item.declarations[0]?.id.type === 'Identifier' &&
-      item.declarations[0].id.value === sentinelName
-  );
-  const sentinel = ast.body[sentinelIndex];
-
-  if (!sentinel) {
-    throw new Error(`Unable to determine SWC source span offset for ${sourcePath}`);
-  }
-
-  ast.body.splice(sentinelIndex, 1);
-  ast[SOURCE_START] =
-    sentinel.span.start - Buffer.byteLength(sourceText) - Buffer.byteLength(sentinelPrefix);
-  return ast;
-}
-
 function getIdentifierKey(identifier) {
   return `${identifier.ctxt}:${identifier.value}`;
-}
-
-function getStringLiteralValue(expression) {
-  if (expression?.type === 'StringLiteral') {
-    return expression.value;
-  }
-
-  if (expression?.type === 'TemplateLiteral' && expression.expressions.length === 0) {
-    return expression.quasis[0]?.cooked ?? expression.quasis[0]?.raw;
-  }
-}
-
-function replaceSourceSpans(sourceText, ast, replacements) {
-  const sourceStart = ast[SOURCE_START];
-
-  return replacements
-    .sort((left, right) => right.span.start - left.span.start)
-    .reduce((source, replacement) => {
-      const start = replacement.span.start - sourceStart;
-      const end = replacement.span.end - sourceStart;
-      return Buffer.concat([
-        source.subarray(0, start),
-        Buffer.from(replacement.value),
-        source.subarray(end),
-      ]);
-    }, Buffer.from(sourceText))
-    .toString();
-}
-
-function getSourceSpanText(sourceText, ast, span) {
-  const sourceStart = ast[SOURCE_START];
-  return Buffer.from(sourceText)
-    .subarray(span.start - sourceStart, span.end - sourceStart)
-    .toString();
-}
-
-function getStringIndexForByteOffset(source, byteOffset) {
-  return source.subarray(0, byteOffset).toString().length;
-}
-
-// Preserve the previous Babel/Jest contract: multiline JSX string attributes collapse newline
-// indentation to one space. Kibana's i18n extraction and existing assertions rely on that value.
-function normalizeMultilineJsxStringAttributes(sourceText, sourcePath) {
-  if (!/=\s*["'][^"']*\r?\n/.test(sourceText)) {
-    return { code: sourceText };
-  }
-
-  const ast = parseSource(sourceText, sourcePath);
-  const source = Buffer.from(sourceText);
-  const sourceStart = ast[SOURCE_START];
-  const normalizedSource = new MagicString(sourceText);
-  let changed = false;
-
-  visitAst(ast, (node) => {
-    if (node.type !== 'JSXAttribute' || node.value?.type !== 'StringLiteral') {
-      return;
-    }
-
-    const normalizedValue = node.value.value.replace(/\r?\n[\t ]+/g, ' ');
-    if (normalizedValue === node.value.value) {
-      return;
-    }
-
-    const startByte = node.value.span.start - sourceStart;
-    const endByte = node.value.span.end - sourceStart;
-    normalizedSource.overwrite(
-      getStringIndexForByteOffset(source, startByte),
-      getStringIndexForByteOffset(source, endByte),
-      `{${JSON.stringify(normalizedValue)}}`
-    );
-    changed = true;
-  });
-
-  if (!changed) {
-    return { code: sourceText };
-  }
-
-  return {
-    code: normalizedSource.toString(),
-    map: JSON.parse(
-      normalizedSource
-        .generateMap({ hires: true, includeContent: true, source: sourcePath })
-        .toString()
-    ),
-  };
-}
-
-function composeSourceMaps(result, inputMap) {
-  if (!inputMap || !result?.map) {
-    return result;
-  }
-
-  const outputMap = typeof result.map === 'string' ? JSON.parse(result.map) : result.map;
-  return {
-    ...result,
-    map: JSON.stringify(remapping([outputMap, inputMap], () => null)),
-  };
 }
 
 function unwrapExpression(expression) {
@@ -219,6 +105,9 @@ function unwrapExpression(expression) {
     expression?.type === 'TsAsExpression' ||
     expression?.type === 'TsConstAssertion' ||
     expression?.type === 'TsSatisfiesExpression' ||
+    expression?.type === 'TsNonNullExpression' ||
+    expression?.type === 'TsTypeAssertion' ||
+    expression?.type === 'TsInstantiation' ||
     expression?.type === 'ParenthesisExpression'
   ) {
     return unwrapExpression(expression.expression);
@@ -237,15 +126,241 @@ function getPropertyName(property) {
   }
 }
 
-function inlineComputedEnumValues(sourceText, sourcePath) {
-  if (!requiresComputedEnumTransform(sourceText, sourcePath)) {
-    return sourceText;
+function getStringLiteralValue(expression) {
+  const unwrapped = unwrapExpression(expression);
+
+  if (unwrapped?.type === 'StringLiteral') {
+    return unwrapped.value;
   }
 
-  const ast = parseSource(sourceText, sourcePath);
+  if (unwrapped?.type === 'TemplateLiteral' && unwrapped.expressions.length === 0) {
+    return unwrapped.quasis[0]?.cooked ?? unwrapped.quasis[0]?.raw;
+  }
+}
+
+function getBindingIdentifiers(pattern) {
+  if (!pattern) {
+    return [];
+  }
+
+  switch (pattern.type) {
+    case 'Identifier':
+      return [pattern];
+    case 'ArrayPattern':
+      return pattern.elements.flatMap((element) => getBindingIdentifiers(element));
+    case 'ObjectPattern':
+      return pattern.properties.flatMap((property) => {
+        if (property.type === 'KeyValuePatternProperty') {
+          return getBindingIdentifiers(property.value);
+        }
+
+        if (property.type === 'AssignmentPatternProperty') {
+          return getBindingIdentifiers(property.key);
+        }
+
+        return getBindingIdentifiers(property.argument);
+      });
+    case 'AssignmentPattern':
+      return getBindingIdentifiers(pattern.left);
+    case 'RestElement':
+      return getBindingIdentifiers(pattern.argument);
+    default:
+      return [];
+  }
+}
+
+function getDeclarationIdentifiers(declaration) {
+  if (declaration?.type === 'VariableDeclaration') {
+    return declaration.declarations.flatMap(({ id }) => getBindingIdentifiers(id));
+  }
+
+  if (
+    declaration?.type === 'FunctionDeclaration' ||
+    declaration?.type === 'ClassDeclaration' ||
+    declaration?.type === 'TsEnumDeclaration'
+  ) {
+    const identifier = declaration.identifier ?? declaration.id;
+    return identifier ? [identifier] : [];
+  }
+
+  if (declaration?.type === 'TsModuleDeclaration' && declaration.id?.type === 'Identifier') {
+    return [declaration.id];
+  }
+
+  return [];
+}
+
+function isDirective(statement) {
+  return statement?.type === 'ExpressionStatement' && statement.expression.type === 'StringLiteral';
+}
+
+function isJestCallee(callee) {
+  return (
+    callee.type === 'MemberExpression' &&
+    callee.property.type === 'Identifier' &&
+    (callee.object.type === 'Identifier' || callee.object.type === 'CallExpression')
+  );
+}
+
+// Returns the jest.mock() calls in a statement expression such as `jest.mock('a').mock('b', f)`,
+// or an empty list when the chain is not rooted at the `jest` object.
+function getJestMockCalls(expression) {
+  const calls = [];
+  let current = expression;
+
+  while (current?.type === 'CallExpression' && isJestCallee(current.callee)) {
+    const { object, property } = current.callee;
+
+    if (!JEST_HOISTED_METHODS.has(property.value)) {
+      return [];
+    }
+
+    if (property.value === 'mock') {
+      calls.push(current);
+    }
+
+    if (object.type === 'Identifier') {
+      return object.value === 'jest' ? calls : [];
+    }
+
+    current = object;
+  }
+
+  return [];
+}
+
+function isHoistedJestStatement(statement) {
+  if (statement?.type !== 'ExpressionStatement') {
+    return false;
+  }
+
+  let current = statement.expression;
+  while (current?.type === 'CallExpression' && isJestCallee(current.callee)) {
+    const { object, property } = current.callee;
+    if (!JEST_HOISTED_METHODS.has(property.value)) {
+      return false;
+    }
+
+    if (object.type === 'Identifier') {
+      return object.value === 'jest';
+    }
+
+    current = object;
+  }
+
+  return false;
+}
+
+// --- Parsing -----------------------------------------------------------------------------------
+
+function getUtf8ByteLength(codePoint) {
+  if (codePoint < 0x80) {
+    return 1;
+  }
+
+  if (codePoint < 0x800) {
+    return 2;
+  }
+
+  return codePoint < 0x10000 ? 3 : 4;
+}
+
+/**
+ * SWC spans are byte offsets that continue across parse calls within a process. A trailing
+ * sentinel statement locates the start of this source so spans can be mapped to string indexes.
+ */
+class ParsedSource {
+  constructor(text, sourcePath) {
+    const ast = parseSync(
+      `${text}\nconst ${SOURCE_SENTINEL} = 0;`,
+      getNodeRegisterParserConfig(sourcePath)
+    );
+    const sentinelIndex = ast.body.findLastIndex(
+      (item) =>
+        item.type === 'VariableDeclaration' &&
+        item.declarations[0]?.id.type === 'Identifier' &&
+        item.declarations[0].id.value === SOURCE_SENTINEL
+    );
+    const sentinel = ast.body[sentinelIndex];
+
+    if (!sentinel) {
+      throw new Error(`Unable to determine SWC source span offset for ${sourcePath}`);
+    }
+
+    ast.body.splice(sentinelIndex, 1);
+
+    this.text = text;
+    this.ast = ast;
+    this.buffer = Buffer.from(text);
+    this.sourceStart = sentinel.span.start - this.buffer.length - 1;
+    this.byteToIndex = this.buffer.length === text.length ? undefined : this.buildByteIndex();
+  }
+
+  buildByteIndex() {
+    const byteToIndex = new Uint32Array(this.buffer.length + 1);
+    let byteOffset = 0;
+
+    for (let index = 0; index < this.text.length; index++) {
+      const codePoint = this.text.codePointAt(index);
+      const byteLength = getUtf8ByteLength(codePoint);
+      byteToIndex.fill(index, byteOffset, byteOffset + byteLength);
+      byteOffset += byteLength;
+      if (codePoint > 0xffff) {
+        index++;
+      }
+    }
+
+    byteToIndex[this.buffer.length] = this.text.length;
+    return byteToIndex;
+  }
+
+  index(bytePosition) {
+    const byteOffset = bytePosition - this.sourceStart;
+    return this.byteToIndex ? this.byteToIndex[byteOffset] : byteOffset;
+  }
+
+  start(node) {
+    return this.index(node.span.start);
+  }
+
+  end(node) {
+    return this.index(node.span.end);
+  }
+
+  slice(node) {
+    return this.text.slice(this.start(node), this.end(node));
+  }
+}
+
+// --- Source rewrites ---------------------------------------------------------------------------
+
+// Babel collapsed newline indentation in JSX string attributes to one space. Kibana's i18n
+// extraction and existing assertions rely on that value.
+function normalizeJsxStringAttributes(parsed, source) {
+  visitAst(parsed.ast, (node) => {
+    if (node.type !== 'JSXAttribute' || node.value?.type !== 'StringLiteral') {
+      return;
+    }
+
+    const normalizedValue = node.value.value.replace(/\r?\n[\t ]+/g, ' ');
+    if (normalizedValue === node.value.value) {
+      return;
+    }
+
+    source.overwrite(
+      parsed.start(node.value),
+      parsed.end(node.value),
+      `{${JSON.stringify(normalizedValue)}}`
+    );
+  });
+}
+
+// SWC treats enum members initialized from identifiers as computed and emits a reverse mapping,
+// while TypeScript folds string constants. Inline the literal so SWC emits a string member.
+function inlineComputedEnumValues(parsed, source) {
   const constantBindings = new Map();
 
-  visitAst(ast, (node) => {
+  visitAst(parsed.ast, (node) => {
     if (node.type !== 'VariableDeclaration' || node.kind !== 'const') {
       return;
     }
@@ -267,8 +382,8 @@ function inlineComputedEnumValues(sourceText, sourcePath) {
     if (unwrapped?.type === 'TemplateLiteral') {
       let value = unwrapped.quasis[0]?.cooked ?? unwrapped.quasis[0]?.raw ?? '';
 
-      for (const [index, expression] of unwrapped.expressions.entries()) {
-        const expressionValue = resolveConstant(expression, seen);
+      for (const [index, templateExpression] of unwrapped.expressions.entries()) {
+        const expressionValue = resolveConstant(templateExpression, seen);
         if (typeof expressionValue !== 'string' && typeof expressionValue !== 'number') {
           return;
         }
@@ -314,387 +429,528 @@ function inlineComputedEnumValues(sourceText, sourcePath) {
     }
   };
 
-  const replacements = [];
-  visitAst(ast, (node) => {
+  visitAst(parsed.ast, (node) => {
     if (node.type !== 'TsEnumDeclaration') {
       return;
     }
 
     for (const member of node.members) {
+      const initializer = unwrapExpression(member.init);
+      if (
+        initializer?.type !== 'Identifier' &&
+        initializer?.type !== 'MemberExpression' &&
+        initializer?.type !== 'TemplateLiteral'
+      ) {
+        continue;
+      }
+
       const value = resolveConstant(member.init);
       if (typeof value === 'string') {
-        replacements.push({ span: member.init.span, value: JSON.stringify(value) });
+        source.overwrite(parsed.start(member.init), parsed.end(member.init), JSON.stringify(value));
       }
     }
   });
-
-  return replacements.length === 0 ? sourceText : replaceSourceSpans(sourceText, ast, replacements);
 }
 
-// Babel's Jest hoist moves jest.mock() calls above local declarations. Resolve each identifier
-// through SWC's binding context so only the literal visible at that call site is inlined.
-function inlineDynamicJestMockNames(sourceText, sourcePath) {
-  if (!/\bjest\s*\.\s*mock\s*\(\s*[A-Za-z_$][\w$]*\s*,/.test(sourceText)) {
-    return sourceText;
-  }
+// Mirrors @babel/traverse Scope#isPure with constantsOnly, which babel-plugin-jest-hoist used to
+// decide whether a binding referenced from a jest.mock() factory may be hoisted with the mock.
+function createPurityChecker(parsed) {
+  const bindingKinds = new Map();
+  const reassigned = new Set();
 
-  const ast = parseSource(sourceText, sourcePath);
-  const moduleNames = new Map();
+  const addBindings = (pattern, kind) => {
+    for (const identifier of getBindingIdentifiers(pattern)) {
+      bindingKinds.set(getIdentifierKey(identifier), kind);
+    }
+  };
+
+  visitAst(parsed.ast, (node) => {
+    switch (node.type) {
+      case 'VariableDeclaration':
+        node.declarations.forEach(({ id }) => addBindings(id, node.kind));
+        break;
+      case 'ImportDeclaration':
+        node.specifiers.forEach(({ local }) => addBindings(local, 'import'));
+        break;
+      case 'FunctionDeclaration':
+      case 'ClassDeclaration':
+        if (node.identifier) {
+          addBindings(node.identifier, node.type === 'FunctionDeclaration' ? 'function' : 'class');
+        }
+        break;
+      case 'AssignmentExpression':
+        getBindingIdentifiers(node.left).forEach((identifier) =>
+          reassigned.add(getIdentifierKey(identifier))
+        );
+        break;
+      case 'UpdateExpression':
+        if (node.argument.type === 'Identifier') {
+          reassigned.add(getIdentifierKey(node.argument));
+        }
+        break;
+      case 'ForInStatement':
+      case 'ForOfStatement':
+        if (node.left.type !== 'VariableDeclaration') {
+          getBindingIdentifiers(node.left).forEach((identifier) =>
+            reassigned.add(getIdentifierKey(identifier))
+          );
+        }
+        break;
+      default:
+        break;
+    }
+  });
+
+  const isConstantBinding = (identifier) => {
+    const key = getIdentifierKey(identifier);
+    const kind = bindingKinds.get(key);
+    return kind === 'const' || kind === 'import' || !reassigned.has(key);
+  };
+
+  const isPure = (node) => {
+    const expression = unwrapExpression(node);
+
+    switch (expression?.type) {
+      case 'StringLiteral':
+      case 'NumericLiteral':
+      case 'BooleanLiteral':
+      case 'NullLiteral':
+      case 'RegExpLiteral':
+      case 'BigIntLiteral':
+      case 'ArrowFunctionExpression':
+      case 'FunctionExpression':
+        return true;
+      case 'TemplateLiteral':
+        return expression.expressions.every(isPure);
+      case 'Identifier':
+        return bindingKinds.has(getIdentifierKey(expression)) && isConstantBinding(expression);
+      case 'ArrayExpression':
+        return expression.elements.every((element) => !element || isPure(element.expression));
+      case 'ObjectExpression':
+        return expression.properties.every((property) => {
+          switch (property.type) {
+            case 'Identifier':
+              return isPure(property);
+            case 'SpreadElement':
+              return isPure(property.arguments);
+            case 'KeyValueProperty':
+              return (
+                (property.key.type !== 'Computed' || isPure(property.key.expression)) &&
+                isPure(property.value)
+              );
+            case 'MethodProperty':
+            case 'GetterProperty':
+            case 'SetterProperty':
+              return property.key.type !== 'Computed' || isPure(property.key.expression);
+            default:
+              return false;
+          }
+        });
+      case 'UnaryExpression':
+        return isPure(expression.argument);
+      case 'BinaryExpression':
+        return isPure(expression.left) && isPure(expression.right);
+      case 'ConditionalExpression':
+        return (
+          isPure(expression.test) && isPure(expression.consequent) && isPure(expression.alternate)
+        );
+      case 'ClassExpression':
+        return (
+          (expression.decorators?.length ?? 0) === 0 &&
+          (!expression.superClass || isPure(expression.superClass))
+        );
+      default:
+        return false;
+    }
+  };
+
+  return { isPure, isConstantBinding };
+}
+
+// Collects identifiers read inside a jest.mock() factory, skipping property names, assignment
+// targets and type positions, matching Babel's ReferencedIdentifier visitor.
+function collectReferencedIdentifiers(factory) {
+  const references = [];
+
+  const walk = (node, parent, key) => {
+    if (!node || typeof node !== 'object') {
+      return;
+    }
+
+    if (Array.isArray(node)) {
+      node.forEach((item) => walk(item, parent, key));
+      return;
+    }
+
+    if (TYPE_ONLY_KEYS.has(key) || key === 'span') {
+      return;
+    }
+
+    if (node.type === 'Identifier') {
+      const isReference =
+        !(parent?.type === 'KeyValueProperty' && key === 'key') &&
+        !(parent?.type === 'KeyValuePatternProperty' && key === 'key') &&
+        !(parent?.type === 'MemberExpression' && key === 'property') &&
+        !(parent?.type === 'AssignmentExpression' && key === 'left') &&
+        !(parent?.type === 'JSXAttribute' && key === 'name') &&
+        !(parent?.type === 'JSXClosingElement' && key === 'name') &&
+        !(parent?.type === 'LabeledStatement' && key === 'label') &&
+        !(parent?.type === 'BreakStatement' || parent?.type === 'ContinueStatement');
+      if (isReference) {
+        references.push(node);
+      }
+      return;
+    }
+
+    if (typeof node.type === 'string' && node.type.startsWith('Ts') && !('expression' in node)) {
+      return;
+    }
+
+    for (const [childKey, value] of Object.entries(node)) {
+      walk(value, node, childKey);
+    }
+  };
+
+  walk(factory, undefined, undefined);
+  return references;
+}
+
+function forEachStatementList(ast, callback) {
+  callback(ast.body, ast);
 
   visitAst(ast, (node) => {
+    if (node.type === 'BlockStatement') {
+      callback(node.stmts, node);
+    }
+  });
+}
+
+/**
+ * Babel's Jest hoist inlined nothing, but only hoisted mocks with literal module names. SWC hoists
+ * every jest.mock() call, so resolve identifier module names to the literal visible at the call
+ * site. Babel also hoisted "pure" constants referenced from a factory along with the mock so the
+ * factory could observe them when the mocked module is first required. SWC hoists neither the
+ * constant nor lets a declaration precede the requires, so block-level constants are moved to the
+ * top of their block here, and module-level constants are moved in the generated output.
+ */
+function rewriteJestMocks(parsed, source) {
+  const { isPure, isConstantBinding } = createPurityChecker(parsed);
+  const hoistedModuleNames = new Set();
+  const movedStatements = new Set();
+  const moduleNameDeclarations = new Map();
+
+  visitAst(parsed.ast, (node) => {
     if (node.type !== 'VariableDeclaration' || node.kind !== 'const') {
       return;
     }
 
     for (const declaration of node.declarations) {
-      if (declaration.id.type !== 'Identifier') {
-        continue;
-      }
-
       const moduleName = getStringLiteralValue(declaration.init);
-      if (moduleName === undefined) {
+      if (declaration.id.type !== 'Identifier' || moduleName === undefined) {
         continue;
       }
 
       const key = getIdentifierKey(declaration.id);
-      const declarations = moduleNames.get(key) ?? [];
-      declarations.push(moduleName);
-      moduleNames.set(key, declarations);
+      moduleNameDeclarations.set(key, [...(moduleNameDeclarations.get(key) ?? []), moduleName]);
     }
   });
 
-  const replacements = [];
+  forEachStatementList(parsed.ast, (statements, block) => {
+    const blockBindings = new Map();
 
-  visitAst(ast, (node) => {
+    for (const statement of statements) {
+      const declaration =
+        statement.type === 'ExportDeclaration' ? statement.declaration : statement;
+      if (declaration.type !== 'VariableDeclaration') {
+        continue;
+      }
+
+      for (const declarator of declaration.declarations) {
+        if (declarator.id.type === 'Identifier') {
+          blockBindings.set(getIdentifierKey(declarator.id), {
+            statement,
+            declaration,
+            declarator,
+          });
+        }
+      }
+    }
+
+    const firstStatement = statements.find((statement) => !isDirective(statement));
+    const blockMoves = [];
+
+    for (const statement of statements) {
+      if (statement.type !== 'ExpressionStatement') {
+        continue;
+      }
+
+      for (const call of getJestMockCalls(statement.expression)) {
+        const moduleName = call.arguments[0]?.expression;
+        if (moduleName?.type === 'Identifier') {
+          const declarations = moduleNameDeclarations.get(getIdentifierKey(moduleName));
+          if (declarations?.length === 1) {
+            source.overwrite(
+              parsed.start(moduleName),
+              parsed.end(moduleName),
+              JSON.stringify(declarations[0])
+            );
+          }
+        }
+
+        const factory = call.arguments[1]?.expression;
+        if (factory?.type !== 'ArrowFunctionExpression' && factory?.type !== 'FunctionExpression') {
+          continue;
+        }
+
+        for (const reference of collectReferencedIdentifiers(factory)) {
+          const binding = blockBindings.get(getIdentifierKey(reference));
+          if (
+            !binding ||
+            /^mock/i.test(reference.value) ||
+            !binding.declarator.init ||
+            binding.declaration.declarations.length !== 1 ||
+            (block !== parsed.ast && binding.statement === firstStatement) ||
+            movedStatements.has(binding.statement) ||
+            !isConstantBinding(binding.declarator.id) ||
+            !isPure(binding.declarator.init)
+          ) {
+            continue;
+          }
+
+          movedStatements.add(binding.statement);
+
+          if (block === parsed.ast) {
+            hoistedModuleNames.add(reference.value);
+          } else {
+            blockMoves.push(binding.statement);
+          }
+        }
+      }
+    }
+
+    // Keep source order so a hoisted constant can still reference an earlier hoisted one.
+    for (const statement of blockMoves.sort((left, right) => left.span.start - right.span.start)) {
+      const end = parsed.end(statement);
+      source.move(parsed.start(statement), end, parsed.start(firstStatement));
+      source.appendLeft(end, ';\n');
+    }
+  });
+
+  return hoistedModuleNames;
+}
+
+// Expands the lazyObject() macro the same way @kbn/lazy-object's Babel plugin does: simple
+// properties become annotated factories evaluated on first access.
+function rewriteLazyObjects(parsed, source) {
+  const lazyObjectImports = parsed.ast.body.filter(
+    (item) => item.type === 'ImportDeclaration' && item.source.value === LAZY_OBJECT_MODULE
+  );
+  const importedNames = new Set(
+    lazyObjectImports.flatMap((item) =>
+      item.specifiers
+        .filter((specifier) => specifier.type === 'ImportSpecifier')
+        .map((specifier) => specifier.imported?.value ?? specifier.local.value)
+    )
+  );
+
+  if (!importedNames.has('lazyObject')) {
+    return;
+  }
+
+  let rewritten = false;
+
+  visitAst(parsed.ast, (node) => {
     if (
       node.type !== 'CallExpression' ||
-      node.callee.type !== 'MemberExpression' ||
-      node.callee.object.type !== 'Identifier' ||
-      node.callee.object.value !== 'jest' ||
-      node.callee.property.type !== 'Identifier' ||
-      node.callee.property.value !== 'mock'
+      node.callee.type !== 'Identifier' ||
+      node.callee.value !== 'lazyObject' ||
+      node.arguments.length !== 1 ||
+      node.arguments[0].expression.type !== 'ObjectExpression'
     ) {
       return;
     }
 
-    const moduleName = node.arguments[0]?.expression;
-    if (moduleName?.type !== 'Identifier') {
-      return;
-    }
-
-    const declarations = moduleNames.get(getIdentifierKey(moduleName));
-    if (declarations?.length === 1) {
-      replacements.push({ span: moduleName.span, value: JSON.stringify(declarations[0]) });
-    }
-  });
-
-  return replacements.length === 0 ? sourceText : replaceSourceSpans(sourceText, ast, replacements);
-}
-
-// lazyObject is still implemented as a Babel macro. Keep this narrow fallback until the
-// macro has an SWC implementation or can be replaced by a runtime API.
-function requiresLazyObjectTransform(sourceText) {
-  return sourceText.includes('@kbn/lazy-object') && /\blazyObject\s*\(/.test(sourceText);
-}
-
-// SWC treats enum members initialized from string constants as numeric members and emits a
-// reverse mapping. Babel preserves the string-enum behavior expected from TypeScript.
-function requiresComputedEnumTransform(sourceText, sourcePath) {
-  if (!/\benum\b/.test(sourceText)) {
-    return false;
-  }
-
-  let requiresTransform = false;
-  visitAst(parseSource(sourceText, sourcePath), (node) => {
-    if (node.type !== 'TsEnumDeclaration') {
-      return;
-    }
-
-    requiresTransform ||= node.members.some((member) => {
-      const initializer = unwrapExpression(member.init);
-      return (
-        initializer?.type === 'Identifier' ||
-        initializer?.type === 'MemberExpression' ||
-        initializer?.type === 'TemplateLiteral'
-      );
-    });
-  });
-
-  return requiresTransform;
-}
-
-function requiresBabelTransform(sourceText, sourcePath) {
-  return (
-    requiresLazyObjectTransform(sourceText) ||
-    requiresComputedEnumTransform(sourceText, sourcePath) ||
-    requiresBabelJestHoist(sourceText)
-  );
-}
-
-function getUninstrumentedOptions(transformOptions) {
-  return transformOptions?.instrument
-    ? {
-        ...transformOptions,
-        instrument: false,
-      }
-    : transformOptions;
-}
-
-function isDefinePropertyCall(node) {
-  return (
-    node.type === 'CallExpression' &&
-    node.callee.type === 'MemberExpression' &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.object.value === 'Object' &&
-    node.callee.property.type === 'Identifier' &&
-    node.callee.property.value === 'defineProperty'
-  );
-}
-
-function isGeneratedExportHelper(functionDeclaration, target) {
-  return (
-    functionDeclaration?.type === 'FunctionDeclaration' &&
-    /^_export(?:_star)?\d*$/.test(functionDeclaration.identifier?.value ?? '') &&
-    functionDeclaration.params.some(
-      ({ pat }) => pat.type === 'Identifier' && pat.value === target.value
-    )
-  );
-}
-
-function makeExportsConfigurable(result, transformOptions, exportNames) {
-  if (!result?.code || transformOptions?.supportsStaticESM) {
-    return result;
-  }
-
-  const ast = parseSource(result.code, '/__kbn_jest_generated__.js');
-  const replacements = [];
-
-  // SWC emits live named exports as non-configurable getters. Restrict changes to explicit
-  // exports and SWC's generated export helpers so user Object.defineProperty() calls are intact.
-  visitAstWithAncestors(ast, (node, ancestors) => {
-    if (!isDefinePropertyCall(node)) {
-      return;
-    }
-
-    const target = node.arguments[0]?.expression;
-    const exportName = node.arguments[1]?.expression;
-    const descriptor = node.arguments[2]?.expression;
-    if (
-      target?.type !== 'Identifier' ||
-      descriptor?.type !== 'ObjectExpression' ||
-      descriptor.properties.some(
-        (property) =>
-          property.type === 'KeyValueProperty' &&
-          (getPropertyName(property.key) === 'configurable' ||
-            getPropertyName(property.key) === 'set')
-      )
-    ) {
-      return;
-    }
-
-    const functionDeclaration = ancestors.findLast(
-      (ancestor) => ancestor.type === 'FunctionDeclaration'
+    rewritten = true;
+    source.overwrite(
+      parsed.start(node.callee),
+      parsed.end(node.callee),
+      'createLazyObjectFromAnnotations'
     );
-    const isExplicitExport =
-      target.value === 'exports' &&
-      exportName?.type === 'StringLiteral' &&
-      exportNames.has(exportName.value);
-    if (!isExplicitExport && !isGeneratedExportHelper(functionDeclaration, target)) {
-      return;
-    }
 
-    const enumerableProperty = descriptor.properties.find(
-      (property) =>
+    for (const property of node.arguments[0].expression.properties) {
+      if (property.type === 'Identifier') {
+        source.appendLeft(parsed.end(property), `: annotateLazy(() => (${property.value}))`);
+      } else if (
         property.type === 'KeyValueProperty' &&
-        getPropertyName(property.key) === 'enumerable' &&
-        property.value.type === 'BooleanLiteral' &&
-        property.value.value
-    );
-    if (!enumerableProperty || !exportName) {
-      return;
+        (property.key.type === 'Identifier' || property.key.type === 'StringLiteral')
+      ) {
+        // Parenthesize so object literal values are expressions rather than block bodies.
+        source.prependLeft(parsed.start(property.value), 'annotateLazy(() => (');
+        source.appendRight(parsed.end(property.value), '))');
+      }
     }
-
-    const enumerableSpan = {
-      start: enumerableProperty.key.span.start,
-      end: enumerableProperty.value.span.end,
-    };
-    const propertyText = getSourceSpanText(result.code, ast, enumerableSpan);
-    const exportNameText = getSourceSpanText(result.code, ast, exportName.span);
-    replacements.push({
-      span: enumerableSpan,
-      value:
-        `${propertyText}, configurable: true, ` +
-        `set: ((name) => function(value) { ` +
-        `Object.defineProperty(this, name, ` +
-        `{ value, writable: true, enumerable: true, configurable: true }); ` +
-        `})(${exportNameText})`,
-    });
   });
 
-  return replacements.length === 0
-    ? result
-    : { ...result, code: replaceSourceSpans(result.code, ast, replacements) };
-}
-
-function makeExportsTdzSafe(result, transformOptions) {
-  if (!result?.code || transformOptions?.supportsStaticESM) {
-    return result;
+  if (!rewritten) {
+    return;
   }
 
-  // Babel initializes CommonJS export slots to undefined before loading dependencies. SWC
-  // exposes live getters instead, which can throw when a circular dependency observes a local
-  // const before initialization. Preserve live bindings while matching Babel during the cycle.
-  const code = result.code
-    .replace(
-      /get: Object\.getOwnPropertyDescriptor\(all, name\)\.get/g,
-      `get: ((getter) => function() { try { return getter(); } catch (error) { if (error instanceof ReferenceError) return undefined; throw error; } })(Object.getOwnPropertyDescriptor(all, name).get)`
+  const importDeclaration = lazyObjectImports.find((item) =>
+    item.specifiers.some(
+      (specifier) =>
+        specifier.type === 'ImportSpecifier' &&
+        (specifier.imported?.value ?? specifier.local.value) === 'lazyObject'
     )
-    .replace(
-      /get: function\(\) \{\n(\s*)return ([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*);\n(\s*)\}/g,
-      `get: function() {\n$1try { return $2; } catch (error) { if (error instanceof ReferenceError) return undefined; throw error; }\n$3}`
-    );
-
-  return code === result.code ? result : { ...result, code };
-}
-
-function getBindingIdentifiers(pattern) {
-  if (!pattern) {
-    return [];
-  }
-
-  if (pattern.type === 'Identifier') {
-    return [pattern];
-  }
-
-  if (pattern.type === 'ArrayPattern') {
-    return pattern.elements.flatMap((element) => getBindingIdentifiers(element));
-  }
-
-  if (pattern.type === 'ObjectPattern') {
-    return pattern.properties.flatMap((property) =>
-      getBindingIdentifiers(
-        property.type === 'KeyValuePatternProperty' ? property.value : property.argument
-      )
-    );
-  }
-
-  if (pattern.type === 'AssignmentPattern' || pattern.type === 'RestElement') {
-    return getBindingIdentifiers(pattern.left ?? pattern.argument);
-  }
-
-  return [];
-}
-
-function getDeclarationIdentifiers(declaration, immutableOnly = false) {
-  if (
-    declaration?.type === 'VariableDeclaration' &&
-    (!immutableOnly || declaration.kind === 'const')
-  ) {
-    return declaration.declarations.flatMap(({ id }) => getBindingIdentifiers(id));
-  }
-
-  if (declaration?.type === 'FunctionDeclaration' || declaration?.type === 'ClassDeclaration') {
-    return declaration.identifier ? [declaration.identifier] : [];
-  }
-
-  return [];
-}
-
-function getExportMetadata(sourceText, sourcePath) {
-  if (!/\bexport\b/.test(sourceText)) {
-    return { exportNames: new Set(), immutableLocalExportNames: new Set() };
-  }
-
-  const ast = parseSource(sourceText, sourcePath);
-  const stableBindings = new Set();
-
-  for (const item of ast.body) {
-    const declaration = item.type === 'ExportDeclaration' ? item.declaration : item;
-    for (const identifier of getDeclarationIdentifiers(declaration, true)) {
-      stableBindings.add(getIdentifierKey(identifier));
-    }
-  }
-
-  const exportNames = new Set();
-  const immutableLocalExportNames = new Set();
-
-  for (const item of ast.body) {
-    if (item.type === 'ExportDeclaration') {
-      for (const identifier of getDeclarationIdentifiers(item.declaration)) {
-        exportNames.add(identifier.value);
-        if (stableBindings.has(getIdentifierKey(identifier))) {
-          immutableLocalExportNames.add(identifier.value);
-        }
-      }
-      continue;
-    }
-
-    if (item.type === 'ExportDefaultDeclaration' || item.type === 'ExportDefaultExpression') {
-      exportNames.add('default');
-      continue;
-    }
-
-    if (item.type !== 'ExportNamedDeclaration' || item.typeOnly) {
-      continue;
-    }
-
-    for (const specifier of item.specifiers) {
-      if (specifier.type === 'ExportSpecifier' && !specifier.isTypeOnly) {
-        const exportName = specifier.exported?.value ?? specifier.orig.value;
-        exportNames.add(exportName);
-        if (
-          !item.source &&
-          specifier.orig.type === 'Identifier' &&
-          stableBindings.has(getIdentifierKey(specifier.orig))
-        ) {
-          immutableLocalExportNames.add(exportName);
-        }
-      } else if (specifier.type === 'ExportNamespaceSpecifier') {
-        exportNames.add(specifier.name.value);
-      } else if (specifier.type === 'ExportDefaultSpecifier') {
-        exportNames.add(specifier.exported.value);
-      }
-    }
-  }
-
-  immutableLocalExportNames.delete('default');
-  return { exportNames, immutableLocalExportNames };
-}
-
-function appendCompatibilityStatements(result, statements) {
-  if (statements.length === 0) {
-    return result;
-  }
-
-  const joinedStatements = statements.join(' ');
-  const sourceMapIndex = result.code.lastIndexOf('\n//# sourceMappingURL=');
-  const trailingLineBreak = sourceMapIndex === -1 ? result.code.match(/\r?\n$/)?.[0] : undefined;
-  const insertionIndex =
-    sourceMapIndex === -1 ? result.code.length - (trailingLineBreak?.length ?? 0) : sourceMapIndex;
-  const code = `${result.code.slice(0, insertionIndex)} ${joinedStatements}${result.code.slice(
-    insertionIndex
-  )}`;
-
-  return { ...result, code };
-}
-
-function makeLocalExportsWritable(result, transformOptions, exportNames) {
-  if (!result?.code || transformOptions?.supportsStaticESM || exportNames.size === 0) {
-    return result;
-  }
-
-  // Babel namespace imports copy data descriptors but preserve accessors. Materialize immutable
-  // local exports after initialization so Jest and Sinon can replace them without affecting
-  // mutable or re-exported live bindings.
-  const statements = [...exportNames].map(
-    (exportName) =>
-      `Object.defineProperty(exports, ${JSON.stringify(exportName)}, ` +
-      `{ value: exports[${JSON.stringify(
-        exportName
-      )}], writable: true, enumerable: true, configurable: true });`
+  );
+  const lastSpecifier = importDeclaration.specifiers.at(-1);
+  const missingHelpers = ['createLazyObjectFromAnnotations', 'annotateLazy'].filter(
+    (name) => !importedNames.has(name)
   );
 
-  return appendCompatibilityStatements(result, statements);
+  if (missingHelpers.length > 0) {
+    source.appendLeft(parsed.end(lastSpecifier), `, ${missingHelpers.join(', ')}`);
+  }
+}
+
+// babel-plugin-add-module-exports exposed a sole default export directly through module.exports.
+function hasSoleDefaultExport(ast) {
+  const exportNames = new Set();
+
+  for (const item of ast.body) {
+    switch (item.type) {
+      case 'ExportDefaultDeclaration':
+      case 'ExportDefaultExpression':
+        exportNames.add('default');
+        break;
+      case 'ExportDeclaration':
+        getDeclarationIdentifiers(item.declaration).forEach(({ value }) => exportNames.add(value));
+        break;
+      case 'ExportNamedDeclaration':
+        if (item.typeOnly) {
+          break;
+        }
+
+        for (const specifier of item.specifiers) {
+          if (specifier.type === 'ExportSpecifier' && !specifier.isTypeOnly) {
+            exportNames.add(specifier.exported?.value ?? specifier.orig.value);
+          } else if (specifier.type === 'ExportNamespaceSpecifier') {
+            exportNames.add(specifier.name.value);
+          } else if (specifier.type === 'ExportDefaultSpecifier') {
+            exportNames.add(specifier.exported.value);
+          }
+        }
+        break;
+      case 'ExportAllDeclaration':
+      case 'TsExportAssignment':
+        return false;
+      default:
+        break;
+    }
+  }
+
+  return exportNames.size === 1 && exportNames.has('default');
+}
+
+const JSX_MULTILINE_STRING_ATTRIBUTE = /=\s*["'][^"']*\r?\n/;
+const ENUM_KEYWORD = /\benum\b/;
+const JEST_MOCK_CALL = /\bjest\s*\.\s*mock\s*\(/;
+const LAZY_OBJECT_CALL = /\blazyObject\s*\(/;
+const DEFAULT_EXPORT = /\bexport\s+default\b|\bas\s+default\b|\bexport\s*\{[^}]*\bdefault\b/;
+
+function prepareSource(sourceText, sourcePath) {
+  const normalizeJsx = JSX_MULTILINE_STRING_ATTRIBUTE.test(sourceText);
+  const inlineEnums = ENUM_KEYWORD.test(sourceText);
+  const rewriteMocks = JEST_MOCK_CALL.test(sourceText);
+  const rewriteLazy = sourceText.includes(LAZY_OBJECT_MODULE) && LAZY_OBJECT_CALL.test(sourceText);
+  const checkDefaultExport = DEFAULT_EXPORT.test(sourceText);
+
+  if (!normalizeJsx && !inlineEnums && !rewriteMocks && !rewriteLazy && !checkDefaultExport) {
+    return { code: sourceText, hoistedModuleNames: new Set(), soleDefaultExport: false };
+  }
+
+  const parsed = new ParsedSource(sourceText, sourcePath);
+  const source = new MagicString(sourceText);
+  let hoistedModuleNames = new Set();
+
+  if (normalizeJsx) {
+    normalizeJsxStringAttributes(parsed, source);
+  }
+
+  if (inlineEnums) {
+    inlineComputedEnumValues(parsed, source);
+  }
+
+  if (rewriteMocks) {
+    hoistedModuleNames = rewriteJestMocks(parsed, source);
+  }
+
+  if (rewriteLazy) {
+    rewriteLazyObjects(parsed, source);
+  }
+
+  const soleDefaultExport = checkDefaultExport && hasSoleDefaultExport(parsed.ast);
+
+  if (!source.hasChanged()) {
+    return { code: sourceText, hoistedModuleNames, soleDefaultExport };
+  }
+
+  return {
+    code: source.toString(),
+    map: JSON.parse(
+      source.generateMap({ hires: true, includeContent: true, source: sourcePath }).toString()
+    ),
+    hoistedModuleNames,
+    soleDefaultExport,
+  };
+}
+
+// --- Generated code rewrites -------------------------------------------------------------------
+
+// SWC emits requires ahead of other statements, so constants that Babel hoisted with a mock are
+// moved after the hoisted jest calls in the generated module.
+function hoistModuleDeclarations(code, hoistedModuleNames) {
+  const parsed = new ParsedSource(code, GENERATED_PATH);
+  const source = new MagicString(code);
+  const { body } = parsed.ast;
+
+  let insertionIndex = 0;
+  while (insertionIndex < body.length && isDirective(body[insertionIndex])) {
+    insertionIndex++;
+  }
+  while (insertionIndex < body.length && isHoistedJestStatement(body[insertionIndex])) {
+    insertionIndex++;
+  }
+
+  const insertionTarget = body[insertionIndex];
+  if (!insertionTarget) {
+    return { code };
+  }
+
+  const insertion = parsed.start(insertionTarget);
+
+  for (const statement of body.slice(insertionIndex + 1)) {
+    if (
+      statement.type !== 'VariableDeclaration' ||
+      !statement.declarations.some(
+        ({ id }) => id.type === 'Identifier' && hoistedModuleNames.has(id.value)
+      )
+    ) {
+      continue;
+    }
+
+    const end = parsed.end(statement);
+    source.move(parsed.start(statement), end, insertion);
+    source.appendLeft(end, '\n');
+  }
+
+  if (!source.hasChanged()) {
+    return { code };
+  }
+
+  return {
+    code: source.toString(),
+    map: JSON.parse(source.generateMap({ hires: true, source: GENERATED_PATH }).toString()),
+  };
 }
 
 function unwrapCallee(callee) {
@@ -769,20 +1025,22 @@ function isEmotionCssCallee(callee, bindings) {
   );
 }
 
-function makeEmotionLabelsSafe(result) {
-  if (!result?.code || !result.code.includes('label:')) {
-    return result;
+// @swc/plugin-emotion emits labels as a separate css() argument. When the preceding template
+// tail has no delimiter, Emotion concatenates the label into the previous declaration. Reuse the
+// formatter's preceding space for the delimiter so generated positions do not move.
+// Matches a label argument whose preceding argument is not a string literal ending in ';'.
+const UNDELIMITED_EMOTION_LABEL = /(?<!;"),\s*"label:/;
+
+function makeEmotionLabelsSafe(code) {
+  if (!UNDELIMITED_EMOTION_LABEL.test(code)) {
+    return code;
   }
 
-  const ast = parseSource(result.code, '/__kbn_jest_generated__.js');
-  const bindings = getEmotionCssBindings(ast);
-  const source = Buffer.from(result.code);
-  const sourceStart = ast[SOURCE_START];
+  const parsed = new ParsedSource(code, GENERATED_PATH);
+  const bindings = getEmotionCssBindings(parsed.ast);
   const replacements = [];
 
-  // The SWC plugin emits labels as a separate css() argument. Add a delimiter when the template
-  // tail has none, reusing the formatter's preceding space so generated positions do not move.
-  visitAst(ast, (node) => {
+  visitAst(parsed.ast, (node) => {
     if (node.type !== 'CallExpression' || !isEmotionCssCallee(node.callee, bindings)) {
       return;
     }
@@ -800,31 +1058,171 @@ function makeEmotionLabelsSafe(result) {
       return;
     }
 
-    const labelStart = label.span.start - sourceStart;
-    if (source[labelStart - 1] !== 32 && source[labelStart - 1] !== 9) {
-      throw new Error('Unable to safely delimit an Emotion label without changing source maps');
+    const labelStart = parsed.start(label);
+    if (code[labelStart - 1] === ' ' || code[labelStart - 1] === '\t') {
+      replacements.push({
+        start: labelStart - 1,
+        end: labelStart + 1,
+        value: `${code[labelStart]};`,
+      });
+    } else {
+      // No preceding whitespace to reuse; inserting shifts only this generated line's columns.
+      replacements.push({ start: labelStart + 1, end: labelStart + 1, value: ';' });
     }
-
-    const labelText = getSourceSpanText(result.code, ast, label.span);
-    replacements.push({
-      span: { start: label.span.start - 1, end: label.span.end },
-      value: `${labelText[0]};${labelText.slice(1)}`,
-    });
   });
 
-  return replacements.length === 0
-    ? result
-    : { ...result, code: replaceSourceSpans(result.code, ast, replacements) };
+  return replacements
+    .sort((left, right) => right.start - left.start)
+    .reduce(
+      (result, { start, end, value }) => `${result.slice(0, start)}${value}${result.slice(end)}`,
+      code
+    );
 }
 
-function stripSourceMapNames(result) {
-  if (!result?.map || typeof result.map !== 'string') {
-    return result;
+// SWC defines CommonJS exports as non-configurable live getters through three helper shapes.
+// Babel emitted plain writable assignments, which Kibana tests rely on for jest.spyOn(), Sinon
+// stubs and direct assignment onto namespace imports. Rewrite only those SWC-generated shapes:
+// getters become configurable, tolerate reads before initialization in circular imports (Babel
+// exposed `undefined`), and gain a setter that replaces the accessor with a data property.
+const MATERIALIZING_SETTER =
+  'set: ((target, name) => function(value) { ' +
+  'Object.defineProperty(target, name, ' +
+  '{ value, writable: true, enumerable: true, configurable: true }); ' +
+  '})';
+const TDZ_SAFE_GETTER =
+  '((getter) => function() { try { return getter(); } ' +
+  'catch (error) { if (error instanceof ReferenceError) return undefined; throw error; } })';
+const BINDING_EXPRESSION = String.raw`[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*`;
+const SINGLE_EXPORT = new RegExp(
+  String.raw`^Object\.defineProperty\(exports, ("(?:[^"\\\n]|\\.)+"), \{\n` +
+    String.raw`    enumerable: true,\n` +
+    String.raw`    get: function\(\) \{\n` +
+    String.raw`        return (${BINDING_EXPRESSION});\n` +
+    String.raw`    \}\n` +
+    String.raw`\}\);$`,
+  'gm'
+);
+const EXPORT_HELPER_LOOP =
+  '    for(var name in all)Object.defineProperty(target, name, {\n' +
+  '        enumerable: true,\n' +
+  '        get: Object.getOwnPropertyDescriptor(all, name).get\n' +
+  '    });';
+const EXPORT_HELPER_CALL = new RegExp(
+  String.raw`^_export\d*\(exports, \{\n((?:    get [^\n]+ \(\) \{\n        return [^\n]+;\n    \},?\n)+)\}\);$`,
+  'gm'
+);
+const EXPORT_HELPER_GETTER = new RegExp(
+  String.raw`^    get ([^\n]+) \(\) \{\n        return (${BINDING_EXPRESSION});`,
+  'gm'
+);
+const EXPORT_STAR_HELPER_DESCRIPTOR =
+  '            Object.defineProperty(to, k, {\n' +
+  '                enumerable: true,\n' +
+  '                get: function() {\n' +
+  '                    return from[k];\n' +
+  '                }\n' +
+  '            });';
+
+function getExportName(rawName) {
+  return rawName.startsWith('"') ? JSON.parse(rawName) : rawName;
+}
+
+function makeExportsReplaceable(code) {
+  if (!code.includes('exports')) {
+    return { code, localExportNames: [] };
   }
 
-  const sourceMap = JSON.parse(result.map);
+  const localExports = [];
+
+  const collectLocalExport = (rawName, bindingExpression) => {
+    if (!bindingExpression.includes('.')) {
+      localExports.push({ name: getExportName(rawName), binding: bindingExpression });
+    }
+  };
+
+  let rewritten = code.replace(SINGLE_EXPORT, (match, rawName, bindingExpression) => {
+    collectLocalExport(rawName, bindingExpression);
+    return (
+      `Object.defineProperty(exports, ${rawName}, {\n` +
+      `    enumerable: true, configurable: true, ${MATERIALIZING_SETTER}(exports, ${rawName}),\n` +
+      `    get: function() {\n` +
+      `        try { return ${bindingExpression}; } ` +
+      `catch (error) { if (error instanceof ReferenceError) return undefined; throw error; }\n` +
+      `    }\n` +
+      `});`
+    );
+  });
+
+  if (rewritten.includes(EXPORT_HELPER_LOOP)) {
+    rewritten = rewritten.replace(
+      EXPORT_HELPER_LOOP,
+      '    for(var name in all)Object.defineProperty(target, name, {\n' +
+        `        enumerable: true, configurable: true, ${MATERIALIZING_SETTER}(target, name),\n` +
+        `        get: ${TDZ_SAFE_GETTER}(Object.getOwnPropertyDescriptor(all, name).get)\n` +
+        '    });'
+    );
+
+    for (const [, getters] of rewritten.matchAll(EXPORT_HELPER_CALL)) {
+      for (const [, rawName, bindingExpression] of getters.matchAll(EXPORT_HELPER_GETTER)) {
+        collectLocalExport(rawName, bindingExpression);
+      }
+    }
+  }
+
+  if (rewritten.includes(EXPORT_STAR_HELPER_DESCRIPTOR)) {
+    rewritten = rewritten.replace(
+      EXPORT_STAR_HELPER_DESCRIPTOR,
+      EXPORT_STAR_HELPER_DESCRIPTOR.replace(
+        'enumerable: true,',
+        'enumerable: true, configurable: true,'
+      )
+    );
+  }
+
+  // Babel exposed local bindings as data properties. Materialize the immutable ones once the
+  // module has initialized so Sinon can wrap them, keeping `let`/`var` exports as live getters.
+  // SWC prints class declarations as `let Name = class Name`, which are still immutable.
+  const isMutableBinding = (binding) =>
+    new RegExp(String.raw`^(?:let|var) ${binding}\b(?! = class\b)`, 'm').test(rewritten);
+  const localExportNames = localExports
+    .filter(({ name, binding }) => name !== 'default' && !isMutableBinding(binding))
+    .map(({ name }) => name);
+
+  return { code: rewritten, localExportNames };
+}
+
+function materializeLocalExports(code, localExportNames) {
+  if (localExportNames.length === 0) {
+    return code;
+  }
+
+  return appendStatement(
+    code,
+    localExportNames
+      .map(
+        (name) =>
+          `Object.defineProperty(exports, ${JSON.stringify(name)}, ` +
+          `{ value: exports[${JSON.stringify(name)}], ` +
+          `writable: true, enumerable: true, configurable: true });`
+      )
+      .join(' ')
+  );
+}
+
+function appendStatement(code, statement) {
+  const sourceMapIndex = code.lastIndexOf('\n//# sourceMappingURL=');
+  const trailingLineBreak = sourceMapIndex === -1 ? code.match(/\r?\n$/)?.[0] : undefined;
+  const insertionIndex =
+    sourceMapIndex === -1 ? code.length - (trailingLineBreak?.length ?? 0) : sourceMapIndex;
+
+  return `${code.slice(0, insertionIndex)} ${statement}${code.slice(insertionIndex)}`;
+}
+
+// SWC name mappings can associate a React component frame with a nested callback. Keep the
+// original source locations while allowing V8 to report the generated function's actual name.
+function stripSourceMapNames(sourceMap) {
   if (!Array.isArray(sourceMap.names) || sourceMap.names.length === 0) {
-    return result;
+    return sourceMap;
   }
 
   const base64Characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -848,62 +1246,43 @@ function stripSourceMapNames(result) {
     return segment;
   });
 
-  return {
-    ...result,
-    map: JSON.stringify({ ...sourceMap, names: [], mappings }),
-  };
+  return { ...sourceMap, names: [], mappings };
 }
 
-function applyCommonJsCompatibility(result, transformOptions, sourceText, sourcePath) {
-  const { exportNames, immutableLocalExportNames } = getExportMetadata(sourceText, sourcePath);
-  const compatibleResult = addModuleExportsCompatibility(
-    makeExportsConfigurable(
-      makeExportsTdzSafe(
-        makeLocalExportsWritable(
-          makeEmotionLabelsSafe(result),
-          transformOptions,
-          immutableLocalExportNames
-        ),
-        transformOptions
-      ),
-      transformOptions,
-      exportNames
-    ),
-    transformOptions
-  );
-
-  // SWC name mappings can associate a React component frame with a nested callback. Keep the
-  // original source locations while allowing V8 to report the generated function's actual name.
-  return stripSourceMapNames(compatibleResult);
+function parseSourceMap(map) {
+  return typeof map === 'string' ? JSON.parse(map) : map;
 }
 
-function addModuleExportsCompatibility(result, transformOptions) {
-  if (!result?.code || transformOptions?.supportsStaticESM) {
-    return result;
+function finalizeResult(result, prepared, transformOptions) {
+  const maps = [parseSourceMap(result.map)];
+  if (prepared.map) {
+    maps.push(prepared.map);
   }
 
-  // The previous Babel pipeline exposed a sole default export directly through
-  // module.exports. Preserve that behavior for CommonJS require() consumers.
-  const exportNames = new Set();
-  const exportPattern =
-    /(?:exports\.([A-Za-z_$][\w$]*)\s*=|Object\.defineProperty\(exports,\s*(?:(?:\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n|$))\s*)*["']([^"']+)["'])/g;
+  let { code } = result;
 
-  for (const match of result.code.matchAll(exportPattern)) {
-    exportNames.add(match[1] ?? match[2]);
+  if (prepared.hoistedModuleNames.size > 0 && !transformOptions?.supportsStaticESM) {
+    const hoisted = hoistModuleDeclarations(code, prepared.hoistedModuleNames);
+    code = hoisted.code;
+    if (hoisted.map) {
+      maps.unshift(hoisted.map);
+    }
   }
 
-  exportNames.delete('__esModule');
+  code = makeEmotionLabelsSafe(code);
 
-  if (
-    !exportNames.has('default') ||
-    exportNames.size !== 1 ||
-    result.code.includes('@swc/helpers/_/_export_star') ||
-    result.code.includes('function _export_star(')
-  ) {
-    return result;
+  if (!transformOptions?.supportsStaticESM) {
+    const replaceable = makeExportsReplaceable(code);
+    code = materializeLocalExports(replaceable.code, replaceable.localExportNames);
+
+    if (prepared.soleDefaultExport) {
+      code = appendStatement(code, 'module.exports = exports.default;');
+    }
   }
 
-  return appendCompatibilityStatements(result, ['module.exports = exports.default;']);
+  const map = maps.length > 1 ? remapping(maps, () => null) : maps[0];
+
+  return { code, map: JSON.stringify(stripSourceMapNames(map)) };
 }
 
 function serializeJestTransformConfig(config) {
@@ -924,58 +1303,25 @@ const transformer = {
   canInstrument: false,
 
   process(sourceText, sourcePath, transformOptions) {
-    if (requiresBabelTransform(sourceText, sourcePath)) {
-      const selectedBabelTransformer = transformOptions?.supportsStaticESM
-        ? babelEsmTransformer
-        : babelTransformer;
-      const compatibleSourceText = inlineComputedEnumValues(sourceText, sourcePath);
-      const { exportNames } = getExportMetadata(sourceText, sourcePath);
-      const result = selectedBabelTransformer.process(
-        inlineDynamicJestMockNames(compatibleSourceText, sourcePath),
-        sourcePath,
-        getUninstrumentedOptions(transformOptions)
-      );
-      return makeExportsConfigurable(result, transformOptions, exportNames);
-    }
-
-    const normalizedSource = normalizeMultilineJsxStringAttributes(sourceText, sourcePath);
-    const result = composeSourceMaps(
-      getSwcTransformer(sourcePath).process(normalizedSource.code, sourcePath, transformOptions),
-      normalizedSource.map
+    const prepared = prepareSource(sourceText, sourcePath);
+    const result = getSwcTransformer(sourcePath).process(
+      prepared.code,
+      sourcePath,
+      transformOptions
     );
-    return applyCommonJsCompatibility(result, transformOptions, sourceText, sourcePath);
+
+    return finalizeResult(result, prepared, transformOptions);
   },
 
   async processAsync(sourceText, sourcePath, transformOptions) {
-    if (requiresBabelTransform(sourceText, sourcePath)) {
-      const selectedBabelTransformer = transformOptions?.supportsStaticESM
-        ? babelEsmTransformer
-        : babelTransformer;
-      const compatibleSourceText = inlineComputedEnumValues(sourceText, sourcePath);
-      const { exportNames } = getExportMetadata(sourceText, sourcePath);
-      const result = await selectedBabelTransformer.processAsync(
-        inlineDynamicJestMockNames(compatibleSourceText, sourcePath),
-        sourcePath,
-        getUninstrumentedOptions(transformOptions)
-      );
-      return makeExportsConfigurable(result, transformOptions, exportNames);
-    }
-
-    const selectedSwcTransformer = getSwcTransformer(sourcePath);
-    const normalizedSource = normalizeMultilineJsxStringAttributes(sourceText, sourcePath);
+    const prepared = prepareSource(sourceText, sourcePath);
+    const swcTransformer = getSwcTransformer(sourcePath);
+    // @swc/jest's async transform always emits ESM, so only use it when Jest asked for ESM.
     const result = transformOptions?.supportsStaticESM
-      ? await selectedSwcTransformer.processAsync(
-          normalizedSource.code,
-          sourcePath,
-          transformOptions
-        )
-      : selectedSwcTransformer.process(normalizedSource.code, sourcePath, transformOptions);
-    return applyCommonJsCompatibility(
-      composeSourceMaps(result, normalizedSource.map),
-      transformOptions,
-      sourceText,
-      sourcePath
-    );
+      ? await swcTransformer.processAsync(prepared.code, sourcePath, transformOptions)
+      : swcTransformer.process(prepared.code, sourcePath, transformOptions);
+
+    return finalizeResult(result, prepared, transformOptions);
   },
 
   getCacheKey(sourceText, sourcePath, transformOptions) {
@@ -983,40 +1329,21 @@ const transformer = {
     const rootDir = Path.resolve(config.rootDir ?? process.cwd());
     const hash = Crypto.createHash('sha256');
 
-    hash.update(THIS_FILE);
-    hash.update('\0');
-    hash.update(SWC_CORE_VERSION);
-    hash.update('\0');
-    hash.update(SWC_JEST_VERSION);
-    hash.update('\0');
-    hash.update(EMOTION_PLUGIN_VERSION);
-    hash.update('\0');
-    hash.update(JSON.stringify(getJestSwcConfig(sourcePath)));
-    hash.update('\0');
-    hash.update(serializeJestTransformConfig(config));
-    hash.update('\0');
-    hash.update(rootDir);
-    hash.update('\0');
-    hash.update(Path.relative(rootDir, Path.resolve(sourcePath)));
-    hash.update('\0');
-    hash.update(transformOptions?.instrument ? 'instrument' : 'no-instrument');
-    hash.update('\0');
-    hash.update(transformOptions?.supportsStaticESM ? 'esm' : 'commonjs');
-    hash.update('\0');
-    hash.update(process.env.NODE_ENV ?? '');
-    hash.update('\0');
-    hash.update(process.version);
-    hash.update('\0');
-    hash.update(sourceText);
-
-    if (requiresBabelTransform(sourceText, sourcePath)) {
-      hash.update('\0babel-compatibility\0');
-      const selectedBabelTransformer = transformOptions?.supportsStaticESM
-        ? babelEsmTransformer
-        : babelTransformer;
-      hash.update(
-        selectedBabelTransformer.getCacheKey(sourceText, sourcePath, transformOptions).toString()
-      );
+    for (const part of [
+      THIS_FILE,
+      DEPENDENCY_VERSIONS,
+      JSON.stringify(getJestSwcConfig(sourcePath)),
+      serializeJestTransformConfig(config),
+      rootDir,
+      Path.relative(rootDir, Path.resolve(sourcePath)),
+      transformOptions?.instrument ? 'instrument' : 'no-instrument',
+      transformOptions?.supportsStaticESM ? 'esm' : 'commonjs',
+      process.env.NODE_ENV ?? '',
+      process.version,
+      sourceText,
+    ]) {
+      hash.update(part);
+      hash.update('\0');
     }
 
     return hash.digest('hex').slice(0, 32);

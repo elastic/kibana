@@ -260,7 +260,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiBasicTable kbnFieldFormatEditor__samples css-clqhn1-samples"
+        class="euiBasicTable kbnFieldFormatEditor__samples css-iow4gq-samples"
         id="generated-id"
       >
         <div

@@ -40,7 +40,7 @@ exports[`it renders with custom logo 1`] = `
             class="emotion-euiTextColor-subdued"
           >
             <h1
-              class="css-1yyshzr-headerStyles"
+              class="css-lizfsz-headerStyles"
               tabindex="-1"
             >
               Select your space

@@ -97,7 +97,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-1fo8g3b-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -926,7 +926,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-1fo8g3b-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div

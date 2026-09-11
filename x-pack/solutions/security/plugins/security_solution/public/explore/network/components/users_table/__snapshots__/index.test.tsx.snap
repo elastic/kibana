@@ -60,7 +60,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
   data-test-subj="table-users-loading-false"
 >
   <header
-    class="toggle-expand siemHeaderSection css-1fo8g3b-header"
+    class="toggle-expand siemHeaderSection css-qibzrl-header"
     data-test-subj="header-section"
   >
     <div

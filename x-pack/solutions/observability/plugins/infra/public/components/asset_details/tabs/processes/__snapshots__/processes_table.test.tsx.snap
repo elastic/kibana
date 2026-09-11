@@ -168,7 +168,7 @@ Object {
             </tr>
           </thead>
           <tbody
-            class="css-v5der9-visibleColumns"
+            class="css-13v7qks-visibleColumns"
           >
             <tr
               class="euiTableRow emotion-euiTableRow-desktop"
@@ -453,7 +453,7 @@ Object {
           </tr>
         </thead>
         <tbody
-          class="css-v5der9-visibleColumns"
+          class="css-13v7qks-visibleColumns"
         >
           <tr
             class="euiTableRow emotion-euiTableRow-desktop"
