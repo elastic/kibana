@@ -20,12 +20,12 @@ jest.mock('@kbn/data-plugin/public', () => ({
 }));
 
 jest.mock('./filter_badge_invalid', () => ({
-  FilterBadgeInvalidPlaceholder: () => <div data-testid="invalid-placeholder" />,
+  FilterBadgeInvalidPlaceholder: () => <div data-test-subj="invalid-placeholder" />,
 }));
 
 jest.mock('./filter_content', () => ({
   FilterContent: ({ valueLabel }: { valueLabel: string }) => (
-    <div data-testid="filter-content">{valueLabel}</div>
+    <div data-test-subj="filter-content">{valueLabel}</div>
   ),
 }));
 
