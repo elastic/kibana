@@ -276,7 +276,6 @@ describe('test fetchAll', () => {
         interceptedWarnings: [],
         result: documents,
         dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
-        esqlHeaderWarning: undefined,
         query,
       },
     ]);

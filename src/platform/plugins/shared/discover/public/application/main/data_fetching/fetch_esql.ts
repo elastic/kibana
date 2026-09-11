@@ -31,7 +31,6 @@ import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import { EsqlSource } from '@kbn/data-source';
-import { parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -160,8 +159,7 @@ export function fetchEsql({
               ? await EsqlSource.create({
                   query: isOfAggregateQueryType(query) ? query.esql : '',
                   resultColumns: esqlQueryColumns,
-                  timeFieldName:
-                    dataView.timeFieldName ?? parseTimeFieldFromESQLQuery(query.toString()),
+                  timeFieldName: dataView.timeFieldName,
                   projectRouting,
                 })
               : undefined;

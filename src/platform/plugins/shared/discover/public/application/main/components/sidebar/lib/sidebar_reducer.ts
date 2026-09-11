@@ -99,7 +99,10 @@ export function discoverSidebarReducer(
       const mappedAndUnmappedFields =
         dataSource?.kind === 'esql'
           ? getEsqlQueryFieldList(dataSource.resultColumns)
-          : getDataViewFieldList(dataSource?.getDataView() ?? state.dataView ?? undefined, fieldCounts);
+          : getDataViewFieldList(
+              dataSource?.getDataView() ?? state.dataView ?? undefined,
+              fieldCounts
+            );
       const nextDataView =
         dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : state.dataView;
       return {
