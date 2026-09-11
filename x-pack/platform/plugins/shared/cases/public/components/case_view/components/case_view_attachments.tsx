@@ -18,10 +18,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { notFound } from '@elastic/eui-illustrations';
 import { CaseViewFilters } from './case_view_filters';
 import { useCaseViewFilters } from '../hooks/use_case_view_filters';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
-import { notFound } from '@elastic/eui-illustrations';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
