@@ -51,6 +51,10 @@ const ClassicRulesV1Route = ({
     setBreadcrumbs,
     history: classicRulesHistory,
     hideListBackButton: true,
+    host: {
+      app: OBSERVABILITY_ALERTING_APP_ID,
+      basePath: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+    },
   });
 };
 

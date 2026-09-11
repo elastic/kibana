@@ -10,6 +10,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { createMemoryHistory } from 'history';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
+import { RULES_MANAGEMENT_HOST } from '@kbn/rule-data-utils';
 import { RulesPageApp } from './rules_page_app';
 import type { TriggersAndActionsUiServices } from './rules_app';
 import type { ClassicRulesPageInternalDeps, ClassicRulesPageProps } from './classic_rules_page';
@@ -21,6 +22,7 @@ export const ComposableClassicRulesPage = ({
   setBreadcrumbs,
   history,
   hideListBackButton,
+  host = RULES_MANAGEMENT_HOST,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const { pluginsStart } = internalDeps;
@@ -84,6 +86,7 @@ export const ComposableClassicRulesPage = ({
       cps: pluginsStart.cps,
       inspector: pluginsStart.inspector,
       hideListBackButton,
+      host,
     }),
     [
       coreStart,
@@ -93,6 +96,7 @@ export const ComposableClassicRulesPage = ({
       resolvedHistory,
       setBreadcrumbs,
       hideListBackButton,
+      host,
     ]
   );
 

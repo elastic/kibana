@@ -7,6 +7,7 @@
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
@@ -99,6 +100,10 @@ describe('ObservabilityAlertingApp', () => {
       expect.objectContaining({
         hideListBackButton: true,
         history,
+        host: {
+          app: OBSERVABILITY_ALERTING_APP_ID,
+          basePath: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+        },
       })
     );
   });
