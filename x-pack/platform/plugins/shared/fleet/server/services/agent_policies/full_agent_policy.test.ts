@@ -220,6 +220,7 @@ describe('getFullAgentPolicy', () => {
     jest.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
     jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOtelIntegrations: true,
+      enableAgentPolicyMultipleDownloadSources: true,
     } as any);
 
     mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
@@ -3498,6 +3499,28 @@ describe('getBinarySourceSettings', () => {
     name: 'Test',
     host: 'http://custom-registry-test',
   } as any;
+
+  beforeEach(() => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableAgentPolicyMultipleDownloadSources: true,
+    } as any);
+  });
+
+  it('should not emit sources when enableAgentPolicyMultipleDownloadSources is disabled', () => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableAgentPolicyMultipleDownloadSources: false,
+    } as any);
+
+    const secondaryDownloadSource = {
+      ...downloadSource,
+      id: 'test-ds-2',
+      host: 'http://custom-registry-test-2',
+    };
+
+    expect(getBinarySourceSettings([downloadSource, secondaryDownloadSource], undefined)).toEqual({
+      sourceURI: 'http://custom-registry-test',
+    });
+  });
 
   it('should return sourceURI for agent download config', () => {
     expect(getBinarySourceSettings([downloadSource], undefined)).toEqual({

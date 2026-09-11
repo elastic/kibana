@@ -108,7 +108,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
           <EuiIconTip
             content={i18n.translate('xpack.fleet.agentPolicyForm.downloadSource.priorityTooltip', {
               defaultMessage:
-                'Optionally choose the order in which servers are contacted in case of timeouts.',
+                'Optionally choose the order in which servers are contacted in case of timeouts. Agents running versions older than 9.6.0 will only use the first server.',
             })}
             position="right"
           />
