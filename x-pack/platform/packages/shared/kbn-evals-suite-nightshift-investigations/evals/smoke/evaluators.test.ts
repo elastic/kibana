@@ -87,6 +87,13 @@ describe('timestampsReplayedEvaluator', () => {
     await expect(score(isoAgo(-2_000))).resolves.toMatchObject({ score: 1 });
   });
 
+  it('describes a future timestamp as such rather than as a negative age', async () => {
+    const result = await score(isoAgo(-2_000));
+
+    expect(result.explanation).toContain('in the future');
+    expect(result.explanation).not.toContain('-');
+  });
+
   it('scores 0 when the newest document still carries its capture-time timestamp', async () => {
     await expect(score(isoAgo(14 * 24 * 60 * 60_000))).resolves.toMatchObject({ score: 0 });
   });

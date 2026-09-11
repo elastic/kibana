@@ -9,6 +9,10 @@ import type { SmokeEvaluator } from './types';
 
 const toSeconds = (milliseconds: number): string => `${Math.round(milliseconds / 1000)}s`;
 
+/** Replay can land the newest document marginally ahead of the clock, so age can be negative. */
+const describeAge = (ageMs: number): string =>
+  ageMs < 0 ? `${toSeconds(-ageMs)} in the future` : `${toSeconds(ageMs)} old`;
+
 /**
  * Scores whether seeding landed at least as many documents in the eval cluster as the eval
  * dataset declares its seed snapshot holds.
@@ -70,9 +74,7 @@ export const timestampsReplayedEvaluator: SmokeEvaluator = {
 
     return {
       score: ageMs <= maximumAgeMs ? 1 : 0,
-      explanation: `Newest document is ${toSeconds(ageMs)} old, limit is ${toSeconds(
-        maximumAgeMs
-      )}.`,
+      explanation: `Newest document is ${describeAge(ageMs)}, limit is ${toSeconds(maximumAgeMs)}.`,
       metadata: { latestTimestamp, ageMs, maximumAgeMs },
     };
   },

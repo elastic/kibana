@@ -12,7 +12,8 @@ import type { SeedableDataset, SeededData, SeedingDeps } from './types';
  * Puts an eval dataset's seed data in the eval cluster.
  *
  * The switch is the suite's single extension point for seeding: a new `SeedSource` member gets a
- * branch here and nothing else changes.
+ * branch here and nothing else changes. Leaving one out fails to compile, since the annotated
+ * return type makes the fall-through path an error rather than an implicit `undefined`.
  */
 export const seedDataset = async (
   dataset: SeedableDataset,
