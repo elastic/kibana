@@ -302,7 +302,6 @@ const ConnectorAddModal = ({
                   <EuiButtonGroup
                     isFullWidth
                     buttonSize="m"
-                    color="primary"
                     legend=""
                     options={groupActionButtons}
                     idSelected={actionType.id}

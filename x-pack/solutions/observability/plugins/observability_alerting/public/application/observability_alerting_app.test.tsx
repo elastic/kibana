@@ -30,6 +30,13 @@ const mockAlertingVTwo = {
   ActionPoliciesPage: () => <Placeholder name="actionPoliciesPage" />,
   ExecutionHistoryPage: () => <Placeholder name="executionHistoryPage" />,
   CreateRuleOptionsFlyout: () => null,
+  createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
+    rules: { app: appId, basePath: paths.rules },
+    ruleLibrary: { app: appId, basePath: paths.ruleLibrary },
+    episodes: { app: appId, basePath: paths.episodes },
+    actionPolicies: { app: appId, basePath: paths.actionPolicies },
+    executionHistory: { app: appId, basePath: paths.executionHistory },
+  })),
 };
 
 const createTestHistory = (pathname: string): ScopedHistory => {

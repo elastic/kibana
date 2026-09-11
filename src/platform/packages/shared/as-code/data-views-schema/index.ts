@@ -32,6 +32,10 @@ export type {
   AsCodeCompositeRuntimeField,
   AsCodeRuntimeBaseField,
   AsCodeFieldSettings,
+  AsCodeFieldFormat,
+  AsCodeDurationFormat,
+  AsCodeHistogramFormat,
+  AsCodeColorFormat,
   AsCodeDataView,
   AsCodeDataViewReference,
   AsCodeDataViewSpec,
@@ -43,3 +47,6 @@ export type {
   AsCodeSavedDataView,
   AsCodeSavedFieldSettings,
 } from './src/types';
+
+// Schemas that are needed individually
+export { formatSchema } from './src/field_settings/formats/format_schema';

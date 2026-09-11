@@ -8,6 +8,7 @@
 import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { RuleDetailsRoute } from '../routes/rule_details_route';
@@ -24,23 +25,25 @@ const SequenceBuilderFallback = () => (
   />
 );
 
-export const RulesApp = ({ basePath = '' }: { basePath?: string }) => {
+export const RulesApp = () => {
+  const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
   return (
     <RequireAlertingPrivilege
       features={['rules']}
       pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', { defaultMessage: 'Rules' })}
     >
       <Routes>
-        <Route exact path={`${basePath}/sequence/create`}>
+        <Route exact path={`${base}/sequence/create`}>
           <Suspense fallback={<SequenceBuilderFallback />}>
             <SequenceBuilderPage />
           </Suspense>
         </Route>
 
-        <Route exact path={`${basePath}/:ruleId`}>
+        <Route exact path={`${base}/:ruleId`}>
           <RuleDetailsRoute />
         </Route>
-        <Route exact path={`${basePath}/`}>
+        <Route exact path={path}>
           <RulesListPage />
         </Route>
       </Routes>

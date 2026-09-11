@@ -105,16 +105,35 @@ export const memoryFree: SchemaBasedAggregations = {
         buckets_path: 'memory_usage_slab_reclaimable.avg',
       },
     },
+    memory_usage_states: {
+      terms: {
+        field: 'state',
+        include: ['cached', 'free', 'slab_unreclaimable', 'slab_reclaimable'],
+      },
+      aggs: {
+        avg: {
+          avg: {
+            field: 'system.memory.usage',
+          },
+        },
+      },
+    },
+    memory_usage_stats: {
+      stats_bucket: {
+        buckets_path: 'memory_usage_states.avg',
+      },
+    },
     memoryFree: {
       bucket_script: {
         buckets_path: {
+          memoryUsageCount: 'memory_usage_stats.count',
           memoryCachedTotal: 'memory_usage_cached_total',
           memoryFreeTotal: 'memory_usage_free_total',
           memorySlabUnreclaimableTotal: 'memory_usage_slab_unreclaimable_total',
           memorySlabReclaimableTotal: 'memory_usage_slab_reclaimable_total',
         },
         script:
-          '(params.memoryCachedTotal + params.memoryFreeTotal) - (params.memorySlabUnreclaimableTotal + params.memorySlabReclaimableTotal)',
+          'params.memoryUsageCount > 0 ? (params.memoryCachedTotal + params.memoryFreeTotal) - (params.memorySlabUnreclaimableTotal + params.memorySlabReclaimableTotal) : null',
         gap_policy: 'skip',
       },
     },
