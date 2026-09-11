@@ -2528,13 +2528,19 @@ export const ANALYZER_CROSS_PROJECT_RENDER_EVENT: EventTypeOpts<{
   },
 };
 
+/**
+ * Temporary sizing telemetry for the New Terms to ES|QL INLINE STATS migration decision. This is a
+ * one-off study to measure the cardinality and value length of the fields customers group by. It should be removed once the migration sizing is settled.
+ *
+ * Removal tracking issue: https://github.com/elastic/kibana/issues/290516
+ */
 export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
   isElasticRule: boolean;
   newTermsFieldsCount: number;
   distinctFieldCombinations: number;
   maxCombinationValueLength: number;
-  avgCombinationValueLength: number;
-  completedFullScan: boolean;
+  combinationValueLengthSum: number;
+  interruptedByMaxSignals: boolean;
 }> = {
   eventType: 'new_terms_field_cardinality_on_rule_execution',
   schema: {
@@ -2553,7 +2559,7 @@ export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: {
         description:
-          'Number of distinct combinations of the grouping fields observed in the rule run window during this execution',
+          'Number of distinct combinations of the grouping-field values seen in the rule run window this execution. Counts every combination scanned, not only the new ones that produced alerts',
       },
     },
     maxCombinationValueLength: {
@@ -2563,18 +2569,18 @@ export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
           'Longest combined character length of the grouping-field values across a single distinct combination this run (value lengths only, not the values)',
       },
     },
-    avgCombinationValueLength: {
+    combinationValueLengthSum: {
       type: 'long',
       _meta: {
         description:
-          'Average combined character length of the grouping-field values across distinct combinations this run',
+          'Sum over the distinct combinations this run of the combined character length of their grouping-field values (lengths only, not the values). Divide by distinctFieldCombinations to get the average',
       },
     },
-    completedFullScan: {
+    interruptedByMaxSignals: {
       type: 'boolean',
       _meta: {
         description:
-          'True if the rule paged through all terms this run; false if it stopped early after reaching maxSignals, in which case the counts are a lower bound',
+          'True if the run stopped early after reaching maxSignals before paging through all terms, in which case the counts are a lower bound. False if it paged through all terms',
       },
     },
   },
