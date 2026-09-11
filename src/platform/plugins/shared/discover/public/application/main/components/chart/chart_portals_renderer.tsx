@@ -23,6 +23,7 @@ import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
+import { DataViewSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -107,6 +108,8 @@ const UnifiedHistogramGuard = ({
   );
   const currentScopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
+  const currentEsqlSource = useRuntimeState(currentTabRuntimeState.currentEsqlSource$);
+  const currentDataSource = currentEsqlSource ?? (currentDataView ? new DataViewSource(currentDataView) : undefined);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
 
@@ -114,7 +117,7 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentDataStateContainer ||
-    !currentDataView
+    !currentDataSource
   ) {
     return null;
   }
@@ -124,7 +127,7 @@ const UnifiedHistogramGuard = ({
   return (
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
-        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+        <RuntimeStateProvider currentDataSource={currentDataSource} adHocDataViews={adHocDataViews}>
           <ScopedServicesProvider
             scopedProfilesManager={currentScopedProfilesManager}
             scopedEBTManager={currentScopedEbtManager}

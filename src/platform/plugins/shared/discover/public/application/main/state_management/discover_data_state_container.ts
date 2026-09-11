@@ -639,6 +639,9 @@ export function getDataStateContainer({
           nextSource
         );
         services.dataSourceService.registerEsqlSource(nextSource);
+        selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentEsqlSource$.next(
+          nextSource
+        );
         if (nextDataView) {
           internalState.dispatch(
             injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })

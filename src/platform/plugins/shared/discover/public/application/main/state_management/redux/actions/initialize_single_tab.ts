@@ -183,12 +183,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      */
 
     let dataView: DataView;
+    let esqlSource: EsqlSource | undefined;
 
     if (isOfAggregateQueryType(initialQuery)) {
       const projectRouting =
         getProjectRoutingFromEsqlQuery(initialQuery.esql) ??
         services.cps?.cpsManager?.getProjectRouting();
-      const esqlSource = await EsqlSource.create({
+      esqlSource = await EsqlSource.create({
         query: initialQuery.esql,
         resultColumns: [],
         timeFieldName: await getESQLTimeField({
@@ -200,6 +201,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       });
       services.dataSourceService.registerEsqlSource(esqlSource);
       dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+      selectTabRuntimeState(runtimeStateManager, tabId).currentEsqlSource$.next(esqlSource);
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
@@ -223,7 +225,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && (esqlSource?.isTimeBased() ?? dataView.isTimeBased())
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
