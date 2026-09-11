@@ -27,18 +27,25 @@ export const ImportListItemsRequestQuery = lazySchema(() =>
 Required when importing to an existing list.
 
       */
-    list_id: ListId.optional(),
+    list_id: ListId.optional().describe(
+      "List's id.\n\nRequired when importing to an existing list.\n"
+    ),
     /**
       * Type of the importing list.
 
 Required when importing a new list whose list `id` is not specified.
 
       */
-    type: ListType.optional(),
+    type: ListType.optional().describe(
+      'Type of the importing list.\n\nRequired when importing a new list whose list `id` is not specified.\n'
+    ),
     /**
      * Determines when changes made by the request are made visible to search.
      */
-    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+    refresh: z
+      .enum(['true', 'false', 'wait_for'])
+      .optional()
+      .describe('Determines when changes made by the request are made visible to search.'),
   })
 );
 export type ImportListItemsRequestQuery = z.infer<typeof ImportListItemsRequestQuery>;

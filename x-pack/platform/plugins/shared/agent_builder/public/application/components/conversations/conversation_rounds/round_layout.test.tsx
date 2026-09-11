@@ -148,8 +148,6 @@ describe('RoundLayout', () => {
       removeError: jest.fn(),
       resumeRound: jest.fn(),
       isResuming: false,
-      regenerate: jest.fn(),
-      isRegenerating: false,
     } as ReturnType<typeof useConversationStream>);
   });
 
@@ -163,7 +161,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={firstRound}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -177,7 +174,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={equivalentRound}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -194,7 +190,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={firstRound}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -208,7 +203,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={updatedRound}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -238,7 +232,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -277,7 +270,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -313,7 +305,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -353,7 +344,6 @@ describe('RoundLayout', () => {
         isCurrentRound={false}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -383,8 +373,6 @@ describe('RoundLayout', () => {
       removeError: jest.fn(),
       resumeRound: jest.fn(),
       isResuming: false,
-      regenerate: jest.fn(),
-      isRegenerating: false,
     } as ReturnType<typeof useConversationStream>);
 
     const round = createRound(1);
@@ -396,7 +384,6 @@ describe('RoundLayout', () => {
         isCurrentRound={true}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -421,7 +408,6 @@ describe('RoundLayout', () => {
         isCurrentRound={true}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 
@@ -455,7 +441,6 @@ describe('RoundLayout', () => {
         isCurrentRound={true}
         rawRound={round}
         roundIndex={0}
-        scrollContainerHeight={100}
       />
     );
 

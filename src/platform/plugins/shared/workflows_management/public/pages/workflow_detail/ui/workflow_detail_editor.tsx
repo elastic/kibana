@@ -62,6 +62,10 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getTestRunTooltipContent } from '../../../shared/ui';
 import { EditorSettingsPopover } from '../../../widgets/workflow_yaml_editor/ui/editor_settings_popover';
+import {
+  type ExtraAction,
+  ExtraActionsBar,
+} from '../../../widgets/workflow_yaml_editor/ui/extra_actions_bar';
 import { KeyboardShortcutsPopover } from '../../../widgets/workflow_yaml_editor/ui/keyboard_shortcuts_popover';
 
 const WorkflowYAMLEditor = React.lazy(() =>
@@ -283,9 +287,10 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     const actionsMenuLabel = i18n.translate('workflows.workflowDetailEditor.tools.actionsMenu', {
       defaultMessage: 'Actions menu',
     });
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
+    const actions: ExtraAction[] = [
+      {
+        id: 'actions-menu',
+        content: (
           <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
             <EuiButtonIcon
               iconType="plus"
@@ -296,8 +301,12 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               data-test-subj="workflowBottomBarActionsMenu"
             />
           </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        ),
+        showInReadOnly: false,
+      },
+      {
+        id: 'documentation',
+        content: (
           <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="documentation"
@@ -309,16 +318,19 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               data-test-subj="workflowBottomBarDocumentation"
             />
           </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, []);
+        ),
+        showInReadOnly: true,
+      },
+    ];
+
+    return <ExtraActionsBar actions={actions} isReadOnly={isReadOnly} />;
+  }, [isReadOnly]);
 
   const toolsSlot = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
-          <KeyboardShortcutsPopover />
+          <KeyboardShortcutsPopover isReadOnly={isReadOnly} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EditorSettingsPopover
@@ -331,7 +343,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [graphDirection, handleHideControlsMenuChange, hideControlsMenu, setGraphDirection]
+    [graphDirection, handleHideControlsMenuChange, hideControlsMenu, isReadOnly, setGraphDirection]
   );
 
   // Keep the graph mounted for a moment after switching to YAML so the

@@ -187,6 +187,7 @@ describe('Attachment Routes', () => {
             getScopedClient: jest.fn().mockReturnValue({}),
           },
         },
+        {},
       ]),
     };
 
@@ -411,7 +412,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.conflict).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 409,
         body: { message: "Attachment with ID 'existing-id' already exists" },
       });
     });
@@ -668,7 +670,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 404,
         body: { message: "Attachment 'non-existent' not found" },
       });
     });
@@ -687,7 +690,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: "Cannot update deleted attachment 'att-1'. Restore it first." },
       });
     });
@@ -776,7 +780,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.conflict).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 409,
         body: {
           message:
             "Cannot permanently delete attachment 'att-1' because it is referenced in conversation rounds",
@@ -807,7 +812,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.conflict).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 409,
         body: {
           message:
             "Cannot permanently delete attachment 'att-1' because it was created from flyout configuration",
@@ -832,7 +838,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: 'Screen context attachments cannot be deleted' },
       });
     });
@@ -848,7 +855,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 404,
         body: { message: "Attachment 'non-existent' not found" },
       });
     });
@@ -865,7 +873,8 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
         body: { message: "Attachment 'att-1' is already deleted" },
       });
     });

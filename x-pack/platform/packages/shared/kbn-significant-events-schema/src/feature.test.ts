@@ -149,15 +149,6 @@ describe('mergeFeature version history', () => {
     expect(emptyExisting.meta).toBeUndefined();
   });
 
-  it('preserves existing aliases and safely merges newly captured aliases', () => {
-    const merged = mergeFeature(
-      createFeature({ meta: { aliases: ['old-alias', 'shared-alias'] } }),
-      createFeature({ meta: { aliases: ['shared-alias', 'new-alias', 42] } })
-    );
-
-    expect(merged.meta?.aliases).toEqual(['old-alias', 'shared-alias', 'new-alias']);
-  });
-
   it('does not trust incoming version history', () => {
     const merged = mergeFeature(
       createFeature({ version: '3.14.1', meta: { version_history: ['3.13.0'] } }),

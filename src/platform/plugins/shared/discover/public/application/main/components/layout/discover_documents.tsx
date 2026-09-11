@@ -154,6 +154,15 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isWarningCalloutDismissed = useCurrentTabSelector(
+    (state) => state.isWarningCalloutDismissed
+  );
+  const setIsWarningCalloutDismissed = useCurrentTabAction(
+    internalStateActions.setIsWarningCalloutDismissed
+  );
+  const dismissWarningCallout = useCallback(() => {
+    dispatch(setIsWarningCalloutDismissed({ isWarningCalloutDismissed: true }));
+  }, [dispatch, setIsWarningCalloutDismissed]);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -375,8 +384,14 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
-    [documentState.interceptedWarnings]
+    () => (
+      <SearchResponseWarningsCallout
+        warnings={documentState.interceptedWarnings ?? []}
+        isDismissed={isWarningCalloutDismissed}
+        onDismiss={dismissWarningCallout}
+      />
+    ),
+    [dismissWarningCallout, documentState.interceptedWarnings, isWarningCalloutDismissed]
   );
 
   const loadingIndicator = useMemo(

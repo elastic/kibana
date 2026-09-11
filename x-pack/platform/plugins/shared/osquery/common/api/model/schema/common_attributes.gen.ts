@@ -141,11 +141,14 @@ export const ECSMappingItem = lazySchema(() =>
     /**
      * The ECS field to map to.
      */
-    field: z.string().optional(),
+    field: z.string().optional().describe('The ECS field to map to.'),
     /**
      * The value to map to the ECS field.
      */
-    value: z.union([z.string(), z.array(z.string())]).optional(),
+    value: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .describe('The value to map to the ECS field.'),
   })
 );
 export type ECSMappingItem = z.infer<typeof ECSMappingItem>;
@@ -167,7 +170,7 @@ export const ECSMappingArrayItem = lazySchema(() =>
     /**
      * The ECS field name.
      */
-    key: z.string().optional(),
+    key: z.string().optional().describe('The ECS field name.'),
     value: ECSMappingItem.optional(),
   })
 );
@@ -235,15 +238,31 @@ well-formed parts (other recognized parts like `BYHOUR`,
 verbatim).
 
       */
-    rrule: z.string().max(2048),
+    rrule: z
+      .string()
+      .max(2048)
+      .describe(
+        'Fully serialized RFC 5545 RRULE string (e.g.\n`"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a\nsubset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,\n`BYMONTH` — but the server accepts and round-trips any\nwell-formed parts (other recognized parts like `BYHOUR`,\n`BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved\nverbatim).\n'
+      ),
     /**
      * RFC 3339 datetime string for the schedule's start.
      */
-    start_date: z.string().max(64).datetime(),
+    start_date: z
+      .string()
+      .max(64)
+      .datetime()
+      .describe("RFC 3339 datetime string for the schedule's start."),
     /**
      * Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`.
      */
-    end_date: z.string().max(64).datetime().optional(),
+    end_date: z
+      .string()
+      .max(64)
+      .datetime()
+      .optional()
+      .describe(
+        "Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`."
+      ),
     /**
       * Optional Go duration string for splay (random execution delay),
 e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
@@ -252,11 +271,22 @@ read for round-trip safety with osquerybeat's writer. Maximum
 12 hours (43200 seconds).
 
       */
-    splay: z.string().max(64).optional(),
+    splay: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Optional Go duration string for splay (random execution delay),\ne.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit\nvalues only; compound durations (`"1h30m"`) are tolerated on\nread for round-trip safety with osquerybeat\'s writer. Maximum\n12 hours (43200 seconds).\n'
+      ),
     /**
      * Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.
      */
-    timeout: z.number().optional(),
+    timeout: z
+      .number()
+      .optional()
+      .describe(
+        'Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.'
+      ),
   })
 );
 export type RRuleScheduleConfig = z.infer<typeof RRuleScheduleConfig>;
@@ -278,7 +308,14 @@ export const ObjectQueriesItem = lazySchema(() =>
       * Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
 
       */
-    interval: z.number().int().nullable().optional(),
+    interval: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe(
+        "Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.\n"
+      ),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
   })

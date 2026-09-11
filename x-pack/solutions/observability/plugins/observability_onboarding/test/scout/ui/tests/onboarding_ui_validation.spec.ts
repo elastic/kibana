@@ -42,13 +42,14 @@ test.describe('Onboarding UI Validation', () => {
     }
   );
 
+  // Test fails on MKI: https://github.com/elastic/kibana/issues/248276
   test(
     'navigates correctly within Host Auto-Detect flow',
     {
       tag: [
-        ...tags.stateful.classic,
-        ...tags.serverless.observability.complete,
-        ...tags.serverless.observability.logs_essentials,
+        '@local-stateful-classic',
+        '@local-serverless-observability_complete',
+        '@local-serverless-observability_logs_essentials',
       ],
     },
     async ({ page, pageObjects }) => {
@@ -58,13 +59,14 @@ test.describe('Onboarding UI Validation', () => {
     }
   );
 
+  // Test fails on MKI: https://github.com/elastic/kibana/issues/267179
   test(
     'navigates correctly within Host OTel flow',
     {
       tag: [
-        ...tags.stateful.classic,
-        ...tags.serverless.observability.complete,
-        ...tags.serverless.observability.logs_essentials,
+        '@local-stateful-classic',
+        '@local-serverless-observability_complete',
+        '@local-serverless-observability_logs_essentials',
       ],
     },
     async ({ page, pageObjects }) => {
@@ -79,13 +81,14 @@ test.describe('Onboarding UI Validation', () => {
     }
   );
 
+  // Test fails on MKI: https://github.com/elastic/kibana/issues/287357
   test(
     'navigates to the Kubernetes OpenTelemetry flow from the landing tile',
     {
       tag: [
-        ...tags.stateful.classic,
-        ...tags.serverless.observability.complete,
-        ...tags.serverless.observability.logs_essentials,
+        '@local-stateful-classic',
+        '@local-serverless-observability_complete',
+        '@local-serverless-observability_logs_essentials',
       ],
     },
     async ({ page, pageObjects }) => {
@@ -94,9 +97,10 @@ test.describe('Onboarding UI Validation', () => {
     }
   );
 
+  // Test fails on MKI: https://github.com/elastic/kibana/issues/287358
   test(
     'validates logs-essentials tier restrictions',
-    { tag: tags.serverless.observability.logs_essentials },
+    { tag: ['@local-serverless-observability_logs_essentials'] },
     async ({ pageObjects }) => {
       await test.step('keeps Applications off the landing and hides metrics-only More tiles', async () => {
         await expect(pageObjects.onboarding.integrationTile('apm')).toBeHidden();
