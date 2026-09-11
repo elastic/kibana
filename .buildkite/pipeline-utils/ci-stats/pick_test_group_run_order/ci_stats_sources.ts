@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CI_STATS_DEFAULTS, PIPELINES } from './const';
-import type { RunOrderConfig } from './env_config';
+import { CI_STATS_DEFAULTS, PIPELINES } from './const.ts';
+import type { RunOrderConfig } from './env_config.ts';
 import type { FTRManifestEntry } from '#pipeline-utils/ci-stats/pick_test_group_run_order/ftr_manifests';
 
 type CiStatsSource =

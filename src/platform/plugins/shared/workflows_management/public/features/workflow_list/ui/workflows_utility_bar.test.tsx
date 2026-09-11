@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -100,13 +100,13 @@ describe('WorkflowsUtilityBar', () => {
     expect(screen.getByTestId('mock-modals')).toBeInTheDocument();
   });
 
-  it('calls deselectWorkflows when clear selection button is clicked', async () => {
+  it('calls deselectWorkflows when clear selection button is clicked', () => {
     const selectedWorkflows = [{ id: '1', name: 'Test Workflow 1' }] as WorkflowListItemDto[];
 
     renderWithI18n(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
 
     const clearSelectionButton = screen.getByTestId('workflows-clear-selection-button');
-    await userEvent.click(clearSelectionButton);
+    fireEvent.click(clearSelectionButton);
 
     expect(mockDeselectWorkflows).toHaveBeenCalledTimes(1);
   });

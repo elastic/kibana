@@ -114,6 +114,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
 
+  // Nightshift – Sandbox
+  'nightshift_sandbox_bash',
+  'nightshift_sandbox_view_file',
+  'nightshift_sandbox_str_replace',
+  'nightshift_sandbox_write_file',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -155,6 +161,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
+  `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -198,6 +205,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'feature-identification',
   'streams-memory-synthesis',
   'streams-memory-consolidation',
   'streams-conversation-scraper',
@@ -205,8 +213,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
+  'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -226,6 +237,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
+  'detection-coverage',
   'pci-compliance',
   'endpoint-forensic-analysis',
   'investigate-rule',
