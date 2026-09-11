@@ -79,7 +79,7 @@ export const useEpisodesHistogramQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
-      const timeRangeFilter = timeRange ? buildAlertEventsTimeRangeFilter(timeRange) : undefined;
+      const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
       const [v2Rows, sourceHistograms] = await Promise.all([
         executeEsqlQuery<HistogramEpisodeRow>({
           expressions: services.expressions,

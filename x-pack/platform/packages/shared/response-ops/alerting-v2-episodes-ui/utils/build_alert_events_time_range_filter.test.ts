@@ -47,7 +47,14 @@ describe('buildAlertEventsTimeRangeFilter', () => {
     const filter = buildAlertEventsTimeRangeFilter({ from: 'now-15m', to: 'now' });
     const range = (filter?.query as any).bool.should[0].bool.filter[1].range['@timestamp'];
 
-    expect(new Date(range.gte).getTime()).toBeLessThan(new Date(range.lte).getTime());
-    expect(new Date(range.lte).getTime() - new Date(range.gte).getTime()).toBe(15 * 60 * 1000);
+    // `to: now` is rounded up, so the span can exceed 15 minutes by a few milliseconds
+    const span = new Date(range.lte).getTime() - new Date(range.gte).getTime();
+    expect(span).toBeGreaterThanOrEqual(15 * 60 * 1000);
+    expect(span).toBeLessThan(15 * 60 * 1000 + 1000);
+  });
+
+  it('returns nothing without a time range', () => {
+    expect(buildAlertEventsTimeRangeFilter(undefined)).toBeUndefined();
+    expect(buildAlertEventsTimeRangeFilter(null)).toBeUndefined();
   });
 });

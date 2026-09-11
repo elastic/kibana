@@ -56,7 +56,7 @@ export const fetchAlertingEpisodes = ({
     ],
   };
 
-  const timeRangeFilter = timeRange ? buildAlertEventsTimeRangeFilter(timeRange) : undefined;
+  const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
   if (timeRangeFilter) {
     input.filters = [timeRangeFilter];
   }

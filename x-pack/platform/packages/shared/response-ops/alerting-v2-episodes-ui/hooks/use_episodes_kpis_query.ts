@@ -87,7 +87,7 @@ export const useEpisodesKpisQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
-      const timeRangeFilter = timeRange ? buildAlertEventsTimeRangeFilter(timeRange) : undefined;
+      const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
       const [v2Rows, sourceKpis] = await Promise.all([
         executeEsqlQuery<EpisodesKpisRow>({
           expressions: services.expressions,

@@ -19,9 +19,14 @@ import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
  *
  * The filter is sent with the request and applied by ES at the source, like the
  * one the `esql` expression derives from `timeField`, so it stays pushed down.
+ * Returns `undefined` when there is no range to apply.
  */
-export const buildAlertEventsTimeRangeFilter = (timeRange: TimeRange): Filter | undefined => {
-  const rangeFilter = getTime(undefined, timeRange, { fieldName: DEFAULT_TIME_FIELD });
+export const buildAlertEventsTimeRangeFilter = (
+  timeRange?: TimeRange | null
+): Filter | undefined => {
+  const rangeFilter = timeRange
+    ? getTime(undefined, timeRange, { fieldName: DEFAULT_TIME_FIELD })
+    : undefined;
   if (!rangeFilter) {
     return undefined;
   }

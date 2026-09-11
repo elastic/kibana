@@ -24,6 +24,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
@@ -79,7 +80,7 @@ export const EpisodeDurationCell = ({ row, columnId, dataView }: CellRendererPro
   const formatted = field
     ? dataView.getFormatterForField(field).convertToText(duration)
     : `${duration}`;
-  if (!row.flattened.duration_is_lower_bound) {
+  if (!row.flattened[DURATION_LOWER_BOUND_FIELD]) {
     return <>{formatted}</>;
   }
   return (
