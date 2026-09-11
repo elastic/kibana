@@ -238,7 +238,7 @@ steps:
   # suppression, threshold, or a query change on a rule mode the preview cannot
   # model) is left to the analyst to apply in the Rules UI, so approving it just
   # acknowledges the follow-up.
-  - name: record_apply_path
+  - name: rule_tune_supported
     type: data.set
     with:
       auto: >-
@@ -254,7 +254,7 @@ steps:
   # events analysts judged; anchoring at now can miss those events.
   - name: run_previews
     type: workflow.execute
-    if: "${{ steps.record_apply_path.output.auto == true }}"
+    if: "${{ steps.rule_tune_supported.output.auto == true }}"
     with:
       workflow-id: system-security-rule-preview
       inputs:
@@ -398,7 +398,7 @@ steps:
     type: workflow.execute
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_apply_path.output.auto == true }}
+        and steps.rule_tune_supported.output.auto == true }}
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -419,7 +419,7 @@ steps:
     type: workflow.execute
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_apply_path.output.auto == false }}
+        and steps.rule_tune_supported.output.auto == false }}
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -510,7 +510,7 @@ steps:
     type: security.setAlertTags
     if: >-
       ${{ steps.record_decision.output.approved == true
-        and steps.record_apply_path.output.auto == false }}
+        and steps.rule_tune_supported.output.auto == false }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:

@@ -198,11 +198,11 @@ describe('detection rule workflows', () => {
         id: '{{ inputs.rule_uuid }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
-      expect(action.if).toContain('steps.record_apply_path.output.auto == true');
+      expect(action.if).toContain('steps.rule_tune_supported.output.auto == true');
 
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
-      expect(manual.if).toContain('steps.record_apply_path.output.auto == false');
+      expect(manual.if).toContain('steps.rule_tune_supported.output.auto == false');
 
       for (const proposal of proposals) {
         expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
@@ -443,7 +443,7 @@ describe('detection rule workflows', () => {
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
         expect(acknowledged.if).toContain('steps.record_decision.output.approved == true');
-        expect(acknowledged.if).toContain('steps.record_apply_path.output.auto == false');
+        expect(acknowledged.if).toContain('steps.rule_tune_supported.output.auto == false');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.acknowledged_tag }}',
@@ -561,8 +561,8 @@ describe('detection rule workflows', () => {
 
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
         const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
-        const applyPath = reviewSteps.find(({ name }) => name === 'record_apply_path')!;
-        const condition = String(applyPath.with?.auto);
+        const supported = reviewSteps.find(({ name }) => name === 'rule_tune_supported')!;
+        const condition = String(supported.with?.auto);
 
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.data_view_id == null'
