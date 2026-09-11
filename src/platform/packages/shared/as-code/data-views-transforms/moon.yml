@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/as-code-data-views-transforms'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: '@elastic/kibana-discover'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/as-code-data-views-transforms'
   description: Moon project for @kbn/as-code-data-views-transforms
   channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/shared/as-code/data-views-transforms
 dependsOn:
   - '@kbn/data-views-plugin'

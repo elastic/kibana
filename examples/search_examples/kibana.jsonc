@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-examples-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": "@elastic/kibana-discover",
   "description": "Examples for using the data plugin search service. Includes examples for searching using the high level search source, or low-level search services, as well as integrating with search sessions.",
   "group": "platform",
   "visibility": "private",

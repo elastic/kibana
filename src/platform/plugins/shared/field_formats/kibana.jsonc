@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/field-formats-plugin",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",
