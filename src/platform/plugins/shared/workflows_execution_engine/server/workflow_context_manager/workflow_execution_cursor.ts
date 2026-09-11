@@ -144,11 +144,11 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   }
 
   public navigateToNextNode(): void {
-    this.nextNodeId = this.runtimeGraph.nodeAfter(this.currentNodeId);
+    this.nextNodeId = this.runtimeGraph.nodeAfter(this.currentNodeId)?.id;
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.nextNodeId = this.runtimeGraph.nodeAfter(nodeId);
+    this.nextNodeId = this.runtimeGraph.nodeAfter(nodeId)?.id;
   }
 
   /**

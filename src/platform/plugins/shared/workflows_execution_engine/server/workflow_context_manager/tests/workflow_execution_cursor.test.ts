@@ -17,28 +17,24 @@ describe('WorkflowExecutionCursor', () => {
 
   beforeEach(() => {
     const topologicalOrder = ['node1', 'node2', 'node3'];
+    const graphNodes: Record<string, GraphNodeUnion> = {
+      node1: { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion,
+      node2: { id: 'node2', stepId: 's2', type: 't2' } as GraphNodeUnion,
+      node3: { id: 'node3', stepId: 's3', type: 't3' } as GraphNodeUnion,
+    };
     workflowExecutionGraph = {
       topologicalOrder,
       nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
         const index = topologicalOrder.findIndex((id) => id === nodeId);
         if (index >= 0 && index < topologicalOrder.length - 1) {
-          return topologicalOrder[index + 1];
+          return graphNodes[topologicalOrder[index + 1]];
         }
         return undefined;
       }),
       getNode: jest.fn().mockImplementation((nodeId: string) => {
-        if (nodeId === 'node1') {
-          return { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion;
-        }
-        if (nodeId === 'node2') {
-          return { id: 'node2', stepId: 's2', type: 't2' } as GraphNodeUnion;
-        }
-        if (nodeId === 'node3') {
-          return { id: 'node3', stepId: 's3', type: 't3' } as GraphNodeUnion;
-        }
-        return undefined;
+        return graphNodes[nodeId];
       }),
-      getNodeStack: jest.fn().mockReturnValue([]),
+      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
       insertSyntheticScope: jest.fn(),
     } as unknown as WorkflowRuntimeGraph;
 

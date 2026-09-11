@@ -121,43 +121,37 @@ describe('WorkflowExecutionRuntimeManager', () => {
     } as unknown as WorkflowExecutionState;
 
     const topologicalOrder = ['node1', 'node2', 'node3'];
+    const graphNodes: Record<string, GraphNodeUnion> = {
+      node1: {
+        id: 'node1',
+        stepId: 'fakeStepId1',
+        stepType: 'fakeStepType1',
+      } as GraphNodeUnion,
+      node2: {
+        id: 'node2',
+        stepId: 'fakeStepId2',
+        stepType: 'fakeStepType2',
+      } as GraphNodeUnion,
+      node3: {
+        id: 'node3',
+        stepId: 'fakeStepId3',
+        stepType: 'fakeStepType3',
+      } as GraphNodeUnion,
+    };
     workflowExecutionGraph = {
       topologicalOrder,
       nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
         const index = topologicalOrder.findIndex((id) => id === nodeId);
         if (index >= 0 && index < topologicalOrder.length - 1) {
-          return topologicalOrder[index + 1];
+          return graphNodes[topologicalOrder[index + 1]];
         }
         return undefined;
       }),
+      getNode: jest.fn().mockImplementation((nodeId: string) => graphNodes[nodeId]),
+      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
       getInnerStepIds: jest.fn().mockReturnValue(new Set<string>()),
+      insertSyntheticScope: jest.fn(),
     } as unknown as WorkflowRuntimeGraph;
-
-    workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
-      switch (nodeId) {
-        case 'node1':
-          return {
-            id: 'node1',
-            stepId: 'fakeStepId1',
-            stepType: 'fakeStepType1',
-          } as GraphNodeUnion;
-        case 'node2':
-          return {
-            id: 'node2',
-            stepId: 'fakeStepId2',
-            stepType: 'fakeStepType2',
-          } as GraphNodeUnion;
-        case 'node3':
-          return {
-            id: 'node3',
-            stepId: 'fakeStepId3',
-            stepType: 'fakeStepType3',
-          } as GraphNodeUnion;
-      }
-    });
-
-    workflowExecutionGraph.getNodeStack = jest.fn().mockReturnValue([]);
-    workflowExecutionGraph.insertSyntheticScope = jest.fn();
 
     fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;

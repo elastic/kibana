@@ -17,8 +17,6 @@ import {
   WorkflowRuntimeGraph,
 } from '../workflow_runtime_graph';
 
-const SCOPE_HASH = /[0-9a-f]{16}$/;
-
 const nestedForeachDefinition = {
   steps: [
     {
@@ -51,39 +49,41 @@ function createOverlay(): WorkflowRuntimeGraph {
   );
 }
 
-function hashedPair(stepId: string, enterId: string): { enterId: string; exitId: string } {
-  expect(enterId).toMatch(new RegExp(`^${ENTER_SYNTHETIC_PREFIX}${stepId}_`));
-  expect(enterId.split('_').pop()).toMatch(SCOPE_HASH);
+function syntheticPairIds(ownerNodeId: string, stepId: string): { enterId: string; exitId: string } {
   return {
-    enterId,
-    exitId: enterId.replace(/^enter/, 'exit'),
+    enterId: `${ENTER_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`,
+    exitId: `${EXIT_SYNTHETIC_PREFIX}${ownerNodeId}_${stepId}`,
   };
 }
 
 describe('WorkflowRuntimeGraph synthetic scopes', () => {
-  it('gives nested owners that both mint iteration 0 distinct hashed pair ids', () => {
+  it('gives nested owners that both mint iteration 0 distinct pair ids', () => {
     const overlay = createOverlay();
 
     const outerEnter = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
     const innerEnter = overlay.insertSyntheticScope('enterForeach_innerLoop', '0', 'iteration');
+    const outer = syntheticPairIds('enterForeach_outerLoop', '0');
+    const inner = syntheticPairIds('enterForeach_innerLoop', '0');
 
-    const outer = hashedPair('0', outerEnter);
-    const inner = hashedPair('0', innerEnter);
-
-    expect(outer.enterId).not.toBe(inner.enterId);
-    expect(overlay.getNode(outer.enterId)?.type).toBe('enter-iteration');
-    expect(overlay.getNode(outer.exitId)?.type).toBe('exit-iteration');
-    expect(overlay.getNode(inner.enterId)?.type).toBe('enter-iteration');
-    expect(overlay.getNode(inner.exitId)?.type).toBe('exit-iteration');
+    expect(outerEnter).toBe(outer.enterId);
+    expect(innerEnter).toBe(inner.enterId);
+    expect(outerEnter).not.toBe(innerEnter);
+    expect(overlay.getNode(outer.enterId).type).toBe('enter-iteration');
+    expect(overlay.getNode(outer.exitId).type).toBe('exit-iteration');
+    expect(overlay.getNode(inner.enterId).type).toBe('enter-iteration');
+    expect(overlay.getNode(inner.exitId).type).toBe('exit-iteration');
   });
 
-  it('throws when the same owner remints the same stepId', () => {
+  it('replaces the pair when the same owner remints the same stepId', () => {
     const overlay = createOverlay();
-    overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
+    const first = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
+    const remint = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
 
-    expect(() => overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration')).toThrow(
-      'Synthetic scope 0 is already in the graph'
-    );
+    expect(remint).toBe(first);
+    expect(overlay.getNode(first).type).toBe('enter-iteration');
+    expect(overlay.topologicalOrder.filter((id) => id.startsWith(ENTER_SYNTHETIC_PREFIX))).toEqual([
+      first,
+    ]);
   });
 
   it('omits the synthetic enter from getNodeStack when the cursor is on that enter', () => {
@@ -91,27 +91,27 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
     const enterId = overlay.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
     const stackNodeIds = overlay
       .getNodeStack(enterId)
-      .flatMap((frame) => frame.nestedScopes.map((scope) => scope.nodeId));
+      .stackFrames.flatMap((frame) => frame.nestedScopes.map((scope) => scope.nodeId));
 
     expect(stackNodeIds).toContain('enterForeach_outerLoop');
     expect(stackNodeIds).not.toContain(enterId);
   });
 
-  it('hydrates a hashed enter when the stack is taken from a body node inside it', () => {
+  it('hydrates the same id and type as the first insert', () => {
     const compiled = WorkflowGraph.fromWorkflowDefinition(nestedForeachDefinition as WorkflowYaml);
     const first = new WorkflowRuntimeGraph(compiled, []);
     const enterId = first.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
-    const stack = first.getNodeStack('enterForeach_innerLoop');
+    const stack = first.getNodeStack('enterForeach_innerLoop').stackFrames;
     const stackNodeIds = stack.flatMap((frame) => frame.nestedScopes.map((scope) => scope.nodeId));
 
     expect(stackNodeIds).toContain(enterId);
 
     const hydrated = new WorkflowRuntimeGraph(compiled, stack);
+    const remint = hydrated.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration');
 
-    expect(hydrated.getNode(enterId)?.type).toBe('enter-iteration');
-    expect(() => hydrated.insertSyntheticScope('enterForeach_outerLoop', '0', 'iteration')).toThrow(
-      'Synthetic scope 0 is already in the graph'
-    );
+    expect(hydrated.getNode(enterId).type).toBe('enter-iteration');
+    expect(hydrated.getNode(enterId).id).toBe(enterId);
+    expect(remint).toBe(enterId);
   });
 
   describe('wrap once, rename the pair', () => {
@@ -132,9 +132,11 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
       const exit1 = enter1.replace(/^enter/, 'exit');
       const order = overlay.topologicalOrder;
 
-      expect(overlay.getNode(enter0)).toBeUndefined();
-      expect(overlay.getNode(enter0.replace(/^enter/, 'exit'))).toBeUndefined();
-      expect(overlay.getNode(enter1)?.stepType).toBe('iteration');
+      expect(() => overlay.getNode(enter0)).toThrow(`Node not found for node id: ${enter0}`);
+      expect(() => overlay.getNode(enter0.replace(/^enter/, 'exit'))).toThrow(
+        `Node not found for node id: ${enter0.replace(/^enter/, 'exit')}`
+      );
+      expect(overlay.getNode(enter1).stepType).toBe('iteration');
       expect(order).not.toContain(enter0);
       expect(order[order.indexOf(enter1) + 1]).not.toBe(exit1);
       expect(order[order.indexOf(exit1) + 1]).toBe('exitForeach_outerLoop');
@@ -163,7 +165,7 @@ describe('WorkflowRuntimeGraph synthetic scopes', () => {
 });
 
 describe('WorkflowExecutionCursor synthetic commit', () => {
-  it('navigates to the hashed enter id returned by the overlay', () => {
+  it('navigates to the owner-scoped enter returned by the overlay', () => {
     const overlay = createOverlay();
     const cursor = new WorkflowExecutionCursor({
       nodeId: 'enterForeach_outerLoop',
@@ -176,9 +178,7 @@ describe('WorkflowExecutionCursor synthetic commit', () => {
     });
     cursor.commitPendingNavigation();
 
-    expect(cursor.currentNode?.id).toMatch(new RegExp(`^${ENTER_SYNTHETIC_PREFIX}0_`));
-    expect(cursor.currentNode?.id).not.toBe('iteration:0');
-    expect(cursor.currentNode?.id).not.toContain('iteration:0');
-    expect(overlay.getNode(`${EXIT_SYNTHETIC_PREFIX}iteration:0`)).toBeUndefined();
+    expect(cursor.currentNode?.id).toBe('enterSynthetic_enterForeach_outerLoop_0');
+    expect(cursor.currentNode?.type).toBe('enter-iteration');
   });
 });
