@@ -12,6 +12,40 @@ import Path from 'path';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
+/** @param {string} specifier */
+function isLinkOrWorkspace(specifier) {
+  return specifier.startsWith('link:') || specifier.startsWith('workspace:');
+}
+
+/**
+ * @param {import('@kbn/repo-info').KibanaPackageJson['dependencies']} deps
+ */
+function managedKbnEntries(deps) {
+  return new Map(
+    Object.entries(deps).filter(
+      ([name, specifier]) => name.startsWith('@kbn/') && isLinkOrWorkspace(specifier)
+    )
+  );
+}
+
+/**
+ * @param {import('@kbn/repo-packages').Package[]} pkgs
+ * @param {import('@kbn/repo-info').KibanaPackageJson} pkgJson
+ * @param {boolean} devOnly
+ */
+function expectedWorkspaceEntries(pkgs, pkgJson, devOnly) {
+  return new Map(
+    pkgs
+      .filter((p) => p.isDevOnly() === devOnly)
+      .filter((p) => {
+        const current =
+          pkgJson.dependencies[p.manifest.id] ?? pkgJson.devDependencies[p.manifest.id];
+        return current === undefined || isLinkOrWorkspace(current);
+      })
+      .map((p) => [p.manifest.id, 'workspace:*'])
+  );
+}
+
 /**
  * @param {import('@kbn/repo-info').KibanaPackageJson['dependencies']} depsObj
  * @param {Map<string, string>} actual
@@ -63,14 +97,14 @@ export async function updatePackageJson(pkgs, log) {
 
   changes ||= updatePkgEntries(
     pkgJson.dependencies,
-    new Map(Object.entries(pkgJson.dependencies).filter(([k]) => k.startsWith('@kbn/'))),
-    new Map(pkgs.filter((p) => !p.isDevOnly()).map((p) => [p.manifest.id, 'workspace:*']))
+    managedKbnEntries(pkgJson.dependencies),
+    expectedWorkspaceEntries(pkgs, pkgJson, false)
   );
 
   changes ||= updatePkgEntries(
     pkgJson.devDependencies,
-    new Map(Object.entries(pkgJson.devDependencies).filter(([k]) => k.startsWith('@kbn/'))),
-    new Map(pkgs.filter((p) => p.isDevOnly()).map((p) => [p.manifest.id, 'workspace:*']))
+    managedKbnEntries(pkgJson.devDependencies),
+    expectedWorkspaceEntries(pkgs, pkgJson, true)
   );
 
   if (changes) {
