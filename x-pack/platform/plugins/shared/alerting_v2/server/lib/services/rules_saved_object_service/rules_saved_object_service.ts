@@ -80,7 +80,7 @@ export type BulkUpdateResultItem =
   | { id: string; success: false; error: SavedObjectError };
 
 export type BulkCreateResultItem =
-  | RuleSavedObjectDoc
+  | (RuleSavedObjectDoc & { error?: undefined })
   | {
       id: string;
       error: SavedObjectError;

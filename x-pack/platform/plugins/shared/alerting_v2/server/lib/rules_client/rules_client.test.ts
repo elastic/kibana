@@ -268,6 +268,9 @@ describe('RulesClient', () => {
     it('cleans up the saved object if scheduling fails', async () => {
       const client = createClient();
       taskManager.bulkSchedule.mockRejectedValueOnce(new Error('schedule failed'));
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
 
       await expect(
         client.createRule({
@@ -280,6 +283,7 @@ describe('RulesClient', () => {
       });
 
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-id-3']);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-id-3']);
     });
 
     it('logs RULE_CREATE_ROLLBACK_FAILED when the compensating delete also fails', async () => {
@@ -329,6 +333,41 @@ describe('RulesClient', () => {
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
+      });
+    });
+
+    it('preserves the SO client status when create fails with a per-item error', async () => {
+      const client = createClient();
+      rulesSavedObjectService.bulkCreate.mockResolvedValueOnce([
+        {
+          id: 'rule-id-forbidden',
+          error: { statusCode: 403, error: 'Forbidden', message: 'nope' },
+        },
+      ]);
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-forbidden' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('rethrows wholesale SO bulkCreate failures so the original status is kept', async () => {
+      const client = createClient();
+      rulesSavedObjectService.bulkCreate.mockRejectedValueOnce(
+        Boom.serverUnavailable('es unreachable')
+      );
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-es' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 503 },
       });
     });
 
@@ -528,6 +567,7 @@ describe('RulesClient', () => {
         expect.objectContaining({ id: 'rule-off' }),
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
       expect(res.rules).toHaveLength(1);
       expect(res.rules[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
@@ -610,8 +650,56 @@ describe('RulesClient', () => {
       expect(res.errors).toEqual([
         {
           id: 'rule-fail',
-          error: { code: 'INTERNAL_SERVER_ERROR', message: 'es down' },
+          error: {
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'es down',
+            details: { statusCode: 500 },
+          },
         },
+      ]);
+    });
+
+    it('rethrows wholesale SO bulkCreate failures instead of mapping them per item', async () => {
+      const client = createClient();
+      rulesSavedObjectService.bulkCreate.mockRejectedValueOnce(
+        Boom.serverUnavailable('es unreachable')
+      );
+
+      await expect(
+        client.bulkCreateRules({
+          rules: [
+            { ...baseCreateData, id: 'rule-a', metadata: { name: 'a' } },
+            { ...baseCreateData, id: 'rule-b', metadata: { name: 'b' } },
+          ],
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 503 },
+      });
+    });
+
+    it('rolls back saved objects and removes executor tasks when bulkSchedule omits a rule', async () => {
+      const client = createClient();
+      mockBulkCreateEcho();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+      taskManager.bulkSchedule.mockResolvedValueOnce([{ params: { ruleId: 'rule-a' } }] as never);
+
+      const res = await client.bulkCreateRules({
+        rules: [
+          { ...baseCreateData, id: 'rule-a', metadata: { name: 'a' } },
+          { ...baseCreateData, id: 'rule-b', metadata: { name: 'b' } },
+        ],
+      });
+
+      expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-b']);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-b']);
+      expect(res.rules.map((rule) => rule.id)).toEqual(['rule-a']);
+      expect(res.errors).toEqual([
+        expect.objectContaining({
+          id: 'rule-b',
+          error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }),
+        }),
       ]);
     });
 
@@ -1383,6 +1471,9 @@ describe('RulesClient', () => {
       it('cleans up the saved object if scheduling fails', async () => {
         const client = createClient();
         taskManager.bulkSchedule.mockRejectedValueOnce(new Error('schedule failed'));
+        getRuleExecutorTaskIdMock.mockImplementation(
+          ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+        );
 
         await expect(
           client.upsertRule({ id: 'rule-id-1', data: baseCreateData })
@@ -1392,6 +1483,7 @@ describe('RulesClient', () => {
         });
 
         expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-id-1']);
+        expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-id-1']);
       });
 
       it('throws 409 when another caller created the rule between get and create', async () => {

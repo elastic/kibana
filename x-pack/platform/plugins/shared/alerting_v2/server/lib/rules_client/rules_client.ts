@@ -139,6 +139,7 @@ const toBulkCreateError = (
         ? ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
         : bulkErrorCodeForStatus(err.statusCode),
     message: err.statusCode === 409 ? getRuleAlreadyExistsMessage(id) : err.message,
+    ...(err.statusCode === 409 ? {} : { details: { statusCode: err.statusCode } }),
   },
 });
 
@@ -164,7 +165,7 @@ interface PreparedRule {
 }
 
 interface PersistPreparedRulesResult {
-  created: Array<{ prepared: PreparedRule; doc: RuleSavedObjectDoc }>;
+  created: RuleSavedObjectDoc[];
   errors: BulkOperationError[];
 }
 
@@ -173,8 +174,9 @@ const throwOnCreateError = (error: BulkOperationError): never => {
   if (code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS) {
     throw Boom.conflict(message, { code, details: { rule_id: error.id } });
   }
+  const statusCode = typeof details?.statusCode === 'number' ? details.statusCode : 500;
   throw new Boom.Boom(message, {
-    statusCode: 500,
+    statusCode,
     data: { code, ...(details ? { details } : {}) },
   });
 };
@@ -430,40 +432,24 @@ export class RulesClient {
     }
 
     const errors: BulkOperationError[] = [];
-    let createResults: Awaited<ReturnType<RulesSavedObjectServiceContract['bulkCreate']>>;
-    try {
-      createResults = await this.rulesSavedObjectService.bulkCreate(
-        prepared.map((item) => ({
-          id: item.id,
-          attrs: item.attrs,
-          references: item.references,
-        }))
-      );
-    } catch (e) {
-      for (const item of prepared) {
-        errors.push({
-          id: item.id,
-          error: {
-            code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
-            message: errorMessage(e),
-          },
-        });
-      }
-      return { created: [], errors };
-    }
+    const createResults = await this.rulesSavedObjectService.bulkCreate(
+      prepared.map((item) => ({
+        id: item.id,
+        attrs: item.attrs,
+        references: item.references,
+      }))
+    );
 
     const persisted: PersistPreparedRulesResult['created'] = [];
-    for (let i = 0; i < createResults.length; i++) {
-      const createResult = createResults[i];
-      const item = prepared[i];
-      if ('error' in createResult) {
+    for (const createResult of createResults) {
+      if (createResult.error) {
         errors.push(toBulkCreateError(createResult.id, createResult.error));
         continue;
       }
-      persisted.push({ prepared: item, doc: createResult });
+      persisted.push(createResult);
     }
 
-    const enabledPersisted = persisted.filter((entry) => entry.prepared.enabled);
+    const enabledPersisted = persisted.filter((doc) => doc.attributes.enabled);
     if (enabledPersisted.length === 0) {
       return { created: persisted, errors };
     }
@@ -474,22 +460,19 @@ export class RulesClient {
       const scheduledTasks = await bulkScheduleRuleExecutorTasks({
         services: { taskManager: this.taskManager },
         input: {
-          items: enabledPersisted.map((entry) => ({
-            ruleId: entry.prepared.id,
+          items: enabledPersisted.map((doc) => ({
+            ruleId: doc.id,
             spaceId,
-            schedule: { interval: entry.prepared.attrs.schedule.every },
+            schedule: { interval: doc.attributes.schedule.every },
           })),
           request: this.request,
         },
       });
       for (const task of scheduledTasks) {
-        const ruleId = task.params.ruleId;
-        if (typeof ruleId === 'string') {
-          scheduledRuleIds.add(ruleId);
-        }
+        scheduledRuleIds.add(task.params.ruleId);
       }
     } catch (e) {
-      const driftedRuleIds = enabledPersisted.map((entry) => entry.prepared.id);
+      const driftedRuleIds = enabledPersisted.map((doc) => doc.id);
       const message = `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
         ', '
       )}]; they were not created: ${errorMessage(e)}`;
@@ -504,15 +487,16 @@ export class RulesClient {
       }
 
       await this.rollbackCreatedRules(driftedRuleIds, spaceId);
+      await this.removeExecutorTasks({ ruleIds: driftedRuleIds, spaceId, errors });
       return {
-        created: persisted.filter((entry) => !entry.prepared.enabled),
+        created: persisted.filter((doc) => !doc.attributes.enabled),
         errors,
       };
     }
 
     const failedScheduleIds = enabledPersisted
-      .filter((entry) => !scheduledRuleIds.has(entry.prepared.id))
-      .map((entry) => entry.prepared.id);
+      .filter((doc) => !scheduledRuleIds.has(doc.id))
+      .map((doc) => doc.id);
 
     for (const id of failedScheduleIds) {
       errors.push(
@@ -523,11 +507,10 @@ export class RulesClient {
       );
     }
     await this.rollbackCreatedRules(failedScheduleIds, spaceId);
+    await this.removeExecutorTasks({ ruleIds: failedScheduleIds, spaceId, errors });
 
     return {
-      created: persisted.filter(
-        (entry) => !entry.prepared.enabled || scheduledRuleIds.has(entry.prepared.id)
-      ),
+      created: persisted.filter((doc) => !doc.attributes.enabled || scheduledRuleIds.has(doc.id)),
       errors,
     };
   }
@@ -651,10 +634,10 @@ export class RulesClient {
       throw Boom.badImplementation('Rule was not created');
     }
     const rule = this.toRuleApiResponse({
-      id: persisted.doc.id,
-      attrs: persisted.doc.attributes,
-      version: persisted.doc.version,
-      references: persisted.doc.references,
+      id: persisted.id,
+      attrs: persisted.attributes,
+      version: persisted.version,
+      references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
@@ -709,12 +692,12 @@ export class RulesClient {
 
     const rules: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
-    for (const entry of persisted.created) {
+    for (const doc of persisted.created) {
       const rule = this.toRuleApiResponse({
-        id: entry.doc.id,
-        attrs: entry.doc.attributes,
-        version: entry.doc.version,
-        references: entry.doc.references,
+        id: doc.id,
+        attrs: doc.attributes,
+        version: doc.version,
+        references: doc.references,
       });
       rules.push(rule);
       createdRules.push({ ruleId: rule.id, spaceId, rule });
