@@ -82,10 +82,10 @@ dependsOn:
   - '@kbn/entity-store'
   - '@kbn/logging-mocks'
   - '@kbn/core-spaces-common'
-  - '@kbn/es-errors'
-  - '@kbn/app-header'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/es-errors'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
