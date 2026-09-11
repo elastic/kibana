@@ -11,11 +11,13 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   ConversationAccessControlMode,
   ConversationRoundStatus,
-  ConversationOriginType,
   createAgentNotFoundError,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { TimelineEvent } from '@kbn/agent-builder-common';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createMockedAgentRegistry } from '../../../test_utils/agents';
 import { createClient } from './client';
@@ -51,9 +53,28 @@ const initialConversation = {
 const request = (message: string): AppendContextMessageRequest => ({
   id: 'conversation',
   message,
-  attachments: [],
-  getTypeDefinition: () => textType,
 });
+
+/**
+ * Materializes attachment inputs the way callers do, so these tests exercise the same
+ * `refs` + snapshot/produced contract the routes pass in.
+ */
+const materialize = async (
+  snapshot: VersionedAttachment[],
+  inputs: AttachmentInput[]
+): Promise<Pick<AppendContextMessageRequest, 'refs' | 'attachments'>> => {
+  const manager = createAttachmentStateManager(snapshot, { getTypeDefinition: () => textType });
+
+  for (const input of inputs) {
+    if (input.id && manager.getAttachmentRecord(input.id)) {
+      await manager.update(input.id, input, ATTACHMENT_REF_ACTOR.user);
+    } else {
+      await manager.add(input, ATTACHMENT_REF_ACTOR.user);
+    }
+  }
+
+  return { refs: manager.getAccessedRefs(), attachments: { snapshot, produced: manager.getAll() } };
+};
 
 const messagesOf = (events: TimelineEvent[] = []): string[] =>
   events.flatMap((event) =>
@@ -71,6 +92,14 @@ describe('appendContextMessage', () => {
     space: 'default',
     logger: loggerMock.create(),
     agentRegistry,
+  });
+
+  const withAttachments = async (
+    message: string,
+    inputs: AttachmentInput[]
+  ): Promise<AppendContextMessageRequest> => ({
+    ...request(message),
+    ...(await materialize((await client.get('conversation')).attachments ?? [], inputs)),
   });
 
   beforeEach(() => {
@@ -98,10 +127,9 @@ describe('appendContextMessage', () => {
   });
 
   it('atomically appends messages and attachments, without projecting rounds', async () => {
-    await client.appendContextMessage({
-      ...request('m1'),
-      attachments: [{ id: 'a1', type: 'text', data: { text: 'context' } }],
-    });
+    await client.appendContextMessage(
+      await withAttachments('m1', [{ id: 'a1', type: 'text', data: { text: 'context' } }])
+    );
     const conversation = await client.get('conversation');
     expect(conversation.rounds).toEqual([]);
     expect(conversation.events).toEqual([
@@ -122,7 +150,7 @@ describe('appendContextMessage', () => {
 
   it('defaults the message and attachments, stamping the event with the current time', async () => {
     const before = Date.now();
-    await client.appendContextMessage({ id: 'conversation', getTypeDefinition: () => textType });
+    await client.appendContextMessage({ id: 'conversation' });
     const [event] = (await client.get('conversation')).events ?? [];
     expect(event).toEqual(expect.objectContaining({ data: { message: '', attachment_refs: [] } }));
     expect(Date.parse(event.created_at)).toBeGreaterThanOrEqual(before);
@@ -151,46 +179,39 @@ describe('appendContextMessage', () => {
     expect(messagesOf((await client.get('conversation')).events)).toEqual(['m1']);
   });
 
-  it('rejects read-only and cross-space writes', async () => {
+  it('appends to read-only conversations, which are only read-only in the UI', async () => {
     stored.read_only = true;
-    await expect(client.appendContextMessage(request('m1'))).rejects.toThrow('read-only');
-    stored.read_only = false;
+    await client.appendContextMessage(request('m1'));
+    expect(messagesOf((await client.get('conversation')).events)).toEqual(['m1']);
+  });
+
+  it('rejects cross-space writes', async () => {
     stored.space = 'other';
     await expect(client.appendContextMessage(request('m1'))).rejects.toThrow();
     expect(mockIndex).not.toHaveBeenCalled();
   });
 
-  it('creates the conversation and initial attachments in one write with the authenticated owner', async () => {
-    mockIndex.mockImplementationOnce(async ({ document }) => {
-      stored = structuredClone(document);
-      version++;
-      return { _seq_no: version, _primary_term: 1 };
-    });
+  it('attributes the message to the supplied author', async () => {
     await client.appendContextMessage({
       ...request('m1'),
-      create: { ...initialConversation, user: { id: 'unknown', username: 'unknown' } },
-      attachments: [{ id: 'a1', type: 'text', data: { text: 'initial' } }],
-      author: { id: 'external-user', full_name: 'Alice Slack' },
-      origin: { type: ConversationOriginType.Slack },
+      author: { id: 'author-user', full_name: 'Alice Author' },
     });
     const conversation = await client.get('conversation');
-    expect(conversation.user).toEqual(initialConversation.user);
-    expect(conversation.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-    expect(conversation.rounds).toEqual([]);
-    expect(conversation.events?.[0].actor).toMatchObject({ type: 'external', id: 'external-user' });
-    expect(conversation.attachments).toHaveLength(1);
+    expect(conversation.events?.[0].actor).toMatchObject({
+      type: 'user',
+      id: 'author-user',
+      full_name: 'Alice Author',
+    });
     expect(mockIndex).toHaveBeenCalledTimes(1);
   });
 
   it('preserves attachment versions referenced by previous messages', async () => {
-    await client.appendContextMessage({
-      ...request('m1'),
-      attachments: [{ id: 'a1', type: 'text', data: { text: 'one' } }],
-    });
-    await client.appendContextMessage({
-      ...request('m2'),
-      attachments: [{ id: 'a1', type: 'text', data: { text: 'two' } }],
-    });
+    await client.appendContextMessage(
+      await withAttachments('m1', [{ id: 'a1', type: 'text', data: { text: 'one' } }])
+    );
+    await client.appendContextMessage(
+      await withAttachments('m2', [{ id: 'a1', type: 'text', data: { text: 'two' } }])
+    );
     const conversation = await client.get('conversation');
     expect(conversation.attachments?.[0].versions).toHaveLength(2);
     expect(
@@ -210,10 +231,5 @@ describe('appendContextMessage', () => {
     agentRegistry.get.mockRejectedValueOnce(createAgentNotFoundError({ agentId: 'agent' }));
     await expect(client.appendContextMessage(request('m2'))).rejects.toThrow();
     expect(mockIndex).toHaveBeenCalledTimes(1);
-  });
-
-  it('retries creation races against the existing conversation', async () => {
-    await client.appendContextMessage({ ...request('m1'), create: initialConversation });
-    expect(messagesOf((await client.get('conversation')).events)).toEqual(['m1']);
   });
 });

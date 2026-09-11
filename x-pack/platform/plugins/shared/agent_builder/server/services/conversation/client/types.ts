@@ -24,16 +24,13 @@ import type {
   ConversationInternalState,
 } from '@kbn/agent-builder-common/chat';
 import type {
-  AttachmentInput,
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 import type {
   ConversationRoundAuthor,
-  ConversationRoundOrigin,
   TimelineEvent,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -148,14 +145,19 @@ export interface AddAttachmentsToLastRoundRequest {
   attachments: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
 }
 
+/**
+ * Appends a standalone user message, with the attachments the caller already materialized.
+ * Merge semantics match {@link AddAttachmentsToLastRoundRequest}: the message is appended to
+ * the stored timeline and the attachment list is reconciled, so concurrent writes survive.
+ */
 export interface AppendContextMessageRequest {
   id: string;
   message?: string;
-  attachments?: AttachmentInput[];
-  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
-  create?: ConversationCreateRequest;
+  /** Referenced from the appended message. */
+  refs?: AttachmentVersionRef[];
+  /** Reconciled into the stored list; `snapshot` is what the caller started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   author?: ConversationRoundAuthor;
-  origin?: ConversationRoundOrigin;
 }
 
 export interface ConversationListOptions {

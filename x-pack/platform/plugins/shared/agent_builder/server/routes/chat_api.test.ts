@@ -234,7 +234,7 @@ describe('context message acknowledgements', () => {
     const getStartServices = jest.fn();
     const services = {
       conversations: {
-        getScopedClient: async () => ({ appendContextMessage }),
+        getScopedClient: async () => ({ appendContextMessage, get: async () => conversation }),
         getConversationRoundAuthor: async () => ({ id: 'user' }),
       },
       attachments: {
@@ -330,7 +330,7 @@ describe('context message acknowledgements', () => {
     const appendContextMessage = jest.fn();
     const services = {
       conversations: {
-        getScopedClient: async () => ({ appendContextMessage }),
+        getScopedClient: async () => ({ appendContextMessage, get: async () => ({}) }),
         getConversationRoundAuthor: async () => ({ id: 'user' }),
       },
       attachments: {
