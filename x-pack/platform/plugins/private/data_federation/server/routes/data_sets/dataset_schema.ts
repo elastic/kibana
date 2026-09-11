@@ -26,7 +26,6 @@ export const datasetSchema = schema.object({
         schema.object({
           type: schema.oneOf([
             schema.literal('keyword'),
-            schema.literal('text'),
             schema.literal('long'),
             schema.literal('integer'),
             schema.literal('double'),

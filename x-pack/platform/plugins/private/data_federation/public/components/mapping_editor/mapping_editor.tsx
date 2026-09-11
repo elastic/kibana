@@ -35,7 +35,6 @@ import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form
 
 export enum DataType {
   KEYWORD = 'keyword',
-  TEXT = 'text',
   LONG = 'long',
   INTEGER = 'integer',
   DOUBLE = 'double',
@@ -122,10 +121,6 @@ const TYPE_INFO_BY_VALUE: Record<DataType, { label: string; docs: string }> = {
     label: 'Long',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
   },
-  [DataType.TEXT]: {
-    label: 'Text',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/text`,
-  },
   [DataType.UNSIGNED_LONG]: {
     label: 'Unsigned long',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`,
@@ -176,7 +171,6 @@ const TYPE_OPTIONS: Array<{ value: '' | DataType; text: string }> = [
   { value: DataType.IP, text: TYPE_INFO_BY_VALUE[DataType.IP].label },
   { value: DataType.KEYWORD, text: TYPE_INFO_BY_VALUE[DataType.KEYWORD].label },
   { value: DataType.LONG, text: TYPE_INFO_BY_VALUE[DataType.LONG].label },
-  { value: DataType.TEXT, text: TYPE_INFO_BY_VALUE[DataType.TEXT].label },
   { value: DataType.UNSIGNED_LONG, text: TYPE_INFO_BY_VALUE[DataType.UNSIGNED_LONG].label },
 ];
 
@@ -693,6 +687,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           {filteredFields.map((f) => {
             const isDate = f.type === DataType.DATETIME;
+            const typeInfo = (
+              TYPE_INFO_BY_VALUE as Record<string, { label: string; docs: string } | undefined>
+            )[f.type];
             const isEditing = editingFieldId === f.id;
             const shouldShowRowValidation = validatedFieldIds.includes(f.id);
             const rowErrors = shouldShowRowValidation
@@ -772,9 +769,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                           >
                             <EuiFlexItem grow={false}>
                               {f.type ? (
-                                <EuiBadge color="hollow">
-                                  {TYPE_INFO_BY_VALUE[f.type as DataType].label}
-                                </EuiBadge>
+                                <EuiBadge color="hollow">{typeInfo?.label ?? f.type}</EuiBadge>
                               ) : (
                                 <span aria-hidden="true">&nbsp;</span>
                               )}

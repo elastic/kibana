@@ -16,6 +16,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DatasetMappingFieldType } from '../../../common/dataset_types';
 
 export interface FieldMappingFormValue<TType extends string = string> {
   type: '' | TType;
@@ -45,13 +46,12 @@ export interface FieldMappingFormProps<TType extends string = string> {
   fieldFormatTestSubj: string;
 }
 
-export const getFieldTypeDocsHelpText = <TType extends string>(
-  type: '' | TType,
-  infoByValue: Record<TType, { label: string; docs: string }>
+export const getFieldTypeDocsHelpText = (
+  type: DatasetMappingFieldType,
+  infoByValue: Record<DatasetMappingFieldType, { label: string; docs: string }>
 ): React.ReactNode => {
-  if (!type) return;
-
   const info = infoByValue[type];
+  if (!info) return;
 
   return (
     <EuiLink href={info.docs} target="_blank" external>

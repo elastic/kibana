@@ -29,7 +29,6 @@ export type DatasetMappingsDynamic = 'true' | 'false';
 
 export type DatasetMappingFieldType =
   | 'keyword'
-  | 'text'
   | 'long'
   | 'integer'
   | 'double'
