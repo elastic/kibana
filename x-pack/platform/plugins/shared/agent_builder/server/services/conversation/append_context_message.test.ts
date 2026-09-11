@@ -173,6 +173,11 @@ describe('ConversationService.appendContextMessage', () => {
     expect(Date.parse(event.created_at)).toBeGreaterThanOrEqual(before);
   });
 
+  it('trims the stored message', async () => {
+    const conversation = await append('  spaced  ');
+    expect(messagesOf(conversation.events)).toEqual(['spaced']);
+  });
+
   it('merges concurrent appends against the fresh snapshot', async () => {
     await Promise.all([append('m1'), append('m2'), append('m3')]);
     const conversation = await readConversation();

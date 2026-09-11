@@ -138,7 +138,7 @@ export class ConversationServiceImpl implements ConversationService {
           type: TimelineEventType.userMessage,
           created_at: new Date().toISOString(),
           actor: userMessageActor({ ...conversation, user }, { author }),
-          data: { message, attachment_refs: stateManager.getAccessedRefs() },
+          data: { message: message.trim(), attachment_refs: stateManager.getAccessedRefs() },
         },
       ],
       attachments: { snapshot, produced: stateManager.getAll() },
