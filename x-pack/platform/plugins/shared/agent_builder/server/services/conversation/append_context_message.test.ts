@@ -15,8 +15,17 @@ import {
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { TimelineEvent } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentInput,
+  AttachmentRefActor,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentStateManager,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { mergeAttachmentInputs } from '../attachments/merge_attachment_inputs';
 import { createMockedAgentRegistry } from '../../test_utils/agents';
 import { getUserFromRequest } from '../utils';
 import { toEs } from './client/converters';
@@ -55,6 +64,28 @@ const initialConversation = {
 
 const request = { headers: {} } as unknown as KibanaRequest;
 
+/** The attachment service methods the conversation service uses, over the real primitives. */
+const attachmentsService = {
+  getTypeDefinition: () => textType,
+  createStateManager: (attachments: VersionedAttachment[]) =>
+    createAttachmentStateManager(attachments, { getTypeDefinition: () => textType }),
+  mergeInputs: ({
+    stateManager,
+    inputs,
+    actor,
+  }: {
+    stateManager: AttachmentStateManager;
+    inputs: AttachmentInput[];
+    actor: AttachmentRefActor;
+  }) =>
+    mergeAttachmentInputs({
+      stateManager,
+      inputs,
+      actor,
+      resolveContext: { request, spaceId: 'default', savedObjectsClient: {} as never },
+    }),
+};
+
 const messagesOf = (events: TimelineEvent[] = []): string[] =>
   events.flatMap((event) =>
     event.type === TimelineEventType.userMessage ? [event.data.message] : []
@@ -73,7 +104,7 @@ describe('ConversationService.appendContextMessage', () => {
       client: { asScoped: () => ({ asCurrentUser: es, asInternalUser: es }) },
     } as never,
     agents: { getRegistry: async () => agentRegistry } as never,
-    attachments: { getTypeDefinition: () => textType } as never,
+    attachments: attachmentsService as never,
   });
 
   const append = (message: string, attachments?: AttachmentInput[]) =>
@@ -189,6 +220,12 @@ describe('ConversationService.appendContextMessage', () => {
           event.type === TimelineEventType.userMessage && event.data.attachment_refs?.[0].version
       )
     ).toEqual([1, 2]);
+  });
+
+  it('reuses a stored attachment when the same content is posted again', async () => {
+    await append('m1', [{ type: 'text', data: { text: 'same' } }]);
+    const conversation = await append('m2', [{ type: 'text', data: { text: 'same' } }]);
+    expect(conversation.attachments).toHaveLength(1);
   });
 
   it('authorizes private/shared writes independently of attribution and checks agent use', async () => {

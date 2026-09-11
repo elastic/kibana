@@ -97,6 +97,8 @@ describe('AgentExecutionService', () => {
     ),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn().mockReturnValue([]),
+    createStateManager: jest.fn(),
+    mergeInputs: jest.fn(),
   };
 
   const service = createAgentExecutionService({

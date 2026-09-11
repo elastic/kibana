@@ -151,6 +151,8 @@ export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock
     validate: jest.fn(),
     getTypeDefinition: jest.fn(),
     getRegisteredTypeIds: jest.fn(),
+    createStateManager: jest.fn(),
+    mergeInputs: jest.fn(),
   };
 };
 

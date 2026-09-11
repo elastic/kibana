@@ -20,7 +20,6 @@ import {
 import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
@@ -119,17 +118,14 @@ export class ConversationServiceImpl implements ConversationService {
     }
 
     const snapshot = conversation.attachments ?? [];
-    const stateManager = createAttachmentStateManager(snapshot, {
-      getTypeDefinition: this.attachments.getTypeDefinition,
-    });
+    const stateManager = this.attachments.createStateManager(snapshot);
 
-    for (const attachment of attachments) {
-      if (attachment.id && stateManager.getAttachmentRecord(attachment.id)) {
-        await stateManager.update(attachment.id, attachment, ATTACHMENT_REF_ACTOR.user);
-      } else {
-        await stateManager.add(attachment, ATTACHMENT_REF_ACTOR.user);
-      }
-    }
+    await this.attachments.mergeInputs({
+      stateManager,
+      inputs: attachments,
+      request,
+      actor: ATTACHMENT_REF_ACTOR.user,
+    });
 
     const user = await this.getCurrentUser({ request });
     const author = await this.getConversationRoundAuthor({ request });
