@@ -11,7 +11,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": ["spaces"],
+    "optionalPlugins": ["spaces", "agentBuilder"],
     "extraPublicDirs": ["common"]
   }
 }

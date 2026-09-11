@@ -31,6 +31,13 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agentic-investigations-common'
+  - '@kbn/core-http-browser'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
