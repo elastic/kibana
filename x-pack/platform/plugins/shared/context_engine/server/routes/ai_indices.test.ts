@@ -11,17 +11,20 @@ import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+  MAX_AI_INDICES,
   aiIndexByIdPath,
   aiIndexFeedbackAnalysisPath,
   aiIndexKiByIdPath,
   aiIndexKiListPath,
   aiIndexPath,
 } from '../../common/constants';
+import { aiIndicesIndexName } from '../ai_indices/storage';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -107,6 +110,8 @@ describe('ai indices routes', () => {
   let esGet: jest.Mock;
   let esDeleteDataStream: jest.Mock;
   let esDeleteIndex: jest.Mock;
+  let esInternalSearch: jest.Mock;
+  let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
   const logger = loggerMock.create();
 
@@ -126,6 +131,9 @@ describe('ai indices routes', () => {
                 deleteDataStream: esDeleteDataStream,
                 delete: esDeleteIndex,
               },
+            },
+            asInternalUser: {
+              search: esInternalSearch,
             },
           },
         },
@@ -152,6 +160,8 @@ describe('ai indices routes', () => {
     esGet = jest.fn();
     esDeleteDataStream = jest.fn().mockResolvedValue({ acknowledged: true });
     esDeleteIndex = jest.fn().mockResolvedValue({ acknowledged: true });
+    esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    spacesStart = spacesMock.createStart();
     aiIndexService = {
       create: jest.fn(),
       put: jest.fn(),
@@ -198,7 +208,7 @@ describe('ai indices routes', () => {
       },
       getActions: async () => actions,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
-      getSpaces: async () => undefined,
+      getSpaces: async () => spacesStart,
     });
   });
 
@@ -847,6 +857,12 @@ describe('ai indices routes', () => {
           query: { delete_knowledge_indicators: true },
         });
 
+        expect(esInternalSearch).toHaveBeenCalledWith({
+          index: aiIndicesIndexName,
+          size: MAX_AI_INDICES,
+          track_total_hits: false,
+          query: { term: { 'dest.value': aiIndexItem.dest.value } },
+        });
         expect(esDeleteDataStream).toHaveBeenCalledWith({ name: aiIndexItem.dest.value });
         expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
       });
@@ -865,6 +881,27 @@ describe('ai indices routes', () => {
 
         expect(esDeleteIndex).toHaveBeenCalledWith({ index: 'my-index' });
         expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('skips dest delete and warns when another AI index still uses the dest', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+        esInternalSearch.mockResolvedValue({
+          hits: { hits: [{ _id: 'other_space_index' }] },
+        });
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(esDeleteDataStream).not.toHaveBeenCalled();
+        expect(esDeleteIndex).not.toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining('other_space_index')],
+          },
+        });
       });
 
       it('returns a partial-failure error when the backing store deletion fails', async () => {
@@ -893,6 +930,7 @@ describe('ai indices routes', () => {
         });
 
         expect(esDeleteDataStream).not.toHaveBeenCalled();
+        expect(esInternalSearch).not.toHaveBeenCalled();
       });
 
       it('does not delete a dest that is an index pattern', async () => {

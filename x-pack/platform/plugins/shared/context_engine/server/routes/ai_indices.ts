@@ -326,7 +326,7 @@ const deleteAiIndexQuerySchema = schema.object({
     defaultValue: false,
     meta: {
       description:
-        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Defaults to false.',
+        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.',
     },
   }),
   delete_automations: schema.boolean({
@@ -652,7 +652,8 @@ export const registerAiIndexRoutes = ({
       description:
         'Deletes an AI index by id. The backing data stream/index (and therefore its Knowledge ' +
         'Indicators) and the attached workflow automations are left untouched unless the ' +
-        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true.',
+        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
+        'The dest is not deleted when another AI index still uses it.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -692,7 +693,7 @@ export const registerAiIndexRoutes = ({
 
           if (deleteKnowledgeIndicators) {
             const err = await deleteBackingStoreResource({
-              esClient: core.elasticsearch.client.asCurrentUser,
+              esClient: core.elasticsearch.client,
               dest: aiIndex.dest,
               logger,
               aiIndexId,

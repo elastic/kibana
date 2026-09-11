@@ -16,6 +16,7 @@ import { AiIndexCardGrid } from './ai_index_card_grid';
 const mockRefetch = jest.fn();
 
 jest.mock('@kbn/content-list-provider', () => ({
+  ...jest.requireActual('@kbn/content-list-provider'),
   useContentListPhase: () => 'populated',
   useContentListItems: () => ({
     items: [

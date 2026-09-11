@@ -6,9 +6,11 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { MAX_AI_INDICES } from '../../common/constants';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { deleteBackingStoreResource } from './delete_resources';
+import { aiIndicesIndexName } from './storage';
 
 const makeResponseError = (statusCode: number) =>
   new errors.ResponseError({
@@ -29,10 +31,20 @@ describe('deleteBackingStoreResource', () => {
   const deleteDataStream = jest.fn();
   const deleteIndex = jest.fn();
   const warn = jest.fn();
+  const registrySearch = jest.fn();
   const esClient = {
-    indices: { deleteDataStream, delete: deleteIndex },
-  } as unknown as ElasticsearchClient;
+    asCurrentUser: {
+      indices: { deleteDataStream, delete: deleteIndex },
+    },
+    asInternalUser: {
+      search: registrySearch,
+    },
+  } as unknown as IScopedClusterClient;
   const logger = { warn } as unknown as Logger;
+
+  const emptySearchResponse = {
+    hits: { hits: [] },
+  };
 
   const deleteBackingStore = (dest: AiIndexDest) =>
     deleteBackingStoreResource({
@@ -46,6 +58,8 @@ describe('deleteBackingStoreResource', () => {
     deleteDataStream.mockReset();
     deleteIndex.mockReset();
     warn.mockReset();
+    registrySearch.mockReset();
+    registrySearch.mockResolvedValue(emptySearchResponse);
   });
 
   describe('data_stream dest', () => {
@@ -114,7 +128,30 @@ describe('deleteBackingStoreResource', () => {
       );
       expect(deleteDataStream).not.toHaveBeenCalled();
       expect(deleteIndex).not.toHaveBeenCalled();
+      expect(registrySearch).not.toHaveBeenCalled();
       expect(warn).toHaveBeenCalled();
     }
   );
+
+  it('skips dest delete when another AI index still uses the dest', async () => {
+    registrySearch.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'my-ai-index' }, { _id: 'other_space_index' }],
+      },
+    });
+
+    await expect(
+      deleteBackingStore({ type: 'data_stream', value: 'ai-index-ds-customer_support' })
+    ).resolves.toMatch(/other_space_index/);
+
+    expect(registrySearch).toHaveBeenCalledWith({
+      index: aiIndicesIndexName,
+      size: MAX_AI_INDICES,
+      track_total_hits: false,
+      query: { term: { 'dest.value': 'ai-index-ds-customer_support' } },
+    });
+    expect(deleteDataStream).not.toHaveBeenCalled();
+    expect(deleteIndex).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
 });
