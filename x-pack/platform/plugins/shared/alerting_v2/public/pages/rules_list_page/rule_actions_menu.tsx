@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiTextColor,
   EuiToolTip,
+  EuiWrappingPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -34,11 +35,10 @@ export interface RuleActionsMenuProps {
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
   /** When provided, adds a leading "View details" read action linking to the rule details page. */
   detailsHref?: string;
-  /**
-   * Renders the popover trigger. Defaults to the kebab "More actions" icon button used in the
-   * rules list. The flyout footer passes a "Take action" button instead.
-   */
   renderButton?: (args: { isOpen: boolean; toggle: () => void }) => React.ReactElement;
+  anchorId?: string;
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
   anchorPosition?: EuiPopoverProps['anchorPosition'];
 }
 
@@ -54,9 +54,20 @@ export const RuleActionsMenu = ({
   onViewChangeHistory,
   detailsHref,
   renderButton,
+  anchorId,
+  isOpen: isOpenProp,
+  onOpenChange,
   anchorPosition = 'downRight',
 }: RuleActionsMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
+  const isControlled = isOpenProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : uncontrolledIsOpen;
+  const setIsOpen = (next: boolean) => {
+    if (!isControlled) {
+      setUncontrolledIsOpen(next);
+    }
+    onOpenChange?.(next);
+  };
 
   // Each action is built once and then arranged into separated groups below. `null` entries
   // (unavailable or write-gated actions) are filtered out before rendering.
@@ -232,7 +243,31 @@ export const RuleActionsMenu = ({
     return null;
   }
 
-  const toggle = () => setIsOpen((open) => !open);
+  const toggle = () => setIsOpen(!isOpen);
+  const closePopover = () => setIsOpen(false);
+  const menuAriaLabel = i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
+    defaultMessage: 'Rule actions',
+  });
+
+  if (anchorId) {
+    const anchor = document.getElementById(anchorId);
+    if (!anchor) {
+      return null;
+    }
+
+    return (
+      <EuiWrappingPopover
+        button={anchor}
+        isOpen={isOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition={anchorPosition}
+        aria-label={menuAriaLabel}
+      >
+        <EuiContextMenuPanel items={menuItems} />
+      </EuiWrappingPopover>
+    );
+  }
 
   const button = renderButton ? (
     renderButton({ isOpen, toggle })
@@ -259,12 +294,10 @@ export const RuleActionsMenu = ({
     <EuiPopover
       button={button}
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition={anchorPosition}
-      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
-        defaultMessage: 'Rule actions',
-      })}
+      aria-label={menuAriaLabel}
     >
       <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>

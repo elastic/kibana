@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RuleApiResponse } from '../../../services/rules_api';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
+import type { RuleApiResponse } from '../../../../services/rules_api';
+import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { RuleSummaryFlyoutContainer } from './rule_summary_flyout_container';
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -17,15 +17,15 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
-jest.mock('../../../hooks/use_fetch_rule', () => ({ useFetchRule: jest.fn() }));
+jest.mock('../../../../hooks/use_fetch_rule', () => ({ useFetchRule: jest.fn() }));
 
 const mockMutation = { mutate: jest.fn(), isLoading: false };
-jest.mock('../../../hooks/use_delete_rule', () => ({ useDeleteRule: () => mockMutation }));
-jest.mock('../../../hooks/use_toggle_rule_enabled', () => ({
+jest.mock('../../../../hooks/use_delete_rule', () => ({ useDeleteRule: () => mockMutation }));
+jest.mock('../../../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockMutation,
 }));
-jest.mock('../../../hooks/use_run_rule', () => ({ useRunRule: () => mockMutation }));
-jest.mock('../../../hooks/use_bulk_update_rule_api_key', () => ({
+jest.mock('../../../../hooks/use_run_rule', () => ({ useRunRule: () => mockMutation }));
+jest.mock('../../../../hooks/use_bulk_update_rule_api_key', () => ({
   useBulkUpdateRuleApiKey: () => mockMutation,
 }));
 
@@ -37,11 +37,11 @@ jest.mock('./rule_summary_flyout', () => ({
   ),
 }));
 
-jest.mock('../../loading_flyout', () => ({
+jest.mock('../../../loading_flyout', () => ({
   LoadingFlyout: () => <div data-test-subj="mockLoadingFlyout" />,
 }));
 
-jest.mock('../../entity_not_found_flyout', () => ({
+jest.mock('../../../entity_not_found_flyout', () => ({
   EntityNotFoundFlyout: () => <div data-test-subj="mockEntityNotFoundFlyout" />,
 }));
 

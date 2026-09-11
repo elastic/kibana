@@ -142,18 +142,6 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
 
   return (
     <>
-      {isSummary && (
-        <>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
-                defaultMessage: 'Rule conditions',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {description && (
         <>
           <EuiText size="s" data-test-subj="ruleConditionsDescription">
