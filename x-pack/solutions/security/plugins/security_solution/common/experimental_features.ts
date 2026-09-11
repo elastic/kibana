@@ -292,6 +292,12 @@ export const allowedExperimentalValues = Object.freeze({
   dexAiSkillRecommendPrebuiltRules: true,
 
   /**
+   * Enables the detection-coverage Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillDetectionCoverage: false,
+
+  /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
    * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
    * Turning this flag on unregisters that advanced setting, forcing the
