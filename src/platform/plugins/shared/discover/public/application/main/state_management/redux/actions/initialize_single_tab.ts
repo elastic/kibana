@@ -35,6 +35,7 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import type { DiscoverServices } from '../../../../../build_services';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 
@@ -186,21 +187,10 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     let esqlSource: EsqlSource | undefined;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      const projectRouting =
-        getProjectRoutingFromEsqlQuery(initialQuery.esql) ??
-        services.cps?.cpsManager?.getProjectRouting();
-      esqlSource = await EsqlSource.create({
-        query: initialQuery.esql,
-        resultColumns: [],
-        timeFieldName: await getESQLTimeField({
-          query: initialQuery.esql,
-          http: services.http,
-          projectRouting,
-        }),
-        projectRouting,
-      });
-      services.dataSourceService.registerEsqlSource(esqlSource);
-      dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+      // Creates a placeholder EsqlSource (empty columns) so DSL consumers can resolve a DataView
+      // by ID before the first fetch. Replaced with real columns by build_esql_fetch_subscribe
+      // once fetch_esql returns results. Remove once DSL consumers migrate to DataSourceService.
+      ({ esqlSource, dataView } = await initializeEsqlDataSource(initialQuery.esql, services));
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
@@ -365,3 +355,20 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     return { showNoDataPage: false };
   }
 );
+
+async function initializeEsqlDataSource(
+  esql: string,
+  services: DiscoverServices
+): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
+  const projectRouting =
+    getProjectRoutingFromEsqlQuery(esql) ?? services.cps?.cpsManager?.getProjectRouting();
+  const esqlSource = await EsqlSource.create({
+    query: esql,
+    resultColumns: [],
+    timeFieldName: await getESQLTimeField({ query: esql, http: services.http, projectRouting }),
+    projectRouting,
+  });
+  services.dataSourceService.registerEsqlSource(esqlSource);
+  const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+  return { esqlSource, dataView };
+}
