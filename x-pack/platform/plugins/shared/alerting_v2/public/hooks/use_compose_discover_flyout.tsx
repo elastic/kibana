@@ -55,6 +55,9 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
   updated_at: new Date().toISOString(),
   metadata: {
     ...template.rule.metadata,
+    // signature_id is optional on proposed/attachment rules; '' is a safe fallback for
+    // this synthetic draft that never gets serialised back to the server directly.
+    signature_id: template.rule.metadata.signature_id ?? '',
     version: 1,
   },
 });

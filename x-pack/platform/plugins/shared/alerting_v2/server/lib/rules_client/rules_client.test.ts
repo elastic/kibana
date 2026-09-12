@@ -355,6 +355,90 @@ describe('RulesClient', () => {
         output: { statusCode: 400 },
       });
     });
+
+    describe('signature_id (step 4.1)', () => {
+      it('generates a UUID v4 signature_id when the caller does not supply one', async () => {
+        const client = createClient();
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-sig-gen' });
+
+        const res = await client.createRule({
+          data: baseCreateData, // no metadata.signature_id
+          options: { id: 'rule-sig-gen' },
+        });
+
+        // The generated id must be a valid UUID v4 format.
+        expect(res.metadata.signature_id).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        );
+
+        // The generated id must have been stored in the saved object.
+        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attrs: expect.objectContaining({
+              metadata: expect.objectContaining({
+                signature_id: expect.stringMatching(
+                  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+                ),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('uses the caller-supplied signature_id when provided', async () => {
+        const client = createClient();
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-sig-caller' });
+
+        const res = await client.createRule({
+          data: { ...baseCreateData, metadata: { name: 'rule-1', signature_id: 'my-stable-id' } },
+          options: { id: 'rule-sig-caller' },
+        });
+
+        expect(res.metadata.signature_id).toBe('my-stable-id');
+        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attrs: expect.objectContaining({
+              metadata: expect.objectContaining({ signature_id: 'my-stable-id' }),
+            }),
+          })
+        );
+      });
+
+      it('rejects with 409 RULE_ALREADY_EXISTS when signature_id collides within the space', async () => {
+        const client = createClient();
+        // The uniqueness find returns an existing rule with the same signature_id.
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [{ id: 'existing-rule', attributes: baseSoAttrs, references: [], score: 0, type: RULE_SAVED_OBJECT_TYPE }],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        });
+
+        await expect(
+          client.createRule({
+            data: { ...baseCreateData, metadata: { name: 'rule-1', signature_id: 'my-stable-id' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+          data: { code: 'RULE_ALREADY_EXISTS' },
+        });
+
+        // No SO should have been created since the conflict was caught early.
+        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+      });
+
+      it('signature_id is present in the rule response', async () => {
+        const client = createClient();
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-sig-resp' });
+
+        const res = await client.createRule({
+          data: { ...baseCreateData, metadata: { name: 'rule-1', signature_id: 'resp-check-id' } },
+          options: { id: 'rule-sig-resp' },
+        });
+
+        expect(res.metadata.signature_id).toBe('resp-check-id');
+      });
+    });
   });
 
   describe('updateRule', () => {
@@ -991,6 +1075,76 @@ describe('RulesClient', () => {
 
       expect(res.version).toBe('WzNEW=');
     });
+
+    describe('signature_id immutability (step 4.1)', () => {
+      const storedAttrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', signature_id: 'stored-sig-id' },
+      });
+
+      it('keeps stored signature_id when the update payload omits the field (omitted-means-keep)', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-sig-keep',
+          attributes: storedAttrs,
+          version: 'WzEsMV0=',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-sig-keep' });
+
+        const res = await client.updateRule({
+          id: 'rule-sig-keep',
+          // metadata.signature_id intentionally omitted
+          data: { metadata: { name: 'renamed' } },
+        });
+
+        expect(res.metadata.signature_id).toBe('stored-sig-id');
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attrs: expect.objectContaining({
+              metadata: expect.objectContaining({ signature_id: 'stored-sig-id' }),
+            }),
+          })
+        );
+      });
+
+      it('passes when the update payload carries the same signature_id (equal-passes)', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-sig-equal',
+          attributes: storedAttrs,
+          version: 'WzEsMV0=',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-sig-equal' });
+
+        await expect(
+          client.updateRule({
+            id: 'rule-sig-equal',
+            data: { metadata: { name: 'renamed', signature_id: 'stored-sig-id' } },
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('rejects with 409 IMMUTABLE_FIELDS_CHANGED when the update payload carries a different signature_id', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-sig-mismatch',
+          attributes: storedAttrs,
+          version: 'WzEsMV0=',
+        });
+
+        await expect(
+          client.updateRule({
+            id: 'rule-sig-mismatch',
+            data: { metadata: { name: 'renamed', signature_id: 'different-sig-id' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+          data: { code: 'IMMUTABLE_FIELDS_CHANGED' },
+          message: expect.stringContaining('metadata.signature_id'),
+        });
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('upsertRule', () => {
@@ -1229,6 +1383,103 @@ describe('RulesClient', () => {
       });
 
       expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+    });
+
+    describe('signature_id — upsert create branch (step 4.1)', () => {
+      beforeEach(() => {
+        // Simulate rule not existing so the create path runs.
+        rulesSavedObjectService.get.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-sig-u')
+        );
+      });
+
+      it('rejects with 409 RULE_ALREADY_EXISTS when signature_id collides in the create branch', async () => {
+        const client = createClient();
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [{ id: 'other-rule', attributes: baseSoAttrs, references: [], score: 0, type: RULE_SAVED_OBJECT_TYPE }],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        });
+
+        await expect(
+          client.upsertRule({
+            id: 'rule-sig-u',
+            data: { ...baseCreateData, metadata: { name: 'rule-1', signature_id: 'taken-id' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+          data: { code: 'RULE_ALREADY_EXISTS' },
+        });
+
+        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('signature_id immutability — upsert replace branch (step 4.1)', () => {
+      const storedAttrsWithSig = createRuleSoAttributes({
+        metadata: { name: 'before', signature_id: 'immutable-sig' },
+      });
+
+      function setupExistingDoc() {
+        const doc = {
+          id: 'rule-sig-replace',
+          attributes: storedAttrsWithSig,
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get.mockResolvedValueOnce(doc).mockResolvedValueOnce(doc);
+      }
+
+      it('keeps stored signature_id when the replace body omits the field (omitted-means-keep)', async () => {
+        const client = createClient();
+        setupExistingDoc();
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-sig-replace' });
+
+        const res = await client.upsertRule({
+          id: 'rule-sig-replace',
+          data: { ...baseCreateData, metadata: { name: 'after' } }, // signature_id omitted
+        });
+
+        expect(res.rule.metadata.signature_id).toBe('immutable-sig');
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attrs: expect.objectContaining({
+              metadata: expect.objectContaining({ signature_id: 'immutable-sig' }),
+            }),
+          })
+        );
+      });
+
+      it('passes when the replace body carries the same signature_id (equal-passes)', async () => {
+        const client = createClient();
+        setupExistingDoc();
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-sig-replace' });
+
+        await expect(
+          client.upsertRule({
+            id: 'rule-sig-replace',
+            data: { ...baseCreateData, metadata: { name: 'after', signature_id: 'immutable-sig' } },
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('rejects with 409 IMMUTABLE_FIELDS_CHANGED when the replace body carries a different signature_id', async () => {
+        const client = createClient();
+        setupExistingDoc();
+
+        await expect(
+          client.upsertRule({
+            id: 'rule-sig-replace',
+            data: { ...baseCreateData, metadata: { name: 'after', signature_id: 'changed-sig' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+          data: { code: 'IMMUTABLE_FIELDS_CHANGED' },
+          message: expect.stringContaining('metadata.signature_id'),
+        });
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
     });
   });
 

@@ -26,6 +26,7 @@ const mockRuleResponse: RuleResponse = {
   enabled: true,
   metadata: {
     name: 'My CPU Alert',
+    signature_id: 'test-sig-id',
     version: 1,
     description: '',
     tags: [],
