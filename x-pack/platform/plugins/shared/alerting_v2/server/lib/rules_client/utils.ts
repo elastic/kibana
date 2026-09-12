@@ -252,16 +252,19 @@ export function assertRuleSourceUnchanged(
  * For a rule whose `builderType` is a registered managed type, copies
  * `{ managed: true, solution, domain }` from the type's declaration.
  * For everything else — no builder type, or an unmanaged registered type —
- * returns `{ managed: false }`.
+ * returns `{ managed: false }`, with `app` filled from the caller identity
+ * when an in-process caller declared one.
  *
- * `app` is intentionally absent in this phase. Phase 5 (step 5.1) fills it
- * from the caller identity on the `onBehalfOf.app` option.
+ * `app` is frozen at creation (records the originator, not the last writer),
+ * so it is only filled here, never on update.
  *
  * Ref: rule-ownership.md "The invariant and how it holds"
+ * Ref: rule-ownership.md "Caller identity"
  */
 export function deriveOwnership(
   registry: BuilderTypeRegistry,
-  builderType: string | undefined | null
+  builderType: string | undefined | null,
+  app?: string
 ): RuleOwnership {
   if (builderType != null) {
     const definition = registry.get(builderType);
@@ -273,7 +276,7 @@ export function deriveOwnership(
       };
     }
   }
-  return { managed: false };
+  return app !== undefined ? { managed: false, app } : { managed: false };
 }
 
 /**

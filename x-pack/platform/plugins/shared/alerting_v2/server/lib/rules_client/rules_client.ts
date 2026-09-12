@@ -62,6 +62,7 @@ import {
   RulesSavedObjectServiceScopedToken,
 } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import { type CallerIdentity, CallerIdentityToken } from './caller_identity';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
@@ -167,7 +168,8 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry
+    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry,
+    @inject(CallerIdentityToken) private readonly callerIdentity: CallerIdentity | undefined
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
@@ -440,9 +442,15 @@ export class RulesClient {
 
     // Derive ownership from the builder type's registration.
     // Managed types stamp { managed: true, solution, domain }; everything else
-    // stamps { managed: false }. Immutable for the rule's life.
+    // stamps { managed: false }, with `app` from the caller identity when an
+    // in-process caller declared one. Immutable for the rule's life.
     // Ref: rule-ownership.md "The invariant and how it holds"
-    const ownership = deriveOwnership(this.builderTypeRegistry, parsed.metadata?.builder_type);
+    // Ref: rule-ownership.md "Caller identity"
+    const ownership = deriveOwnership(
+      this.builderTypeRegistry,
+      parsed.metadata?.builder_type,
+      this.callerIdentity?.app
+    );
 
     // Resolve source: use caller-supplied value or default to internal.
     // Ref: rule-source.md "Who writes the source"
