@@ -100,7 +100,7 @@ const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
         )}
         data-test-subj="copyTextToClipboardButton"
         color="text"
-        iconType="copy"
+        iconType={isTextCopied ? 'check' : 'copy'}
         onClick={onClick}
         onBlur={onBlur}
       />
@@ -125,10 +125,8 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   const metaDataIcon = (
     <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        display="empty"
-        size="s"
         iconType="info"
-        color="primary"
+        color="text"
         data-test-subj="documentMetadataButton"
         onClick={(e: React.MouseEvent<HTMLElement>) => {
           e.stopPropagation();
@@ -146,12 +144,6 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       closePopover={closePopover}
       aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle id={popoverTitleId}>
-        <FormattedMessage
-          id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"
-          defaultMessage="Document metadata"
-        />
-      </EuiPopoverTitle>
       <EuiFlexGroup
         gutterSize="s"
         direction="column"
