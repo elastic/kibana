@@ -59,6 +59,38 @@ const mockRulesWithLongTags = [
   },
 ];
 
+/**
+ * A managed detection rule returned from the API. `ownership.managed` is true,
+ * which should suppress edit, delete, enable, and disable affordances.
+ * Ref: rule-ownership.md "Reads stay open"
+ */
+const mockManagedRule = {
+  id: 'rule-managed',
+  kind: 'signal',
+  enabled: true,
+  metadata: {
+    name: 'Detection Rule',
+    tags: [],
+    builder_type: 'security.detection.query',
+    ownership: { managed: true, solution: 'security', domain: 'detection' },
+  },
+  schedule: { every: '5m' },
+  query: null,
+};
+
+const mockUnmanagedRule = {
+  id: 'rule-unmanaged',
+  kind: 'alert',
+  enabled: true,
+  metadata: {
+    name: 'Unmanaged Rule',
+    tags: [],
+    ownership: { managed: false },
+  },
+  schedule: { every: '1m' },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+};
+
 const defaultProps: RulesListTableProps = {
   items: mockRules as any,
   totalItemCount: 2,
@@ -647,6 +679,113 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('expandRule-rule-1'));
 
       expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
+
+  describe('managed rule read-only affordances', () => {
+    // Renders one managed and one unmanaged rule side-by-side so the contrast
+    // is verifiable without separate render calls for each assertion.
+    const renderMixed = (overrides: Partial<RulesListTableProps> = {}) =>
+      renderTable({
+        items: [mockManagedRule, mockUnmanagedRule] as any,
+        totalItemCount: 2,
+        ...overrides,
+      });
+
+    it('hides the quick edit button for a managed rule but not for an unmanaged one', () => {
+      renderMixed();
+
+      expect(screen.queryByTestId('quickEditRule-rule-managed')).not.toBeInTheDocument();
+      expect(screen.getByTestId('quickEditRule-rule-unmanaged')).toBeInTheDocument();
+    });
+
+    it('hides edit, delete, run, and clone actions for a managed rule', () => {
+      renderMixed();
+
+      // With no write affordances and no read-only extras (no onViewChangeHistory, no
+      // detailsHref), RuleActionsMenu returns null, so the menu button itself is absent.
+      expect(screen.queryByTestId('ruleActionsButton-rule-managed')).not.toBeInTheDocument();
+      // Individually, none of the write action elements are in the DOM.
+      expect(screen.queryByTestId('editRule-rule-managed')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-managed')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('runRule-rule-managed')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-managed')).not.toBeInTheDocument();
+    });
+
+    it('shows write actions for an unmanaged rule when canWrite is true', async () => {
+      renderMixed();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-unmanaged'));
+
+      expect(await screen.findByTestId('editRule-rule-unmanaged')).toBeInTheDocument();
+      expect(screen.getByTestId('deleteRule-rule-unmanaged')).toBeInTheDocument();
+    });
+
+    it('shows a read-only enabled badge for a managed rule instead of a switch', () => {
+      renderMixed();
+
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-managed')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-managed')).toHaveTextContent('Enabled');
+    });
+
+    it('still shows an enable switch for an unmanaged rule', () => {
+      renderMixed();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-unmanaged')).toBeInTheDocument();
+    });
+
+    it('shows a type label badge with the builder_type for a managed rule', () => {
+      renderMixed();
+
+      expect(screen.getByTestId('managedRuleTypeBadge-rule-managed')).toHaveTextContent(
+        'security.detection.query'
+      );
+    });
+
+    it('falls back to "Managed" in the type label when builder_type is absent', () => {
+      const managedRuleNoType = {
+        ...mockManagedRule,
+        id: 'rule-managed-notype',
+        metadata: {
+          ...mockManagedRule.metadata,
+          builder_type: undefined,
+        },
+      };
+      renderTable({ items: [managedRuleNoType] as any, totalItemCount: 1 });
+
+      expect(screen.getByTestId('managedRuleTypeBadge-rule-managed-notype')).toHaveTextContent(
+        'Managed'
+      );
+    });
+
+    it('does not show a type label badge for an unmanaged rule', () => {
+      renderMixed();
+
+      expect(screen.queryByTestId('managedRuleTypeBadge-rule-unmanaged')).not.toBeInTheDocument();
+    });
+
+    it('keeps read-only affordances (name link, expand) available for a managed rule', () => {
+      renderMixed();
+
+      expect(screen.getByTestId('ruleNameLink-rule-managed')).toBeInTheDocument();
+      expect(screen.getByTestId('expandRule-rule-managed')).toBeInTheDocument();
+    });
+
+    it('shows view change history for a managed rule when the callback is provided', async () => {
+      const onViewChangeHistory = jest.fn();
+      renderMixed({ onViewChangeHistory });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-managed'));
+
+      expect(await screen.findByTestId('viewChangeHistoryRule-rule-managed')).toBeInTheDocument();
+    });
+
+    it('still shows the managed rule in the selection column (bulk selection stays open)', () => {
+      renderMixed();
+
+      // Selection checkboxes exist for both rows.
+      expect(screen.getByTestId('checkboxSelectRow-rule-managed')).toBeInTheDocument();
+      expect(screen.getByTestId('checkboxSelectRow-rule-unmanaged')).toBeInTheDocument();
     });
   });
 });
