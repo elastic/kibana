@@ -9,6 +9,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { stableStringify } from '@kbn/std';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type { Query } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -33,16 +34,30 @@ export const detectDataPresence = async ({
   queryService,
   rule,
   input,
+  effectiveQuery,
+  now,
   logger,
   maxResponseSize,
 }: {
   queryService: QueryServiceContract;
   rule: RuleResponse;
   input: RuleExecutionInput;
+  /** The run's effective query from pipeline state. Used instead of rule.query
+   *  so that execution-time compiled queries are consulted for the no-data
+   *  block. Undefined only in paths that pre-date CompileRuleQueryStep. */
+  effectiveQuery?: Query;
+  /** Shared run-level now, ms since epoch. Passed from state.executionWindow to
+   *  keep the no-data window aligned with the breach window. Defaults to
+   *  Date.now() when absent. */
+  now?: number;
   logger: LoggerServiceContract;
   maxResponseSize?: number;
 }): Promise<Set<string>> => {
-  const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data_strategy);
+  // effectiveQuery is set by CompileRuleQueryStep, which always runs before the
+  // classify step that calls this helper. The non-null assertion is safe in all
+  // correctly assembled pipelines.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const noDataQuery = getNoDataEsqlQuery(effectiveQuery!, rule.no_data_strategy);
 
   if (!noDataQuery) {
     return new Set();
@@ -53,6 +68,7 @@ export const detectDataPresence = async ({
     query: noDataQuery,
     timeField: rule.time_field,
     lookbackWindow,
+    now,
   });
 
   logger.debug({

@@ -338,6 +338,42 @@ describe('ExecuteRuleQueryStep', () => {
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 
+  it('halts with state_not_ready when effectiveQuery is missing from state', async () => {
+    // A state with a rule but no effectiveQuery simulates a pipeline that has
+    // not run CompileRuleQueryStep yet.
+    const state = createRulePipelineState({ rule: createRuleResponse(), effectiveQuery: undefined });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+
+  it('uses the shared now from executionWindow for the breach query payload', async () => {
+    // Set executionWindow to a fixed past time that cannot be confused with
+    // the current wall clock. The step should use that time — not Date.now() —
+    // so that the breach window is identical to what CompileRuleQueryStep set.
+    const fixedEnd = '2025-01-01T01:00:00.000Z';
+    const lookback = '10m';
+    const expectedStart = new Date(
+      new Date(fixedEnd).getTime() - 10 * 60 * 1000
+    ).toISOString();
+
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({ schedule: { every: '1m', lookback } });
+    const state = createRulePipelineState({
+      rule,
+      effectiveQuery: rule.query,
+      executionWindow: { start: expectedStart, end: fixedEnd },
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    expect(result.state.queryPayload?.dateEnd).toBe(fixedEnd);
+    expect(result.state.queryPayload?.dateStart).toBe(expectedStart);
+  });
+
   it('emits rowsReturnedByQuery equal to the row count in the single JSON batch', async () => {
     mockEsClient.esql.query.mockResolvedValue(
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])

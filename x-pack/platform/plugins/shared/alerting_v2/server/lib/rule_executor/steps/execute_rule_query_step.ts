@@ -46,18 +46,25 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return guardedExpandStep(streamState, ['rule'], async function* (state) {
+    return guardedExpandStep(streamState, ['rule', 'effectiveQuery'], async function* (state) {
       const { input, rule } = state;
       const logger = state.logger.withLabels({ step: step.name });
 
-      const effectiveQuery = getBreachEsqlQuery(rule.query);
+      const effectiveQuery = getBreachEsqlQuery(state.effectiveQuery);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
+
+      // Use the shared now resolved by CompileRuleQueryStep so the breach window
+      // matches what every other query in this run uses.
+      const now = state.executionWindow
+        ? new Date(state.executionWindow.end).getTime()
+        : undefined;
 
       const queryPayload = getQueryPayload({
         query: effectiveQuery,
         timeField,
         lookbackWindow,
+        now,
       });
 
       const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
