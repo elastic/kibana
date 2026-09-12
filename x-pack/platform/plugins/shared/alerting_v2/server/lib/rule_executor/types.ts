@@ -6,6 +6,7 @@
  */
 
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { Query } from '@kbn/alerting-v2-schemas';
 
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
@@ -32,6 +33,10 @@ export interface RulePipelineState {
   /** Bound per-execution logger (subsystem + rule/space/task labels). */
   readonly logger: LoggerServiceContract;
   readonly rule?: RuleResponse;
+  /** The query this run executes. rule.query for stored-query rules; compiled otherwise. */
+  readonly effectiveQuery?: Query;
+  /** The run's time window, resolved once. end is the run's `now`. */
+  readonly executionWindow?: { readonly start: string; readonly end: string };
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
