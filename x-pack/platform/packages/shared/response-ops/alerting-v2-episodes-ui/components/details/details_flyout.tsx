@@ -28,7 +28,7 @@ import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded } from '../../types/rule_state';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
-import { FLYOUT_FOOTER_OFFSET, getAlertEpisodeDetailsPath } from '../../constants';
+import { FLYOUT_FOOTER_OFFSET } from '../../constants';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
 import { AlertEpisodeOverviewSection } from './overview_section';
 import { AlertEpisodesRelatedSection } from './related_section';
@@ -48,6 +48,8 @@ export interface AlertEpisodeDetailsFlyoutProps {
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
+  getRuleDetailsHref: (ruleId: string) => string;
+  getEpisodeDetailsHref: (episodeId: string) => string;
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -56,6 +58,8 @@ export const AlertEpisodeDetailsFlyout = ({
   onClose,
   services,
   actions,
+  getRuleDetailsHref,
+  getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
@@ -227,12 +231,14 @@ export const AlertEpisodeDetailsFlyout = ({
             episodeId={episodeId}
             groupHash={groupHash}
             services={services}
+            getRuleDetailsHref={getRuleDetailsHref}
           />
         )}
         {effectiveTab === 'related' && (
           <AlertEpisodesRelatedSection
             episodeId={episodeId}
             services={services}
+            getEpisodeDetailsHref={getEpisodeDetailsHref}
             showHeading={false}
             compressed
           />
@@ -282,9 +288,7 @@ export const AlertEpisodeDetailsFlyout = ({
               <EpisodeFooterActionMenu
                 actions={compatibleActions}
                 episodes={episodes}
-                viewDetailsHref={services.http.basePath.prepend(
-                  getAlertEpisodeDetailsPath(episodeId)
-                )}
+                viewDetailsHref={getEpisodeDetailsHref(episodeId)}
                 onSuccess={invalidateEpisodeQueries}
               />
             </EuiFlexItem>

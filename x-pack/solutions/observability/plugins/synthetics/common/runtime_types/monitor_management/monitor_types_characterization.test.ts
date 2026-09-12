@@ -20,6 +20,7 @@
  *    three of these have to be reproduced deliberately.
  */
 
+import type { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
 import { decode } from '../test_helpers/codec_agnostic';
@@ -42,6 +43,7 @@ import {
   SyntheticsMonitorCodec,
   TCPFieldsCodec,
 } from './monitor_types';
+import * as zodMonitor from '../zod/monitor_types';
 
 const COMMON_REQUIRED_KEYS = [
   ConfigKey.APM_SERVICE_NAME,
@@ -60,15 +62,15 @@ const COMMON_REQUIRED_KEYS = [
 interface FieldsCase {
   label: string;
   flavor: 'io-ts' | 'zod';
-  codec: t.Mixed;
-  exactCodec: t.Mixed;
+  codec: t.Mixed | z.ZodType;
+  exactCodec: t.Mixed | z.ZodType;
   valid: MonitorFixture;
   requiredKeys: string[];
   violations: Array<[string, unknown]>;
 }
 
-// Only the io-ts flavor exists today; the migration PR appends the zod twins
-// (same fixtures, same expectations) so both run against this table.
+type LooseObjectSchema = z.ZodObject<z.ZodRawShape> & { strip: () => z.ZodType };
+
 const ioTsCase = (
   label: string,
   codec: t.HasProps & t.Mixed,
@@ -85,101 +87,141 @@ const ioTsCase = (
   violations: [...commonFieldTypeViolations, ...typeViolations],
 });
 
+const zodCase = (
+  label: string,
+  codec: LooseObjectSchema,
+  valid: MonitorFixture,
+  typeRequiredKeys: string[],
+  typeViolations: Array<[string, unknown]>
+): FieldsCase => ({
+  label,
+  flavor: 'zod',
+  codec,
+  // Flat looseObject + .strip() matches shallow t.exact: top-level extras go,
+  // nested looseObject extras stay.
+  exactCodec: codec.strip(),
+  valid,
+  requiredKeys: [...COMMON_REQUIRED_KEYS, ...typeRequiredKeys].sort(),
+  violations: [...commonFieldTypeViolations, ...typeViolations],
+});
+
+const httpRequired = [
+  ConfigKey.METADATA,
+  ConfigKey.MAX_REDIRECTS,
+  ConfigKey.URLS,
+  ConfigKey.PORT,
+  ConfigKey.PROXY_URL,
+  ConfigKey.RESPONSE_BODY_INDEX,
+  ConfigKey.RESPONSE_HEADERS_INDEX,
+  ConfigKey.RESPONSE_STATUS_CHECK,
+  ConfigKey.REQUEST_METHOD_CHECK,
+  ConfigKey.PASSWORD,
+  ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+  ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+  ConfigKey.RESPONSE_HEADERS_CHECK,
+  ConfigKey.REQUEST_BODY_CHECK,
+  ConfigKey.REQUEST_HEADERS_CHECK,
+  ConfigKey.USERNAME,
+];
+const httpViolations: Array<[string, unknown]> = [
+  [ConfigKey.URLS, ''],
+  [ConfigKey.URLS, 42],
+  [ConfigKey.MAX_REDIRECTS, true],
+  [ConfigKey.PORT, '443'],
+  [ConfigKey.RESPONSE_BODY_INDEX, 'sometimes'],
+  [ConfigKey.RESPONSE_STATUS_CHECK, '200'],
+  [ConfigKey.RESPONSE_HEADERS_CHECK, { 'content-type': 1 }],
+  [ConfigKey.REQUEST_BODY_CHECK, { value: 'x', type: 'yaml' }],
+  [ConfigKey.RESPONSE_JSON_CHECK, [{ description: 'missing expression' }]],
+  [ConfigKey.TLS_VERSION, ['TLSv0.9']],
+  [ConfigKey.TLS_VERIFICATION_MODE, 'lenient'],
+];
+
+const tcpRequired = [
+  ConfigKey.METADATA,
+  ConfigKey.HOSTS,
+  ConfigKey.PORT,
+  ConfigKey.PROXY_URL,
+  ConfigKey.PROXY_USE_LOCAL_RESOLVER,
+  ConfigKey.RESPONSE_RECEIVE_CHECK,
+  ConfigKey.REQUEST_SEND_CHECK,
+];
+const tcpViolations: Array<[string, unknown]> = [
+  [ConfigKey.HOSTS, ''],
+  [ConfigKey.HOSTS, '   '],
+  [ConfigKey.PROXY_USE_LOCAL_RESOLVER, 'true'],
+  [ConfigKey.RESPONSE_RECEIVE_CHECK, 42],
+  [ConfigKey.PORT, '9200'],
+];
+
+const icmpRequired = [ConfigKey.HOSTS, ConfigKey.WAIT];
+const icmpViolations: Array<[string, unknown]> = [
+  [ConfigKey.HOSTS, ''],
+  [ConfigKey.WAIT, 2],
+  [ConfigKey.MODE, 'fast'],
+];
+
+const browserRequired = [
+  ConfigKey.METADATA,
+  ConfigKey.SOURCE_INLINE,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.URLS,
+  ConfigKey.PORT,
+  ConfigKey.SCREENSHOTS,
+  ConfigKey.JOURNEY_FILTERS_MATCH,
+  ConfigKey.JOURNEY_FILTERS_TAGS,
+  ConfigKey.IGNORE_HTTPS_ERRORS,
+  ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+  ConfigKey.THROTTLING_CONFIG,
+  ConfigKey.SYNTHETICS_ARGS,
+];
+const browserViolations: Array<[string, unknown]> = [
+  [ConfigKey.SOURCE_INLINE, 'journey("full journey", () => {})'],
+  [ConfigKey.SOURCE_INLINE, 'console.log("no step definition")'],
+  [ConfigKey.THROTTLING_CONFIG, { value: { download: '5' }, label: 'l', id: 'i' }],
+  [ConfigKey.SYNTHETICS_ARGS, '--no-sandbox'],
+  [ConfigKey.IGNORE_HTTPS_ERRORS, 'false'],
+  [ConfigKey.SCREENSHOTS, 42],
+];
+
 const cases: FieldsCase[] = [
-  ioTsCase(
+  ioTsCase('HTTPFieldsCodec', HTTPFieldsCodec, fullHttpMonitor(), httpRequired, httpViolations),
+  zodCase(
     'HTTPFieldsCodec',
-    HTTPFieldsCodec,
+    zodMonitor.HTTPFieldsCodec as LooseObjectSchema,
     fullHttpMonitor(),
-    [
-      ConfigKey.METADATA,
-      ConfigKey.MAX_REDIRECTS,
-      ConfigKey.URLS,
-      ConfigKey.PORT,
-      ConfigKey.PROXY_URL,
-      ConfigKey.RESPONSE_BODY_INDEX,
-      ConfigKey.RESPONSE_HEADERS_INDEX,
-      ConfigKey.RESPONSE_STATUS_CHECK,
-      ConfigKey.REQUEST_METHOD_CHECK,
-      ConfigKey.PASSWORD,
-      ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
-      ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
-      ConfigKey.RESPONSE_HEADERS_CHECK,
-      ConfigKey.REQUEST_BODY_CHECK,
-      ConfigKey.REQUEST_HEADERS_CHECK,
-      ConfigKey.USERNAME,
-    ],
-    [
-      [ConfigKey.URLS, ''],
-      [ConfigKey.URLS, 42],
-      [ConfigKey.MAX_REDIRECTS, true],
-      [ConfigKey.PORT, '443'],
-      [ConfigKey.RESPONSE_BODY_INDEX, 'sometimes'],
-      [ConfigKey.RESPONSE_STATUS_CHECK, '200'],
-      [ConfigKey.RESPONSE_HEADERS_CHECK, { 'content-type': 1 }],
-      [ConfigKey.REQUEST_BODY_CHECK, { value: 'x', type: 'yaml' }],
-      [ConfigKey.RESPONSE_JSON_CHECK, [{ description: 'missing expression' }]],
-      [ConfigKey.TLS_VERSION, ['TLSv0.9']],
-      [ConfigKey.TLS_VERIFICATION_MODE, 'lenient'],
-    ]
+    httpRequired,
+    httpViolations
   ),
-  ioTsCase(
+  ioTsCase('TCPFieldsCodec', TCPFieldsCodec, fullTcpMonitor(), tcpRequired, tcpViolations),
+  zodCase(
     'TCPFieldsCodec',
-    TCPFieldsCodec,
+    zodMonitor.TCPFieldsCodec as LooseObjectSchema,
     fullTcpMonitor(),
-    [
-      ConfigKey.METADATA,
-      ConfigKey.HOSTS,
-      ConfigKey.PORT,
-      ConfigKey.PROXY_URL,
-      ConfigKey.PROXY_USE_LOCAL_RESOLVER,
-      ConfigKey.RESPONSE_RECEIVE_CHECK,
-      ConfigKey.REQUEST_SEND_CHECK,
-    ],
-    [
-      [ConfigKey.HOSTS, ''],
-      [ConfigKey.HOSTS, '   '],
-      [ConfigKey.PROXY_USE_LOCAL_RESOLVER, 'true'],
-      [ConfigKey.RESPONSE_RECEIVE_CHECK, 42],
-      [ConfigKey.PORT, '9200'],
-    ]
+    tcpRequired,
+    tcpViolations
   ),
-  ioTsCase(
+  ioTsCase('ICMPFieldsCodec', ICMPFieldsCodec, fullIcmpMonitor(), icmpRequired, icmpViolations),
+  zodCase(
     'ICMPFieldsCodec',
-    ICMPFieldsCodec,
+    zodMonitor.ICMPFieldsCodec as LooseObjectSchema,
     fullIcmpMonitor(),
-    [ConfigKey.HOSTS, ConfigKey.WAIT],
-    [
-      [ConfigKey.HOSTS, ''],
-      [ConfigKey.WAIT, 2],
-      [ConfigKey.MODE, 'fast'],
-    ]
+    icmpRequired,
+    icmpViolations
   ),
   ioTsCase(
     'BrowserFieldsCodec',
     BrowserFieldsCodec,
     fullBrowserMonitor(),
-    [
-      ConfigKey.METADATA,
-      ConfigKey.SOURCE_INLINE,
-      ConfigKey.SOURCE_PROJECT_CONTENT,
-      ConfigKey.URLS,
-      ConfigKey.PORT,
-      ConfigKey.SCREENSHOTS,
-      ConfigKey.JOURNEY_FILTERS_MATCH,
-      ConfigKey.JOURNEY_FILTERS_TAGS,
-      ConfigKey.IGNORE_HTTPS_ERRORS,
-      ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
-      ConfigKey.THROTTLING_CONFIG,
-      ConfigKey.SYNTHETICS_ARGS,
-    ],
-    [
-      [ConfigKey.SOURCE_INLINE, 'journey("full journey", () => {})'],
-      [ConfigKey.SOURCE_INLINE, 'console.log("no step definition")'],
-      [ConfigKey.THROTTLING_CONFIG, { value: { download: '5' }, label: 'l', id: 'i' }],
-      [ConfigKey.SYNTHETICS_ARGS, '--no-sandbox'],
-      [ConfigKey.IGNORE_HTTPS_ERRORS, 'false'],
-      [ConfigKey.SCREENSHOTS, 42],
-    ]
+    browserRequired,
+    browserViolations
+  ),
+  zodCase(
+    'BrowserFieldsCodec',
+    zodMonitor.BrowserFieldsCodec as LooseObjectSchema,
+    fullBrowserMonitor(),
+    browserRequired,
+    browserViolations
   ),
 ];
 
@@ -267,7 +309,27 @@ describe.each(cases)(
 describe.each([
   {
     label: 'EncryptedHTTPFieldsCodec',
-    codec: EncryptedHTTPFieldsCodec,
+    flavor: 'io-ts' as const,
+    exactCodec: t.exact(EncryptedHTTPFieldsCodec),
+    valid: fullHttpMonitor(),
+    strippedKeys: [
+      ConfigKey.PASSWORD,
+      ConfigKey.PROXY_HEADERS,
+      ConfigKey.REQUEST_BODY_CHECK,
+      ConfigKey.REQUEST_HEADERS_CHECK,
+      ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+      ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+      ConfigKey.RESPONSE_HEADERS_CHECK,
+      ConfigKey.RESPONSE_JSON_CHECK,
+      ConfigKey.TLS_KEY,
+      ConfigKey.TLS_KEY_PASSPHRASE,
+      ConfigKey.USERNAME,
+    ],
+  },
+  {
+    label: 'EncryptedHTTPFieldsCodec',
+    flavor: 'zod' as const,
+    exactCodec: (zodMonitor.EncryptedHTTPFieldsCodec as LooseObjectSchema).strip(),
     valid: fullHttpMonitor(),
     strippedKeys: [
       ConfigKey.PASSWORD,
@@ -285,7 +347,20 @@ describe.each([
   },
   {
     label: 'EncryptedTCPFieldsCodec',
-    codec: EncryptedTCPFieldsCodec,
+    flavor: 'io-ts' as const,
+    exactCodec: t.exact(EncryptedTCPFieldsCodec),
+    valid: fullTcpMonitor(),
+    strippedKeys: [
+      ConfigKey.REQUEST_SEND_CHECK,
+      ConfigKey.RESPONSE_RECEIVE_CHECK,
+      ConfigKey.TLS_KEY,
+      ConfigKey.TLS_KEY_PASSPHRASE,
+    ],
+  },
+  {
+    label: 'EncryptedTCPFieldsCodec',
+    flavor: 'zod' as const,
+    exactCodec: (zodMonitor.EncryptedTCPFieldsCodec as LooseObjectSchema).strip(),
     valid: fullTcpMonitor(),
     strippedKeys: [
       ConfigKey.REQUEST_SEND_CHECK,
@@ -296,7 +371,8 @@ describe.each([
   },
   {
     label: 'EncryptedBrowserFieldsCodec',
-    codec: EncryptedBrowserFieldsCodec,
+    flavor: 'io-ts' as const,
+    exactCodec: t.exact(EncryptedBrowserFieldsCodec),
     valid: fullBrowserMonitor(),
     strippedKeys: [
       ConfigKey.PORT,
@@ -308,9 +384,24 @@ describe.each([
       ConfigKey.URLS,
     ],
   },
-])('$label secret stripping (io-ts)', ({ codec, valid, strippedKeys }) => {
+  {
+    label: 'EncryptedBrowserFieldsCodec',
+    flavor: 'zod' as const,
+    exactCodec: (zodMonitor.EncryptedBrowserFieldsCodec as LooseObjectSchema).strip(),
+    valid: fullBrowserMonitor(),
+    strippedKeys: [
+      ConfigKey.PORT,
+      ConfigKey.SOURCE_INLINE,
+      ConfigKey.SOURCE_PROJECT_CONTENT,
+      ConfigKey.SYNTHETICS_ARGS,
+      ConfigKey.TLS_KEY,
+      ConfigKey.TLS_KEY_PASSPHRASE,
+      ConfigKey.URLS,
+    ],
+  },
+])('$label secret stripping ($flavor)', ({ exactCodec, valid, strippedKeys }) => {
   it('strips exactly the sensitive fields through the exact codec', () => {
-    const result = decode(t.exact(codec), valid);
+    const result = decode(exactCodec, valid);
     expect(result.success).toBe(true);
     if (result.success) {
       const decoded = result.value as Record<string, unknown>;
@@ -322,17 +413,20 @@ describe.each([
   });
 });
 
-describe('SyntheticsMonitorCodec union (io-ts)', () => {
+describe.each([
+  { flavor: 'io-ts' as const, codec: SyntheticsMonitorCodec },
+  { flavor: 'zod' as const, codec: zodMonitor.SyntheticsMonitorCodec },
+])('SyntheticsMonitorCodec union ($flavor)', ({ codec }) => {
   it.each([
     ['http', fullHttpMonitor()],
     ['tcp', fullTcpMonitor()],
     ['icmp', fullIcmpMonitor()],
     ['browser', fullBrowserMonitor()],
   ])('accepts a fully-populated %s monitor', (_type, valid) => {
-    expect(decode(SyntheticsMonitorCodec, valid).success).toBe(true);
+    expect(decode(codec, valid).success).toBe(true);
   });
 
   it('rejects an object that matches no monitor variant', () => {
-    expect(decode(SyntheticsMonitorCodec, { type: 'not-a-monitor' }).success).toBe(false);
+    expect(decode(codec, { type: 'not-a-monitor' }).success).toBe(false);
   });
 });

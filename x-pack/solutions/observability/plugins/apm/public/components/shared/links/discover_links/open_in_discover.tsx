@@ -64,7 +64,7 @@ export function OpenInDiscover({
           aria-label={label}
           isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
           isDisabled={isDisabled}
-          iconType="discoverApp"
+          iconType="productDiscover"
           href={discoverHref}
           {...ebtProps}
         >
@@ -78,7 +78,7 @@ export function OpenInDiscover({
           aria-label={label}
           isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
           isDisabled={isDisabled}
-          iconType="discoverApp"
+          iconType="productDiscover"
           href={discoverHref}
           {...ebtProps}
         >
@@ -93,7 +93,7 @@ export function OpenInDiscover({
             aria-label={label}
             isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
             isDisabled={isDisabled}
-            iconType="discoverApp"
+            iconType="productDiscover"
             href={discoverHref}
             {...ebtProps}
           />

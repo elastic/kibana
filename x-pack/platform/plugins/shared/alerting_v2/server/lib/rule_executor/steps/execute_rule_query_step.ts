@@ -13,6 +13,8 @@ import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
+import { toQueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
@@ -38,7 +40,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   ) {
     const config = pluginConfigAccessor.get<PluginConfig>();
     this.queryRowLimit = getQueryRowLimit(config);
-    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize;
+    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize.getValueInBytes();
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -100,7 +102,20 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           };
         }
       } catch (error) {
-        if (isMaximumResponseSizeExceededError(error) || isEsqlUserError(error)) {
+        if (isMaximumResponseSizeExceededError(error)) {
+          const sizeError = toQueryResponseSizeExceededError(
+            error,
+            'breach',
+            step.maxQueryResponseSize
+          );
+          logger.warn({
+            message: sizeError.message,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
+            labels: { rule_id: input.ruleId, space_id: input.spaceId, step: step.name },
+          });
+          throw createTaskRunError(sizeError, TaskErrorSource.USER);
+        }
+        if (isEsqlUserError(error)) {
           throw createTaskRunError(error as Error, TaskErrorSource.USER);
         }
         throw error;
