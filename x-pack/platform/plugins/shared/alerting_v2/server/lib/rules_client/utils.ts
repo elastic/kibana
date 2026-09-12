@@ -339,13 +339,25 @@ export const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] 
  * array. The result can be compared with `isEqual` without false positives from
  * the difference between an explicit `undefined` value and an absent key.
  *
- * This is necessary because `buildUpdateRuleAttributes` spreads optional fields
- * explicitly onto the result (e.g. `tags: undefined`), while stored attributes
- * may have those keys entirely absent. `isEqual({tags: undefined}, {})` is
- * `false` in lodash, which would count a semantically no-op update as a
- * meaningful edit and inflate the revision counter.
+ * This is necessary because `buildUpdateRuleAttributes` normalizes on the way
+ * in, and those normalizations produce stored forms that differ from an
+ * entirely absent key in the stored document:
  *
- * `null` is preserved: it is a meaningful stored value for `state_transition`.
+ * - `tags: undefined` vs absent key — `isEqual({tags: undefined}, {})` is
+ *   `false` in lodash; keys with `undefined` values are stripped.
+ * - `state_transition: null` (from `applyNullableUpdate(null, undefined)`) vs
+ *   an absent `state_transition` in a rule that was never given one — `null`
+ *   values are stripped so both sides compare as absent.
+ * - `artifacts: []` (from `nullToEmptyArray(null, undefined)`) vs an absent
+ *   `artifacts` in a rule created without artifacts — empty arrays are stripped
+ *   so both sides compare as absent.
+ *
+ * Stripping is applied symmetrically to both sides of the diff, so real
+ * changes still register: a stored `null` is also stripped, meaning
+ * `null → { type: 'foo' }` still differs after normalization, and a non-empty
+ * `[{...}]` is never empty after mapping so it is never stripped.
+ *
+ * Ref: rule-versions.md "How the diff runs"
  */
 function deepOmitUndefined(value: unknown): unknown {
   if (Array.isArray(value)) {
@@ -354,7 +366,7 @@ function deepOmitUndefined(value: unknown): unknown {
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>)
-        .filter(([, v]) => v !== undefined)
+        .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
         .map(([k, v]) => [k, deepOmitUndefined(v)])
     );
   }
@@ -397,12 +409,14 @@ function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, 
  * `builder_fields` is compared as one value because updates replace the
  * container wholesale.
  *
- * Undefined values are stripped from both sides before comparing:
- * `buildUpdateRuleAttributes` sets optional absent fields to `undefined`
- * explicitly (e.g. `tags: undefined`), while stored attrs may have those keys
- * absent entirely. Stripping makes the two representations equivalent, so a
- * write that sends `tags: null` against a rule with no stored tags does not
- * count as a meaningful edit.
+ * Before comparing, both sides are normalized by `deepOmitUndefined`: keys
+ * with `undefined`, `null`, or empty-array values are stripped. This makes
+ * the three PATCH normalizations transparent to the diff:
+ *   - `tags: null`           → `undefined` (absent) — equal to an absent key
+ *   - `state_transition: null` (clear) → stripped — equal to an absent key
+ *   - `artifacts: null`      → `[]` → stripped — equal to an absent key
+ * A write that sends any of these against a rule that never had the field does
+ * not move the revision counter.
  *
  * Ref: rule-versions.md "How the diff runs"
  */

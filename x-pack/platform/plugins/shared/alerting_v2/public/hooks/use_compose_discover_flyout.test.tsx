@@ -265,6 +265,83 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
   });
 });
 
+describe('useComposeDiscoverFlyout — create-from-template source stamping (step 4.3)', () => {
+  const templateId = 'tpl-abc-123';
+  const template = {
+    id: templateId,
+    engine: 'v2' as const,
+    rule: {
+      kind: 'alert' as const,
+      metadata: { name: 'Template rule' },
+      time_field: '@timestamp',
+      schedule: { every: '5m', lookback: '10m' },
+      query: { format: 'standalone' as const, breach: { query: 'FROM logs-* | LIMIT 10' } },
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+  });
+
+  it('stamps { type: template, id } on the create payload when opened from a template', async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplateFlyout(template);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    // Simulate the flyout calling onCreateRule with a payload that has no source
+    // (as composeFormToCreateRequest produces).
+    const onCreateRule = capturedFlyoutProps.onCreateRule as (
+      payload: unknown,
+      notifications?: unknown
+    ) => void;
+    act(() => {
+      onCreateRule({ metadata: { name: 'My rule' } }, undefined);
+    });
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      {
+        payload: {
+          metadata: {
+            name: 'My rule',
+            source: { type: 'template', id: templateId, version: 1 },
+          },
+        },
+      },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
+  it('does NOT stamp template source when opened via openCreateFlyout', async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    const onCreateRule = capturedFlyoutProps.onCreateRule as (
+      payload: unknown,
+      notifications?: unknown
+    ) => void;
+    act(() => {
+      onCreateRule({ metadata: { name: 'My rule' } }, undefined);
+    });
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } } },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+});
+
 describe('useComposeDiscoverFlyout — edit submission wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
