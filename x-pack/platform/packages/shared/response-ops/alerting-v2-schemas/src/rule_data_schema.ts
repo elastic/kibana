@@ -978,8 +978,25 @@ export const ruleResponseSchema = createRuleDataBaseSchema
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
-/** Sort field for find rules API. */
-export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+/**
+ * Sort field for find rules API.
+ *
+ * Phase 4 additions:
+ *   - `builder_type`: sort by the builder type discriminator (keyword).
+ *   - `builder_fields.risk_score`: sort by the detection risk_score sub-field
+ *     (integer). The dot-separated name is the API alias; the SO path resolved
+ *     by mapSortField is `metadata.builder_fields.risk_score`.
+ *
+ * Ref: rule-types.md "The discriminator must be indexed and filterable"
+ *      rule-data-model.md "The shared detection fragment"
+ */
+export const findRulesSortFieldSchema = z.enum([
+  'kind',
+  'enabled',
+  'name',
+  'builder_type',
+  'builder_fields.risk_score',
+]);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */

@@ -9,12 +9,14 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   securityDetectionQueryManifest,
   securityDetectionThresholdManifest,
+  DETECTION_RULE_TYPE_OWNERSHIP,
 } from '@kbn/security-detection-rule-schema';
 import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
+  ruleSavedObjectAttributesSchemaV8,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -154,4 +156,107 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   // type (identical declarations merge silently at the mapping assembly) plus
   // `query` as text. No backfill needed for the same reason.
   '8': fromBuilderManifest(securityDetectionThresholdManifest, 1),
+
+  // ---------------------------------------------------------------------------
+  // Framework rule-model fields (step 4.5)
+  //
+  // One shared version carrying all four field families added in Phase 4:
+  // identity (signature_id), versions (revision), source, and ownership — plus
+  // the builder_type keyword mapping that the Detections API filter depends on.
+  //
+  // The mappings_addition mirrors every field into the static rule_mappings.ts;
+  // Kibana core validates at startup that every addition is present verbatim.
+  //
+  // The data_backfill stamps:
+  //   - signature_id  := the rule's own saved-object id (deterministic, unique)
+  //   - source        := { type: 'internal', version: 1 } (no lineage to recover)
+  //   - revision      := 0 (the "never meaningfully edited" baseline)
+  //   - ownership     := type-aware: managed types from DETECTION_RULE_TYPE_OWNERSHIP,
+  //                      everything else { managed: false }
+  //
+  // All four use `?? <default>` so that rules already written by the Phase 4
+  // write paths (steps 4.1–4.4) keep their live values when this version's
+  // backfill runs during migration.
+  //
+  // The type-to-ownership map is a plain package constant, not a runtime
+  // registry query, so the backfill runs even when the owning plugin is disabled.
+  //
+  // Ref: rule-identity.md "Storage and migration"
+  //      rule-versions.md "Storage and migration"
+  //      rule-source.md "Storage and migration"
+  //      rule-ownership.md "Storage, mapping, and migration"
+  //      rule-types.md "The discriminator must be indexed and filterable"
+  // ---------------------------------------------------------------------------
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              // rule-identity.md: keyword-indexed so find can filter on it
+              signature_id: { type: 'keyword', ignore_above: 256 },
+              // rule-source.md: type/id as keyword, version as integer
+              source: {
+                properties: {
+                  type: { type: 'keyword', ignore_above: 256 },
+                  id: { type: 'keyword', ignore_above: 256 },
+                  version: { type: 'integer' },
+                },
+              },
+              // rule-ownership.md: managed/solution/domain for filter + exclusion;
+              // app is attribution-only (128-char cap matches SO schema bound)
+              ownership: {
+                properties: {
+                  managed: { type: 'boolean' },
+                  solution: { type: 'keyword', ignore_above: 256 },
+                  domain: { type: 'keyword', ignore_above: 256 },
+                  app: { type: 'keyword', ignore_above: 128 },
+                },
+              },
+              // rule-types.md: builder_type must be keyword-indexed and filterable
+              builder_type: { type: 'keyword', ignore_above: 256 },
+            },
+          },
+        },
+      },
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const builderType = doc.attributes.metadata?.builder_type;
+          const ownershipEntry =
+            builderType != null ? DETECTION_RULE_TYPE_OWNERSHIP[builderType] : undefined;
+          const derivedOwnership = ownershipEntry
+            ? {
+                managed: true as const,
+                solution: ownershipEntry.solution,
+                domain: ownershipEntry.domain,
+              }
+            : { managed: false as const };
+
+          return {
+            attributes: {
+              metadata: {
+                ...doc.attributes.metadata,
+                // Preserve an already-set signature_id (set by the 4.1 write path);
+                // fall back to the object id for unmigrated rules.
+                signature_id: doc.attributes.metadata?.signature_id ?? (doc.id as string),
+                // Preserve a declared source; default to internal for unmigrated rules.
+                source:
+                  doc.attributes.metadata?.source ?? ({ type: 'internal', version: 1 } as const),
+                // Preserve a non-zero revision; 0 is the "never edited" baseline.
+                revision: doc.attributes.metadata?.revision ?? 0,
+                // Preserve a stamped ownership; derive from the type map for managed types.
+                ownership: doc.attributes.metadata?.ownership ?? derivedOwnership,
+              },
+            },
+          };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
+    },
+  },
 };

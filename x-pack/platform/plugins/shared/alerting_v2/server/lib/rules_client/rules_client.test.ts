@@ -2009,6 +2009,60 @@ describe('RulesClient', () => {
         expect.objectContaining({ sortField: 'enabled', sortOrder: 'desc' })
       );
     });
+
+    // Phase 4 — filter and sort additions (step 4.5)
+
+    it('filters by signature_id through findRules', async () => {
+      const client = createClient();
+
+      await client.findRules({ filter: 'metadata.signature_id: "RULE-001"' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id: "RULE-001"`,
+        })
+      );
+    });
+
+    it('filters by builder_type through findRules', async () => {
+      const client = createClient();
+
+      await client.findRules({
+        filter: 'metadata.builder_type: "security.detection.query"',
+      });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.builder_type: "security.detection.query"`,
+        })
+      );
+    });
+
+    it('maps builder_type sort to the keyword SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'builder_type', sortOrder: 'asc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.builder_type',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('maps builder_fields.risk_score sort to the integer sub-field SO path', async () => {
+      const client = createClient();
+
+      await client.findRules({ sortField: 'builder_fields.risk_score', sortOrder: 'desc' });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'metadata.builder_fields.risk_score',
+          sortOrder: 'desc',
+        })
+      );
+    });
   });
 
   describe('getTags', () => {

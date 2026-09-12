@@ -118,11 +118,11 @@ describe('ruleModelVersions fold lines', () => {
     expect(v8.changes.some((c) => c.type === 'mappings_addition')).toBe(true);
   });
 
-  it('dense version sequence runs from 1 to 8 with no gaps', () => {
+  it('dense version sequence runs from 1 to 9 with no gaps', () => {
     const keys = Object.keys(ruleModelVersions)
       .map(Number)
       .sort((a, b) => a - b);
-    expect(keys).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(keys).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 });
 
