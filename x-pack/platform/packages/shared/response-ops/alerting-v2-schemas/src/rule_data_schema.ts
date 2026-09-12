@@ -835,18 +835,20 @@ export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 // Ref: rule-types.md "What this design needs from the framework"
 // ---------------------------------------------------------------------------
 
-const replaceRuleMetadataSchema = metadataSchema.extend({
-  // Override: accept null on PUT to clear a stored builder relationship.
-  builder_type: builderTypeSchema
-    .optional()
-    .nullable()
-    .describe(
-      'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
-        'Absent for rules authored directly in ES|QL. ' +
-        'Send null on a PUT replace to explicitly clear the builder relationship ' +
-        'and switch the rule to ES|QL mode. (min length: 1, max length: 64)'
-    ),
-});
+export const replaceRuleMetadataSchema = metadataSchema
+  .extend({
+    // Override: accept null on PUT to clear a stored builder relationship.
+    builder_type: builderTypeSchema
+      .optional()
+      .nullable()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
+          'Absent for rules authored directly in ES|QL. ' +
+          'Send null on a PUT replace to explicitly clear the builder relationship ' +
+          'and switch the rule to ES|QL mode. (min length: 1, max length: 64)'
+      ),
+  })
+  .meta({ id: 'alerting_replace_rule_metadata' });
 
 export const replaceRuleBodySchema = createRuleDataBaseSchema
   .extend({
@@ -925,12 +927,15 @@ export const updateRuleDataSchema = z
       .extend({
         // `null` opts the rule out of builder mode, clearing both builder fields
         // and releasing `query` for direct edits in the same request.
-        builder_type: builderTypeSchema.optional().nullable().describe(
-          'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
-            'Absent for rules authored directly in ES|QL. ' +
-            'Send null to explicitly clear the builder relationship and switch the ' +
-            'rule to ES|QL mode. (min length: 1, max length: 64)'
-        ),
+        builder_type: builderTypeSchema
+          .optional()
+          .nullable()
+          .describe(
+            'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
+              'Absent for rules authored directly in ES|QL. ' +
+              'Send null to explicitly clear the builder relationship and switch the ' +
+              'rule to ES|QL mode. (min length: 1, max length: 64)'
+          ),
         builder_fields: builderFieldsSchema.optional().nullable(),
         // `null` clears all tags (an empty array is rejected by `.min(1)`, and
         // omitting `tags` preserves the existing ones on a partial update).

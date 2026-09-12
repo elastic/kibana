@@ -937,5 +937,88 @@ describe('RulesListTableContainer', () => {
       expect(screen.getByTestId('checkboxSelectRow-rule-3')).toBeChecked();
       expect(screen.getByTestId('checkboxSelectRow-rule-4')).toBeChecked();
     });
+
+    it('does not include managed rules when selectAllRulesOnPage is clicked on a mixed page', async () => {
+      // Managed rules are read-only in the listing: they must not be reachable
+      // via bulk delete/enable/disable even when the header "select all on this
+      // page" checkbox is clicked. The container filters them out of the
+      // selectable set that useBulkSelect operates on.
+      //
+      // Ref: rule-ownership.md "Reads stay open"
+      const managedRule = {
+        ...mockRules[0],
+        id: 'rule-managed',
+        metadata: {
+          ...mockRules[0].metadata,
+          name: 'Managed Rule',
+          ownership: { managed: true as const, solution: 'security', domain: 'detection' },
+        },
+      } as RuleApiResponse;
+      const plainRule = { ...mockRules[1], id: 'rule-plain' } as RuleApiResponse;
+      const mixedPage = [managedRule, plainRule];
+
+      render(
+        <I18nProvider>
+          <ContentListProvider
+            id="rules-list-managed-select-test"
+            labels={{ entity: 'rule', entityPlural: 'rules' }}
+            dataSource={{
+              findItems: async () => ({
+                items: mixedPage.map(toListItem),
+                total: 2,
+              }),
+            }}
+            features={{
+              sorting: { initialSort: { field: 'name', direction: 'asc' } },
+              pagination: { initialPageSize: 20 },
+              search: true,
+              selection: false,
+            }}
+          >
+            <RulesListTableContainer
+              onEditInFlyout={mockOnEditInFlyout}
+              onCloneInFlyout={mockOnCloneInFlyout}
+            />
+          </ContentListProvider>
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Managed Rule')).toBeInTheDocument();
+      });
+
+      // Click the header "select all on this page" checkbox.
+      fireEvent.click(screen.getByTestId('selectAllRulesOnPage'));
+
+      // Only the plain rule should be selected; the managed rule must be excluded.
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkDeleteRules'));
+
+      // Confirm the deletion modal.
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      // bulkDeleteRules must be called with only the plain rule id.
+      expect(mockBulkDeleteMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ ids: ['rule-plain'] }),
+        expect.any(Object)
+      );
+      expect(mockBulkDeleteMutate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ ids: expect.arrayContaining(['rule-managed']) }),
+        expect.any(Object)
+      );
+    });
   });
 });

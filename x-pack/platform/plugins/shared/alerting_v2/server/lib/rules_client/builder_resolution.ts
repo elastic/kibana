@@ -347,7 +347,7 @@ export function resolveReplaceRuleBuilder(
     return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData);
   }
 
-  // The stored rule is builder-managed. Three valid paths:
+  // The stored rule is builder-managed. Four valid paths:
   //
   //   1. The PUT body sends `builder_fields` — regenerate the query through
   //      the builder. The existing builder type is still the effective type;
@@ -357,9 +357,17 @@ export function resolveReplaceRuleBuilder(
   //      transition to ES|QL mode. Strip the builder context before delegating
   //      so null never reaches storage.
   //
-  //   3. Anything else — the PUT body carries a plain query (or no query at
-  //      all) without either of the above signals. This would silently drop
-  //      the builder relationship; reject.
+  //   3. The PUT body carries the same `builder_type` as stored, the stored
+  //      rule has no `builder_fields` (nothing to drop), and the query is
+  //      unchanged — faithful round-trip that only changes non-query metadata.
+  //      Mirrors PATCH's `queryChanged && effectiveType` check.
+  //
+  //   4. Anything else — the PUT body omits or changes `builder_type`, drops
+  //      stored `builder_fields`, or changes the query without any of the
+  //      above signals. This would silently corrupt the builder relationship;
+  //      reject.
+  //
+  // Ref: rule-types.md "What this design needs from the framework"
 
   if (data.metadata?.builder_fields) {
     // Path 1: builder_fields provided → delegate to create-shaped resolution.
@@ -378,7 +386,25 @@ export function resolveReplaceRuleBuilder(
     return resolveCreateRuleBuilder(registry, cleared);
   }
 
-  // Path 3: no builder_fields, no explicit null — reject.
+  // Path 3 / 4: no builder_fields, no explicit null.
+  //
+  // Check whether this is a faithful round-trip (Path 3) or a destructive
+  // change (Path 4). The round-trip is accepted only when:
+  //   - the body carries the same builder_type as stored (not omitted),
+  //   - the stored rule has no builder_fields to drop, and
+  //   - the query is identical to the stored query.
+  const storedBuilderFields = existing.metadata.builder_fields;
+  const storedQuery = toStoredQuery(existing.query);
+  const bodyQuery = data.query;
+  const queryChanged = !bodyQuery || !isEqual(toStoredQuery(bodyQuery), storedQuery);
+  const typePreserved = data.metadata?.builder_type === existingType;
+
+  if (typePreserved && !storedBuilderFields && !queryChanged) {
+    // Path 3: faithful round-trip — pass through unchanged.
+    return data as unknown as ResolvedCreateRuleData;
+  }
+
+  // Path 4: reject.
   throw Boom.badRequest(
     `Rule "${ruleId}" is authored by the "${existingType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder_type: null in the same request to confirm the transition to ES|QL mode.`,
     {

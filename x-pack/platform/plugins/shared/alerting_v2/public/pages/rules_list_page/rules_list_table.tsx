@@ -290,10 +290,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                   )}
                 >
                   {managedTypeLabel ??
-                    i18n.translate(
-                      'xpack.alertingV2.rulesList.managedRuleTypeBadge.defaultLabel',
-                      { defaultMessage: 'Managed' }
-                    )}
+                    i18n.translate('xpack.alertingV2.rulesList.managedRuleTypeBadge.defaultLabel', {
+                      defaultMessage: 'Managed',
+                    })}
                 </EuiBadge>
               )}
               {metadata?.description && (

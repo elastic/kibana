@@ -1086,11 +1086,11 @@ describe('resolveReplaceRuleBuilder', () => {
         });
       });
 
-      it('throws BUILDER_TYPE_NOT_CLEARED even when the PUT query is identical to the stored query', () => {
-        // Unlike the PATCH path, which only rejects on queryChanged, the PUT
-        // path always rejects when no explicit clear signal is present —
-        // because a PUT without builder_type: null would strip builder_type
-        // from storage regardless of whether the query changes.
+      it('throws BUILDER_TYPE_NOT_CLEARED when the body omits builder_type even if the query is identical', () => {
+        // `baseCreateData` has no metadata.builder_type (undefined), so the
+        // body would strip builder_type from storage. The query being identical
+        // is not enough to make the PUT safe — the builder_type must be
+        // preserved too.
         const registry = createMockRegistry();
         // Same query as in builderExisting.
         const data: CreateRuleData = {
@@ -1098,9 +1098,47 @@ describe('resolveReplaceRuleBuilder', () => {
           query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
         };
 
-        expect(() =>
-          resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)
-        ).toThrow(
+        expect(() => resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
+            }),
+          })
+        );
+      });
+
+      it('accepts a faithful round-trip that carries the same builder_type and an unchanged query', () => {
+        // A PUT that preserves the stored builder_type and sends an identical
+        // query is a round-trip (e.g. only metadata.name changed). The stored
+        // rule has no builder_fields, so nothing is dropped. This mirrors
+        // PATCH's queryChanged check.
+        //
+        // Ref: rule-types.md "What this design needs from the framework"
+        const registry = createMockRegistry();
+        // Carry the same builder_type and the same query as in builderExisting.
+        const data = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE, name: 'renamed' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        } as ReplaceRuleData;
+
+        let result: ReturnType<typeof resolveReplaceRuleBuilder>;
+        expect(
+          () => (result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting))
+        ).not.toThrow();
+        expect(result!.metadata.builder_type).toBe(BUILDER_TYPE);
+        expect(result!.query).toEqual(data.query);
+      });
+
+      it('throws when the round-trip body changes the query even with the same builder_type', () => {
+        const registry = createMockRegistry();
+        const data = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 1' } }, // different
+        } as ReplaceRuleData;
+
+        expect(() => resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
           expect.objectContaining({
             data: expect.objectContaining({
               code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,

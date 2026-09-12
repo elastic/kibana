@@ -281,17 +281,10 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "object",
                 },
                 "builder_type": Object {
-                  "anyOf": Array [
-                    Object {
-                      "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
-                      "maxLength": 64,
-                      "minLength": 1,
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
+                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string",
                 },
                 "description": Object {
                   "description": "Human-readable description of the rule.",
