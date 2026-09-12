@@ -59,6 +59,18 @@ export const getRetentionPolicyHelpText = ({
   });
 };
 
+export const shouldSuppressPreviewErrorToast = ({
+  error,
+  originProjectId,
+  projectRouting,
+}: {
+  error: unknown;
+  originProjectId?: string;
+  projectRouting?: PostTransformsPreviewRequestSchema['source']['project_routing'];
+}): boolean =>
+  originProjectId !== undefined &&
+  isLinkedProjectScopedSourceIndexUnavailableError(error, projectRouting, originProjectId);
+
 export const EditTransformRetentionPolicy: FC = () => {
   const { cps } = useAppDependencies();
   const toastNotifications = useToastNotifications();
@@ -115,13 +127,7 @@ export const EditTransformRetentionPolicy: FC = () => {
       projectRouting
     );
 
-    if (!isProjectScopedSourceIndexError) {
-      setIsSourceIndexUnavailable(false);
-      addPreviewErrorToast();
-      return;
-    }
-
-    if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+    if (!isProjectScopedSourceIndexError || projectRouting === PROJECT_ROUTING.ORIGIN) {
       setIsSourceIndexUnavailable(false);
       addPreviewErrorToast();
       return;
@@ -139,11 +145,11 @@ export const EditTransformRetentionPolicy: FC = () => {
     void cpsManager
       .fetchProjects(PROJECT_ROUTING.ORIGIN)
       .then((projectsData) => {
-        const shouldSuppressErrorToast = isLinkedProjectScopedSourceIndexUnavailableError(
-          transformsPreviewError,
+        const shouldSuppressErrorToast = shouldSuppressPreviewErrorToast({
+          error: transformsPreviewError,
+          originProjectId: projectsData?.origin?._id,
           projectRouting,
-          projectsData?.origin?._id
-        );
+        });
 
         if (isMounted) {
           setIsSourceIndexUnavailable(shouldSuppressErrorToast);
