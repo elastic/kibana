@@ -70,7 +70,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const rule = useRule();
   const { actionPolicyLocators } = useAlertingLocators();
   const { totalCount, catchAllCount, matchingCriteriaCount, isCountTruncated, isLoading, isError } =
-    useLinkedActionPolicies(rule.id);
+    useLinkedActionPolicies(rule.metadata.tags ?? []);
 
   const openNotificationPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
 

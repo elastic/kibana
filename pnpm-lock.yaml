@@ -5244,6 +5244,9 @@ importers:
       '@kbn/evals-suite-ml':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/ml/evals
+      '@kbn/evals-suite-nightshift-investigations':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations
       '@kbn/evals-suite-observability-ai':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai
@@ -5277,6 +5280,9 @@ importers:
       '@kbn/evals-suite-streams':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-evals-suite-streams
+      '@kbn/evals-suite-threat-intel-enrichment':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment
       '@kbn/evals-suite-workflows':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-evals-suite-workflows
@@ -8755,6 +8761,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2: {}
 
+  x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations: {}
+
   x-pack/platform/packages/shared/kbn-evals-suite-significant-events: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
@@ -9422,6 +9430,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment: {}
 
   x-pack/solutions/security/packages/kbn-scout-security: {}
 
