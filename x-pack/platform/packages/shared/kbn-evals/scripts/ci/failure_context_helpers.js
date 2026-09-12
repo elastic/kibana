@@ -69,7 +69,7 @@ const TRIAGE_TOOL = {
 const TRIAGE_TOOL_CHOICE = { type: 'function', function: { name: TRIAGE_TOOL_NAME } };
 
 // Static output contract for the per-suite structured triage prompt.
-const TRIAGE_OUTPUT_INSTRUCTIONS = `Report the result by calling the \`${TRIAGE_TOOL_NAME}\` tool with {"groups":[{"error":"<most relevant error line, verbatim from the excerpts, one line>","location":"<file:line / test or scenario if shown, else empty>","models":["<affected model id>"],"rootCause":"<short cause + one short action>"}]}. Do not answer in prose.
+const TRIAGE_OUTPUT_INSTRUCTIONS = `Report the result by calling the \`${TRIAGE_TOOL_NAME}\` tool with {"groups":[{"error":"<most relevant error line, verbatim from the excerpts, one line>","location":"<file:line / test or scenario if shown, else empty>","models":["<affected model id>"],"rootCause":"<short cause + one short action>"}]}.
 
 Rules:
 - One group per distinct error. Merge the same failure (same message/location) into one group and list all its affected models.
@@ -447,19 +447,18 @@ async function runTriageModelStructured(userPrompt) {
   );
 
   const message = responseJson?.choices?.[0]?.message;
-  try {
-    return { groups: parseTriageGroups(message?.tool_calls?.[0]?.function?.arguments), modelId };
-  } catch (error) {
+  const args = message?.tool_calls?.[0]?.function?.arguments;
+  if (args === undefined) {
     // The Buildkite step log is the only place the raw reply is visible; the
     // Slack/GitHub fallback line stays generic.
     console.error(
-      `Raw triage model reply: ${redactSecrets(JSON.stringify(message ?? responseJson)).slice(
-        0,
-        500
-      )}`
+      `Triage model ignored the tool call. Raw reply: ${redactSecrets(
+        JSON.stringify(message ?? responseJson)
+      ).slice(0, 1000)}`
     );
-    throw error;
+    throw new Error('Triage model did not call the report_triage tool');
   }
+  return { groups: parseTriageGroups(args), modelId };
 }
 
 module.exports = {

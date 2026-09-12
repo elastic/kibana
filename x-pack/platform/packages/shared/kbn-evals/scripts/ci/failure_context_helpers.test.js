@@ -241,30 +241,29 @@ describe('runTriageModelStructured / runTriageModel (mocked fetch)', () => {
     });
   });
 
-  it('fails generically and logs the redacted raw reply when the model answered in text', async () => {
+  it('logs the redacted raw reply and throws when the model answered in text instead of calling the tool', async () => {
     global.fetch = mockFetchJson(
       textResponse('Sure! Here is my analysis. Authorization: Bearer abc.def.ghi')
     );
 
     await expect(runTriageModelStructured('triage this')).rejects.toThrow(
-      'Triage model did not return valid JSON'
+      'Triage model did not call the report_triage tool'
     );
     expect(consoleError).toHaveBeenCalledTimes(1);
     const logged = consoleError.mock.calls[0][0];
-    expect(logged).toContain('Raw triage model reply:');
+    expect(logged).toContain('Triage model ignored the tool call. Raw reply:');
     expect(logged).toContain('Sure! Here is my analysis');
     expect(logged).toContain('[REDACTED]');
     expect(logged).not.toContain('abc.def.ghi');
   });
 
-  it('fails generically and logs the raw reply when the tool arguments are cut off', async () => {
+  it('throws when the tool arguments are cut off (malformed JSON bubbles directly, no extra log)', async () => {
     global.fetch = mockFetchJson(toolCallResponse('{"groups":[{"error":"boom","mo'));
 
     await expect(runTriageModelStructured('triage this')).rejects.toThrow(
       'Triage model did not return valid JSON'
     );
-    expect(consoleError.mock.calls[0][0]).toContain('Raw triage model reply:');
-    expect(consoleError.mock.calls[0][0]).toContain('boom');
+    expect(consoleError).not.toHaveBeenCalled();
   });
 
   it('keeps the weekly rollup on the plain text request', async () => {
