@@ -26,6 +26,7 @@ import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths, getRspackDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
+import { getReportColorModeOverride } from '../report_color_mode';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
@@ -132,6 +133,11 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
           darkMode = userSettingDarkMode;
         } else {
           darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
+        }
+
+        const reportColorMode = getReportColorModeOverride(request);
+        if (reportColorMode !== undefined) {
+          darkMode = reportColorMode;
         }
       }
     } catch (e) {

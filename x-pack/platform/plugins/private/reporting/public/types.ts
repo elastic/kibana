@@ -73,6 +73,10 @@ export interface ScheduledReport {
    */
   optimizedForPrinting?: boolean;
   /**
+   * PDF/PNG screenshot color mode stored on the job.
+   */
+  colorMode?: 'light' | 'dark';
+  /**
    * The date when the report should be first generated
    */
   startDate: string;

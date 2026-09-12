@@ -69,6 +69,7 @@ export const CreateScheduledReportForm = ({
         timezone,
         recurringSchedule,
         optimizedForPrinting,
+        colorMode,
         sendByEmail,
         emailRecipients,
         emailCcRecipients,
@@ -91,6 +92,7 @@ export const CreateScheduledReportForm = ({
           title,
           reportTypeId,
           ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
+          ...(reportTypeId === 'printablePdfV2' || reportTypeId === 'pngV2' ? { colorMode } : {}),
         }),
         schedule: { rrule: rrule as Rrule },
         notification: sendByEmail

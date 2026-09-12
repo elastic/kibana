@@ -108,6 +108,31 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   );
 });
 
+test(`passes color mode headers to getScreenshots`, async () => {
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
+      forceNow: 'test',
+      layout: { dimensions: {} },
+      title: 'PDF Color Mode Test',
+      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+      browserTimezone: 'UTC',
+      headers: encryptedHeaders,
+      colorMode: 'dark',
+    }),
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  });
+
+  expect(getScreenshotsSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      headers: { 'x-kbn-report-color-mode': 'dark' },
+    })
+  );
+});
+
 test(`returns content_type of application/pdf`, async () => {
   const { content_type: contentType } = await mockPdfExportType.runTask({
     jobId: 'pdfJobId',

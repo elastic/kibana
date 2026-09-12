@@ -103,6 +103,30 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   );
 });
 
+test(`passes color mode headers to getScreenshots`, async () => {
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
+      forceNow: 'test',
+      layout: { dimensions: {} },
+      locatorParams: [],
+      browserTimezone: 'UTC',
+      headers: encryptedHeaders,
+      colorMode: 'light',
+    }),
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  });
+
+  expect(getScreenshotsSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      headers: { 'x-kbn-report-color-mode': 'light' },
+    })
+  );
+});
+
 test(`returns content_type of application/png`, async () => {
   const { content_type: contentType } = await mockPngExportType.runTask({
     jobId: 'pngJobId',

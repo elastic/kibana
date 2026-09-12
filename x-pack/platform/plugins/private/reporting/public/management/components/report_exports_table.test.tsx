@@ -111,6 +111,38 @@ describe('ReportExportsTable', () => {
     expect(await screen.findByTestId(`reportDownloadLink-${mockJobs[0].id}`)).toBeInTheDocument();
   });
 
+  it('renders color mode for screenshot reports and an em dash otherwise', async () => {
+    jest.spyOn(reportingAPIClient, 'list').mockImplementation(() =>
+      Promise.resolve([
+        new Job({
+          ...mockJobs[0],
+          payload: { ...mockJobs[0].payload, colorMode: 'dark' },
+        }),
+        new Job({
+          ...mockJobs[0],
+          id: 'light-color-mode-job',
+          payload: { ...mockJobs[0].payload, colorMode: 'light' },
+        }),
+        new Job(mockJobs[1]),
+      ])
+    );
+
+    render(
+      <ThemeProvider theme={mockTheme}>
+        <ReportExportsTable {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(await screen.findByText('Color mode')).toBeInTheDocument();
+    const colorModeCells = await screen.findAllByTestId('reportJobColorMode');
+    expect(colorModeCells[0]).toHaveTextContent('Dark');
+    expect(colorModeCells[0].querySelector('[data-euiicon-type="moon"]')).toBeInTheDocument();
+    expect(colorModeCells[1]).toHaveTextContent('Light');
+    expect(colorModeCells[1].querySelector('[data-euiicon-type="sun"]')).toBeInTheDocument();
+    expect(colorModeCells[2]).toHaveTextContent('—');
+    expect(colorModeCells[2].querySelector('[data-euiicon-type]')).not.toBeInTheDocument();
+  });
+
   it('should show config flyout from table action', async () => {
     render(
       <ThemeProvider theme={mockTheme}>

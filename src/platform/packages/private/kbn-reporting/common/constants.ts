@@ -82,6 +82,20 @@ export const REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES = [
 export const REPORTING_REDIRECT_APP = '/app/reportingRedirect';
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
+/**
+ * Header Chromium sends when rendering PDF/PNG reports so Kibana bootstrap uses
+ * the job's stored color mode instead of the exporting user's Appearance preference.
+ * Keep in sync with `KBN_REPORT_COLOR_MODE_HEADER` in core rendering.
+ */
+export const KBN_REPORT_COLOR_MODE_HEADER = 'x-kbn-report-color-mode';
+
+export const getReportColorModeHeaders = (colorMode?: 'light' | 'dark'): Record<string, string> => {
+  if (!colorMode) {
+    return {};
+  }
+  return { [KBN_REPORT_COLOR_MODE_HEADER]: colorMode };
+};
+
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 export const REPORTING_MANAGEMENT_SCHEDULES =

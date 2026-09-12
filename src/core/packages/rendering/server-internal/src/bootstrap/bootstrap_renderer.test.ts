@@ -282,6 +282,57 @@ describe('bootstrapRenderer', () => {
         })
       );
     });
+
+    it('overrides user settings when the report color mode header is light', async () => {
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(true);
+
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: '/base-path',
+        userSettingsService,
+        themeName$,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'x-kbn-report-color-mode': 'light' },
+      });
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          colorMode: 'light',
+        })
+      );
+    });
+
+    it('overrides ui settings when the report color mode header is dark', async () => {
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: false,
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'x-kbn-report-color-mode': 'dark' },
+      });
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          colorMode: 'dark',
+        })
+      );
+    });
   });
 
   describe('when the auth status is `unknown`', () => {

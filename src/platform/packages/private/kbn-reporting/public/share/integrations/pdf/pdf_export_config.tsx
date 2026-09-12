@@ -45,9 +45,16 @@ export const getShareMenuItems =
 
     const requiresSavedState = sharingData.locatorParams === null;
 
-    const generateReportPDF = ({ intl, optimizedForPrinting = false }: ExportGenerationOpts) => {
+    const generateReportPDF = ({
+      intl,
+      optimizedForPrinting = false,
+      colorMode,
+    }: ExportGenerationOpts) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')(),
+        ...getJobParams(
+          { ...jobProviderOptions, optimizedForPrinting, colorMode },
+          'printablePdfV2'
+        )(),
       });
 
       return firstValueFrom(startServices$).then(([startServices]) => {
@@ -98,9 +105,9 @@ export const getShareMenuItems =
       });
     };
 
-    const generateExportUrlPDF = ({ optimizedForPrinting }: ExportGenerationOpts) => {
+    const generateExportUrlPDF = ({ optimizedForPrinting, colorMode }: ExportGenerationOpts) => {
       const jobParams = apiClient.getDecoratedJobParams(
-        getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')()
+        getJobParams({ ...jobProviderOptions, optimizedForPrinting, colorMode }, 'printablePdfV2')()
       );
       const relativePathPDF = apiClient.getReportingPublicJobPath('printablePdfV2', jobParams);
 
@@ -118,6 +125,7 @@ export const getShareMenuItems =
       exportType: 'printablePdfV2',
       requiresSavedState,
       renderLayoutOptionSwitch: objectType === 'dashboard',
+      renderColorModeOption: true,
       copyAssetURIConfig: {
         headingText: i18n.translate(
           'reporting.shareContextMenu.copyUriModal.pdfExportCopyUriHeading',

@@ -22,6 +22,34 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).not.toThrow();
   });
 
+  it('accepts colorMode light and dark', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00Z',
+      colorMode: 'dark' as const,
+    };
+
+    expect(validateJobParams(validParams).colorMode).toBe('dark');
+  });
+
+  it('rejects invalid colorMode values', () => {
+    const invalidParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00Z',
+      colorMode: 'system',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(invalidParams)).toThrow();
+  });
+
   it('accepts valid csv job params', () => {
     const validParams = {
       browserTimezone: 'America/Los_Angeles',
