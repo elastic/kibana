@@ -17,6 +17,19 @@ const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
 const FAKE_REQUEST = { fake: true } as never;
 
+/**
+ * The step gates on the execution's own privileges before touching the
+ * service. `hasAllRequested` is the only axis the handler branches on.
+ */
+const createSecurity = (hasAllRequested: boolean) =>
+  ({
+    authz: {
+      checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+        atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
+      }),
+    },
+  } as never);
+
 /** The step identifies the Worker from the execution's own fake request. */
 const resolvedUser = {
   username: 'worker-user',
@@ -148,6 +161,7 @@ describe('investigations.createProposal step', () => {
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
+      getSecurity: () => createSecurity(true),
     });
 
     const result = await definition.handler(
@@ -183,6 +197,7 @@ describe('investigations.createProposal step', () => {
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
+      getSecurity: () => createSecurity(true),
     });
 
     const result = await definition.handler(
@@ -197,6 +212,7 @@ describe('investigations.createProposal step', () => {
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
+      getSecurity: () => createSecurity(true),
     });
 
     await definition.handler(
@@ -214,6 +230,7 @@ describe('investigations.createProposal step', () => {
     const definition = getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
+      getSecurity: () => createSecurity(true),
     });
 
     const result = await definition.handler(
@@ -230,6 +247,7 @@ describe('investigations.updateProposal step', () => {
     const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
     const definition = getUpdateProposalStepDefinition({
       getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getSecurity: () => createSecurity(true),
     });
 
     const result = await definition.handler(
@@ -247,6 +265,7 @@ describe('investigations.updateProposal step', () => {
     const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
     const definition = getUpdateProposalStepDefinition({
       getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getSecurity: () => createSecurity(true),
     });
 
     await definition.handler(
@@ -261,5 +280,63 @@ describe('investigations.updateProposal step', () => {
       expect.objectContaining({ executionError: 'gate timed out' }),
       SPACE_ID
     );
+  });
+});
+
+describe('investigations.createProposal privilege gate', () => {
+  it('should deny before calling the service when the execution lacks manage_proposals', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const definition = getCreateProposalStepDefinition({
+      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
+      getSecurity: () => createSecurity(false),
+    });
+
+    const result = await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
+
+    expect(create).not.toHaveBeenCalled();
+    expect(result.error?.message).toMatch(/lacks/);
+  });
+
+  it('should fail closed when the privilege check itself errors', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const security = {
+      authz: {
+        checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+          atSpace: jest.fn().mockRejectedValue(new Error('es unreachable')),
+        }),
+      },
+    } as never;
+    const definition = getCreateProposalStepDefinition({
+      getProposalsService: () => ({ create } as unknown as ProposalsService),
+      resolveUser,
+      getSecurity: () => security,
+    });
+
+    const result = await definition.handler(
+      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
+    );
+
+    expect(create).not.toHaveBeenCalled();
+    expect(result.error?.message).toMatch(/Privilege check failed/);
+  });
+});
+
+describe('investigations.updateProposal privilege gate', () => {
+  it('should deny before calling the service when the execution lacks manage_proposals', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'p', status: 'succeeded' });
+    const definition = getUpdateProposalStepDefinition({
+      getProposalsService: () => ({ update } as unknown as ProposalsService),
+      getSecurity: () => createSecurity(false),
+    });
+
+    const result = await definition.handler(
+      createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(result.error?.message).toMatch(/lacks/);
   });
 });

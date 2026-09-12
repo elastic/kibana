@@ -130,6 +130,13 @@ export const proposalSchema = z.object({
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * Id of the recovery clone that superseded this proposal, written when the
+   * error path creates a replacement. Lets the queue filter to the live head
+   * of a chain (`supersededBy == null`) without touching `status`, which is
+   * already terminal (`failed`). See #19287.
+   */
+  supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
 
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
   createdBy: proposalUserSchema.optional(),
@@ -152,6 +159,7 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema.default('worker'),
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
