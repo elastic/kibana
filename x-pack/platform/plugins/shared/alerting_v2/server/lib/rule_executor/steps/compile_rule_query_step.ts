@@ -68,9 +68,18 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
 
       // 2a. No builder type: plain ES|QL rule. Pass through the stored query.
       if (!builderType) {
+        if (!rule.query) {
+          throw createTaskRunError(
+            Boom.badRequest(
+              `Rule "${rule.id}" has no stored query and its builder type does not compile at execution time.`,
+              { code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG }
+            ) as Error,
+            TaskErrorSource.USER
+          );
+        }
         return {
           type: 'continue',
-          state: { ...state, effectiveQuery: rule.query!, executionWindow },
+          state: { ...state, effectiveQuery: rule.query, executionWindow },
         };
       }
 
@@ -93,9 +102,18 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
 
       // 2c. Write-time builder: query was compiled and stored at write time.
       if (definition.compilation !== 'execution_time') {
+        if (!rule.query) {
+          throw createTaskRunError(
+            Boom.badRequest(
+              `Rule "${rule.id}" has no stored query and its builder type does not compile at execution time.`,
+              { code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG }
+            ) as Error,
+            TaskErrorSource.USER
+          );
+        }
         return {
           type: 'continue',
-          state: { ...state, effectiveQuery: rule.query!, executionWindow },
+          state: { ...state, effectiveQuery: rule.query, executionWindow },
         };
       }
 
