@@ -281,37 +281,12 @@ export function deriveOwnership(
 }
 
 /**
- * Asserts that the calling client may write to a managed rule, or may create
- * a rule of a managed type.
- *
- * A rule is managed when **either** its stored `metadata.ownership.managed` is
- * `true` **or** its `builder_type`'s current registration declares `ownership`.
- * Both halves are checked so the gate stays closed when the owning plugin is
- * disabled (stored field holds it) and before a become-managed transition's
- * backfill has run (registration holds it).
- *
- * For mutating paths that already have the stored rule, pass the stored
- * ownership and the stored/effective builder type. For create paths (no stored
- * rule), pass `storedOwnership: undefined` and the requested builder type —
- * the registration half of the gate applies.
- *
- * Match is on `solution` alone, never `solution` plus `domain`. The solution
- * is the trust boundary; requiring the domain to match as well would force a
- * caller to create one client per domain for no isolation gain.
- *
- * Throws `RULE_IS_MANAGED` (400) when the rule is managed and the caller has
- * no identity or a mismatched-solution identity. The error details carry
- * `{ solution, domain }` so the caller can report which owner refused the write.
+ * Shared parameter shape for both the throwing and non-throwing gate helpers.
  *
  * Ref: rule-ownership.md "The write gate"
  * Ref: rule-ownership.md "Path by path"
  */
-export function assertManagedRuleWrite({
-  registry,
-  callerIdentity,
-  storedOwnership,
-  builderType,
-}: {
+interface ManagedWriteCheckParams {
   registry: BuilderTypeRegistry;
   callerIdentity: CallerIdentity | undefined;
   /**
@@ -325,8 +300,28 @@ export function assertManagedRuleWrite({
    * ownership mark is absent or unmanaged.
    */
   builderType: string | undefined | null;
-}): void {
-  // Determine the owning solution and domain using the two-half check.
+}
+
+/**
+ * Returns the owning `{ solution, domain }` when the caller may NOT write the
+ * rule, or `undefined` when the write is allowed.
+ *
+ * A rule is managed when **either** its stored `metadata.ownership.managed` is
+ * `true` **or** its `builder_type`'s current registration declares `ownership`.
+ * Both halves are checked so the gate stays closed when the owning plugin is
+ * disabled (stored field holds it) and before a become-managed transition's
+ * backfill has run (registration holds it).
+ *
+ * Match is on `solution` alone — the solution is the trust boundary.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ */
+export function getManagedWriteOwner({
+  registry,
+  callerIdentity,
+  storedOwnership,
+  builderType,
+}: ManagedWriteCheckParams): { solution: string; domain: string } | undefined {
   let owningSolution: string | undefined;
   let owningDomain: string | undefined;
 
@@ -345,16 +340,59 @@ export function assertManagedRuleWrite({
 
   // Not a managed rule — write proceeds.
   if (owningSolution === undefined) {
-    return;
+    return undefined;
   }
 
-  // Managed rule — the caller must carry a matching solution identity.
-  if (callerIdentity?.solution !== owningSolution) {
+  // Managed rule — caller with matching solution may write it.
+  if (callerIdentity?.solution === owningSolution) {
+    return undefined;
+  }
+
+  return { solution: owningSolution, domain: owningDomain! };
+}
+
+/**
+ * Per-rule bulk error for a managed rule the caller is not allowed to write.
+ * Used by the four bulk executors to report refused rules as per-item results
+ * rather than failing the entire request.
+ *
+ * Ref: rule-ownership.md "Path by path"
+ */
+export const managedRuleWriteError = (
+  ruleId: string,
+  solution: string,
+  domain: string,
+  name?: string
+): BulkOperationError => ({
+  id: ruleId,
+  error: {
+    code: ALERTING_ERROR_CODES.RULE_IS_MANAGED,
+    message: `Rule is managed by solution "${solution}" / domain "${domain}" and may not be written by this caller`,
+    ...nameDetails(name),
+  },
+});
+
+/**
+ * Asserts that the calling client may write to a managed rule, or may create
+ * a rule of a managed type. Delegates to {@link getManagedWriteOwner} and
+ * throws `RULE_IS_MANAGED` (400) when that returns an owner.
+ *
+ * For mutating paths that already have the stored rule, pass the stored
+ * ownership and the stored/effective builder type. For create paths (no stored
+ * rule), pass `storedOwnership: undefined` and the requested builder type —
+ * the registration half of the gate applies.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ * Ref: rule-ownership.md "Path by path"
+ */
+export function assertManagedRuleWrite(params: ManagedWriteCheckParams): void {
+  const owner = getManagedWriteOwner(params);
+  if (owner !== undefined) {
     throw Boom.badRequest(
-      `Rule is managed by solution "${owningSolution}" / domain "${owningDomain}" and may not be written by this caller`,
+      `Rule is managed by solution "${owner.solution}" / domain "${owner.domain}" and may not be written by this caller`,
       {
         code: ALERTING_ERROR_CODES.RULE_IS_MANAGED,
-        details: { solution: owningSolution, domain: owningDomain },
+        details: { solution: owner.solution, domain: owner.domain },
       }
     );
   }
@@ -590,7 +628,11 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       owner: data.metadata.owner,
       tags: data.metadata.tags,
       signature_id: signatureId,
-      builder_type: data.metadata.builder_type,
+      // `metadata.builder_type: null` is accepted in the PUT body as the
+      // explicit-clear signal (rule-types.md "What this design needs"). The
+      // replace branch normalises it away via resolveReplaceRuleBuilder before
+      // reaching here, but guard defensively so null never reaches storage.
+      builder_type: data.metadata.builder_type ?? undefined,
       builder_fields: data.metadata.builder_fields,
       source,
       version,

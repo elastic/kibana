@@ -305,3 +305,79 @@ export function resolveUpdateRuleBuilder(
 
   return data;
 }
+
+/**
+ * Settles the query for a PUT (upsert replace): closes the builder-query
+ * protection hole that `resolveCreateRuleBuilder` cannot close on its own.
+ *
+ * When the stored rule carries a `builder_type`, a plain PUT body must either
+ * supply `metadata.builder_fields` (to regenerate the query through the
+ * builder) or send `metadata.builder_type: null` (the explicit escape hatch
+ * that confirms the transition to ES|QL mode). Any other plain-query body
+ * would silently strip the builder relationship, so it is rejected with
+ * `BUILDER_TYPE_NOT_CLEARED`.
+ *
+ * The `metadata.builder_type: null` signal is normalised to `undefined` before
+ * the call reaches `resolveCreateRuleBuilder`, so null never propagates to
+ * storage.
+ *
+ * For rules that have no stored `builder_type`, the function delegates
+ * directly to `resolveCreateRuleBuilder` — identical to the old behaviour.
+ *
+ * Ref: rule-types.md "What this design needs from the framework"
+ *
+ * @throws `Boom` 400 with `BUILDER_TYPE_NOT_CLEARED` when the PUT body would
+ * silently strip an existing builder relationship.
+ */
+export function resolveReplaceRuleBuilder(
+  registry: BuilderTypeRegistry,
+  ruleId: string,
+  data: CreateRuleData,
+  existing: RuleSavedObjectAttributes
+): ResolvedCreateRuleData {
+  const existingType = existing.metadata.builder_type;
+
+  // No stored builder type: the replace is a straightforward create-shaped
+  // resolution. Delegate to the create path unchanged.
+  if (!existingType) {
+    return resolveCreateRuleBuilder(registry, data);
+  }
+
+  // The stored rule is builder-managed. Three valid paths:
+  //
+  //   1. The PUT body sends `builder_fields` — regenerate the query through
+  //      the builder. The existing builder type is still the effective type;
+  //      the create path handles generation.
+  //
+  //   2. The PUT body sends `metadata.builder_type: null` — explicit
+  //      transition to ES|QL mode. Strip the builder context before delegating
+  //      so null never reaches storage.
+  //
+  //   3. Anything else — the PUT body carries a plain query (or no query at
+  //      all) without either of the above signals. This would silently drop
+  //      the builder relationship; reject.
+
+  if (data.metadata?.builder_fields) {
+    // Path 1: builder_fields provided → delegate to create-shaped resolution.
+    return resolveCreateRuleBuilder(registry, data);
+  }
+
+  if (data.metadata?.builder_type === null) {
+    // Path 2: explicit clear. Normalise null → undefined so the create path
+    // treats this as a plain rule, and null is never written to storage.
+    const cleared: CreateRuleData = {
+      ...data,
+      metadata: { ...data.metadata, builder_type: undefined, builder_fields: undefined },
+    };
+    return resolveCreateRuleBuilder(registry, cleared);
+  }
+
+  // Path 3: no builder_fields, no explicit null — reject.
+  throw Boom.badRequest(
+    `Rule "${ruleId}" is authored by the "${existingType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder_type: null in the same request to confirm the transition to ES|QL mode.`,
+    {
+      code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
+      details: { rule_id: ruleId, builder_type: existingType },
+    }
+  );
+}

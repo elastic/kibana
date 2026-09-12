@@ -216,4 +216,102 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       expect(stored.version).toBe(rule.version);
     }
   );
+
+  // ---------------------------------------------------------------------------
+  // Step 5.3: managed-rule write gate on the bulk-update-api-key path
+  // Ref: rule-ownership.md "Path by path"
+  // ---------------------------------------------------------------------------
+
+  apiTest(
+    'managed-rule gate: should refuse a managed rule with RULE_IS_MANAGED and not rotate its key',
+    async ({ apiClient, apiServices }) => {
+      const managedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'managed-rotate' } })
+      );
+      try {
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+        // Re-fetch so the baseline version reflects the ES partial update from
+        // setOwnership (which bumps _seq_no). The rotation gate must leave it
+        // at this version — any write by the rotation path would bump it further.
+        const versionAfterStamp = (await apiServices.alertingV2.rules.get(managedRule.id)).version;
+
+        const response = await apiClient.post(BULK_UPDATE_API_KEY_URL, {
+          headers: writerHeaders,
+          body: { ids: [managedRule.id] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.affected_count).toBe(0);
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0]).toMatchObject({
+          id: managedRule.id,
+          error: { code: 'RULE_IS_MANAGED' },
+        });
+        // Version unchanged from the post-stamp baseline — no write happened.
+        const stored = await apiServices.alertingV2.rules.get(managedRule.id);
+        expect(stored.version).toBe(versionAfterStamp);
+      } finally {
+        // Un-manage so the normal cleanup can delete this rule.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: false,
+        });
+      }
+    }
+  );
+
+  apiTest(
+    'managed-rule gate: should rotate unmanaged rules and refuse managed ones in a mixed batch',
+    async ({ apiClient, apiServices }) => {
+      const managedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'managed-rotate-batch' } })
+      );
+      const unmanagedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'unmanaged-rotate-batch' } })
+      );
+      try {
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+        // Re-fetch so the baseline version reflects the ES partial update from
+        // setOwnership. Creating the unmanaged rule first advances the shard
+        // seq_no by 1, so the setOwnership write assigns a seq_no two higher
+        // than what managedRule.version captured at create time.
+        const managedVersionAfterStamp = (
+          await apiServices.alertingV2.rules.get(managedRule.id)
+        ).version;
+
+        const response = await apiClient.post(BULK_UPDATE_API_KEY_URL, {
+          headers: writerHeaders,
+          body: { ids: [managedRule.id, unmanagedRule.id] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.affected_count).toBe(1);
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0]).toMatchObject({
+          id: managedRule.id,
+          error: { code: 'RULE_IS_MANAGED' },
+        });
+        // The unmanaged rule's version should have bumped (audit stamp); the
+        // managed one's should be unchanged from the post-stamp baseline.
+        const storedManaged = await apiServices.alertingV2.rules.get(managedRule.id);
+        const storedUnmanaged = await apiServices.alertingV2.rules.get(unmanagedRule.id);
+        expect(storedManaged.version).toBe(managedVersionAfterStamp);
+        // Version strings are base64-encoded opaque tokens — use not.toBe to
+        // confirm the rotation write changed the token, not toBeGreaterThan.
+        expect(storedUnmanaged.version).not.toBe(unmanagedRule.version);
+      } finally {
+        // Un-manage so the normal cleanup can delete this rule.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: false,
+        });
+      }
+    }
+  );
 });

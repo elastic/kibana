@@ -16,10 +16,18 @@
  *
  * `resolveCreateRuleBuilder` is used by:
  *   - createRule  (create path)
- *   - upsertRule's "replace" branch (PUT path)
+ *   - resolveReplaceRuleBuilder (which delegates to it after its own guard)
  *
  * `resolveUpdateRuleBuilder` is used by:
  *   - updateRule  (PATCH path)
+ *
+ * `resolveReplaceRuleBuilder` is used by:
+ *   - upsertRule's "replace" branch (PUT path)
+ *
+ * Step 5.4 introduced `resolveReplaceRuleBuilder` and deliberately changed the
+ * characterisation: the PUT path no longer calls `resolveCreateRuleBuilder`
+ * directly, so tests that implicitly relied on the create path's permissiveness
+ * on PUT have been migrated to the new `resolveReplaceRuleBuilder` suite.
  *
  * Mocking strategy: BuilderTypeRegistry is given a minimal jest mock because
  * the resolution functions need only `generate()`.  Registry-level validation
@@ -32,7 +40,11 @@ import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { BuilderTypeRegistry, GeneratedQuery } from '../builder_types';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
-import { resolveCreateRuleBuilder, resolveUpdateRuleBuilder } from './builder_resolution';
+import {
+  resolveCreateRuleBuilder,
+  resolveReplaceRuleBuilder,
+  resolveUpdateRuleBuilder,
+} from './builder_resolution';
 
 // ---------------------------------------------------------------------------
 // Registry mock
@@ -904,6 +916,206 @@ describe('resolveUpdateRuleBuilder', () => {
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting);
 
       expect(result).toBe(data);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveReplaceRuleBuilder
+// ---------------------------------------------------------------------------
+
+describe('resolveReplaceRuleBuilder', () => {
+  // -------------------------------------------------------------------------
+  // Plain (non-builder) stored rule — delegates to resolveCreateRuleBuilder
+  // -------------------------------------------------------------------------
+
+  describe('stored rule has no builder type', () => {
+    it('delegates to resolveCreateRuleBuilder unchanged when the stored rule is a plain rule', () => {
+      // For a plain rule, replace is a full create-shaped resolution with no
+      // extra checks. The stored rule has no builder_type, so the guard is a no-op.
+      const registry = createMockRegistry();
+
+      const result = resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, plainExisting);
+
+      expect(result.query).toEqual(baseCreateData.query);
+    });
+
+    it('does not call registry.generate when the stored rule is plain', () => {
+      const generate = jest.fn();
+      const registry = createMockRegistry(generate);
+
+      resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, plainExisting);
+
+      expect(generate).not.toHaveBeenCalled();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Stored rule has a builder type — guard paths
+  // -------------------------------------------------------------------------
+
+  describe('stored rule has a builder type', () => {
+    // -----------------------------------------------------------------------
+    // Path 1: PUT body carries builder_fields → builder regeneration
+    // -----------------------------------------------------------------------
+
+    describe('PUT body sends builder_fields (path 1: regeneration)', () => {
+      it('calls registry.generate with the provided builder_fields', () => {
+        // A PUT that carries builder_fields regenerates the query through the
+        // builder, preserving the builder relationship.
+        const generate = jest.fn().mockReturnValue(standaloneGenerated);
+        const registry = createMockRegistry(generate);
+
+        resolveReplaceRuleBuilder(registry, RULE_ID, builderCreateData, builderExisting);
+
+        expect(generate).toHaveBeenCalledWith(
+          BUILDER_TYPE,
+          RAW_FIELDS,
+          expect.objectContaining({ kind: 'alert' })
+        );
+      });
+
+      it('returns the generated query in the result', () => {
+        const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneGenerated));
+
+        const result = resolveReplaceRuleBuilder(
+          registry,
+          RULE_ID,
+          builderCreateData,
+          builderExisting
+        );
+
+        expect(result.query).toEqual(standaloneGenerated.query);
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Path 2: PUT body sends builder_type: null → explicit clear
+    // -----------------------------------------------------------------------
+
+    describe('PUT body sends builder_type: null (path 2: explicit clear)', () => {
+      // `null` is the escape hatch that explicitly transitions a builder rule
+      // to plain ES|QL mode. resolveReplaceRuleBuilder normalises it to
+      // undefined before delegating to resolveCreateRuleBuilder, so null
+      // never reaches storage.
+
+      it('succeeds and returns the body query when builder_type is null', () => {
+        const registry = createMockRegistry();
+        const data = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: null },
+        } as CreateRuleData;
+
+        // Should not throw.
+        const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
+
+        expect(result.query).toEqual(baseCreateData.query);
+      });
+
+      it('produces a result whose metadata.builder_type is not null (normalised away)', () => {
+        const registry = createMockRegistry();
+        const data = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: null },
+        } as CreateRuleData;
+
+        const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
+
+        // null must not propagate to storage. resolveCreateRuleBuilder receives
+        // the data with builder_type: undefined, so the result has no null.
+        expect(result.metadata.builder_type).not.toBe(null);
+      });
+
+      it('does not call registry.generate when builder_type is null (explicit clear path)', () => {
+        const generate = jest.fn();
+        const registry = createMockRegistry(generate);
+        const data = {
+          ...baseCreateData,
+          metadata: { ...baseCreateData.metadata, builder_type: null },
+        } as CreateRuleData;
+
+        resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
+
+        expect(generate).not.toHaveBeenCalled();
+      });
+    });
+
+    // -----------------------------------------------------------------------
+    // Path 3: PUT body carries a plain query without an explicit clear → reject
+    // -----------------------------------------------------------------------
+
+    describe('PUT body carries a plain query without builder_type: null (path 3: reject)', () => {
+      // Step 5.4: closes the PUT bypass of the builder-query protection.
+      // Before this step, the replace branch called resolveCreateRuleBuilder
+      // directly, which had no access to the stored rule and allowed any PUT
+      // body to silently strip the builder relationship.
+
+      it('throws BUILDER_TYPE_NOT_CLEARED when a plain query is PUT over a builder rule', () => {
+        const registry = createMockRegistry();
+
+        expect(() =>
+          resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, builderExisting)
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
+            }),
+          })
+        );
+      });
+
+      it('includes the rule_id and builder_type in the BUILDER_TYPE_NOT_CLEARED error details', () => {
+        const registry = createMockRegistry();
+
+        let caught: unknown;
+        try {
+          resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, builderExisting);
+        } catch (error) {
+          caught = error;
+        }
+
+        expect(caught).toMatchObject({
+          data: expect.objectContaining({
+            details: expect.objectContaining({
+              rule_id: RULE_ID,
+              builder_type: BUILDER_TYPE,
+            }),
+          }),
+        });
+      });
+
+      it('throws BUILDER_TYPE_NOT_CLEARED even when the PUT query is identical to the stored query', () => {
+        // Unlike the PATCH path, which only rejects on queryChanged, the PUT
+        // path always rejects when no explicit clear signal is present —
+        // because a PUT without builder_type: null would strip builder_type
+        // from storage regardless of whether the query changes.
+        const registry = createMockRegistry();
+        // Same query as in builderExisting.
+        const data: CreateRuleData = {
+          ...baseCreateData,
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        };
+
+        expect(() =>
+          resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)
+        ).toThrow(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
+            }),
+          })
+        );
+      });
+
+      it('does not throw for a plain query PUT over a non-builder rule', () => {
+        // The guard only fires when the stored rule has a builder_type.
+        const registry = createMockRegistry();
+
+        expect(() =>
+          resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, plainExisting)
+        ).not.toThrow();
+      });
     });
   });
 });
