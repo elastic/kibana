@@ -23,7 +23,7 @@ settings:
       # a genuine failure.
       - name: record_expiry
         type: investigations.updateProposal
-        if: "${{ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type == 'TimeoutError' }}"
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type == 'TimeoutError' }}"
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId }}'
           status: dismissed
@@ -32,7 +32,7 @@ settings:
         # Skipped when no proposal exists on this run (creation or recovery
         # itself failed): there is nothing to mark, and the template would
         # resolve to an empty id.
-        if: "${{ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type != 'TimeoutError' }}"
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type != 'TimeoutError' }}"
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId }}'
           status: failed
@@ -52,9 +52,9 @@ settings:
       # another.
       - name: spawn_recovery
         type: workflow.executeAsync
-        if: "${{ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type != 'TimeoutError' }}"
+        if: "${{ steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '' and error.type != 'TimeoutError' }}"
         with:
-          workflow-id: 'system-create-investigation-proposal'
+          workflow-id: 'system-recover-investigation-proposal'
           inputs:
             conversationId: '{{ inputs.conversationId }}'
             comment: '{{ inputs.comment }}'
@@ -62,10 +62,7 @@ settings:
             actionInput: '${{ inputs.actionInput }}'
             impact: "{{ inputs.impact | default: 'low' }}"
             confidence: "{{ inputs.confidence | default: 'medium' }}"
-            # The flip: recovery is never autonomous, even when the original
-            # run was approved unattended.
-            autoApprove: false
-            recoveryOf: '{{ steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId }}'
+            proposalId: '{{ steps.create_proposal.output.proposalId }}'
 triggers:
   - type: manual
     inputs:
@@ -102,12 +99,6 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
-        recoveryOf:
-          type: string
-          description: >
-            Recovery flow only: id of the failed proposal this run clones
-            instead of creating a new one. Set by the on-failure recovery
-            path; never supply it manually.
       required:
         - conversationId
         - comment
@@ -123,9 +114,7 @@ outputs:
     type: string
 
 steps:
-  # Normal run: create a fresh proposal. Skipped entirely on a recovery run.
   - name: create_proposal
-    if: "${{ inputs.recoveryOf == null or inputs.recoveryOf == '' }}"
     type: investigations.createProposal
     with:
       conversationId: '{{ inputs.conversationId }}'
@@ -138,17 +127,6 @@ steps:
       # Must stay equal to the gate timeout below, or the deadline the queue
       # shows an analyst is not the one the gate actually enforces.
       expiresIn: '72h'
-  # Recovery run: clone the failed original instead of creating. The clone
-  # carries the original createdAt/expiresAt (the deadline does not reset),
-  # parks on THIS execution as its new gate, and marks the original
-  # superseded. Only a failed, unexpired, not-yet-superseded proposal can be
-  # cloned — enforced in the service, not here.
-  - name: recover_original
-    if: "${{ inputs.recoveryOf != null and inputs.recoveryOf != '' }}"
-    type: investigations.cloneProposal
-    with:
-      proposalId: '{{ inputs.recoveryOf }}'
-
   - name: decision_gate
     type: if
     # `autoApprove` is only meaningful for an action proposal: autonomy governs

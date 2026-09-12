@@ -194,39 +194,6 @@ describe('create-investigation-proposal workflow', () => {
     expect(Object.keys(execute.with?.inputs ?? {})).toEqual(['actionInput']);
   });
 
-  it('exposes a recoveryOf input so a recovery run can name its failed original', () => {
-    const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
-    expect(manualTrigger?.inputs?.properties).toEqual(
-      expect.objectContaining({ recoveryOf: expect.anything() })
-    );
-    expect(manualTrigger?.inputs?.required).not.toContain('recoveryOf');
-  });
-  it('creates a fresh proposal on a normal run and clones on a recovery run', () => {
-    const create = findStep(workflow.steps, 'create_proposal');
-    const recover = findStep(workflow.steps, 'recover_original');
-    expect(create?.if).toContain("inputs.recoveryOf == null or inputs.recoveryOf == ''");
-    expect(recover?.if).toContain("inputs.recoveryOf != null and inputs.recoveryOf != ''");
-    expect(recover?.type).toBe('investigations.cloneProposal');
-    expect(recover?.with?.proposalId).toContain('inputs.recoveryOf');
-  });
-  it('parks the clone on its own gate by pointing every proposal reference at whichever step produced it', () => {
-    const gateBranch = workflow.steps.find(({ name }) => name === 'decision_gate') as {
-      condition?: string;
-    };
-    const output = findStep(workflow.steps, 'output_result') as { with?: Record<string, unknown> };
-    expect(JSON.stringify(output.with)).toContain(
-      'steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId'
-    );
-    const recover = findStep(workflow.steps, 'recover_original') as {
-      with?: Record<string, unknown>;
-    };
-    expect(recover.with?.proposalId).toBe('{{ inputs.recoveryOf }}');
-    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-    const spawn = fallback.find(({ name }) => name === 'spawn_recovery');
-    expect(spawn?.with?.inputs?.recoveryOf).toContain(
-      'steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId'
-    );
-  });
   it('spawns the recovery execution only for a genuine failure, never for an expired gate', () => {
     const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
     const spawn = fallback.find(({ name }) => name === 'spawn_recovery');
@@ -234,21 +201,7 @@ describe('create-investigation-proposal workflow', () => {
     expect(spawn?.if).toContain("error.type != 'TimeoutError'");
     expect(spawn?.if).toContain('proposalId != null');
     expect(spawn?.type).toBe('workflow.executeAsync');
-    expect(spawn?.with?.['workflow-id']).toBe('system-create-investigation-proposal');
-  });
-  it('forces the recovery run through the human gate by pinning autoApprove false', () => {
-    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-    const spawn = fallback.find(({ name }) => name === 'spawn_recovery');
-    expect(spawn?.with?.inputs?.autoApprove).toBe(false);
-  });
-  it('drops the original from the queue by superseding it via the clone step', () => {
-    // The clone step itself performs the supersede write-back (service-level
-    // markSuperseded), asserted in proposals_service.test.ts. The YAML only
-    // needs to not re-supersede from a template: assert the spawn passes
-    // recoveryOf and nothing else names supersededBy.
-    const text = CREATE_INVESTIGATION_PROPOSAL_YAML;
-    expect(text).toContain('recoveryOf');
-    expect(text).not.toContain('supersededBy:');
+    expect(spawn?.with?.['workflow-id']).toBe('system-recover-investigation-proposal');
   });
 
   it('parses every condition with the ${{ }} expression syntax, never a single-brace variant', () => {
@@ -285,19 +238,23 @@ describe('create-investigation-proposal workflow', () => {
       }
     }
   });
-  it('forces the recovery run through a human gate', () => {
+  it('never grants the recovery run autonomy: no autoApprove is passed through', () => {
     const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
     const spawn = fallback.find(({ name }) => name === 'spawn_recovery') as {
       with?: { inputs?: Record<string, unknown> };
     };
-    expect(spawn.with?.inputs?.autoApprove).toBe(false);
+    // The dedicated recovery workflow declares no autonomy input, so the
+    // spawn must not pass one either.
+    expect(spawn.with?.inputs?.autoApprove).toBeUndefined();
   });
   it('bounds the recovery chain by carrying the deadline instead of resetting it', () => {
-    const recover = findStep(workflow.steps, 'recover_original') as {
+    // The clone service enforces expiresAt; neither workflow may pass a
+    // fresh deadline through the spawn.
+    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+    const spawn = fallback.find(({ name }) => name === 'spawn_recovery') as {
       with?: Record<string, unknown>;
     };
-    // The clone service enforces expiresAt; the workflow must not extend it.
-    expect(JSON.stringify(recover.with)).not.toContain('expiresIn');
+    expect(JSON.stringify(spawn.with)).not.toContain('expiresIn');
   });
   it('records the execution outcome around the action', () => {
     expect(findStep(workflow.steps, 'mark_executing')?.type).toBe('investigations.updateProposal');
