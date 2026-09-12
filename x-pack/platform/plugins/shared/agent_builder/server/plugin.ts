@@ -45,6 +45,7 @@ import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
@@ -53,10 +54,12 @@ import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
-import { registerConversationWorkflowSteps } from './workflows';
+import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
+import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
+import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 
 export class AgentBuilderPlugin
   implements
@@ -78,6 +81,7 @@ export class AgentBuilderPlugin
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
   private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
+  private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -163,6 +167,14 @@ export class AgentBuilderPlugin
     );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+    // External Deductive execution path (agent + Advanced Settings). Self-contained in the
+    // deductive module so the whole temporary integration can be removed by deleting it.
+    registerDeductiveAgent({
+      coreSetup,
+      uiSettings: coreSetup.uiSettings,
+      agents: serviceSetups.agents,
+      register: this.config.deductive?.register ?? false,
+    });
 
     this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -195,6 +207,24 @@ export class AgentBuilderPlugin
       isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
+    registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
+      getAttachmentClient: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Attachment client not available — plugin has not started');
+        }
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return createAttachmentPublicClient({
+          request,
+          conversationsService: services.conversations,
+          attachmentsService: services.attachments,
+          coreStart,
+          spaces: startDeps.spaces,
+        });
+      },
+      isExperimentalEnabled: this.isExperimentalEnabled,
+    });
+
     registerAgentBuilderHandlerContext({ coreSetup });
 
     const getInternalServices = () => {
@@ -217,6 +247,12 @@ export class AgentBuilderPlugin
     });
 
     registerBeforeAgentWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerAfterExecutionWorkflowsHook(serviceSetups, {
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger,
       getInternalServices,
@@ -333,6 +369,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      deductiveRegister: this.config.deductive?.register ?? false,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -368,6 +405,13 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
     });
+
+    this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
+      logger: this.logger.get('recommended-endpoints-poller'),
+      esClient: elasticsearch.client.asInternalUser,
+      features: searchInferenceEndpoints.features,
+    });
+    this.recommendedEndpointsPoller.start();
 
     return {
       agents: {
@@ -416,6 +460,7 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
+    this.recommendedEndpointsPoller?.stop();
     await this.teardownTracing?.();
   }
 

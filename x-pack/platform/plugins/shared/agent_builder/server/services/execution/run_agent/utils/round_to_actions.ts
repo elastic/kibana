@@ -14,7 +14,6 @@ import {
   type ReasoningStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
-import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ResearchAgentAction } from '../actions';
 import { toolCallAction, executeToolAction } from '../actions';
 import { groupToolCallSteps } from './to_langchain_messages';
@@ -24,7 +23,7 @@ export const roundToActions = ({
   round,
   toolIdMapping,
 }: {
-  round: ConversationRound | ProcessedConversationRound;
+  round: ConversationRound;
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
