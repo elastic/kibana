@@ -1682,11 +1682,80 @@ describe('bulkGetRulesParamsSchema', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Step 4.4: ruleOwnershipSchema — response-only discriminated union
+// ---------------------------------------------------------------------------
+
+describe('ruleOwnershipSchema (step 4.4)', () => {
+  // Imported via the re-export from rule_data_schema.ts
+  const { ruleOwnershipSchema, createRuleDataSchema, updateRuleDataSchema } =
+    require('./rule_data_schema');
+
+  it('accepts a managed ownership object', () => {
+    const result = ruleOwnershipSchema.parse({
+      managed: true,
+      solution: 'security',
+      domain: 'detection',
+    });
+    expect(result).toEqual({ managed: true, solution: 'security', domain: 'detection' });
+  });
+
+  it('accepts an unmanaged ownership object without app', () => {
+    const result = ruleOwnershipSchema.parse({ managed: false });
+    expect(result).toEqual({ managed: false });
+  });
+
+  it('accepts an unmanaged ownership object with app', () => {
+    const result = ruleOwnershipSchema.parse({ managed: false, app: 'significantEvents' });
+    expect(result).toEqual({ managed: false, app: 'significantEvents' });
+  });
+
+  it('rejects an unmanaged ownership with app exceeding 128 chars', () => {
+    const result = ruleOwnershipSchema.safeParse({ managed: false, app: 'a'.repeat(129) });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a managed ownership without solution', () => {
+    const result = ruleOwnershipSchema.safeParse({ managed: true, domain: 'detection' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a managed ownership without domain', () => {
+    const result = ruleOwnershipSchema.safeParse({ managed: true, solution: 'security' });
+    expect(result.success).toBe(false);
+  });
+
+  it('createRuleDataSchema rejects ownership in metadata (response-only, strict schema)', () => {
+    const result = createRuleDataSchema.safeParse({
+      kind: 'alert',
+      metadata: { name: 'r', ownership: { managed: false } },
+      schedule: { every: '5m' },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('updateRuleDataSchema rejects ownership in metadata (response-only, strict schema)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'r', ownership: { managed: false } },
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1, signature_id: 'sample-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 } },
+    metadata: {
+      name: 'r',
+      version: 1,
+      signature_id: 'sample-sig-id',
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
+      // Step 4.4: ownership is now required in the response schema.
+      ownership: { managed: false },
+    },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },

@@ -146,6 +146,7 @@ const baseRule: RuleApiResponse = {
     source: { type: 'internal' as const, version: 1 },
     description: 'Test rule description',
     tags: ['prod', 'infra'],
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },

@@ -4182,6 +4182,162 @@ describe('RulesClient', () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Step 4.4: metadata.ownership — server-derived, immutable, response-only
+  //
+  // Pins the three invariants from the design:
+  //   1. Managed type create stamps the type's declared ownership.
+  //   2. Unmanaged (or no builder type) create stamps { managed: false }.
+  //   3. No request body can set or change ownership (schema rejects it).
+  // ---------------------------------------------------------------------------
+
+  describe('metadata.ownership (step 4.4)', () => {
+    describe('createRule', () => {
+      it('stamps { managed: false } for a rule without a builder type', async () => {
+        const client = createClient();
+        // Default baseSoAttrs has no builder_type.
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-own-unmanaged' });
+
+        const res = await client.createRule({
+          data: baseCreateData, // no builder_type
+          options: { id: 'rule-own-unmanaged' },
+        });
+
+        // Response carries unmanaged ownership.
+        expect(res.metadata.ownership).toEqual({ managed: false });
+
+        // Stored attributes carry unmanaged ownership.
+        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        expect(attrs.metadata.ownership).toEqual({ managed: false });
+      });
+
+      it('stamps managed ownership for a rule whose builder type declares ownership', async () => {
+        const client = createClient();
+
+        // Spy on registry.get so that deriveOwnership reads the managed declaration
+        // without needing a full valid registration. builder_type is set but
+        // builder_fields is absent so resolveCreateRuleBuilder falls through to
+        // the stored query path, avoiding registry.generate altogether.
+        jest.spyOn(builderTypeRegistry, 'get').mockReturnValue({
+          type: 'security.detection.query',
+          name: 'Detection query',
+          ownership: { solution: 'security', domain: 'detection' },
+          builderFieldsSchema: {} as never,
+          generateQuery: jest.fn(),
+        });
+
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-own-managed' });
+
+        const res = await client.createRule({
+          data: {
+            ...baseCreateData,
+            metadata: { name: 'detection-rule', builder_type: 'security.detection.query' },
+            // No builder_fields → resolveCreateRuleBuilder uses baseCreateData.query directly.
+          },
+          options: { id: 'rule-own-managed' },
+        });
+
+        // Response carries managed ownership.
+        expect(res.metadata.ownership).toEqual({
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+
+        // Stored attributes carry managed ownership.
+        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        expect(attrs.metadata.ownership).toEqual({
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+      });
+
+      it('ownership is never accepted from the request body (schema rejects it)', async () => {
+        const { createRuleDataSchema } = await import('@kbn/alerting-v2-schemas');
+
+        const result = createRuleDataSchema.safeParse({
+          kind: 'alert',
+          metadata: {
+            name: 'rule-1',
+            // ownership is response-only; the strict metadataSchema rejects unknown fields
+            ownership: { managed: false },
+          },
+          schedule: { every: '5m' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        });
+
+        expect(result.success).toBe(false);
+      });
+    });
+
+    describe('upsertRule — replace branch', () => {
+      it('carries stored ownership forward without accepting ownership from the body', async () => {
+        const client = createClient();
+
+        const storedOwnership = { managed: true, solution: 'security', domain: 'detection' };
+        const existing = createRuleSoAttributes({
+          metadata: { name: 'before', signature_id: 'own-replace-sig', ownership: storedOwnership },
+        });
+        const doc = { id: 'rule-own-replace', attributes: existing, version: 'WzEsMV0=' };
+        rulesSavedObjectService.get.mockResolvedValue(doc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-own-replace' });
+
+        const res = await client.upsertRule({
+          id: 'rule-own-replace',
+          data: { ...baseCreateData, metadata: { name: 'after' } }, // no ownership in body
+        });
+
+        // Ownership is carried forward from storage.
+        expect(res.rule.metadata.ownership).toEqual(storedOwnership);
+
+        // Stored attributes carry the same managed ownership.
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.ownership).toEqual(storedOwnership);
+      });
+    });
+
+    describe('updateRule', () => {
+      it('preserves stored ownership across a metadata update', async () => {
+        const client = createClient();
+        const storedOwnership = { managed: false };
+        const existing = createRuleSoAttributes({
+          metadata: { name: 'rule-1', signature_id: 'own-update-sig', ownership: storedOwnership },
+        });
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-own-update',
+          attributes: existing,
+          version: 'v1',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-own-update' });
+
+        const res = await client.updateRule({
+          id: 'rule-own-update',
+          data: { metadata: { name: 'renamed' } },
+        });
+
+        // Ownership is preserved in the response.
+        expect(res.metadata.ownership).toEqual(storedOwnership);
+
+        // Ownership is preserved in the stored attributes.
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.ownership).toEqual(storedOwnership);
+      });
+    });
+  });
+
   describe('schedule guardrails', () => {
     describe('minimumScheduleInterval', () => {
       it('rejects creating a rule whose interval is below the configured minimum', async () => {

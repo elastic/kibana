@@ -56,6 +56,7 @@ const baseRule: RuleApiResponse = {
     revision: 0,
     tags: ['prod'],
     source: { type: 'internal' as const, version: 1 },
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },

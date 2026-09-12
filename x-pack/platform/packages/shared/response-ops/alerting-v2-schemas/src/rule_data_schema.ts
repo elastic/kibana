@@ -28,6 +28,47 @@ import {
   MAX_SIGNATURE_ID_LENGTH,
 } from './constants';
 
+/** Rule ownership — discriminated union (rule-ownership.md "The ownership object"). */
+
+/** A rule whose lifecycle the owning solution manages. Writes are gated. */
+export const managedRuleOwnershipSchema = z
+  .object({
+    managed: z.literal(true),
+    /** The solution that manages the rule's lifecycle. 'security' for detection rules. */
+    solution: z.string(),
+    /** The domain within the solution. 'detection' for detection rules; 'cloud' or 'benchmark' are plausible later. */
+    domain: z.string(),
+  })
+  .strict();
+
+/** A rule that any caller may write through the generic API. */
+export const unmanagedRuleOwnershipSchema = z
+  .object({
+    managed: z.literal(false),
+    /**
+     * Who initiated the create, when known. For in-process callers, the id the
+     * calling plugin declares (e.g. 'significantEvents'). Absent for direct
+     * API requests. Max 128 chars.
+     */
+    app: z.string().max(128).optional(),
+  })
+  .strict();
+
+/**
+ * Server-derived ownership union. Immutable for the rule's life. Never accepted
+ * from a request body — appears only in the response schema.
+ *
+ * Ref: rule-ownership.md "The ownership object"
+ */
+export const ruleOwnershipSchema = z.discriminatedUnion('managed', [
+  managedRuleOwnershipSchema,
+  unmanagedRuleOwnershipSchema,
+]);
+
+export type ManagedRuleOwnership = z.infer<typeof managedRuleOwnershipSchema>;
+export type UnmanagedRuleOwnership = z.infer<typeof unmanagedRuleOwnershipSchema>;
+export type RuleOwnership = z.infer<typeof ruleOwnershipSchema>;
+
 /** Rule source — three-variant discriminated union (rule-source.md). */
 
 /** The rule's content is the user's own. The default. */
@@ -902,6 +943,14 @@ export const ruleResponseMetadataSchema = metadataSchema
      * Ref: rule-source.md "The three variants"
      */
     source: ruleSourceSchema,
+    /**
+     * Server-derived ownership — stamped on every create from the builder type's
+     * registration for managed types, or `{ managed: false }` otherwise. Immutable
+     * for the rule's life. Never accepted from a request body.
+     *
+     * Ref: rule-ownership.md "The ownership object"
+     */
+    ownership: ruleOwnershipSchema,
   })
   .meta({ id: 'alerting_rule_response_metadata' });
 
