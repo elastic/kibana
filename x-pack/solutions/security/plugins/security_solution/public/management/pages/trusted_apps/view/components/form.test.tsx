@@ -718,14 +718,12 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.name));
     });
 
-    it('should validate invalid Hash value', async () => {
-      const valueField = getConditionValue(getCondition());
-      await act(async () => {
-        await userEvent.clear(valueField);
-        await userEvent.type(valueField, 'someHASH');
-        fireEvent.blur(valueField);
+    it('should validate invalid Hash value', () => {
+      setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
+      formProps.item = createItem({
+        entries: [createEntry(ConditionEntryField.HASH, 'match', 'someHASH')],
       });
-      rerenderWithLatestProps();
+      rerender();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
 
