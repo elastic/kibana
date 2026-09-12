@@ -365,10 +365,7 @@ export const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] 
  *
  * Ref: rule-versions.md "How the diff runs"
  */
-function deepOmitUndefined(
-  value: unknown,
-  opaqueKeys: ReadonlySet<string> = new Set()
-): unknown {
+function deepOmitUndefined(value: unknown, opaqueKeys: ReadonlySet<string> = new Set()): unknown {
   if (Array.isArray(value)) {
     return value.map((item) => deepOmitUndefined(item, opaqueKeys));
   }
