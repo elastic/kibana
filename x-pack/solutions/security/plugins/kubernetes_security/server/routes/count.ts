@@ -17,6 +17,8 @@ import {
   CONTAINER_IMAGE_NAME,
   CLOUD_INSTANCE_NAME,
   ENTRY_LEADER_ENTITY_ID,
+  INDEX_PATTERN_MAX_LENGTH,
+  QUERY_DSL_MAX_LENGTH,
 } from '../../common/constants';
 
 export const registerCountRoute = (router: IRouter, logger: Logger) => {
@@ -41,8 +43,8 @@ export const registerCountRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              query: schema.string(),
+              index: schema.string({ maxLength: INDEX_PATTERN_MAX_LENGTH }),
+              query: schema.string({ maxLength: QUERY_DSL_MAX_LENGTH }),
               field: schema.oneOf([
                 schema.literal(ORCHESTRATOR_CLUSTER_ID),
                 schema.literal(ORCHESTRATOR_RESOURCE_ID),

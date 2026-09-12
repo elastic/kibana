@@ -10,7 +10,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
 
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
@@ -66,6 +66,13 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
    * @param deps - The dependencies required for the locator.
    */
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
+
+  public readonly getTimeRange = (params: DashboardLocatorParams) => params.time_range;
+
+  public readonly setTimeRange = (params: DashboardLocatorParams, timeRange?: TimeRange) => ({
+    ...params,
+    time_range: timeRange,
+  });
 
   /**
    * Generates the location for a dashboard based on the provided parameters.

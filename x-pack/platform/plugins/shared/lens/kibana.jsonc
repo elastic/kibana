@@ -23,7 +23,6 @@
       "uiActions",
       "embeddable",
       "share",
-      "presentationUtil",
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressionGauge",
@@ -34,10 +33,10 @@
       "eventAnnotation",
       "unifiedSearch",
       "kql",
-      "contentManagement"
+      "contentManagement",
+      "expressionLegacyMetricVis",
     ],
     "optionalPlugins": [
-      "expressionLegacyMetricVis",
       "expressionPartitionVis",
       "usageCollection",
       "taskManager",
@@ -58,6 +57,7 @@
       "charts",
       "esqlDataGrid",
       "esql",
+      "presentationUtil",
     ],
     "extraPublicDirs": ["common/constants"]
   }

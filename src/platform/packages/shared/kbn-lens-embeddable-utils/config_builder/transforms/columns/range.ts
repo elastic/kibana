@@ -9,11 +9,7 @@
 
 import type { RangeIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
-import {
-  LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-  LENS_HISTOGRAM_GRANULARITY_MAX,
-  LENS_RANGE_DEFAULT_INTERVAL,
-} from '../../schema/constants';
+import { LENS_RANGE_DEFAULT_INTERVAL } from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
@@ -46,6 +42,7 @@ export function fromRangeOrHistogramLensApiToLensState(
     ...getLensStateBucketSharedProps(options),
     params: {
       type: 'histogram',
+      // `granularity` is the raw target bar count Lens stores as `maxBars` (1..histogram:maxBars | 'auto').
       maxBars: options.granularity,
       ranges: [],
       format: fromFormatAPIToLensState(options.format),
@@ -74,11 +71,8 @@ export function fromRangeOrHistogramLensStateToAPI(
   return {
     operation: 'histogram',
     include_empty_rows: Boolean(column.params.includeEmptyRows),
-    granularity:
-      column.params?.maxBars !== LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE &&
-      column.params?.maxBars > LENS_HISTOGRAM_GRANULARITY_MAX
-        ? 'auto'
-        : column.params?.maxBars,
+    // Pass `maxBars` through verbatim
+    granularity: column.params?.maxBars,
     ...getLensAPIBucketSharedProps(column),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };

@@ -150,7 +150,7 @@ const IntegrationPostureDashboard = ({
         <EuiEmptyPrompt
           data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS}
           color="plain"
-          icon={<EuiIcon type="logoSecurity" size="xl" />}
+          icon={<EuiIcon type="logoSecurity" size="xl" aria-hidden={true} />}
           title={
             <h2>
               <FormattedMessage

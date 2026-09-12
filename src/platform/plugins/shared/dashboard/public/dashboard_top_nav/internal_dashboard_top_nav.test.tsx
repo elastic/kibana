@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -26,6 +28,11 @@ import {
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 
+// The top nav reads chrome via context hooks (`useChromeStyle`), so render inside
+// the chrome provider just like production. The mock defaults to classic chrome (legacy header mode).
+const renderWithChrome = (ui: React.ReactElement) =>
+  renderWithI18n(coreServices.chrome.withProvider(ui));
+
 describe('Internal dashboard top nav', () => {
   beforeEach(() => {
     setMockedPresentationUtilServices();
@@ -36,7 +43,7 @@ describe('Internal dashboard top nav', () => {
 
   it('should not render the managed badge by default', async () => {
     const { api, internalApi } = buildMockDashboardApi();
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={api}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -56,7 +63,7 @@ describe('Internal dashboard top nav', () => {
       ...api,
       isManaged: true,
     };
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -82,7 +89,7 @@ describe('Internal dashboard top nav', () => {
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
 
-      renderWithI18n(
+      renderWithChrome(
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav
@@ -117,7 +124,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -144,7 +151,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -162,10 +169,79 @@ describe('Internal dashboard top nav', () => {
 
     expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
       expect.objectContaining({
-        showDatePicker: true,
+        showDatePicker: { disabled: false },
         showFilterBar: true,
         showQueryInput: false,
         showSearchBar: true,
+      }),
+      {}
+    );
+  });
+
+  it('should disable the date picker when no data view is time-based', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { isTimeBased: () => false } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: true },
+      }),
+      {}
+    );
+  });
+
+  it('should keep the date picker enabled when at least one data view is time-based', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { isTimeBased: () => false } as DataView,
+        { isTimeBased: () => true } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: false },
       }),
       {}
     );
@@ -178,7 +254,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -212,7 +288,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    renderWithI18n(
+    renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -239,5 +315,54 @@ describe('Internal dashboard top nav', () => {
       }),
       {}
     );
+  });
+
+  describe('esqlApproximation toggle', () => {
+    it('should be disabled when there is no ES|QL panel', async () => {
+      const { api, internalApi } = buildMockDashboardApi();
+
+      renderWithChrome(
+        <DashboardContext.Provider value={api}>
+          <DashboardInternalContext.Provider value={internalApi}>
+            <InternalDashboardTopNav redirectTo={jest.fn()} />
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlApproximation: expect.objectContaining({ disabled: true }),
+          }),
+          {}
+        );
+      });
+    });
+
+    it('should be enabled when a panel publishes usesEsql$ as true (e.g. a Vega panel using ES|QL)', async () => {
+      const { api, internalApi } = buildMockDashboardApi();
+      api.registerChildApi({
+        uuid: 'vega-panel',
+        usesEsql$: new BehaviorSubject(true),
+        approximationApplied$: new BehaviorSubject<boolean | undefined>(undefined),
+      } as unknown as Parameters<typeof api.registerChildApi>[0]);
+
+      renderWithChrome(
+        <DashboardContext.Provider value={api}>
+          <DashboardInternalContext.Provider value={internalApi}>
+            <InternalDashboardTopNav redirectTo={jest.fn()} />
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlApproximation: expect.objectContaining({ disabled: false }),
+          }),
+          {}
+        );
+      });
+    });
   });
 });

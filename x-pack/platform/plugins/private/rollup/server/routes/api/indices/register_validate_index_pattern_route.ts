@@ -68,7 +68,7 @@ export const registerValidateIndexPatternRoute = ({
       },
       validate: {
         params: schema.object({
-          indexPattern: schema.string(),
+          indexPattern: schema.string({ maxLength: 1000 }),
         }),
       },
     },

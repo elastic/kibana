@@ -7,42 +7,45 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
-import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
-import { inject, injectable } from 'inversify';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
 import type { IResourceInitializer } from './resource_manager';
-import { EsServiceInternalToken } from '../es_service/tokens';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-@injectable()
+// Expand to zero replicas on single-node clusters, where a replica can never
+// be allocated and would leave the cluster health permanently yellow.
+const AUTO_EXPAND_REPLICAS = '0-1';
+
+// Max Java long. Installing at the highest priority keeps our managed template
+// from being rejected for tying with a user template whose patterns overlap
+// `.rule-events*` / `.alert-actions*` (ES only rejects overlapping templates at
+// equal priority). Stringified to avoid JS number precision loss.
+const INDEX_TEMPLATE_PRIORITY = `${9223372036854775807n}` as unknown as number;
+
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
-    @inject(LoggerToken) private readonly logger: Logger,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {}
 
   public async initialize(): Promise<void> {
-    await this.esClient.ilm.putLifecycle({
-      name: this.resourceDefinition.ilmPolicy.name,
-      policy: this.resourceDefinition.ilmPolicy.policy,
-    });
-
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
       version: this.resourceDefinition.version,
       template: {
         aliases: {},
-        priority: 500,
+        priority: INDEX_TEMPLATE_PRIORITY,
         mappings: this.resourceDefinition.mappings,
+        lifecycle: this.resourceDefinition.lifecycle,
         settings: {
-          'index.lifecycle.name': this.resourceDefinition.ilmPolicy.name,
+          'index.auto_expand_replicas': AUTO_EXPAND_REPLICAS,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          'index.lifecycle.prefer_ilm': false,
         },
         _meta: {
           managed: true,
@@ -58,16 +61,34 @@ export class DatastreamInitializer implements IResourceInitializer {
         elasticsearchClient: this.esClient,
       });
     } catch (error) {
-      if (!isResponseError(error)) {
+      if (!isResponseError(error) || error.statusCode !== 409) {
         throw error;
       }
 
-      if (error.statusCode === 409) {
-        this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
-        return;
-      }
+      this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
+    }
 
-      throw error;
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  /**
+   * Applies `auto_expand_replicas` to the data stream's existing backing indices: the index
+   * template only affects indices created after it was installed, so without this, deployments
+   * that created the data stream before the setting was added would keep an unallocatable
+   * replica shard until the next rollover.
+   */
+  private async updateExistingIndicesReplicaSettings(): Promise<void> {
+    try {
+      await this.esClient.indices.putSettings({
+        index: this.resourceDefinition.dataStreamName,
+        settings: { 'index.auto_expand_replicas': AUTO_EXPAND_REPLICAS },
+      });
+    } catch (error) {
+      // Best effort: replica expansion only affects cluster health reporting and
+      // must not block the initialization of alerting resources.
+      this.logger.warn(
+        `Failed to update auto_expand_replicas for ${this.resourceDefinition.dataStreamName}: ${error.message}`
+      );
     }
   }
 }

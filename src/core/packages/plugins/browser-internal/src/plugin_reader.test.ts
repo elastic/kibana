@@ -32,7 +32,7 @@ beforeEach(() => {
 it('handles undefined plugin exports', () => {
   expect(() => {
     read('foo');
-  }).toThrowError(`Definition of plugin "foo" not found and may have failed to load.`);
+  }).toThrow(`Definition of plugin "foo" not found and may have failed to load.`);
 });
 
 it('handles plugin exports with a "plugin" export that is not a function', () => {
@@ -42,7 +42,7 @@ it('handles plugin exports with a "plugin" export that is not a function', () =>
 
   expect(() => {
     read('foo');
-  }).toThrowError(`Definition of plugin "foo" should either be a function or a module.`);
+  }).toThrow(`Definition of plugin "foo" should either be a function or a module.`);
 });
 
 it('returns the plugin definition when the "plugin" named export is a function', () => {

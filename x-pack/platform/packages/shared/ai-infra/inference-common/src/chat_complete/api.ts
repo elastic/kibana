@@ -13,6 +13,7 @@ import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
 import type { ToolCallOfToolOptions } from './tools_of';
 import type { AnonymizationResponseMetadata } from './anonymization';
+import type { ChatCompletionReasoning } from './reasoning';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -106,6 +107,14 @@ export type ChatCompleteOptions = {
    */
   temperature?: number;
   /**
+   * Optional reasoning configuration for the Elasticsearch unified chat completion API.
+   *
+   * When native function tools are present and this is omitted, the Inference adapter
+   * defaults to `{ effort: 'none' }` so OpenAI Chat Completions accepts tool-calling
+   * requests on newer reasoning models.
+   */
+  reasoning?: ChatCompletionReasoning;
+  /**
    * The model name identifier to use. Can be defined to use another model than the
    * default one, when using connectors / providers exposing multiple models.
    *
@@ -148,7 +157,35 @@ export type ChatCompleteOptions = {
    * The timeout for the chat completion request.
    */
   timeout?: number;
+  /**
+   * Optional response content length override for connectors that support it.
+   */
+  maxContentLength?: number;
+  /**
+   * Optional prompt-cache directive. Only honored by Elastic-managed (EIS) inference
+   * endpoints;
+   */
+  cacheControl?: ChatCompleteCacheControl;
+  /**
+   * Optional session identifier used by EIS to scope prompt caching across calls.
+   */
+  sessionId?: string;
 } & ToolOptions;
+
+/**
+ * Cache-control directive for EIS prompt caching.
+ */
+export interface ChatCompleteCacheControl {
+  /**
+   * Cache entry type. Currently only `'ephemeral'` is supported.
+   */
+  type: 'ephemeral';
+  /**
+   * Optional time-to-live as an Elasticsearch TimeValue string.
+   * EIS currently supports `'5m'` and `'1h'`.
+   */
+  ttl?: '5m' | '1h';
+}
 
 export interface ChatCompleteRetryConfiguration {
   /**

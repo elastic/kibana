@@ -6,59 +6,67 @@
  */
 
 import type { Span } from '@opentelemetry/api';
+import { SpanKind } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
-import { tap } from 'rxjs';
-import { safeJsonStringify } from '@kbn/std';
 import {
   withActiveInferenceSpan,
   ElasticGenAIAttributes,
   GenAISemanticConventions,
 } from '@kbn/inference-tracing';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import {
   attachOpikDistributedTrace,
   type OpikDistributedTraceHeaders,
 } from './opik_distributed_tracing';
+import { withAgentBuilderContext } from './agent_builder_context';
 
 interface WithConverseSpanOptions {
   agentId: string;
+  agentName: string;
+  providerName: string;
   conversationId: string | undefined;
+  spaceId: string;
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
 export function withConverseSpan(
-  { agentId, conversationId, opikHeaders }: WithConverseSpanOptions,
+  {
+    agentId,
+    agentName,
+    providerName,
+    conversationId,
+    spaceId,
+    opikHeaders,
+  }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
-  return withActiveInferenceSpan(
-    'Converse',
-    {
-      attributes: {
-        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [ElasticGenAIAttributes.AgentId]: agentId,
-        [ElasticGenAIAttributes.AgentConversationId]: conversationId,
-        [GenAISemanticConventions.GenAIConversationId]: conversationId,
-      },
-    },
-    (span) => {
-      if (!span) {
-        return cb();
-      }
-
-      if (opikHeaders) {
-        attachOpikDistributedTrace(span, opikHeaders);
-      }
-
-      return cb(span).pipe(
-        tap({
-          next: (event) => {
-            if (isRoundCompleteEvent(event)) {
-              span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
-            }
+  return withAgentBuilderContext(
+    () =>
+      withActiveInferenceSpan(
+        `invoke_agent ${agentName}`,
+        {
+          kind: SpanKind.INTERNAL,
+          attributes: {
+            [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+            [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
+            [GenAISemanticConventions.GenAIAgentId]: agentId,
+            [GenAISemanticConventions.GenAIAgentName]: agentName,
+            [GenAISemanticConventions.GenAIProviderName]: providerName,
+            [GenAISemanticConventions.GenAIConversationId]: conversationId,
           },
-        })
-      );
-    }
+        },
+        (span) => {
+          if (!span) {
+            return cb();
+          }
+
+          if (opikHeaders) {
+            attachOpikDistributedTrace(span, opikHeaders);
+          }
+
+          return cb(span);
+        }
+      ),
+    { spaceId, conversationId }
   );
 }

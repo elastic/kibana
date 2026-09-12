@@ -10,9 +10,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type {
   ESQLSourceResult,
+  EsqlDatasetsResult,
   IndexAutocompleteItem,
   IndicesAutocompleteResult,
 } from '@kbn/esql-types';
+import { SOURCES_TYPES } from '@kbn/esql-types';
 
 const normalizeTimeseriesIndices = ({
   indices,
@@ -27,12 +29,30 @@ const normalizeTimeseriesIndices = ({
   );
 };
 
+const normalizeDatasets = ({ datasets }: EsqlDatasetsResult): ESQLSourceResult[] =>
+  datasets?.map((d) => ({
+    name: d.name,
+    title: d.name,
+    description: d.description,
+    type: SOURCES_TYPES.EXTERNAL,
+    hidden: false,
+  })) ?? [];
+
+const mergeSources = (
+  base: ESQLSourceResult[],
+  datasets: ESQLSourceResult[]
+): ESQLSourceResult[] => {
+  const seenNames = new Set(base.map((source) => source.name));
+  return [...base, ...datasets.filter((dataset) => !seenNames.has(dataset.name))];
+};
+
 export interface UseAllSourcesParams {
   isOpen: boolean;
   preloadedSources?: ESQLSourceResult[];
   isTimeseries: boolean;
   getSources: () => Promise<ESQLSourceResult[]>;
   getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getDatasets?: () => Promise<EsqlDatasetsResult>;
 }
 
 export const useAllSources = ({
@@ -41,6 +61,7 @@ export const useAllSources = ({
   isTimeseries,
   getSources,
   getTimeseriesIndices,
+  getDatasets,
 }: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
   const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,9 +78,32 @@ export const useAllSources = ({
     if (!isOpen) return;
     let isEffectActive = true;
 
+    const fetchDatasets = async (): Promise<ESQLSourceResult[]> => {
+      if (isTimeseries || !getDatasets) return [];
+      try {
+        const result = await getDatasets();
+        return normalizeDatasets(result);
+      } catch (error) {
+        // getDatasets already swallows fetch errors; this only guards against
+        // normalizeDatasets failing on an unexpected response shape.
+        // eslint-disable-next-line no-console
+        console.error('Failed to normalize the datasets', error);
+        return [];
+      }
+    };
+
     if (preloadedSources !== undefined) {
+      // Render preloaded sources immediately, then append federated datasets when they
+      // arrive, since preloaded sources come from the autocomplete cache and don't include them.
       setAllSources(preloadedSources);
-      return;
+      fetchDatasets().then((datasets) => {
+        if (isMountedRef.current && isEffectActive) {
+          setAllSources(mergeSources(preloadedSources, datasets));
+        }
+      });
+      return () => {
+        isEffectActive = false;
+      };
     }
 
     const fetchSources = async () => {
@@ -70,8 +114,10 @@ export const useAllSources = ({
           const normalized = normalizeTimeseriesIndices(result);
           if (isMountedRef.current && isEffectActive) setAllSources(normalized);
         } else {
-          const fetched = (await getSources?.()) ?? [];
-          if (isMountedRef.current && isEffectActive) setAllSources(fetched);
+          const [fetched, datasets] = await Promise.all([getSources?.() ?? [], fetchDatasets()]);
+          if (isMountedRef.current && isEffectActive) {
+            setAllSources(mergeSources(fetched, datasets));
+          }
         }
       } catch {
         if (isMountedRef.current && isEffectActive) setAllSources([]);
@@ -85,7 +131,7 @@ export const useAllSources = ({
     return () => {
       isEffectActive = false;
     };
-  }, [getSources, getTimeseriesIndices, isTimeseries, isOpen, preloadedSources]);
+  }, [getSources, getTimeseriesIndices, getDatasets, isTimeseries, isOpen, preloadedSources]);
 
   return { allSources, isLoading };
 };

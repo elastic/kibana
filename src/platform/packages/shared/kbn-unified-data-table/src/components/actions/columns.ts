@@ -69,11 +69,12 @@ export function getStateColumnActions({
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
+    // Strip display-only prepended time field before persisting
     const actualColumns =
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
-
+    // Clean against nextColumns so display-only prepended time field width is preserved
     let nextSettings = cleanColumnSettings(nextColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
@@ -92,32 +93,18 @@ export function getStateColumnActions({
   };
 }
 
-/**
- * Helper function to provide a fallback to a single _source column if the given array of columns
- * is empty, and removes _source if there are more than 1 columns given
- * @param columns
- */
-function buildColumns(columns: string[]) {
-  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-    return columns.filter((col) => col !== '_source');
-  } else if (columns.length !== 0) {
-    return columns;
-  }
-  return [];
-}
-
 function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName]);
+  return [...columns, columnName];
 }
 
 function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns(columns.filter((col) => col !== columnName));
+  return columns.filter((col) => col !== columnName);
 }
 
 function moveColumn(columns: string[], columnName: string, newIndex: number) {

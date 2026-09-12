@@ -91,7 +91,7 @@ describe('eql_executor', () => {
         experimentalFeatures: mockExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
       });
-      expect(mockScheduleNotificationResponseActionsService).toBeCalledWith({
+      expect(mockScheduleNotificationResponseActionsService).toHaveBeenCalledWith({
         signals: result.createdSignals,
         signalsCount: result.createdSignalsCount,
         responseActions: params.responseActions,

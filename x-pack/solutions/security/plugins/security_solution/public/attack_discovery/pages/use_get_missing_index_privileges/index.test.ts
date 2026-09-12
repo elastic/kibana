@@ -51,9 +51,9 @@ describe('useGetMissingIndexPrivileges', () => {
     queryClient = new QueryClient();
   });
 
-  it('should invoke `getMissingIndexPrivileges` and return data on success', async () => {
-    const mockResponse = [{ index_name: 'test-index', privileges: ['read'] }];
-    mockHttpGet.mockResolvedValue(mockResponse);
+  it('should invoke `getMissingIndexPrivileges` and return the index privileges on success', async () => {
+    const indexPrivileges = [{ index_name: 'test-index', privileges: ['read'] }];
+    mockHttpGet.mockResolvedValue({ feature_privileges: [], index_privileges: indexPrivileges });
 
     const { result } = renderHook(() => useGetMissingIndexPrivileges(), { wrapper });
 
@@ -65,7 +65,7 @@ describe('useGetMissingIndexPrivileges', () => {
       version: API_VERSIONS.internal.v1,
       signal: expect.anything(),
     });
-    expect(result.current.data).toEqual(mockResponse);
+    expect(result.current.data).toEqual(indexPrivileges);
   });
 
   it('should invoke `addError` on failure', async () => {

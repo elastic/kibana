@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
@@ -22,8 +22,14 @@ import * as nodeDataModel from '../../models/node_data';
 import type { State } from '../../../common/store/types';
 
 export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
+  const originTimestampMs = useSelector((state: State) =>
+    selectors.originTimestamp(state.analyzer[id])
+  );
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+    nodeDataModel.eventAtOrBefore(
+      selectors.nodeDataForID(state.analyzer[id])(nodeID),
+      originTimestampMs
+    )
   );
   const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 

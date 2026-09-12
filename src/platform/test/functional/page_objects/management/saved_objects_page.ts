@@ -76,13 +76,21 @@ export class SavedObjectsPageObject extends FtrService {
 
     if (!overwriteAll) {
       this.log.debug(`Toggling overwriteAll`);
-      const radio = await this.testSubjects.find(
-        'savedObjectsManagement-importModeControl-overwriteRadioGroup'
-      );
-      // a radio button consists of a div tag that contains an input, a div, and a label
-      // we can't click the input directly, need to go up one level and click the parent div
-      const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
-      await div.click();
+      // The click on the radio's wrapper div can silently fail to register, leaving
+      // overwrite-all enabled; retry until the input is actually selected.
+      await this.retry.try(async () => {
+        const radio = await this.testSubjects.find(
+          'savedObjectsManagement-importModeControl-overwriteRadioGroup'
+        );
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to go up one level and click the parent div
+        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
+        await div.click();
+        const input = await radio.findByCssSelector('input#overwriteDisabled');
+        if (!(await input.isSelected())) {
+          throw new Error('overwriteDisabled radio not selected yet');
+        }
+      });
     } else {
       this.log.debug(`Leaving overwriteAll alone`);
     }

@@ -42,9 +42,12 @@ export const bulkChangeAgentsPrivilegeLevelHandler: FleetRequestHandler<
   const { agents, ...options } = request.body;
   const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
 
-  const body = await bulkChangeAgentsPrivilegeLevel(esClient, soClient, {
+  const result = await bulkChangeAgentsPrivilegeLevel(esClient, soClient, {
     ...options,
     ...agentOptions,
   });
-  return response.ok({ body });
+  if (options.dryRun) {
+    return response.ok({ body: { count: (result as { count: number }).count } });
+  }
+  return response.ok({ body: result as { actionId: string } });
 };

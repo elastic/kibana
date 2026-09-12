@@ -25,6 +25,12 @@ export interface UserProfileService {
   getEnabled$(): Observable<boolean>;
 
   /**
+   * Retrieve an observable that emits once an {@link update} or {@link partialUpdate} call has
+   * been persisted and the internal profile cache has been cleared.
+   */
+  getDataUpdates$(): Observable<UserProfileData>;
+
+  /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
    * users authenticated via authenticating proxies, the `null` value is returned.
    * @param [params] Get current user profile operation parameters.

@@ -8,7 +8,8 @@
  */
 
 import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../lib/constants';
-import { cloneClean, setImportant, roundRect } from './clone_element';
+import { cloneClean, roundRect } from './clone_element';
+import { setImportant } from '../lib/dom/set_important';
 import type { ElementSession, ElementRegistry, MediaEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
 import { renderEuiComponentLive } from '../components/edit/library/insert_element';

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
+import type { EdgeLabel } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
-import type { GraphNodeUnion } from '../types';
+import type { GraphNodeUnion, WorkflowGraphType } from '../types';
 import { isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
@@ -30,12 +30,12 @@ import { isEnterWorkflowTimeoutZone } from '../types/guards';
  * ```
  */
 export class WorkflowGraph {
-  private graph: graphlib.Graph<GraphNodeUnion>;
+  private graph: WorkflowGraphType;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
   private innerStepIdsCache = new Map<string, Set<string>>();
 
-  constructor(graph: graphlib.Graph<GraphNodeUnion>) {
+  constructor(graph: WorkflowGraphType) {
     this.graph = graph;
   }
 
@@ -86,9 +86,16 @@ export class WorkflowGraph {
   }
 
   public getNodeStack(nodeId: string): string[] {
+    const currentNode = this.getNode(nodeId);
+
+    if (!currentNode) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
+
     const predecessors = this.getAllPredecessors(nodeId).toReversed();
 
     const stack: string[] = [];
+
     for (const node of predecessors) {
       if (node.type.startsWith('enter-')) {
         stack.push(node.id);
@@ -98,6 +105,11 @@ export class WorkflowGraph {
         stack.pop();
       }
     }
+
+    if (currentNode.type.startsWith('exit-')) {
+      stack.pop();
+    }
+
     return stack;
   }
 
@@ -109,7 +121,7 @@ export class WorkflowGraph {
     return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
   }
 
-  public getEdge(edgeMetadata: { v: string; w: string }): GraphEdge {
+  public getEdge(edgeMetadata: { v: string; w: string }): EdgeLabel | undefined {
     return this.graph.edge(edgeMetadata);
   }
 

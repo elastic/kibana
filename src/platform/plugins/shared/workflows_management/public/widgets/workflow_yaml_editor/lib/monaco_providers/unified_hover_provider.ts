@@ -555,13 +555,13 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
       if (templateInfo.filters.length > 0 && templateInfo.isOnFilter) {
         evaluatedPath = templateInfo.expression;
-        value = evaluateExpression({
+        value = await evaluateExpression({
           expression: templateInfo.expression,
           context: evalContext,
         });
       } else {
         evaluatedPath = templateInfo.pathUpToCursor.join('.');
-        value = evaluateExpression({
+        value = await evaluateExpression({
           expression: evaluatedPath,
           context: evalContext,
         });

@@ -15,7 +15,7 @@ export const formatValueAsText = (value: number | string, fieldFormatter: IField
     return '-';
   }
 
-  return fieldFormatter.convert(value, 'text');
+  return fieldFormatter.convertToText(value);
 };
 
 export const formatValueAsReactNode = (
@@ -26,5 +26,5 @@ export const formatValueAsReactNode = (
     return '-';
   }
 
-  return fieldFormatter.reactConvert(value);
+  return fieldFormatter.convertToReact(value);
 };

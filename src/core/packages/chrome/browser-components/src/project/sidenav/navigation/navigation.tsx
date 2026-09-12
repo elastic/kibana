@@ -28,21 +28,22 @@ export interface ChromeNavigationProps {
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
+  const onCustomizeNavigation = useCustomizeNavigation();
 
   if (!state) {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, activeItemId, solutionId } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
-        logo={logoItem}
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
+        onCustomizeNavigation={onCustomizeNavigation}
         activeItemId={activeItemId}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
@@ -62,11 +63,23 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
     const panelStateManager = new PanelStateManager(basePath.get());
     return chrome.project.getNavigation$().pipe(
       map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
+        ...toNavigationItems(
+          nav.navigationTree,
+          nav.activeNodes,
+          nav.overflowItemIds,
+          panelStateManager
+        ),
         solutionId: nav.solutionId,
       }))
     );
   }, [chrome, basePath]);
 
   return useObservable(items$, null);
+};
+
+const useCustomizeNavigation = (): (() => void) | undefined => {
+  const chrome = useChromeService();
+  const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
+  const handler = useObservable(handler$, null);
+  return handler ?? undefined;
 };

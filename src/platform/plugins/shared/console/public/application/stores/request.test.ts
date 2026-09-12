@@ -31,6 +31,36 @@ describe('request store', () => {
     expect(initialValue.requestInFlight).toBe(false);
   });
 
+  it('should handle setRequestInFlight without clearing output', () => {
+    const stateWithData: Store = {
+      requestInFlight: false,
+      lastResult: {
+        data: [
+          {
+            response: {
+              value: 'test',
+              statusCode: 200,
+              statusText: 'OK',
+              timeMs: 50,
+              contentType: 'application/json' as BaseResponseType,
+            },
+            request: { data: '', method: 'GET', path: '/' },
+          },
+        ],
+      },
+    };
+
+    const action: Actions = { type: 'setRequestInFlight', payload: true };
+    const newState = reducer(stateWithData, action);
+
+    expect(newState).not.toBe(stateWithData);
+    expect(newState.requestInFlight).toBe(true);
+    expect(newState.lastResult.data).toStrictEqual(stateWithData.lastResult.data);
+
+    // Verify original state unchanged
+    expect(stateWithData.requestInFlight).toBe(false);
+  });
+
   it('should handle requestSuccess action with proper immutability', () => {
     const mockData: RequestResult[] = [
       {

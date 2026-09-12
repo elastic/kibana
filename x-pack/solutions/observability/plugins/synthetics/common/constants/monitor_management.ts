@@ -21,6 +21,7 @@ export enum ConfigKey {
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
+  CERTIFICATE_ERROR_SPKI_ALLOWLIST = 'certificate_error_spki_allowlist',
   MONITOR_SOURCE_TYPE = 'origin',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
@@ -126,6 +127,32 @@ export const MONITOR_STATUS_ENUM = {
   UP: 'up',
   DOWN: 'down',
   PENDING: 'pending',
+  // The monitor produced a run inside the queried window but its latest run has
+  // gone stale (it stopped reporting). Distinct from `pending`, which means no
+  // run was found in the window at all (e.g. a brand-new, first-run monitor).
+  // Mirrors the SLO plugin's `stale` concept (a summary that stopped updating).
+  STALE: 'stale',
   SUCCESS: 'succeeded',
   DISABLED: 'disabled',
 };
+
+export const OVERVIEW_STATUS_FILTER_VALUES = [
+  MONITOR_STATUS_ENUM.UP,
+  MONITOR_STATUS_ENUM.DOWN,
+  MONITOR_STATUS_ENUM.PENDING,
+  MONITOR_STATUS_ENUM.STALE,
+  MONITOR_STATUS_ENUM.DISABLED,
+] as const;
+
+export type OverviewStatusFilter = (typeof OVERVIEW_STATUS_FILTER_VALUES)[number];
+
+export const OVERVIEW_PAGINATION_DEFAULTS = {
+  page: 1,
+  perPage: 20,
+  sortField: 'status',
+  sortOrder: 'asc',
+} as const;
+
+// Route max for `perPage`. Card-view window refresh must clamp to this and
+// request later pages separately — sending `loadedCount` unbounded 400s.
+export const OVERVIEW_STATUS_MAX_PER_PAGE = 500;

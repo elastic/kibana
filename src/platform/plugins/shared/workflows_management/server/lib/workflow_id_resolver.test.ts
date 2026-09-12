@@ -31,6 +31,13 @@ describe('generateWorkflowId', () => {
   it('should strip diacritics and produce a valid slug', () => {
     expect(generateWorkflowId('Alerte Sécurité')).toBe('alerte-securite');
   });
+
+  it('should avoid reserved workflow prefixes when deriving an ID from the name', () => {
+    expect(generateWorkflowId('system-example-greeting Copy')).toBe(
+      'workflow-system-example-greeting-copy'
+    );
+    expect(generateWorkflowId('internal-workflow Copy')).toBe('workflow-internal-workflow-copy');
+  });
 });
 
 describe('validateWorkflowId', () => {

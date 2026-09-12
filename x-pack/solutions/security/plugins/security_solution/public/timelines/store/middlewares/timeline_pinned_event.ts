@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import type { Action, Middleware } from 'redux';
+import type { Action, Middleware } from 'redux-v4';
 import type { CoreStart } from '@kbn/core/public';
 
 import type { State } from '../../../common/store/types';

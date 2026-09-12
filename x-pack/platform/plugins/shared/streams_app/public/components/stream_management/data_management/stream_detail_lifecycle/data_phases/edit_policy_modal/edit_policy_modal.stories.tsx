@@ -13,6 +13,7 @@ import type { AffectedResource } from './edit_policy_modal';
 import { EditPolicyModal } from './edit_policy_modal';
 
 interface StoryArgs {
+  policyName: string;
   affectedResources: AffectedResource[];
   isManaged?: boolean;
   isProcessing?: boolean;
@@ -35,6 +36,7 @@ const meta: Meta<StoryArgs> = {
   component: EditPolicyModal,
   title: 'streams/EditPolicyModal',
   args: {
+    policyName: '.monitoring-8-ilm-policy',
     affectedResources: baseResources,
   },
 };
@@ -42,30 +44,43 @@ const meta: Meta<StoryArgs> = {
 export default meta;
 type Story = StoryObj<StoryArgs>;
 
-export const Default: Story = {
-  render: (args) => {
-    return (
-      <EuiOverlayMask>
-        <EditPolicyModal
-          affectedResources={args.affectedResources}
-          isManaged={args.isManaged}
-          isProcessing={args.isProcessing}
-          onCancel={action('onCancel')}
-          onOverwrite={action('onOverwrite')}
-          onSaveAsNew={action('onSaveAsNew')}
-        />
-      </EuiOverlayMask>
-    );
-  },
+const render = (args: StoryArgs) => {
+  return (
+    <EuiOverlayMask>
+      <EditPolicyModal
+        policyName={args.policyName}
+        affectedResources={args.affectedResources}
+        isManaged={args.isManaged}
+        isProcessing={args.isProcessing}
+        onCancel={action('onCancel')}
+        onOverwrite={action('onOverwrite')}
+        onSaveAsNew={action('onSaveAsNew')}
+      />
+    </EuiOverlayMask>
+  );
 };
 
-export const ManagedPolicy: Story = {
+// Managed policy that is also used by multiple data sources.
+export const Both: Story = {
+  render,
   args: {
     isManaged: true,
+    affectedResources: baseResources,
   },
 };
 
-export const ManagedPolicyNoAffectedResources: Story = {
+// Policy used by multiple data sources but not managed.
+export const MultipleDataSourcesOnly: Story = {
+  render,
+  args: {
+    isManaged: false,
+    affectedResources: baseResources,
+  },
+};
+
+// Managed policy that is not in use by other data sources.
+export const ManagedOnly: Story = {
+  render,
   args: {
     isManaged: true,
     affectedResources: [],
@@ -73,6 +88,7 @@ export const ManagedPolicyNoAffectedResources: Story = {
 };
 
 export const ProcessingState: Story = {
+  render,
   args: {
     isProcessing: true,
   },

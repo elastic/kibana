@@ -17,6 +17,7 @@ import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 
 /**
  * Delete all comments for a case.
@@ -35,7 +36,6 @@ export async function deleteAll(
   try {
     const comments = await caseService.getAllCaseComments({
       id: caseID,
-      mode: 'legacy',
     });
 
     if (comments.total <= 0) {
@@ -68,6 +68,7 @@ export async function deleteAll(
         id: comment.id,
         owner: comment.attributes.owner,
         attachment: comment.attributes,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
       })),
       user,
     });
@@ -101,7 +102,6 @@ export async function deleteComment(
   try {
     const attachment = await attachmentService.getter.get({
       savedObjectId,
-      mode: 'legacy',
     });
 
     if (attachment == null) {
@@ -144,6 +144,7 @@ export async function deleteComment(
         action: UserActionActions.delete,
         caseId: id,
         savedObjectId,
+        savedObjectType: attachment.type as AttachmentSavedObjectType,
         payload: { attachment: attachmentRequestAttributes },
         user,
         owner: attachment.attributes.owner,

@@ -18,6 +18,7 @@ import type { ExperimentalFeatures } from '../../common/config';
 import { PluginContext } from '../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../types';
 import type { ISloTelemetryClient } from '../services/telemetry';
+import { createUnwrappingSloClient } from './unwrap_slo_client';
 
 interface Props {
   core: CoreStart;
@@ -57,6 +58,7 @@ export const getLazyWithContextProviders =
   ): React.FunctionComponent<React.ComponentProps<TElement>> => {
     const { spinnerSize = 'xl' } = options ?? {};
     const queryClient = new QueryClient();
+    const unwrappingSloClient = createUnwrappingSloClient(sloClient);
     return (props) => (
       <KibanaContextProvider
         services={{
@@ -75,7 +77,7 @@ export const getLazyWithContextProviders =
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
             experimentalFeatures,
-            sloClient,
+            sloClient: unwrappingSloClient,
             telemetry,
           }}
         >

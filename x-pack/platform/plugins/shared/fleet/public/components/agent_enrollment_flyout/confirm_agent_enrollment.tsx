@@ -7,13 +7,14 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  EuiCallOut,
-  EuiButton,
   EuiText,
   EuiLink,
-  EuiLoadingSpinner,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -32,6 +33,8 @@ interface Props {
 interface UsePollingAgentCountOptions {
   noLowerTimeLimit?: boolean;
   pollImmediately?: boolean;
+  // When false, polling is suspended (e.g. while the active space is still resolving).
+  enabled?: boolean;
 }
 
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
@@ -48,7 +51,10 @@ export const usePollingAgentCount = (
 ): { enrolledAgentIds: string[] } => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const [didPollInitially, setDidPollInitially] = useState(false);
+
   const timeout = useRef<number | undefined>(undefined);
+
+  const enabled = opts?.enabled ?? true;
 
   const lowerTimeLimitKuery = opts?.noLowerTimeLimit
     ? ''
@@ -56,6 +62,9 @@ export const usePollingAgentCount = (
   const kuery = `${AGENTS_PREFIX}.policy_id:"${policyId}" and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ${lowerTimeLimitKuery}`;
 
   const getNewAgentIds = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
     const request = await sendGetAgents({
       kuery,
       showInactive: false,
@@ -65,10 +74,10 @@ export const usePollingAgentCount = (
     if (newAgentIds.some((id) => !agentIds.includes(id))) {
       setAgentIds(newAgentIds);
     }
-  }, [agentIds, kuery]);
+  }, [agentIds, kuery, enabled]);
 
   // optionally poll once on first render
-  if (!didPollInitially && opts?.pollImmediately) {
+  if (!didPollInitially && opts?.pollImmediately && enabled) {
     getNewAgentIds();
     setDidPollInitially(true);
   }
@@ -141,28 +150,33 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   if (showLoading && !agentCount) {
     return (
       <>
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="m"
-          color="primary"
-          iconType={EuiLoadingSpinner}
           title={
-            isLongEnrollment ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
-                defaultMessage="Listening for agent... this can take several minutes"
-              />
-            ) : isCollector ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeningCollector"
-                defaultMessage="Listening for collector"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listening"
-                defaultMessage="Listening for agent"
-              />
-            )
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {isLongEnrollment ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
+                    defaultMessage="Listening for agent... this can take several minutes"
+                  />
+                ) : isCollector ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listeningCollector"
+                    defaultMessage="Listening for collector"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listening"
+                    defaultMessage="Listening for agent"
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         />
         <EuiSpacer size="m" />
@@ -187,7 +201,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiCallOut
+    <KbnSuccessCallout
       data-test-subj="ConfirmAgentEnrollmentCallOut"
       title={
         isCollector
@@ -206,24 +220,23 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
               },
             })
       }
-      color="success"
-      iconType="check"
-    >
-      {showViewAgents && (
-        <EuiButton
-          onClick={onButtonClick}
-          color="success"
-          data-test-subj="ConfirmAgentEnrollmentButton"
-        >
-          {isCollector
-            ? i18n.translate('xpack.fleet.agentEnrollment.confirmation.buttonCollector', {
-                defaultMessage: 'View connected collectors',
-              })
-            : i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
-                defaultMessage: 'View enrolled agents',
-              })}
-        </EuiButton>
-      )}
-    </EuiCallOut>
+      actionProps={
+        showViewAgents
+          ? {
+              primary: {
+                onClick: onButtonClick,
+                'data-test-subj': 'ConfirmAgentEnrollmentButton',
+                children: isCollector
+                  ? i18n.translate('xpack.fleet.agentEnrollment.confirmation.buttonCollector', {
+                      defaultMessage: 'View connected collectors',
+                    })
+                  : i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
+                      defaultMessage: 'View enrolled agents',
+                    }),
+              },
+            }
+          : undefined
+      }
+    />
   );
 };

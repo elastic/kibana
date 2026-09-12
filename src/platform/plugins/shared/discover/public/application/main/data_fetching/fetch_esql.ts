@@ -10,7 +10,14 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
+import {
+  type Query,
+  type AggregateQuery,
+  type Filter,
+  type TimeRange,
+  type ProjectRouting,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,6 +28,8 @@ import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common'
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
+import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -45,6 +54,7 @@ export interface FetchEsqlParams {
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
   projectRouting?: ProjectRouting;
+  esqlApproximation: boolean;
   inspectorConfig?: {
     title: string;
     description: string;
@@ -65,6 +75,7 @@ export function fetchEsql({
   esqlVariables,
   searchSessionId,
   projectRouting,
+  esqlApproximation,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
@@ -85,6 +96,7 @@ export function fetchEsql({
             timeRange,
             esqlVariables,
             projectRouting,
+            isApproximate: esqlApproximation,
           },
           searchSessionId,
         });
@@ -96,6 +108,7 @@ export function fetchEsql({
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
+        let approximationApplied: boolean | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
@@ -103,13 +116,25 @@ export function fetchEsql({
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
+            approximationApplied = table.meta?.approximationApplied;
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
+            let inlineHighlights: ESQLColumnsWithHighlights | undefined;
+            if (isOfAggregateQueryType(query)) {
+              try {
+                inlineHighlights = getColumnsWithHighlights(query.esql);
+              } catch (_e) {
+                inlineHighlights = undefined;
+              }
+            }
             finalData = rows.map((row, idx) => {
+              const raw = Object.keys(inlineHighlights ?? {}).length
+                ? { ...row, inline_highlights: inlineHighlights }
+                : row;
               const record: DataTableRecord = {
                 id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
-                raw: row,
+                raw,
                 flattened: row,
               };
 
@@ -134,6 +159,7 @@ export function fetchEsql({
               interceptedWarnings,
               esqlQueryColumns,
               esqlHeaderWarning,
+              approximationApplied,
             };
           }
         });
@@ -143,6 +169,7 @@ export function fetchEsql({
         interceptedWarnings: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
+        approximationApplied: undefined,
       };
     })
     .catch((err) => {

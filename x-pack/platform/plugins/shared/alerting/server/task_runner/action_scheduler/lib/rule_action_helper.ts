@@ -138,7 +138,13 @@ export const logNumberOfFilteredAlerts = ({
     logger.debug(
       `(${count}) alert${count > 1 ? 's' : ''} ${
         count > 1 ? 'have' : 'has'
-      } been filtered out for: ${action.actionTypeId}:${action.uuid}`
+      } been filtered out for: ${action.actionTypeId}:${action.uuid}`,
+      {
+        labels: {
+          actionId: action.id,
+          actionTypeId: action.actionTypeId,
+        },
+      }
     );
   }
 };

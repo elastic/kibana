@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { AsSerializableRecord, SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
@@ -15,11 +15,14 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ProfileStateMap } from './context_awareness';
 import type { VIEW_MODE, NEW_TAB_ID } from './constants';
+import type { ExpandedDocRef } from '../public';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
-export interface DiscoverAppLocatorParams extends SerializableRecord {
+export type DiscoverAppLocatorParams = AsSerializableRecord<{
   /**
    * Optionally set saved search ID.
    */
@@ -120,6 +123,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   hideTable?: boolean;
   /**
+   * Used to force the field list sidebar to be hidden or visible
+   */
+  hideSidebar?: boolean;
+  /**
    * Number of rows to sample for Discover grid
    */
   sampleSize?: number;
@@ -131,7 +138,30 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Optionally add some ESQL controls
    */
   esqlControls?: ControlPanelsState<OptionsListESQLControlState> & SerializableRecord;
-}
+  /**
+   * Resolved ES|QL control variable values, so the reporting server can bind named
+   * params (e.g. ?crew_id) at export time.
+   *
+   * Note: this overlaps with `esqlControls` (control definitions, from which variable
+   * values could be derived), but it exists separately because some callers — e.g. the
+   * dashboard panel CSV export action — only have access to the resolved variable
+   * values, not the controls state.
+   */
+  esqlVariables?: ESQLControlVariable[];
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  esqlApproximation?: boolean;
+  /**
+   * Profile state carried by generated links. URL fields are written to `_p`; persistent fields
+   * are carried in the navigation state.
+   */
+  profileState?: ProfileStateMap;
+  /**
+   * The document to expand in the doc viewer flyout on load.
+   */
+  expandedDoc?: ExpandedDocRef;
+}>;
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
@@ -142,6 +172,7 @@ export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
   esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
   isAlertResults?: boolean;
+  profileState?: ProfileStateMap;
 }
 
 export type DiscoverAppLocatorGetLocation =

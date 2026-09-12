@@ -8,7 +8,7 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
 import type { IndexMode } from '../../common/types/data_streams';
-import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
+import type { DataStream, EnhancedDataStreamFromEs, EsDataRetention, Health } from '../../common';
 
 const toLowercaseHealth = (status: EnhancedDataStreamFromEs['status']): Health => {
   switch (status) {
@@ -31,7 +31,14 @@ const toLowercaseHealth = (status: EnhancedDataStreamFromEs['status']): Health =
 export function deserializeDataStream(
   dataStreamFromEs: EnhancedDataStreamFromEs,
   isLogsdbEnabled: boolean,
-  failureStoreSettings?: { enabled?: string[] | string; defaultRetentionPeriod?: string }
+  failureStoreSettings?: { enabled?: string[] | string; defaultRetentionPeriod?: string },
+  explicitOptions?: {
+    failureStore?: {
+      enabled?: boolean;
+      lifecycle?: { enabled?: boolean; data_retention?: EsDataRetention };
+    };
+    lifecycleSettings?: DataStream['lifecycleSettings'];
+  }
 ): DataStream {
   const {
     name,
@@ -56,6 +63,47 @@ export function deserializeDataStream(
     failure_store: failureStore,
   } = dataStreamFromEs;
 
+  // `lifecycleSettings` is used by the UI as an explicit override marker.
+  // We only populate it from the "explicit settings" endpoint (`GET .../_settings`), not from the
+  // standard data stream GET response, because the latter reflects effective values (template +
+  // overrides merged) and cannot reliably distinguish inheritance from explicit overrides.
+  const lifecycleSettingsFromEs =
+    explicitOptions?.lifecycleSettings && Object.keys(explicitOptions.lifecycleSettings).length > 0
+      ? explicitOptions.lifecycleSettings
+      : undefined;
+
+  // `failureStoreSettings` represents the data stream's *explicit* override (from the
+  // `_options` endpoint), NOT the effective failure store from the data stream GET (which
+  // also includes values inherited from the index template). The UI relies on the presence
+  // of this object to distinguish "inherited" from "explicit override".
+  const failureStoreSettingsFromEs = (() => {
+    const explicitFailureStore = explicitOptions?.failureStore;
+    if (!explicitFailureStore) return undefined;
+
+    const { enabled, lifecycle: failureLifecycle } = explicitFailureStore;
+
+    const result: DataStream['failureStoreSettings'] = {
+      ...(typeof enabled === 'boolean' ? { enabled } : {}),
+    };
+
+    if (failureLifecycle) {
+      const lifecycleResult: NonNullable<DataStream['failureStoreSettings']>['lifecycle'] = {
+        ...(typeof failureLifecycle.enabled === 'boolean'
+          ? { enabled: failureLifecycle.enabled }
+          : {}),
+        ...(failureLifecycle.data_retention !== undefined
+          ? { dataRetention: failureLifecycle.data_retention }
+          : {}),
+      };
+
+      if (lifecycleResult.enabled !== undefined || lifecycleResult.dataRetention !== undefined) {
+        result.lifecycle = lifecycleResult;
+      }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+  })();
+
   const meteringStorageSize =
     meteringStorageSizeBytes !== undefined
       ? new ByteSizeValue(meteringStorageSizeBytes).toString()
@@ -63,19 +111,37 @@ export function deserializeDataStream(
 
   // Determine failure store status based on cluster settings and data stream configuration
   let failureStoreEnabled = false;
+  let matchesFailureStoreClusterPattern = false;
+
+  const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wildcardToRegExp = (pattern: string): RegExp => {
+    const source = pattern.split('*').map(escapeRegExp).join('.*');
+    return new RegExp(`^${source}$`);
+  };
 
   // Check if data stream name matches any pattern in the cluster setting
   if (failureStoreSettings?.enabled) {
-    const patterns = Array.isArray(failureStoreSettings.enabled)
-      ? failureStoreSettings.enabled
-      : [failureStoreSettings.enabled];
+    const enabledSetting = failureStoreSettings.enabled;
 
-    const matchesPattern = patterns.some((pattern) => {
-      const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-      return regex.test(name);
-    });
+    if (enabledSetting === 'true') {
+      // In some deployments this setting is a boolean-like "true", meaning "enable for all".
+      matchesFailureStoreClusterPattern = true;
+    } else if (enabledSetting === 'false') {
+      matchesFailureStoreClusterPattern = false;
+    } else {
+      const patterns =
+        Array.isArray(enabledSetting) && enabledSetting.every((p) => typeof p === 'string')
+          ? enabledSetting
+          : typeof enabledSetting === 'string'
+          ? [enabledSetting]
+          : [];
 
-    if (matchesPattern) {
+      matchesFailureStoreClusterPattern = patterns.some((pattern) =>
+        wildcardToRegExp(pattern).test(name)
+      );
+    }
+
+    if (matchesFailureStoreClusterPattern) {
       // If matches pattern, enable unless explicitly disabled
       const isExplicitlyDisabled = failureStore?.enabled === false;
       failureStoreEnabled = !isExplicitlyDisabled;
@@ -87,6 +153,19 @@ export function deserializeDataStream(
     failureStoreEnabled = true;
   }
   const failureStoreLifecycle = failureStore?.lifecycle;
+
+  const resolvedIndexMode: IndexMode =
+    indexMode === LOGSDB_INDEX_MODE || indexMode === STANDARD_INDEX_MODE
+      ? indexMode
+      : isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
+      ? LOGSDB_INDEX_MODE
+      : STANDARD_INDEX_MODE;
+
+  const resolvedFailureStoreDefaultRetentionPeriod =
+    failureStoreLifecycle?.retention_determined_by === 'default_failures_retention' &&
+    typeof failureStoreLifecycle.effective_retention === 'string'
+      ? failureStoreLifecycle.effective_retention
+      : failureStoreSettings?.defaultRetentionPeriod;
 
   return {
     name,
@@ -113,6 +192,8 @@ export function deserializeDataStream(
     health: toLowercaseHealth(status),
     indexTemplateName: template,
     ilmPolicyName,
+    ...(lifecycleSettingsFromEs ? { lifecycleSettings: lifecycleSettingsFromEs } : {}),
+    ...(failureStoreSettingsFromEs ? { failureStoreSettings: failureStoreSettingsFromEs } : {}),
     storageSize,
     storageSizeBytes,
     maxTimeStamp,
@@ -128,18 +209,21 @@ export function deserializeDataStream(
     },
     nextGenerationManagedBy,
     failureStoreEnabled,
+    matchesFailureStoreClusterPattern,
     failureStoreRetention: {
       customRetentionPeriod:
         failureStoreLifecycle?.enabled && failureStoreLifecycle?.data_retention
           ? failureStoreLifecycle.data_retention
           : undefined,
-      defaultRetentionPeriod: failureStoreSettings?.defaultRetentionPeriod,
+      defaultRetentionPeriod: resolvedFailureStoreDefaultRetentionPeriod,
       retentionDisabled: failureStoreLifecycle?.enabled === false,
+      retentionDeterminedBy:
+        failureStoreLifecycle?.retention_determined_by === 'default_failures_retention' ||
+        failureStoreLifecycle?.retention_determined_by === 'data_stream_configuration'
+          ? failureStoreLifecycle.retention_determined_by
+          : undefined,
     },
-    indexMode: (indexMode ??
-      (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
-        ? LOGSDB_INDEX_MODE
-        : STANDARD_INDEX_MODE)) as IndexMode,
+    indexMode: resolvedIndexMode,
   };
 }
 

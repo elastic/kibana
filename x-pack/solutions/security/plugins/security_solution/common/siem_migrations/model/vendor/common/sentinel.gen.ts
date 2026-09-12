@@ -21,3 +21,85 @@ import { z, lazySchema } from '@kbn/zod/v4';
  */
 export const SentinelResourceType = lazySchema(() => z.literal('watchlist'));
 export type SentinelResourceType = z.infer<typeof SentinelResourceType>;
+
+/**
+ * A Microsoft Sentinel watchlist ARM template resource
+ */
+export const SentinelWatchlistResource = lazySchema(() =>
+  z.object({
+    /**
+     * The ARM resource identifier
+     */
+    id: z.string().optional().describe('The ARM resource identifier'),
+    /**
+     * The ARM resource name
+     */
+    name: z.string().optional().describe('The ARM resource name'),
+    /**
+     * The ARM resource type
+     */
+    type: z.string().optional().describe('The ARM resource type'),
+    /**
+     * The Sentinel watchlist properties
+     */
+    properties: z
+      .object({
+        /**
+         * The Sentinel watchlist alias
+         */
+        watchlistAlias: z.string().min(1).describe('The Sentinel watchlist alias'),
+        /**
+         * The raw CSV content for the watchlist
+         */
+        rawContent: z.string().describe('The raw CSV content for the watchlist'),
+        /**
+         * The watchlist search key column name
+         */
+        itemsSearchKey: z.string().optional().describe('The watchlist search key column name'),
+        /**
+         * The number of raw content lines to skip
+         */
+        numberOfLinesToSkip: z
+          .number()
+          .int()
+          .optional()
+          .describe('The number of raw content lines to skip'),
+        /**
+         * The source file name
+         */
+        source: z.string().optional().describe('The source file name'),
+        /**
+         * The source content type
+         */
+        contentType: z.string().optional().describe('The source content type'),
+      })
+      .describe('The Sentinel watchlist properties'),
+  })
+);
+export type SentinelWatchlistResource = z.infer<typeof SentinelWatchlistResource>;
+
+/**
+ * A Microsoft Sentinel watchlist ARM deployment template
+ */
+export const SentinelWatchlistTemplate = lazySchema(() =>
+  z.object({
+    /**
+     * The ARM deployment template schema
+     */
+    $schema: z.string().optional().describe('The ARM deployment template schema'),
+    /**
+     * The ARM deployment template content version
+     */
+    contentVersion: z.string().optional().describe('The ARM deployment template content version'),
+    /**
+     * The ARM deployment template parameters
+     */
+    parameters: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('The ARM deployment template parameters'),
+    resources: z.array(SentinelWatchlistResource).min(1).max(1),
+  })
+);
+export type SentinelWatchlistTemplate = z.infer<typeof SentinelWatchlistTemplate>;

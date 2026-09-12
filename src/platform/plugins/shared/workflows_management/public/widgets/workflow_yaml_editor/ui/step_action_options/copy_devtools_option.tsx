@@ -9,7 +9,7 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RequestOptions } from '@kbn/workflows';

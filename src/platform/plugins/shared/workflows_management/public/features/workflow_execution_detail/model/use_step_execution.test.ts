@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -90,7 +90,10 @@ describe('useStepExecution', () => {
     expect(cachedQuery.state.dataUpdateCount).toBe(1);
 
     mockGetStepExecution.mockClear();
-    jest.advanceTimersByTime(10_000);
+    await act(async () => {
+      jest.advanceTimersByTime(10_000);
+      await Promise.resolve();
+    });
     expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
@@ -106,9 +109,11 @@ describe('useStepExecution', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockGetStepExecution).toHaveBeenCalledTimes(1);
 
-    // Advance past the 5s refetch interval — should trigger another fetch
     mockGetStepExecution.mockClear();
-    jest.advanceTimersByTime(5_000);
+    await act(async () => {
+      jest.advanceTimersByTime(5_000);
+      await Promise.resolve();
+    });
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
   });
 
@@ -126,11 +131,17 @@ describe('useStepExecution', () => {
     // Now the fetched data returns terminal status
     mockGetStepExecution.mockResolvedValue(stepResponse);
     mockGetStepExecution.mockClear();
-    jest.advanceTimersByTime(5_000);
+    await act(async () => {
+      jest.advanceTimersByTime(5_000);
+      await Promise.resolve();
+    });
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalledTimes(1));
 
     mockGetStepExecution.mockClear();
-    jest.advanceTimersByTime(15_000);
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+      await Promise.resolve();
+    });
     expect(mockGetStepExecution).not.toHaveBeenCalled();
   });
 
@@ -147,9 +158,11 @@ describe('useStepExecution', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    // Should still poll because the fetched data is not terminal yet
     mockGetStepExecution.mockClear();
-    jest.advanceTimersByTime(5_000);
+    await act(async () => {
+      jest.advanceTimersByTime(5_000);
+      await Promise.resolve();
+    });
     await waitFor(() => expect(mockGetStepExecution).toHaveBeenCalled());
   });
 

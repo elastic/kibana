@@ -21,7 +21,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -29,14 +29,9 @@ import type {
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type {
-  DiscoverAppState,
-  UpdateESQLQueryActionPayload,
-} from '../application/main/state_management/redux';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
 
-export type UpdateESQLQueryFn = (
-  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
-) => void;
+export type UpdateESQLQueryFn = (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -79,16 +74,6 @@ export interface FieldListExtension {
  */
 export interface AppMenuExtensionParams {
   /**
-   * Available actions for the app menu
-   */
-  actions: {
-    /**
-     * Updates the ad hoc data views list
-     * @param adHocDataViews The new ad hoc data views to set
-     */
-    updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-  };
-  /**
    * True if Discover is in ESQL mode
    */
   isEsqlMode: boolean;
@@ -122,23 +107,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
-}
-
-export interface ChartSectionConfigurationExtensionParams {
   /**
-   * Available actions for the chart section configuration
+   * Whether the new tab should use approximate ES|QL execution
    */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: UpdateESQLQueryFn;
-  };
+  esqlApproximation?: boolean;
 }
 
 /**
@@ -199,43 +171,9 @@ export interface DocViewerExtension {
 }
 
 /**
- * Parameters passed to the additional cell actions extension
- */
-export interface AdditionalCellActionsParams {
-  /**
-   * Available actions for the additional cell actions extension
-   */
-  actions?: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-  };
-}
-
-/**
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
-  /**
-   * Available actions for the doc viewer extension
-   */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: UpdateESQLQueryFn;
-    /**
-     * Refreshes the current Discover table data.
-     */
-    refreshData?: () => void;
-  };
   /**
    * The record being displayed in the doc viewer
    */
@@ -257,7 +195,8 @@ export interface RowIndicatorExtensionParams {
  */
 export interface DefaultAppStateColumn {
   /**
-   * The field name of the column
+   * The field name of the column.
+   * Use `'_source'` for the Summary column - it is always treated as a valid profile column.
    */
   name: string;
   /**
@@ -281,7 +220,9 @@ export interface DefaultAppStateExtensionParams {
  */
 export interface DefaultAppStateExtension {
   /**
-   * The columns to display in the data grid
+   * The columns to display in the data grid.
+   * Include `{ name: '_source' }` (usually last; omit `width` for auto-width) to show Summary
+   * alongside other default fields. Users can still pin or unpin Summary from the Columns popover.
    */
   columns?: DefaultAppStateColumn[];
   /**
@@ -303,6 +244,10 @@ export interface DefaultAppStateExtension {
    * The state for data table visibility toggle
    */
   hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**
@@ -330,15 +275,6 @@ export interface ModifiedVisAttributesExtensionParams {
  */
 export interface CellRenderersExtensionParams {
   /**
-   * Available actions for cell renderers
-   */
-  actions: {
-    /**
-     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
-     */
-    addFilter?: DocViewFilterFn;
-  };
-  /**
    * The current data view
    */
   dataView: DataView;
@@ -356,21 +292,6 @@ export interface CellRenderersExtensionParams {
  * Parameters passed to the row controls extension
  */
 export interface RowControlsExtensionParams {
-  /**
-   * Available actions for row controls
-   */
-  actions: {
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: UpdateESQLQueryFn;
-    /**
-     * Sets the expanded document, which is displayed in a flyout
-     * @param record - The record to display in the flyout
-     * @param options.initialTabId - The tabId to display in the flyout
-     */
-    setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
-  };
   /**
    * The current data view
    */
@@ -559,9 +480,7 @@ export interface Profile {
    * This allows modifying the chart section with a custom component
    * @returns The custom configuration for the chart
    */
-  getChartSectionConfiguration: (
-    params: ChartSectionConfigurationExtensionParams
-  ) => ChartSectionConfiguration;
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 
   /**
    * Data grid
@@ -596,7 +515,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
+  getAdditionalCellActions: () => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration

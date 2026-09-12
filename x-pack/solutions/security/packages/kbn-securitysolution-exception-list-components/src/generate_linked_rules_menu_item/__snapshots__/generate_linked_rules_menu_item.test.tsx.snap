@@ -20,6 +20,7 @@ exports[`generateLinedRulesMenuItems should render the first linked rules with l
             data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
           >
             <span
+              aria-hidden="true"
               data-euiicon-type="check"
             />
           </div>

@@ -78,20 +78,20 @@ describe.each([
   it('should display tooltip if collapsed', () => {
     render();
 
-    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(2);
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(3);
   });
 
   it('should display tooltip when collapsed but only if not empty', () => {
     item.description = '';
     render();
 
-    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(1);
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(2);
   });
 
   it('should NOT display a tooltip if expanded', () => {
     render({ expanded: true });
 
-    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(0);
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(1);
   });
 
   it('should call `onExpandCollapse` callback when button is clicked', () => {

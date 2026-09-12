@@ -77,6 +77,8 @@ export interface BaseMetricExpressionParams {
   sourceId?: string;
   threshold: number[];
   comparator: COMPARATORS | LEGACY_COMPARATORS;
+  warningThreshold?: number[];
+  warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
 }
 
 export interface CustomThresholdExpressionMetric {

@@ -1,0 +1,89 @@
+version: "1"
+# Every 4h: fetch enabled sources, skip known fingerprints (90d), write new reports.
+# Installed once globally so no space re-fetches the same feed. MVP sources are all
+# global (`space_id: '*'`), but `load_sources` and `check_dedup` are deliberately
+# space-blind rather than pinned to `*`: a future space-owned custom source (the
+# adapters already stamp each report with its own source's `space_id`; see
+# `space_filter.ts`'s `canMutateSourceInSpace`) is picked up by this single global
+# instance with no workflow change. `enabled: true` is the complete gate either way.
+name: Ingest threat feeds
+description: Fetch enabled sources and write new reports to .kibana-threat-reports
+tags:
+  - threat-intel
+enabled: false
+settings:
+  concurrency:
+    key: "threat-intel-ingest-global"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "4h"
+steps:
+  - name: load_sources
+    type: elasticsearch.search
+    with:
+      index: .kibana-threat-intel-sources
+      size: 1000
+      query:
+        bool:
+          filter:
+            - term:
+                enabled:
+                  value: true
+          # Space-blind on purpose: a space_id filter here would also silently
+          # exclude a future space-owned source from ever being fetched by this
+          # single global instance. `enabled` alone is the complete gate today and
+          # stays correct once per-space sources exist.
+
+  - name: dispatch_each_source
+    type: foreach
+    foreach: "{{ steps.load_sources.output.hits.hits }}"
+    steps:
+      # `${{ }}` keeps the hit as an object. `{{ }}` stringifies it to "[object Object]".
+      - name: fetch_source
+        type: threat_intel.fetch_source
+        with:
+          source: "${{ foreach.item }}"
+        on-failure:
+          continue: true
+
+      - name: skip_empty_source
+        type: loop.continue
+        if: "NOT steps.fetch_source.output.total_fetched > 0 OR NOT steps.fetch_source.output.reports:*"
+
+      - name: emit_reports
+        type: foreach
+        foreach: "{{ steps.fetch_source.output.reports | default: '[]' }}"
+        steps:
+          - name: check_dedup
+            type: elasticsearch.search
+            with:
+              index: .kibana-threat-reports
+              size: 0
+              track_total_hits: true
+              query:
+                bool:
+                  filter:
+                    - term:
+                        content_fingerprint: "{{ foreach.item.content_fingerprint }}"
+                    - range:
+                        "@timestamp":
+                          gte: "now-90d"
+                  # Space-blind, same reasoning as load_sources: a space_id filter here
+                  # would miss a duplicate fingerprint already written under a future
+                  # space-owned source's own space_id, and re-ingest the same report.
+
+          - name: skip_if_seen
+            type: loop.continue
+            if: "steps.check_dedup.output.hits.total.value > 0"
+
+          - name: write_report
+            type: elasticsearch.index
+            with:
+              index: .kibana-threat-reports
+              op_type: create
+              document: "${{ foreach.item }}"
+            on-failure:
+              continue: true

@@ -7,7 +7,9 @@
 
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import styled from '@emotion/styled';
+import { ConsoleInfo } from './components/console_info';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import type { CommandInputProps } from './components/command_input';
@@ -21,9 +23,9 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 
 const ConsoleWindow = styled.div`
   height: 100%;
-  background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
-  border: ${({ theme: { eui } }) => eui.euiBorderThin};
-  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBaseSubdued};
+  border: ${({ theme }) => theme.euiTheme.border.thin};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
 
   .layout {
     height: 100%;
@@ -37,37 +39,36 @@ const ConsoleWindow = styled.div`
     }
 
     &-bottomBorder {
-      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
-        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+      border-bottom: ${({ theme }) => theme.euiTheme.size.s} solid
+        ${({ theme }) => theme.euiTheme.colors.backgroundBaseSubdued};
     }
 
     &-container {
-      padding: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingMedium};
+      padding: ${({ theme }) => theme.euiTheme.size.base};
     }
 
     &-header {
-      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
-      border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
-      border-top-left-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
-      border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
-      padding: ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize}
-        ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
+      background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBasePlain};
+      border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.borderBasePlain};
+      border-top-left-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+      border-top-right-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+      padding: ${({ theme }) => theme.euiTheme.size.base};
     }
 
     &-commandInput {
-      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-top: ${({ theme }) => theme.euiTheme.size.xs};
+      padding-bottom: ${({ theme }) => theme.euiTheme.size.xs};
     }
 
     &-footer {
       padding-top: 0;
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme }) => theme.euiTheme.size.xs};
     }
 
     &-rightPanel {
       width: 35%;
-      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
+      background-color: ${({ theme }) => theme.euiTheme.components.forms.background};
+      border-left: ${({ theme }) => theme.euiTheme.border.thin};
     }
 
     &-historyOutput {
@@ -96,7 +97,7 @@ const ConsoleWindow = styled.div`
   //-----------------------------------------------------------
 
   .font-family-code {
-    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
+    font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
   }
 
   .font-style-italic {
@@ -112,6 +113,7 @@ export const Console = memo<ConsoleProps>(
     TitleComponent,
     storagePrefix,
     managedKey,
+    apiRef,
     ...commonProps
   }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
@@ -154,6 +156,7 @@ export const Console = memo<ConsoleProps>(
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
         storagePrefix={storagePrefix}
+        apiRef={apiRef}
       >
         <ConsoleWindow {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>
@@ -186,7 +189,14 @@ export const Console = memo<ConsoleProps>(
                           <div
                             className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
                             ref={scrollingViewport}
+                            tabIndex={0}
+                            role="region"
+                            aria-label={i18n.translate(
+                              'xpack.securitySolution.console.historyViewport.ariaLabel',
+                              { defaultMessage: 'Command output history' }
+                            )}
                           >
+                            <ConsoleInfo data-test-subj={getTestId('consoleAboutPanel')} />
                             <HistoryOutput />
                           </div>
                         </EuiFlexItem>

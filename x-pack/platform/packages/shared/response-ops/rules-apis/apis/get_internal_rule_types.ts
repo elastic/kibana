@@ -53,9 +53,23 @@ const rewriteRuleType: RewriteRequestCase<InternalRuleType> = ({
   ...rest,
 });
 
-export async function getInternalRuleTypes({ http }: { http: HttpStart }) {
+export interface GetInternalRuleTypesParams {
+  http: HttpStart;
+  /**
+   * When `true`, the response also includes rule types the user can read as
+   * alerts (not only as rules). Alert views opt in so alerts-only users still
+   * receive a non-empty list.
+   */
+  includeAlertViewableTypes?: boolean;
+}
+
+export async function getInternalRuleTypes({
+  http,
+  includeAlertViewableTypes = false,
+}: GetInternalRuleTypesParams) {
   const res = await http.get<Array<AsApiContract<InternalRuleType>>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`
+    `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`,
+    { query: { include_alert_viewable_types: includeAlertViewableTypes } }
   );
   return rewriteResponse(res);
 }

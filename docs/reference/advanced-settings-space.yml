@@ -104,6 +104,11 @@ groups:
         id: theme-darkmode
         description: |
           The UI theme that the {{product.kibana}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{product.kibana}} UI theme follow the system theme. You must refresh the page to apply the setting.
+
+          The default value depends on your version:
+
+          * {applies_to}`stack: ga 9.5+` Defaults to `system`.
+          * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
         datatype: enum
         options:
           - option: enabled
@@ -521,7 +526,7 @@ groups:
         description: |
           Sets the file size limit when importing files. The highest supported value for this setting is `1GB`.
         datatype: string
-        default: 100MB
+        default: 500MB
         applies_to:
           stack: ga
           ech: ga
@@ -529,6 +534,9 @@ groups:
           eck: ga
           self: ga
           serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          In these versions, this setting defaults to `100MB`.
 
       - setting: enableESQL
         id: enableESQL
@@ -574,20 +582,6 @@ groups:
           self: ga
           serverless: unavailable
 
-      - setting: "workflows:ui:enabled"
-        id: "workflows:ui:enabled"
-        description: |
-          Enables Elastic Workflows and related experiences.
-        datatype: bool
-        default: false
-        applies_to:
-          stack: preview 9.3
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: preview
-
       - setting: "fields:popularLimit"
         id: fields-popularlimit
         description: |
@@ -627,12 +621,15 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: experimental
           ech: ga
           ece: ga
           eck: ga
           self: ga
           serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.4.3!+
+          From version 9.4.3, all panels load immediately regardless of this setting. Deferred loading of below-the-fold panels is disabled because enabling it can cause some dashboards to fail to load.
 
       - setting: "labs:canvas:byValueEmbeddable"
         id: labs-canvas-by-value-embeddable
@@ -641,7 +638,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          stack: ga
+          stack: removed 9.6
           ech: ga
           ece: ga
           eck: ga
@@ -655,7 +652,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: removed 9.6
           ech: ga
           ece: ga
           eck: ga
@@ -669,7 +666,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: removed 9.6
           ech: ga
           ece: ga
           eck: ga
@@ -809,16 +806,17 @@ groups:
       - setting: "cases:maxOpenCasesPerRuleRun"
         id: cases-max-open-cases-per-rule-run
         description: |
-          Sets the maximum number of new cases the Cases connector can open in one detection rule run when the rule includes a Cases action. Values must be between 1 and 1000. Very high values can add load on {{kib}} and {{es}}. `20` by default.
+          Sets the upper limit for how many new cases the [Cases connector](/reference/connectors-kibana/cases-action-type.md) can open during a single detection rule run. It applies when the rule has a Cases action. Values must be between 1 and 1000. Very high values can add load on {{kib}} and {{es}}.
         datatype: int
         default: 20
         applies_to:
-          stack: ga 9.4
+          stack: ga 9.4+
           ech: ga
           ece: ga
           eck: ga
           self: ga
           serverless: ga
+        note: "This setting does not apply to [Attack Discovery](docs-content://solutions/security/ai/attack-discovery/index.md), which uses its own case-creation limit."
 
   - group: Discover
     id: kibana-discover-settings
@@ -845,6 +843,20 @@ groups:
         datatype: string
         applies_to:
           stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "discover:defaultEsqlQuery"
+        id: discover-default-esql-query
+        description: |
+          The ES|QL query that **Discover** starts with when opening in ES|QL mode. When set, it takes precedence over the query **Discover** would otherwise derive from your data sources. Leave empty to use the default behavior.
+        datatype: string
+        default: ""
+        applies_to:
+          stack: ga 9.6
           ech: ga
           ece: ga
           eck: ga
@@ -1742,12 +1754,14 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: preview
+          stack: preview, removed 9.6
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          observability: preview
+        note: |
+          :applies_to: stack: ga 9.6
+          From this version, you can no longer control Significant Events availability using this setting.
 
   - group: Reporting
     id: kibana-reporting-settings
@@ -1900,9 +1914,9 @@ groups:
       - setting: "securitySolution:refreshIntervalDefaults"
         id: securitysolution-refreshintervaldefaults
         description: |
-          The default refresh interval for the Security time filter, in milliseconds.
-        datatype: string
-        default: "300000"
+          The default refresh interval for the {{security-app}} time filter. Must include `pause` and `value`. Specify `value` in milliseconds.
+        datatype: json
+        default: '{"pause": true, "value": 300000}'
         applies_to:
           stack: ga
           ech: ga
@@ -1910,12 +1924,13 @@ groups:
           eck: ga
           self: ga
           security: ga
+        note: "The UI [time filter](docs-content://explore-analyze/query-filter/filtering.md) overrides the default values."
 
       - setting: "securitySolution:timeDefaults"
         id: securitysolution-timedefaults
         description: |
-          The default period of time of the Security solution time filter.
-        datatype: string
+          The default time range for the {{security-app}} time filter. Must include `from` and `to`.
+        datatype: json
         default: '{"from": "now/d","to": "now/d"}'
         applies_to:
           stack: ga
@@ -1924,12 +1939,17 @@ groups:
           eck: ga
           self: ga
           security: ga
+        note: "Refer to [Date Math](elasticsearch://reference/elasticsearch/rest-apis/common-options.md) for information about the syntax. The UI [time filter](docs-content://explore-analyze/query-filter/filtering.md) overrides the default values."
 
       - setting: "securitySolution:defaultIndex"
         id: securitysolution-defaultindex
         description: |
-          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events.
-        datatype: string
+          A comma-delimited list of {{es}} indices from which the {{security-app}} collects events. The {{security-app}} uses this list to generate the [default Security data view](docs-content://solutions/security/get-started/data-views-elastic-security.md#default-data-view-security). The [entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md) also extracts entities from these indices.
+
+          Index patterns can use wildcards. For example, `filebeat-*` matches all indices that start with `filebeat-`.
+
+          If you leave the `-*elastic-cloud-logs-*` pattern in the list, Elastic Cloud monitoring logs are excluded from {{security-app}} queries.
+        datatype: array
         default: "apm-*-transaction*, auditbeat-*, endgame-*, filebeat-*, logs-*, packetbeat-*, traces-apm*, winlogbeat-*, -*elastic-cloud-logs-*"
         applies_to:
           stack: ga
@@ -1938,12 +1958,17 @@ groups:
           eck: ga
           self: ga
           security: ga
+        note: |
+          :applies_to: serverless: ga
+          The list can include a maximum of 50 items.
 
       - setting: "securitySolution:defaultThreatIndex"
         id: securitysolution-threatindices
         description: |
-          A comma-delimited list of Threat Intelligence indices from which the {{security-app}} collects indicators.
-        datatype: string
+          A comma-delimited list of threat intelligence indices from which the {{security-app}} collects indicators. Features that query these indices include the Threat Intelligence view on the Overview dashboard, indicator match rules, and the alert enrichment query.
+
+          Do not remove or overwrite the `logs-ti_*` index pattern as it is used by {{agent}} integrations.
+        datatype: array
         default: "logs-ti_*"
         applies_to:
           stack: ga
@@ -1952,6 +1977,9 @@ groups:
           eck: ga
           self: ga
           security: ga
+        note: |
+          :applies_to: serverless: ga
+          The list can include a maximum of 10 items.
 
       - setting: "securitySolution:defaultAnomalyScore"
         id: securitysolution-defaultanomalyscore
@@ -1984,7 +2012,7 @@ groups:
       - setting: "securitySolution:excludeColdAndFrozenTiersInAnalyzer"
         id: security-solution-exclude-cold-frozen-tiers-analyzer
         description: |
-          Skips cold and frozen tiers in Analyzer's queries when activated.
+          When on, [visual event analyzer](docs-content://solutions/security/investigate/visual-event-analyzer.md) queries exclude [cold and frozen data tiers](docs-content://manage-data/lifecycle/data-tiers.md). Including that data can slow analyzer queries.
         datatype: bool
         default: false
         applies_to:
@@ -1995,19 +2023,86 @@ groups:
           self: ga
           serverless: unavailable
 
-      - setting: "securitySolution:enableGraphVisualization"
-        id: security-solution-enable-graph-visualization
+      - setting: "securitySolution:excludeColdAndFrozenTiersInPrevalence"
+        id: security-solution-exclude-cold-frozen-tiers-prevalence
         description: |
-          Enables the Graph Visualization feature within the Security solution.
+          Skips cold and frozen tiers in Prevalence queries when activated.
         datatype: bool
         default: false
         applies_to:
-          stack: removed 9.4, preview 9.1-9.3
+          stack: ga 9.2
           ech: ga
           ece: ga
           eck: ga
           self: ga
+          serverless: unavailable
+
+      - setting: "securitySolution:enableGraphVisualization"
+        id: security-solution-enable-graph-visualization
+        description: |
+          Enables the Graph Visualization feature within the Security solution. When enabled, the graph appears in the **Visualization** section of the alert and event details flyouts for supported event types, and can be viewed in full-screen.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.0-9.3, removed 9.4+
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
           serverless: removed
+
+      - setting: "securitySolution:enableVisualizationsInFlyout"
+        id: security-solution-enable-visualizations-in-flyout
+        description: |
+          Allows you to access the event analyzer and Session View in the **Visualize** tab on the alert or event details flyout. Refer to the [Visualizations section](docs-content://solutions/security/detect-and-alert/view-detection-alert-details.md#visualizations-section) for information on how to access these tools.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga =9.0, removed 9.1+
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
+          serverless: removed
+
+      - setting: "securitySolution:enableAlertsAndAttacksAlignment"
+        id: security-solution-enable-alerts-and-attacks-alignment
+        description: |
+          Controls whether **Attacks** appears in the {{security-app}} navigation, so you can triage Attack Discovery findings next to **Alerts**.
+
+          The default value depends on your version:
+
+          * {applies_to}`stack: ga 9.5+` {applies_to}`security: ga` Defaults to `true`.
+          * {applies_to}`stack: ga =9.4` Defaults to `false`.
+        datatype: bool
+        applies_to:
+          stack: ga 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+        note: |
+          :applies_to: serverless: ga
+          The **Attacks** view is unavailable on the **Elastic AI SOC Engine (EASE)** feature tier. Use the dedicated [Attack Discovery](docs-content://solutions/security/ai/attack-discovery/run-from-attack-discovery-page.md) page instead.
+
+      - setting: "securitySolution:enableAttackDiscoveryWorkflows"
+        id: security-solution-enable-attack-discovery-workflows
+        description: |
+          Enables Attack Discovery workflows for the space. When enabled, Attack Discovery uses workflows to collect alerts and run analysis. This turns on flexible alert retrieval on the Attacks view, workflow and Agent Builder triggers, and AI-assisted query editing and troubleshooting. 
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+        note: |
+          After you turn the setting on, existing schedules keep their previous configuration until you edit and save them. If you turn the setting off:
+          * Schedules that already used the workflow settings stop generating and temporarily disappear from the schedule list. Turn the setting on again to restore them.
+          * Manual runs from the Attacks view always follow the setting's current value.
 
       - setting: "securitySolution:enableAssetInventory"
         id: security-solution-enable-asset-inventory
@@ -2016,27 +2111,32 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: preview
+          stack: ga 9.1+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          security: preview
-        note: "Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, visit the **Entity Store Management** page."
+          security: ga
+        note: |
+          Turning this setting off does not turn off the entity store or clear persisted entity metadata. To manage or turn off the entity store, go to the **Entity analytics** management page. Refer to [Entity store](docs-content://solutions/security/advanced-entity-analytics/entity-store.md).
 
       - setting: "securitySolution:enableCloudConnector"
         id: security-solution-enable-cloud-connector
         description: |
-          Enables the Cloud Connector experience within the Security solution.
+          Turns on Cloud Connector deployment for the Cloud Security Posture Management (CSPM) and Cloud Asset Discovery integrations. 
+
+          The default value depends on your version:
+
+          * {applies_to}`stack: ga 9.2+` {applies_to}`security: ga` Defaults to `true`.
+          * {applies_to}`stack: ga =9.1` Defaults to `false`.
         datatype: bool
-        default: true
         applies_to:
-          stack: preview
+          stack: ga 9.1+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          security: preview
+          security: ga
 
       - setting: "securitySolution:rulesTableRefresh"
         id: security-solution-rules-table-refresh
@@ -2069,7 +2169,12 @@ groups:
       - setting: "securitySolution:ipReputationLinks"
         id: securitysolution-ipreputationlinks
         description: |
-          A JSON array containing links for verifying the reputation of an IP address. The links are displayed on [IP detail](docs-content://solutions/security/explore/network-page.md) pages.
+          A JSON array of external sites for verifying an IP address's reputation. The links appear on [IP details](docs-content://solutions/security/advanced-entity-analytics/network-page.md#ip-details-page) pages.
+
+          Each array element must include:
+
+          * `name`: The link's display name.
+          * `url_template`: The link's URL. It can include `{{ip}}`, which is replaced with the IP address you're viewing.
 
           :::{dropdown} Default array
           ```json
@@ -2079,7 +2184,7 @@ groups:
           ]
           ```
           :::
-        datatype: string
+        datatype: json
         applies_to:
           stack: ga
           ech: ga
@@ -2091,25 +2196,29 @@ groups:
       - setting: "securitySolution:enableCcsWarning"
         id: securitysolution-enableCcsWarning
         description: |
-          Enables privilege check warnings in rules for CCS indices.
+          Controls whether detection rules show a privilege warning when they query a remote [cross-cluster search](docs-content://solutions/security/detect-and-alert/cross-cluster-search-detection-rules.md) (CCS) index pattern. 
+          
+          Each time a detection rule runs using a remote CCS index pattern, it returns a warning saying that the rule may not have the required read privileges to the remote index. Because privileges cannot be checked across remote indices, this warning displays even when the rule actually does have read privileges to the remote index.
+
+          If you've ensured that your detection rules have the required privileges across your remote indices, you can use this setting to disable the warning and reduce noise.
         datatype: bool
         default: true
         applies_to:
           stack: ga 9.0-9.3, removed 9.4+
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
           serverless: unavailable
 
       - setting: "securitySolution:suppressionBehaviorOnAlertClosure"
         id: security-solution-suppression-behavior-on-alert-closure
         description: |
-          If an alert is closed while suppression is active, you can choose whether suppression continues or resets.
+          Controls whether [alert suppression](docs-content://solutions/security/detect-and-alert/alert-suppression.md#security-alert-suppression-impact-close-alerts) continues or restarts after you close a suppressed alert during an active suppression window.
         datatype: string
         default: Restart suppression
         applies_to:
-          stack: ga
+          stack: ga 9.2+
           ech: ga
           ece: ga
           eck: ga
@@ -2119,7 +2228,7 @@ groups:
       - setting: "securitySolution:showRelatedIntegrations"
         id: securitySolution-showRelatedIntegrations
         description: |
-          Shows related integrations on the rules and monitoring tables.
+          Shows the related integrations badge on the rules and monitoring tables. If you turn this setting off, related integrations still appear on rule details pages.
         datatype: bool
         default: true
         applies_to:
@@ -2133,8 +2242,8 @@ groups:
       - setting: "securitySolution:alertTags"
         id: security-solution-alert-tags
         description: |
-          List of tag options for use with alerts generated by Security Solution rules.
-        datatype: string
+          The list of tag options available when you apply tags to detection alerts.
+        datatype: array
         default: "Duplicate, False Positive, Further investigation required"
         applies_to:
           stack: ga
@@ -2144,58 +2253,98 @@ groups:
           self: ga
           security: ga
 
-      - setting: "securitySolution:excludedDataTiersForRuleExecution"
-        id: security-solution-excluded-data-tiers-for-rule-execution
+      - setting: "securitySolution:detectionsCloseReasons"
+        id: security-solution-detections-close-reasons
         description: |
-          Specifies data tiers to exclude from searching during rule execution. Excludes events from the specified data tiers, which might help improve rule performance or reduce execution time. For example: `data_frozen,data_cold`.
-        datatype: string
+          Additional close reason options shown in the closing reason menu when you close an alert or an attack. The same options appear in the closing reason menu when you close a case with **Sync alert status with case status** turned on. Custom reasons supplement the predefined options (`Duplicate`, `False positive`, `True positive`, `Benign positive`, and `Other`) and must be unique. To learn more, refer to [Change an alert's status](docs-content://solutions/security/detect-and-alert/manage-detection-alerts.md#detection-alert-status) and [Set an alert closing reason when closing a case](docs-content://solutions/security/investigate/security-cases.md#cases-set-closing-reason).
+        datatype: array
+        default: "[]"
         applies_to:
-          stack: ga
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          security: ga
-
-      - setting: "securitySolution:includedDataStreamNamespacesForRuleExecution"
-        id: security-solution-included-data-stream-namespaces-for-rule-execution
-        description: |
-          When configured, the setting restricts which documents detection rules search. Only events whose `data_stream.namespace` field matches one of the specified namespaces are queried. This applies to all detection rules in the {{kib}} space and acts like a global filter on `data_stream.namespace`. Specify an array of namespace strings (for example, `["namespace1", "namespace2"]`). You can configure up to 50 namespaces. Empty by default (searches all namespaces).
-        datatype: json
-        applies_to:
-          stack: ga 9.4
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: ga
-
-      - setting: "securitySolution:enablePrivilegedUserMonitoring"
-        id: security-solution-enable-privileged-user-monitoring
-        description: |
-          Enables the privileged user monitoring dashboard and onboarding experience, which are in technical preview.
-        datatype: bool
-        default: true
-        applies_to:
-          stack: preview 9.1, removed 9.3
+          stack: ga 9.4+
           ech: ga
           ece: ga
           eck: ga
           self: ga
           serverless: unavailable
 
-      - setting: "securitySolution:enableEsqlRiskScoring"
-        id: security-solution-enable-esql-risk-scoring
+      - setting: "securitySolution:maxUnassociatedNotes"
+        id: security-solution-max-unassociated-notes
         description: |
-          Enables risk scoring based on {{esql}} queries. Disabling this reverts to using scripted metrics.
-        datatype: bool
-        default: true
+          The maximum number of unassociated [notes](docs-content://solutions/security/investigate/notes.md) (notes that are not assigned to a Timeline) that can be created. Values must be between `1` and `10000`.
+        datatype: int
+        default: 1000
         applies_to:
-          stack: preview 9.0, removed 9.3
+          stack: ga =9.0, removed 9.1+
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
+          serverless: removed
+
+      - setting: "securitySolution:excludedDataTiersForRuleExecution"
+        id: security-solution-excluded-data-tiers-for-rule-execution
+        description: |
+          Specifies [data tiers](docs-content://manage-data/lifecycle/data-tiers.md) to exclude from detection rule queries. Allowed values are `data_cold` and `data_frozen`. If you specify more than one, separate them with commas. For example: `data_frozen,data_cold`. Excluding this data might improve rule performance or reduce execution time. This setting does not apply to {{ml}} rules.
+        datatype: array
+        default: "[]"
+        applies_to:
+          stack: ga
           ech: ga
           ece: ga
           eck: ga
           self: ga
+          serverless: unavailable
+        note: |
+          Even when this setting is on, indicator match, event correlation, and {{esql}} rules can still fail if a cold or frozen shard that matches the rule's index pattern is unavailable. If that happens, change the rule's index patterns to match only hot-tier data.
+
+      - setting: "securitySolution:includedDataStreamNamespacesForRuleExecution"
+        id: security-solution-included-data-stream-namespaces-for-rule-execution
+        description: |
+          Restricts which documents detection rules search. Only events whose `data_stream.namespace` field matches one of the specified namespaces are queried. This applies to all detection rules in the {{kib}} space.
+
+          Specify namespace strings separated by commas (for example: `namespace1,namespace2`). You can include up to 50 namespaces. Leave the setting empty to search all namespaces.
+        datatype: array
+        default: "[]"
+        applies_to:
+          stack: ga 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+        note: |
+          If rules aren't creating expected alerts or are missing data, check that this setting isn't filtering out the namespaces where your data is stored. Refer to [Troubleshoot missing alerts](docs-content://troubleshoot/security/detection-rules.md#troubleshoot-namespace-filter).
+
+      - setting: "securitySolution:enablePrivilegedUserMonitoring"
+        id: security-solution-enable-privileged-user-monitoring
+        description: |
+          Turns on access to the [Entity analytics](docs-content://solutions/security/advanced-entity-analytics/monitor-entity-risk.md) page and [privileged user monitoring](docs-content://solutions/security/advanced-entity-analytics/privileged-user-monitoring.md).
+
+          The default value depends on your version:
+
+          * {applies_to}`stack: ga =9.2` Defaults to `true`.
+          * {applies_to}`stack: ga =9.1` Defaults to `false`.
+        datatype: bool
+        applies_to:
+          stack: ga 9.1-9.2, removed 9.3+
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
+          serverless: unavailable
+
+      - setting: "securitySolution:enableEsqlRiskScoring"
+        id: security-solution-enable-esql-risk-scoring
+        description: |
+          When on, [entity risk scoring](docs-content://solutions/security/advanced-entity-analytics/entity-risk-scoring.md) uses {{esql}} queries. Turn this setting off to use scripted metrics instead.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga =9.2, removed 9.3+
+          ech: removed
+          ece: removed
+          eck: removed
+          self: removed
           serverless: unavailable
 
       - setting: "securitySolution:defaultAIConnector"
@@ -2237,6 +2386,37 @@ groups:
         applies_to:
           stack: unavailable
           security: ga
+
+      - setting: "securitySolution:enableNewFlyout"
+        id: security-solution-enable-new-flyout
+        description: |
+          Enables the new flyout system for document (alert and event), attack, host, user, rule, network, indicator of compromise, misconfigurations, and vulnerabilities details.
+
+          Turn this setting off to use the previous flyout layout, which uses right, left, and preview panels instead of a single flyout with [child flyouts](docs-content://solutions/security/get-started/elastic-security-ui.md#details-flyouts).
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "securitySolution:enableRuleChangesHistory"
+        id: security-solution-enable-rule-changes-history
+        description: |
+          Controls whether you can view a chronological [history of changes](docs-content://solutions/security/detect-and-alert/view-rule-changes-history.md) made to a detection rule, compare revisions, and restore a rule to a previous state.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+        note: "If you turn the setting off and later turn it back on, any gap in rule revisions from while it was off isn't filled. Capturing rule change history might add a small amount of overhead when rules are created or updated."
 
   - group: Timelion
     id: kibana-timelion-settings
@@ -2375,3 +2555,38 @@ groups:
           eck: ga
           self: ga
           elasticsearch: ga
+
+  - group: Workflows
+    id: kibana-workflows-settings
+    settings:
+
+      - setting: "workflows:ui:enabled"
+        id: "workflows:ui:enabled"
+        description: |
+          Enables Elastic Workflows and related experiences.
+        note: |
+          :applies_to: stack: preview =9.3
+          In this version, the default is `false`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.4+, preview =9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: preview
+
+      - setting: "workflows:ui:showManagedWorkflows"
+        id: "workflows:ui:showManagedWorkflows"
+        description: |
+          Shows managed workflows and their executions in workflow experiences.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.5
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga

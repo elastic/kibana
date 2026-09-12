@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
-
+import type { TimeRange } from '@kbn/es-query';
+import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 export const queryKeys = {
   all: ['alert-episodes'] as const,
   actionsAll: () => [...queryKeys.all, 'actions'] as const,
@@ -15,17 +15,39 @@ export const queryKeys = {
   groupActionsAll: () => [...queryKeys.all, 'group-actions'] as const,
   groupActions: (spaceId: string, groupHashes: string[]) =>
     [...queryKeys.groupActionsAll(), spaceId, ...groupHashes] as const,
+  actionsHistoryAll: () => [...queryKeys.all, 'actions-history'] as const,
+  actionsHistory: (spaceId: string, episodeId: string, groupHash: string) =>
+    [...queryKeys.actionsHistoryAll(), spaceId, episodeId, groupHash] as const,
   listAll: () => [...queryKeys.all, 'list'] as const,
   list: (
     spaceId: string,
     pageSize: number,
     filterState?: EpisodesFilterState,
     sortState?: EpisodesSortState,
-    timeRange?: { from: string; to: string } | null
-  ) => [...queryKeys.listAll(), spaceId, pageSize, filterState, sortState, timeRange] as const,
+    timeRange?: { from: string; to: string } | null,
+    additionalSourceId?: string
+  ) =>
+    [
+      ...queryKeys.listAll(),
+      spaceId,
+      pageSize,
+      filterState,
+      sortState,
+      timeRange,
+      additionalSourceId,
+    ] as const,
+  episodeAll: () => [...queryKeys.all, 'episode'] as const,
+  episode: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeAll(), spaceId, episodeId] as const,
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
+  episodeFlappingAll: () => [...queryKeys.all, 'episode-flapping'] as const,
+  episodeFlapping: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeFlappingAll(), spaceId, episodeId] as const,
+  episodeTrendAll: () => [...queryKeys.all, 'episode-trend'] as const,
+  episodeTrend: (spaceId: string, episodeId: string, metricLabels: string[]) =>
+    [...queryKeys.episodeTrendAll(), spaceId, episodeId, ...metricLabels] as const,
   relatedSameGroupEpisodes: (
     spaceId: string,
     ruleId: string,
@@ -60,11 +82,48 @@ export const queryKeys = {
   episodeEventData: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventDataAll(), spaceId, episodeId] as const,
   tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
-  tagOptions: (spaceId: string, timeRange?: { from: string; to: string } | null) =>
-    [...queryKeys.tagOptionsAll(), spaceId, timeRange] as const,
+  tagOptions: (
+    spaceId: string,
+    timeRange?: { from: string; to: string } | null,
+    additionalSourceId?: string
+  ) => [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
+  fetchRule: (id: string) => [...queryKeys.all, 'fetch-rule', id] as const,
+  histogramAll: () => [...queryKeys.all, 'histogram'] as const,
+  histogram: (
+    spaceId: string | undefined,
+    filterState: EpisodesFilterState,
+    timeRange: TimeRange | undefined,
+    breakdownField: string | undefined,
+    additionalSourceId?: string
+  ) =>
+    [
+      ...queryKeys.histogramAll(),
+      spaceId,
+      filterState,
+      timeRange,
+      breakdownField,
+      additionalSourceId,
+    ] as const,
+  currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
+  kpisAll: () => [...queryKeys.all, 'kpis'] as const,
+  kpis: (
+    spaceId: string,
+    filterState?: EpisodesFilterState,
+    timeRange?: { from: string; to: string } | null,
+    currentUserUid?: string,
+    additionalSourceId?: string
+  ) =>
+    [
+      ...queryKeys.kpisAll(),
+      spaceId,
+      filterState,
+      timeRange,
+      currentUserUid,
+      additionalSourceId,
+    ] as const,
 };

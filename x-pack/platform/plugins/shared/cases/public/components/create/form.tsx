@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useMemo, useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CasePostRequest, ObservablePost } from '../../../common/types/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import { fieldName as descriptionFieldName } from '../case_form_fields/description';
 import * as i18n from './translations';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
@@ -33,7 +33,6 @@ import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { getOwnerDefaultValue } from './utils';
-import { useCasesFeatures } from '../../common/use_cases_features';
 import { useSubmitCase } from './use_submit_case';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
@@ -46,7 +45,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
-  observables?: ObservablePost[];
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
@@ -107,6 +106,7 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
           withSteps={withSteps}
           draftStorageKey={draftStorageKey}
           configuration={currentConfiguration}
+          selectedOwner={selectedOwner}
         />
       </>
     );
@@ -123,18 +123,13 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onSuccess,
     timelineIntegration,
     attachments,
-    observables = [],
+    getAttachments,
     initialValue,
   }) => {
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
     const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
     const [selectedOwner, onSelectedOwner] = useState<string>(defaultOwnerValue);
-
-    const { observablesAuthorized, isExtractObservablesEnabled, isObservablesFeatureEnabled } =
-      useCasesFeatures();
-    const canExtractObservables =
-      observablesAuthorized && isObservablesFeatureEnabled && isExtractObservablesEnabled;
 
     const { data: configurations, isLoading: isLoadingCaseConfiguration } =
       useGetAllCaseConfigurations();
@@ -171,7 +166,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
 
     const { submitCase, isSubmitting } = useSubmitCase({
       attachments,
-      observables: canExtractObservables ? observables : [],
+      getAttachments,
       onSuccess: handleOnSuccess,
       afterCaseCreated,
     });

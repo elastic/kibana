@@ -187,7 +187,7 @@ export const Content = ({
   const highlightedValue = useMemo(() => {
     if (!value) return undefined;
 
-    // Use field formatter's reactConvert which handles search highlighting natively
+    // Use field formatter's convertToReact which handles search highlighting natively
     const withSearchHighlights = formatFieldStringValueWithHighlights({
       value,
       hit: row.raw,

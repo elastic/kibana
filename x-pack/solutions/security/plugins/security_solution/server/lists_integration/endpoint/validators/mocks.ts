@@ -7,7 +7,7 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { buildSpaceOwnerIdTag } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator } from './base_validator';

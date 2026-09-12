@@ -14,7 +14,7 @@ describe('buildRequestPreviewCodeContent()', () => {
         method: 'POST',
         url: '/streams/_simulate',
       })
-    ).toBe('POST /streams/_simulate');
+    ).toBe('POST kbn:/streams/_simulate');
 
     expect(
       buildRequestPreviewCodeContent({
@@ -22,7 +22,16 @@ describe('buildRequestPreviewCodeContent()', () => {
         url: '/streams',
         body: null,
       })
-    ).toBe('GET /streams');
+    ).toBe('GET kbn:/streams');
+  });
+
+  it('does not double-prefix urls that already include kbn:', () => {
+    expect(
+      buildRequestPreviewCodeContent({
+        method: 'GET',
+        url: 'kbn:/api/streams',
+      })
+    ).toBe('GET kbn:/api/streams');
   });
 
   it('includes formatted body when provided', () => {
@@ -32,7 +41,7 @@ describe('buildRequestPreviewCodeContent()', () => {
       body: { processing: ['step1'] },
     });
 
-    expect(result).toBe(`PUT /streams/logs-foo
+    expect(result).toBe(`PUT kbn:/streams/logs-foo
 {
   "processing": [
     "step1"

@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { DEVELOPER_TOOLBAR_ID, DEVTOOL_HIDDEN_ATTR, NON_DELETABLE_TAGS } from '../lib/constants';
-import { setImportant } from '../edit_engine/clone_element';
+import { setImportant } from '../lib/dom/set_important';
 
 /**
  * Manages soft-deletion of elements: fades them out, hides them with

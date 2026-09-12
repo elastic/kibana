@@ -63,7 +63,15 @@ test.describe(
       await test.step('Clicking a span row opens the span detail flyout', async () => {
         await traceWaterfallFlyout.clickSpan(testData.WATERFALL_NODE_DB_SPAN_NAME);
         await expect(traceWaterfallFlyout.spanDetailFlyout).toBeVisible();
-        await traceWaterfallFlyout.childDocFlyout.close();
+      });
+
+      await test.step('Expanding an About field cell shows the popover above the nested flyout', async () => {
+        const { childDocFlyout } = traceWaterfallFlyout;
+        await childDocFlyout.expandFirstValueCell();
+        await expect(childDocFlyout.cellPopover).toBeVisible();
+        await childDocFlyout.ensureCellPopoverOnTop();
+        await childDocFlyout.closeCellPopover();
+        await childDocFlyout.close();
       });
 
       await test.step('Clicking "View error" on a transaction with one error opens the error detail flyout', async () => {
@@ -79,12 +87,12 @@ test.describe(
     });
 
     test('"Open in Discover" opens Discover with trace filter and results', async ({
-      pageObjects: { transactionDetailsPage, discover },
+      pageObjects: { transactionDetailsPage, dataGrid, discover },
     }) => {
       await openFlyoutActionsMenu(transactionDetailsPage);
       await transactionDetailsPage.traceWaterfallFlyout.openInDiscoverLink.click();
 
-      await discover.waitForDocTableRendered();
+      await dataGrid.waitForDocTableRendered();
 
       const query = await discover.getEsqlQueryValue();
       expect(query).toContain('trace.id');

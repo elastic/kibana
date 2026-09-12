@@ -22,12 +22,18 @@ Try to translate to ESQL as much as possible. Keep in mind below when translatin
 - If not even 20% of the detection logic can be translated, you must:
   - Provide a summary of the reasons why it cannot be translated.
   - NOT provide any dummy/example or simple ESQL query.
-- Use LOOKUP JOIN to enrich data with lookup indices.
 - Never add quotes or backticks to index names. This also applied to lookup index names
 - Always use the provided index pattern in the output, do not use a different index pattern. This is very important.
 - Since you are creating ESQL query, try to use ESQL specific commands and syntax as much as possible, do not use KQL/lucene unless necessary. For example, use \`where\` command for filtering instead of KQL. Only use KQL for below use cases:
   - when you need to search for a value in the entire payload and no specific field is mentioned.
   - when a capability is not available in ESQL but is available in KQL.
+- LOOKUP JOIN rules:
+  - Use LOOKUP JOIN for lookup indices. Do not use ENRICH.
+  - Lookup fields are declared as field elements; field @name is the lookup-side ES|QL field name and field @type is its datatype.
+  - When source and lookup field names differ, use LOOKUP JOIN lookup_index ON source_field == lookup_field.
+  - When source and lookup field names are the same, use LOOKUP JOIN lookup_index ON field_name.
+  - If source and lookup field types differ, create a source-side EVAL field with the matching type before LOOKUP JOIN.
+
 
 See the example output below for formatting.
 

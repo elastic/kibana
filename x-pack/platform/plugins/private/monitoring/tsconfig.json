@@ -7,7 +7,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "server/**/*.json"
+    "server/**/*.json",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -18,6 +19,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/alerting-plugin",
+    "@kbn/app-header",
     "@kbn/actions-plugin",
     "@kbn/cloud-plugin",
     "@kbn/encrypted-saved-objects-plugin",
@@ -60,7 +62,8 @@
     "@kbn/react-query",
     "@kbn/response-ops-rule-params",
     "@kbn/kql",
-    "@kbn/cloud-connect-plugin"
+    "@kbn/cloud-connect-plugin",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

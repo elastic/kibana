@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -104,16 +105,28 @@ export const LinksList: React.FC<LinksListProps> = ({
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="danger"
-                    onClick={() => {
-                      links.splice(currentLinkIndex, 1);
-                      editAction('links', links, index);
-                    }}
-                    iconType="minusCircle"
-                    css={{ marginTop: 28 }}
-                    data-test-subj="pagerDutyRemoveLinkButton"
-                  />
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.stackConnectors.components.pagerDuty.removeLinkButtonLabel',
+                      { defaultMessage: 'Remove link' }
+                    )}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="danger"
+                      onClick={() => {
+                        links.splice(currentLinkIndex, 1);
+                        editAction('links', links, index);
+                      }}
+                      iconType="minusCircle"
+                      css={{ marginTop: 28 }}
+                      data-test-subj="pagerDutyRemoveLinkButton"
+                      aria-label={i18n.translate(
+                        'xpack.stackConnectors.components.pagerDuty.removeLinkButtonLabel',
+                        { defaultMessage: 'Remove link' }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

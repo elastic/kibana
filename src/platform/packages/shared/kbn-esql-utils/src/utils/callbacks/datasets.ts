@@ -18,15 +18,16 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
  * @returns A promise that resolves to the datasets list.
  */
 export const getDatasets = cacheParametrizedAsyncFunction(
-  async (http: HttpStart) => {
+  async (http: HttpStart, signal?: AbortSignal) => {
     try {
-      const result = await http.get<EsqlDatasetsResult>(DATASETS_ROUTE);
+      const result = await http.get<EsqlDatasetsResult>(DATASETS_ROUTE, { signal });
       return result ?? { datasets: [] };
-    } catch {
+    } catch (e) {
+      if (signal?.aborted) throw e;
       return { datasets: [] };
     }
   },
-  (http: HttpStart) => 'datasets',
+  (_http: HttpStart, _signal?: AbortSignal) => 'datasets',
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
   1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
 );

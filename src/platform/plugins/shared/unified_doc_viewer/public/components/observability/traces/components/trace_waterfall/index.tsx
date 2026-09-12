@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { getEbtProps } from '@kbn/ebt-click';
+import { esqlEquals } from '../../../../../utils/esql_expressions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -71,7 +71,11 @@ function InternalTraceWaterfall({
   dataView,
   ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 }: Props) {
-  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const { data, apmShared } = getUnifiedDocViewerServices();
+  const FocusedTraceWaterfallWithFetching = useMemo(
+    () => apmShared.FocusedTraceWaterfallWithFetching,
+    [apmShared.FocusedTraceWaterfallWithFetching]
+  );
   const { indexes } = useDataSourcesContext();
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
@@ -123,13 +127,10 @@ function InternalTraceWaterfall({
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
-  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-focused-trace-waterfall'
-  )?.render;
-
+  const traceIdWhereClause = useMemo(() => esqlEquals(TRACE_ID_FIELD, traceId), [traceId]);
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
-    whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
+    whereClause: traceIdWhereClause,
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
@@ -252,8 +253,6 @@ function InternalTraceWaterfall({
     [ebtDetail, openInDiscoverSectionAction, setShowFullScreenWaterfall]
   );
 
-  if (!FocusedTraceWaterfall) return null;
-
   return (
     <>
       {showFullScreenWaterfall && renderReady ? (
@@ -307,7 +306,7 @@ function InternalTraceWaterfall({
             }
           `}
         >
-          <FocusedTraceWaterfall
+          <FocusedTraceWaterfallWithFetching
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

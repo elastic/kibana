@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
-
-import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { adminTestUser, kibanaTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -28,9 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
 
     const cookies = response.headers['set-cookie'];
-    expect(cookies).to.have.length(1);
-
-    const cookie = parseCookie(cookies[0])!;
+    const cookie = findSessionCookie(cookies);
     return cookie;
   }
 
@@ -47,9 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
 
     const cookies = response.headers['set-cookie'];
-    expect(cookies).to.have.length(1);
-
-    const cookie = parseCookie(cookies[0])!;
+    const cookie = findSessionCookie(cookies);
     return cookie;
   }
 

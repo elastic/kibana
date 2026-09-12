@@ -12,7 +12,10 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import {
+  assertCanReadManagedWorkflowExecution,
+  WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -21,7 +24,7 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
     .get({
       path: '/api/workflows/executions/{executionId}',
       access: 'public',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Get a workflow execution',
       description: 'Retrieve details of a single workflow execution by its ID.',
       options: {
@@ -63,6 +66,7 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
           if (!workflowExecution) {
             return response.notFound();
           }
+          assertCanReadManagedWorkflowExecution(request, workflowExecution);
           return response.ok({ body: workflowExecution });
         } catch (error) {
           return handleRouteError(response, error);

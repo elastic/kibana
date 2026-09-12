@@ -8,6 +8,7 @@
 export {
   setupAgentDirectAnswer,
   setupAgentDirectError,
+  setupAgentHangingAnswer,
   setupAgentCallSearchToolWithEsqlThenAnswer,
   setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
   setupAgentParallelToolCallsThenAnswer,

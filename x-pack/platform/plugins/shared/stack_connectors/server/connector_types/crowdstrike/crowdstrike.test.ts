@@ -283,7 +283,7 @@ describe('CrowdstrikeConnector', () => {
 
       await expect(() =>
         connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
-      ).rejects.toThrowError('something goes wrong');
+      ).rejects.toThrow('something goes wrong');
     });
 
     it('should handle authentication flow for API requests', async () => {

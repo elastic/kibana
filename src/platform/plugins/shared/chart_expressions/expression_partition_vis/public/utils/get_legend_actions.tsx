@@ -10,20 +10,61 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { LegendAction, SeriesIdentifier } from '@elastic/charts';
 import { useLegendAction } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import {
+  isFilterableColumnSet,
+  getFilterDrilldownWarningMessage,
+} from '@kbn/chart-expressions-common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { PartitionVisParams } from '../../common/types';
 import type { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
+const filterForValueLabel = i18n.translate(
+  'expressionPartitionVis.legend.filterForValueButtonAriaLabel',
+  {
+    defaultMessage: 'Filter for',
+  }
+);
+
+const filterOutValueLabel = i18n.translate(
+  'expressionPartitionVis.legend.filterOutValueButtonAriaLabel',
+  {
+    defaultMessage: 'Filter out',
+  }
+);
+
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
+};
+
+const footerMessageStyles = {
+  root: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      padding: ${euiTheme.size.m};
+      color: ${euiTheme.colors.textSubdued};
+      border-block-start: ${euiTheme.border.thin};
+      margin-block: ${euiTheme.size.s} -${euiTheme.size.s};
+      margin-inline: -${euiTheme.size.s};
+    `,
+};
+
+const PopoverFooterMessage = ({ message }: { message: string }) => {
+  const styles = useMemoCss(footerMessageStyles);
+  return (
+    <div css={styles.root} data-test-subj="legendFilterFooterMessage">
+      {message}
+    </div>
+  );
 };
 
 export const getLegendActions = (
@@ -45,22 +86,28 @@ export const getLegendActions = (
     );
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
+    const isEsqlMode = visData.meta?.type === ESQL_TABLE_TYPE;
+    // column may be undefined when columnIndex === -1; the early return below ensures it is
+    // non-null for the rest of the component.
+    const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
+    // isComputedColumnFilterable gates the disabled state below; warningMessage is
+    // display-only and can be suppressed (e.g. for dates) without affecting it.
+    const isComputedColumnFilterable = !isEsqlMode || !column || isFilterableColumnSet([column]);
+    const warningMessage =
+      isEsqlMode && column ? getFilterDrilldownWarningMessage([column]) : undefined;
+
     useEffect(() => {
-      if (!canFilter || !filterData) {
+      if (!canFilter || !filterData || !isComputedColumnFilterable) {
         setIsFilterable(false);
         return;
       }
-
+      // Reset to true before the async check so we don't show a stale disabled state
+      // while the promise is in flight.
+      setIsFilterable(true);
       (async () => setIsFilterable(await canFilter(filterData)))();
-    }, [filterData]);
+    }, [filterData, isComputedColumnFilterable]);
 
-    if (columnIndex === -1) {
-      return null;
-    }
-
-    // Don't show filter actions for computed columns
-    const column = visData.columns[columnIndex];
-    if (column?.isComputedColumn === true) {
+    if (columnIndex === -1 || !column) {
       return null;
     }
 
@@ -76,12 +123,38 @@ export const getLegendActions = (
     const compatibleCellActions = columnCellValueActions[columnIndex] ?? [];
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
-    if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
+
+    if (!isComputedColumnFilterable && warningMessage) {
       panelItems.push(
         {
-          name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
-            defaultMessage: 'Filter for',
-          }),
+          name: filterForValueLabel,
+          'data-test-subj': `legend-${title}-filterIn`,
+          icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
+          disabled: true,
+          onClick: () => {},
+        },
+        {
+          name: filterOutValueLabel,
+          'data-test-subj': `legend-${title}-filterOut`,
+          icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
+          disabled: true,
+          onClick: () => {},
+        },
+        {
+          renderItem: () => <PopoverFooterMessage message={warningMessage} />,
+        }
+      );
+    }
+
+    if (
+      isComputedColumnFilterable &&
+      !hasFilterCellAction(compatibleCellActions) &&
+      isFilterable &&
+      filterData
+    ) {
+      panelItems.push(
+        {
+          name: filterForValueLabel,
           'data-test-subj': `legend-${title}-filterIn`,
           icon: <EuiIcon type="plusCircle" size="m" aria-hidden={true} />,
           onClick: () => {
@@ -90,9 +163,7 @@ export const getLegendActions = (
           },
         },
         {
-          name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
-            defaultMessage: 'Filter out',
-          }),
+          name: filterOutValueLabel,
           'data-test-subj': `legend-${title}-filterOut`,
           icon: <EuiIcon type="minusCircle" size="m" aria-hidden={true} />,
           onClick: () => {
@@ -103,14 +174,13 @@ export const getLegendActions = (
       );
     }
 
-    const columnMeta = visData.columns[columnIndex].meta;
     compatibleCellActions.forEach((action) => {
       panelItems.push({
         name: action.displayName,
         'data-test-subj': `legend-${title}-${action.id}`,
         icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
         onClick: () => {
-          action.execute([{ columnMeta, value: pieSeries.key }]);
+          action.execute([{ columnMeta: column.meta, value: pieSeries.key }]);
           setPopoverOpen(false);
         },
       });
@@ -143,7 +213,7 @@ export const getLegendActions = (
           marginRight: 4,
         }}
         data-test-subj={`legend-${title}`}
-        onKeyPress={() => setPopoverOpen(!popoverOpen)}
+        onKeyDown={() => setPopoverOpen(!popoverOpen)}
         onClick={() => setPopoverOpen(!popoverOpen)}
         aria-label={i18n.translate('expressionPartitionVis.legend.legendActionsAria', {
           defaultMessage: 'Legend actions',

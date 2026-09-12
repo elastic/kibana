@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
@@ -15,9 +15,8 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
-  useBatchedPublishingSubjects,
   apiPublishesSettings,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
 import {
@@ -42,6 +41,7 @@ import {
   crossPanelActionsComparators,
   initializeCrossPanelActions,
 } from './initialize_cross_panel_actions';
+import { cancelAllInFlightRequests } from '../actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
@@ -117,15 +117,13 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
-    function serializeState() {
-      const savedObjectId = savedMap.getSavedObjectId();
-      return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
-    }
-
-    const unsavedChangesApi = initializeUnsavedChanges<MapEmbeddableState>({
+    const stateApi = initializeStateApi<MapEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => {
+        const savedObjectId = savedMap.getSavedObjectId();
+        return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
+      },
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         crossPanelActions.anyStateChange$,
@@ -145,21 +143,23 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
           savedObjectId: 'skip',
         };
       },
-      onReset: async (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        timeRangeManager.reinitializeState(lastSaved);
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: async (nextState) => {
+        drilldownsManager.reinitializeState(nextState);
+        timeRangeManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
 
-        if (lastSaved) {
-          await savedMap.reset(lastSaved);
-        }
+        savedMap.reset(nextState);
+        reduxSync.internalApi.syncWithStore();
       },
     });
 
     api = finalizeApi({
+      cancelRequests: () => {
+        savedMap.getStore().dispatch<any>(cancelAllInFlightRequests());
+      },
       defaultTitle$,
       defaultDescription$,
-      ...unsavedChangesApi,
+      ...stateApi,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
       ...titleManager.api,
@@ -183,7 +183,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       ),
       ...initializeDataViews(savedMap.getStore()),
       ...projectRoutingManager.api,
-      serializeState,
       supportedTriggers: () => {
         return [ON_OPEN_PANEL_MENU, ON_APPLY_FILTER, ON_CLICK_VALUE];
       },
@@ -200,13 +199,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     return {
       api,
       Component: () => {
-        const [defaultTitle, title, defaultDescription, description] = useBatchedPublishingSubjects(
-          defaultTitle$,
-          titleManager.api.title$,
-          defaultDescription$,
-          titleManager.api.description$
-        );
-
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
@@ -250,14 +242,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   ? parentApi.getTooltipRenderer()
                   : undefined
               }
-              title={title ?? defaultTitle}
-              description={description ?? defaultDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={
-                isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'
-                  ? parentApi.isSharable
-                  : true
-              }
             />
           </Provider>
         );

@@ -10,12 +10,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFieldText,
-  EuiText,
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import type { SeriesUrl } from '../../types';
@@ -101,16 +102,23 @@ export function SeriesName({ series, seriesId }: Props) {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="exploratoryViewSeriesNameButton"
-          onClick={() => setIsEditingEnabled(!isEditingEnabled)}
-          iconType="pencil"
-          aria-label={i18n.translate('xpack.exploratoryView.expView.seriesEditor.editName', {
+        <EuiToolTip
+          content={i18n.translate('xpack.exploratoryView.expView.seriesEditor.editName', {
             defaultMessage: 'Edit name',
           })}
-          color="text"
-          buttonRef={buttonRef}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="exploratoryViewSeriesNameButton"
+            onClick={() => setIsEditingEnabled(!isEditingEnabled)}
+            iconType="pencil"
+            aria-label={i18n.translate('xpack.exploratoryView.expView.seriesEditor.editName', {
+              defaultMessage: 'Edit name',
+            })}
+            color="text"
+            buttonRef={buttonRef}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

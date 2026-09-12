@@ -26,6 +26,7 @@ import {
 
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import { alertIdSchema, sessionEntityIdSchema, sessionTimestampSchema } from './validation';
 
 export const registerAlertsRoute = (
   router: IRouter,
@@ -48,10 +49,10 @@ export const registerAlertsRoute = (
         validate: {
           request: {
             query: schema.object({
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              investigatedAlertId: schema.maybe(schema.string()),
-              cursor: schema.maybe(schema.string()),
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              investigatedAlertId: schema.maybe(alertIdSchema),
+              cursor: schema.maybe(sessionTimestampSchema),
             }),
           },
         },

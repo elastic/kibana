@@ -6,8 +6,24 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { ErrorCause, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ErrorCause,
+  IngestFieldAccessPattern,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { apiTest } from '@kbn/scout';
+import { namespaceIndex, RUN_NAMESPACE } from './index_namespace';
+
+/**
+ * Optional pipeline settings applied when a pipeline is created for an ingest call.
+ */
+export interface TestBedPipelineOptions {
+  field_access_pattern?: IngestFieldAccessPattern;
+}
+
+export interface TestBedIngestOptions {
+  pipeline?: TestBedPipelineOptions;
+}
 
 export interface TestBedFixture {
   testBed: {
@@ -17,12 +33,14 @@ export interface TestBedFixture {
      * @param indexName The name of the index.
      * @param documents An array of documents to ingest.
      * @param processors An optional array of ingest processors to create a pipeline.
+     * @param options Optional ingest options, e.g. pipeline settings like `field_access_pattern`.
      * @returns An object containing the number of ingested documents and an array of errors.
      */
     ingest: (
       indexName: string,
       documents: Array<Record<string, unknown>>,
-      processors?: IngestProcessorContainer[]
+      processors?: IngestProcessorContainer[],
+      options?: TestBedIngestOptions
     ) => Promise<{ errors: ErrorCause[]; docs: number }>;
     /**
      * Gets all documents from an index in their natural, non-deterministic order.
@@ -61,11 +79,15 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       const createdPipelines = new Set<string>();
       const createdIndexes = new Set<string>();
 
-      const createPipeline = async (processors: IngestProcessorContainer[]) => {
-        const pipelineId = `test-bed-pipeline-${Date.now()}`;
+      const createPipeline = async (
+        processors: IngestProcessorContainer[],
+        pipelineOptions?: TestBedPipelineOptions
+      ) => {
+        const pipelineId = `test-bed-pipeline-${RUN_NAMESPACE}-${Date.now()}`;
         await esClient.ingest.putPipeline({
           id: pipelineId,
           processors,
+          ...pipelineOptions,
         });
         createdPipelines.add(pipelineId);
         return pipelineId;
@@ -74,15 +96,17 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       const ingest = async (
         indexName: string,
         documents: Array<Record<string, unknown>>,
-        processors?: IngestProcessorContainer[]
+        processors?: IngestProcessorContainer[],
+        options?: TestBedIngestOptions
       ) => {
         let pipelineId: string | undefined;
         if (processors && processors.length > 0) {
-          pipelineId = await createPipeline(processors);
+          pipelineId = await createPipeline(processors, options?.pipeline);
         }
 
-        await ensureIndexCreated(indexName, esClient);
-        createdIndexes.add(indexName);
+        const physicalIndex = namespaceIndex(indexName);
+        await ensureIndexCreated(physicalIndex, esClient);
+        createdIndexes.add(physicalIndex);
 
         if (!documents || documents.length === 0) {
           return { docs: 0, errors: [] };
@@ -90,7 +114,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
 
         const body = documents
           .map((doc, idx) => ({ ...doc, order_id: idx })) // Add order_id for deterministic sorting
-          .flatMap((doc) => [{ index: { _index: indexName } }, doc]);
+          .flatMap((doc) => [{ index: { _index: physicalIndex } }, doc]);
 
         const bulkRequest: Record<string, unknown> = {
           refresh: true,
@@ -117,7 +141,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
 
       const getDocs = async (indexName: string) => {
         const response = await esClient.search({
-          index: indexName,
+          index: namespaceIndex(indexName),
           query: { match_all: {} },
           size: 1000,
         });
@@ -159,14 +183,18 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
         return docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
       };
 
-      const clean = async (indexName: string) => {
-        if (await esClient.indices.exists({ index: indexName })) {
+      const deleteIndex = async (physicalIndex: string) => {
+        if (await esClient.indices.exists({ index: physicalIndex })) {
           await esClient.indices.delete({
-            index: indexName,
+            index: physicalIndex,
             ignore_unavailable: true,
           });
-          createdIndexes.delete(indexName);
+          createdIndexes.delete(physicalIndex);
         }
+      };
+
+      const clean = async (indexName: string) => {
+        await deleteIndex(namespaceIndex(indexName));
       };
 
       // Test execution phase
@@ -180,7 +208,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       });
 
       // Cleanup phase
-      await Promise.all([...createdIndexes].map((indexName) => clean(indexName)));
+      await Promise.all([...createdIndexes].map((physicalIndex) => deleteIndex(physicalIndex)));
       await Promise.all(
         [...createdPipelines].map((pipelineId) =>
           esClient.ingest.deletePipeline({ id: pipelineId })

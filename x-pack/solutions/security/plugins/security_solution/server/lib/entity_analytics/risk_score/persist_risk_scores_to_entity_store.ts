@@ -50,7 +50,7 @@ export const persistRiskScoresToEntityStore = async ({
   crudClient: EntityUpdateClient;
   logger: Pick<Logger, 'debug' | 'warn'>;
   scores: Partial<Record<EntityType, EntityRiskScoreRecord[]>>;
-}): Promise<string[]> => {
+}) => {
   const allObjects: BulkObject[] = [];
   for (const [entityType, entityScores] of Object.entries(scores)) {
     if (entityScores && entityScores.length > 0) {
@@ -61,7 +61,7 @@ export const persistRiskScoresToEntityStore = async ({
   }
 
   if (allObjects.length === 0) {
-    return [];
+    return { docsWritten: 0, unexpectedErrors: [] };
   }
 
   const errors = await crudClient.bulkUpdateEntity({
@@ -84,7 +84,10 @@ export const persistRiskScoresToEntityStore = async ({
     );
   }
 
-  return unexpectedErrors.map((e) => `[${e._id}] ${e.reason}`);
+  return {
+    docsWritten: allObjects.length - errors.length,
+    unexpectedErrors: unexpectedErrors.map((e) => `[${e._id}] ${e.reason}`),
+  };
 };
 
 const isMissingEntityUpdateError = ({ status, type }: { status: number; type?: string }): boolean =>

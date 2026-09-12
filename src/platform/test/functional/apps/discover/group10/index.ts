@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: DELETE this index and ./config.ts once ./_lens_vis is resolved.
+ * The config adds no suite-specific server args on top of ../../../config.base.js, and Scout
+ * targets already exist under src/platform/plugins/shared/discover/test/scout. No serverless
+ * FTR mirror.
+ */
+
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
   describe('discover/group10', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
-    });
-
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
     });
 
     loadTestFile(require.resolve('./_lens_vis')); // 16 min

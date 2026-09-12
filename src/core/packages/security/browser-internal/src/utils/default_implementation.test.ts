@@ -24,4 +24,20 @@ describe('getDefaultSecurityImplementation', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"No authenticated user"`);
     });
   });
+
+  describe('serviceAccounts', () => {
+    it('isEnabled returns false', () => {
+      expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+
+    it('canCreate returns false', () => {
+      expect(implementation.serviceAccounts.canCreate()).toBe(false);
+    });
+
+    it('create rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.create({ name: 'my-service-account' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+  });
 });

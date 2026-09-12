@@ -20,8 +20,12 @@
  */
 export const ruleFormKeys = {
   all: ['ruleForm'] as const,
+  indexSources: () => [...ruleFormKeys.all, 'indexSources'] as const,
   preview: (query: string, timeField: string, lookback: string) =>
     [...ruleFormKeys.all, 'preview', query, timeField, lookback] as const,
   queryColumns: (query: string) => [...ruleFormKeys.all, 'queryColumns', query] as const,
   dataFields: (query: string) => [...ruleFormKeys.all, 'dataFields', query] as const,
+  composeDiscoverApiTimeField: (fromSourceQuery: string) =>
+    [...ruleFormKeys.all, 'composeDiscoverApiTimeField', fromSourceQuery] as const,
+  tags: (search?: string) => ['rule', 'tags', { search }] as const,
 };

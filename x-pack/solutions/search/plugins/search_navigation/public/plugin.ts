@@ -21,12 +21,14 @@ import {
   INDEX_MANAGEMENT_LOCATOR_ID,
   type IndexManagementLocatorParams,
 } from '@kbn/index-management-shared-types';
+import { BaseClassicNavItems } from './base_classic_navigation_items';
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
   ClassicNavItem,
   SearchNavigationSetBreadcrumbsOptions,
   AppPluginStartDependencies,
+  AppPluginSetupDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
 import { SearchIndexManagementLocatorDefinition } from './locator';
@@ -35,18 +37,20 @@ export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
 {
   private readonly logger: Logger;
+  private contextEngineSetup: AppPluginSetupDependencies['contextEngine'] = undefined;
   private currentChromeStyle: ChromeStyle | undefined = undefined;
   private coreStart: CoreStart | undefined = undefined;
   private pluginsStart: AppPluginStartDependencies | undefined = undefined;
   private onAppMountHandlers: Array<() => Promise<void>> = [];
   private chromeSub: Subscription | undefined;
-  private baseClassicNavItems: ClassicNavItem[] = [];
+  private baseClassicNavItems: ClassicNavItem[] = BaseClassicNavItems;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(_core: CoreSetup): SearchNavigationPluginSetup {
+  public setup(_core: CoreSetup, plugins: AppPluginSetupDependencies): SearchNavigationPluginSetup {
+    this.contextEngineSetup = plugins.contextEngine;
     return {};
   }
 
@@ -73,13 +77,7 @@ export class SearchNavigationPlugin
       );
     }
 
-    // Async loads classic nav items on start
-    import('./base_classic_navigation_items').then(({ BaseClassicNavItems }) => {
-      // caches nav items so we don't need to do an async call when needed by other plugins.
-      this.baseClassicNavItems = BaseClassicNavItems;
-    });
-
-    return {
+    const startContract: SearchNavigationPluginStart = {
       handleOnAppMount: this.handleOnAppMount.bind(this),
       registerOnAppMountHandler: this.registerOnAppMountHandler.bind(this),
       getBaseClassicNavItems: this.getBaseClassicNavItems.bind(this),
@@ -89,6 +87,17 @@ export class SearchNavigationPlugin
         clearBreadcrumbs: this.clearBreadcrumbs.bind(this),
       },
     };
+
+    this.contextEngineSetup?.registerAppChromeAdapter({
+      handleOnAppMount: startContract.handleOnAppMount,
+      getClassicNavigation: startContract.useClassicNavigation,
+      breadcrumbs: {
+        setAppBreadcrumbs: startContract.breadcrumbs.setSearchBreadCrumbs,
+        clearBreadcrumbs: startContract.breadcrumbs.clearBreadcrumbs,
+      },
+    });
+
+    return startContract;
   }
 
   public stop() {
@@ -102,7 +111,7 @@ export class SearchNavigationPlugin
     if (this.onAppMountHandlers.length === 0) return;
 
     try {
-      await Promise.all(this.onAppMountHandlers);
+      await Promise.all(this.onAppMountHandlers.map((handler) => handler()));
     } catch (e) {
       this.logger.warn('Error handling app mount functions for search navigation');
       this.logger.warn(e);

@@ -11,9 +11,15 @@ import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
-import { isServiceRunning, readState, startService, tailLog } from '../services';
+import {
+  isServiceRunning,
+  readState,
+  startService,
+  tailLog,
+  EDOT_CONTAINER_NAME,
+} from '../services';
 import { safeExec } from '../utils';
-import { defaultExportProfile, readVaultConfig, resolveVaultConfigPath } from '../profiles';
+import { defaultExportProfile, readVaultConfigFromFile, resolveVaultConfigPath } from '../profiles';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
@@ -106,11 +112,12 @@ export const doctorCmd: Command<void> = {
     const dockerPs = safeExec('docker', [
       'ps',
       '--filter',
-      'name=kibana-edot-collector',
+      `name=${EDOT_CONTAINER_NAME}`,
       '--format',
       '{{.Names}}',
     ]);
-    const edotDockerAlive = dockerPs !== null && dockerPs.length > 0;
+    const edotDockerAlive =
+      dockerPs !== null && dockerPs.split('\n').some((name) => name.trim() === EDOT_CONTAINER_NAME);
 
     if (edotManagedAlive || edotDockerAlive) {
       const source = edotManagedAlive ? 'managed' : 'docker';
@@ -133,11 +140,14 @@ export const doctorCmd: Command<void> = {
           const edotUpAfterFix = safeExec('docker', [
             'ps',
             '--filter',
-            'name=kibana-edot-collector',
+            `name=${EDOT_CONTAINER_NAME}`,
             '--format',
             '{{.Names}}',
           ]);
-          if (edotUpAfterFix && edotUpAfterFix.length > 0) {
+          if (
+            edotUpAfterFix &&
+            edotUpAfterFix.split('\n').some((n) => n.trim() === EDOT_CONTAINER_NAME)
+          ) {
             log.info('EDOT collector started successfully');
           } else {
             log.warning(
@@ -263,7 +273,7 @@ export const doctorCmd: Command<void> = {
     log.info('  node scripts/evals start --suite <suite-id>');
 
     // --- Profile hint: golden datasets + local export ---
-    const goldenConfigExists = readVaultConfig(repoRoot) !== undefined;
+    const goldenConfigExists = readVaultConfigFromFile(repoRoot) !== undefined;
     const localProfile = defaultExportProfile(repoRoot);
     const localConfigExists = localProfile != null;
     if (goldenConfigExists) {

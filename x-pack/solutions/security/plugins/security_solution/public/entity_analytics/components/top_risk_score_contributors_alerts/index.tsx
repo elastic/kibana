@@ -32,7 +32,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { useUserData } from '../../../detections/components/user_info';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { RiskInformationButtonEmpty } from '../risk_information';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
@@ -54,9 +53,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
 
-  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(PageScope.alerts);
-
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -141,8 +138,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-              dataViewSpec={oldSourcererDataViewSpec} // TODO: Should be removed after migrating to new data view picker
-              dataView={experimentalDataView}
+              dataView={dataView}
               defaultFilters={defaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}

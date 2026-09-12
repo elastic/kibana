@@ -7,118 +7,111 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type { ComponentProps } from 'react';
+import React, { useMemo, useRef, useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiButtonGroup,
-  EuiCallOut,
-  EuiHorizontalRule,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiLoadingSpinner,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
-import { ProjectListItem } from './project_list_item';
-import { strings } from './strings';
-import type { UseFetchProjectsResult } from './use_fetch_projects';
+import {
+  ProjectPickerStateProvider,
+  type ProjectPickerStateProviderProps,
+} from './project_picker_update/state';
+import { ProjectPickerFrame } from './project_picker_update/blocks/frame';
+import { ProjectPickerList } from './project_picker_update/blocks/list';
+import type { ProjectsData } from '../types';
+import { useFetchProjects } from './use_fetch_projects';
 
-export interface ProjectPickerContentProps {
+interface ProjectPickerContentBaseProps
+  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'>,
+    Pick<ComponentProps<typeof ProjectPickerFrame>, 'showHeader'> {
   projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  projects: UseFetchProjectsResult;
-  isReadonly?: boolean;
+  /**
+   * Fetches projects matching a filter-only routing expression.
+   */
+  fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
+  maxListHeight?: number;
+  customHeaderText?: React.ReactNode;
+  /** Whether to show each project's custom tag count badge. Defaults to true. */
+  showProjectTags?: boolean;
 }
 
-const projectPickerOptions = [
-  {
-    id: PROJECT_ROUTING.ALL,
-    label: i18n.translate('cpsUtils.projectPicker.allProjectsLabel', {
-      defaultMessage: 'All projects',
-    }),
-  },
-  {
-    id: PROJECT_ROUTING.ORIGIN,
-    label: strings.getOriginProjectLabel(),
-  },
-];
+interface ProjectPickerContentEnabledProps extends ProjectPickerContentBaseProps {
+  controlsState?: 'enabled';
+  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
+}
+
+interface ProjectPickerContentReadOnlyProps extends ProjectPickerContentBaseProps {
+  /**
+   * Controls the project routing toggle (`All projects` / `This project`):
+   * - `disabled`: shown but not interactive
+   * - `hidden`: not rendered, leaving a read-only project list
+   */
+  controlsState: Exclude<NonNullable<ProjectPickerStateProviderProps['controlsState']>, 'enabled'>;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
+}
+
+export type ProjectPickerContentProps =
+  | ProjectPickerContentEnabledProps
+  | ProjectPickerContentReadOnlyProps;
 
 export const ProjectPickerContent = ({
-  projectRouting,
+  maxListHeight = 500,
+  projectRouting = PROJECT_ROUTING.ORIGIN,
   onProjectRoutingChange,
-  projects,
-  isReadonly = false,
+  fetchProjectsByRouting,
+  controlsState = 'enabled',
+  customHeaderText,
+  projectRoutingStrategy,
+  showHeader,
+  showProjectTags = true,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
-  const { originProject, linkedProjects, error, isLoading } = projects;
+  const initialProjectRouting = useRef(projectRouting);
+  const currentProjectRouting = useRef(projectRouting);
+  currentProjectRouting.current = projectRouting;
 
-  if (!originProject) {
-    return null;
-  }
+  const projects = useFetchProjects(fetchProjectsByRouting, PROJECT_ROUTING.ALL);
 
-  const projectsList = [originProject, ...linkedProjects];
+  const { originProject, linkedProjects, isLoading } = projects;
+
+  const availableProjects = useMemo(
+    () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
+    [originProject, linkedProjects]
+  );
+
+  const defaultProjectRoutingGetter = useCallback(() => initialProjectRouting.current, []);
+  const currentProjectRoutingGetter = useCallback(() => currentProjectRouting.current, []);
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          isFullWidth
-          legend={strings.getProjectPickerButtonAriaLabel()}
-          idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
-          options={projectPickerOptions}
-          onChange={(optionId: string) => {
-            onProjectRoutingChange(optionId);
-          }}
-          css={styles.buttonGroup}
-          buttonSize="compressed"
-          isDisabled={isReadonly}
-        />
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={styles.projectCountHeader}>
-        <EuiTitle size="xxxs">
-          <h6 css={styles.projectCountTitle}>
-            <FormattedMessage
-              id="cpsUtils.projectPicker.numberOfProjectsDescription"
-              defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
-              values={{
-                numberOfProjects: projectsList.length,
-              }}
-            />
-          </h6>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem css={styles.listContainer} className="eui-yScroll">
-        {isLoading && (
+      <EuiFlexItem>
+        {isLoading ? (
           <div css={styles.loadingOverlay}>
             <EuiLoadingSpinner size="m" />
           </div>
+        ) : (
+          <ProjectPickerStateProvider
+            onProjectRoutingChange={onProjectRoutingChange ?? (() => {})}
+            originProjectId={originProject?._id}
+            availableProjects={availableProjects}
+            currentProjectRoutingGetter={currentProjectRoutingGetter}
+            defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+            fetchProjectsByRouting={fetchProjectsByRouting}
+            controlsState={controlsState}
+            projectRoutingStrategy={projectRoutingStrategy}
+          >
+            <ProjectPickerFrame
+              maxBodyHeight={maxListHeight}
+              customHeaderText={customHeaderText}
+              showHeader={showHeader}
+            >
+              <ProjectPickerList showProjectTags={showProjectTags} />
+            </ProjectPickerFrame>
+          </ProjectPickerStateProvider>
         )}
-        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-          {error ? (
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              color="danger"
-              title={strings.getProjectPickerFetchError()}
-              css={styles.errorCallout}
-            />
-          ) : (
-            projectsList.map((project, index) => (
-              <ProjectListItem
-                key={project._id}
-                project={project}
-                index={index}
-                isOriginProject={project._id === originProject._id}
-              />
-            ))
-          )}
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

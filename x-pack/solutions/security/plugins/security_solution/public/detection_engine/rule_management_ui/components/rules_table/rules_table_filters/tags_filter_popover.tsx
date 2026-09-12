@@ -89,6 +89,7 @@ const TagsFilterPopoverComponent = ({
       panelProps={{
         'data-test-subj': 'tags-filter-popover',
       }}
+      aria-label={i18n.TAGS}
     >
       <EuiSelectable
         searchable

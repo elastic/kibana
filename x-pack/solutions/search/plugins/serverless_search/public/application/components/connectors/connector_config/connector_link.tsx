@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
@@ -97,13 +90,11 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
           </EuiFlexItem>
         ) : (
           <EuiFlexItem>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={i18n.translate('xpack.serverlessSearch.connectors.pleaseSelectServiceType', {
                 defaultMessage: 'Please select a connector type.',
               })}
-              color="warning"
-              iconType="info"
             />
           </EuiFlexItem>
         )}
@@ -111,13 +102,11 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
         {Boolean(serviceType) &&
         (status === ConnectorStatus.CREATED || status === ConnectorStatus.NEEDS_CONFIGURATION) ? (
           <EuiFlexItem>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={i18n.translate('xpack.serverlessSearch.connectors.waitingForConnection', {
                 defaultMessage: 'Waiting for connection',
               })}
-              color="warning"
-              iconType="info"
             />
           </EuiFlexItem>
         ) : null}

@@ -33,8 +33,12 @@ import {
   ALERT_GROUP,
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
   AssetDetailsLocatorParams,
@@ -84,7 +88,7 @@ const mockOptions = {
   startedAtOverridden: false,
   previousStartedAt: null,
   state: {},
-  spaceId: '',
+  spaceId: DEFAULT_SPACE_ID,
   rule: {
     id: '',
     name: '',
@@ -2878,6 +2882,66 @@ describe('The metric threshold rule type', () => {
       });
     });
 
+    describe('legacy alertOnGroupDisappear: false with noDataBehavior', () => {
+      const runWith = async (params: Record<string, unknown>) => {
+        setEvaluationResults([{}]);
+        await executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            ...params,
+          },
+        });
+      };
+
+      const trackedMissingGroups = () =>
+        jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][4];
+
+      test('remainActive still tracks missing groups', async () => {
+        await runWith({
+          noDataBehavior: 'remainActive',
+          alertOnGroupDisappear: false,
+          alertOnNoData: false,
+        });
+        expect(trackedMissingGroups()).toBe(true);
+      });
+
+      test('alertOnNoData still tracks missing groups', async () => {
+        await runWith({
+          noDataBehavior: 'alertOnNoData',
+          alertOnGroupDisappear: false,
+          alertOnNoData: false,
+        });
+        expect(trackedMissingGroups()).toBe(true);
+      });
+
+      test('recover does not track missing groups', async () => {
+        await runWith({
+          noDataBehavior: 'recover',
+          alertOnGroupDisappear: true,
+        });
+        expect(trackedMissingGroups()).toBe(false);
+      });
+
+      test('legacy alertOnGroupDisappear: false without noDataBehavior does not track', async () => {
+        await runWith({
+          alertOnGroupDisappear: false,
+          alertOnNoData: false,
+        });
+        expect(trackedMissingGroups()).toBe(false);
+      });
+    });
+
     describe("noDataBehavior: 'recover' with groupBy", () => {
       const alertIdA = 'a';
 
@@ -3583,6 +3647,11 @@ describe('The metric threshold rule type', () => {
           : {}),
         [ALERT_REASON]: reason,
         [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
+        ...(actionGroup === FIRED_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_CRITICAL }
+          : actionGroup === WARNING_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING }
+          : {}),
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),

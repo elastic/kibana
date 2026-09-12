@@ -9,10 +9,11 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const componentStyles = {
-  wrapper: ({ euiTheme }: UseEuiTheme) =>
+  fullHeightEditorWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
-      marginBottom: `-${euiTheme.size.l}`,
       overflow: 'hidden',
+      minHeight: 0,
+      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
   pageTemplate: css({
     flexGrow: 0,
@@ -21,6 +22,9 @@ export const componentStyles = {
     css({
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       overflow: 'hidden',
+      paddingTop: euiTheme.size.s,
+      paddingBottom: euiTheme.size.base,
+      paddingInline: euiTheme.size.l,
       borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
   headerSection: css({
@@ -43,15 +47,18 @@ export const componentStyles = {
     minWidth: 0,
     overflow: 'hidden',
   }),
-  editorPanel: css({
-    height: '100%',
-    overflow: 'auto',
-  }),
+  editorPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: '100%',
+      overflow: 'hidden',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    }),
   previewPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '100%',
       overflow: 'auto',
-      padding: euiTheme.size.m,
+      padding: euiTheme.size.base,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
 };

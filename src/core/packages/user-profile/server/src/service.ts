@@ -33,6 +33,15 @@ export interface UserProfileService {
   ): Promise<UserProfileWithSecurity<D, L> | null>;
 
   /**
+   * Retrieves only the identifier of the user profile for the current user extracted from the specified request,
+   * without fetching the full user profile. If the profile isn't available, e.g. for the anonymous users or users
+   * authenticated via authenticating proxies, the `null` value is returned.
+   * @param params Get current user profile id operation parameters.
+   * @param params.request User request instance to get user profile id for.
+   */
+  getCurrentProfileId(params: UserProfileGetCurrentProfileIdParams): Promise<string | null>;
+
+  /**
    * Retrieves multiple user profiles by their identifiers.
    * @param params Bulk get operation parameters.
    * @param params.uids List of user profile identifiers.
@@ -86,6 +95,16 @@ export interface UserProfileGetCurrentParams {
    * parameter can be used to return personal data for this user (within `kibana` namespace only).
    */
   dataPath?: string;
+}
+
+/**
+ * Parameters for the get current user profile id API.
+ */
+export interface UserProfileGetCurrentProfileIdParams {
+  /**
+   * User request instance to get user profile id for.
+   */
+  request: KibanaRequest;
 }
 
 /**

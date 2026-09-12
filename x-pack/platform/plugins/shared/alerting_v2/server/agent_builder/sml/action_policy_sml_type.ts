@@ -5,38 +5,50 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   ACTION_POLICY_ATTACHMENT_TYPE,
-  ACTION_POLICY_SML_TYPE,
   actionPolicyAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
-import type { GetScopedActionPolicyClient } from '../scoped_action_policy_client_factory';
+import { PolicyMatcher } from '../../lib/dispatcher/state';
+import type { ActionPolicyClient } from '../../lib/action_policy_client';
 
 interface CreateActionPolicySmlTypeOptions {
-  getScopedActionPolicyClient: GetScopedActionPolicyClient;
-  getInternalRepository: () => ISavedObjectsRepository;
+  getScopedActionPolicyClient: (request: KibanaRequest) => ActionPolicyClient;
+  /**
+   * Resolves the `alerting:v2:enabled` global advanced setting. When the engine
+   * is disabled, the SML hooks below become no-ops: `list` yields nothing (so
+   * the crawler's mark-and-sweep removes any previously indexed policy chunks),
+   * and `getSmlEntry` / `toAttachment` return `undefined`. This gates action
+   * policy data out of the context layer dynamically, without a restart.
+   */
+  getIsAlertingV2Enabled: () => Promise<boolean>;
 }
 
 export const createActionPolicySmlType = ({
   getScopedActionPolicyClient,
-  getInternalRepository,
+  getIsAlertingV2Enabled,
 }: CreateActionPolicySmlTypeOptions): SmlTypeDefinition => ({
-  id: ACTION_POLICY_SML_TYPE,
+  id: ACTION_POLICY_KI_TYPE,
   fetchFrequency: () => '1m',
 
-  async *list() {
-    const repository = getInternalRepository();
-    const finder = repository.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
-      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 1000,
-      namespaces: ['*'],
-      fields: [],
-    });
+  async *list(context) {
+    if (!(await getIsAlertingV2Enabled())) {
+      return;
+    }
+
+    const finder =
+      context.savedObjectsClient.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        perPage: 1000,
+        namespaces: ['*'],
+        fields: [],
+      });
 
     try {
       for await (const response of finder.find()) {
@@ -51,10 +63,13 @@ export const createActionPolicySmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return undefined;
+    }
+
     try {
-      const repository = getInternalRepository();
-      const so = await repository.get<ActionPolicySavedObjectAttributes>(
+      const so = await context.savedObjectsClient.get<ActionPolicySavedObjectAttributes>(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         originId
       );
@@ -62,7 +77,7 @@ export const createActionPolicySmlType = ({
       const name = attrs?.name ?? originId;
       const description = attrs?.description ?? '';
       const tags = attrs?.tags?.join(', ') ?? '';
-      const matcher = attrs?.matcher ?? '';
+      const matcher = PolicyMatcher.of(attrs?.matcher).toKql() ?? '';
       const groupingMode = attrs?.groupingMode ?? '';
       const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 
@@ -71,14 +86,9 @@ export const createActionPolicySmlType = ({
       );
 
       return {
-        chunks: [
-          {
-            type: ACTION_POLICY_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}`],
-          },
-        ],
+        type: ACTION_POLICY_KI_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(
@@ -88,10 +98,24 @@ export const createActionPolicySmlType = ({
     }
   },
 
+  requiredHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE],
+
+  /**
+   * Action policies are gated by the dedicated `ai_index:alerting_v2_action_policy/read` action.
+   * The Alerting v2 feature grants it by declaring `aiIndex: { read: [ACTION_POLICY_KI_TYPE] }`
+   * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step with that
+   * declaration.
+   */
+  getPermissions: () => kibanaPermissions({ kiType: ACTION_POLICY_KI_TYPE }),
+
   toAttachment: async (item, context) => {
+    if (!(await getIsAlertingV2Enabled())) {
+      return undefined;
+    }
+
     try {
       const client = getScopedActionPolicyClient(context.request);
-      const policy = await client.getActionPolicy({ id: item.origin_id });
+      const policy = await client.getActionPolicy({ id: item.origin_id ?? '' });
       return {
         type: ACTION_POLICY_ATTACHMENT_TYPE,
         data: actionPolicyAttachmentDataSchema.parse(policy),

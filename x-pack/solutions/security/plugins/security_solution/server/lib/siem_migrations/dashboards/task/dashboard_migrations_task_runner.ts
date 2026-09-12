@@ -20,13 +20,16 @@ import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { DashboardMigrationTelemetryClient } from './dashboard_migrations_telemetry_client';
-import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
+import {
+  enrichLookupResourcesWithMappings,
+  type EnrichedMigrationResources,
+} from '../../common/task/util/enrich_lookup_resources';
 
 export interface DashboardMigrationTaskInput
   extends Pick<StoredDashboardMigrationDashboard, 'id' | 'original_dashboard'> {
-  resources: MigrationResources;
+  resources: EnrichedMigrationResources;
 }
 export type DashboardMigrationTaskOutput = MigrateDashboardState;
 
@@ -114,7 +117,11 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     return {
       id: migrationDashboard.id,
       original_dashboard: migrationDashboard.original_dashboard,
-      resources,
+      resources: await enrichLookupResourcesWithMappings({
+        resources,
+        resourcesDataClient: this.data.resources,
+        logger: this.logger,
+      }),
     };
   }
 

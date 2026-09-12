@@ -11,6 +11,7 @@ import {
   getCaseStepCommonDefinition,
   type GetCaseStepInput,
 } from '../../../common/workflows/steps/get_case';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 
@@ -20,14 +21,20 @@ export const getCaseStepDefinition = (
   createServerStepDefinition({
     ...getCaseStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: GetCaseStepInput) => {
+      // `include_comments` is deprecated (see common definition) but behavior is preserved
+      // to avoid breaking existing workflows. Prefer the `cases.getAllAttachments` step.
+      // Hard removal is deferred to v10, gated on usage telemetry.
       const theCase = await client.cases.get({
         id: input.case_id,
         includeComments: input.include_comments,
       });
 
+      // The client is unified-only; the output schema mirrors the public (legacy) wire
+      // shape, so unified comments must be converted back or they'd silently mismatch
+      // the schema and fall through `safeParseCaseForWorkflowOutput`'s raw fallback.
       return safeParseCaseForWorkflowOutput(
         getCaseStepCommonDefinition.outputSchema.shape.case,
-        theCase
+        toLegacyCaseResponse(theCase)
       );
     }),
   });

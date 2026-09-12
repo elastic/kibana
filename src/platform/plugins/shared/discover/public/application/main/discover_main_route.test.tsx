@@ -22,6 +22,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
+import { DATASETS_ROUTE } from '@kbn/esql-types';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -53,7 +54,8 @@ jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
 function getServicesMock(
   hasESData = true,
   hasUserDataView = true,
-  locationState?: MainHistoryLocationState
+  locationState?: MainHistoryLocationState,
+  hasESQLDatasets = false
 ) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
@@ -62,7 +64,16 @@ function getServicesMock(
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
   dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
-  discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
+  discoverServiceMock.core.http.get = jest.fn().mockImplementation((path: string) => {
+    if (path === DATASETS_ROUTE) {
+      return Promise.resolve({
+        datasets: hasESQLDatasets
+          ? [{ name: 'fds_dataset', data_source: 's3', resource: 'bucket' }]
+          : [],
+      });
+    }
+    return Promise.resolve({});
+  });
   discoverServiceMock.getScopedHistory = jest.fn().mockReturnValue({
     location: {
       state: locationState,
@@ -77,11 +88,13 @@ const setupComponent = ({
   hasUserDataView = true,
   locationState,
   onAppLeave = jest.fn(),
+  hasESQLDatasets = false,
 }: {
   hasESData?: boolean;
   hasUserDataView?: boolean;
   locationState?: MainHistoryLocationState;
   onAppLeave?: AppMountParameters['onAppLeave'];
+  hasESQLDatasets?: boolean;
 } = {}) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
@@ -91,7 +104,9 @@ const setupComponent = ({
 
   renderWithI18n(
     <MemoryRouter>
-      <DiscoverTestProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
+      <DiscoverTestProvider
+        services={getServicesMock(hasESData, hasUserDataView, locationState, hasESQLDatasets)}
+      >
         <DiscoverMainRoute {...props} />
       </DiscoverTestProvider>
     </MemoryRouter>
@@ -148,6 +163,14 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
+  });
+
+  test('renders the main app when ES|QL datasets exist but no local ES data or user data view', async () => {
+    setupComponent({ hasESData: false, hasUserDataView: false, hasESQLDatasets: true });
+
+    await waitForLoad();
+
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
   test('renders no data view when hasESData=true & hasUserDataView=false', async () => {

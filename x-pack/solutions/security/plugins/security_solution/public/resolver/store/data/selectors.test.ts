@@ -7,9 +7,9 @@
 
 import * as selectors from './selectors';
 import type { DataState, AnalyzerById } from '../../types';
-import type { Reducer, AnyAction } from 'redux';
+import type { Reducer, AnyAction } from 'redux-v4';
 import { dataReducer } from './reducer';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
@@ -145,6 +145,33 @@ describe('data state', () => {
       parameters to fetch: null
       requires a pending request to be aborted: null"
     `);
+  });
+
+  describe('originTimestamp', () => {
+    it('returns undefined when there is no origin ID', () => {
+      expect(selectors.originTimestamp(state())).toBeUndefined();
+    });
+
+    it("returns the origin node's timestamp in milliseconds", () => {
+      const originID = 'origin';
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID: 'first-child',
+        secondChildID: 'second-child',
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        serverReturnedResolverData({
+          id,
+          result: resolverTree,
+          dataSource,
+          schema,
+          parameters: mockTreeFetcherParameters(),
+        }),
+      ];
+
+      expect(selectors.originTimestamp(state())).toBe(1600863932316);
+    });
   });
 
   describe('when there are parameters to fetch but no pending request', () => {

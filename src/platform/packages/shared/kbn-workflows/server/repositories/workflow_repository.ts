@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
+import { pickWorkflowDocumentVersion } from '../../common/utils';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 import { buildWorkflowFilters } from '../lib/workflow_filters';
 import type { ManagedFilter } from '../lib/workflow_filters';
@@ -80,10 +81,13 @@ export class WorkflowRepository {
       const source = document._source as Record<string, unknown>;
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
       const managedBy = typeof source.managedBy === 'string' ? source.managedBy : undefined;
+      const billable = typeof source.billable === 'boolean' ? source.billable : undefined;
       const originManagedWorkflowId =
         typeof source.originManagedWorkflowId === 'string'
           ? source.originManagedWorkflowId
           : undefined;
+      const managedVersion =
+        typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
       return {
         id: workflowId,
         name: source.name as string,
@@ -100,7 +104,10 @@ export class WorkflowRepository {
         yaml: source.yaml as string,
         ...(managed !== undefined ? { managed } : {}),
         ...(managedBy !== undefined ? { managedBy } : {}),
+        ...(billable !== undefined ? { billable } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
+        ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...pickWorkflowDocumentVersion(source),
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -267,6 +274,8 @@ export class WorkflowRepository {
       'managed',
       'managedBy',
       'originManagedWorkflowId',
+      'managedVersion',
+      'version',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
@@ -339,6 +348,10 @@ export class WorkflowRepository {
         ...(typeof source.originManagedWorkflowId === 'string'
           ? { originManagedWorkflowId: source.originManagedWorkflowId }
           : {}),
+        ...(typeof source.managedVersion === 'number'
+          ? { managedVersion: source.managedVersion }
+          : {}),
+        ...pickWorkflowDocumentVersion(source),
       }));
     } finally {
       try {

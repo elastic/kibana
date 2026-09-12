@@ -12,24 +12,15 @@ import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ResumeExecutionButton } from './resume_execution_button';
-import { TestWrapper } from '../../../shared/test_utils';
+import { createTestQueryClient, TestWrapper } from '../../../shared/test_utils';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
-
 jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
   convertJsonSchemaToZod: jest.fn(),
-}));
-
-jest.mock('../../../../common/lib/generate_sample_from_json_schema', () => ({
-  generateSampleFromJsonSchema: jest.fn(),
 }));
 
 const { convertJsonSchemaToZod } = jest.requireMock(
@@ -37,17 +28,22 @@ const { convertJsonSchemaToZod } = jest.requireMock(
 );
 
 // Capture callbacks and props exposed by ResumeExecutionModal so tests can inspect them.
-let capturedOnSubmit: ((params: { stepInputs: Record<string, unknown> }) => void) | undefined;
+let capturedOnSubmit:
+  | ((params: { stepInputs: Record<string, unknown> }) => Promise<void>)
+  | undefined;
 let capturedContextOverride: ContextOverrideData | undefined;
 
-jest.mock('./resume_execution_modal', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
+  generateSampleFromJsonSchema: jest.fn(),
   ResumeExecutionModal: ({
     onSubmit,
     onClose,
     resumeMessage,
     initialcontextOverride,
   }: {
-    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => void;
+    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => Promise<void>;
     onClose: () => void;
     resumeMessage?: string;
     initialcontextOverride?: ContextOverrideData;
@@ -71,9 +67,11 @@ describe('ResumeExecutionButton', () => {
   const mockHttpPost = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const queryClient = createTestQueryClient();
 
   const defaultProps = {
     executionId: 'exec-123',
+    waitingStepExecutionId: 'wait-step-exec-1',
   };
 
   beforeEach(() => {
@@ -96,7 +94,7 @@ describe('ResumeExecutionButton', () => {
 
   const renderComponent = (props = {}) =>
     render(
-      <TestWrapper>
+      <TestWrapper queryClient={queryClient}>
         <ResumeExecutionButton {...defaultProps} {...props} />
       </TestWrapper>
     );
@@ -185,7 +183,10 @@ describe('ResumeExecutionButton', () => {
       });
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
-          body: JSON.stringify({ input: { approved: true } }),
+          body: JSON.stringify({
+            input: { approved: true },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
           version: '2023-10-31',
         });
       });
@@ -195,13 +196,11 @@ describe('ResumeExecutionButton', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
-      act(() => {
-        capturedOnSubmit!({ stepInputs: {} });
+      await act(async () => {
+        await capturedOnSubmit?.({ stepInputs: {} });
       });
-      await waitFor(() => {
-        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
-        expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
-      });
+      expect(mockAddSuccess).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('resume-execution-modal')).not.toBeInTheDocument();
     });
 
     it('shows error toast and keeps modal open on failed submit', async () => {
@@ -264,7 +263,7 @@ describe('ResumeExecutionButton', () => {
 
     it('re-enables the button when waitingStepExecutionId changes after a successful submit', async () => {
       const { rerender } = render(
-        <TestWrapper>
+        <TestWrapper queryClient={queryClient}>
           <ResumeExecutionButton {...defaultProps} waitingStepExecutionId="wait-step-exec-1" />
         </TestWrapper>
       );
@@ -278,11 +277,54 @@ describe('ResumeExecutionButton', () => {
       });
 
       rerender(
-        <TestWrapper>
+        <TestWrapper queryClient={queryClient}>
           <ResumeExecutionButton {...defaultProps} waitingStepExecutionId="wait-step-exec-2" />
         </TestWrapper>
       );
       expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
+    });
+  });
+
+  describe('approval mode', () => {
+    const approvalProps = {
+      approvalLabels: { approveLabel: 'Approve', rejectLabel: 'Decline' },
+      resumeMessage: 'Approve deployment?',
+    };
+
+    it('renders approve and reject buttons instead of the JSON modal flow', () => {
+      renderComponent(approvalProps);
+      expect(screen.getByTestId('waitForApprovalCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('approveActionButton')).toHaveTextContent('Approve');
+      expect(screen.getByTestId('rejectActionButton')).toHaveTextContent('Decline');
+      expect(screen.queryByTestId('provideActionButton')).not.toBeInTheDocument();
+    });
+
+    it('submits approved=true when Approve is clicked', async () => {
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('approveActionButton'));
+      await waitFor(() => {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
+          body: JSON.stringify({
+            input: { approved: true },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('submits approved=false when Decline is clicked', async () => {
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('rejectActionButton'));
+      await waitFor(() => {
+        expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/executions/exec-123/resume', {
+          body: JSON.stringify({
+            input: { approved: false },
+            stepExecutionId: 'wait-step-exec-1',
+          }),
+          version: '2023-10-31',
+        });
+      });
     });
   });
 });

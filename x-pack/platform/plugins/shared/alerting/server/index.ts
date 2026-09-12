@@ -14,6 +14,8 @@ export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
   RuleType,
+  RuleTypeParamsAuthorizer,
+  RuleTypeParamsAuthorizerContext,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
@@ -55,10 +57,24 @@ export type {
   GetRuleHistoryResult,
   RuleChangeTrackingDisabledError,
 } from './rules_client';
+export type {
+  BulkCreateRulesItem,
+  BulkCreateRulesParams,
+  BulkCreateRulesResult,
+} from './application/rule/methods/bulk_create';
+export type {
+  BulkUpdateRulesItem,
+  BulkUpdateRulesParams,
+  BulkUpdateRulesResult,
+} from './application/rule/methods/bulk_update';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
+// Imported from the module rather than the `./lib` barrel to keep this a leaf: the definition of a
+// UIAM missing-key rejection has to be reachable from the plugins whose own error handling can hide
+// one, without pulling the healer's dependencies in behind it.
+export { isMissingUiamApiKeyMessage } from './lib/uiam_api_key_error';
 export type { AlertingRulesConfig } from './config';
 export {
   AlertingAuthorizationFilterType,

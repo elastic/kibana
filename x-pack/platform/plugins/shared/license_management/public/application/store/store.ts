@@ -12,11 +12,11 @@ import {
   type CombinedState,
   type PreloadedState,
   type StoreEnhancer,
-} from 'redux';
-import thunk from 'redux-thunk';
+} from 'redux-v4';
+import thunk from 'redux-thunk-v2';
 
 import { licenseManagement } from './reducers';
-import type { LicenseManagementState, ThunkServices } from './types';
+import type { AppStore, LicenseManagementState, ThunkServices } from './types';
 
 declare global {
   interface Window {
@@ -27,13 +27,11 @@ declare global {
 export const licenseManagementStore = (
   initialState: PreloadedState<CombinedState<LicenseManagementState>>,
   services: ThunkServices
-) => {
+): AppStore => {
   const thunkEnhancer = applyMiddleware(thunk.withExtraArgument(services));
   const enhancer = window.__REDUX_DEVTOOLS_EXTENSION__
     ? compose(thunkEnhancer, window.__REDUX_DEVTOOLS_EXTENSION__())
     : thunkEnhancer;
 
-  return createStore(licenseManagement, initialState, enhancer);
+  return createStore(licenseManagement, initialState, enhancer) as AppStore;
 };
-
-export type AppStore = ReturnType<typeof licenseManagementStore>;

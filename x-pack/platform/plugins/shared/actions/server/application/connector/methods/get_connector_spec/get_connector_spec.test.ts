@@ -11,12 +11,37 @@ import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 
+// All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
+// synthetic non-testable spec to cover the isTestable: false branch.
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorsSpecs: {
+      ...actual.connectorsSpecs,
+      StubNoTest: {
+        metadata: {
+          id: '.stub-no-test',
+          displayName: 'Stub (no test)',
+          minimumLicense: 'basic',
+          supportedFeatureIds: [],
+        },
+        auth: null,
+        schema: null,
+        actions: {},
+        test: { handler: async () => ({}), enabled: false },
+      },
+    },
+  };
+});
+
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 
 const configurationUtilities = {
   getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
   isEarsEnabled: () => false,
+  isEarsExperimentalEnabled: () => false,
 } as unknown as ActionsConfigurationUtilities;
 
 function createContext(): ActionsClientContext {
@@ -92,6 +117,24 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('schema');
   });
 
+  it('returns isTestable true when the spec opts in to testing', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.abuseipdb',
+      configurationUtilities,
+    });
+    expect(result).toHaveProperty('isTestable', true);
+  });
+
+  it('returns isTestable false when the spec does not opt in to testing', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.stub-no-test',
+      configurationUtilities,
+    });
+    expect(result).toHaveProperty('isTestable', false);
+  });
+
   it('rejects with 404 when the connector type has no spec', async () => {
     await expect(
       getConnectorSpecAsJsonSchema({
@@ -100,5 +143,83 @@ describe('getConnectorSpecAsJsonSchema', () => {
         configurationUtilities,
       })
     ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('excludes experimental EARS auth types when isEarsExperimentalEnabled is false', async () => {
+    const earsEnabledUtils = {
+      getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
+      isEarsEnabled: () => true,
+      isEarsExperimentalEnabled: () => false,
+    } as unknown as ActionsConfigurationUtilities;
+
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.google_calendar',
+      configurationUtilities: earsEnabledUtils,
+    });
+
+    const schemaJson = result.schema as {
+      properties?: {
+        secrets?: { oneOf?: Array<{ properties?: { authType?: { const?: string } } }> };
+      };
+    };
+    const secretsOneOf = schemaJson.properties?.secrets?.oneOf || [];
+    const authTypes = secretsOneOf
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).not.toContain('ears');
+  });
+
+  it('includes stable (non-experimental) EARS auth types even when isEarsExperimentalEnabled is false', async () => {
+    const earsEnabledUtils = {
+      getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
+      isEarsEnabled: () => true,
+      isEarsExperimentalEnabled: () => false,
+    } as unknown as ActionsConfigurationUtilities;
+
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.microsoft-teams',
+      configurationUtilities: earsEnabledUtils,
+    });
+
+    const schemaJson = result.schema as {
+      properties?: {
+        secrets?: { oneOf?: Array<{ properties?: { authType?: { const?: string } } }> };
+      };
+    };
+    const secretsOneOf = schemaJson.properties?.secrets?.oneOf || [];
+    const authTypes = secretsOneOf
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).toContain('ears');
+  });
+
+  it('includes experimental EARS auth types when isEarsExperimentalEnabled is true', async () => {
+    const earsEnabledUtils = {
+      getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
+      isEarsEnabled: () => true,
+      isEarsExperimentalEnabled: () => true,
+    } as unknown as ActionsConfigurationUtilities;
+
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.google_calendar',
+      configurationUtilities: earsEnabledUtils,
+    });
+
+    const schemaJson = result.schema as {
+      properties?: {
+        secrets?: { oneOf?: Array<{ properties?: { authType?: { const?: string } } }> };
+      };
+    };
+    const secretsOneOf = schemaJson.properties?.secrets?.oneOf || [];
+    const authTypes = secretsOneOf
+      .map((opt) => opt.properties?.authType?.const)
+      .filter(Boolean) as string[];
+
+    expect(authTypes).toContain('ears');
   });
 });

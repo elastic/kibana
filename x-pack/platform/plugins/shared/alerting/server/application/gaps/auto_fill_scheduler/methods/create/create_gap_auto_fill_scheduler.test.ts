@@ -5,72 +5,27 @@
  * 2.0.
  */
 
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { SavedObject, KibanaRequest } from '@kbn/core/server';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../../authorization';
-import { alertingAuthorizationMock } from '../../../../../authorization/alerting_authorization.mock';
-import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
-import type { ConstructorOptions } from '../../../../../rules_client';
 import { RulesClient } from '../../../../../rules_client';
-import { ruleTypeRegistryMock } from '../../../../../rule_type_registry.mock';
+import { getRulesClientMockParams } from '../../../../../test_utils';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
 import type { CreateGapAutoFillSchedulerParams } from './types';
 
-const kibanaVersion = 'v8.0.0';
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn().mockResolvedValue('elastic'),
-  createAPIKey: jest.fn(),
-  cloneAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  authorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
+} = getRulesClientMockParams({
+  kibanaVersion: 'v8.0.0',
+  getUserName: jest.fn().mockResolvedValue('elastic'),
   backfillClient: null as unknown as never,
-  isSystemAction: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 function getParams(
   overwrites: Partial<CreateGapAutoFillSchedulerParams> = {}

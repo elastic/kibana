@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isScreenReaderOnly } from './is_screen_reader_only';
+
 /**
  * Checks whether the element is visually hidden and should be skipped
  * when collecting editable text nodes.
+ *
+ * @param el - The element to check.
+ * @returns Whether the element is hidden.
  */
 const isHiddenElement = (el: Element): boolean => {
   if (!(el instanceof HTMLElement)) return false;
@@ -17,8 +22,7 @@ const isHiddenElement = (el: Element): boolean => {
   if (el.hasAttribute('hidden')) return true;
   const { display, visibility, opacity } = el.style;
   if (display === 'none' || visibility === 'hidden' || opacity === '0') return true;
-  // Screen-reader-only patterns (e.g. EUI's .euiScreenReaderOnly)
-  if (el.classList.contains('euiScreenReaderOnly')) return true;
+  if (isScreenReaderOnly(el)) return true;
   // offsetWidth/offsetHeight are 0 for detached elements; skip this check
   // when the element is not connected to the document (e.g. clones).
   if (el.isConnected && el.offsetWidth === 0 && el.offsetHeight === 0) return true;

@@ -29,6 +29,11 @@ const createStartMock = () => {
     authc: lazyObject({
       getCurrentUser: jest.fn(),
     }),
+    serviceAccounts: lazyObject({
+      isEnabled: jest.fn().mockReturnValue(false),
+      canCreate: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
+    }),
   });
 
   return mock;
@@ -46,6 +51,11 @@ const createInternalStartMock = () => {
   const mock: jest.MockedObjectDeep<InternalSecurityServiceStart> = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
+    }),
+    serviceAccounts: lazyObject({
+      isEnabled: jest.fn().mockReturnValue(false),
+      canCreate: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
     }),
   });
 

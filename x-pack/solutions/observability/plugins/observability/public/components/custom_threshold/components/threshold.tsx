@@ -25,6 +25,10 @@ export interface Props {
   title: string;
   value: number;
   valueFormatter?: ValueFormatter;
+  warning?: {
+    threshold: number[];
+    comparator: COMPARATORS | string;
+  };
 }
 
 const NO_DATA_VALUE = i18n.translate('xpack.observability.customThreshold.rule.noDataValue', {
@@ -46,6 +50,7 @@ export function Threshold({
   title,
   value,
   valueFormatter = (d) => String(d),
+  warning,
 }: Props) {
   const color = useEuiBackgroundColor('danger');
 
@@ -84,6 +89,23 @@ export function Threshold({
                           }
                         )
                       : THRESHOLD_NO_DATA_TITLE}
+                    {warning && (
+                      <>
+                        <br />
+                        {i18n.translate(
+                          'xpack.observability.customThreshold.rule.warningThresholdExtraTitle',
+                          {
+                            values: {
+                              comparator: warning.comparator,
+                              threshold: warning.threshold
+                                .map((t) => valueFormatter(t))
+                                .join(' - '),
+                            },
+                            defaultMessage: `Warn when {comparator} {threshold}`,
+                          }
+                        )}
+                      </>
+                    )}
                   </span>
                 ),
                 color,

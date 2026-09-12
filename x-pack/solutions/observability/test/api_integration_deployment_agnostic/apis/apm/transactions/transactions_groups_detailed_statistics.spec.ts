@@ -210,7 +210,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             metricsSixtyMinErrorRateMean,
           ];
           // Mean of per-bucket error rates can diverge slightly from the population rate (25%)
-          // because `nullifyLeadingTrailingEmptyRedMetricPoints` drops edge buckets and rollups
+          // because `nullifyEmptyRedMetricPoints` nulls empty buckets and rollups
           // weight buckets differently than raw events.
           const expectedPop = GO_PROD_ERROR_RATE / (GO_PROD_RATE + GO_PROD_ERROR_RATE);
           errorRateMeans.forEach((value) =>

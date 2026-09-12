@@ -5,17 +5,33 @@
  * 2.0.
  */
 
-import { identifyFeatures, toPreviouslyIdentifiedFeature } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
+import {
+  identifyFeatures,
+  sumTokens,
+  toPreviouslyIdentifiedFeature,
+  type InferenceDocument,
+  type SearchSimilarFeaturesArguments,
+  type AnalysisTarget,
+  type SimilarFeatureHit,
+  featuresPrompt,
+} from '@kbn/nightshift-ai';
 import { tags } from '@kbn/scout';
-import { createSpanLatencyEvaluator, getCurrentTraceId } from '@kbn/evals';
-import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/streams-schema';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  createChatCallsEvaluator,
+  createSpanLatencyEvaluator,
+  getCurrentTraceId,
+  type EvaluationDataset,
+  type Evaluator,
+  type Example,
+} from '@kbn/evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
+import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
-  listAvailableSnapshots,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -24,6 +40,7 @@ import {
   createMergeCorrectnessEvaluator,
   createIdReuseEvaluator,
 } from '../../src/evaluators/ki_feature_deduplication/evaluators';
+import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -33,12 +50,119 @@ import {
   type KIFeatureExtractionScenario,
   type KIFeatureDeduplicationScenario,
 } from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
   extractionScenario: KIFeatureExtractionScenario;
 }
+
+interface DedupContextInput extends Record<string, unknown> {
+  sampleDocuments: InferenceDocument[];
+  knownFeatureIds: string;
+  similarFeature?: SimilarFeatureHit;
+}
+
+interface DedupContextExpected {
+  expectedId: string;
+  expectEntitySearch: boolean;
+}
+
+type DedupContextExample = Example<DedupContextInput, DedupContextExpected>;
+
+interface DedupContextOutput {
+  features: BaseFeature[];
+  searchCalls: SearchSimilarFeaturesArguments[];
+}
+
+const checkoutDocument: InferenceDocument = {
+  _id: 'checkout-doc',
+  fields: {
+    'service.name': 'checkout-api',
+    'event.dataset': 'checkout-api.logs',
+    message: 'checkout-api handled GET /checkout',
+  },
+};
+
+const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
+  name: 'sigevents: KI feature deduplication context contracts',
+  description: 'Known feature id and semantic duplicate search behavior',
+  examples: [
+    {
+      id: 'known-feature-id-reuse',
+      input: {
+        sampleDocuments: [checkoutDocument],
+        // Deliberately not derivable from `service.name`, so reusing it is observable.
+        knownFeatureIds: 'entity: checkout-api-svc-7',
+      },
+      output: {
+        expectedId: 'checkout-api-svc-7',
+        expectEntitySearch: false,
+      },
+    },
+    {
+      id: 'semantic-search-id-reuse',
+      input: {
+        sampleDocuments: [checkoutDocument],
+        knownFeatureIds: '',
+        similarFeature: {
+          id: 'checkout-service',
+          title: 'Checkout API',
+          description: 'Checkout API service handling checkout requests',
+          // Feature confidence is 0-100; the hit is handed to the model verbatim.
+          confidence: 99,
+        },
+      },
+      output: {
+        expectedId: 'checkout-service',
+        expectEntitySearch: true,
+      },
+    },
+  ],
+};
+
+const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContextOutput> = {
+  name: 'dedup_context_contract',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected }) => {
+    if (!expected) {
+      return { score: 0, explanation: 'Expected deduplication contract is missing' };
+    }
+
+    // Membership alone would pass when the model reuses the id AND mints a duplicate
+    // alongside it, which is the deduplication failure these cases exist to catch.
+    const entityFeatures = output.features.filter(({ type }) => type === 'entity');
+    const reusedExpectedId =
+      entityFeatures.length === 1 && entityFeatures[0].id === expected.expectedId;
+    const entitySearchCalls = output.searchCalls.filter(({ type }) => type === 'entity');
+    const searchBehaviorMatches = expected.expectEntitySearch
+      ? entitySearchCalls.length > 0
+      : entitySearchCalls.length === 0;
+
+    return {
+      score: reusedExpectedId && searchBehaviorMatches ? 1 : 0,
+      explanation: [
+        reusedExpectedId
+          ? `Reused expected id "${expected.expectedId}"`
+          : entityFeatures.length === 1
+          ? `Emitted entity id "${entityFeatures[0].id}" instead of "${expected.expectedId}"`
+          : `Expected exactly 1 entity feature with id "${expected.expectedId}", got ${
+              entityFeatures.length
+            }: ${entityFeatures.map(({ id }) => id).join(', ')}`,
+        expected.expectEntitySearch
+          ? `Entity semantic search calls: ${entitySearchCalls.length}`
+          : `Unexpected entity semantic search calls: ${entitySearchCalls.length}`,
+      ].join('; '),
+      metadata: {
+        emitted_ids: output.features.map(({ id }) => id),
+        entity_search_calls: entitySearchCalls,
+      },
+    };
+  },
+};
 
 evaluate.describe(
   'KI feature deduplication',
@@ -47,23 +171,41 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
-      const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const dataset of activeDatasets) {
-        for (const scenario of dataset.kiFeatureDeduplication) {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
-          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-        }
-      }
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
 
-      for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-        const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-        availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-      }
+      const snapshots = await buildAvailableSnapshotsBySource(
+        activeDatasets,
+        (dataset) => dataset.kiFeatureDeduplication,
+        esClient,
+        log
+      );
+      snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -114,10 +256,11 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            inferenceClient,
+            fetch,
+            connector,
             evaluators,
             evaluationConnector,
-            logger,
+            inferenceClient,
             executorClient,
             traceEsClient,
             log,
@@ -137,18 +280,20 @@ evaluate.describe(
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI feature deduplication (${dataset.id})`,
-                  description: `[${dataset.id}] KI feature deduplication across scenarios`,
-                  examples: availableScenarios.map(({ scenario }) => ({
-                    id: scenario.input.scenario_id,
-                    input: {
-                      scenario_id: scenario.input.scenario_id,
-                      stream_name: MANAGED_STREAM_NAME,
-                      iterations: scenario.input.iterations,
-                    },
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI feature deduplication (${dataset.id})`,
+                    description: `[${dataset.id}] KI feature deduplication across scenarios`,
+                    examples: availableScenarios.map(({ scenario }) => ({
+                      id: scenario.input.scenario_id,
+                      input: {
+                        scenario_id: scenario.input.scenario_id,
+                        stream_name: MANAGED_STREAM_NAME,
+                        iterations: scenario.input.iterations,
+                      },
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 task: async ({
                   input,
@@ -189,26 +334,33 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
+                  let tokensUsed = sumTokens({});
 
                   for (let i = 0; i < input.iterations; i++) {
-                    const sampleDocuments = await collectSampleDocuments({
+                    const sampledHits = await collectSampleDocuments({
                       esClient,
                       scenario: extractionScenario,
                       log,
                     });
+                    const sampleDocuments = compactInferenceDocuments(sampledHits);
 
                     const previouslyIdentifiedFeatures = accumulated
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const { features: identifiedFeatures } = await identifyFeatures({
-                      streamName: input.stream_name,
+                    const iterationResult = await runFeatureIdentificationAgent({
+                      fetch,
+                      log,
+                      streamName: MANAGED_STREAM_NAME,
+                      connectorId: connector.id,
                       sampleDocuments,
-                      systemPrompt: featuresPrompt,
-                      inferenceClient,
-                      logger,
-                      signal: new AbortController().signal,
                       previouslyIdentifiedFeatures,
+                    });
+
+                    const identifiedFeatures = iterationResult.features;
+                    tokensUsed = sumTokens({
+                      accumulated: tokensUsed,
+                      added: iterationResult.tokensUsed,
                     });
 
                     iterations.push({
@@ -226,19 +378,9 @@ evaluate.describe(
                         }
                         const merged = mergeFeature(existing, baseFeature);
 
-                        accumulated.update({
-                          ...merged,
-                          uuid: existing.uuid,
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.update(merged);
                       } else {
-                        accumulated.add({
-                          ...baseFeature,
-                          uuid: uuidv4(),
-                          status: 'active',
-                          last_seen: new Date().toISOString(),
-                        });
+                        accumulated.add(baseFeature);
                       }
                     }
                   }
@@ -248,6 +390,7 @@ evaluate.describe(
                     mergeEvents,
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
+                    tokens_used: tokensUsed,
                     traceId: getCurrentTraceId(),
                   };
                 },
@@ -260,10 +403,12 @@ evaluate.describe(
                   inferenceClient: evaluatorInferenceClient,
                 }),
                 createIdReuseEvaluator(),
+                ...createReportedTokenEvaluators(),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
-                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+                createChatCallsEvaluator({ traceEsClient, log }),
+                createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
               ]
             );
           }
@@ -275,5 +420,86 @@ evaluate.describe(
         });
       });
     }
+
+    evaluate(
+      'known feature ids and semantic duplicate search',
+      async ({ executorClient, inferenceClient, logger }) => {
+        await executorClient.runExperiment(
+          {
+            datasets: [dedupContextDataset],
+            concurrency: 1,
+            task: async ({ input }: DedupContextExample): Promise<DedupContextOutput> => {
+              if (!input) {
+                throw new Error('Deduplication context input is missing');
+              }
+
+              const searchCalls: SearchSimilarFeaturesArguments[] = [];
+              const searchTool: ToolDefinition = {
+                description:
+                  'Search known features by meaning. Pass every uncertain candidate in the candidates array; results are grouped by candidate_id.',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    candidates: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          candidate_id: { type: 'string' },
+                          title: { type: 'string' },
+                          description: { type: 'string' },
+                          type: { type: 'string' },
+                        },
+                        required: ['candidate_id', 'title', 'description', 'type'],
+                      },
+                    },
+                  },
+                  required: ['candidates'],
+                },
+              };
+              const searchCallback: ToolCallback = async (toolCall) => {
+                const rawCandidates = toolCall.function.arguments?.candidates;
+                const candidates = (
+                  Array.isArray(rawCandidates) ? rawCandidates : []
+                ) as SearchSimilarFeaturesArguments[];
+                const results = candidates.map((candidate) => {
+                  searchCalls.push(candidate);
+                  const searchText =
+                    `${candidate.candidate_id} ${candidate.title} ${candidate.description}`.toLowerCase();
+                  const features: SimilarFeatureHit[] =
+                    input.similarFeature &&
+                    candidate.type === 'entity' &&
+                    searchText.includes('checkout')
+                      ? [input.similarFeature]
+                      : [];
+                  return { candidate_id: candidate.candidate_id, features };
+                });
+                return { response: { results } };
+              };
+
+              const { features } = await identifyFeatures({
+                target: {
+                  id: MANAGED_STREAM_NAME,
+                  name: MANAGED_STREAM_NAME,
+                  sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
+                  samplingSource: MANAGED_STREAM_NAME,
+                } satisfies AnalysisTarget,
+                sampleDocuments: input.sampleDocuments,
+                systemPrompt: featuresPrompt,
+                inferenceClient,
+                logger,
+                signal: new AbortController().signal,
+                knownFeatureIds: input.knownFeatureIds,
+                additionalTools: { search_similar_features: searchTool },
+                additionalToolCallbacks: { search_similar_features: searchCallback },
+              });
+
+              return { features, searchCalls };
+            },
+          },
+          [dedupContextContractEvaluator]
+        );
+      }
+    );
   }
 );

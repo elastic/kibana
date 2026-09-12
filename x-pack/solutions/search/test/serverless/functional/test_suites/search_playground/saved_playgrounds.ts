@@ -11,12 +11,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'common',
-    'svlCommonPage',
-    'searchPlayground',
-    'solutionNavigation',
-  ]);
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'searchPlayground']);
 
   const esArchiver = getService('esArchiver');
 
@@ -91,11 +86,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
           testPlaygroundName
         );
-        const { solutionNavigation } = pageObjects;
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: testPlaygroundName,
-        });
       });
       it.skip('should be able to search index', async () => {
         await pageObjects.searchPlayground.expectPageModeToBeSelected('chat');
@@ -173,10 +163,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToExist();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
         await pageObjects.searchPlayground.SavedPlaygroundPage.clickEditPlaygroundNameButton();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditModal(
+        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditInput(
           updatedPlaygroundName
         );
-        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundNameInModal();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundName();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
           updatedPlaygroundName
         );

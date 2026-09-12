@@ -19,10 +19,18 @@ export class AlertPage {
     await this.page.gotoApp(`observability/alerts/${alertId}`);
   }
 
+  async openActionsMenu() {
+    await this.page.testSubj.click('alert-details-header-actions-menu-button');
+  }
+
+  async clickInvestigate() {
+    await this.page.testSubj.click('alertDetailsInvestigate');
+  }
+
   async gotoAlertByRuleId(rulesPage: RulesPage, ruleId: string) {
     await rulesPage.goto(ruleId);
 
-    await expect(this.page.testSubj.locator('ruleName')).toBeVisible();
+    await expect(this.page.testSubj.locator('appHeaderTitle')).toBeVisible();
 
     await this.page.testSubj.waitForSelector('expand-event');
     const expandAlertButtons = await this.page.testSubj.locator('expand-event').all();

@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,7 +18,9 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../../app_context';
 
@@ -109,14 +110,21 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
       })}
       anchorPosition="upCenter"
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.contentConnectors.createConnector.info', {
+        <EuiToolTip
+          content={i18n.translate('xpack.contentConnectors.createConnector.info', {
             defaultMessage: 'More information',
           })}
-          data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
-          iconType="info"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.contentConnectors.createConnector.info', {
+              defaultMessage: 'More information',
+            })}
+            data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
+            iconType="info"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => {
@@ -135,7 +143,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             <>
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     title={
                       showIsOnlySelfManaged
@@ -155,8 +163,6 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                           )
                     }
                     size="s"
-                    iconType="warning"
-                    color="warning"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -167,7 +173,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={i18n.translate(
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
@@ -176,8 +182,6 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                     }
                   )}
                   size="s"
-                  iconType="warning"
-                  color="warning"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -1,0 +1,343 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { RulesSavedObjectService } from './rules_saved_object_service';
+import { createRulesSavedObjectService } from './rules_saved_object_service.mock';
+
+interface ScheduleAggregations {
+  schedule_intervals: {
+    sum_other_doc_count: number;
+    buckets: Array<{ key: string; doc_count: number }>;
+  };
+}
+
+const buildFindResponse = <T = unknown, A = unknown>(
+  overrides: Partial<SavedObjectsFindResponse<T, A>> = {}
+): SavedObjectsFindResponse<T, A> => ({
+  saved_objects: [],
+  total: 0,
+  page: 1,
+  per_page: 20,
+  ...overrides,
+});
+
+const buildFindResult = (id: string): SavedObjectsFindResult<unknown> => ({
+  id,
+  type: RULE_SAVED_OBJECT_TYPE,
+  attributes: {},
+  references: [],
+  score: 0,
+});
+
+const buildAggregationResponse = (buckets: Array<{ key: string; doc_count: number }>) =>
+  buildFindResponse<unknown, ScheduleAggregations>({
+    aggregations: { schedule_intervals: { sum_other_doc_count: 0, buckets } },
+  });
+
+interface MatchCountAggregations {
+  match_count: { value: number };
+}
+
+const buildMatchCountResponse = (value: number, total = value) =>
+  buildFindResponse<unknown, MatchCountAggregations>({
+    total,
+    per_page: 0,
+    aggregations: { match_count: { value } },
+  });
+
+const MATCH_COUNT_AGGS = { match_count: { value_count: { field: 'type' } } };
+
+describe('RulesSavedObjectService', () => {
+  let rulesSavedObjectService: RulesSavedObjectService;
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+  beforeEach(() => {
+    ({ rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService());
+  });
+
+  describe('getTotalScheduledPerMinute', () => {
+    it('aggregates enabled rules across all spaces and sums their per-minute frequency', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        buildAggregationResponse([
+          { key: '1m', doc_count: 3 }, // 3 * 1 = 3
+          { key: '30s', doc_count: 2 }, // 2 * 2 = 4
+          { key: '5m', doc_count: 5 }, // 5 * 0.2 = 1
+        ])
+      );
+
+      const total = await rulesSavedObjectService.getTotalScheduledPerMinute();
+
+      expect(total).toBeCloseTo(8);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          namespaces: ['*'],
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+          aggs: expect.objectContaining({
+            schedule_intervals: {
+              terms: expect.objectContaining({
+                field: `${RULE_SAVED_OBJECT_TYPE}.attributes.schedule.every`,
+              }),
+            },
+          }),
+        })
+      );
+    });
+
+    it('returns 0 when there are no aggregation results', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(buildFindResponse());
+
+      expect(await rulesSavedObjectService.getTotalScheduledPerMinute()).toBe(0);
+    });
+  });
+
+  describe('countByQuery', () => {
+    it('returns the exact match count from the value_count aggregation and threads the selectors through', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(buildMatchCountResponse(42));
+
+      const total = await rulesSavedObjectService.countByQuery({
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+        search: 'prod*',
+        searchFields: ['metadata.name'],
+      });
+
+      expect(total).toBe(42);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+        search: 'prod*',
+        searchFields: ['metadata.name'],
+        defaultSearchOperator: 'AND',
+        aggs: MATCH_COUNT_AGGS,
+      });
+    });
+
+    it('omits filter and search from the request when they are not provided', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(buildMatchCountResponse(7));
+
+      const total = await rulesSavedObjectService.countByQuery({});
+
+      expect(total).toBe(7);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        aggs: MATCH_COUNT_AGGS,
+      });
+    });
+  });
+
+  describe('getRuleIdsByQuery', () => {
+    /**
+     * Configures `createPointInTimeFinder` to yield the given pages.
+     */
+    const stubFinder = (pages: string[][]) => {
+      const close = jest.fn().mockResolvedValue(undefined);
+      const finder: ISavedObjectsPointInTimeFinder<unknown, unknown> = {
+        find: async function* find() {
+          for (const page of pages) {
+            yield buildFindResponse({
+              saved_objects: page.map((id) => buildFindResult(id)),
+              total: page.length,
+              per_page: page.length,
+            });
+          }
+        },
+        close,
+      };
+      mockSavedObjectsClient.createPointInTimeFinder.mockReturnValueOnce(finder);
+      return { close };
+    };
+
+    it('returns [] without opening the PIT when maxItems is 0', async () => {
+      const result = await rulesSavedObjectService.getRuleIdsByQuery({ maxItems: 0 });
+
+      expect(result).toEqual([]);
+      expect(mockSavedObjectsClient.createPointInTimeFinder).not.toHaveBeenCalled();
+    });
+
+    it('collects ids across pages', async () => {
+      const { close } = stubFinder([
+        ['a', 'b'],
+        ['c', 'd'],
+      ]);
+
+      const result = await rulesSavedObjectService.getRuleIdsByQuery({ maxItems: 100 });
+
+      expect(result).toEqual(['a', 'b', 'c', 'd']);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('caps the returned ids at maxItems, mid-page if needed', async () => {
+      const { close } = stubFinder([
+        ['a', 'b'],
+        ['c', 'd', 'e', 'f'],
+      ]);
+
+      const result = await rulesSavedObjectService.getRuleIdsByQuery({ maxItems: 3 });
+
+      expect(result).toEqual(['a', 'b', 'c']);
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the finder even when the caller cap is reached before the last page', async () => {
+      const { close } = stubFinder([
+        ['a', 'b'],
+        ['c', 'd'],
+      ]);
+
+      await rulesSavedObjectService.getRuleIdsByQuery({ maxItems: 2 });
+
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('threads filter, search and searchFields through to the finder', async () => {
+      stubFinder([['a']]);
+
+      await rulesSavedObjectService.getRuleIdsByQuery({
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+        search: 'prod',
+        searchFields: ['metadata.name'],
+        maxItems: 10,
+      });
+
+      expect(mockSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+          search: 'prod',
+          searchFields: ['metadata.name'],
+          defaultSearchOperator: 'AND',
+        })
+      );
+    });
+  });
+
+  describe('findTags', () => {
+    const mockTagsResponse = (buckets: Array<{ key: string }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { tags: { buckets } },
+      } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+    it('aggregates tags with size 20 and _count:desc when no search or filter', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockTagsResponse([{ key: 'cpu' }, { key: 'memory' }])
+      );
+
+      const tags = await rulesSavedObjectService.findTags();
+
+      expect(tags).toEqual(['cpu', 'memory']);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          aggs: {
+            tags: expect.objectContaining({
+              terms: expect.objectContaining({ size: 20, order: { _count: 'desc' } }),
+            }),
+          },
+        })
+      );
+    });
+
+    it('does not include an include pattern when search is absent', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags();
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms).not.toHaveProperty('include');
+    });
+
+    it('adds an escaped prefix include pattern when search is provided', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'production' }]));
+
+      await rulesSavedObjectService.findTags({ search: 'pro' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('pro.*');
+    });
+
+    it('escapes regex special characters in the search prefix', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ search: 'a.b+c' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('a\\.b\\+c.*');
+    });
+
+    it('escapes Elasticsearch-only regexp operators in the search prefix', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ search: 'a<b&c' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('a\\<b\\&c.*');
+    });
+
+    it('forwards the SO filter when provided', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'tag' }]));
+
+      await rulesSavedObjectService.findTags({
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
+      });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
+        })
+      );
+    });
+
+    it('returns empty array when aggregations are missing', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      } as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+      const tags = await rulesSavedObjectService.findTags();
+
+      expect(tags).toEqual([]);
+    });
+
+    it('forwards a custom size to the terms aggregation', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ size: 10000 });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.size).toBe(10000);
+    });
+
+    it('clamps size to the allowed range', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ size: 0 });
+      expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(1);
+
+      mockSavedObjectsClient.find.mockClear();
+      await rulesSavedObjectService.findTags({ size: 99999 });
+      expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(
+        10000
+      );
+    });
+  });
+});

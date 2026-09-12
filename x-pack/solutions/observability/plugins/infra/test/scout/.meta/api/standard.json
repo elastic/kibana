@@ -1,0 +1,1558 @@
+{
+  "sha1": "cd91ae8babf97f579f5ae1ad5806ad5ed79bde43",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "467c694372d2e00-930d48f4fc84317",
+      "title": "API /api/infra/host/count counts ECS hosts with schema=ecs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_count.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "467c694372d2e00-0c80068ab8e8176",
+      "title": "API /api/infra/host/count counts only OTel hosts with schema=semconv",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_count.spec.ts",
+        "line": 57,
+        "column": 19
+      }
+    },
+    {
+      "id": "467c694372d2e00-f363d9919da1cbc",
+      "title": "API /api/infra/host/count schema=ecs returns the ECS host count only (mixed data)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_count.spec.ts",
+        "line": 80,
+        "column": 26
+      }
+    },
+    {
+      "id": "467c694372d2e00-b26d3199ed4905f",
+      "title": "API /api/infra/host/count schema=semconv returns the OTel host count only (mixed data)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_count.spec.ts",
+        "line": 92,
+        "column": 24
+      }
+    },
+    {
+      "id": "6563551b06b05f3-0a1b00557681c4b",
+      "title": "Infra Custom Dashboards API when the UI setting is disabled GET responds with an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_disabled.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "6563551b06b05f3-32e772c141a22c9",
+      "title": "Infra Custom Dashboards API when the UI setting is disabled GET responds with an error when trying to request a custom dashboard for unsupported asset type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_disabled.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
+      "id": "6563551b06b05f3-554f502232cf095",
+      "title": "Infra Custom Dashboards API when the UI setting is disabled POST responds with an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_disabled.spec.ts",
+        "line": 49,
+        "column": 26
+      }
+    },
+    {
+      "id": "6563551b06b05f3-427c70621a6bae6",
+      "title": "Infra Custom Dashboards API when the UI setting is disabled PUT responds with an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_disabled.spec.ts",
+        "line": 58,
+        "column": 69
+      }
+    },
+    {
+      "id": "6563551b06b05f3-90604c4d0dd8ee3",
+      "title": "Infra Custom Dashboards API when the UI setting is disabled DELETE responds with an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_disabled.spec.ts",
+        "line": 68,
+        "column": 13
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-ab8f2c4ca7f746f",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled GET responds with an empty configuration if custom dashboard saved object does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 54,
+        "column": 17
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-66c2010904d28a8",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled GET responds with the custom dashboard configuration for a given asset type when it exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 63,
+        "column": 25
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-49c871d289d9598",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled POST responds with an error when trying to update a custom dashboard for unsupported asset type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 87,
+        "column": 28
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-f928f7d73445afe",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled POST creates a new dashboard configuration when saving for the first time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 100,
+        "column": 26
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-a693a59461d99f2",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled POST returns 400 when the dashboard already exist and tries to create it again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 123,
+        "column": 31
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-2a89f703223e418",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled PUT responds with an error when trying to update non existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 148,
+        "column": 66
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-523f477b06f0410",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled PUT updates existing dashboard configuration for a given asset type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 162,
+        "column": 20
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-36d560a99e0f7a1",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled DELETE responds with an error when trying to delete not existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 219,
+        "column": 31
+      }
+    },
+    {
+      "id": "3d9a42ff6cbf946-9d7e4b559181071",
+      "title": "Infra Custom Dashboards API when the UI setting is enabled DELETE deletes an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_custom_dashboards_enabled.spec.ts",
+        "line": 228,
+        "column": 28
+      }
+    },
+    {
+      "id": "a535163e5a463ff-5ff3314f97d91ba",
+      "title": "API /api/metrics/infra/host (ECS) returns metrics for a host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_ecs.spec.ts",
+        "line": 48,
+        "column": 89
+      }
+    },
+    {
+      "id": "a535163e5a463ff-2de4d522f80a5f1",
+      "title": "API /api/metrics/infra/host (ECS) returns all hosts if query params is not sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_ecs.spec.ts",
+        "line": 99,
+        "column": 21
+      }
+    },
+    {
+      "id": "a535163e5a463ff-781d039940d2f06",
+      "title": "API /api/metrics/infra/host (ECS) returns 3 hosts when filtered by host.os.name=CentOS Linux",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_ecs.spec.ts",
+        "line": 156,
+        "column": 24
+      }
+    },
+    {
+      "id": "a535163e5a463ff-df46ff11acb3ccb",
+      "title": "API /api/metrics/infra/host (ECS) returns 0 hosts when filtered by host.os.name=Ubuntu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_ecs.spec.ts",
+        "line": 188,
+        "column": 32
+      }
+    },
+    {
+      "id": "a535163e5a463ff-369be9811d2f0e2",
+      "title": "API /api/metrics/infra/host (ECS) returns hosts when filtered by must_not host.name=gke-observability-8--observability-8--bc1afd95-nhhw",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_ecs.spec.ts",
+        "line": 264,
+        "column": 27
+      }
+    },
+    {
+      "id": "8f619e7b8305111-1320c2d81e812ee",
+      "title": "API /api/metrics/infra/host (mixed ECS + semconv) returns only ECS hosts when schema=ecs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_mixed.spec.ts",
+        "line": 69,
+        "column": 80
+      }
+    },
+    {
+      "id": "8f619e7b8305111-3d89039331e3dbb",
+      "title": "API /api/metrics/infra/host (mixed ECS + semconv) returns only OTel hosts when schema=semconv",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_mixed.spec.ts",
+        "line": 100,
+        "column": 15
+      }
+    },
+    {
+      "id": "584639c49425277-0243a973246a511",
+      "title": "API /api/metrics/infra/host (semconv) returns only OTel hosts (filtered by data_stream.dataset=hostmetricsreceiver.otel)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_semconv.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "584639c49425277-c6f775d5cb1bb29",
+      "title": "API /api/metrics/infra/host (semconv) reports hasSystemMetrics=true and computes core metrics for an OTel host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_semconv.spec.ts",
+        "line": 73,
+        "column": 21
+      }
+    },
+    {
+      "id": "584639c49425277-4198b627c2b9820",
+      "title": "API /api/metrics/infra/host (semconv) rejects rxV2 with 400 when schema=semconv",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_semconv.spec.ts",
+        "line": 99,
+        "column": 6
+      }
+    },
+    {
+      "id": "584639c49425277-c034f4c965bc285",
+      "title": "API /api/metrics/infra/host (semconv) rejects txV2 with 400 when schema=semconv",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_semconv.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "584639c49425277-012687b2ffdd850",
+      "title": "API /api/metrics/infra/host (semconv) returns only the queried OTel host when filtered by host.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_semconv.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "7c33cd165622464-80d5b9bacacafe3",
+      "title": "API /api/metrics/infra/host (validations) fails when limit is 0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 45,
+        "column": 24
+      }
+    },
+    {
+      "id": "7c33cd165622464-d3f66c42cf0fa26",
+      "title": "API /api/metrics/infra/host (validations) fails when limit is negative",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 58,
+        "column": 87
+      }
+    },
+    {
+      "id": "7c33cd165622464-6f9d15fe4efffd8",
+      "title": "API /api/metrics/infra/host (validations) fails when limit above 500",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 72,
+        "column": 61
+      }
+    },
+    {
+      "id": "7c33cd165622464-f8f8914be0d412a",
+      "title": "API /api/metrics/infra/host (validations) fails when metric is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 85,
+        "column": 54
+      }
+    },
+    {
+      "id": "7c33cd165622464-d60dca5d5974f28",
+      "title": "API /api/metrics/infra/host (validations) passes when limit is 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 99,
+        "column": 48
+      }
+    },
+    {
+      "id": "7c33cd165622464-7b04ee0b0ee3156",
+      "title": "API /api/metrics/infra/host (validations) passes when limit is 500",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 108,
+        "column": 7
+      }
+    },
+    {
+      "id": "7c33cd165622464-70ea8518b0be6ab",
+      "title": "API /api/metrics/infra/host (validations) fails when from and to are not informed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/infra_metrics_validation.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "e8465ead50560f1-9aceee2d5d45ab5",
+      "title": "API /api/infra/ip_to_host resolves hostname for a known IP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/ip_to_host.spec.ts",
+        "line": 53,
+        "column": 31
+      }
+    },
+    {
+      "id": "e8465ead50560f1-9d9c9de9c2da9a0",
+      "title": "API /api/infra/ip_to_host returns 404 for an unknown IP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/ip_to_host.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "2cda671208260e5-f1016fdba9c4fd3",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 26,
+        "column": 27
+      }
+    },
+    {
+      "id": "2cda671208260e5-09c2af8ec6f0579",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets deduplicates repeated indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 56,
+        "column": 14
+      }
+    },
+    {
+      "id": "2cda671208260e5-a83f5cc96bfd2e0",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets rejects requests with too many indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 98,
+        "column": 13
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-636502cc6b4aab7",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 35,
+        "column": 13
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-80d2384ccc7cf39",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices deduplicates fields with identical specifications without multiplying errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 57,
+        "column": 14
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-321984b4d3b12c2",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with duplicate field names that have conflicting specifications",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 82,
+        "column": 13
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-4f0585f79a79c69",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices returns errors in a deterministic order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 116,
+        "column": 7
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-8e5be94eacdeeed",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with too many indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 149,
+        "column": 13
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-580a4e38c30b335",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with too many fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 171,
+        "column": 13
+      }
+    },
+    {
+      "id": "a7b84fa3efec8bc-a9f97645fb67aba",
+      "title": "API /api/infra/metadata returns host metadata for 7.0.0 archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
+        "line": 43,
+        "column": 32
+      }
+    },
+    {
+      "id": "a7b84fa3efec8bc-d6a18a83a3f1ead",
+      "title": "API /api/infra/metadata returns docker metadata for 6.6.0 archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
+        "line": 55,
+        "column": 21
+      }
+    },
+    {
+      "id": "a7b84fa3efec8bc-0d4f8a7f71c00d9",
+      "title": "API /api/infra/metadata returns host metadata with cloud info for 8.0.0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
+        "line": 72,
+        "column": 16
+      }
+    },
+    {
+      "id": "a7b84fa3efec8bc-c921e6fc389d31e",
+      "title": "API /api/infra/metadata returns AWS host metadata for 8.0.0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
+        "line": 129,
+        "column": 20
+      }
+    },
+    {
+      "id": "a7b84fa3efec8bc-328e888538ab119",
+      "title": "API /api/infra/metadata returns pod metadata for 8.0.0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
+        "line": 185,
+        "column": 23
+      }
+    },
+    {
+      "id": "a7b84fa3efec8bc-35f04476326ebd0",
+      "title": "API /api/infra/metadata returns container metadata for 8.0.0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
+        "line": 244,
+        "column": 9
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-2f2a07b2a54ca12",
+      "title": "Metrics Explorer API works for multiple metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 18,
+        "column": 76
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-6cdeeab251efa2c",
+      "title": "Metrics Explorer API applies filterQuery to data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 61,
+        "column": 33
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-db7a97ed5478e5f",
+      "title": "Metrics Explorer API works for empty metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 102,
+        "column": 5
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-58c582dc928a3f4",
+      "title": "Metrics Explorer API works for custom metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-34d1752efbd9822",
+      "title": "Metrics Explorer API works with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 192,
+        "column": 18
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-3441251c1284cca",
+      "title": "Metrics Explorer API works with multiple groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 239,
+        "column": 23
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-8464d7187ba38e1",
+      "title": "Metrics Explorer API returns 400 when requesting more than 20 metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 290,
+        "column": 10
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-5da5489abcb4d97",
+      "title": "Metrics Explorer API works when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 322,
+        "column": 18
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-381e2cbcdc9c5b0",
+      "title": "Metrics Explorer API works when there is no data with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 351,
+        "column": 12
+      }
+    },
+    {
+      "id": "48b0693c54c0b26-a22cc955649ff06",
+      "title": "API /api/metrics/overview/top returns top hosts for the 7.0 archive window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_overview_top.spec.ts",
+        "line": 28,
+        "column": 51
+      }
+    },
+    {
+      "id": "48b0693c54c0b26-6f60fa5613de3a6",
+      "title": "API /api/metrics/overview/top returns sorted rx/tx calculations for the 8.0 hosts_and_network archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_overview_top.spec.ts",
+        "line": 43,
+        "column": 29
+      }
+    },
+    {
+      "id": "39e4a567e648280-1f91d35a5e4d0c0",
+      "title": "API /api/metrics/process_list/chart returns CPU and memory chart series for a process",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_process_list_chart.spec.ts",
+        "line": 25,
+        "column": 51
+      }
+    },
+    {
+      "id": "a60249e527eafba-2576652e31fc7ff",
+      "title": "API /api/metrics/process_list returns process list and summary for an ECS host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_process_list.spec.ts",
+        "line": 29,
+        "column": 51
+      }
+    },
+    {
+      "id": "57a70e4c10c3397-987f7527a8b18b7",
+      "title": "API /api/metrics/node_details should basically work",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
+        "line": 57,
+        "column": 38
+      }
+    },
+    {
+      "id": "57a70e4c10c3397-5c2450ca611cd5a",
+      "title": "API /api/metrics/node_details should support multiple metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
+        "line": 66,
+        "column": 62
+      }
+    },
+    {
+      "id": "57a70e4c10c3397-cccb7f03ca49eac",
+      "title": "API /api/metrics/node_details should return multiple values for podOverview metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
+        "line": 76,
+        "column": 19
+      }
+    },
+    {
+      "id": "57a70e4c10c3397-78e8ae63a8f4344",
+      "title": "API /api/metrics/node_details should use fallback when cpu.usage.limit.pct is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
+        "line": 87,
+        "column": 28
+      }
+    },
+    {
+      "id": "350fb75edfd3879-454301bc866f8d3",
+      "title": "GET /infra/services with logs only should return services with logs only data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/services_logs_only.spec.ts",
+        "line": 31,
+        "column": 13
+      }
+    },
+    {
+      "id": "d29a721fad3f39b-1d3ebee4c47e0bf",
+      "title": "GET /infra/services with transactions returns no services with no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/services.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "d29a721fad3f39b-1490cfd1bef9381",
+      "title": "GET /infra/services with transactions should return correct number of services running on specified host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/services.spec.ts",
+        "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "d29a721fad3f39b-b3d01a03f9d61f7",
+      "title": "GET /infra/services with transactions should return bad request if unallowed filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/services.spec.ts",
+        "line": 60,
+        "column": 26
+      }
+    },
+    {
+      "id": "7c933f5becb043c-b6c896bfb292ac3",
+      "title": "API /api/metrics/snapshot (6.6.0) should basically work",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_6_6_0.spec.ts",
+        "line": 23,
+        "column": 17
+      }
+    },
+    {
+      "id": "2f328f78aa66277-e4bca545e26ef01",
+      "title": "API /api/metrics/snapshot (7.0.0) should basically work",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 26,
+        "column": 17
+      }
+    },
+    {
+      "id": "2f328f78aa66277-e051b96238f25e5",
+      "title": "API /api/metrics/snapshot (7.0.0) should allow for overrides for interval and ignoring lookback",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 104,
+        "column": 32
+      }
+    },
+    {
+      "id": "2f328f78aa66277-bdbcb2139334255",
+      "title": "API /api/metrics/snapshot (7.0.0) should allow for overrides for lookback",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 145,
+        "column": 13
+      }
+    },
+    {
+      "id": "2f328f78aa66277-5b625856d82fe9a",
+      "title": "API /api/metrics/snapshot (7.0.0) should work with custom metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 178,
+        "column": 13
+      }
+    },
+    {
+      "id": "2f328f78aa66277-eed2e87adf71850",
+      "title": "API /api/metrics/snapshot (7.0.0) should basically work with 1 grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 262,
+        "column": 15
+      }
+    },
+    {
+      "id": "2f328f78aa66277-9caff9861043451",
+      "title": "API /api/metrics/snapshot (7.0.0) should basically work with 2 groupings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 294,
+        "column": 15
+      }
+    },
+    {
+      "id": "2f328f78aa66277-c88eb970be4b91d",
+      "title": "API /api/metrics/snapshot (7.0.0) should show metrics for all nodes when grouping by service type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_7_0_0.spec.ts",
+        "line": 330,
+        "column": 9
+      }
+    },
+    {
+      "id": "2bf0b832954343e-3fe5025e87dde94",
+      "title": "API /api/metrics/snapshot (8.0.0) should use the id for the label when the name doesn't exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_8_0_0.spec.ts",
+        "line": 23,
+        "column": 17
+      }
+    },
+    {
+      "id": "2bf0b832954343e-d5739f1b577669e",
+      "title": "API /api/metrics/snapshot (8.0.0) should have an id and label",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_8_0_0.spec.ts",
+        "line": 52,
+        "column": 35
+      }
+    },
+    {
+      "id": "2bf0b832954343e-3133404c63c927a",
+      "title": "API /api/metrics/snapshot (8.0.0) should not return timeseries data - with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_8_0_0.spec.ts",
+        "line": 85,
+        "column": 13
+      }
+    },
+    {
+      "id": "2bf0b832954343e-f60a0959aadf05a",
+      "title": "API /api/metrics/snapshot (8.0.0) should not return timeseries data - without groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_8_0_0.spec.ts",
+        "line": 130,
+        "column": 25
+      }
+    },
+    {
+      "id": "c438c686ebabc3c-5565529ec00c535",
+      "title": "API /api/metrics/snapshot (semconv) returns OTel hosts when schema=semconv (cpu)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv.spec.ts",
+        "line": 52,
+        "column": 13
+      }
+    },
+    {
+      "id": "c438c686ebabc3c-6eb5826ff96243c",
+      "title": "API /api/metrics/snapshot (semconv) returns OTel hosts when schema=semconv (memory)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv.spec.ts",
+        "line": 75,
+        "column": 43
+      }
+    },
+    {
+      "id": "219b1e867d89106-d94e11b83f1b2e3",
+      "title": "API /api/metrics/snapshot (request validation) should return 400 when requesting more than 20 metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_validation.spec.ts",
+        "line": 21,
+        "column": 76
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-fe7801d6d27f2fe",
+      "title": "API /api/metrics/source PATCH applies all top-level field updates to an existing source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 78,
+        "column": 56
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-a5222c0b27454f9",
+      "title": "API /api/metrics/source PATCH applies a single top-level update to an existing source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 111,
+        "column": 16
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-551ced8e07fc51c",
+      "title": "API /api/metrics/source PATCH validates anomalyThreshold is between range 1-100",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 140,
+        "column": 27
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-7fd0ca0be44d9e5",
+      "title": "API /api/metrics/source GET source by id should just work",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 154,
+        "column": 26
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-59dfcf879f927dd",
+      "title": "API /api/metrics/source GET source hasData by id should just work",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 159,
+        "column": 75
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-f7ecea51c9918f0",
+      "title": "API /api/metrics/source GET hasData returns true when source is host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 174,
+        "column": 24
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-7881331a9776cf5",
+      "title": "API /api/metrics/source GET hasData returns true when source is pod",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 187,
+        "column": 5
+      }
+    },
+    {
+      "id": "4c7f58302a9b284-d2e4fbbbdb92519",
+      "title": "API /api/metrics/source GET hasData returns true when source is all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
+        "line": 198,
+        "column": 16
+      }
+    }
+  ]
+}
