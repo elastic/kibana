@@ -87,6 +87,7 @@ import type {
 import { resolveCreateRuleBuilder, resolveUpdateRuleBuilder } from './builder_resolution';
 import {
   assertImmutableUnchanged,
+  assertManagedRuleWrite,
   assertRuleSourceUnchanged,
   assertSignatureIdUnchanged,
   validateMergedRuleAttributes,
@@ -426,6 +427,17 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
     this.artifactTypeRegistry.validate(parsed.artifacts);
+
+    // Gate: creating a rule of a managed type requires a matching caller identity.
+    // No stored ownership exists yet; the registration half of the gate applies.
+    // Ref: rule-ownership.md "Path by path" (create paths row)
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: undefined,
+      builderType: parsed.metadata?.builder_type,
+    });
+
     const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, parsed);
 
     // Resolve signature_id: use caller-supplied value or generate a UUID v4.
@@ -537,6 +549,16 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
+
+    // Gate: managed rules may only be written by the owning solution's client.
+    // Both the stored ownership mark and the current registration are consulted.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
 
     if (
       !isStateTransitionAllowed({
@@ -664,6 +686,15 @@ export class RulesClient {
     // rule can be emitted as the change-history snapshot for the deletion.
     const { attrs: existingAttrs, references } = await this.getExistingRule(id);
 
+    // Gate: managed rules may only be deleted by the owning solution's client.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
@@ -692,6 +723,16 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
 
     const { attrs } = await this.getExistingRule(id);
+
+    // Gate: triggering execution of a managed rule is a lifecycle act gated
+    // the same as any other write. No exceptions per the design.
+    // Ref: rule-ownership.md "Path by path"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: attrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: attrs.metadata.builder_type,
+    });
 
     if (!attrs.enabled) {
       throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
@@ -747,6 +788,15 @@ export class RulesClient {
       references,
     } = await this.getExistingRule(id);
 
+    // Gate: enabling a managed rule is gated with no exceptions.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
@@ -800,6 +850,15 @@ export class RulesClient {
       version: existingVersion,
       references,
     } = await this.getExistingRule(id);
+
+    // Gate: disabling a managed rule is gated with no exceptions.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -1626,6 +1685,15 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
+
+    // Gate: managed rules may only be replaced by the owning solution's client.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
 
     assertImmutableUnchanged(parsed, existingAttrs);
     // Separate omitted-means-keep check for the nested signature_id — see the
