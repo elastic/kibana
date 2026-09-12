@@ -7,20 +7,53 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiTitle, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  euiFontSize,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { ClusterView } from './components/cluster_view';
 
-const clusterStyle = ({ euiTheme }) => css`
+const clusterStyle = (theme) => css`
+  table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: ${theme.euiTheme.size.l};
+    border-collapse: collapse;
+    font-size: ${euiFontSize(theme, 's').fontSize};
+    line-height: ${euiFontSize(theme, 's').lineHeight};
+  }
+
+  thead {
+    font-size: ${euiFontSize(theme, 'xs').fontSize};
+  }
+
+  th,
+  td {
+    border-top: ${theme.euiTheme.border.thin};
+    padding: ${theme.euiTheme.size.xs};
+    vertical-align: top;
+  }
+
   th {
     text-align: left;
+    border-bottom: ${theme.euiTheme.border.thin};
+    vertical-align: bottom;
+  }
+
+  thead:first-child > tr:first-child > th {
+    border-top: 0;
   }
 
   td:first-child {
-    width: calc(${euiTheme.base} * 12.5);
+    width: calc(${theme.euiTheme.base} * 12.5);
   }
 `;
 
