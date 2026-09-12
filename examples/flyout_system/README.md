@@ -14,7 +14,15 @@ directly and one opened through core:
    its zones. The child flyouts render with a collapsed header
    (`<FlyoutTemplate.Header collapsed />`).
 
-Neither widget demos every part `FlyoutTemplate` supports (e.g. `Body.Accordion`, tabs, header
-badges/info blocks) — that full part matrix is covered by the template's Storybook
-(`flyout_template.stories.tsx`), not by this example. This plugin's job is demonstrating the
-*service* integration: sessions, history, cascade close, and URL-backed state.
+Both widgets render the template's full set of parts, allowing accessibility behavior to be tested in a real browser. The surface is split across the two widgets because `Body.Section` and `Body.Accordion` cannot be mixed in one body, and tabbed mode ignores top-level `Body` children:
+
+| | Flyout Template widget | Core service widget |
+| --- | --- | --- |
+| Header blocks | 3 meta blocks, 6 badges, 10 info blocks | same |
+| Body | `Body.Section` plus `Section.Subsection` | `Body.Accordion` plus `Accordion.Subsection` |
+| Tabs | none | three tabs, everything reachable on the first |
+| Footer | secondary and primary actions | same |
+
+Every flyout carries a root `data-test-subj` (`flyoutComponent<Session>` and
+`flyoutOverlays<Session>`, plus `…Child<A|B>`). The Scout suite under
+`test/scout_examples/ui` uses these to scope accessibility scans to one flyout at a time, preventing errors when a child flyout is open over its parent.
