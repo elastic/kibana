@@ -33,6 +33,22 @@ export interface DataStreamDefinition<
   hidden?: boolean;
 
   /**
+   * Whether this is a system data stream.
+   *
+   * When set to `true`, Kibana will verify in dev/CI mode that Elasticsearch recognises the
+   * stream as a system data stream after creation. If it does not, Kibana throws a clear error
+   * so the misconfiguration is caught early — before it becomes a data-exposure risk in
+   * production.
+   *
+   * A `SystemDataStreamDescriptor` must be registered with Elasticsearch before the stream is
+   * initialised; otherwise the check will throw. See the Elasticsearch documentation and
+   * `kibana-team#3797` for guidance on how to register one.
+   *
+   * @remark Only set this to `true` after coordinating with the Elasticsearch team.
+   */
+  system?: boolean;
+
+  /**
    * @remark Must be **incremented** in order to release a new version of the template definition.
    * @remark Must be greater than 0
    */
