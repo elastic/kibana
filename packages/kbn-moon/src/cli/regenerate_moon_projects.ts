@@ -22,7 +22,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
+import {
+  KIBANA_JSONC_FILENAME,
+  MOON_CONFIG_KEY_ORDER,
+  MOON_CONST,
+  MOON_WORKSPACE_CONFIG_PATH,
+} from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
 import {
   compactFilePathsToGlobs,
@@ -131,6 +136,8 @@ export function regenerateMoonProjects() {
       ].join('\n')
     );
 
+    assertHiddenDirProjectsAreRegistered(allPackages);
+
     if (check) {
       const outOfDate = [...projectResults.create, ...projectResults.update];
       if (outOfDate.length > 0) {
@@ -142,6 +149,31 @@ export function regenerateMoonProjects() {
       }
     }
   }, cliOptions);
+}
+
+/**
+ * Moon discovers projects with the `src/**\/moon.yml` style globs in
+ * `.moon/workspace.yml`, and glob matching skips hidden directories. A project under
+ * one (`.storybook`, `.buildkite`, ...) gets a `moon.yml` that Moon never loads, so it
+ * silently drops out of the project graph and of affected-module detection. Such
+ * projects must be listed under `projects.sources` instead.
+ */
+function assertHiddenDirProjectsAreRegistered(allPackages: readonly Package[]) {
+  const workspace = parse(readFile(path.resolve(REPO_ROOT, MOON_WORKSPACE_CONFIG_PATH)));
+  const registered = new Set<string>(Object.values(workspace?.projects?.sources ?? {}));
+
+  const unregistered = allPackages
+    .map((pkg) => pkg.normalizedRepoRelativeDir)
+    .filter((dir) => dir.split('/').some((segment) => segment.startsWith('.')))
+    .filter((dir) => !registered.has(dir));
+
+  if (unregistered.length > 0) {
+    throw createFailError(
+      `${unregistered.length} Moon project(s) live in a hidden directory but are not listed under ` +
+        `'projects.sources' in ${MOON_WORKSPACE_CONFIG_PATH}, so Moon cannot discover them:\n` +
+        unregistered.map((dir) => `  ${dir}`).join('\n')
+    );
+  }
 }
 
 const getGeneratedPreambleForProject = (projectId: string) =>
