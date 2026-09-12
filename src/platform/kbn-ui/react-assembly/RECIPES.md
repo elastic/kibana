@@ -348,7 +348,7 @@ This recipe shows a complete `ActionBar` that renders arbitrary React nodes alon
 
 ### Renderer implementation
 
-Use `assembly.parseChildren()` (not `part.parseChildren()`) to get the full interleaved result. Pass `{ supportsOtherChildren: true }` to suppress the dev-mode warning for unrecognized function components, since this renderer intentionally supports them.
+Use `assembly.parseChildren()` (not `part.parseChildren()`) to get the full interleaved result. Pass `{ supportsOtherChildren: true }` to suppress the dev-mode warning for unrecognized function components, since this renderer intentionally supports them. A child that is a declarative part of a *different* assembly still warns, because such a part is misnested and renders nothing wherever it is placed.
 
 ```tsx
 // action_bar/action_bar.tsx
