@@ -35,7 +35,7 @@
  * builder_type_registry tests.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, ReplaceRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { BuilderTypeRegistry, GeneratedQuery } from '../builder_types';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -1001,10 +1001,11 @@ describe('resolveReplaceRuleBuilder', () => {
 
       it('succeeds and returns the body query when builder_type is null', () => {
         const registry = createMockRegistry();
-        const data = {
+        // ReplaceRuleData accepts builder_type: null as the explicit escape hatch.
+        const data: ReplaceRuleData = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: null },
-        } as CreateRuleData;
+        };
 
         // Should not throw.
         const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
@@ -1014,10 +1015,10 @@ describe('resolveReplaceRuleBuilder', () => {
 
       it('produces a result whose metadata.builder_type is not null (normalised away)', () => {
         const registry = createMockRegistry();
-        const data = {
+        const data: ReplaceRuleData = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: null },
-        } as CreateRuleData;
+        };
 
         const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
 
@@ -1029,10 +1030,10 @@ describe('resolveReplaceRuleBuilder', () => {
       it('does not call registry.generate when builder_type is null (explicit clear path)', () => {
         const generate = jest.fn();
         const registry = createMockRegistry(generate);
-        const data = {
+        const data: ReplaceRuleData = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: null },
-        } as CreateRuleData;
+        };
 
         resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
 

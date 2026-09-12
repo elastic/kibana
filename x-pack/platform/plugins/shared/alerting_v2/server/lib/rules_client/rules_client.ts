@@ -12,8 +12,10 @@ import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
   createRuleDataSchema,
+  replaceRuleBodySchema,
   isStateTransitionAllowed,
   updateRuleDataSchema,
+  type ReplaceRuleData,
   type RuleKind,
   type RuleOwnership,
   type RuleSource,
@@ -1770,15 +1772,25 @@ export class RulesClient {
     data,
   }: {
     id: string;
-    data: CreateRuleData;
+    data: ReplaceRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
-    const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    const parsed = this.parseRuleData(replaceRuleBodySchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const rule = await this.createRule({ data, options: { id } });
+      // Normalise `null` → `undefined` for builder_type before the create path.
+      // The null escape hatch is only meaningful in the replace branch; createRule
+      // uses createRuleDataSchema which does not accept null.
+      const createData: CreateRuleData = {
+        ...data,
+        metadata: {
+          ...data.metadata,
+          builder_type: data.metadata.builder_type ?? undefined,
+        },
+      };
+      const rule = await this.createRule({ data: createData, options: { id } });
       return { rule, created: true };
     }
 

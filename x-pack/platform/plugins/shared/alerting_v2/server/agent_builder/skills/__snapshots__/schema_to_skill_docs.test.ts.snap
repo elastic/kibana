@@ -331,7 +331,7 @@ Use \`set_metadata\` to name the rule and add a description or tags so the user 
 | \`description\` | string | optional | Human-readable description of the rule. (max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`signature_id\` | string | optional | Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation. (min length: 1, max length: 256) |
-| \`builder_type\` | string \\\\| null | optional |  |
+| \`builder_type\` | string | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL. (min length: 1, max length: 64) |
 | \`builder_fields\` | object | optional | Structured parameters for the rule builder identified by \`builder_type\`. The server generates the rule query from these fields. |
 | \`source\` | { type: \\"internal\\", ... } \\\\| { type: \\"template\\", ... } \\\\| { type: \\"external\\", ... } | optional |  |
 | \`operation\` | \\"set_metadata\\" | required |  |
