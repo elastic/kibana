@@ -205,17 +205,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 />
               ),
               width: '32px',
-              render: (id: string) => (
-                <EuiCheckbox
-                  id={`select-rule-${id}`}
-                  checked={isRowSelected(id)}
-                  onChange={() => onSelectRow(id)}
-                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
-                    defaultMessage: 'Select rule',
-                  })}
-                  data-test-subj={`checkboxSelectRow-${id}`}
-                />
-              ),
+              render: (id: string, rule: RuleApiResponse) => {
+                // Managed rules have no selection affordance: their lifecycle
+                // belongs to the owning solution, and bulk enable/disable/delete
+                // should not be reachable for them through the generic UI.
+                // Ref: rule-ownership.md "Reads stay open"
+                if (isRuleManaged(rule)) {
+                  return null;
+                }
+                return (
+                  <EuiCheckbox
+                    id={`select-rule-${id}`}
+                    checked={isRowSelected(id)}
+                    onChange={() => onSelectRow(id)}
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
+                      defaultMessage: 'Select rule',
+                    })}
+                    data-test-subj={`checkboxSelectRow-${id}`}
+                  />
+                );
+              },
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),

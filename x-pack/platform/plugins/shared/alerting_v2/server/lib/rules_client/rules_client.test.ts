@@ -4476,6 +4476,42 @@ describe('RulesClient', () => {
   // ---------------------------------------------------------------------------
 
   describe('caller identity (step 5.1)', () => {
+    describe('updateRule — ownership.app is frozen', () => {
+      it('does not re-stamp ownership.app on update — the stored app is preserved', async () => {
+        // Pins invariant 3: "The app is frozen at creation — not re-stamped on update."
+        // A client carrying onBehalfOf.app:'b' must not overwrite the stored
+        // ownership.app:'a' when it updates a rule. buildUpdateRuleAttributes
+        // restores ownership from storage unchanged.
+        // Ref: rule-ownership.md "The ownership object"
+        const storedOwnership = { managed: false, app: 'originalApp' };
+        const storedAttrs = {
+          ...baseSoAttrs,
+          metadata: {
+            ...baseSoAttrs.metadata,
+            ownership: storedOwnership,
+          },
+        };
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-frozen-app',
+          attributes: storedAttrs,
+          version: 'WzEsMV0=',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-frozen-app' });
+
+        // Client carries a different app than the stored rule.
+        const client = createClient(undefined, { app: 'differentApp' });
+
+        await client.updateRule({
+          id: 'rule-frozen-app',
+          data: { metadata: { description: 'minor edit' } },
+        });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        // The persisted ownership must still carry the original app, not 'differentApp'.
+        expect(attrs.metadata.ownership).toEqual(storedOwnership);
+      });
+    });
+
     describe('createRule — ownership.app', () => {
       it('stamps ownership.app when the client carries an app identity', async () => {
         const client = createClient(undefined, { app: 'significantEvents' });

@@ -780,11 +780,13 @@ describe('RulesListTable', () => {
       expect(await screen.findByTestId('viewChangeHistoryRule-rule-managed')).toBeInTheDocument();
     });
 
-    it('still shows the managed rule in the selection column (bulk selection stays open)', () => {
+    it('suppresses the selection checkbox for a managed rule', () => {
+      // Managed rules must not appear in the selection column because the bulk
+      // actions menu (enable, disable, delete) must not be reachable for them.
+      // Ref: rule-ownership.md "Reads stay open"
       renderMixed();
 
-      // Selection checkboxes exist for both rows.
-      expect(screen.getByTestId('checkboxSelectRow-rule-managed')).toBeInTheDocument();
+      expect(screen.queryByTestId('checkboxSelectRow-rule-managed')).not.toBeInTheDocument();
       expect(screen.getByTestId('checkboxSelectRow-rule-unmanaged')).toBeInTheDocument();
     });
   });

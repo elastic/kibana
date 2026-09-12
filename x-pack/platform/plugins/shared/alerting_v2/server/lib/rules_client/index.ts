@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
+export { createRuleDataSchema, replaceRuleBodySchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
+export type { ReplaceRuleData } from '@kbn/alerting-v2-schemas';
 export { RulesClient } from './rules_client';
 export type {
   BulkByIdsParams,

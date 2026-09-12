@@ -14,6 +14,7 @@ import {
   isRecoveryQueryProvidedForStrategy,
   isSignalUsingStandaloneFormat,
   type CreateRuleData,
+  type ReplaceRuleData,
   type Query,
   type RuleKind,
   type UpdateRuleData,
@@ -332,7 +333,7 @@ export function resolveUpdateRuleBuilder(
 export function resolveReplaceRuleBuilder(
   registry: BuilderTypeRegistry,
   ruleId: string,
-  data: CreateRuleData,
+  data: ReplaceRuleData,
   existing: RuleSavedObjectAttributes
 ): ResolvedCreateRuleData {
   const existingType = existing.metadata.builder_type;
@@ -340,7 +341,10 @@ export function resolveReplaceRuleBuilder(
   // No stored builder type: the replace is a straightforward create-shaped
   // resolution. Delegate to the create path unchanged.
   if (!existingType) {
-    return resolveCreateRuleBuilder(registry, data);
+    // Cast: data.metadata.builder_type is `string | null | undefined` on
+    // ReplaceRuleData. When there is no stored builder_type we know the null
+    // escape hatch is irrelevant; create resolution treats null as absent.
+    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData);
   }
 
   // The stored rule is builder-managed. Three valid paths:
@@ -359,14 +363,16 @@ export function resolveReplaceRuleBuilder(
 
   if (data.metadata?.builder_fields) {
     // Path 1: builder_fields provided → delegate to create-shaped resolution.
-    return resolveCreateRuleBuilder(registry, data);
+    // The schema already rejected null builder_type together with builder_fields,
+    // so the cast is safe.
+    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData);
   }
 
   if (data.metadata?.builder_type === null) {
     // Path 2: explicit clear. Normalise null → undefined so the create path
     // treats this as a plain rule, and null is never written to storage.
     const cleared: CreateRuleData = {
-      ...data,
+      ...(data as unknown as CreateRuleData),
       metadata: { ...data.metadata, builder_type: undefined, builder_fields: undefined },
     };
     return resolveCreateRuleBuilder(registry, cleared);
