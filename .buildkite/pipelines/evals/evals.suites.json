@@ -138,6 +138,23 @@
       ]
     },
     {
+      "id": "nightshift-investigations",
+      "name": "Nightshift Investigations",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "tags": [
+        "platform",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-investigations"
+      ],
+      "stepTimeoutInMinutes": 60,
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#search-ml-ux-team",
@@ -147,19 +164,6 @@
       ],
       "ciLabels": [
         "evals:llm-tasks"
-      ]
-    },
-    {
-      "id": "obs-ai-assistant",
-      "name": "Observability AI Assistant",
-      "slackChannel": "#obs-ai-assistant-alerts",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts",
-      "tags": [
-        "observability",
-        "ai-assistant"
-      ],
-      "ciLabels": [
-        "evals:obs-ai-assistant"
       ]
     },
     {

@@ -9,6 +9,7 @@ import type { Dataset, PartialConfig } from '@kbn/data-forge';
 import { cleanup, generate } from '@kbn/data-forge';
 import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
+import { SLI_DESTINATION_INDEX_PATTERN } from '@kbn/slo-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const RULE_TYPE_ID = 'slo.rules.burnRate';
@@ -28,8 +29,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const sloApi = getService('sloApi');
   const config = getService('config');
+  const retry = getService('retry');
   const isServerless = config.get('serverless');
   const kibanaServer = getService('kibanaServer');
+
+  // The burn-rate rule evaluates this SLO's rollup data; wait until a rollup document lands
+  // and force one evaluation so the breach is detected deterministically, not by racing the
+  // scheduler and the rollup transform.
+  const waitForBurnRateRuleToEvaluate = async (
+    roleAuthc: RoleCredentials,
+    currentRuleId: string,
+    currentSloId: string
+  ) => {
+    await retry.tryForTime(120 * 1000, async () => {
+      const response = await esClient.search({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        size: 1,
+        query: { term: { 'slo.id': currentSloId } },
+      });
+      if (response.hits.hits.length === 0) {
+        throw new Error(`No SLI rollup documents for SLO ${currentSloId} yet`);
+      }
+    });
+    await alertingApi.runRule(roleAuthc, currentRuleId);
+  };
 
   describe('Burn rate rule - consumers and privileges', function () {
     let dataForgeConfig: PartialConfig;
@@ -188,6 +211,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         ruleId = createdRule.id;
         expect(ruleId).not.to.be(undefined);
+
+        await waitForBurnRateRuleToEvaluate(currentRoleAuthc, ruleId, sloId);
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
@@ -287,6 +312,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         ruleId = createdRule.id;
         expect(ruleId).not.to.be(undefined);
+
+        await waitForBurnRateRuleToEvaluate(currentRoleAuthc, ruleId, sloId);
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
@@ -387,6 +414,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         ruleId = createdRule.id;
         expect(ruleId).not.to.be(undefined);
+
+        await waitForBurnRateRuleToEvaluate(currentRoleAuthc, ruleId, sloId);
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
@@ -485,6 +514,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         ruleId = createdRule.id;
         expect(ruleId).not.to.be(undefined);
+
+        await waitForBurnRateRuleToEvaluate(currentRoleAuthc, ruleId, sloId);
       });
 
       it('should find the created rule with correct information about the consumer', async () => {

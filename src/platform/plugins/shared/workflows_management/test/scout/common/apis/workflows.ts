@@ -287,37 +287,31 @@ export class WorkflowsApiService {
     includeOutput?: boolean;
   }): Promise<WorkflowExecutionDto> {
     const expected = Array.isArray(status) ? status : [status];
-    return waitForConditionOrThrow({
+    const execution = await waitForConditionOrThrow({
       action: () => this.getExecution(workflowExecutionId, { includeOutput }),
-      condition: (execution) =>
-        execution != null && expected.includes(execution.status as ExecutionStatus),
+      condition: (next) => next != null && expected.includes(next.status as ExecutionStatus),
       interval: 1000,
       timeout,
-      errorMessage: (execution) =>
+      errorMessage: (last) =>
         `Execution with id ${workflowExecutionId} did not reach ${expected.join('|')}` +
-        ` (last status: ${execution?.status ?? 'undefined'})`,
+        ` (last status: ${last?.status ?? 'undefined'})`,
     });
+    if (execution == null) {
+      throw new Error(`Execution with id ${workflowExecutionId} was not found`);
+    }
+    return execution;
   }
 
   /** POST /api/workflows/executions/{id}/resume — resume a paused HITL execution. */
-  async resume(
-    workflowExecutionId: string,
-    input: Record<string, unknown>
-  ): Promise<{ success: boolean; executionId: string; message: string }> {
-    const response = await this.rawResume(workflowExecutionId, input);
-    return response.data;
-  }
-
-  /** POST /api/workflows/executions/{id}/resume — resume, with response status. */
   async rawResume(
     workflowExecutionId: string,
     input: Record<string, unknown>,
-    options?: Partial<ReqOptions>
+    options?: Partial<ReqOptions> & { stepExecutionId?: string }
   ): Promise<{
     data: { success: boolean; executionId: string; message: string };
     status: number;
   }> {
-    const { headers, retries, ...rest } = options ?? {};
+    const { headers, retries, stepExecutionId, ...rest } = options ?? {};
     const response = await this.kbnClient.request<{
       success: boolean;
       executionId: string;
@@ -328,7 +322,10 @@ export class WorkflowsApiService {
       retries: retries ?? 0,
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/executions/${workflowExecutionId}/resume`,
-      body: { input },
+      body: {
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      },
       headers: { 'elastic-api-version': '2023-10-31', ...headers },
     });
     return response;

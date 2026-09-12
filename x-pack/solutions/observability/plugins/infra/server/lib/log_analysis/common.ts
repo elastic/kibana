@@ -6,9 +6,19 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getProjectRoutingFromJob } from '@kbn/ml-cps-common';
-import type { MlAnomalyDetectors, MlSystem, ServerlessInfo } from '../../types';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../../../common/cps_feature_flag';
+import type {
+  InfraPluginStartServicesAccessor,
+  MlAnomalyDetectors,
+  MlSystem,
+  ServerlessInfo,
+} from '../../types';
 import { NoLogAnalysisMlJobError } from './errors';
 
 import type { CompositeDatasetKey, LogEntryDatasetBucket } from './queries/log_entry_data_sets';
@@ -39,15 +49,67 @@ export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: 
   };
 }
 
+export interface CpsPlatformGateDeps {
+  serverless: ServerlessInfo;
+  cps?: CPSServerSetup;
+  getStartServices: InfraPluginStartServicesAccessor;
+}
+
 /**
- * Resolves the CPS project scope to query raw log data with on behalf of an ML job.
- * If CPS is not enabled, undefined is returned
+ * Builds the platform half of the Logs ML CPS gate — the CPS config, the infra CPS feature flag,
+ * and pricing tier eligibility — mirroring the browser's `useIsCpsPlatformGateEnabled`. The ES
+ * ML cross-project search capability is layered on top by `fetchIsInfraMlCpsEnabled`.
+ */
+export const createIsCpsPlatformGateEnabled =
+  ({ serverless, cps, getStartServices }: CpsPlatformGateDeps) =>
+  async (): Promise<boolean> => {
+    if (!serverless.isServerless || !serverless.cpsEnabled || !cps) {
+      return false;
+    }
+
+    const [coreStart] = await getStartServices();
+    const isCpsFeatureFlagEnabled = await coreStart.featureFlags.getBooleanValue(
+      OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+      OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+    );
+    if (!isCpsFeatureFlagEnabled) {
+      return false;
+    }
+
+    return cps.isTierEligible();
+  };
+
+/**
+ * The server twin of the browser's `useIsInfraMlCpsEnabled` gate: the platform conditions plus
+ * whether Elasticsearch supports ML cross-project search, as reported by the ML info API. An unreachable or
+ * erroring ML info API reads as capability-off.
+ * Skips the ML call entirely when the platform gate is disabled.
+ */
+export const fetchIsInfraMlCpsEnabled = async (
+  isCpsPlatformGateEnabled: () => Promise<boolean>,
+  mlSystem: MlSystem
+): Promise<boolean> => {
+  if (!(await isCpsPlatformGateEnabled())) {
+    return false;
+  }
+
+  try {
+    const { isMlCpsEnabled } = await mlSystem.mlInfo();
+    return Boolean(isMlCpsEnabled);
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Resolves the CPS project scope to query raw log data with on behalf of an ML job. Returns
+ * undefined when the Logs ML CPS gate is disabled, leaving the queries at their default scope.
  */
 export const resolveJobProjectRouting = (
   mlJob: estypes.MlJob,
-  serverless: ServerlessInfo
+  isMlCpsEnabled: boolean
 ): string | undefined => {
-  if (!serverless.isServerless || !serverless.cpsEnabled) {
+  if (!isMlCpsEnabled) {
     return undefined;
   }
 

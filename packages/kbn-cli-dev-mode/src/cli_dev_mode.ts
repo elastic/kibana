@@ -59,6 +59,7 @@ export type SomeCliArgs = Pick<
   | 'cache'
   | 'dist'
   | 'basePath'
+  | 'serverless'
 >;
 
 export interface CliDevModeOptions {
@@ -105,11 +106,13 @@ export class CliDevMode {
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
   private readonly optimizer: Optimizer;
+  private readonly serverless: boolean;
   private startTime?: number;
   private subscription?: Rx.Subscription;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
     this.log = log || new CliLog(!!cliArgs.silent);
+    this.serverless = !!cliArgs.serverless;
 
     if (cliArgs.basePath) {
       this.basePathProxy = getBasePathProxyServer({
@@ -242,7 +245,7 @@ export class CliDevMode {
       });
 
       this.subscription.add(() => basePathProxy.stop());
-    } else {
+    } else if (!this.serverless) {
       this.log.warn('no-base-path', '='.repeat(100));
       this.log.warn(
         'no-base-path',

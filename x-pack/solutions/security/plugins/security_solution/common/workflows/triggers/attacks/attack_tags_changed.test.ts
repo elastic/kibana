@@ -22,8 +22,8 @@ describe('attackTagsChanged trigger', () => {
     expect(() =>
       schema.parse({
         attackIds: ['a'],
-        tagsToAdd: ['t'],
-        tagsToRemove: [],
+        tagsAdded: ['t'],
+        tagsRemoved: [],
         truncated: false,
       })
     ).not.toThrow();

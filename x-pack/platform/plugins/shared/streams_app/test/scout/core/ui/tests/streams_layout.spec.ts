@@ -10,7 +10,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-id
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const TAB_NAMES = ['canvas', 'sources', 'pipelines', 'destinations'];
+const TAB_NAMES = ['canvas', 'sources', 'destinations'];
 
 test.describe(
   'Streams layout',
@@ -50,17 +50,12 @@ test.describe(
       await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
     });
 
-    test('renders Sources and placeholders for tabs without content', async ({
-      pageObjects: { streams },
-    }) => {
+    test('renders the sources table', async ({ pageObjects: { streams } }) => {
       await streams.gotoStreamsLayout();
 
       await streams.clickStreamsLayoutTab('sources');
       await expect(streams.streamsSourcesTable).toBeVisible();
       await expect(streams.streamsAddSourceButton).toBeVisible();
-
-      await streams.clickStreamsLayoutTab('pipelines');
-      await expect(streams.streamsLayoutPipelinesPlaceholder).toBeVisible();
     });
 
     test('renders the destinations table', async ({ pageObjects: { streams } }) => {
