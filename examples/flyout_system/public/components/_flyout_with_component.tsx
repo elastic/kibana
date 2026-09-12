@@ -27,7 +27,9 @@ import {
   createMainFlyoutDescriptionItems,
   FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
+  headerBlocks,
   FlyoutTypeSwitch,
+  returnFocusToTrigger,
 } from '../utils';
 
 interface SessionFlyoutProps {
@@ -45,6 +47,8 @@ interface FlyoutFromComponentsProps {
 
 const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, historyKey } = props;
+  // Create a selector-safe string for use in test subjects
+  const titleKey = title.replace(/\s+/g, '');
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useBooleanUrlState(`flyoutOpen-${title}`);
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
@@ -88,33 +92,23 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const handleCloseFlyout = useCallback(() => {
     console.log('close main flyout', title); // eslint-disable-line no-console
     setIsFlyoutOpen(false);
-
-    // Return focus to main trigger button after closing main flyout
-    // TODO: clean this up if EUI adds internal support for returning focus to the trigger element on close
-    // https://github.com/elastic/eui/issues/9365
-    setTimeout(() => {
-      mainTriggerRef.current?.focus();
-    }, 100);
+    returnFocusToTrigger(mainTriggerRef);
   }, [title, setIsFlyoutOpen]);
+
+  const handleSave = useCallback(() => {
+    console.log('save main flyout', title); // eslint-disable-line no-console
+  }, [title]);
 
   const handleCloseChildFlyoutA = useCallback(() => {
     console.log('close child flyout A', title); // eslint-disable-line no-console
     setIsChildFlyoutAOpen(false);
-
-    // Return focus to child trigger button after closing child flyout A
-    setTimeout(() => {
-      childTriggerARef.current?.focus();
-    }, 100);
+    returnFocusToTrigger(childTriggerARef);
   }, [title]);
 
   const handleCloseChildFlyoutB = useCallback(() => {
     console.log('close child flyout B', title); // eslint-disable-line no-console
     setIsChildFlyoutBOpen(false);
-
-    // Return focus to child trigger button after closing child flyout B
-    setTimeout(() => {
-      childTriggerBRef.current?.focus();
-    }, 100);
+    returnFocusToTrigger(childTriggerBRef);
   }, [title]);
 
   // Render
@@ -165,8 +159,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           ownFocus={flyoutOwnFocus}
           onActive={mainFlyoutOnActive}
           onClose={handleCloseFlyout}
+          data-test-subj={`flyoutComponent${titleKey}`}
         >
-          <FlyoutTemplate.Header title={title} description="Rendered with @kbn/flyout-template" />
+          <FlyoutTemplate.Header title={title} description="Rendered with @kbn/flyout-template">
+            {headerBlocks()}
+          </FlyoutTemplate.Header>
           <FlyoutTemplate.Body>
             <FlyoutTemplate.Body.Section title="Flyout properties">
               <EuiDescriptionList
@@ -179,6 +176,18 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                   <EuiCode>{'@kbn/flyout-template'}</EuiCode>
                 )}
               />
+            </FlyoutTemplate.Body.Section>
+            <FlyoutTemplate.Body.Section id="details" title="Details">
+              <FlyoutTemplate.Body.Section.Subsection id="host" title="Host">
+                <EuiText size="s">
+                  <p>A subsection adds a second level of titling inside a section.</p>
+                </EuiText>
+              </FlyoutTemplate.Body.Section.Subsection>
+              <FlyoutTemplate.Body.Section.Subsection id="service" title="Service">
+                <EuiText size="s">
+                  <p>With subsections present, each one carries the border the section drops.</p>
+                </EuiText>
+              </FlyoutTemplate.Body.Section.Subsection>
             </FlyoutTemplate.Body.Section>
             <FlyoutTemplate.Body.Section title="Child flyouts">
               <EuiText>
@@ -243,6 +252,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               onClick={handleCloseFlyout}
               data-test-subj={`closeMainFlyoutComponentButton-${title}`}
             />
+            <FlyoutTemplate.Footer.PrimaryAction
+              label="Save"
+              onClick={handleSave}
+              data-test-subj={`saveMainFlyoutComponentButton-${title}`}
+            />
           </FlyoutTemplate.Footer>
         </FlyoutTemplate>
       )}
@@ -257,6 +271,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           minWidth={FLYOUT_MIN_WIDTH}
           onActive={childFlyoutAOnActive}
           onClose={handleCloseChildFlyoutA}
+          data-test-subj={`flyoutComponent${titleKey}ChildA`}
         >
           <FlyoutTemplate.Header title={`${title} - Child A`} collapsed />
           <FlyoutTemplate.Body>
@@ -293,6 +308,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           minWidth={FLYOUT_MIN_WIDTH}
           onActive={childFlyoutBOnActive}
           onClose={handleCloseChildFlyoutB}
+          data-test-subj={`flyoutComponent${titleKey}ChildB`}
         >
           <FlyoutTemplate.Header title={`${title} - Child B`} collapsed />
           <FlyoutTemplate.Body>

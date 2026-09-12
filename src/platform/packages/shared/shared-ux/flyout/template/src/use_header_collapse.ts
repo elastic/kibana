@@ -34,6 +34,24 @@ const WHEEL_LINE_HEIGHT = 20;
  */
 const WHEEL_PAGE_FRACTION = 0.9;
 
+/** Absorbs fractional-DPR rounding when comparing a scroll offset against its extreme. */
+const SCROLL_EDGE_EPSILON = 1;
+
+/**
+ * Whether the scroller can no longer move in the delta's direction.
+ *
+ * `EuiFlyout` wraps the header, body, and footer in a `.euiFlyout__content` element that becomes
+ * a scroll container of its own at short viewports. Calling `preventDefault()` on a wheel event
+ * cancels scroll chaining as well as the default scroll, so swallowing the event at the body
+ * scroller's extreme would leave that outer container — and the footer with it — unreachable.
+ */
+const isAtScrollEdge = (scroller: HTMLElement, delta: number): boolean => {
+  if (delta === 0) return true;
+  if (delta < 0) return scroller.scrollTop <= SCROLL_EDGE_EPSILON;
+  const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
+  return scroller.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
+};
+
 /**
  * Normalizes a wheel delta to pixels, which is the only unit `scrollBy` accepts.
  *
@@ -97,6 +115,10 @@ export const useHeaderCollapse = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const scrollerRef = useRef<HTMLElement | null>(null);
+  // Mirrors the state so `evaluate` can read the current value without a functional updater,
+  // which must stay free of side effects.
+  const isCollapsedRef = useRef(false);
+  const collapsibleNodeRef = useRef<HTMLElement | null>(null);
   const collapsibleHeightRef = useRef(0);
   const expandedTitleHeightRef = useRef(0);
   const expandedSpacerHeightRef = useRef(0);
@@ -115,18 +137,37 @@ export const useHeaderCollapse = ({
     const collapsibleHeight = collapsibleHeightRef.current;
     const collapseBudget =
       collapsibleHeight + expandedTitleHeightRef.current + expandedSpacerHeightRef.current;
-    setIsCollapsed((prev) => {
-      // Nothing measured yet, so there is no budget to judge the collapse against. A header with
-      // an empty collapsible region still has one, because the title row and spacer shrink too.
-      if (collapseBudget <= 0) return false;
+    const wasCollapsed = isCollapsedRef.current;
+
+    let next: boolean;
+    // Nothing measured yet, so there is no budget to judge the collapse against. A header with
+    // an empty collapsible region still has one, because the title row and spacer shrink too.
+    if (collapseBudget <= 0) {
+      next = false;
+    } else if (wasCollapsed) {
       // The overflow guard gates entry only. Collapsing shrinks the header, which grows the body
       // and shrinks its scroll range, so re-testing the guard while collapsed judges the state
       // against geometry the collapse itself produced: it reports "cannot collapse", expands,
       // which restores the scroll range and re-collapses, and the header oscillates. Leaving
       // collapse is therefore driven by scroll position alone.
-      if (prev) return scrollTop > EXPAND_AT;
-      return scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
-    });
+      next = scrollTop > EXPAND_AT;
+    } else {
+      next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
+    }
+
+    if (next === wasCollapsed) return;
+
+    // The region is about to become `aria-hidden` and `inert`, which the browser answers by
+    // blurring any focused descendant — focus would land on `<body>`, outside the flyout's focus
+    // trap. Moving it has to happen here, before the state flips: once the attributes are on the
+    // element there is no focused node left to find. The scroll container is the natural
+    // destination, being both focusable and the thing the user was already scrolling.
+    if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
+      scroller.focus();
+    }
+
+    isCollapsedRef.current = next;
+    setIsCollapsed(next);
   }, []);
 
   // A separate flag rather than testing `rafRef`, whose assignment lands after a synchronous callback.
@@ -190,6 +231,7 @@ export const useHeaderCollapse = ({
 
   const collapsibleRef = useCallback(
     (node: HTMLElement | null) => {
+      collapsibleNodeRef.current = node;
       observeNaturalHeight(node, collapsibleHeightRef, collapsibleCleanupRef);
     },
     [observeNaturalHeight]
@@ -222,10 +264,13 @@ export const useHeaderCollapse = ({
       // Let modified wheel events (Ctrl/Cmd+scroll = browser zoom, Alt+scroll = h-scroll, etc.)
       // pass through unmodified so the browser can handle them normally.
       if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      const delta = wheelDeltaToPixels(event, scroller.clientHeight);
+      // Release the event at the extreme so the browser can chain the scroll outward.
+      if (isAtScrollEdge(scroller, delta)) return;
       // The header is not scrollable, so the browser would otherwise scroll the page behind it.
       // Requires the non-passive listener below; React's onWheel is passive and cannot do this.
       event.preventDefault();
-      scroller.scrollBy({ top: wheelDeltaToPixels(event, scroller.clientHeight) });
+      scroller.scrollBy({ top: delta });
     };
 
     header.addEventListener('wheel', onWheel, { passive: false });
