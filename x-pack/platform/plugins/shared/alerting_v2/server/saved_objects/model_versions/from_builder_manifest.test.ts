@@ -14,7 +14,7 @@ import {
 } from '../schemas/rule_saved_object_attributes/v4';
 import {
   currentRuleSavedObjectAttributesSchema,
-  ruleSavedObjectAttributesSchemaV7 as latestV7,
+  ruleSavedObjectAttributesSchemaV8 as latestV8,
 } from '../schemas/rule_saved_object_attributes';
 import { fromBuilderManifest, assertBuilderFieldsIsOpenRecord } from './from_builder_manifest';
 
@@ -397,12 +397,13 @@ describe('fromBuilderManifest', () => {
   // ---------------------------------------------------------------------------
 
   describe('open-record assertion: metadata.builder_fields stays an open record', () => {
-    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v7)', () => {
+    it('currentRuleSavedObjectAttributesSchema is the latest versioned schema (v8)', () => {
       // Pin the alias so that adding a vN+1 schema does not silently leave fold
       // lines on the wrong schema. Update this test when advancing the alias.
+      // Updated from v7 to v8 by step 4.4: metadata.ownership was added to v8.
       //
       // Ref: rule-data-migration.md "Rollback behavior"
-      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV7);
+      expect(currentRuleSavedObjectAttributesSchema).toBe(latestV8);
     });
 
     // Production-function coverage: assertBuilderFieldsIsOpenRecord is called

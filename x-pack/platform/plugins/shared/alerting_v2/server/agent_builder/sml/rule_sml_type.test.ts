@@ -52,6 +52,8 @@ const baseRuleResponse = {
     source: { type: 'internal' as const, version: 1 },
     version: baseRuleAttrs.metadata?.version ?? 1,
     revision: baseRuleAttrs.metadata?.revision ?? 0,
+    // Step 4.4: ownership is now required in ruleResponseMetadataSchema.
+    ownership: { managed: false } as const,
   },
 };
 

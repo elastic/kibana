@@ -61,6 +61,9 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
     version: 1,
     revision: 0,
     source: template.rule.metadata.source ?? { type: 'internal' as const, version: 1 },
+    // Step 4.4: ownership is server-derived; a template is a create payload so it
+    // carries no ownership — default to { managed: false } for this synthetic draft.
+    ownership: { managed: false } as const,
   },
 });
 

@@ -11,6 +11,7 @@ import type {
   CreateRuleData,
   UpdateRuleData,
   Query,
+  RuleOwnership,
   RuleResponse,
   RuleSource,
 } from '@kbn/alerting-v2-schemas';
@@ -30,6 +31,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
+import type { BuilderTypeRegistry } from '../builder_types';
 import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
 
 /**
@@ -245,6 +247,36 @@ export function assertRuleSourceUnchanged(
 }
 
 /**
+ * Derives the `metadata.ownership` value for a new rule from the registry.
+ *
+ * For a rule whose `builderType` is a registered managed type, copies
+ * `{ managed: true, solution, domain }` from the type's declaration.
+ * For everything else — no builder type, or an unmanaged registered type —
+ * returns `{ managed: false }`.
+ *
+ * `app` is intentionally absent in this phase. Phase 5 (step 5.1) fills it
+ * from the caller identity on the `onBehalfOf.app` option.
+ *
+ * Ref: rule-ownership.md "The invariant and how it holds"
+ */
+export function deriveOwnership(
+  registry: BuilderTypeRegistry,
+  builderType: string | undefined | null
+): RuleOwnership {
+  if (builderType != null) {
+    const definition = registry.get(builderType);
+    if (definition?.ownership != null) {
+      return {
+        managed: true,
+        solution: definition.ownership.solution,
+        domain: definition.ownership.domain,
+      };
+    }
+  }
+  return { managed: false };
+}
+
+/**
  * Returns just the immutable fields from `attrs`, suitable for spreading at
  * the end of an attribute builder so subsequent code cannot accidentally
  * overwrite them.
@@ -420,9 +452,16 @@ export function transformCreateRuleBodyToRuleSoAttributes(
      * Ref: rule-source.md "Who writes the source"
      */
     source: RuleSource;
+    /**
+     * Server-derived ownership. For create: from `deriveOwnership(registry, builder_type)`.
+     * For upsert replace: always the stored value — ownership is immutable.
+     *
+     * Ref: rule-ownership.md "The invariant and how it holds"
+     */
+    ownership: RuleOwnership;
   }
 ): RuleSavedObjectAttributes {
-  const { version, signatureId, source, ...restServerFields } = serverFields;
+  const { version, signatureId, source, ownership, ...restServerFields } = serverFields;
   return {
     kind: data.kind,
     metadata: {
@@ -437,6 +476,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       version,
       // Seed revision at 0: a freshly created rule has had no meaningful edits.
       revision: 0,
+      ownership,
     },
     time_field: data.time_field,
     schedule: {
@@ -508,6 +548,11 @@ export function buildUpdateRuleAttributes(
         // Force type and id from storage; only version is owner-writable.
         return { ...stored, version: incoming.version };
       })(),
+      // `ownership` is immutable for the rule's life — always restore from
+      // storage. No request body ever carries this field; the spread of
+      // `updateData.metadata` above cannot reach it. The explicit assignment
+      // guards against future schema drift and documents the contract clearly.
+      ownership: existingAttrs.metadata.ownership,
       version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
@@ -660,6 +705,10 @@ export function transformRuleSoAttributesToRuleApiResponse(
       // Falls back to 0 for rules created before this field was introduced
       // (pending the model-version migration in step 4.5).
       revision: attrs.metadata.revision ?? RULE_REVISION_FALLBACK,
+      // Falls back to `{ managed: false }` for rules created before this field
+      // was introduced (pending the model-version migration in step 4.5 which
+      // stamps the type-aware value).
+      ownership: (attrs.metadata.ownership ?? { managed: false }) as RuleOwnership,
     },
     time_field: attrs.time_field,
     schedule: {
