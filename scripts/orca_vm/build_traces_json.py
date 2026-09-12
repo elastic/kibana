@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--suite", default="security-persona-matrix",
                     help="suite_id filter for score docs (agent-builder feeds agent_eval_full boards)")
     ap.add_argument("--since", required=True, help="ISO lower bound for trace docs")
+    ap.add_argument("--until", default=None, help="ISO upper bound (exclusive era separation for trial-replica builds)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -64,7 +65,7 @@ def main():
         "size": 1000,
         "query": {"bool": {"filter": [
             {"term": {"metadata.suite_id": args.suite}},
-            {"range": {"@timestamp": {"gte": args.since}}},
+            {"range": {"@timestamp": {"gte": args.since, **({"lt": args.until} if args.until else {})}}},
         ]}},
         "_source": [
             "metadata.execution_id", "task.model.id", "example.id",
@@ -104,7 +105,7 @@ def main():
     span_body = {
         "size": 1000,
         "query": {"bool": {"filter": [
-            {"range": {"@timestamp": {"gte": args.since}}},
+            {"range": {"@timestamp": {"gte": args.since, **({"lt": args.until} if args.until else {})}}},
             {"exists": {"field": "attributes.gen_ai.tool.call.arguments"}},
         ]}},
         "_source": [
@@ -239,6 +240,7 @@ def main():
         "cells": out,
         "meta": {
             "since": args.since,
+            "until": args.until,
             "scoreDocs": n_docs,
             "argSpans": n_spans,
             "note": "toolParams joined from gen_ai.tool.call.arguments spans",

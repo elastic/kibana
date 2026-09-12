@@ -30,25 +30,43 @@ PROMPT_IDS = [
     "multi-step-a", "multi-step-b", "multi-step-c",
 ]
 
-# Reference board's 33 models. Those without golden coverage render as an
-# explicit "no connector" row -- never imputed, never dropped silently.
+# Reference board's 33 models, in the reference's exact row order (parsed from
+# the original agent_eval_full-3.html). Those without golden coverage render as
+# an explicit "no connector" row -- never imputed, never dropped silently.
 REFERENCE_MODELS = [
-    "anthropic-claude-4.5-haiku", "anthropic-claude-4.5-opus",
-    "anthropic-claude-4.6-opus", "anthropic-claude-4.6-sonnet",
-    "anthropic-claude-4.7-opus", "anthropic-claude-4.8-opus",
-    "anthropic-claude-5-opus", "anthropic-claude-5-sonnet",
-    "google-gemini-2.5-flash", "google-gemini-2.5-flash-lite",
-    "google-gemini-2.5-pro", "google-gemini-3.0-flash",
-    "google-gemini-3.1-flash-lite", "google-gemini-3.1-pro",
-    "google-gemini-3.5-flash", "google-gemini-3.5-flash-lite",
+    "anthropic-claude-4.5-haiku",
+    "anthropic-claude-4.5-opus",
+    "anthropic-claude-4.6-opus",
+    "anthropic-claude-4.7-opus",
+    "anthropic-claude-4.8-opus",
+    "anthropic-claude-5-opus",
+    "gp-llm-v2",
+    "anthropic-claude-4.6-sonnet",
+    "anthropic-claude-5-sonnet",
+    "deepseek/deepseek-v4-pro",
+    "google/gemma-4-31b-it",
+    "google-gemini-2.5-flash",
+    "google-gemini-2.5-flash-lite",
+    "google-gemini-2.5-pro",
+    "google-gemini-3.0-flash",
+    "google-gemini-3.1-flash-lite",
+    "google-gemini-3.1-pro",
+    "google-gemini-3.5-flash",
+    "google-gemini-3.5-flash-lite",
     "google-gemini-3.6-flash",
-    "openai-gpt-5.2", "openai-gpt-5.4", "openai-gpt-5.4-mini",
-    "openai-gpt-5.4-nano", "openai-gpt-5.5",
-    "openai-gpt-5.6-luna", "openai-gpt-5.6-sol", "openai-gpt-5.6-terra",
-    "openai-gpt-oss-120b", "openai-gpt-oss-20b",
-    "deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.6",
-    "google/gemma-4-31b-it", "Qwen36_27b",
-    "zai-glm-5-2", "gp-llm-v2",
+    "moonshotai/kimi-k2.6",
+    "openai-gpt-5.2",
+    "openai-gpt-5.4",
+    "openai-gpt-5.4-mini",
+    "openai-gpt-5.4-nano",
+    "openai-gpt-5.5",
+    "openai-gpt-5.6-luna",
+    "openai-gpt-5.6-sol",
+    "openai-gpt-5.6-terra",
+    "openai-gpt-oss-120b",
+    "openai-gpt-oss-20b",
+    "Qwen36_27b",
+    "zai-glm-5-2",
 ]
 
 MISSING_REASONS = {
@@ -119,15 +137,11 @@ def render(traces, out, since, extra_missing=None):
                  if s.get("type") == "tool")
     n_ans = sum(1 for c in cells.values() if c.get("answer"))
 
-    miss_rows = "".join(
-        f'<tr><td class="model">{esc(m)}</td><td colspan="21" class="missing-cell">{esc(MISSING_REASONS.get(m, "not in this run window"))}</td></tr>'
-        for m in REFERENCE_MODELS if m not in covered
-    )
-
-    # scoreboard rows
-    sb_rows = []
+    # one row per reference model, in reference order — data row or missing-row
+    all_rows = []
     for m in REFERENCE_MODELS:
         if m not in covered:
+            all_rows.append(f'<tr><td class="model">{esc(m)}</td><td colspan="21" class="missing-cell">{esc(MISSING_REASONS.get(m, "not in this run window"))}</td></tr>')
             continue
         tds = []
         for p in PROMPT_IDS:
@@ -141,7 +155,7 @@ def render(traces, out, since, extra_missing=None):
             tds.append(
                 f'<td class="cell {cell_status(c)}" title="{esc(p)}: {steps} steps, {n_ev} evaluator scores">{ans} {steps} steps</td>'
             )
-        sb_rows.append(f'<tr><td class="model">{esc(m)}</td>{"".join(tds)}</tr>')
+        all_rows.append(f'<tr><td class="model">{esc(m)}</td>{"".join(tds)}</tr>')
 
     # per-model sections
     sections = []
@@ -245,7 +259,7 @@ code {{ font-family:ui-monospace,monospace; }}
 </div>
 
 <table><thead><tr><th>Model</th>{''.join(f'<th>{esc(p)}</th>' for p in PROMPT_IDS)}</tr></thead>
-<tbody>{''.join(sb_rows)}{miss_rows}</tbody></table>
+<tbody>{''.join(all_rows)}</tbody></table>
 <div class="sub">✓ = final answer present · △ = partial (no answer recorded) · — = no score doc in window</div>
 
 {''.join(sections)}
