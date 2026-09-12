@@ -157,11 +157,10 @@ components:
     RuntimeFieldMapping:
       type: object
       description: >-
-        A single runtime field mapping to be attached verbatim to the
-        `_update_by_query` as `runtime_mappings`. Allows the close query to
-        reference fields that are not natively mapped on the alerts index but
-        are evaluatable at query time by Elasticsearch — for example, scripted
-        fields defined on a data view.
+        A runtime field included in the status-update query so the query
+        can match fields that are not in the alerts index mapping, for
+        example scripted fields on a data view. Elasticsearch evaluates
+        the field at query time.
       required: [type]
       properties:
         type:
