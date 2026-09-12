@@ -22,14 +22,27 @@ import type {
  */
 export const NON_STREAMING_MAX_ROWS = 1000;
 
-async function* yieldSingleBatch(response: EsqlQueryResponse): AsyncIterable<EsqlRow[]> {
-  yield toRows(response, { normalizeDates: true });
+/**
+ * Rows per batch yielded by the JSON format. The raw response is still
+ * materialised in full (that is the format's limit), but slicing bounds every
+ * downstream copy — row objects, alert events, bulk bodies — to one slice at a
+ * time instead of the whole result set.
+ */
+export const JSON_STREAM_BATCH_SIZE = 100;
+
+async function* yieldRowSlices(response: EsqlQueryResponse): AsyncIterable<EsqlRow[]> {
+  const { values } = response;
+
+  for (let start = 0; start < values.length; start += JSON_STREAM_BATCH_SIZE) {
+    const slice = values.slice(start, start + JSON_STREAM_BATCH_SIZE);
+    yield toRows({ ...response, values: slice }, { normalizeDates: true });
+  }
 }
 
 /**
- * Single-shot ES|QL JSON query. Not a stream: it yields the full result set as
- * one in-memory batch, preserving the batched contract shared with the
- * streaming formats.
+ * Single-shot ES|QL JSON query. Not a stream: the whole result set arrives in
+ * one response, which is then yielded in `JSON_STREAM_BATCH_SIZE` slices to
+ * preserve the batched contract shared with the streaming formats.
  */
 export const jsonFormat = {
   name: 'json' as const,
@@ -40,6 +53,6 @@ export const jsonFormat = {
     options: EsqlFormatRequestOptions
   ): Promise<EsqlRowBatchSource> {
     const response = await esClient.esql.query(request, options);
-    return { batches: yieldSingleBatch(response) };
+    return { batches: yieldRowSlices(response) };
   },
 } satisfies EsqlResponseFormat;

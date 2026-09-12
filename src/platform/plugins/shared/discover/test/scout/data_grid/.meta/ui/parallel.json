@@ -1,5 +1,5 @@
 {
-  "sha1": "0dc8f2ae0f7872b35343226a175df99d33deced0",
+  "sha1": "a16ada80470bdcec7948df7a376bad57e18057c7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -803,6 +803,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table.spec.ts",
         "line": 59,
         "column": 18
+      }
+    },
+    {
+      "id": "0a00c5204210411-c194797620e6e3a",
+      "title": "Discover doc viewer - fields table renders a field row that was not initially mounted once scrolled into view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_fields_table.spec.ts",
+        "line": 73,
+        "column": 21
       }
     },
     {

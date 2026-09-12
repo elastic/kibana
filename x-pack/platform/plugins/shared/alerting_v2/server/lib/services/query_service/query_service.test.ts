@@ -10,6 +10,7 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
+import { JSON_STREAM_BATCH_SIZE } from './formats';
 import { createQueryService } from './query_service.mock';
 import {
   createMockArrowReader,
@@ -501,7 +502,7 @@ describe('QueryService', () => {
   describe('executeQueryStream (json)', () => {
     const mockQuery = 'FROM .alerting-* | LIMIT 10';
 
-    it('runs the JSON query and yields all rows as a single batch', async () => {
+    it('runs the JSON query and yields a small result set as a single batch', async () => {
       mockEsClient.esql.query.mockResolvedValue({
         columns: [
           { name: 'host', type: 'keyword' },
@@ -525,6 +526,31 @@ describe('QueryService', () => {
         { host: 'host-a', count: 1 },
         { host: 'host-b', count: 2 },
       ]);
+    });
+
+    it('yields rows in slices of JSON_STREAM_BATCH_SIZE so downstream steps never hold the full result', async () => {
+      const total = JSON_STREAM_BATCH_SIZE * 2 + 50;
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'count', type: 'integer' },
+        ],
+        values: Array.from({ length: total }, (_, i) => [`host-${i}`, i]),
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+      expect(batches.map((batch) => batch.length)).toEqual([
+        JSON_STREAM_BATCH_SIZE,
+        JSON_STREAM_BATCH_SIZE,
+        50,
+      ]);
+      expect(batches[0][0]).toEqual({ host: 'host-0', count: 0 });
+      expect(batches[2][49]).toEqual({ host: `host-${total - 1}`, count: total - 1 });
     });
 
     it('yields nothing when the result set is empty', async () => {

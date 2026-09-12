@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createMockEsClient } from '../../../test_utils';
-import { jsonFormat, NON_STREAMING_MAX_ROWS } from './json_format';
+import { jsonFormat, JSON_STREAM_BATCH_SIZE, NON_STREAMING_MAX_ROWS } from './json_format';
 import { collectBatches } from './test_utils';
 
 describe('jsonFormat', () => {
@@ -37,7 +37,7 @@ describe('jsonFormat', () => {
     expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
   });
 
-  it('yields the whole result set as a single batch', async () => {
+  it('yields a result set smaller than one slice as a single batch', async () => {
     mockEsClient.esql.query.mockResolvedValue({
       columns: [
         { name: 'host', type: 'keyword' },
@@ -71,7 +71,27 @@ describe('jsonFormat', () => {
     expect(await collectBatches(source.batches)).toEqual([[{ bucket: Date.parse(iso) }]]);
   });
 
-  it('yields one empty batch when the result set is empty', async () => {
+  it('yields rows in slices of JSON_STREAM_BATCH_SIZE so downstream steps never hold the full result', async () => {
+    const total = JSON_STREAM_BATCH_SIZE * 2 + 50;
+    mockEsClient.esql.query.mockResolvedValue({
+      columns: [{ name: 'host', type: 'keyword' }],
+      values: Array.from({ length: total }, (_, index) => [`host-${index}`]),
+    });
+
+    const source = await jsonFormat.open(mockEsClient, request, options);
+    const batches = await collectBatches(source.batches);
+
+    expect(batches.map(({ length }) => length)).toEqual([
+      JSON_STREAM_BATCH_SIZE,
+      JSON_STREAM_BATCH_SIZE,
+      50,
+    ]);
+    expect(batches.flat()).toHaveLength(total);
+    expect(batches[0][0]).toEqual({ host: 'host-0' });
+    expect(batches[2][49]).toEqual({ host: `host-${total - 1}` });
+  });
+
+  it('yields no batches when the result set is empty', async () => {
     mockEsClient.esql.query.mockResolvedValue({
       columns: [{ name: 'host', type: 'keyword' }],
       values: [],
@@ -79,7 +99,7 @@ describe('jsonFormat', () => {
 
     const source = await jsonFormat.open(mockEsClient, request, options);
 
-    expect(await collectBatches(source.batches)).toEqual([[]]);
+    expect(await collectBatches(source.batches)).toEqual([]);
   });
 
   it('does not expose a close hook, since it holds no resources', async () => {

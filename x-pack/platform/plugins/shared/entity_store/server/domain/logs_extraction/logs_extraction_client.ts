@@ -14,6 +14,7 @@ import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
+  ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
@@ -35,6 +36,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
+import { getMergedConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';
@@ -101,6 +103,7 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  extractionMode?: ExtractionMode;
 }
 
 export class LogsExtractionClient {
@@ -110,6 +113,7 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  extractionMode: ExtractionMode;
   constructor({
     logger,
     namespace,
@@ -117,6 +121,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
+    extractionMode,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -124,6 +129,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
+    this.extractionMode = extractionMode ?? 'single';
   }
 
   private async getLogExtractionConfigAndState(
@@ -133,8 +139,20 @@ export class LogsExtractionClient {
     if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
       throw new EntityStoreNotRunningError();
     }
-    const globalState = await this.globalStateClient.findOrThrow();
-    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
+    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    return {
+      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      engineState: engineDescriptor.logExtractionState,
+    };
+  }
+
+  /** Config in effect for one entity type, without requiring the engine to be started. */
+  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+    const [globalOverrides, engineDescriptor] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.engineDescriptorClient.findOrThrow(type),
+    ]);
+    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
   }
 
   public async extractLogs(
@@ -204,7 +222,7 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionInstallParams): Promise<LogExtractionConfig> {
+  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({ logsExtraction: params });
     return state.logsExtraction;
   }
@@ -769,6 +787,7 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
+        extractionMode: this.extractionMode,
       });
 
       this.logger.debug(

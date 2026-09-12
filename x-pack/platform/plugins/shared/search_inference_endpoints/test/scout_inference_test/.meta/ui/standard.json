@@ -1,23 +1,9 @@
 {
-  "sha1": "80a9a162084ad61fe72097c248c9b34a57ba5dc1",
+  "sha1": "08b96053db2acad4d9be1395d004fb1a518e5e14",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "7fe1ca7de104f44-2a47ec5f7173cba",
-      "title": "Confirm region selection modal Save opens the confirm region selection modal instead of the legacy confirm modal",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/confirm_region_selection_modal.spec.ts",
-        "line": 40,
-        "column": 11
-      }
-    },
     {
       "id": "7fe1ca7de104f44-69d56e662abfdf1",
       "title": "Confirm region selection modal an in-use 409 keeps the confirmation open with Issues; ignore and save retries with force",
@@ -28,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/confirm_region_selection_modal.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 26,
+        "column": 5
       }
     },
     {

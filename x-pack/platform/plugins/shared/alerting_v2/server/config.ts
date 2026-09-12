@@ -31,8 +31,10 @@ const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
 /** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
 const MAX_ALERTS_PER_RUN = 10000;
-/** Default cap on the ES response body size for non-streaming rule queries (50 MB). */
-const DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
+/** Default cap on the ES response body size for non-streaming rule queries. */
+const DEFAULT_MAX_QUERY_RESPONSE_SIZE = '50mb';
+/** Anything smaller than this cannot hold a single ES|QL row with metadata. */
+const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
@@ -48,14 +50,20 @@ const rulesRunSchema = schema.object({
   query: schema.object({
     /**
      * Maximum allowed Elasticsearch response body size (in bytes) for
-     * non-streaming rule queries (recovery, data-presence). Queries whose
-     * response exceeds this limit are aborted and the execution is attributed
-     * to the rule owner so they can narrow the query or raise the limit.
-     * Defaults to 50 MB.
+     * non-streaming rule queries: the breach query on the JSON response path,
+     * plus the recovery and data-presence queries. Queries whose response
+     * exceeds this limit are aborted and the execution fails as a user error
+     * so the rule owner can narrow the query (KEEP / STATS) or raise the limit.
+     *
+     * Every execution transiently holds roughly 4x the response size in heap,
+     * and Task Manager capacity decides how many run at once, so size this as
+     * `heap budget / (capacity x 4)`. Accepts a byte-size string (`10mb`, `512kb`)
+     * or a plain number of bytes. Defaults to 50mb; `config/serverless.yml`
+     * lowers it to 10mb for the default Serverless background-tasks pod.
      */
-    maxResponseSize: schema.number({
-      defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES,
-      min: 1024,
+    maxResponseSize: schema.byteSize({
+      defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
+      min: MIN_MAX_QUERY_RESPONSE_SIZE,
     }),
   }),
 });
@@ -87,8 +95,11 @@ const rulesSchema = schema.object({
    * Upper bound on the combined number of rule runs per minute across all
    * spaces. Creating, updating or enabling a rule that would push the total
    * past this limit is rejected.
+   *
+   * The default matches the alerting v1 hosted budget (`xpack.alerting.rules.maxScheduledPerMinute`).
+   * Serverless projects are capped at 400 via `config/serverless.yml`, mirroring v1.
    */
-  maxScheduledPerMinute: schema.number({ defaultValue: 400, min: 0, max: 32000 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0, max: 32000 }),
   /** Per-execution guardrails applied while a rule runs. */
   run: rulesRunSchema,
 });
