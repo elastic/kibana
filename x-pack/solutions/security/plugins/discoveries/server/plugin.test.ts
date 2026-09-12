@@ -12,7 +12,7 @@ import { DiscoveriesPlugin } from './plugin';
 import type { DiscoveriesPluginSetupDeps, DiscoveriesPluginStartDeps } from './types';
 
 jest.mock('@kbn/discoveries/impl/attack_discovery/alert_fields', () => ({
-  ATTACK_DISCOVERY_ALERTS_CONTEXT: 'siem.security.attack.discovery',
+  ATTACK_DISCOVERY_ALERTS_CONTEXT: 'security.attack.discovery',
   attackDiscoveryAlertFieldMap: {},
 }));
 

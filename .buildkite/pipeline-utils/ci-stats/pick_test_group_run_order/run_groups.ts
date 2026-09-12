@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuildkiteClient } from '../../buildkite';
-import type { RunGroup } from './types';
+import type { BuildkiteClient } from '../../buildkite/index.ts';
+import type { RunGroup } from './types.ts';
 
 /**
  * Pick all run-groups for a given type from the ci-stats response, while

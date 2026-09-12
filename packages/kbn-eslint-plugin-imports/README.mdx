@@ -37,7 +37,7 @@ This rule validates that every import request in the repository follows a standa
  - imports to an `index` file end with the directory name, ie `/index` or `/index.{ext}` are stripped
  - unless this is a `require.resolve()`, the imports should not mention file extensions. `require.resolve()` calls will retain the extension if added manually
 
-This rule is not configurable, should never be skipped, and is auto-fixable.
+Set `preserveFileExtensions: true` for native Node.js TypeScript packages that require explicit relative file extensions. This also preserves `/index.{ext}`. The rule is auto-fixable.
 
 ## `@kbn/imports/require_import`
 
