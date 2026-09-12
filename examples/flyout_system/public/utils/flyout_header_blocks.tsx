@@ -12,7 +12,7 @@ import { EuiHealth, EuiLink } from '@elastic/eui';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 
 /**
- * Shared header block content. 
+ * Shared header block content.
  * Returned as arrays to preserve direct parent-child relationship with FlyoutTemplate.Header.
  */
 
