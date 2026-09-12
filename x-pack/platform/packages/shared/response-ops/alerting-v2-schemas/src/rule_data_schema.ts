@@ -86,7 +86,11 @@ export const templateRuleSourceSchema = z
     type: z.literal('template'),
     version: z.number().int().min(1).describe('Content version. Starts at 1.'),
     /** The id of the template the rule was created from. */
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The id of the template the rule was created from.'),
+    id: z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .describe('The id of the template the rule was created from.'),
   })
   .strict();
 

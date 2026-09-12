@@ -11,6 +11,7 @@ import {
   createRuleDataSchema,
   isRecoveryTransitionConsistentWithStrategy,
   updateRuleDataSchema,
+  ruleOwnershipSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
   getRecoverEsqlQuery,
@@ -1687,10 +1688,6 @@ describe('bulkGetRulesParamsSchema', () => {
 // ---------------------------------------------------------------------------
 
 describe('ruleOwnershipSchema (step 4.4)', () => {
-  // Imported via the re-export from rule_data_schema.ts
-  const { ruleOwnershipSchema, createRuleDataSchema, updateRuleDataSchema } =
-    require('./rule_data_schema');
-
   it('accepts a managed ownership object', () => {
     const result = ruleOwnershipSchema.parse({
       managed: true,

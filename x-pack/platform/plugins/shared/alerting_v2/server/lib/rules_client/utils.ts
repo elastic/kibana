@@ -390,7 +390,7 @@ function deepOmitUndefined(value: unknown): unknown {
 function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, unknown> {
   const { updatedAt, updatedBy, metadata, ...rest } = attrs;
   // `version` and `revision` are excluded; all other metadata fields are kept.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const { version: _version, revision: _revision, ...restMetadata } = metadata;
   return { ...rest, metadata: restMetadata };
 }
@@ -706,14 +706,14 @@ export function transformRuleSoAttributesToRuleApiResponse(
       // signature_id is always set at create time (generated or caller-supplied).
       // The non-null assertion is safe for all rules created since step 4.1;
       // step 4.5's model-version migration backfills any pre-existing rules.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       signature_id: attrs.metadata.signature_id!,
       builder_type: attrs.metadata.builder_type,
       builder_fields: attrs.metadata.builder_fields,
       // Falls back to the default for rules created before this field was
       // introduced (pending the model-version migration in step 4.5 which
       // backfills `{ type: 'internal', version: 1 }`).
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       source: (attrs.metadata.source ?? { type: 'internal', version: 1 }) as RuleSource,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
       // Falls back to 0 for rules created before this field was introduced
