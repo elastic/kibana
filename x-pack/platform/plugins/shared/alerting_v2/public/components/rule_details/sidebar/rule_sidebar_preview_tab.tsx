@@ -18,15 +18,16 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { QuerySandbox, RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
 import { useRule } from '../rule_context';
 
 const queryClient = new QueryClient();
 
 const RuleSidebarPreviewTabInner: React.FC = () => {
   const rule = useRule();
-  const query = rule.query ? getRootEsqlQuery(rule.query) : '';
   const timeField = rule.time_field ?? '@timestamp';
 
   const http = useService<HttpStart>(CoreStart('http'));
@@ -51,10 +52,26 @@ const RuleSidebarPreviewTabInner: React.FC = () => {
     setDateEnd(range.dateEnd);
   }, []);
 
+  if (!rule.query) {
+    return (
+      <EuiEmptyPrompt
+        iconType="iInCircle"
+        body={
+          <p>
+            {i18n.translate('xpack.alertingV2.ruleDetails.previewTab.noQueryMessage', {
+              defaultMessage:
+                "This rule's query is generated from its parameters on each run — there is nothing to preview here.",
+            })}
+          </p>
+        }
+      />
+    );
+  }
+
   return (
     <RuleFormProvider services={services}>
       <QuerySandbox
-        query={query}
+        query={getRootEsqlQuery(rule.query)}
         timeField={timeField}
         dateRange={{ dateStart, dateEnd }}
         onDateRangeChange={handleDateRangeChange}

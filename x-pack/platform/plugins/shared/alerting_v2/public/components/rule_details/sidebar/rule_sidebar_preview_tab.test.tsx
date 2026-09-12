@@ -99,10 +99,13 @@ describe('RuleSidebarPreviewTab', () => {
     expect(capturedProps.timeField).toBe('@timestamp');
   });
 
-  it('defaults query to empty string when query is missing', () => {
+  it('renders an empty prompt instead of QuerySandbox when the rule has no query', () => {
+    // Changed in step 6.3: a rule with no persisted query (execution-compiled) must not
+    // auto-run an empty ES|QL string. The component now renders EuiEmptyPrompt so the
+    // user sees an explanation rather than an ES|QL error.
     const { query: _, ...ruleWithoutQuery } = baseRule;
     renderPreviewTab(ruleWithoutQuery as RuleApiResponse);
-    expect(capturedProps.query).toBe('');
+    expect(screen.queryByTestId('mockQuerySandbox')).not.toBeInTheDocument();
   });
 
   it('passes autoRun as true', () => {

@@ -1059,6 +1059,11 @@ export const ruleResponseMetadataSchema = metadataSchema
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
+    /**
+     * Absent on execution-compiled builder rules, which persist no query at all
+     * (rule-execution-logic.md "A rule without a persisted query").
+     */
+    query: querySchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
     metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),

@@ -274,6 +274,43 @@ describe('CompileRuleQueryStep', () => {
     });
   });
 
+  // ─── failure: INVALID_RULE_QUERY_CONFIG ──────────────────────────────────
+
+  describe('INVALID_RULE_QUERY_CONFIG', () => {
+    it('fails the run as a user-source error when a plain rule has no stored query', async () => {
+      // A plain ES|QL rule (no builder_type) with no query is misconfigured — it
+      // has no mechanism to produce one, so the run must fail loudly rather than
+      // silently halt with state_not_ready.
+      const rule = createRuleResponse({ query: undefined });
+      const state = createRulePipelineState({ rule });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeDefined();
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG);
+    });
+
+    it('fails the run as a user-source error when a write-time builder rule has no stored query', async () => {
+      // A write-time builder rule is supposed to have its query stored at save time.
+      // If it is missing, the run must fail loudly rather than silently halt.
+      registry = makeRegistry(makeWriteTimeDefinition());
+      step = new CompileRuleQueryStep(registry);
+
+      const rule = createRuleResponse({
+        query: undefined,
+        metadata: { builder_type: 'test.write', builder_fields: { q: 'hello' } },
+      });
+      const state = createRulePipelineState({ rule });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeDefined();
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG);
+    });
+  });
+
   // ─── failure: INVALID_BUILDER_FIELDS ─────────────────────────────────────
 
   describe('INVALID_BUILDER_FIELDS', () => {

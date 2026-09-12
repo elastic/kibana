@@ -120,10 +120,8 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    const expectedQuery =
-      rule.query.format === 'standalone'
-        ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${NON_STREAMING_MAX_ROWS}`
-        : '';
+    const breach = rule.query?.format === 'standalone' ? rule.query.breach.query : undefined;
+    const expectedQuery = breach ? `${breach.trimEnd()}\n| LIMIT ${NON_STREAMING_MAX_ROWS}` : '';
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: expectedQuery, drop_null_columns: true }),
       expect.objectContaining({ signal: abortController.signal })

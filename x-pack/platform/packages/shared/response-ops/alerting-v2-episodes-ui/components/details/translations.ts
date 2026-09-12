@@ -387,6 +387,14 @@ export const RULE_OVERVIEW_DISABLED = i18n.translate(
   }
 );
 
+export const RULE_OVERVIEW_NO_QUERY_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.ruleOverview.noQueryPlaceholder',
+  {
+    defaultMessage:
+      "This rule has no stored query — it is generated from the rule's parameters on each run.",
+  }
+);
+
 /** --- Rule overview panel section --- */
 export const RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverviewPanelSection.errorTitle',

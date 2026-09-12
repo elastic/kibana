@@ -94,16 +94,26 @@ export const AlertEpisodeRuleOverviewPanel = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiCodeBlock
-        language="esql"
-        fontSize="s"
-        paddingSize="s"
-        isCopyable
-        overflowHeight={240}
-        data-test-subj="alertingV2EpisodeDetailsRuleQueryCodeBlock"
-      >
-        {getBreachEsqlQuery(rule.query)}
-      </EuiCodeBlock>
+      {rule.query ? (
+        <EuiCodeBlock
+          language="esql"
+          fontSize="s"
+          paddingSize="s"
+          isCopyable
+          overflowHeight={240}
+          data-test-subj="alertingV2EpisodeDetailsRuleQueryCodeBlock"
+        >
+          {getBreachEsqlQuery(rule.query)}
+        </EuiCodeBlock>
+      ) : (
+        <EuiText
+          size="s"
+          color="subdued"
+          data-test-subj="alertingV2EpisodeDetailsRuleNoQueryPlaceholder"
+        >
+          <p>{i18n.RULE_OVERVIEW_NO_QUERY_PLACEHOLDER}</p>
+        </EuiText>
+      )}
     </>
   );
 

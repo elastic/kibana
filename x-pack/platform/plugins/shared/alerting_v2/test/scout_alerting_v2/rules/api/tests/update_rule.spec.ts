@@ -603,7 +603,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
       // The rejected update must not have persisted: the query stays standalone.
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.query.format).toBe('standalone');
+      expect(stored.query?.format).toBe('standalone');
     }
   );
 
