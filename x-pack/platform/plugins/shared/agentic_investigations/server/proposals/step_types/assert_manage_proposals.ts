@@ -39,7 +39,10 @@ export const assertManageProposals = async ({
   try {
     const checkPrivileges = security.authz.checkPrivilegesWithRequest(request);
     const privileges = await checkPrivileges.atSpace(spaceId, {
-      kibana: [PROPOSALS_API_PRIVILEGE_MANAGE],
+      // The serialized form of a feature API privilege is prefixed (see
+      // api_authorization.ts: requestedPrivileges.map(p => actions.api.get(p)));
+      // checking the bare string never matches for API-key credentials.
+      kibana: [security.authz.actions.api.get(PROPOSALS_API_PRIVILEGE_MANAGE)],
     });
     if (!privileges.hasAllRequested) {
       throw new ProposalsAuthorizationError(

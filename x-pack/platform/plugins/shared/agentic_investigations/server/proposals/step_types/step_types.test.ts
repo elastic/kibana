@@ -24,6 +24,11 @@ const FAKE_REQUEST = { fake: true } as never;
 const createSecurity = (hasAllRequested: boolean) =>
   ({
     authz: {
+      // Mirrors the real serializer: feature API privileges are stored in
+      // prefixed form (api_authorization.ts routes requests through
+      // actions.api.get). A gate passing the bare string passes unit tests
+      // with a naive mock but denies every real API-key caller.
+      actions: { api: { get: (privilege: string) => `api:${privilege}` } },
       checkPrivilegesWithRequest: jest.fn().mockReturnValue({
         atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
       }),
