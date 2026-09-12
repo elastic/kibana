@@ -363,6 +363,144 @@ describe('createAlertEventsBatchBuilder', () => {
       expect(cappedDocs[0].group_hash).toBe(uncappedDocs[0].group_hash);
     });
   });
+
+  describe('enrichRuleEvent hook', () => {
+    const makeBaseOpts = (): BuildAlertEventsBaseOpts => ({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: [] } },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+      maxGroupsPerExecution: 10000,
+    });
+
+    it('precedence rule 1: hook-returned severity wins over the row severity column', () => {
+      // The row carries severity: 'low' via the column; the hook returns 'critical'.
+      // The hook wins.
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => ({ severity: 'critical' }),
+      };
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a', severity: 'low' },
+      ]);
+
+      expect(doc.severity).toBe('critical');
+    });
+
+    it('precedence rule 1: row severity column applies when the hook returns no severity', () => {
+      // The hook returns only data; no severity. The column extraction runs unchanged.
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => ({ data: { 'kibana.alert.risk_score': 75 } }),
+      };
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a', severity: 'high' },
+      ]);
+
+      expect(doc.severity).toBe('high');
+    });
+
+    it('precedence rule 2: hook data additions merge over the row', () => {
+      // The hook adds a field not present in the row.
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => ({ data: { 'kibana.alert.risk_score': 75 } }),
+      };
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a' },
+      ]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', 'kibana.alert.risk_score': 75 });
+    });
+
+    it('precedence rule 2: hook wins key collisions with the row', () => {
+      // Both the row and the hook carry the same key; the hook's value must win.
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => ({ data: { region: 'hook-region' } }),
+      };
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a', region: 'row-region' },
+      ]);
+
+      expect((doc.data as Record<string, unknown>).region).toBe('hook-region');
+    });
+
+    it('passes the unmerged row to the hook as the pre-merge data', () => {
+      // The hook receives the original row doc (no enrichment applied yet) so the
+      // hook author can read raw row values.
+      const receivedRows: Array<Readonly<Record<string, unknown>>> = [];
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: (row) => {
+          receivedRows.push(row);
+          return {};
+        },
+      };
+      createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a', severity: 'high' },
+      ]);
+
+      expect(receivedRows).toHaveLength(1);
+      expect(receivedRows[0]).toEqual({ 'host.name': 'host-a', severity: 'high' });
+    });
+
+    it('row data is unchanged when the hook returns no data field', () => {
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => ({}),
+      };
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a' },
+      ]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a' });
+    });
+
+    it('propagates a throw from the hook so the caller can classify it', () => {
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => {
+          throw new Error('hook boom');
+        },
+      };
+      expect(() =>
+        createAlertEventsBatchBuilder(opts).buildBatch([{ 'host.name': 'host-a' }])
+      ).toThrow('hook boom');
+    });
+
+    it('applies the hook to every row in the batch', () => {
+      const callCount = { value: 0 };
+      const opts: BuildAlertEventsBaseOpts = {
+        ...makeBaseOpts(),
+        enrichRuleEvent: () => {
+          callCount.value += 1;
+          return { severity: 'info' };
+        },
+      };
+      createAlertEventsBatchBuilder(opts).buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+      ]);
+
+      expect(callCount.value).toBe(3);
+    });
+
+    it('does not call the hook when no enrichRuleEvent callback is provided (no-hook case)', () => {
+      // Baseline: omitting enrichRuleEvent produces the same event shape as a hook that
+      // returns empty enrichment. The data field equals the raw row, severity comes
+      // from the column.
+      const [doc] = createAlertEventsBatchBuilder(makeBaseOpts()).buildBatch([
+        { 'host.name': 'host-a', severity: 'medium' },
+      ]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'medium' });
+      expect(doc.severity).toBe('medium');
+    });
+  });
 });
 
 describe('buildRecoveryAlertEvents', () => {
@@ -819,5 +957,56 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     expect(events).toHaveLength(1);
     expect(events[0].space_id).toBe('custom-space');
+  });
+});
+
+describe('synthetic event builders are untouched by enrichment', () => {
+  // Recovery, no-data, and continued-breach events are built by separate
+  // functions that do not accept an enrichRuleEvent callback. Their `data`
+  // payload is always empty by design, and no hook can influence them.
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('buildRecoveryAlertEvents always produces data: {}', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      activeGroupHashes: [{ group_hash: 'hash-a' }],
+      breachedGroupHashes: new Set(),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+    expect(events[0].data).toEqual({});
+  });
+
+  it('buildContinuedBreachAlertEvents always produces data: {}', () => {
+    const events = buildContinuedBreachAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: ['hash-a'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+    expect(events[0].data).toEqual({});
+  });
+
+  it('buildNoDataAlertEvents always produces data: {}', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: ['hash-a'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      type: 'signal',
+    });
+    expect(events[0].data).toEqual({});
   });
 });

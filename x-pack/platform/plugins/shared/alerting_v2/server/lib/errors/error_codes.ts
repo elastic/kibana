@@ -43,6 +43,13 @@ export const ALERTING_ERROR_CODES = {
    * parser rejects.
    */
   BUILDER_QUERY_GENERATION_FAILED: 'BUILDER_QUERY_GENERATION_FAILED',
+  /**
+   * The registered `enrichRuleEvent` hook threw during event building. The
+   * hook is a pure function of validated fields and a query row, so a throw
+   * is a deterministic type bug that must fail the run loudly rather than
+   * silently ship unenriched events.
+   */
+  RULE_EVENT_ENRICHMENT_FAILED: 'RULE_EVENT_ENRICHMENT_FAILED',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
   INVALID_STATE_TRANSITION_CONFIG: 'INVALID_STATE_TRANSITION_CONFIG',
