@@ -282,9 +282,8 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
         // setOwnership. Creating the unmanaged rule first advances the shard
         // seq_no by 1, so the setOwnership write assigns a seq_no two higher
         // than what managedRule.version captured at create time.
-        const managedVersionAfterStamp = (
-          await apiServices.alertingV2.rules.get(managedRule.id)
-        ).version;
+        const managedVersionAfterStamp = (await apiServices.alertingV2.rules.get(managedRule.id))
+          .version;
 
         const response = await apiClient.post(BULK_UPDATE_API_KEY_URL, {
           headers: writerHeaders,
