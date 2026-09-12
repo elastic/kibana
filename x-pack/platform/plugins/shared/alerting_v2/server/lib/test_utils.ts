@@ -157,6 +157,10 @@ export function createRulePipelineState(state?: Partial<RulePipelineState>): Rul
       space_id: 'default',
       task_id: 'task-1',
     }),
+    // Simulate what CompileRuleQueryStep sets: effective query defaults to the stored
+    // rule query so step tests that provide a rule get a consistent pipeline state
+    // without requiring the compile step to run.
+    effectiveQuery: state?.rule?.query,
     ...state,
   };
 }
