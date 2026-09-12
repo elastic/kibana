@@ -51,6 +51,7 @@ export interface DocLinks {
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
+    readonly metrics: string;
     readonly metricsUi: string;
   };
   readonly canvas: {

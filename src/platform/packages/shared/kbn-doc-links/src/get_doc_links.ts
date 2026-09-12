@@ -67,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
+      metrics: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
       metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
     },
     canvas: {
