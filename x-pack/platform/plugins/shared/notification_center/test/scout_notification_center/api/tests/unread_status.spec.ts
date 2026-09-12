@@ -39,21 +39,27 @@ apiTest.describe('Notification Center - unread status', { tag: [...tags.stateful
   });
 
   apiTest('tracks read-state transitions', async ({ apiClient }) => {
-    const initial = await h.getUnreadStatus(apiClient);
-    expect(initial).toHaveStatusCode(200);
-    expect(initial.body).toStrictEqual({ hasUnread: true });
+    await apiTest.step('reports unread after seeding', async () => {
+      const initial = await h.getUnreadStatus(apiClient);
+      expect(initial).toHaveStatusCode(200);
+      expect(initial.body).toStrictEqual({ hasUnread: true });
+    });
 
-    // The newest of the two, so the scan has to look past its override to stay correct.
-    expect(await h.markRead(apiClient, { notification_id: 'unread-status-b' })).toHaveStatusCode(
-      200
-    );
-    const afterMarkRead = await h.getUnreadStatus(apiClient);
-    expect(afterMarkRead).toHaveStatusCode(200);
-    expect(afterMarkRead.body).toStrictEqual({ hasUnread: true });
+    await apiTest.step('scan looks past the newest override', async () => {
+      // The newer of the two, so the scan has to look past its override to stay correct.
+      expect(await h.markRead(apiClient, { notification_id: 'unread-status-b' })).toHaveStatusCode(
+        200
+      );
+      const afterMarkRead = await h.getUnreadStatus(apiClient);
+      expect(afterMarkRead).toHaveStatusCode(200);
+      expect(afterMarkRead.body).toStrictEqual({ hasUnread: true });
+    });
 
-    expect(await h.markAllRead(apiClient)).toHaveStatusCode(200);
-    const afterMarkAllRead = await h.getUnreadStatus(apiClient);
-    expect(afterMarkAllRead).toHaveStatusCode(200);
-    expect(afterMarkAllRead.body).toStrictEqual({ hasUnread: false });
+    await apiTest.step('mark-all-read clears the badge', async () => {
+      expect(await h.markAllRead(apiClient)).toHaveStatusCode(200);
+      const afterMarkAllRead = await h.getUnreadStatus(apiClient);
+      expect(afterMarkAllRead).toHaveStatusCode(200);
+      expect(afterMarkAllRead.body).toStrictEqual({ hasUnread: false });
+    });
   });
 });

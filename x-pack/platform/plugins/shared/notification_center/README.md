@@ -185,7 +185,10 @@ against the same newest collapsed representative per `notification_id` that the 
 
 The first request initializes `readAllBefore` through the same path as the list, so inherited
 backlog does not appear as unread. A caller without a user profile receives `403`; a user-storage
-read or initialization failure returns `500` rather than a misleading `false`.
+read or initialization failure returns `500` rather than a misleading `false`. A document whose
+`_source` fails validation counts as unread: it already passed the horizon filter, and a badge
+that wrongly shows a dot costs one click, while one that hides unread notifications is never
+noticed.
 
 v1 renders a dot, so a boolean is all the badge needs. The route is named for the status rather
 than the count so that adding `unreadCount` to the response later does not rename it.

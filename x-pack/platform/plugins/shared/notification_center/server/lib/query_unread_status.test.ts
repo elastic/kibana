@@ -119,7 +119,7 @@ describe('queryUnreadStatus', () => {
     expect(result).toEqual({ hasUnread: false });
   });
 
-  it('drops malformed documents rather than treating them as unread', async () => {
+  it('treats a malformed document as unread rather than hiding the badge', async () => {
     const { deps } = setup([{ '@timestamp': '2026-07-20T00:00:00.000Z' } as never]);
 
     const result = await queryUnreadStatus(deps, {
@@ -127,6 +127,6 @@ describe('queryUnreadStatus', () => {
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
 
-    expect(result).toEqual({ hasUnread: false });
+    expect(result).toEqual({ hasUnread: true });
   });
 });

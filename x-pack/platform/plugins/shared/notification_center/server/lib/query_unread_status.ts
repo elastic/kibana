@@ -45,30 +45,20 @@ export const queryUnreadStatus = async (
     track_total_hits: false,
   });
 
-  const malformedIds: string[] = [];
-  let hasUnread = false;
   for (const hit of response.hits.hits) {
     const parsed = unreadStatusSourceSchema.safeParse(hit._source);
     if (!parsed.success) {
-      malformedIds.push(hit._id ?? 'unknown');
-      continue;
+      // The range filter already placed this hit past the read horizon, and without a
+      // `notification_id` there is no override to check it against. A badge that wrongly shows a
+      // dot costs the user one click; one that hides unread notifications is never noticed.
+      logger.debug(`Treating malformed notification doc ${hit._id ?? 'unknown'} as unread.`);
+      return { hasUnread: true };
     }
-    const notification = parsed.data;
-    if (!isReadAt(readState, notification.notification_id, notification['@timestamp'])) {
-      hasUnread = true;
-      break;
+    const { notification_id: id, '@timestamp': timestamp } = parsed.data;
+    if (!isReadAt(readState, id, timestamp)) {
+      return { hasUnread: true };
     }
   }
 
-  if (malformedIds.length) {
-    logger.debug(
-      `Dropped ${
-        malformedIds.length
-      } malformed notification docs from unread status. Sample: ${malformedIds
-        .slice(0, 10)
-        .join(', ')}`
-    );
-  }
-
-  return { hasUnread };
+  return { hasUnread: false };
 };

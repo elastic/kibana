@@ -13,6 +13,7 @@ import {
   READ_ALL_BEFORE_DEFAULT,
   READ_ALL_BEFORE_KEY,
 } from '../storage/user_storage';
+import { GET_UNREAD_STATUS_PATH } from '../../common/routes';
 import type { NotificationRouteDeps } from './route_deps';
 import { registerGetUnreadStatusRoute } from './get_unread_status';
 
@@ -33,10 +34,7 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
       core: { getStartServices },
       logger: loggingSystemMock.createLogger(),
     } as unknown as NotificationRouteDeps);
-    const route = router.versioned.getRoute(
-      'get',
-      '/internal/notification_center/notifications/_unread_status'
-    );
+    const route = router.versioned.getRoute('get', GET_UNREAD_STATUS_PATH);
     const handler = route.versions['1']?.handler;
     if (!handler) {
       throw new Error('Unread-status route was not registered');
@@ -63,10 +61,7 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
       core: { getStartServices },
       logger: loggingSystemMock.createLogger(),
     } as unknown as NotificationRouteDeps);
-    const route = router.versioned.getRoute(
-      'get',
-      '/internal/notification_center/notifications/_unread_status'
-    );
+    const route = router.versioned.getRoute('get', GET_UNREAD_STATUS_PATH);
     const handler = route.versions['1']?.handler;
     if (!handler) {
       throw new Error('Unread-status route was not registered');
@@ -114,10 +109,7 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
       core: { getStartServices },
       logger: loggingSystemMock.createLogger(),
     } as unknown as NotificationRouteDeps);
-    const route = router.versioned.getRoute(
-      'get',
-      '/internal/notification_center/notifications/_unread_status'
-    );
+    const route = router.versioned.getRoute('get', GET_UNREAD_STATUS_PATH);
     const handler = route.versions['1']?.handler;
     if (!handler) {
       throw new Error('Unread-status route was not registered');
