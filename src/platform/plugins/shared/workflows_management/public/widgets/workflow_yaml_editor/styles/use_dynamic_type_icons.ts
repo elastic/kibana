@@ -267,7 +267,7 @@ export function useDynamicTypeIcons(
       const allTypes = getAllTypes();
       const { colorMode } = euiThemeContext;
       await injectDynamicConnectorIcons(allTypes, editorContainer, colorMode);
-      injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
+      injectSuggestBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(
         allTypes,
         editorContainer,
@@ -406,11 +406,11 @@ async function injectDynamicConnectorIcons(
   }
 }
 
-function injectSuggestTechPreviewBadges(
+function injectSuggestBadges(
   editorContainer: HTMLElement | undefined,
   euiThemeContext: UseEuiTheme
 ): void {
-  const styleId = 'dynamic-suggest-tech-preview-badges';
+  const styleId = 'dynamic-suggest-badges';
   const targetDoc = editorContainer?.ownerDocument ?? document;
   const ariaLabelPrefixes = collectTechPreviewSuggestAriaPrefixes();
   const cssToInject = buildSuggestTechPreviewBadgeRules(ariaLabelPrefixes, euiThemeContext);

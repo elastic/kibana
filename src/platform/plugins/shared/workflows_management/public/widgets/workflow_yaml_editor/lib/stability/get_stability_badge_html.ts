@@ -57,6 +57,11 @@ export function buildStabilityBadgeHtml(label: string, colors: StabilityBadgeCol
   )}" width="${width}" height="${STABILITY_BADGE_HEIGHT_PX}" />`;
 }
 
+/** Returns HTML for a compact hollow badge using the current editor theme. */
+export function getHollowBadgeHtml(label: string): string {
+  return buildStabilityBadgeHtml(label, getStabilityBadgeColors());
+}
+
 /**
  * Returns HTML for a compact stability badge (matches actions menu EuiBetaBadge).
  */
@@ -65,13 +70,13 @@ export function getStabilityBadgeHtml(stability: StabilityLevel | undefined): st
     const label = i18n.translate('workflows.actionsMenu.techPreviewBadge', {
       defaultMessage: 'Tech preview',
     });
-    return buildStabilityBadgeHtml(label, getStabilityBadgeColors());
+    return getHollowBadgeHtml(label);
   }
   if (stability === 'beta') {
     const label = i18n.translate('workflows.actionsMenu.betaBadge', {
       defaultMessage: 'Beta',
     });
-    return buildStabilityBadgeHtml(label, getStabilityBadgeColors());
+    return getHollowBadgeHtml(label);
   }
   return '';
 }

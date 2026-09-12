@@ -9,6 +9,7 @@
  * Get all actions with in-memory connectors
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { getConnectorAuthType } from '@kbn/connector-specs';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -122,6 +123,7 @@ async function getAllHelper({
   const mergedResult = [
     ...savedObjectsActions,
     ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
+      const authType = getConnectorAuthType(connector);
       return {
         id: connector.id,
         actionTypeId: connector.actionTypeId,
@@ -131,6 +133,7 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         authMode: getAuthMode(connector.authMode),
+        ...(authType !== undefined ? { authType } : {}),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),

@@ -12,6 +12,7 @@ import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import {
+  type ConnectorTypeInfo,
   getBuiltInStepStability,
   isBuiltInStepType,
   resolveKibanaStepTypeAlias,
@@ -20,6 +21,10 @@ import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { stepSchemas } from '../../../../../common/step_schemas';
+import {
+  buildConnectorActionCapabilitiesIndex,
+  classifyConnectorAction,
+} from '../../../../shared/lib/action_type_utils';
 
 const isTechPreviewStep = (connectorType: string): boolean => {
   const connector = getCachedAllConnectorsMap()?.get(connectorType);
@@ -34,9 +39,11 @@ function buildConnectorDecoration(
   baseConnectorType: string,
   lineNumber: number,
   startColumn: number,
-  endColumn: number
+  endColumn: number,
+  isUnavailable: boolean
 ): monaco.editor.IModelDeltaDecoration {
   const techPreviewClass = isTechPreviewStep(connectorType) ? ' type-tech-preview' : '';
+  const unavailableClass = isUnavailable ? ' type-unavailable' : '';
 
   return {
     range: { startLineNumber: lineNumber, startColumn, endLineNumber: lineNumber, endColumn },
@@ -44,7 +51,7 @@ function buildConnectorDecoration(
       inlineClassName: `type-inline-highlight type-${baseConnectorType.replaceAll(
         '.',
         '-'
-      )}${techPreviewClass}`,
+      )}${techPreviewClass}${unavailableClass}`,
       stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
     },
   };
@@ -61,13 +68,16 @@ export const resolveBaseConnectorType = (connectorType: string): string => {
   return isKnownStep ? connectorType : getBaseConnectorType(connectorType);
 };
 
-const extractTypePair = (stepNode: {
-  items: Array<Pair | unknown>;
-}): Pair<Scalar, Scalar> | undefined =>
+type ScalarPair = Pair<Scalar, Scalar> & { key: Scalar; value: Scalar };
+
+const extractScalarPair = (
+  stepNode: { items: Array<Pair | unknown> },
+  key: string
+): ScalarPair | undefined =>
   stepNode.items.find(
-    (item): item is Pair<Scalar, Scalar> =>
-      isPair(item) && isScalar(item.key) && item.key.value === 'type'
-  ) as Pair<Scalar, Scalar> | undefined;
+    (item): item is ScalarPair =>
+      isPair(item) && isScalar(item.key) && item.key.value === key && isScalar(item.value)
+  );
 
 const resolveDecorationColumns = (
   connectorType: string,
@@ -104,12 +114,14 @@ interface UseConnectorTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   yamlDocument: Document | null;
   isEditorMounted: boolean;
+  connectorTypes?: Record<string, ConnectorTypeInfo>;
 }
 
 export const useConnectorTypeDecorations = ({
   editor,
   yamlDocument,
   isEditorMounted,
+  connectorTypes,
 }: UseConnectorTypeDecorationsProps) => {
   const connectorTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
@@ -137,11 +149,14 @@ export const useConnectorTypeDecorations = ({
 
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
       const stepNodes = getStepNodesWithType(yamlDocument);
+      const capabilityIndex = connectorTypes
+        ? buildConnectorActionCapabilitiesIndex(connectorTypes)
+        : undefined;
 
       for (const stepNode of stepNodes) {
-        const typePair = extractTypePair(stepNode);
+        const typePair = extractScalarPair(stepNode, 'type');
 
-        if (!typePair || !isScalar(typePair.value)) {
+        if (!typePair) {
           // eslint-disable-next-line no-continue
           continue;
         }
@@ -191,6 +206,13 @@ export const useConnectorTypeDecorations = ({
           startPosition,
           endPosition
         );
+        const connectorIdPair = extractScalarPair(stepNode, 'connector-id');
+        const connectorId = connectorIdPair?.value.value;
+        const isUnavailable =
+          typeof connectorId === 'string' &&
+          capabilityIndex !== undefined &&
+          classifyConnectorAction(connectorId, resolvedConnectorType, capabilityIndex)?.status ===
+            'unavailable';
 
         decorations.push(
           buildConnectorDecoration(
@@ -198,7 +220,8 @@ export const useConnectorTypeDecorations = ({
             baseConnectorType,
             targetLineNumber,
             startColumn,
-            endColumn
+            endColumn,
+            isUnavailable
           )
         );
       }
@@ -210,7 +233,7 @@ export const useConnectorTypeDecorations = ({
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, yamlDocument, editor, typeExists]);
+  }, [isEditorMounted, yamlDocument, editor, typeExists, connectorTypes]);
 
   return {
     decorationCollectionRef: connectorTypeDecorationCollectionRef,
