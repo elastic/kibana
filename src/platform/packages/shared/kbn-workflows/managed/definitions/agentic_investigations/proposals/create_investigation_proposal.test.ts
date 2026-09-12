@@ -194,6 +194,68 @@ describe('create-investigation-proposal workflow', () => {
     expect(Object.keys(execute.with?.inputs ?? {})).toEqual(['actionInput']);
   });
 
+  it('spawns the recovery execution only for a genuine failure, never for an expired gate', () => {
+    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+    const spawn = fallback.find(({ name }) => name === 'spawn_recovery');
+    expect(spawn).toBeDefined();
+    expect(spawn?.if).toContain("error.type != 'TimeoutError'");
+    expect(spawn?.if).toContain('proposalId != null');
+    expect(spawn?.type).toBe('workflow.executeAsync');
+    expect(spawn?.with?.['workflow-id']).toBe('system-recover-investigation-proposal');
+  });
+
+  it('parses every condition with the ${{ }} expression syntax, never a single-brace variant', () => {
+    // e2e-caught defect class: `${ ((...)) }` is stored verbatim by YAML
+    // parsing and only blows up at execution time, so the on-failure chain
+    // silently never runs. Walk every step and fallback entry with an `if`.
+    const conditions: string[] = [];
+    const walk = (entries: Array<{ if?: string }>) => {
+      for (const entry of entries) {
+        if (entry.if !== undefined) conditions.push(entry.if);
+      }
+    };
+    walk(workflow.steps as Array<{ if?: string }>);
+    walk((workflow.settings?.['on-failure']?.fallback ?? []) as Array<{ if?: string }>);
+    expect(conditions.length).toBeGreaterThan(0);
+    for (const condition of conditions) {
+      expect(condition).toMatch(/^\$\{\{/);
+      expect(condition).toMatch(/\}\}$/);
+    }
+  });
+
+  it('renders every recovery-spawn input through a real liquid template', () => {
+    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+    const spawn = fallback.find(({ name }) => name === 'spawn_recovery') as {
+      with?: { inputs?: Record<string, unknown> };
+    };
+    // A typo'd template renders literally ('{ inputs.x }' or '$\{ inputs.x \}')
+    // and the recovery run receives garbage instead of the original context.
+    // Both '{{ x }}' (string) and '${{ x }}' (raw expression) are valid forms;
+    // only string values are templated (autoApprove is a literal false).
+    for (const value of Object.values(spawn.with?.inputs ?? {})) {
+      if (typeof value === 'string') {
+        expect(value).toMatch(/^\$?\{\{/);
+      }
+    }
+  });
+  it('never grants the recovery run autonomy: no autoApprove is passed through', () => {
+    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+    const spawn = fallback.find(({ name }) => name === 'spawn_recovery') as {
+      with?: { inputs?: Record<string, unknown> };
+    };
+    // The dedicated recovery workflow declares no autonomy input, so the
+    // spawn must not pass one either.
+    expect(spawn.with?.inputs?.autoApprove).toBeUndefined();
+  });
+  it('bounds the recovery chain by carrying the deadline instead of resetting it', () => {
+    // The clone service enforces expiresAt; neither workflow may pass a
+    // fresh deadline through the spawn.
+    const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
+    const spawn = fallback.find(({ name }) => name === 'spawn_recovery') as {
+      with?: Record<string, unknown>;
+    };
+    expect(JSON.stringify(spawn.with)).not.toContain('expiresIn');
+  });
   it('records the execution outcome around the action', () => {
     expect(findStep(workflow.steps, 'mark_executing')?.type).toBe('investigations.updateProposal');
     expect(findStep(workflow.steps, 'record_success')?.type).toBe('investigations.updateProposal');

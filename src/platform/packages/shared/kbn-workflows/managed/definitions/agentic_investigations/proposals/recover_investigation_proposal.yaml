@@ -1,0 +1,71 @@
+version: '1'
+name: 'Recover investigation proposal'
+description: >
+  Recovery companion to 'Create investigation proposal' (#19287). Spawned
+  asynchronously by the create workflow's on-failure when a proposal failed
+  after a human decision. Clones the failed original into a fresh pending
+  record — carrying the original deadline — parks the clone on a new human
+  gate, and marks the original superseded. The gate here has no autonomy
+  input at all: recovery always requires a human.
+settings:
+  on-failure:
+    fallback:
+      # Recovery has its own recovery: none. A failed recovery is terminal;
+      # the original stays `failed` and unsuperseded, so a human can clone
+      # again from the UI once the cause is fixed.
+      - name: record_recovery_failure
+        type: investigations.updateProposal
+        if: "${{ steps.clone_original.output.proposalId != null and steps.clone_original.output.proposalId != '' }}"
+        with:
+          proposalId: "{{ steps.clone_original.output.proposalId }}"
+          status: failed
+          executionError: '{{ error.message }}'
+steps:
+  - name: clone_original
+    type: investigations.cloneProposal
+    with:
+      proposalId: '{{ inputs.proposalId }}'
+      comment: '{{ inputs.comment }}'
+  - name: await_decision
+    type: waitForApproval
+    with:
+      message: 'Recovery: approve to re-run the action on the clone'
+      timeout: '72h'
+  - name: run_action
+    type: workflow.execute
+    if: "${{ inputs.actionWorkflowId != null and inputs.actionWorkflowId != '' }}"
+    with:
+      workflow-id: '{{ inputs.actionWorkflowId }}'
+      inputs:
+        actionInput: '${{ inputs.actionInput }}'
+  - name: record_success
+    type: investigations.updateProposal
+    if: "${{ steps.run_action.output.status != null and steps.run_action.output.status == 'completed' }}"
+    with:
+      proposalId: '{{ steps.clone_original.output.proposalId }}'
+      status: succeeded
+  - name: record_failure
+    type: investigations.updateProposal
+    if: "${{ steps.run_action.output.status != null and steps.run_action.output.status == 'failed' }}"
+    with:
+      proposalId: '{{ steps.clone_original.output.proposalId }}'
+      status: failed
+      executionError: '{{ error.message }}'
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        proposalId:
+          type: string
+          description: Id of the failed proposal to recover.
+        comment:
+          type: string
+          description: Optional updated comment rendered on the clone.
+        actionWorkflowId:
+          type: string
+          description: The action workflow the original carried, re-run on approval.
+        actionInput:
+          type: object
+          description: The original action input, re-run on approval.
+      required:
+        - proposalId

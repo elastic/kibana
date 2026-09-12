@@ -11,6 +11,8 @@ import { createProposalStepInputSchema } from '../../../common/proposals/step_ty
 import { updateProposalStepInputSchema } from '../../../common/proposals/step_types/update_proposal_step';
 import type { ProposalsService } from '../services/proposals_service';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
+import { getCloneProposalStepDefinition } from './clone_proposal_step';
+import { cloneProposalStepInputSchema } from '../../../common/proposals/step_types/clone_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
@@ -343,5 +345,110 @@ describe('investigations.updateProposal privilege gate', () => {
 
     expect(update).not.toHaveBeenCalled();
     expect(result.error?.message).toMatch(/lacks/);
+  });
+
+  describe('investigations.cloneProposal step', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should clone from the step context execution, not from any caller-supplied id', async () => {
+      const clone = jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'pending' });
+      const definition = getCloneProposalStepDefinition({
+        getProposalsService: () => ({ clone } as unknown as ProposalsService),
+        getSecurity: () => createSecurity(true),
+      });
+
+      const result = await definition.handler(createContext({ proposalId: 'proposal-1' }));
+
+      expect(clone).toHaveBeenCalledWith({ proposalId: 'proposal-1' }, SPACE_ID, {
+        workflowExecutionId: EXECUTION_ID,
+      });
+      expect(result.output).toEqual({
+        proposalId: 'proposal-2',
+        status: 'pending',
+        requiresDecision: true,
+      });
+    });
+
+    it('should apply optional caller overrides', async () => {
+      const clone = jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'pending' });
+      const definition = getCloneProposalStepDefinition({
+        getProposalsService: () => ({ clone } as unknown as ProposalsService),
+        getSecurity: () => createSecurity(true),
+      });
+
+      await definition.handler(
+        createContext({
+          proposalId: 'proposal-1',
+          overrides: { comment: 'Retried with retuned input' },
+        })
+      );
+
+      expect(clone).toHaveBeenCalledWith(
+        expect.objectContaining({ overrides: { comment: 'Retried with retuned input' } }),
+        SPACE_ID,
+        expect.anything()
+      );
+    });
+
+    it('should deny before calling the service when the execution lacks manage_proposals', async () => {
+      const clone = jest.fn().mockResolvedValue({ id: 'p2', status: 'pending' });
+      const definition = getCloneProposalStepDefinition({
+        getProposalsService: () => ({ clone } as unknown as ProposalsService),
+        getSecurity: () => createSecurity(false),
+      });
+
+      const result = await definition.handler(createContext({ proposalId: 'proposal-1' }));
+
+      expect(clone).not.toHaveBeenCalled();
+      expect(result.error?.message).toMatch(/lacks/);
+    });
+
+    it('should fail closed when the privilege check itself errors', async () => {
+      const clone = jest.fn().mockResolvedValue({ id: 'p2', status: 'pending' });
+      const security = {
+        authz: {
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+            atSpace: jest.fn().mockRejectedValue(new Error('es unreachable')),
+          }),
+        },
+      } as never;
+      const definition = getCloneProposalStepDefinition({
+        getProposalsService: () => ({ clone } as unknown as ProposalsService),
+        getSecurity: () => security,
+      });
+
+      const result = await definition.handler(createContext({ proposalId: 'proposal-1' }));
+
+      expect(clone).not.toHaveBeenCalled();
+      expect(result.error?.message).toMatch(/Privilege check failed/);
+    });
+
+    it('should return an error result rather than throwing when the service refuses the clone', async () => {
+      const clone = jest
+        .fn()
+        .mockRejectedValue(new Error('only a failed proposal can be recovered'));
+      const definition = getCloneProposalStepDefinition({
+        getProposalsService: () => ({ clone } as unknown as ProposalsService),
+        getSecurity: () => createSecurity(true),
+      });
+
+      const result = await definition.handler(createContext({ proposalId: 'proposal-1' }));
+
+      expect(result.error?.message).toMatch(/only a failed proposal/);
+      expect(result.output).toBeUndefined();
+    });
+  });
+
+  describe('investigations.cloneProposal input schema', () => {
+    it("should treat a blank optional input as absent, since liquid renders omissions as ''", () => {
+      const parsed = cloneProposalStepInputSchema.parse({ proposalId: 'proposal-1', comment: '' });
+      expect(parsed).toEqual({ proposalId: 'proposal-1' });
+    });
+
+    it('should require proposalId', () => {
+      expect(cloneProposalStepInputSchema.safeParse({ comment: 'x' }).success).toBe(false);
+    });
   });
 });

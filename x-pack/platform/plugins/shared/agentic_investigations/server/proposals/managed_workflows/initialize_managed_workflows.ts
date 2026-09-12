@@ -6,7 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -28,20 +31,25 @@ export const initializeManagedWorkflows = async ({
     AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
   );
 
-  let canReconcile = true;
+  const install = async (workflowId: string): Promise<boolean> => {
+    try {
+      await client.install(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+      return true;
+    } catch (error) {
+      logger.error(
+        `Failed to install managed workflow "${workflowId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return false;
+    }
+  };
 
-  try {
-    await client.install(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
-  } catch (error) {
-    canReconcile = false;
-    logger.error(
-      `Failed to install managed workflow "${CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID}": ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
+  // The recovery companion must be installed alongside the gate it recovers;
+  // a failure to install either is logged and degrades reconciliation.
+  const installedCreate = await install(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
+  const installedRecover = await install(RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
+  const canReconcile = installedCreate && installedRecover;
 
   if (canReconcile) {
     try {

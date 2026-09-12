@@ -16,7 +16,11 @@ import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
 } from '../common/proposals/constants';
-import { CreateProposalStepId, UpdateProposalStepId } from '../common/proposals/step_types';
+import {
+  CreateProposalStepId,
+  UpdateProposalStepId,
+  CloneProposalStepId,
+} from '../common/proposals/step_types';
 import { AgenticInvestigationsPlugin } from './plugin';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
 import {
@@ -134,7 +138,11 @@ describe('AgenticInvestigationsPlugin', () => {
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([CreateProposalStepId, UpdateProposalStepId]);
+      expect(registeredIds).toEqual([
+        CreateProposalStepId,
+        UpdateProposalStepId,
+        CloneProposalStepId,
+      ]);
     });
 
     it('registers the HTTP routes', () => {
