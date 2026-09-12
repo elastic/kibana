@@ -70,39 +70,13 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
   label,
   fieldTypeLabel,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const iconButton = (
-    <EuiButtonEmpty
-      size="s"
-      aria-label={
-        fieldTypeLabel ??
-        i18n.translate('xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel', {
-          defaultMessage: "Show this field's type",
-        })
-      }
-      onClick={fieldTypeLabel ? () => setIsPopoverOpen(!isPopoverOpen) : undefined}
-    >
-      <EuiToken iconType={iconType} size="s" />
-    </EuiButtonEmpty>
-  );
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
-        {fieldTypeLabel ? (
-          <EuiPopover
-            aria-label={fieldTypeLabel}
-            closePopover={() => setIsPopoverOpen(false)}
-            button={iconButton}
-            isOpen={isPopoverOpen}
-          >
-            {fieldTypeLabel}
-          </EuiPopover>
-        ) : (
-          iconButton
-        )}
+        <EuiToken iconType={iconType} size="s" />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s" color="default">
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="default">
           {label}
         </EuiText>
       </EuiFlexItem>

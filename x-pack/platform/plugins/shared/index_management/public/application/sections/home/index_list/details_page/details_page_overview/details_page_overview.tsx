@@ -149,7 +149,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
           getUrlForApp: core.getUrlForApp,
         })
       ) : (
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
             <EuiTitle size="s">
               <h2>
@@ -199,12 +199,14 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
             />
           </EuiFlexItem>
-          <IndexDocuments
-            documents={sampleDocuments}
-            isLoading={isDocumentsLoading}
-            error={documentsError}
-            mappings={mappingsData ?? undefined}
-          />
+          <EuiFlexItem>
+            <IndexDocuments
+              documents={sampleDocuments}
+              isLoading={isDocumentsLoading}
+              error={documentsError}
+              mappings={mappingsData ?? undefined}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </>

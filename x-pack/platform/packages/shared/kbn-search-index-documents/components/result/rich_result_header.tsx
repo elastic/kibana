@@ -77,17 +77,17 @@ const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
       content={
         isTextCopied
           ? i18n.translate(
-              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copiedTextToClipboard',
-              {
-                defaultMessage: 'Copied to clipboard',
-              }
-            )
+            'xpack.searchIndexDocuments.result.header.compactCard.metadata.copiedTextToClipboard',
+            {
+              defaultMessage: 'Copied to clipboard',
+            }
+          )
           : i18n.translate(
-              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
-              {
-                defaultMessage: 'Copy text to clipboard',
-              }
-            )
+            'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
+            {
+              defaultMessage: 'Copy text to clipboard',
+            }
+          )
       }
       data-test-subj="copyTextToClipboardButtonTooltip"
     >
@@ -190,11 +190,11 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
               hasDeleteDocumentsPrivilege === false
                 ? i18n.translate(
-                    'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
-                    {
-                      defaultMessage: 'You do not have permision to delete documents',
-                    }
-                  )
+                  'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
+                  {
+                    defaultMessage: 'You do not have permision to delete documents',
+                  }
+                )
                 : undefined
             }
             position="bottom"
@@ -284,28 +284,26 @@ export const RichResultHeader: React.FC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiText>
-                <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-                  <EuiFlexItem>
-                    {onTitleClick ? (
-                      <EuiLink onClick={onTitleClick} color="text">
-                        <EuiTitle size="s">
-                          <h4>{title}</h4>
-                        </EuiTitle>
-                      </EuiLink>
-                    ) : (
-                      <EuiTitle size="s">
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                <EuiFlexItem>
+                  {onTitleClick ? (
+                    <EuiLink onClick={onTitleClick} color="text">
+                      <EuiTitle size="xxs">
                         <h4>{title}</h4>
                       </EuiTitle>
-                    )}
-                  </EuiFlexItem>
-                  {!!metaData && (
-                    <EuiFlexItem grow={false}>
-                      <MetadataPopover {...metaData} showScore={showScore} />
-                    </EuiFlexItem>
+                    </EuiLink>
+                  ) : (
+                    <EuiTitle size="xxs">
+                      <h4>{title}</h4>
+                    </EuiTitle>
                   )}
-                </EuiFlexGroup>
-              </EuiText>
+                </EuiFlexItem>
+                {!!metaData && (
+                  <EuiFlexItem grow={false}>
+                    <MetadataPopover {...metaData} showScore={showScore} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

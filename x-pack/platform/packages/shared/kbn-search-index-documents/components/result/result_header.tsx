@@ -109,7 +109,7 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
     <Styles.ResultHeader euiTheme={euiTheme}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>

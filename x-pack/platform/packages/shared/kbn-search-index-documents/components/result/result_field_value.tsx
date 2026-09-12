@@ -32,8 +32,8 @@ function truncateVectors(embeddings: string[] | string[][]): string {
   const embeds = Array.isArray(embeddings[0])
     ? truncateVectors(embeddings[0])
     : embeddings.length > 4
-    ? embeddings.slice(0, 5).concat(['...']).join(', ')
-    : embeddings.join(', ');
+      ? embeddings.slice(0, 5).concat(['...']).join(', ')
+      : embeddings.join(', ');
   return `[${embeds}]`;
 }
 
@@ -135,7 +135,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
         {fieldType === 'dense_vector' ? (
           <VectorFieldValue embeddings={fieldValue} dimensions={dimensions} />
         ) : (
-          <EuiText size="s" color="default">
+          <EuiText size="xs" color="default">
             {fieldValue}
           </EuiText>
         )}
@@ -150,7 +150,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
         css={{ flex: 1 }}
       >
         <EuiFlexItem>
-          <EuiText size="s" color="default">
+          <EuiText size="xs" color="default">
             {fieldValue}
           </EuiText>
         </EuiFlexItem>
@@ -162,7 +162,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
   }
   {
     return (
-      <EuiText size="s" color="default">
+      <EuiText size="xs" color="default">
         {fieldValue}
       </EuiText>
     );
