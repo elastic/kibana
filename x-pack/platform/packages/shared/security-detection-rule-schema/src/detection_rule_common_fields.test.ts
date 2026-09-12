@@ -15,6 +15,8 @@ import {
   DETECTION_RULE_FRAGMENT_SUB_FIELD_MAPPINGS,
 } from './detection_rule_common_fields';
 import { DETECTION_RULE_TYPE_OWNERSHIP } from './type_ownership_map';
+import { securityDetectionQuery } from './custom_query';
+import { securityDetectionThreshold } from './threshold_definition';
 
 // Build a closed schema that replicates how each rule type uses the fragment.
 const commonSchema = z.object(detectionRuleCommonFields).strict();
@@ -348,5 +350,17 @@ describe('DETECTION_RULE_TYPE_OWNERSHIP', () => {
       solution: 'security',
       domain: 'detection',
     });
+  });
+
+  it('agrees with securityDetectionQuery.ownership so the backfill and the registration gate cannot drift', () => {
+    expect(DETECTION_RULE_TYPE_OWNERSHIP[securityDetectionQuery.type]).toEqual(
+      securityDetectionQuery.ownership
+    );
+  });
+
+  it('agrees with securityDetectionThreshold.ownership so the backfill and the registration gate cannot drift', () => {
+    expect(DETECTION_RULE_TYPE_OWNERSHIP[securityDetectionThreshold.type]).toEqual(
+      securityDetectionThreshold.ownership
+    );
   });
 });
