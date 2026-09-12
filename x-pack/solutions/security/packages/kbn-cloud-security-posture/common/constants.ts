@@ -21,6 +21,17 @@ export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
 export const CDR_MISCONFIGURATIONS_INDEX_PATTERN =
   CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN;
 
+// Destination index of the CSPM metering state pivot transform
+// (cloud_security_posture/server/create_transforms/metering_state_transform.ts).
+// Read by the serverless metering task to bill corroborated CSPM resources.
+// The `logs-` prefix is load-bearing, not cosmetic. The elastic/kibana service
+// account holds `read` on `logs-*.*`, which covers this name — that is what lets
+// the serverless metering task query this index every billing cycle. Under
+// `security_solution-*` the only grants are `*.misconfiguration_latest*` and
+// `*.vulnerability_latest*`, so a name there is denied with a 403 that the
+// freshness probe silently swallows, permanently falling back to legacy billing.
+export const CDR_METERING_STATE_INDEX = 'logs-cloud_security_posture.metering_state-default';
+
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_NAME = 'Latest Cloud Security Misconfigurations';
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 export const MAX_FINDINGS_TO_LOAD = 500;
