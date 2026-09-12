@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
 import {
   type CreateRuleData,
   type ReplaceRuleData,
@@ -14,7 +16,13 @@ import {
   type UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import type { BuilderTypeRegistry, GeneratedQuery, OpaqueBuilderFields } from '../builder_types';
+import type {
+  BuilderTypeRegistry,
+  DerivedRuleFields,
+  GeneratedQuery,
+  OpaqueBuilderFields,
+  RegisteredBuilderType,
+} from '../builder_types';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type { ResolvedCreateRuleData, ResolvedUpdateRuleData } from './types';
 import { toStoredQuery } from './utils';
@@ -22,6 +30,24 @@ import {
   adaptToKind,
   assertGeneratedQueryIsValid,
 } from '../builder_types/generated_query_validation';
+
+/** Options shared by all resolution functions. */
+export interface BuilderResolutionOptions {
+  /**
+   * When false, skip the builder schema parse (and the derived-fields
+   * projection for execution-time types). Default: true.
+   *
+   * The opt-out exists for migration tooling that manages its own consistency.
+   * The framework's own HTTP routes and the Detections API never pass it.
+   *
+   * Ref: rule-validation.md "Write-path validation: on by default, opt-out per call"
+   */
+  validateBuilderFields?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
 
 const withGenerated = <T extends { query?: Query; time_field?: string; grouping?: unknown }>(
   data: T,
@@ -34,19 +60,162 @@ const withGenerated = <T extends { query?: Query; time_field?: string; grouping?
 });
 
 /**
+ * Applies derived rule fields with the same override semantics as
+ * `withGenerated`: an `undefined` member keeps the caller-sent or stored value.
+ * Unlike `withGenerated`, no `query` is set — execution-time rules persist none.
+ *
+ * Ref: rule-execution-logic.md "Derived rule fields at write time"
+ */
+const withDerived = <T extends { time_field?: string; grouping?: unknown }>(
+  data: T,
+  derived: DerivedRuleFields
+): T => ({
+  ...data,
+  ...(derived.time_field === undefined ? {} : { time_field: derived.time_field }),
+  ...(derived.grouping === undefined ? {} : { grouping: derived.grouping }),
+});
+
+/**
+ * Parses `builderFields` against the type's schema and throws a well-formed
+ * Boom 400 on failure. Returns the parsed value on success.
+ */
+function parseBuilderFields(
+  definition: RegisteredBuilderType,
+  builderFields: OpaqueBuilderFields
+): OpaqueBuilderFields {
+  let result;
+  try {
+    result = definition.builderFieldsSchema.safeParse(builderFields);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw Boom.badRequest(
+      `builder_fields for builder type "${definition.type}" failed validation: ${message}`,
+      {
+        code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
+        details: { builder_type: definition.type },
+      }
+    );
+  }
+
+  if (!result.success) {
+    throw Boom.badRequest(
+      `builder_fields for builder type "${definition.type}" are invalid: ${stringifyZodError(
+        result.error
+      )}`,
+      {
+        code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
+        details: { builder_type: definition.type, errors: treeifyError(result.error) },
+      }
+    );
+  }
+
+  return result.data;
+}
+
+/**
+ * Handles the execution-time create path: derive framework fields from the
+ * parsed builder fields; persist no `query`.
+ *
+ * When `validateBuilderFields` is false and the fields do not parse, the
+ * derivation is skipped and the caller-sent values stand. That inconsistency
+ * cannot reach detection — such a rule fails every run at the compile step.
+ *
+ * Ref: rule-execution-logic.md "Derived rule fields at write time"
+ */
+function resolveExecutionTimeCreate(
+  definition: RegisteredBuilderType,
+  data: CreateRuleData,
+  validateBuilderFields: boolean
+): ResolvedCreateRuleData {
+  const builderFields = data.metadata.builder_fields as OpaqueBuilderFields;
+
+  if (!validateBuilderFields) {
+    // Opt-out: attempt parse, skip derivation on failure.
+    const result = definition.builderFieldsSchema.safeParse(builderFields);
+    if (!result.success) {
+      // Fields do not parse under opt-out — skip derivation, return as-is.
+      return data;
+    }
+    if (definition.deriveRuleFields) {
+      return withDerived(data, definition.deriveRuleFields(result.data));
+    }
+    return data;
+  }
+
+  // Validation on (default): parse throws on failure.
+  const parsed = parseBuilderFields(definition, builderFields);
+  if (definition.deriveRuleFields) {
+    return withDerived(data, definition.deriveRuleFields(parsed));
+  }
+  return data;
+}
+
+/**
+ * Handles the execution-time update path: derive framework fields from the
+ * parsed builder fields; persist no `query`.
+ */
+function resolveExecutionTimeUpdate(
+  definition: RegisteredBuilderType,
+  data: UpdateRuleData,
+  effectiveType: string,
+  builderFields: OpaqueBuilderFields,
+  validateBuilderFields: boolean
+): ResolvedUpdateRuleData {
+  const base: UpdateRuleData = {
+    ...data,
+    metadata: { ...data.metadata, builder_type: effectiveType },
+  };
+
+  if (!validateBuilderFields) {
+    const result = definition.builderFieldsSchema.safeParse(builderFields);
+    if (!result.success) {
+      return base;
+    }
+    if (definition.deriveRuleFields) {
+      return withDerived(base, definition.deriveRuleFields(result.data));
+    }
+    return base;
+  }
+
+  const parsed = parseBuilderFields(definition, builderFields);
+  if (definition.deriveRuleFields) {
+    return withDerived(base, definition.deriveRuleFields(parsed));
+  }
+  return base;
+}
+
+// ---------------------------------------------------------------------------
+// Public resolution functions
+// ---------------------------------------------------------------------------
+
+/**
  * Settles the query for a create (or PUT upsert): generated from
  * `metadata.builder_fields` when the rule carries them, otherwise taken as sent.
+ *
+ * For write-time types the query is generated and persisted. For
+ * execution-time types the query is not generated at write; only derived
+ * framework fields (grouping, time_field) are computed and persisted.
  *
  * @throws `Boom` 400 when the builder type is unregistered or its fields are
  * invalid.
  */
 export function resolveCreateRuleBuilder(
   registry: BuilderTypeRegistry,
-  data: CreateRuleData
+  data: CreateRuleData,
+  options?: BuilderResolutionOptions
 ): ResolvedCreateRuleData {
   const { builder_type: builderType, builder_fields: builderFields } = data.metadata;
+  const validateBuilderFields = options?.validateBuilderFields ?? true;
 
   if (builderType && builderFields) {
+    const definition = registry.get(builderType);
+
+    // Execution-time types: derive fields, persist no query.
+    if (definition?.compilation === 'execution_time') {
+      return resolveExecutionTimeCreate(definition, data, validateBuilderFields);
+    }
+
+    // Write-time types (default): compile and persist the query.
     const generated = adaptToKind(
       registry.generate(builderType, builderFields, {
         kind: data.kind,
@@ -103,11 +272,13 @@ export function resolveUpdateRuleBuilder(
   registry: BuilderTypeRegistry,
   ruleId: string,
   data: UpdateRuleData,
-  existing: RuleSavedObjectAttributes
+  existing: RuleSavedObjectAttributes,
+  options?: BuilderResolutionOptions
 ): ResolvedUpdateRuleData {
   const requestedType = data.metadata?.builder_type;
   const requestedFields = data.metadata?.builder_fields;
   const existingType = existing.metadata.builder_type;
+  const validateBuilderFields = options?.validateBuilderFields ?? true;
 
   if (requestedType === null) {
     if (requestedFields != null) {
@@ -149,6 +320,21 @@ export function resolveUpdateRuleBuilder(
       );
     }
 
+    const definition = registry.get(effectiveType);
+
+    // Execution-time types: derive fields, persist no query.
+    if (definition?.compilation === 'execution_time') {
+      return resolveExecutionTimeUpdate(
+        definition,
+        data,
+        effectiveType,
+        requestedFields as OpaqueBuilderFields,
+        validateBuilderFields
+      );
+    }
+
+    // Write-time types (default): compile and persist the query.
+    //
     // Use the post-write (effective) values of schedule and time_field so that
     // a query compiled here agrees with what `buildUpdateRuleAttributes` will
     // persist. The persisted schedule is `{ ...existing.schedule, ...data.schedule }`,
@@ -188,7 +374,7 @@ export function resolveUpdateRuleBuilder(
       }
     }
 
-    return withGenerated(
+    const resolvedData = withGenerated(
       {
         ...data,
         metadata: { ...data.metadata, builder_type: effectiveType },
@@ -198,9 +384,22 @@ export function resolveUpdateRuleBuilder(
       },
       effectiveGenerated
     );
+
+    // Fix: assertGeneratedQueryIsValid also runs on the update path.
+    // Previously this check was missing from updates, allowing a builder to
+    // generate a query that violates invariants (e.g. recovery_strategy: 'query'
+    // but no recovery block generated) without being rejected.
+    //
+    // `kind` comes from the stored rule — updates cannot change it — so it is
+    // always present and guarantees RuleQueryValidationContext.kind is satisfied.
+    //
+    // Ref: rule-execution-logic.md "What this design needs from the framework"
+    assertGeneratedQueryIsValid({ ...resolvedData, kind: existing.kind }, effectiveType);
+
+    return resolvedData;
   }
 
-  const storedQuery = toStoredQuery(existing.query);
+  const storedQuery = existing.query !== undefined ? toStoredQuery(existing.query) : undefined;
   const queryChanged = data.query !== undefined && !isEqual(toStoredQuery(data.query), storedQuery);
 
   if (queryChanged && effectiveType) {
@@ -267,7 +466,8 @@ export function resolveReplaceRuleBuilder(
   registry: BuilderTypeRegistry,
   ruleId: string,
   data: ReplaceRuleData,
-  existing: RuleSavedObjectAttributes
+  existing: RuleSavedObjectAttributes,
+  options?: BuilderResolutionOptions
 ): ResolvedCreateRuleData {
   const existingType = existing.metadata.builder_type;
 
@@ -277,7 +477,7 @@ export function resolveReplaceRuleBuilder(
     // Cast: data.metadata.builder_type is `string | null | undefined` on
     // ReplaceRuleData. When there is no stored builder_type we know the null
     // escape hatch is irrelevant; create resolution treats null as absent.
-    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData);
+    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData, options);
   }
 
   // The stored rule is builder-managed. Four valid paths:
@@ -306,7 +506,7 @@ export function resolveReplaceRuleBuilder(
     // Path 1: builder_fields provided → delegate to create-shaped resolution.
     // The schema already rejected null builder_type together with builder_fields,
     // so the cast is safe.
-    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData);
+    return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData, options);
   }
 
   if (data.metadata?.builder_type === null) {
@@ -316,7 +516,7 @@ export function resolveReplaceRuleBuilder(
       ...(data as unknown as CreateRuleData),
       metadata: { ...data.metadata, builder_type: undefined, builder_fields: undefined },
     };
-    return resolveCreateRuleBuilder(registry, cleared);
+    return resolveCreateRuleBuilder(registry, cleared, options);
   }
 
   // Path 3 / 4: no builder_fields, no explicit null.
@@ -327,7 +527,7 @@ export function resolveReplaceRuleBuilder(
   //   - the stored rule has no builder_fields to drop, and
   //   - the query is identical to the stored query.
   const storedBuilderFields = existing.metadata.builder_fields;
-  const storedQuery = toStoredQuery(existing.query);
+  const storedQuery = existing.query !== undefined ? toStoredQuery(existing.query) : undefined;
   const bodyQuery = data.query;
   const queryChanged = !bodyQuery || !isEqual(toStoredQuery(bodyQuery), storedQuery);
   const typePreserved = data.metadata?.builder_type === existingType;

@@ -650,7 +650,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    query: toStoredQuery(data.query),
+    // Absent for execution-time builder rules, which compile a query on every
+    // run and persist nothing in `query`.
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    ...(data.query !== undefined ? { query: toStoredQuery(data.query) } : {}),
     recovery_strategy: data.recovery_strategy,
     no_data_strategy: data.no_data_strategy,
     state_transition: data.state_transition,
