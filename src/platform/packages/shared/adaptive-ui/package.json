@@ -6,6 +6,6 @@
   "sideEffects": [
     "**/*.css",
     "**/vendor/distillate/instance.js",
-    "**/vendor/distillate/styles.js"
+    "**/vendor/distillate/styles/index.js"
   ]
 }

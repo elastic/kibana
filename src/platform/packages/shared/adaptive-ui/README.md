@@ -2,7 +2,7 @@
 
 Vendored Kibana mirror of [`@elastic/adaptive-ui-host-kibana`](https://github.com/elastic/adaptive-ui-poc) — the batteries-included Kibana distribution of Adaptive UI. One package, whatever the upstream workspace splits into.
 
-Upstream externalizes its siblings, so this package vendors the whole closure (the runtime, the SDK, Distillate, both theme packages, both primitive packs, the SVG engine, and the takumi generator) into `vendor/` and rewrites every cross-package `@elastic/*` specifier to a relative path inside it. That is what keeps Kibana at one package instead of one per upstream package.
+Upstream externalizes its siblings, so this package vendors the whole closure (the runtime, the SDK, Distillate, both theme packages, both primitive packs, the SVG engine, and the takumi generator) into `vendor/` and rewrites every cross-package `@elastic/*` specifier to a relative path inside it. Distillate is no longer an upstream workspace package — the sync resolves it from `node_modules/@elastic/distillate` in the adaptive-ui checkout. That is what keeps Kibana at one package instead of one per upstream package.
 
 ## Entry points
 

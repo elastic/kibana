@@ -8,12 +8,14 @@
  */
 
 // Vendors the built `dist/` of `@elastic/adaptive-ui-host-kibana` — the
-// batteries-included Kibana distribution — and its workspace closure into
+// batteries-included Kibana distribution — and its closure into
 // `vendor/`, rewriting cross-package `@elastic/*` specifiers to relative paths
 // inside this one package. Upstream externalizes its siblings, so those
 // specifiers have to resolve somewhere; resolving them inward is what lets
 // Kibana carry one `@kbn/adaptive-ui` instead of one mirror per upstream
-// package.
+// package. Distillate is linked into the upstream checkout rather than
+// shipped as a workspace package; `CLOSURE.distillate` points at
+// `node_modules/@elastic/distillate`.
 //
 //   node src/platform/packages/shared/adaptive-ui/scripts/sync_dist.mjs \
 //     --from /path/to/adaptive-ui-poc
@@ -43,14 +45,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = resolve(HERE, '..');
 const VENDOR_ROOT = join(PACKAGE_ROOT, 'vendor');
 
-// Vendor directory name -> upstream workspace directory. The name is the npm
-// package name minus the `@elastic/` scope, so a specifier maps to a directory
-// without a second lookup table to keep in sync.
+// Vendor directory name -> upstream directory, relative to the adaptive-ui
+// checkout. Distillate is a linked external package, not a workspace member.
 const CLOSURE = {
   'adaptive-ui-host-kibana': 'packages/host/adaptive-ui-host-kibana',
   'adaptive-ui-runtime': 'packages/core/adaptive-ui-runtime',
   'adaptive-ui-sdk': 'packages/core/adaptive-ui-sdk',
-  distillate: 'packages/distillate',
+  distillate: 'node_modules/@elastic/distillate',
   'adaptive-ui-theme-tokens': 'packages/theme/adaptive-ui-theme-tokens',
   'adaptive-ui-theme-borealis': 'packages/theme/adaptive-ui-theme-borealis',
   'adaptive-ui-primitives-components': 'packages/primitives/adaptive-ui-primitives-components',
