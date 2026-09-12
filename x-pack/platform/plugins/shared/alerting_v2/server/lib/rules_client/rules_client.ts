@@ -84,12 +84,18 @@ import type {
   RuleResponse,
   UpdateRuleParams,
 } from './types';
-import { resolveCreateRuleBuilder, resolveUpdateRuleBuilder } from './builder_resolution';
+import {
+  resolveCreateRuleBuilder,
+  resolveReplaceRuleBuilder,
+  resolveUpdateRuleBuilder,
+} from './builder_resolution';
 import {
   assertImmutableUnchanged,
   assertManagedRuleWrite,
   assertRuleSourceUnchanged,
   assertSignatureIdUnchanged,
+  getManagedWriteOwner,
+  managedRuleWriteError,
   validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
   computeNextRevision,
@@ -948,15 +954,42 @@ export class RulesClient {
    * the two consumers below — {@link countByQuery} and {@link getRuleIdsByQuery}
    * — always agree on the query they're issuing against the same index.
    */
+  /**
+   * Builds a KQL exclusion fragment (in SO-attribute-path form) that removes
+   * managed rules the current caller cannot write from the by-query match set.
+   * This keeps the dry-run match_count and sample honest about what a forced run
+   * would actually touch.
+   *
+   * Identity-less callers cannot write any managed rule, so the exclusion is
+   * simply `NOT <managedPath>: true`. A caller with a known solution may write
+   * that solution's managed rules, so only other solutions' managed rules are
+   * excluded.
+   *
+   * Enforcement does not depend on this exclusion — it exists for honest counts.
+   * The per-rule gate in each bulk executor is the authoritative enforcement.
+   *
+   * Ref: rule-ownership.md "Path by path"
+   */
+  private buildOwnershipExclusionFilter(): string {
+    const managedPath = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.managed`;
+    if (this.callerIdentity?.solution != null) {
+      const solutionPath = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.solution`;
+      return `NOT (${managedPath}: true AND NOT ${solutionPath}: "${this.callerIdentity.solution}")`;
+    }
+    return `NOT ${managedPath}: true`;
+  }
+
   private buildSoQueryParams(params: Pick<BulkByQueryParams, 'filter' | 'search'>): {
     filter?: string;
     search?: string;
     searchFields?: string[];
   } {
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const exclusion = this.buildOwnershipExclusionFilter();
+    const filter = soFilter ? `(${soFilter}) AND ${exclusion}` : exclusion;
     const search = buildSoSearch(params.search);
     return {
-      filter: soFilter,
+      filter,
       search,
       searchFields: search ? RULE_SEARCH_FIELDS : undefined,
     };
@@ -1037,18 +1070,46 @@ export class RulesClient {
     }
 
     // Capture pre-delete state so the deleted rule can be emitted as the
-    // change-history snapshot per deleted rule.
+    // change-history snapshot per deleted rule. While iterating, apply the
+    // managed-rule write gate: refuse managed rules as per-item errors and
+    // remove them from the set of ids to actually delete.
+    //
+    // Rules that could not be pre-fetched (fetch error) are kept in the delete
+    // set so bulkDelete surfaces the real per-rule error (e.g. RULE_NOT_FOUND).
+    //
+    // Ref: rule-ownership.md "Path by path"
     const docsById = new Map<
       string,
       { attrs: RuleSavedObjectAttributes; references: SavedObjectReference[] }
     >();
+    const refusedIds = new Set<string>();
     for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
-      if (!('error' in doc)) {
-        docsById.set(doc.id, { attrs: doc.attributes, references: doc.references ?? [] });
+      if ('error' in doc) {
+        // Keep in the delete set — bulkDelete will surface the real error.
+        continue;
       }
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
+        refusedIds.add(doc.id);
+        continue;
+      }
+      docsById.set(doc.id, { attrs: doc.attributes, references: doc.references ?? [] });
     }
 
-    const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    const idsToDelete = ids.filter((id) => !refusedIds.has(id));
+    if (idsToDelete.length === 0) {
+      return { affected_count: affectedCount, errors };
+    }
+
+    const deleteResults = await this.rulesSavedObjectService.bulkDelete(idsToDelete);
     const deletedRules: EventRule[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
@@ -1113,6 +1174,21 @@ export class RulesClient {
     for (const doc of fetchResults) {
       if ('error' in doc) {
         errors.push(toBulkError(doc.id, doc.error));
+        continue;
+      }
+
+      // Managed-rule write gate — refuse per-item, never fail the whole request.
+      // Ref: rule-ownership.md "Path by path"
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
         continue;
       }
 
@@ -1248,6 +1324,21 @@ export class RulesClient {
         continue;
       }
 
+      // Managed-rule write gate — refuse per-item, never fail the whole request.
+      // Ref: rule-ownership.md "Path by path"
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
+        continue;
+      }
+
       if (!doc.attributes.enabled) {
         affectedCount += 1;
         continue;
@@ -1348,6 +1439,21 @@ export class RulesClient {
     for (const doc of fetchResults) {
       if ('error' in doc) {
         errors.push(toBulkError(doc.id, doc.error));
+        continue;
+      }
+
+      // Managed-rule write gate — refuse per-item, never fail the whole request.
+      // Ref: rule-ownership.md "Path by path"
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
         continue;
       }
 
@@ -1703,9 +1809,17 @@ export class RulesClient {
     assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
 
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
-    // PUT replaces the whole resource, so the body alone decides whether the
-    // rule is builder-managed — no need to reconcile against what is stored.
-    const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, parsed);
+    // PUT replaces the whole resource, but a stored builder relationship must
+    // not be silently stripped. resolveReplaceRuleBuilder runs the same
+    // BUILDER_TYPE_NOT_CLEARED guard as the PATCH path, for every builder rule,
+    // managed or not.
+    // Ref: rule-types.md "What this design needs from the framework"
+    const resolved = resolveReplaceRuleBuilder(
+      this.builderTypeRegistry,
+      id,
+      parsed,
+      existingAttrs
+    );
     // Resolve source for replace: omit keeps stored value (a PUT that omits
     // source cannot silently reset an external rule to internal). When present,
     // assertRuleSourceUnchanged above already confirmed type/id are unchanged.

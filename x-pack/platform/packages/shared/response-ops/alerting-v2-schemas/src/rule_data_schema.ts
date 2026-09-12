@@ -218,7 +218,11 @@ export const metadataSchema = z
       .describe(
         'Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.'
       ),
-    builder_type: builderTypeSchema.optional(),
+    // `null` is accepted on the PUT (upsert replace) path to explicitly clear
+    // the builder relationship. The replace branch of upsertRule normalises it
+    // to `undefined` before writing to storage, so null never reaches the SO.
+    // Ref: rule-types.md "What this design needs from the framework"
+    builder_type: builderTypeSchema.optional().nullable(),
     builder_fields: builderFieldsSchema.optional(),
     /**
      * Provenance of the rule's content. Optional on create — defaults to
