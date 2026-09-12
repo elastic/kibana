@@ -66,11 +66,7 @@ export interface RuleSavedObjectService {
    *
    * Ref: rule-ownership.md "Storage, mapping, and migration"
    */
-  setOwnership: (
-    ruleId: string,
-    ownership: StoredOwnership,
-    spaceId?: string
-  ) => Promise<void>;
+  setOwnership: (ruleId: string, ownership: StoredOwnership, spaceId?: string) => Promise<void>;
 }
 
 export const getRuleSavedObjectService = ({
