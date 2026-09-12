@@ -7,7 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
-import type { CreateRuleData, UpdateRuleData, Query, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  UpdateRuleData,
+  Query,
+  RuleResponse,
+  RuleSource,
+} from '@kbn/alerting-v2-schemas';
 import {
   IMMUTABLE_RULE_FIELDS,
   isNoDataQueryConsistentWithStrategy,
@@ -23,7 +29,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
+import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
 
 /**
@@ -186,6 +192,59 @@ export function assertSignatureIdUnchanged(
 }
 
 /**
+ * Enforces the `metadata.source` immutability rules for update (PATCH) and
+ * upsert replace (PUT) calls.
+ *
+ * - `undefined` (source omitted) → keep stored value, no error.
+ * - `source.type` differs from stored → 409 conflict.
+ * - `source.id` differs from stored (same type, derived variants) → 409 conflict.
+ * - `source.version` differs → allowed; it is the only owner-writable sub-field.
+ *
+ * When there is no stored source (pre-migration rule), the check is skipped and
+ * the caller's value is accepted — the model-version migration in step 4.5
+ * backfills all existing rules with `{ type: 'internal', version: 1 }`.
+ *
+ * Ref: rule-source.md "Who writes the source"
+ */
+export function assertRuleSourceUnchanged(
+  incomingSource: RuleSource | undefined,
+  existing: RuleSavedObjectAttributes
+): void {
+  if (incomingSource == null) {
+    // Source omitted — keep stored value, no error.
+    return;
+  }
+  const stored = existing.metadata.source;
+  if (stored == null) {
+    // Pre-migration rule: no stored source yet. Accept the incoming value.
+    return;
+  }
+
+  const changed: string[] = [];
+
+  if (incomingSource.type !== stored.type) {
+    changed.push('metadata.source.type');
+  } else {
+    // Same type: if both variants carry an id, compare them.
+    const incomingId = 'id' in incomingSource ? incomingSource.id : undefined;
+    const storedId = 'id' in stored ? stored.id : undefined;
+    if (incomingId !== storedId) {
+      changed.push('metadata.source.id');
+    }
+  }
+
+  if (changed.length > 0) {
+    throw Boom.conflict(
+      `metadata.source fields cannot be changed after creation: ${changed.join(', ')}.`,
+      {
+        code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
+        details: { fields: changed },
+      }
+    );
+  }
+}
+
+/**
  * Returns just the immutable fields from `attrs`, suitable for spreading at
  * the end of an attribute builder so subsequent code cannot accidentally
  * overwrite them.
@@ -243,6 +302,88 @@ export const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] 
     ? { ...query, breach: { segment: query.breach?.segment ?? '' } }
     : query;
 
+/**
+ * Recursively removes keys whose value is `undefined` from a plain object or
+ * array. The result can be compared with `isEqual` without false positives from
+ * the difference between an explicit `undefined` value and an absent key.
+ *
+ * This is necessary because `buildUpdateRuleAttributes` spreads optional fields
+ * explicitly onto the result (e.g. `tags: undefined`), while stored attributes
+ * may have those keys entirely absent. `isEqual({tags: undefined}, {})` is
+ * `false` in lodash, which would count a semantically no-op update as a
+ * meaningful edit and inflate the revision counter.
+ *
+ * `null` is preserved: it is a meaningful stored value for `state_transition`.
+ */
+function deepOmitUndefined(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(deepOmitUndefined);
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, deepOmitUndefined(v)])
+    );
+  }
+  return value;
+}
+
+/**
+ * Strips the four fields excluded from the revision diff so that equal values
+ * on those fields never inflate the comparison. The result is a plain object
+ * safe to pass to `isEqual`.
+ *
+ * Exclusion list (per rule-versions.md "What moves it and what does not"):
+ *   - `updatedAt` / `updatedBy`  — stamped on every write
+ *   - `metadata.version`         — incremented on every mutation
+ *   - `metadata.revision`        — the field being computed
+ *
+ * `enabled` and the create stamps (`createdAt`, `createdBy`) are excluded by
+ * construction — update paths always preserve them from storage, so they are
+ * equal before the diff even runs.
+ */
+function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, unknown> {
+  const { updatedAt, updatedBy, metadata, ...rest } = attrs;
+  // `version` and `revision` are excluded; all other metadata fields are kept.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { version: _version, revision: _revision, ...restMetadata } = metadata;
+  return { ...rest, metadata: restMetadata };
+}
+
+/**
+ * Returns the next `metadata.revision` value for an update or upsert-replace
+ * write. Compares the computed next attributes against the stored attributes,
+ * ignoring the four excluded fields. Bumps the counter by exactly one on the
+ * first non-excluded difference; a write that changes nothing meaningful returns
+ * the current revision unchanged.
+ *
+ * The diff runs at the attribute level (not the request-payload level) so that
+ * v2's PATCH normalization — `null` clears, query rewriting — is already applied
+ * before the comparison. A payload that normalizes to no change produces no bump.
+ *
+ * `builder_fields` is compared as one value because updates replace the
+ * container wholesale.
+ *
+ * Undefined values are stripped from both sides before comparing:
+ * `buildUpdateRuleAttributes` sets optional absent fields to `undefined`
+ * explicitly (e.g. `tags: undefined`), while stored attrs may have those keys
+ * absent entirely. Stripping makes the two representations equivalent, so a
+ * write that sends `tags: null` against a rule with no stored tags does not
+ * count as a meaningful edit.
+ *
+ * Ref: rule-versions.md "How the diff runs"
+ */
+export function computeNextRevision(
+  nextAttrs: RuleSavedObjectAttributes,
+  storedAttrs: RuleSavedObjectAttributes
+): number {
+  const current = storedAttrs.metadata.revision ?? RULE_REVISION_FALLBACK;
+  const nextNorm = deepOmitUndefined(stripForRevisionDiff(nextAttrs));
+  const storedNorm = deepOmitUndefined(stripForRevisionDiff(storedAttrs));
+  return isEqual(nextNorm, storedNorm) ? current : current + 1;
+}
+
 /** Inverse of {@link toStoredQuery}: an empty stored segment reads back as an omitted block. */
 const toApiQuery = (query: RuleSavedObjectAttributes['query']): Query => {
   if (query.format !== 'composed' || query.breach.segment.trim()) {
@@ -271,9 +412,17 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     version: number;
     /** Resolved signature id — caller-supplied or UUID v4 generated by createRule. */
     signatureId: string;
+    /**
+     * Resolved source. For create: `data.metadata.source ?? { type: 'internal', version: 1 }`.
+     * For upsert replace: `body.metadata.source ?? storedSource ?? { type: 'internal', version: 1 }`.
+     * Callers own the resolution because the fallback differs between the two paths.
+     *
+     * Ref: rule-source.md "Who writes the source"
+     */
+    source: RuleSource;
   }
 ): RuleSavedObjectAttributes {
-  const { version, signatureId, ...restServerFields } = serverFields;
+  const { version, signatureId, source, ...restServerFields } = serverFields;
   return {
     kind: data.kind,
     metadata: {
@@ -284,7 +433,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       signature_id: signatureId,
       builder_type: data.metadata.builder_type,
       builder_fields: data.metadata.builder_fields,
+      source,
       version,
+      // Seed revision at 0: a freshly created rule has had no meaningful edits.
+      revision: 0,
     },
     time_field: data.time_field,
     schedule: {
@@ -318,7 +470,9 @@ export function buildUpdateRuleAttributes(
   serverFields: { updatedBy: string | null; updatedAt: string; version: number }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
-  return {
+  // Build next attributes without revision first; revision is derived from the
+  // diff of this intermediate state against the stored attributes.
+  const withoutRevision: RuleSavedObjectAttributes = {
     ...existingAttrs,
     metadata: {
       ...existingAttrs.metadata,
@@ -341,6 +495,19 @@ export function buildUpdateRuleAttributes(
       // `null` clears all tags. The SO schema is `maybe(...)` without
       // `nullable()`, so the cleared value must be stored as `undefined`.
       tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
+      // source — omit keeps stored value; when provided, `type` and `id` are
+      // forced from storage (assertRuleSourceUnchanged in the rules client
+      // validates the caller did not try to change them), and only `version`
+      // can move. If stored source is absent (pre-migration), accept the
+      // incoming value as-is.
+      source: (() => {
+        const incoming = updateData.metadata?.source;
+        if (incoming === undefined) return existingAttrs.metadata.source;
+        const stored = existingAttrs.metadata.source;
+        if (stored === undefined) return incoming;
+        // Force type and id from storage; only version is owner-writable.
+        return { ...stored, version: incoming.version };
+      })(),
       version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
@@ -372,6 +539,17 @@ export function buildUpdateRuleAttributes(
     // Immutable fields are forced from storage last, so no preceding override
     // can leak through if someone adds a new immutable field to the registry.
     ...pickImmutable(existingAttrs),
+  };
+
+  // Revision: diff the computed next state against stored state, excluding the
+  // four always-changing fields, then bump by at most one.
+  // Ref: rule-versions.md "How the diff runs"
+  return {
+    ...withoutRevision,
+    metadata: {
+      ...withoutRevision.metadata,
+      revision: computeNextRevision(withoutRevision, existingAttrs),
+    },
   };
 }
 
@@ -473,7 +651,15 @@ export function transformRuleSoAttributesToRuleApiResponse(
       signature_id: attrs.metadata.signature_id!,
       builder_type: attrs.metadata.builder_type,
       builder_fields: attrs.metadata.builder_fields,
+      // Falls back to the default for rules created before this field was
+      // introduced (pending the model-version migration in step 4.5 which
+      // backfills `{ type: 'internal', version: 1 }`).
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      source: (attrs.metadata.source ?? { type: 'internal', version: 1 }) as RuleSource,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
+      // Falls back to 0 for rules created before this field was introduced
+      // (pending the model-version migration in step 4.5).
+      revision: attrs.metadata.revision ?? RULE_REVISION_FALLBACK,
     },
     time_field: attrs.time_field,
     schedule: {

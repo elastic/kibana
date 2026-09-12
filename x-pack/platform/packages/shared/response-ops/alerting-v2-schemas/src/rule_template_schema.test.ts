@@ -308,6 +308,84 @@ describe('rule template create-rule schema coupling', () => {
                   "minLength": 1,
                   "type": "string",
                 },
+                "source": Object {
+                  "oneOf": Array [
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "type": Object {
+                          "const": "internal",
+                          "type": "string",
+                        },
+                        "version": Object {
+                          "description": "Content version. Starts at 1.",
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer",
+                        },
+                      },
+                      "required": Array [
+                        "type",
+                        "version",
+                      ],
+                      "type": "object",
+                    },
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "id": Object {
+                          "description": "The id of the template the rule was created from.",
+                          "maxLength": 150,
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "const": "template",
+                          "type": "string",
+                        },
+                        "version": Object {
+                          "description": "Content version. Starts at 1.",
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer",
+                        },
+                      },
+                      "required": Array [
+                        "type",
+                        "version",
+                        "id",
+                      ],
+                      "type": "object",
+                    },
+                    Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "id": Object {
+                          "description": "The stable id of the external asset.",
+                          "maxLength": 150,
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "const": "external",
+                          "type": "string",
+                        },
+                        "version": Object {
+                          "description": "Asset version the rule is synced to.",
+                          "maximum": 9007199254740991,
+                          "minimum": 1,
+                          "type": "integer",
+                        },
+                      },
+                      "required": Array [
+                        "type",
+                        "version",
+                        "id",
+                      ],
+                      "type": "object",
+                    },
+                  ],
+                },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
                   "items": Object {

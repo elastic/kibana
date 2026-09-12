@@ -39,6 +39,8 @@ const buildBaseSnapshot = ({
     name,
     signature_id: 'test-sig-id',
     version: 1,
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],
     owner: 'observability',

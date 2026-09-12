@@ -164,6 +164,9 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
     metadata: {
       name: 'Rule One',
       signature_id: 'test-sig-id',
+      version: 1,
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
       description: 'Monitors log errors',
       tags: ['prod'],
     },
@@ -182,7 +185,7 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', signature_id: 'test-sig-id', tags: [] as string[], version: 1 },
+    metadata: { name: 'Rule Two', signature_id: 'test-sig-id', tags: [] as string[], version: 1, revision: 0, source: { type: 'internal' as const, version: 1 } },
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   }),
@@ -904,11 +907,11 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', signature_id: 'test-sig-id', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Three', signature_id: 'test-sig-id', tags: [] as string[], version: 1, revision: 0, source: { type: 'internal' as const, version: 1 } },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', signature_id: 'test-sig-id', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Four', signature_id: 'test-sig-id', tags: [] as string[], version: 1, revision: 0, source: { type: 'internal' as const, version: 1 } },
         }),
       ];
 

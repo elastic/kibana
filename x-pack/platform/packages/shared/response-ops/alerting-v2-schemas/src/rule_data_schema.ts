@@ -28,6 +28,61 @@ import {
   MAX_SIGNATURE_ID_LENGTH,
 } from './constants';
 
+/** Rule source — three-variant discriminated union (rule-source.md). */
+
+/** The rule's content is the user's own. The default. */
+export const internalRuleSourceSchema = z
+  .object({
+    type: z.literal('internal'),
+    /** The rule's content version. Starts at 1; moved only by the rule's owner. */
+    version: z.number().int().min(1).describe('Content version. Starts at 1.'),
+  })
+  .strict();
+
+/** The rule was created from a rule template and the content is the user's since. */
+export const templateRuleSourceSchema = z
+  .object({
+    type: z.literal('template'),
+    version: z.number().int().min(1).describe('Content version. Starts at 1.'),
+    /** The id of the template the rule was created from. */
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The id of the template the rule was created from.'),
+  })
+  .strict();
+
+/** The rule's content is distributed content, installed from an external asset. */
+export const externalRuleSourceSchema = z
+  .object({
+    type: z.literal('external'),
+    /** The version of the asset the rule was installed from or last upgraded to. */
+    version: z.number().int().min(1).describe('Asset version the rule is synced to.'),
+    /** The stable id of the external asset. */
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The stable id of the external asset.'),
+  })
+  .strict();
+
+/**
+ * Discriminated union of the three rule source variants.
+ *
+ * `internal` — user-created rule; content belongs to the user.
+ * `template` — rule instantiated from a template; records where the starting
+ *              content came from but the user owns it from that point on.
+ * `external` — rule whose content is distributed content, installed from an
+ *              external asset such as an Elastic prebuilt rule package.
+ *
+ * Every variant carries a content `version`. `template` and `external` also
+ * carry the `id` of the asset the rule originates from. `type` and `id` are
+ * immutable after creation; only `version` is owner-writable.
+ *
+ * Ref: rule-source.md "The three variants"
+ */
+export const ruleSourceSchema = z.discriminatedUnion('type', [
+  internalRuleSourceSchema,
+  templateRuleSourceSchema,
+  externalRuleSourceSchema,
+]);
+
+export type RuleSource = z.infer<typeof ruleSourceSchema>;
+
 /** Primitives */
 
 export const esqlQuerySchema = z
@@ -120,6 +175,16 @@ export const metadataSchema = z
       ),
     builder_type: builderTypeSchema.optional(),
     builder_fields: builderFieldsSchema.optional(),
+    /**
+     * Provenance of the rule's content. Optional on create — defaults to
+     * `{ type: 'internal', version: 1 }` when absent. `type` and `id` are
+     * immutable after creation; only `version` is owner-writable. Response-only
+     * in the sense that it is always present in responses (the framework stamps
+     * it at create time if the caller omits it).
+     *
+     * Ref: rule-source.md "Who writes the source"
+     */
+    source: ruleSourceSchema.optional(),
   })
   .strict()
   .describe('Rule metadata.')
@@ -814,6 +879,29 @@ export const ruleResponseMetadataSchema = metadataSchema
       .describe(
         'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
       ),
+    /**
+     * Meaningful-edit counter. Incremented by at most one per write, only when
+     * the write changes a field that is meaningful to the rule configuration.
+     * Technical mutations (enable, disable, API-key rotation) never bump it.
+     * Starts at 0 on create. Response-only: no request body may set this field.
+     *
+     * Ref: rule-versions.md "metadata.revision: the meaningful-edit counter"
+     */
+    revision: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Number of meaningful configuration edits. Incremented only when rule data changes, not on technical mutations like enable/disable. Starts at 0.'
+      ),
+    /**
+     * Provenance of the rule's content. Always present in responses — the
+     * framework stamps `{ type: 'internal', version: 1 }` at create time when
+     * the caller omits it.
+     *
+     * Ref: rule-source.md "The three variants"
+     */
+    source: ruleSourceSchema,
   })
   .meta({ id: 'alerting_rule_response_metadata' });
 

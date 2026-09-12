@@ -42,7 +42,9 @@ const mockRuleResponse: RuleResponse = {
   metadata: {
     name: 'CPU usage',
     signature_id: 'test-sig-id',
+    source: { type: 'template', version: 1, id: 'template-1' },
     version: 1,
+    revision: 0,
     description: '',
     tags: [],
   },
@@ -53,6 +55,19 @@ const mockRuleResponse: RuleResponse = {
   created_at: '2026-01-01T00:00:00.000Z',
   updated_by: 'test-user',
   updated_at: '2026-01-01T00:00:00.000Z',
+};
+
+/**
+ * Step 4.3 stamps `{ type: 'template', id }` on the create payload so the
+ * created rule carries its lineage. This is the expected payload shape that
+ * the hook passes to `createRule`.
+ */
+const mockCreatePayloadWithSource: CreateRuleData = {
+  ...mockCreatePayload,
+  metadata: {
+    ...mockCreatePayload.metadata,
+    source: { type: 'template', version: 1, id: 'template-1' },
+  },
 };
 
 const createWrapper = () => createHookTestProviders();
@@ -98,7 +113,9 @@ describe('useInstallRuleTemplate', () => {
     result.current.mutate(mockTemplate);
 
     await waitFor(() => {
-      expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
+      // Lineage is stamped: the hook passes source: { type: 'template', id } in
+      // the create payload so the created rule records its template provenance.
+      expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayloadWithSource);
       expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
       expect(mockAddSuccess).toHaveBeenCalledWith(
         expect.objectContaining({
