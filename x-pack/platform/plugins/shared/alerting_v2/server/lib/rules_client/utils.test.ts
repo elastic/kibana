@@ -1133,6 +1133,65 @@ describe('utils', () => {
       expect(computeNextRevision(nextDifferentBuilder, storedWithBuilder)).toBe(2);
     });
 
+    it('bumps when builder_fields gains an empty-array field (e.g. references: [])', () => {
+      // The design says builder_fields diffs as one whole value — any difference
+      // in the container is meaningful content, not a PATCH normalisation.
+      // An empty array inside builder_fields (e.g. references: []) must register
+      // as a change, not be silently erased by deepOmitUndefined.
+      const storedNoRefs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'security.detection.query',
+          builder_fields: { severity: 'high', risk_score: 50 },
+          revision: 3,
+        },
+      });
+      const nextWithEmptyRefs = {
+        ...storedNoRefs,
+        metadata: {
+          ...storedNoRefs.metadata,
+          builder_fields: { severity: 'high', risk_score: 50, references: [] },
+        },
+      };
+      // Adding references: [] is a real content change — revision must bump.
+      expect(computeNextRevision(nextWithEmptyRefs, storedNoRefs)).toBe(4);
+    });
+
+    it('bumps when builder_fields drops an empty-array field (e.g. references: [] removed)', () => {
+      // The reverse direction: stored has references: [], next drops it.
+      // Both sides must be compared verbatim — no silent erasure of the empty array.
+      const storedWithEmptyRefs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'security.detection.query',
+          builder_fields: { severity: 'high', risk_score: 50, references: [] },
+          revision: 4,
+        },
+      });
+      const nextNoRefs = {
+        ...storedWithEmptyRefs,
+        metadata: {
+          ...storedWithEmptyRefs.metadata,
+          builder_fields: { severity: 'high', risk_score: 50 },
+        },
+      };
+      // Dropping references: [] is a real content change — revision must bump.
+      expect(computeNextRevision(nextNoRefs, storedWithEmptyRefs)).toBe(5);
+    });
+
+    it('does NOT bump when builder_fields is identical including empty arrays', () => {
+      // If both sides carry the same empty-array field, there is no change.
+      const storedWithEmptyRefs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'security.detection.query',
+          builder_fields: { severity: 'high', risk_score: 50, references: [] },
+          revision: 4,
+        },
+      });
+      expect(computeNextRevision(storedWithEmptyRefs, storedWithEmptyRefs)).toBe(4);
+    });
+
     it('falls back to 0 and bumps to 1 when stored has no revision (unmigrated rule)', () => {
       // Rule created before step 4.2's migration — no revision on disk.
       const storedNoRevision = createRuleSoAttributes({
