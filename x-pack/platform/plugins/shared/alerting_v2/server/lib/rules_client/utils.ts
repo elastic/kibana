@@ -335,9 +335,10 @@ export const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] 
     : query;
 
 /**
- * Recursively removes keys whose value is `undefined` from a plain object or
- * array. The result can be compared with `isEqual` without false positives from
- * the difference between an explicit `undefined` value and an absent key.
+ * Recursively removes keys whose value is `undefined`, `null`, or an empty
+ * array from a plain object or array. The result can be compared with `isEqual`
+ * without false positives from the difference between an explicit `undefined`
+ * value and an absent key.
  *
  * This is necessary because `buildUpdateRuleAttributes` normalizes on the way
  * in, and those normalizations produce stored forms that differ from an
@@ -357,17 +358,25 @@ export const toStoredQuery = (query: Query): RuleSavedObjectAttributes['query'] 
  * `null → { type: 'foo' }` still differs after normalization, and a non-empty
  * `[{...}]` is never empty after mapping so it is never stripped.
  *
+ * `opaqueKeys` names keys whose values are passed through verbatim — no
+ * recursion and no stripping inside them. Use this for fields the design says
+ * must diff as one whole value (e.g. `builder_fields`), where an empty array
+ * inside the container is real content, not an absent-field normalisation.
+ *
  * Ref: rule-versions.md "How the diff runs"
  */
-function deepOmitUndefined(value: unknown): unknown {
+function deepOmitUndefined(
+  value: unknown,
+  opaqueKeys: ReadonlySet<string> = new Set()
+): unknown {
   if (Array.isArray(value)) {
-    return value.map(deepOmitUndefined);
+    return value.map((item) => deepOmitUndefined(item, opaqueKeys));
   }
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>)
         .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
-        .map(([k, v]) => [k, deepOmitUndefined(v)])
+        .map(([k, v]) => [k, opaqueKeys.has(k) ? v : deepOmitUndefined(v, opaqueKeys)])
     );
   }
   return value;
@@ -396,6 +405,17 @@ function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, 
 }
 
 /**
+ * `builder_fields` is treated as an opaque key by `deepOmitUndefined`: its
+ * value is passed through verbatim, with no internal stripping of `null`,
+ * `undefined`, or empty arrays. The design says the container diffs as one
+ * whole value — "any difference in the container is both correct and cheap"
+ * (rule-versions.md "How the diff runs") — so an empty array inside it
+ * (e.g. `references: []`) is real caller-owned content, not a normalisation
+ * artifact, and must register as a change.
+ */
+const BUILDER_FIELDS_OPAQUE_KEYS: ReadonlySet<string> = new Set(['builder_fields']);
+
+/**
  * Returns the next `metadata.revision` value for an update or upsert-replace
  * write. Compares the computed next attributes against the stored attributes,
  * ignoring the four excluded fields. Bumps the counter by exactly one on the
@@ -407,7 +427,9 @@ function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, 
  * before the comparison. A payload that normalizes to no change produces no bump.
  *
  * `builder_fields` is compared as one value because updates replace the
- * container wholesale.
+ * container wholesale. The normalization does not recurse into it, so an
+ * empty array inside the container (e.g. `references: []`) registers as a
+ * change rather than being silently erased.
  *
  * Before comparing, both sides are normalized by `deepOmitUndefined`: keys
  * with `undefined`, `null`, or empty-array values are stripped. This makes
@@ -425,8 +447,11 @@ export function computeNextRevision(
   storedAttrs: RuleSavedObjectAttributes
 ): number {
   const current = storedAttrs.metadata.revision ?? RULE_REVISION_FALLBACK;
-  const nextNorm = deepOmitUndefined(stripForRevisionDiff(nextAttrs));
-  const storedNorm = deepOmitUndefined(stripForRevisionDiff(storedAttrs));
+  const nextNorm = deepOmitUndefined(stripForRevisionDiff(nextAttrs), BUILDER_FIELDS_OPAQUE_KEYS);
+  const storedNorm = deepOmitUndefined(
+    stripForRevisionDiff(storedAttrs),
+    BUILDER_FIELDS_OPAQUE_KEYS
+  );
   return isEqual(nextNorm, storedNorm) ? current : current + 1;
 }
 
